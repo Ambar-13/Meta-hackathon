@@ -58,7 +58,11 @@ Notice that the reconnect starts at 4, never at 3, and that the delta carries no
 - `src/job-queue.ts`: `makeApiEnqueue`, the job queue the routes use.
 - `src/route-errors.ts`: the error shape every refusal is sent in.
 - `src/sessions/`: the cookie, the Origin check, the account limit, sign-up, recovery, transfer, claim and deletion.
+- `src/sources/`: upload, the names review and reading a source.
+- `src/cards/`: building, reading and approving a card, and a quote's source message.
+- `src/quizzes/`: starting a quiz, reading it and sending your answers.
 - `src/pairs/`: invites, joining and the lobby poll.
+- `src/meetings/`: create a meeting, read it, give your go-ahead, and start it.
 - `src/meeting-stream/`: the LISTEN connection, the stream and the poll fallback.
 - `src/web-pages/`: the web build, the app-shell fallback, the CSP header and `/api/health`.
 - `src/testing/`: `buildTestApp`, `cookieJar` and `readSse` for every api test.
@@ -69,4 +73,4 @@ Notice that the reconnect starts at 4, never at 3, and that the delta carries no
 
 The app shell is served as `text/html; charset=utf-8`; error log lines are pino level 50.
 
-Not built yet: the source, card, quiz, meeting, brief, comic and share routes, which arrive with their builders through requests that fill their slots in `server.ts`; the `delete_person` job (deletion, Wave 2).
+Not built yet: the brief, comic and share routes, which arrive with their Wave 2 builders through requests that fill their slots in `server.ts`; the `delete_person` job (deletion, Wave 2).

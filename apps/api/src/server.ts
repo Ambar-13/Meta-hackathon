@@ -9,6 +9,7 @@ import { makeApiEnqueue } from "./job-queue.js";
 import { handleNotFound, handleRouteError, replaceJsonParser } from "./route-errors.js";
 import { addOriginCheck, addSessionHook, registerAccountRateLimit, registerSessionsRoutes } from "./sessions/index.js";
 import { registerCardsRoutes } from "./cards/index.js";
+import { registerMeetingsRoutes } from "./meetings/index.js";
 import { registerPairsRoutes } from "./pairs/index.js";
 import { registerQuizRoutes } from "./quizzes/index.js";
 import { registerSourcesRoutes } from "./sources/index.js";
@@ -76,7 +77,7 @@ export async function registerAllRoutes(app: FastifyInstance, deps: RouteDeps): 
   await registerCardsRoutes(app, deps);
   await registerQuizRoutes(app, deps);
   await registerPairsRoutes(app, deps);
-  // slot 6: registerMeetingsRoutes from "./meetings/index.js", added by meeting-engine through a request
+  await registerMeetingsRoutes(app, deps);
   await registerMeetingStreamRoutes(app, deps);
   // slot 8: registerBriefsRoutes from "./briefs/index.js", added by briefs through a request
   // slot 9: registerComicsRoutes from "./comics/index.js", added by comic through a request

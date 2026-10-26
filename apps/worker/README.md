@@ -21,10 +21,10 @@ Notice that the self-test runs before any task is registered, so a bad schema st
 
 ## The main pieces
 
-`src/runner.ts` holds the boot order, the task slots and the crontab filter. `src/job-context.ts` builds the context every job gets, the payload wrapper and the enqueue. `src/cards/` holds the names pass (`scrub-names-job.ts`), the card build (`build-card-job.ts`), the sampler, the quote check and the request builders. `src/testing/` holds the test runner, the fake clock, the recorded reply helpers, the fixture cases and the golden path rules.
+`src/runner.ts` holds the boot order, the task slots and the crontab filter. `src/job-context.ts` builds the context every job gets, the payload wrapper and the enqueue. `src/cards/` holds the names pass (`scrub-names-job.ts`), the card build (`build-card-job.ts`), the sampler, the quote check and the request builders. `src/quizzes/` holds the persona answers and the blind judge of the knows-me quiz. `src/meetings/` holds the meeting jobs: one persona turn per `meeting_step`, the stalled-meeting sweeper that also starts ready meetings, and the question check that builds the prompt prefixes. `src/testing/` holds the test runner, the fake clock, the recorded reply helpers, the fixture cases and the golden path rules.
 
 ## How to test it
 
 `pnpm test:unit apps/worker/src` and `pnpm test:integration apps/worker/src/cards`.
 
-Not built yet: quizzes, meetings, briefs, comics, retention task lists; each lands with its builder.
+Not built yet: the brief, comic and retention task lists; each lands with its Wave 2 builder.

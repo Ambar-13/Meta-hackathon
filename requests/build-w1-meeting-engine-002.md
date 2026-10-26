@@ -16,3 +16,5 @@ The spread goes inside the merged task list, next to the other task maps (seams 
 Why: the three meeting jobs (`meeting_step`, `sweep_stalled`, `check_question`) reach the worker only through slot 3 (seams S3). Test: the worker boots with the three meeting jobs and the `sweep_stalled` cron. That check is the worker boot test in the dossier folder.
 
 Until then: the meeting tests call the three tasks directly through `makeMeetingTestContext` and `drainJobs` (spec section 4.15). No value is used.
+
+Resolved at merge, 26 Oct: applied on main with the meeting-engine merge.

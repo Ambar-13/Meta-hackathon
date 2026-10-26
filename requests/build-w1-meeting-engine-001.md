@@ -14,3 +14,5 @@ Change wanted:
 Why: the meeting routes (create, read, ready, start) reach the app only through slot 6 of `server.ts` (seams S2). Test: every case of `apps/api/src/meetings/meeting-routes.integration.test.ts` runs through the full app once this slot is in place.
 
 Until then: the meeting route tests pass the plugin to `buildTestApp({ routes: [registerMeetingsRoutes] })`, so they do not depend on this request. No value is used.
+
+Resolved at merge, 26 Oct: applied on main with the meeting-engine merge.

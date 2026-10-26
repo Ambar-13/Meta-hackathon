@@ -17,3 +17,5 @@ Change wanted:
 Why: repo rule 2 says the README of every app names its folders. The worker README lists the meeting folder as not built yet, which is no longer true once the meeting jobs merge. Test: none; repo rule 2 is checked by reading the README.
 
 Until then: the worker README names no meeting folder. No value is used.
+
+Resolved at merge, 26 Oct: applied on main with the meeting-engine merge.

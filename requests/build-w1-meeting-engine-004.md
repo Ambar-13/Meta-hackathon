@@ -14,3 +14,5 @@ Change wanted:
 Why: repo rule 2 says the README of every app names its folders, and the API gains the meeting folder with this builder's merge. Test: none; repo rule 2 is checked by reading the README.
 
 Until then: the API README names no meeting folder. No value is used.
+
+Resolved at merge, 26 Oct: applied on main with the meeting-engine merge.
