@@ -6,6 +6,7 @@ import { ContractError, CRONTAB, JOB_NAMES, WORKER_CONCURRENCY, workerEnv } from
 import { assertSchemaVersion, makeDatabase, POOL_SIZE, SCHEMA_VERSION } from "@meet-first/db";
 import { assertWorkerModeAllowed, runBootSelfTest, selfTestExitCode } from "@meet-first/llm";
 import { definePayloadTask, makeJobContext, type JobContext, type JobTask, type TaskList } from "./job-context.js";
+import { briefTasks } from "./briefs/index.js";
 import { cardTasks } from "./cards/index.js";
 import { comicTasks } from "./comics/index.js";
 import { meetingTasks } from "./meetings/index.js";
@@ -17,7 +18,7 @@ export const TASKS: TaskList = {
   ...cardTasks,
   ...quizTasks,
   ...meetingTasks,
-  // slot 4: briefTasks from "./briefs/index.js", added by briefs through a request
+  ...briefTasks,
   ...comicTasks,
   ...retentionTasks,
 };

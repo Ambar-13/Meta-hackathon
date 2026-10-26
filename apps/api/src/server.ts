@@ -14,6 +14,7 @@ import { registerPairsRoutes } from "./pairs/index.js";
 import { registerQuizRoutes } from "./quizzes/index.js";
 import { registerSourcesRoutes } from "./sources/index.js";
 import { registerMeetingStreamRoutes } from "./meeting-stream/index.js";
+import { registerBriefsRoutes } from "./briefs/index.js";
 import { registerComicsRoutes } from "./comics/index.js";
 import { registerShareRoutes } from "./share/index.js";
 import { addContentSecurityPolicy, registerWebPagesRoutes } from "./web-pages/index.js";
@@ -81,7 +82,7 @@ export async function registerAllRoutes(app: FastifyInstance, deps: RouteDeps): 
   await registerPairsRoutes(app, deps);
   await registerMeetingsRoutes(app, deps);
   await registerMeetingStreamRoutes(app, deps);
-  // slot 8: registerBriefsRoutes from "./briefs/index.js", added by briefs through a request
+  await registerBriefsRoutes(app, deps);
   await registerComicsRoutes(app, deps);
   await registerShareRoutes(app, deps);
   await registerWebPagesRoutes(app, deps);
