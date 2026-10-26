@@ -200,12 +200,14 @@ s17_eval() {
 # Command 18: the api image builds the web app, then the api, on Node 22 (D72).
 s18_docker_api() {
   docker build -f Dockerfile.api -t meet-first-api:check .
-  docker run --rm meet-first-api:check node --version | grep -q '^v22\.'
+  # grep without -q reads the whole output, so docker never writes into a closed pipe, which pipefail would count as a failure.
+  docker run --rm meet-first-api:check node --version | grep '^v22\.'
 }
 # Command 19: the worker image builds on Node 22 (D72).
 s19_docker_worker() {
   docker build -f Dockerfile.worker -t meet-first-worker:check .
-  docker run --rm meet-first-worker:check node --version | grep -q '^v22\.'
+  # grep without -q reads the whole output, so docker never writes into a closed pipe, which pipefail would count as a failure.
+  docker run --rm meet-first-worker:check node --version | grep '^v22\.'
 }
 # Command 20: the production image refuses to boot in replay mode (D74, R13.3), before it reads the schema, since the database URL is given.
 s20_production_refuses_replay() {
@@ -227,6 +229,8 @@ s22_checks() { pnpm checks; }
 # Command 23: no mock module, no model key outside the worker, and MSW only under apps/web/src/testing, in code; a README may name them to say so.
 s23_forbidden_imports() {
   local mock key msw
+  # grep exits 1 when it finds nothing, which is the pass case here. The row runs in its own process, so this changes only this row.
+  set +o pipefail
   mock=$(grep -rln --exclude-dir=node_modules --exclude-dir=dist --exclude="*.md" "mock-api" apps packages 2>/dev/null | wc -l | tr -d ' ')
   key=$(grep -rln --exclude-dir=node_modules --exclude-dir=dist --exclude="*.md" "META_API_KEY" apps/web apps/api 2>/dev/null | wc -l | tr -d ' ')
   # Both quote styles: the code base writes imports with double quotes, so a single-quote grep alone would always pass.
