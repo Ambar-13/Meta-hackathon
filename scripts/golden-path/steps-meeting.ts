@@ -102,7 +102,7 @@ function cutChecks(a: EventStreamReader, isMock: boolean, notes: string[]): Asse
     return isMock ? [check(`A's stream reaches seq ${String(PLANNED_DISCONNECT_SEQ)} before the meeting ends`, true, false)] : [];
   }
   const index = a.committed.findIndex((event) => event.seq === PLANNED_DISCONNECT_SEQ);
-  return [check(`seq-${String(PLANNED_DISCONNECT_SEQ)} reconnect`, RESUMED_SEQ, a.committed[index + 1]?.seq)];
+  return [check("planned reconnect", RESUMED_SEQ, a.committed[index + 1]?.seq)];
 }
 
 // Step 8: both screens show the same turns, the recall switch works on A's side only, deltas arrive before the commit, and the planned cut resumes with the next seq.

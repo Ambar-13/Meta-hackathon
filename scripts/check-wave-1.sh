@@ -149,7 +149,7 @@ s16_golden_path() {
   pnpm golden-path --mock --until brief --base "$APP_ORIGIN" --report "$EVIDENCE/golden-path.json"
   jq -e '.result == "pass"' "$EVIDENCE/golden-path.json" >/dev/null
   jq -e '.ledger.modes == ["replay"]' "$EVIDENCE/golden-path.json" >/dev/null
-  jq -e '[.steps[] | select(.name == "stream") | .assertions[] | select(.name == "seq-20 reconnect") | .pass] == [true]' "$EVIDENCE/golden-path.json" >/dev/null
+  jq -e '[.steps[] | select(.name == "stream") | .assertions[] | select(.name == "planned reconnect") | .pass] == [true]' "$EVIDENCE/golden-path.json" >/dev/null
 }
 # Command 17: no session token reached a log line.
 s17_no_tokens_in_logs() {
