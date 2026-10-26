@@ -8,6 +8,18 @@ importers:
 
   .:
     devDependencies:
+      '@meet-first/contracts':
+        specifier: workspace:*
+        version: link:packages/contracts
+      '@meet-first/db':
+        specifier: workspace:*
+        version: link:packages/db
+      '@meet-first/parsers':
+        specifier: workspace:*
+        version: link:packages/parsers
+      '@meet-first/scrub':
+        specifier: workspace:*
+        version: link:packages/scrub
       '@secretlint/secretlint-rule-preset-recommend':
         specifier: 13.0.6
         version: 13.0.6

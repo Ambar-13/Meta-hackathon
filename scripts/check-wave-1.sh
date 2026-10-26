@@ -65,19 +65,19 @@ s04_forced_rls() {
   echo "$count"
   [ "$count" = "0" ]
 }
-# Command 05: the schema holds 25 tables in public (ARCHITECTURE 2, with the confirm in the spec).
+# Command 05: the schema holds 27 tables in public: 25 from 0001 (asks dropped, as-built item 28) and 2 from 0002 (item 29).
 s05_tables() {
   local count
   count=$(psql "$DATABASE_URL_MIGRATE" -Atc "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relkind = 'r'")
   echo "$count"
-  [ "$count" = "25" ]
+  [ "$count" = "27" ]
 }
-# Command 06: the security definer functions are exactly the 12 of ARCHITECTURE 3.
+# Command 06: the security definer functions are exactly the 15 of 0001 (as-built item 6).
 s06_definer_functions() {
   local count
   count=$(psql "$DATABASE_URL_MIGRATE" -Atc "SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname = 'public' AND p.prosecdef")
   echo "$count"
-  [ "$count" = "12" ]
+  [ "$count" = "15" ]
 }
 # Command 07: the quiz bank is seeded with its 30 questions (D28).
 s07_quiz_bank() {

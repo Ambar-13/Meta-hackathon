@@ -9,7 +9,7 @@ export default defineWorkspace(
   KINDS.map((kind) => ({
     test: {
       name: kind,
-      include: [`{apps,packages}/*/src/**/*.${kind}.test.{ts,tsx}`, `tests/${kind}/**/*.test.ts`],
+      include: [`{apps,packages}/*/src/**/*.${kind}.test.{ts,tsx}`, `scripts/**/*.${kind}.test.ts`, `tests/${kind}/**/*.test.ts`],
       environment: kind === "accessibility" ? "jsdom" : "node",
       globalSetup: NEEDS_POSTGRES.has(kind) ? ["packages/db/src/testing/fresh-database.ts"] : [],
       testTimeout: kind === "reliability" ? 120_000 : 20_000,

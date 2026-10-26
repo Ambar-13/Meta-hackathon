@@ -26,6 +26,10 @@
     "replay:serve": "tsx scripts/replay-serve.ts"
   },
   "devDependencies": {
+    "@meet-first/contracts": "workspace:*",
+    "@meet-first/db": "workspace:*",
+    "@meet-first/parsers": "workspace:*",
+    "@meet-first/scrub": "workspace:*",
     "@secretlint/secretlint-rule-preset-recommend": "13.0.6",
     "@types/node": "22.7.4",
     "@vitest/coverage-v8": "2.1.2",

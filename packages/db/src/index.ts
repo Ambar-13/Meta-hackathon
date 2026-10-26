@@ -42,3 +42,5 @@ export { parseDatabaseError, TRIGGER_CODES, type DatabaseRefusal, type TriggerCo
 export { searchRecallCorpus } from "./recall-search.js";
 // The event log seq and the event append (invariant 11).
 export { nextEventSeq, appendMeetingEvent } from "./event-seq.js";
+// Counts, table by table, the rows that still point at one person (D69, invariant 16). The golden path reads it after a deletion.
+export { countRowsForPerson } from "./count-person.js";
