@@ -40,16 +40,23 @@ export function clearSessionCookie(reply: FastifyReply): void {
   reply.setCookie(SESSION_COOKIE, "", { ...COOKIE_ATTRIBUTES, maxAge: 0 });
 }
 
+// The person behind a live session token hash, through auth_person_for_session, or null (D33, invariant 21). A stream
+// uses the hash it kept on the request, because the token itself is not kept after the cookie is read.
+export async function findPersonForSessionHash(db: Kysely<Database>, tokenHash: Buffer): Promise<string | null> {
+  const result = await sql<{ person_id: string | null }>`SELECT auth_person_for_session(${tokenHash}) AS person_id`.execute(db);
+  return result.rows[0]?.person_id ?? null;
+}
+
 // The person behind a live session token, through auth_person_for_session, or null (D33).
 export async function findSessionPerson(db: Kysely<Database>, token: string): Promise<string | null> {
-  const result = await sql<{ person_id: string | null }>`SELECT auth_person_for_session(${hashToken(token)}) AS person_id`.execute(db);
-  return result.rows[0]?.person_id ?? null;
+  return findPersonForSessionHash(db, hashToken(token));
 }
 
 // Registers the cookie parser and the session hook (A7).
 export async function addSessionHook(app: FastifyInstance, deps: RouteDeps): Promise<void> {
   await app.register(fastifyCookie);
   app.decorateRequest("personId", null);
+  app.decorateRequest("sessionTokenHash", null);
   app.addHook("onRequest", async (request) => {
     const pattern: string | undefined = request.routeOptions.url;
     if (pattern === undefined || !pattern.startsWith("/api/") || isPublicRoute(request.method, pattern)) {
@@ -57,7 +64,9 @@ export async function addSessionHook(app: FastifyInstance, deps: RouteDeps): Pro
     }
     const token = request.cookies[SESSION_COOKIE];
     if (token !== undefined && SESSION_TOKEN_PATTERN.test(token)) {
-      request.personId = await findSessionPerson(deps.db, token);
+      const tokenHash = hashToken(token);
+      request.sessionTokenHash = tokenHash;
+      request.personId = await findPersonForSessionHash(deps.db, tokenHash);
     }
     if (request.personId === null) {
       throw makeSessionMissingError();

@@ -47,7 +47,8 @@ export function loggerOptions(level: ApiEnv["LOG_LEVEL"], logStream?: NodeJS.Wri
 
 // Builds the app: logger, body limit, JSON parser, hooks, error and not-found handlers, then the routes.
 export async function buildApp(deps: RouteDeps, options: BuildAppOptions): Promise<FastifyInstance> {
-  const app = fastify({ logger: loggerOptions(deps.env.LOG_LEVEL, options.logStream), trustProxy: true, bodyLimit: JSON_BODY_LIMIT_BYTES });
+  // One trusted hop, Render's proxy: request.ip is then the address that proxy appended, never a value the client sent. Wave 3 checks the hop count on Render.
+  const app = fastify({ logger: loggerOptions(deps.env.LOG_LEVEL, options.logStream), trustProxy: 1, bodyLimit: JSON_BODY_LIMIT_BYTES });
   replaceJsonParser(app);
   addContentSecurityPolicy(app);
   addOriginCheck(app, deps.env.APP_ORIGIN);

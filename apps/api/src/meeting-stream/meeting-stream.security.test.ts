@@ -1,13 +1,16 @@
 import type { AddressInfo } from "node:net";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import { CommittedEvent } from "@meet-first/contracts";
-import { asMeeting, createPairedMeeting, type SeededMeeting } from "@meet-first/db/testing";
-import { buildTestApp } from "../testing/app-factory.js";
+import { asMeeting, asPerson, createPairedMeeting, type SeededMeeting } from "@meet-first/db/testing";
+import { buildTestApp, testLogLines } from "../testing/app-factory.js";
 import { readSse, type SseItem } from "../testing/sse-reader.js";
 import { sessionHeader } from "../testing/cookie-jar.js";
-import { registerMeetingStreamRoutes } from "./index.js";
+import { meetingStreamRoutes } from "./index.js";
 import { makeStreamReads } from "./replay-and-poll.js";
-import { createSubscriber } from "./subscriber.js";
+import { createSubscriber, STREAM_TIMING } from "./subscriber.js";
+
+// The session re-check interval these tests use, shorter than the 15 s real one, so a signed-out stream ends quickly.
+const SESSION_CHECK_MS = 200;
 
 let t: Awaited<ReturnType<typeof buildTestApp>>;
 let base = "";
@@ -34,6 +37,11 @@ async function insertEvents(meetingId: string, fromSeq: number, toSeq: number): 
   });
 }
 
+// How many stream_session_ended lines the app has written so far.
+function endedLines(): number {
+  return testLogLines(t.app).filter((line) => line.includes("stream_session_ended")).length;
+}
+
 // Waits the given milliseconds.
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -45,7 +53,7 @@ function eventIds(items: SseItem[]): string[] {
 }
 
 beforeAll(async () => {
-  t = await buildTestApp({ routes: [registerMeetingStreamRoutes] });
+  t = await buildTestApp({ routes: [meetingStreamRoutes({ ...STREAM_TIMING, sessionCheckMs: SESSION_CHECK_MS })] });
   await t.app.listen({ port: 0, host: "127.0.0.1" });
   const address = t.app.server.address() as AddressInfo;
   base = "http://127.0.0.1:" + String(address.port);
@@ -72,7 +80,8 @@ it("R8.7-T1: a stream woken for a meeting its viewer is not in reads zero rows a
     end: () => undefined,
     now: () => new Date(),
     log: t.app.log,
-    timing: { heartbeatMs: 60_000, safetyPollMs: 60_000 },
+    timing: { heartbeatMs: 60_000, safetyPollMs: 60_000, sessionCheckMs: 60_000 },
+    sessionStillValid: () => Promise.resolve(true),
   });
 
   sub.wake({ kind: "event", meetingId: mY.meetingId, seq: 3 });
@@ -126,4 +135,38 @@ it("R8.7-T4: a deleted meeting's stream is 404 not_found for its own members", a
 
   expect(r.statusCode).toBe(404);
   expect(r.json()).toMatchObject({ code: "not_found" });
+});
+
+it("A7-T10: an open stream ends within two session checks after its person's sessions are deleted (invariant 21)", async () => {
+  const endedBefore = endedLines();
+  const m: Meeting = await createPairedMeeting(t.db);
+  const response = await openStream(m.meetingId, m.a.sessionToken);
+  await sleep(100);
+  await asPerson(t.db, m.a.personId, (trx) => trx.deleteFrom("sessions").where("person_id", "=", m.a.personId).execute());
+  const deletedAt = Date.now();
+
+  const items = await readSse(bodyOf(response), { timeoutMs: 3000 });
+  const elapsed = Date.now() - deletedAt;
+
+  // Two check intervals, plus 200 ms for the database reads and the close.
+  expect(elapsed).toBeLessThan(2 * SESSION_CHECK_MS + 200);
+  expect(items.filter((item) => "id" in item && item.id !== null)).toEqual([]);
+  expect(endedLines() - endedBefore).toBe(1);
+});
+
+it("R8.7-T5: an open stream ends within two session checks after its meeting is set to deleted (review row 25)", async () => {
+  const endedBefore = endedLines();
+  const m: Meeting = await createPairedMeeting(t.db);
+  const response = await openStream(m.meetingId, m.a.sessionToken);
+  await sleep(100);
+  await asMeeting(t.db, m.meetingId, (trx) => trx.updateTable("meetings").set({ state: "deleted" }).where("id", "=", m.meetingId).execute());
+  const deletedAt = Date.now();
+
+  const items = await readSse(bodyOf(response), { timeoutMs: 3000 });
+  const elapsed = Date.now() - deletedAt;
+
+  // Two check intervals, plus 200 ms for the database reads and the close.
+  expect(elapsed).toBeLessThan(2 * SESSION_CHECK_MS + 200);
+  expect(items.filter((item) => "id" in item && item.id !== null)).toEqual([]);
+  expect(endedLines() - endedBefore).toBe(1);
 });

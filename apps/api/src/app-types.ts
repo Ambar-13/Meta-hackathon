@@ -10,6 +10,8 @@ declare module "fastify" {
   interface FastifyRequest {
     // The person this request acts for, set by the session hook from the __Host-session cookie; null when no live session came (A7).
     personId: string | null;
+    // The sha256 of the session token that acted for this request, set with personId; a meeting stream re-checks it (A7, invariant 21).
+    sessionTokenHash: Buffer | null;
   }
 }
 

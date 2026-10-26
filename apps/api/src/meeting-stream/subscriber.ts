@@ -10,16 +10,18 @@ export const SSE_HEADERS = { "content-type": "text/event-stream", "cache-control
 export const SSE_PADDING = `:${" ".repeat(SSE_PADDING_BYTES - 3)}\n\n`;
 // The heartbeat comment, written every HEARTBEAT_MS, 15 s (D50, D53).
 export const HEARTBEAT_LINE = ":hb\n\n";
-// How often a stream writes the heartbeat and how often it re-reads on its own.
-export type StreamTiming = { heartbeatMs: number; safetyPollMs: number };
-// The timing every real stream uses: the 15 s heartbeat (D50) and the 10 s safety poll (D49).
-export const STREAM_TIMING: StreamTiming = { heartbeatMs: HEARTBEAT_MS, safetyPollMs: SERVER_SAFETY_POLL_MS };
+// How often a stream writes the heartbeat, how often it re-reads on its own, and how often it re-checks its session.
+export type StreamTiming = { heartbeatMs: number; safetyPollMs: number; sessionCheckMs: number };
+// The timing every real stream uses: the 15 s heartbeat (D50), the 10 s safety poll (D49), and a session re-check
+// at the heartbeat interval by default, so a signed-out session ends its stream within one heartbeat (A7, invariant 21).
+export const STREAM_TIMING: StreamTiming = { heartbeatMs: HEARTBEAT_MS, safetyPollMs: SERVER_SAFETY_POLL_MS, sessionCheckMs: HEARTBEAT_MS };
 // What one stream has sent of a running step's partial text.
 export type SentDelta = { stepSeq: number; attempt: number; sentLen: number };
 // One open stream (D47 to D53).
 export type Subscriber = { start: () => void; wake: (signal: WakeSignal) => void; stop: () => void; end: () => void; whenIdle: () => Promise<void> };
-// What a subscriber needs; write and end are the HTTP response's.
-export type SubscriberOptions = { personId: string; meetingId: string; lastSeq: number; reads: StreamReads; write: (chunk: string) => void; end: () => void; now: () => Date; log: FastifyBaseLogger; timing: StreamTiming };
+// What a subscriber needs; write and end are the HTTP response's. sessionStillValid answers whether the session and the
+// membership that opened the stream still hold; a false answer, or a failed check, ends the stream.
+export type SubscriberOptions = { personId: string; meetingId: string; lastSeq: number; reads: StreamReads; write: (chunk: string) => void; end: () => void; now: () => Date; log: FastifyBaseLogger; timing: StreamTiming; sessionStillValid: () => Promise<boolean> };
 // The open streams of one process, at most a fixed number per person and meeting (D51).
 export type ConnectionLimit<T> = { admit: (key: string, stream: T) => void; release: (key: string, stream: T) => void; endAll: () => void; count: (key: string) => number };
 
@@ -101,6 +103,7 @@ class StreamSubscriber implements Subscriber {
   private chain: Promise<void> = Promise.resolve();
   private heartbeatTimer: NodeJS.Timeout | null = null;
   private pollTimer: NodeJS.Timeout | null = null;
+  private sessionTimer: NodeJS.Timeout | null = null;
 
   constructor(private readonly options: SubscriberOptions) {
     this.lastSentSeq = options.lastSeq;
@@ -117,6 +120,29 @@ class StreamSubscriber implements Subscriber {
     this.pollTimer = setInterval(() => {
       this.wake({ kind: "poll" });
     }, this.options.timing.safetyPollMs);
+    this.sessionTimer = setInterval(() => {
+      this.checkSession();
+    }, this.options.timing.sessionCheckMs);
+  }
+
+  // Queues one session check behind the reads already waiting, so it never runs beside a frame being written.
+  private checkSession(): void {
+    this.enqueue(() => this.verifySession());
+  }
+
+  // Ends the stream when the session or the membership no longer holds. A check that cannot be made counts as a
+  // failure, so the stream fails closed rather than keep sending events it cannot vouch for.
+  private async verifySession(): Promise<void> {
+    let isStillValid = false;
+    try {
+      isStillValid = await this.options.sessionStillValid();
+    } catch (error) {
+      this.options.log.warn({ code: "stream_session_check_failed", meetingId: this.options.meetingId, err: error }, "stream_session_check_failed");
+    }
+    if (!isStillValid) {
+      this.options.log.info({ code: "stream_session_ended", meetingId: this.options.meetingId }, "stream_session_ended");
+      this.end();
+    }
   }
 
   // Writes the heartbeat comment and stamps presence, so the other member sees this person as watching (D53).
@@ -209,6 +235,10 @@ class StreamSubscriber implements Subscriber {
     if (this.pollTimer !== null) {
       clearInterval(this.pollTimer);
       this.pollTimer = null;
+    }
+    if (this.sessionTimer !== null) {
+      clearInterval(this.sessionTimer);
+      this.sessionTimer = null;
     }
   }
 

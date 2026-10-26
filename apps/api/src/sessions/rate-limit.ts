@@ -1,7 +1,8 @@
 // What exists: anyone can make an account with one POST, because there is no email and no password.
 // The problem: a script could make thousands of accounts and spend the model budget through them (R9.5).
-// The step: because server.ts trusts the proxy, request.ip is the visitor's address from X-Forwarded-For, and
-// POST /api/people allows 10 accounts per address per hour (PERSON_CREATE_RATE_LIMIT, R9.5, D60).
+// The step: because server.ts trusts exactly one proxy hop, request.ip is the address that proxy appended to
+// X-Forwarded-For, which a client cannot forge, and POST /api/people allows 10 accounts per address per hour
+// (PERSON_CREATE_RATE_LIMIT, R9.5, D60).
 // What it does not do: the count lives in this process's memory, so a restart resets it and two api processes
 // would each count on their own; no other route is limited here.
 // (Technical name: @fastify/rate-limit with one per-route limit and no global limit.)

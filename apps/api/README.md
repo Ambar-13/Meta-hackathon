@@ -11,6 +11,7 @@ The api is the one web server of Meet First. It answers every route under `/api`
 - It never puts the session token in a response body, a URL or a log line.
 - It never accepts a POST, PUT, PATCH or DELETE whose `Origin` header is not `APP_ORIGIN`.
 - It never answers a non-public `/api` route without a live session.
+- It never keeps a meeting stream open after its session is signed out or deleted, after its person leaves the meeting, or after the meeting is deleted; the stream re-checks all of these every 15 s.
 - It never compresses a response, so no compressor can hold back the meeting stream.
 
 ## How it fits

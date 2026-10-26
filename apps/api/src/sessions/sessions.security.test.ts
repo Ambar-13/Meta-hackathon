@@ -219,6 +219,21 @@ it("R9.5-T1: the 11th account from one address in an hour is 429 too_many_accoun
   expect(other.statusCode).toBe(201);
 });
 
+it("R9.5-T2: a client cannot dodge the account limit by choosing the first X-Forwarded-For entry; the entry the proxy appends is the one counted", async () => {
+  const statuses: number[] = [];
+  for (let n = 1; n <= 10; n += 1) {
+    const r = await appUnderTest.inject({ method: "POST", url: "/api/people", headers: { origin: ORIGIN, "content-type": "application/json", "x-forwarded-for": "198.51.100." + String(n) + ", 192.0.2.77" }, payload: JSON.stringify({ displayName: "F" + String(n) }) });
+    statuses.push(r.statusCode);
+  }
+  const eleventh = await appUnderTest.inject({ method: "POST", url: "/api/people", headers: { origin: ORIGIN, "content-type": "application/json", "x-forwarded-for": "198.51.100.11, 192.0.2.77" }, payload: JSON.stringify({ displayName: "F11" }) });
+  const otherProxyAddress = await appUnderTest.inject({ method: "POST", url: "/api/people", headers: { origin: ORIGIN, "content-type": "application/json", "x-forwarded-for": "198.51.100.12, 192.0.2.78" }, payload: JSON.stringify({ displayName: "F12" }) });
+
+  expect(statuses.every((status) => status === 201)).toBe(true);
+  expect(eleventh.statusCode).toBe(429);
+  expect(eleventh.json()).toMatchObject({ code: "too_many_accounts" });
+  expect(otherProxyAddress.statusCode).toBe(201);
+});
+
 it("D4-T1: a JSON body over 1 MiB is 413 payload_too_large", async () => {
   const r = await appUnderTest.inject({ method: "POST", url: "/api/people", headers: { origin: ORIGIN, "content-type": "application/json", "x-forwarded-for": "192.0.2.6" }, payload: JSON.stringify({ displayName: "a".repeat(1_048_576) }) });
 
