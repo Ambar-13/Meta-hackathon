@@ -179,7 +179,8 @@ s16_golden_path() {
   jq -e '[.steps[] | select(.name == "comic") | .assertions[] | select(.name == "the comic is written after the brief") | .pass] == [true]' "$report" >/dev/null
   jq -e '[.steps[] | select(.name == "delete") | .assertions[] | select(.name == "every table is empty for A") | .pass] == [true]' "$report" >/dev/null
 }
-# Command 17: the eval in replay mode against the api and worker of command 09: seven metrics with sample sizes, the two thresholds, the results file.
+# Command 17: the eval in replay mode against the api and worker of command 09: seven metrics with sample sizes, the two thresholds, the results
+# file, then the eval's two stack tests against the same pair.
 s17_eval() {
   pnpm eval --replay
   local metric
@@ -187,6 +188,8 @@ s17_eval() {
     grep -q "$metric" "$EVIDENCE/17-eval.txt"
   done
   jq -e '.commit and .date and .llmMode == "replay" and .model and (.metrics | length == 7) and (.thresholdFailures | length == 0)' "$ROOT/eval/results.json" >/dev/null
+  # The eval's own stack tests (W2-EVAL-T13 and T14) run only when EVAL_BASE_URL names a running stack; here one is running.
+  EVAL_BASE_URL="$APP_ORIGIN" pnpm exec vitest run --project integration packages/evals/src/run-eval.integration.test.ts
 }
 # Command 18: the api image builds the web app, then the api, on Node 22 (D72).
 s18_docker_api() {
