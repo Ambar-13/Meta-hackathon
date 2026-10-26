@@ -1,4 +1,4 @@
-Request build/w2-deletion-004. File: specs/wave-2-deletion.md at /Users/ambar/Downloads/persona-hackathon/specs/wave-2-deletion.md (integrator decision). Change wanted: in section 5, W2-DEL-T2, change the check text from "reached by meeting_id or by comic_id in PERSON_TABLES" to:
+Request build/w2-deletion-004. File: specs/wave-2-deletion.md in the planning folder (integrator decision). Change wanted: in section 5, W2-DEL-T2, change the check text from "reached by meeting_id or by comic_id in PERSON_TABLES" to:
 
 ```diff
 -- `W2-DEL-T2 (invariant 16): every table with a meeting_id column is reached by meeting_id or by comic_id in PERSON_TABLES`.

@@ -1,4 +1,4 @@
-Request build/w2-deletion-003. File: specs/wave-2-deletion.md at /Users/ambar/Downloads/persona-hackathon/specs/wave-2-deletion.md (the spec is not my file; this is a decision for the integrator). Change wanted, option A (the one I built to): in section 5, W2-DEL-T3 and the expected counts of W2-DEL-T4, change `briefs: 2` to `briefs: 1`, and add to section 4.1 under the joint-table rule:
+Request build/w2-deletion-003. File: specs/wave-2-deletion.md in the planning folder (the spec is not my file; this is a decision for the integrator). Change wanted, option A (the one I built to): in section 5, W2-DEL-T3 and the expected counts of W2-DEL-T4, change `briefs: 2` to `briefs: 1`, and add to section 4.1 under the joint-table rule:
 
 ```diff
 -Count statements (Kysely), by `reach`:
