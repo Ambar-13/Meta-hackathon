@@ -1,2 +1,2 @@
-// The brief page placeholder, replaced in Wave 2.
+// The brief page: its screen component.
 export { BriefScreen } from "./screen.js";
