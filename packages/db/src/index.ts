@@ -39,7 +39,7 @@ export { SCHEMA_VERSION, assertSchemaVersion, readSchemaVersion } from "./migrat
 // Reading a refusal off a Postgres error (docs/contracts.md section 4).
 export { parseDatabaseError, TRIGGER_CODES, type DatabaseRefusal, type TriggerCode } from "./database-errors.js";
 // The recall lookup (D38).
-export { searchRecallCorpus } from "./recall-search.js";
+export { queryWords, searchRecallCorpus } from "./recall-search.js";
 // The event log seq and the event append (invariant 11).
 export { nextEventSeq, appendMeetingEvent } from "./event-seq.js";
 // Counts, table by table, the rows that still point at one person (D69, invariant 16). The golden path reads it after a deletion.

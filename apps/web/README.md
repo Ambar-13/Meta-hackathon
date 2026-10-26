@@ -33,7 +33,7 @@ Notice that the meeting screen never reads the stream itself: every event and po
 - src/app-shell: routes, apiFetch and ApiError, the server clock, what a tab remembers, the screen frame.
 - src/streaming: the fetch-based event stream, the 2 s poll fallback and the reconnect schedule.
 - src/transcript: the event fold, the partial-text rule, the allow-list markdown renderer and the replay player.
-- src/screens: one folder per screen; brief, comic, share and settings are placeholders until Wave 2.
+- src/screens: one folder per screen; the card screen's Sharing section holds the friends, directory and dating switches and the public items, and the directory screen lists the people who opted in and starts a meeting with one.
 - src/testing: the MSW stubs, the 375 px render, the fixtures and the fake event stream.
 
 ## How to test it

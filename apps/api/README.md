@@ -64,6 +64,7 @@ Notice that the reconnect starts at 4, never at 3, and that the delta carries no
 - `src/pairs/`: invites, joining and the lobby poll.
 - `src/meetings/`: create a meeting, read it, give your go-ahead, and start it.
 - `src/meeting-stream/`: the LISTEN connection, the stream and the poll fallback.
+- `src/directory/`: a card's sharing settings, the directory and your own listing, meetings with a listed persona, and the friends list.
 - `src/web-pages/`: the web build, the app-shell fallback, the CSP header and `/api/health`.
 - `src/testing/`: `buildTestApp`, `cookieJar` and `readSse` for every api test.
 
