@@ -775,9 +775,15 @@ LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public, pg_temp AS $$
   SELECT mt.id, 'queued', mt.queue_position FROM meetings mt WHERE mt.state = 'queued'
   UNION ALL
   SELECT mt.id, 'running', NULL::int FROM meetings mt WHERE mt.state = 'running'
+  UNION ALL
+  SELECT mt.id, 'ready', NULL::int
+  FROM meetings mt
+  WHERE mt.state = 'ready' AND mt.question_checked_at IS NOT NULL AND mt.question_rejected_reason IS NULL
+    AND (SELECT count(*) FROM meeting_members mm
+         WHERE mm.meeting_id = mt.id AND mm.ready_at IS NOT NULL AND mm.frozen_prefix IS NOT NULL) = 2
   ORDER BY 2, 3
 $$;
-COMMENT ON FUNCTION sweep_candidates(int) IS 'Meetings the sweeper must look at: queued ones with their position, lowest first; every running one, for the token stop; and stalled ones, with no event for n seconds (D46).';
+COMMENT ON FUNCTION sweep_candidates(int) IS 'Meetings the sweeper must look at: queued ones with their position, lowest first; ready ones whose two people have both given their go-ahead and whose prompt prefixes exist, to start with nobody online; every running one, for the token stop; and stalled ones, with no event for n seconds (D46).';
 
 CREATE OR REPLACE FUNCTION pair_display_names(p uuid)
 RETURNS TABLE (creator_display_name text, joiner_display_name text)
