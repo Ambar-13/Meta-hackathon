@@ -108,8 +108,9 @@ async function applyVerdict(trx: Transaction<Database>, scope: VerdictScope, ver
     await trx.updateTable("meetings").set({ question_rejected_reason: verdict.reason }).where("id", "=", meetingId).execute();
     return "refused";
   }
-  // A romance question to a listed persona whose owner has not switched on dating questions is refused (as-built item 54).
-  if (verdict?.kind === "romance") {
+  // A question with any romantic part, to a listed persona whose owner has not switched on dating questions, is refused, whatever kind
+  // the check gave it (as-built items 54 and 55).
+  if (verdict !== undefined && (verdict.romantic || verdict.kind === "romance")) {
     const meeting = await trx.selectFrom("meetings").select("romance_allowed").where("id", "=", meetingId).executeTakeFirstOrThrow();
     if (!meeting.romance_allowed) {
       await trx.updateTable("meetings").set({ question_rejected_reason: ROMANCE_NOT_OPEN_REASON }).where("id", "=", meetingId).execute();

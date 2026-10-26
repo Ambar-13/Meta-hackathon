@@ -2,7 +2,7 @@
 export const CURRENT_PROMPTS = {
   dossier: "v1",
   "scrub-names": "v1",
-  "question-check": "v4",
+  "question-check": "v5",
   "quiz-persona-answer": "v1",
   "quiz-judge": "v1",
   "meeting-moderator": "v4",

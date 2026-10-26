@@ -94,7 +94,7 @@ function moderatorText(): string {
 
 it("R10.5-T1: an allowed free-text question is marked checked and both prefixes are stored", async () => {
   await freeText(m.meetingId);
-  const t = await openTest(questionCheck({ allowed: true, reason: "A question about splitting work.", kind: "decision" }));
+  const t = await openTest(questionCheck({ allowed: true, reason: "A question about splitting work.", kind: "decision", romantic: false }));
   await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
   const checked = await meetingOf(m.meetingId);
   expect(checked.question_checked_at).not.toBeNull();
@@ -115,7 +115,7 @@ it("R10.5-T1: an allowed free-text question is marked checked and both prefixes 
 
 it("R10.5-T2: a refused free-text question keeps its reason and gets no prefix", async () => {
   await freeText(m.meetingId);
-  const t = await openTest(questionCheck({ allowed: false, reason: "Questions about health are not allowed.", kind: "situation" }));
+  const t = await openTest(questionCheck({ allowed: false, reason: "Questions about health are not allowed.", kind: "situation", romantic: false }));
   await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
   const meeting = await meetingOf(m.meetingId);
   expect(meeting.question_rejected_reason).toBe("Questions about health are not allowed.");
@@ -130,12 +130,22 @@ it("R10.5-T2: a refused free-text question keeps its reason and gets no prefix",
 it("W5-DIR-T10: a free-text question the check calls romance is refused in a meeting whose listed person has dating questions off", async () => {
   await freeText(m.meetingId);
   await withMeeting(workerDb, m.meetingId, (trx) => trx.updateTable("meetings").set({ romance_allowed: false }).where("id", "=", m.meetingId).execute());
-  const t = await openTest(questionCheck({ allowed: true, reason: "A question about whether two people would enjoy a first date.", kind: "romance" }));
+  const t = await openTest(questionCheck({ allowed: true, reason: "A question about whether two people would enjoy a first date.", kind: "romance", romantic: true }));
   await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
   const meeting = await meetingOf(m.meetingId);
   expect(meeting.question_rejected_reason).toBe(ROMANCE_NOT_OPEN_REASON);
   expect(meeting.question_checked_at).toBeNull();
   for (const side of await membersOf(m.meetingId)) expect(side.frozen_prefix).toBeNull();
+});
+
+it("W5-DIR-T11: a question the check marks romantic under another kind is refused just the same when dating questions are off", async () => {
+  await freeText(m.meetingId);
+  await withMeeting(workerDb, m.meetingId, (trx) => trx.updateTable("meetings").set({ romance_allowed: false }).where("id", "=", m.meetingId).execute());
+  const t = await openTest(questionCheck({ allowed: true, reason: "A question about splitting work, with a date in it.", kind: "deal", romantic: true }));
+  await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
+  const meeting = await meetingOf(m.meetingId);
+  expect(meeting.question_rejected_reason).toBe(ROMANCE_NOT_OPEN_REASON);
+  expect(meeting.question_checked_at).toBeNull();
 });
 
 it("D41-T4: a curated question needs no model call and gets both prefixes, which carry the curated question's kind", async () => {

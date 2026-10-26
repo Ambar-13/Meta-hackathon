@@ -80,9 +80,10 @@ export const MeetingStartResponse = z.object({
 });
 // The type of MeetingStartResponse, read from the schema above.
 export type MeetingStartResponse = z.infer<typeof MeetingStartResponse>;
-// What the question check model returns: whether the question may be used, why, and which kind it is (R10.5). The kind matters only
-// when the question is allowed.
-export const QuestionCheckOutput = z.object({ allowed: z.boolean(), reason: z.string().min(1).max(200), kind: QuestionKind });
+// What the question check model returns: whether the question may be used, why, which kind it is, and whether any part of it is romantic
+// (R10.5). The kind matters only when the question is allowed. romantic is asked apart from the kind, so a mixed question cannot pass a
+// closed dating switch under another kind (as-built item 55).
+export const QuestionCheckOutput = z.object({ allowed: z.boolean(), reason: z.string().min(1).max(200), kind: QuestionKind, romantic: z.boolean() });
 // The type of QuestionCheckOutput, read from the schema above.
 export type QuestionCheckOutput = z.infer<typeof QuestionCheckOutput>;
 // The 20 curated meeting questions in five groups of 4 as the lobby shows them: getting along or clashing (1 to 4), help (5 to 8),

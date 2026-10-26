@@ -1,0 +1,37 @@
+{
+  "name": "question-check",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "allowed": {
+        "type": "boolean"
+      },
+      "reason": {
+        "type": "string"
+      },
+      "kind": {
+        "type": "string",
+        "enum": [
+          "get_along",
+          "help",
+          "situation",
+          "decision",
+          "deal",
+          "debate",
+          "romance"
+        ]
+      },
+      "romantic": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "allowed",
+      "reason",
+      "kind",
+      "romantic"
+    ],
+    "additionalProperties": false
+  }
+}

@@ -75,7 +75,7 @@ export async function writeQuestionCheckFixture(): Promise<string> {
   const body = chatBodyFor(args, false);
   const folder = join(FIXTURE_DIR, "question_check");
   const path = join(folder, requestHash(body) + ".json");
-  const response = structuredReplyLayout({ allowed: true, reason: "A question about how two people could help each other.", kind: "help" });
+  const response = structuredReplyLayout({ allowed: true, reason: "A question about how two people could help each other.", kind: "help", romantic: false });
   await mkdir(folder, { recursive: true });
   await writeFile(path, JSON.stringify(scriptedRecordedCall({ callSite: "question_check", promptVersion: prompt.version, body }, response), null, 2) + "\n");
   return path;

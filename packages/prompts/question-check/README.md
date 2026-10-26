@@ -4,7 +4,7 @@ One small model call that decides whether a typed meeting question may start a m
 
 ## What this does
 
-When a person types their own meeting question instead of picking one of the 12 curated ones, the check_question job sends it here once. The answer is allowed or not, with one sentence the start screen can show, and the question's kind (get_along, help, situation, decision, deal, debate or romance), which the meeting and the brief follow. It refuses sexually explicit questions. From v3 it also judges asks about one person's persona: how a friend would probably react, and help requests sent to many personas.
+When a person types their own meeting question instead of picking one of the 12 curated ones, the check_question job sends it here once. The answer is allowed or not, with one sentence the start screen can show, and the question's kind (get_along, help, situation, decision, deal, debate or romance), which the meeting and the brief follow. It refuses sexually explicit questions, and from v5 it says apart from the kind whether any part of a question is romantic. From v3 it also judges asks about one person's persona: how a friend would probably react, and help requests sent to many personas.
 
 ## What this never does
 

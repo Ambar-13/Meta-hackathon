@@ -6,6 +6,8 @@ For adults only: Meet First is for people 18 and over, as the Meta terms and the
 
 No sexually explicit questions: dating and romance questions are allowed, but the question check refuses anything that asks for sexual content.
 
+The dating switch rests on the question check: a model reads each typed question and says whether any part of it is romantic, and a question worded to hide that can still reach a listed persona whose owner left the switch off.
+
 No compatibility score.
 
 A matching quote proves provenance, not truth.
