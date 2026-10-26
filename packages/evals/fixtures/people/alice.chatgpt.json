@@ -1,0 +1,2294 @@
+[
+  {
+    "title": "Synthetic export: invented notes about one made-up person",
+    "create_time": 1704067200.0,
+    "current_node": "c0-a13",
+    "mapping": {
+      "root": {
+        "id": "root",
+        "message": null,
+        "parent": null,
+        "children": [
+          "c0-u0"
+        ]
+      },
+      "c0-u0": {
+        "id": "c0-u0",
+        "message": {
+          "id": "c0-u0",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704067200.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I plan my week on Sunday evening, and I keep the plan to one page so I actually read it."
+            ]
+          }
+        },
+        "parent": "root",
+        "children": [
+          "c0-a0"
+        ]
+      },
+      "c0-a0": {
+        "id": "c0-a0",
+        "message": {
+          "id": "c0-a0",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704067230.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c0-u0",
+        "children": [
+          "c0-u1"
+        ]
+      },
+      "c0-u1": {
+        "id": "c0-u1",
+        "message": {
+          "id": "c0-u1",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704067320.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I work best when the first hour of the day has no calls and no chat messages at all."
+            ]
+          }
+        },
+        "parent": "c0-a0",
+        "children": [
+          "c0-a1"
+        ]
+      },
+      "c0-a1": {
+        "id": "c0-a1",
+        "message": {
+          "id": "c0-a1",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704067350.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c0-u1",
+        "children": [
+          "c0-u2"
+        ]
+      },
+      "c0-u2": {
+        "id": "c0-u2",
+        "message": {
+          "id": "c0-u2",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704067440.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "My manager Priya Raman prefers short written updates, so I send one each Thursday."
+            ]
+          }
+        },
+        "parent": "c0-a1",
+        "children": [
+          "c0-a2"
+        ]
+      },
+      "c0-a2": {
+        "id": "c0-a2",
+        "message": {
+          "id": "c0-a2",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704067470.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c0-u2",
+        "children": [
+          "c0-u3"
+        ]
+      },
+      "c0-u3": {
+        "id": "c0-u3",
+        "message": {
+          "id": "c0-u3",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704067560.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I like a clear owner for every task, and I write the owner's name next to each line of my plan."
+            ]
+          }
+        },
+        "parent": "c0-a2",
+        "children": [
+          "c0-a3"
+        ]
+      },
+      "c0-a3": {
+        "id": "c0-a3",
+        "message": {
+          "id": "c0-a3",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704067590.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c0-u3",
+        "children": [
+          "c0-u4"
+        ]
+      },
+      "c0-u4": {
+        "id": "c0-u4",
+        "message": {
+          "id": "c0-u4",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704067680.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I stop working at six most days, because the evening is when I cook and read."
+            ]
+          }
+        },
+        "parent": "c0-a3",
+        "children": [
+          "c0-a4"
+        ]
+      },
+      "c0-a4": {
+        "id": "c0-a4",
+        "message": {
+          "id": "c0-a4",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704067710.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c0-u4",
+        "children": [
+          "c0-u5"
+        ]
+      },
+      "c0-u5": {
+        "id": "c0-u5",
+        "message": {
+          "id": "c0-u5",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704067800.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "When I feel stuck, I write the problem in plain words and then sleep on it before I decide."
+            ]
+          }
+        },
+        "parent": "c0-a4",
+        "children": [
+          "c0-a5"
+        ]
+      },
+      "c0-a5": {
+        "id": "c0-a5",
+        "message": {
+          "id": "c0-a5",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704067830.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c0-u5",
+        "children": [
+          "c0-u6"
+        ]
+      },
+      "c0-u6": {
+        "id": "c0-u6",
+        "message": {
+          "id": "c0-u6",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704067920.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I want feedback in private and in writing first, and then I want to talk it through once."
+            ]
+          }
+        },
+        "parent": "c0-a5",
+        "children": [
+          "c0-a6"
+        ]
+      },
+      "c0-a6": {
+        "id": "c0-a6",
+        "message": {
+          "id": "c0-a6",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704067950.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c0-u6",
+        "children": [
+          "c0-u7"
+        ]
+      },
+      "c0-u7": {
+        "id": "c0-u7",
+        "message": {
+          "id": "c0-u7",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704068040.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I keep a running list of questions for my manager and bring the list to every one to one."
+            ]
+          }
+        },
+        "parent": "c0-a6",
+        "children": [
+          "c0-a7"
+        ]
+      },
+      "c0-a7": {
+        "id": "c0-a7",
+        "message": {
+          "id": "c0-a7",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704068070.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c0-u7",
+        "children": [
+          "c0-u8"
+        ]
+      },
+      "c0-u8": {
+        "id": "c0-u8",
+        "message": {
+          "id": "c0-u8",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704068160.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I dislike long agendas, so I ask for a three line agenda before any meeting longer than thirty minutes."
+            ]
+          }
+        },
+        "parent": "c0-a7",
+        "children": [
+          "c0-a8"
+        ]
+      },
+      "c0-a8": {
+        "id": "c0-a8",
+        "message": {
+          "id": "c0-a8",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704068190.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c0-u8",
+        "children": [
+          "c0-u9"
+        ]
+      },
+      "c0-u9": {
+        "id": "c0-u9",
+        "message": {
+          "id": "c0-u9",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704068280.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I use a paper notebook for ideas, because typing into a laptop makes me want to check email."
+            ]
+          }
+        },
+        "parent": "c0-a8",
+        "children": [
+          "c0-a9"
+        ]
+      },
+      "c0-a9": {
+        "id": "c0-a9",
+        "message": {
+          "id": "c0-a9",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704068310.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c0-u9",
+        "children": [
+          "c0-u10"
+        ]
+      },
+      "c0-u10": {
+        "id": "c0-u10",
+        "message": {
+          "id": "c0-u10",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704068400.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I try to finish one task completely before I start the next, even when a small thing is waiting."
+            ]
+          }
+        },
+        "parent": "c0-a9",
+        "children": [
+          "c0-a10"
+        ]
+      },
+      "c0-a10": {
+        "id": "c0-a10",
+        "message": {
+          "id": "c0-a10",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704068430.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c0-u10",
+        "children": [
+          "c0-u11"
+        ]
+      },
+      "c0-u11": {
+        "id": "c0-u11",
+        "message": {
+          "id": "c0-u11",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704068520.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I am careful with promises, so I only say I will do something when I have a clear time for it."
+            ]
+          }
+        },
+        "parent": "c0-a10",
+        "children": [
+          "c0-a11"
+        ]
+      },
+      "c0-a11": {
+        "id": "c0-a11",
+        "message": {
+          "id": "c0-a11",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704068550.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c0-u11",
+        "children": [
+          "c0-u12"
+        ]
+      },
+      "c0-u12": {
+        "id": "c0-u12",
+        "message": {
+          "id": "c0-u12",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704068640.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I prefer to review drafts after a day away, because the wording looks different in the morning."
+            ]
+          }
+        },
+        "parent": "c0-a11",
+        "children": [
+          "c0-a12"
+        ]
+      },
+      "c0-a12": {
+        "id": "c0-a12",
+        "message": {
+          "id": "c0-a12",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704068670.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c0-u12",
+        "children": [
+          "c0-u13"
+        ]
+      },
+      "c0-u13": {
+        "id": "c0-u13",
+        "message": {
+          "id": "c0-u13",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704068760.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I like working on one project at a time, and I say so early when I am asked to juggle two."
+            ]
+          }
+        },
+        "parent": "c0-a12",
+        "children": [
+          "c0-a13"
+        ]
+      },
+      "c0-a13": {
+        "id": "c0-a13",
+        "message": {
+          "id": "c0-a13",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704068790.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c0-u13",
+        "children": []
+      }
+    }
+  },
+  {
+    "title": "Notes on work habits 2",
+    "create_time": 1704153600.0,
+    "current_node": "c1-a13",
+    "mapping": {
+      "root": {
+        "id": "root",
+        "message": null,
+        "parent": null,
+        "children": [
+          "c1-u0"
+        ]
+      },
+      "c1-u0": {
+        "id": "c1-u0",
+        "message": {
+          "id": "c1-u0",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704153600.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "On a team, I like to know who decides before we start talking about the options."
+            ]
+          }
+        },
+        "parent": "root",
+        "children": [
+          "c1-a0"
+        ]
+      },
+      "c1-a0": {
+        "id": "c1-a0",
+        "message": {
+          "id": "c1-a0",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704153630.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c1-u0",
+        "children": [
+          "c1-u1"
+        ]
+      },
+      "c1-u1": {
+        "id": "c1-u1",
+        "message": {
+          "id": "c1-u1",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704153720.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I am comfortable disagreeing in a meeting, but I prefer to disagree in a document first."
+            ]
+          }
+        },
+        "parent": "c1-a0",
+        "children": [
+          "c1-a1"
+        ]
+      },
+      "c1-a1": {
+        "id": "c1-a1",
+        "message": {
+          "id": "c1-a1",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704153750.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c1-u1",
+        "children": [
+          "c1-u2"
+        ]
+      },
+      "c1-u2": {
+        "id": "c1-u2",
+        "message": {
+          "id": "c1-u2",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704153840.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "When someone shares a half finished idea, I ask what would make it good enough to test."
+            ]
+          }
+        },
+        "parent": "c1-a1",
+        "children": [
+          "c1-a2"
+        ]
+      },
+      "c1-a2": {
+        "id": "c1-a2",
+        "message": {
+          "id": "c1-a2",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704153870.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c1-u2",
+        "children": [
+          "c1-u3"
+        ]
+      },
+      "c1-u3": {
+        "id": "c1-u3",
+        "message": {
+          "id": "c1-u3",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704153960.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I am most useful when I can take a messy set of notes and turn them into a short plan."
+            ]
+          }
+        },
+        "parent": "c1-a2",
+        "children": [
+          "c1-a3"
+        ]
+      },
+      "c1-a3": {
+        "id": "c1-a3",
+        "message": {
+          "id": "c1-a3",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704153990.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c1-u3",
+        "children": [
+          "c1-u4"
+        ]
+      },
+      "c1-u4": {
+        "id": "c1-u4",
+        "message": {
+          "id": "c1-u4",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704154080.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I trust people who say I do not know yet, and I trust them more when they say when they will know."
+            ]
+          }
+        },
+        "parent": "c1-a3",
+        "children": [
+          "c1-a4"
+        ]
+      },
+      "c1-a4": {
+        "id": "c1-a4",
+        "message": {
+          "id": "c1-a4",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704154110.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c1-u4",
+        "children": [
+          "c1-u5"
+        ]
+      },
+      "c1-u5": {
+        "id": "c1-u5",
+        "message": {
+          "id": "c1-u5",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704154200.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I keep one hour each week for reading the things other people wrote and did not get to share."
+            ]
+          }
+        },
+        "parent": "c1-a4",
+        "children": [
+          "c1-a5"
+        ]
+      },
+      "c1-a5": {
+        "id": "c1-a5",
+        "message": {
+          "id": "c1-a5",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704154230.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c1-u5",
+        "children": [
+          "c1-u6"
+        ]
+      },
+      "c1-u6": {
+        "id": "c1-u6",
+        "message": {
+          "id": "c1-u6",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704154320.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I think it is fair to ask for a deadline and to offer a reason when the deadline is too short."
+            ]
+          }
+        },
+        "parent": "c1-a5",
+        "children": [
+          "c1-a6"
+        ]
+      },
+      "c1-a6": {
+        "id": "c1-a6",
+        "message": {
+          "id": "c1-a6",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704154350.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c1-u6",
+        "children": [
+          "c1-u7"
+        ]
+      },
+      "c1-u7": {
+        "id": "c1-u7",
+        "message": {
+          "id": "c1-u7",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704154440.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I like a shared folder where every decision has a short note about why we made it."
+            ]
+          }
+        },
+        "parent": "c1-a6",
+        "children": [
+          "c1-a7"
+        ]
+      },
+      "c1-a7": {
+        "id": "c1-a7",
+        "message": {
+          "id": "c1-a7",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704154470.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c1-u7",
+        "children": [
+          "c1-u8"
+        ]
+      },
+      "c1-u8": {
+        "id": "c1-u8",
+        "message": {
+          "id": "c1-u8",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704154560.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I would rather lose a small argument quickly than win a long one that wastes the whole week."
+            ]
+          }
+        },
+        "parent": "c1-a7",
+        "children": [
+          "c1-a8"
+        ]
+      },
+      "c1-a8": {
+        "id": "c1-a8",
+        "message": {
+          "id": "c1-a8",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704154590.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c1-u8",
+        "children": [
+          "c1-u9"
+        ]
+      },
+      "c1-u9": {
+        "id": "c1-u9",
+        "message": {
+          "id": "c1-u9",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704154680.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "When a project gets stuck, I go back to the first question and check whether it is still the right one."
+            ]
+          }
+        },
+        "parent": "c1-a8",
+        "children": [
+          "c1-a9"
+        ]
+      },
+      "c1-a9": {
+        "id": "c1-a9",
+        "message": {
+          "id": "c1-a9",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704154710.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c1-u9",
+        "children": [
+          "c1-u10"
+        ]
+      },
+      "c1-u10": {
+        "id": "c1-u10",
+        "message": {
+          "id": "c1-u10",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704154800.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I prefer quiet rooms for hard conversations, and I try to book one before the feedback gets heavy."
+            ]
+          }
+        },
+        "parent": "c1-a9",
+        "children": [
+          "c1-a10"
+        ]
+      },
+      "c1-a10": {
+        "id": "c1-a10",
+        "message": {
+          "id": "c1-a10",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704154830.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c1-u10",
+        "children": [
+          "c1-u11"
+        ]
+      },
+      "c1-u11": {
+        "id": "c1-u11",
+        "message": {
+          "id": "c1-u11",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704154920.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I like to end a meeting by saying who does what by when, out loud, so nobody leaves unsure."
+            ]
+          }
+        },
+        "parent": "c1-a10",
+        "children": [
+          "c1-a11"
+        ]
+      },
+      "c1-a11": {
+        "id": "c1-a11",
+        "message": {
+          "id": "c1-a11",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704154950.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c1-u11",
+        "children": [
+          "c1-u12"
+        ]
+      },
+      "c1-u12": {
+        "id": "c1-u12",
+        "message": {
+          "id": "c1-u12",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704155040.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I try to keep my own promises visible, so people can see that I am following through on them."
+            ]
+          }
+        },
+        "parent": "c1-a11",
+        "children": [
+          "c1-a12"
+        ]
+      },
+      "c1-a12": {
+        "id": "c1-a12",
+        "message": {
+          "id": "c1-a12",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704155070.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c1-u12",
+        "children": [
+          "c1-u13"
+        ]
+      },
+      "c1-u13": {
+        "id": "c1-u13",
+        "message": {
+          "id": "c1-u13",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704155160.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I think a good teammate writes things down before they are asked, and I try to be one."
+            ]
+          }
+        },
+        "parent": "c1-a12",
+        "children": [
+          "c1-a13"
+        ]
+      },
+      "c1-a13": {
+        "id": "c1-a13",
+        "message": {
+          "id": "c1-a13",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704155190.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c1-u13",
+        "children": []
+      }
+    }
+  },
+  {
+    "title": "Notes on work habits 3",
+    "create_time": 1704240000.0,
+    "current_node": "c2-a13",
+    "mapping": {
+      "root": {
+        "id": "root",
+        "message": null,
+        "parent": null,
+        "children": [
+          "c2-u0"
+        ]
+      },
+      "c2-u0": {
+        "id": "c2-u0",
+        "message": {
+          "id": "c2-u0",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704240000.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I have a habit of reading the last page of a long report first, so I know where it is going."
+            ]
+          }
+        },
+        "parent": "root",
+        "children": [
+          "c2-a0"
+        ]
+      },
+      "c2-a0": {
+        "id": "c2-a0",
+        "message": {
+          "id": "c2-a0",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704240030.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c2-u0",
+        "children": [
+          "c2-u1"
+        ]
+      },
+      "c2-u1": {
+        "id": "c2-u1",
+        "message": {
+          "id": "c2-u1",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704240120.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "My colleague Dev Sharma and I split the review work so that each of us reads the other's first pass."
+            ]
+          }
+        },
+        "parent": "c2-a0",
+        "children": [
+          "c2-a1"
+        ]
+      },
+      "c2-a1": {
+        "id": "c2-a1",
+        "message": {
+          "id": "c2-a1",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704240150.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c2-u1",
+        "children": [
+          "c2-u2"
+        ]
+      },
+      "c2-u2": {
+        "id": "c2-u2",
+        "message": {
+          "id": "c2-u2",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704240240.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I keep my phone face down during work blocks, and I use a timer for the breaks in between."
+            ]
+          }
+        },
+        "parent": "c2-a1",
+        "children": [
+          "c2-a2"
+        ]
+      },
+      "c2-a2": {
+        "id": "c2-a2",
+        "message": {
+          "id": "c2-a2",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704240270.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c2-u2",
+        "children": [
+          "c2-u3"
+        ]
+      },
+      "c2-u3": {
+        "id": "c2-u3",
+        "message": {
+          "id": "c2-u3",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704240360.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I like to make small improvements to a process once a month rather than a big change once a year."
+            ]
+          }
+        },
+        "parent": "c2-a2",
+        "children": [
+          "c2-a3"
+        ]
+      },
+      "c2-a3": {
+        "id": "c2-a3",
+        "message": {
+          "id": "c2-a3",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704240390.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c2-u3",
+        "children": [
+          "c2-u4"
+        ]
+      },
+      "c2-u4": {
+        "id": "c2-u4",
+        "message": {
+          "id": "c2-u4",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704240480.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "When I learn a new tool, I try it on a small real task before I read any guide about it."
+            ]
+          }
+        },
+        "parent": "c2-a3",
+        "children": [
+          "c2-a4"
+        ]
+      },
+      "c2-a4": {
+        "id": "c2-a4",
+        "message": {
+          "id": "c2-a4",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704240510.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c2-u4",
+        "children": [
+          "c2-u5"
+        ]
+      },
+      "c2-u5": {
+        "id": "c2-u5",
+        "message": {
+          "id": "c2-u5",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704240600.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I am careful about how many tabs I keep open, and I close the ones I am not using every afternoon."
+            ]
+          }
+        },
+        "parent": "c2-a4",
+        "children": [
+          "c2-a5"
+        ]
+      },
+      "c2-a5": {
+        "id": "c2-a5",
+        "message": {
+          "id": "c2-a5",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704240630.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c2-u5",
+        "children": [
+          "c2-u6"
+        ]
+      },
+      "c2-u6": {
+        "id": "c2-u6",
+        "message": {
+          "id": "c2-u6",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704240720.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I prefer a simple written list of next steps, with the first step already done when possible."
+            ]
+          }
+        },
+        "parent": "c2-a5",
+        "children": [
+          "c2-a6"
+        ]
+      },
+      "c2-a6": {
+        "id": "c2-a6",
+        "message": {
+          "id": "c2-a6",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704240750.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c2-u6",
+        "children": [
+          "c2-u7"
+        ]
+      },
+      "c2-u7": {
+        "id": "c2-u7",
+        "message": {
+          "id": "c2-u7",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704240840.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I value calm and direct messages, so I try to write mine without extra words or greetings."
+            ]
+          }
+        },
+        "parent": "c2-a6",
+        "children": [
+          "c2-a7"
+        ]
+      },
+      "c2-a7": {
+        "id": "c2-a7",
+        "message": {
+          "id": "c2-a7",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704240870.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c2-u7",
+        "children": [
+          "c2-u8"
+        ]
+      },
+      "c2-u8": {
+        "id": "c2-u8",
+        "message": {
+          "id": "c2-u8",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704240960.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I say thank you in writing when someone helps me, and I copy their manager when the help was large."
+            ]
+          }
+        },
+        "parent": "c2-a7",
+        "children": [
+          "c2-a8"
+        ]
+      },
+      "c2-a8": {
+        "id": "c2-a8",
+        "message": {
+          "id": "c2-a8",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704240990.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c2-u8",
+        "children": [
+          "c2-u9"
+        ]
+      },
+      "c2-u9": {
+        "id": "c2-u9",
+        "message": {
+          "id": "c2-u9",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704241080.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I am happiest when my week has one thing I can finish by Friday, and I plan for it on Monday."
+            ]
+          }
+        },
+        "parent": "c2-a8",
+        "children": [
+          "c2-a9"
+        ]
+      },
+      "c2-a9": {
+        "id": "c2-a9",
+        "message": {
+          "id": "c2-a9",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704241110.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c2-u9",
+        "children": [
+          "c2-u10"
+        ]
+      },
+      "c2-u10": {
+        "id": "c2-u10",
+        "message": {
+          "id": "c2-u10",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704241200.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I try to answer a question with a clear yes, no, or not yet, and then the reason in one line."
+            ]
+          }
+        },
+        "parent": "c2-a9",
+        "children": [
+          "c2-a10"
+        ]
+      },
+      "c2-a10": {
+        "id": "c2-a10",
+        "message": {
+          "id": "c2-a10",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704241230.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c2-u10",
+        "children": [
+          "c2-u11"
+        ]
+      },
+      "c2-u11": {
+        "id": "c2-u11",
+        "message": {
+          "id": "c2-u11",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704241320.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I keep a short log of what I learned each day, and I read it before I plan the next one."
+            ]
+          }
+        },
+        "parent": "c2-a10",
+        "children": [
+          "c2-a11"
+        ]
+      },
+      "c2-a11": {
+        "id": "c2-a11",
+        "message": {
+          "id": "c2-a11",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704241350.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c2-u11",
+        "children": [
+          "c2-u12"
+        ]
+      },
+      "c2-u12": {
+        "id": "c2-u12",
+        "message": {
+          "id": "c2-u12",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704241440.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I like to spend time on the hard part of a task first, so the rest of the day feels lighter."
+            ]
+          }
+        },
+        "parent": "c2-a11",
+        "children": [
+          "c2-a12"
+        ]
+      },
+      "c2-a12": {
+        "id": "c2-a12",
+        "message": {
+          "id": "c2-a12",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704241470.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c2-u12",
+        "children": [
+          "c2-u13"
+        ]
+      },
+      "c2-u13": {
+        "id": "c2-u13",
+        "message": {
+          "id": "c2-u13",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704241560.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I want to keep my notes tidy enough that a stranger could follow them without asking me anything."
+            ]
+          }
+        },
+        "parent": "c2-a12",
+        "children": [
+          "c2-a13"
+        ]
+      },
+      "c2-a13": {
+        "id": "c2-a13",
+        "message": {
+          "id": "c2-a13",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704241590.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c2-u13",
+        "children": []
+      }
+    }
+  },
+  {
+    "title": "Notes on work habits 4",
+    "create_time": 1704326400.0,
+    "current_node": "c3-a13",
+    "mapping": {
+      "root": {
+        "id": "root",
+        "message": null,
+        "parent": null,
+        "children": [
+          "c3-u0"
+        ]
+      },
+      "c3-u0": {
+        "id": "c3-u0",
+        "message": {
+          "id": "c3-u0",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704326400.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I do not answer work messages after nine at night, and I tell people that at the start."
+            ]
+          }
+        },
+        "parent": "root",
+        "children": [
+          "c3-a0"
+        ]
+      },
+      "c3-a0": {
+        "id": "c3-a0",
+        "message": {
+          "id": "c3-a0",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704326430.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c3-u0",
+        "children": [
+          "c3-u1"
+        ]
+      },
+      "c3-u1": {
+        "id": "c3-u1",
+        "message": {
+          "id": "c3-u1",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704326520.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I want to get better at saying no early, before a request has already become a plan."
+            ]
+          }
+        },
+        "parent": "c3-a0",
+        "children": [
+          "c3-a1"
+        ]
+      },
+      "c3-a1": {
+        "id": "c3-a1",
+        "message": {
+          "id": "c3-a1",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704326550.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c3-u1",
+        "children": [
+          "c3-u2"
+        ]
+      },
+      "c3-u2": {
+        "id": "c3-u2",
+        "message": {
+          "id": "c3-u2",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704326640.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Working on weekends is a line I hold, and I only cross it for a launch that I chose myself."
+            ]
+          }
+        },
+        "parent": "c3-a1",
+        "children": [
+          "c3-a2"
+        ]
+      },
+      "c3-a2": {
+        "id": "c3-a2",
+        "message": {
+          "id": "c3-a2",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704326670.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c3-u2",
+        "children": [
+          "c3-u3"
+        ]
+      },
+      "c3-u3": {
+        "id": "c3-u3",
+        "message": {
+          "id": "c3-u3",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704326760.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I am trying to speak up more in larger meetings, so I plan one question for each one I attend."
+            ]
+          }
+        },
+        "parent": "c3-a2",
+        "children": [
+          "c3-a3"
+        ]
+      },
+      "c3-a3": {
+        "id": "c3-a3",
+        "message": {
+          "id": "c3-a3",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704326790.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c3-u3",
+        "children": [
+          "c3-u4"
+        ]
+      },
+      "c3-u4": {
+        "id": "c3-u4",
+        "message": {
+          "id": "c3-u4",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704326880.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I prefer to be told when my work is good, not only when it needs changes, because it helps me repeat it."
+            ]
+          }
+        },
+        "parent": "c3-a3",
+        "children": [
+          "c3-a4"
+        ]
+      },
+      "c3-a4": {
+        "id": "c3-a4",
+        "message": {
+          "id": "c3-a4",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704326910.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c3-u4",
+        "children": [
+          "c3-u5"
+        ]
+      },
+      "c3-u5": {
+        "id": "c3-u5",
+        "message": {
+          "id": "c3-u5",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704327000.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I am slowly learning to write shorter emails, and I now cut every paragraph that repeats the one before."
+            ]
+          }
+        },
+        "parent": "c3-a4",
+        "children": [
+          "c3-a5"
+        ]
+      },
+      "c3-a5": {
+        "id": "c3-a5",
+        "message": {
+          "id": "c3-a5",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704327030.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c3-u5",
+        "children": [
+          "c3-u6"
+        ]
+      },
+      "c3-u6": {
+        "id": "c3-u6",
+        "message": {
+          "id": "c3-u6",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704327120.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "When I am asked for a favour, I ask what it is for before I decide how much time to give it."
+            ]
+          }
+        },
+        "parent": "c3-a5",
+        "children": [
+          "c3-a6"
+        ]
+      },
+      "c3-a6": {
+        "id": "c3-a6",
+        "message": {
+          "id": "c3-a6",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704327150.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c3-u6",
+        "children": [
+          "c3-u7"
+        ]
+      },
+      "c3-u7": {
+        "id": "c3-u7",
+        "message": {
+          "id": "c3-u7",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704327240.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I would like my next role to give me more time to think before I have to respond to anything."
+            ]
+          }
+        },
+        "parent": "c3-a6",
+        "children": [
+          "c3-a7"
+        ]
+      },
+      "c3-a7": {
+        "id": "c3-a7",
+        "message": {
+          "id": "c3-a7",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704327270.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c3-u7",
+        "children": [
+          "c3-u8"
+        ]
+      },
+      "c3-u8": {
+        "id": "c3-u8",
+        "message": {
+          "id": "c3-u8",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704327360.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I try to keep one hobby that has nothing to do with my work, so I do not forget how to rest."
+            ]
+          }
+        },
+        "parent": "c3-a7",
+        "children": [
+          "c3-a8"
+        ]
+      },
+      "c3-a8": {
+        "id": "c3-a8",
+        "message": {
+          "id": "c3-a8",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704327390.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c3-u8",
+        "children": [
+          "c3-u9"
+        ]
+      },
+      "c3-u9": {
+        "id": "c3-u9",
+        "message": {
+          "id": "c3-u9",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704327480.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I value honest reviews, and I ask for them in writing so I can reread them when I am calm."
+            ]
+          }
+        },
+        "parent": "c3-a8",
+        "children": [
+          "c3-a9"
+        ]
+      },
+      "c3-a9": {
+        "id": "c3-a9",
+        "message": {
+          "id": "c3-a9",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704327510.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c3-u9",
+        "children": [
+          "c3-u10"
+        ]
+      },
+      "c3-u10": {
+        "id": "c3-u10",
+        "message": {
+          "id": "c3-u10",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704327600.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I am working on finishing projects instead of starting new ones before the old ones are done."
+            ]
+          }
+        },
+        "parent": "c3-a9",
+        "children": [
+          "c3-a10"
+        ]
+      },
+      "c3-a10": {
+        "id": "c3-a10",
+        "message": {
+          "id": "c3-a10",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704327630.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c3-u10",
+        "children": [
+          "c3-u11"
+        ]
+      },
+      "c3-u11": {
+        "id": "c3-u11",
+        "message": {
+          "id": "c3-u11",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704327720.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I want my team to know that I will say when something is not working, early and plainly."
+            ]
+          }
+        },
+        "parent": "c3-a10",
+        "children": [
+          "c3-a11"
+        ]
+      },
+      "c3-a11": {
+        "id": "c3-a11",
+        "message": {
+          "id": "c3-a11",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704327750.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c3-u11",
+        "children": [
+          "c3-u12"
+        ]
+      },
+      "c3-u12": {
+        "id": "c3-u12",
+        "message": {
+          "id": "c3-u12",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704327840.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I plan to write a short note each quarter on what I want to get better at, and I review it later."
+            ]
+          }
+        },
+        "parent": "c3-a11",
+        "children": [
+          "c3-a12"
+        ]
+      },
+      "c3-a12": {
+        "id": "c3-a12",
+        "message": {
+          "id": "c3-a12",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704327870.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c3-u12",
+        "children": [
+          "c3-u13"
+        ]
+      },
+      "c3-u13": {
+        "id": "c3-u13",
+        "message": {
+          "id": "c3-u13",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1704327960.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "I hope to be known as the person who makes a hard decision clear and then helps others carry it out."
+            ]
+          }
+        },
+        "parent": "c3-a12",
+        "children": [
+          "c3-a13"
+        ]
+      },
+      "c3-a13": {
+        "id": "c3-a13",
+        "message": {
+          "id": "c3-a13",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1704327990.0,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Thanks, that is clear. Shall I help you turn it into a short plan?"
+            ]
+          }
+        },
+        "parent": "c3-u13",
+        "children": []
+      }
+    }
+  }
+]
