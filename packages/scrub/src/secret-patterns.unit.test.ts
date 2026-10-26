@@ -56,4 +56,18 @@ describe("applyPatternRule and the secret rules", () => {
       { text: "MONKEY=abc ok", isProtected: false, category: null },
     ]);
   });
+
+  it("R2.2-T26: a setting whose name has no secret word is skipped, and the next setting is still read", () => {
+    expect(apply("NAME=abcdefgh", SECRET_ASSIGNMENT)).toEqual([{ text: "NAME=abcdefgh", isProtected: false, category: null }]);
+    expect(apply("ENV=X_KEY=abcdefgh", SECRET_ASSIGNMENT)).toContainEqual({ text: "abcdefgh", isProtected: true, category: "secret" });
+  });
+
+  it("R2.2-T27: a text with neither = nor : never reaches the setting rule", () => {
+    const text = "A_KEY" + " ".repeat(40) + "abcdefgh";
+    expect(apply(text, SECRET_ASSIGNMENT)).toEqual([{ text, isProtected: false, category: null }]);
+  });
+
+  it("R2.2-T28: a URL with no :// is never read by the URL rule, even with a password-like shape", () => {
+    expect(apply("user:pa/ss@host/db", URL_WITH_CREDENTIALS)).toEqual([{ text: "user:pa/ss@host/db", isProtected: false, category: null }]);
+  });
 });

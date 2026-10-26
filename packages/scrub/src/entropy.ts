@@ -10,9 +10,9 @@ export const ALLOWLIST_MIN_LENGTH = 3;
 // Every character of a token is printable ASCII, so a long Tamil or Hindi word is never a key [confirm].
 const PRINTABLE_ASCII = /^[\x21-\x7e]+$/;
 // Opening punctuation kept outside a token, such as a bracket or a quote.
-const OPENING_PUNCTUATION = /^[(\[{<"'`]*/;
+const OPENING_PUNCTUATION = "([{<\"'`";
 // Closing punctuation kept outside a token, such as a bracket, a quote or a full stop.
-const CLOSING_PUNCTUATION = /[)\]}>"'`.,;:!?]*$/;
+const CLOSING_PUNCTUATION = ")]}>\"'`.,;:!?";
 
 // Shannon entropy of a string in bits per character: minus the sum, over its distinct characters, of p times log2 p.
 export function shannonEntropy(token: string): number {
@@ -36,11 +36,14 @@ function isKeyLike(token: string, names: readonly string[]): boolean {
   return !names.some((name) => lower.includes(name));
 }
 
-// The token inside one whitespace-separated run, with the opening punctuation before it counted as its lead.
+// The token inside one whitespace-separated run, with the opening punctuation before it counted as its lead. Both ends are
+// trimmed by a plain loop: a regex that looks for the end from every position backtracks quadratically on a long run of punctuation.
 function coreOf(raw: string): { token: string; lead: number } {
-  const lead = OPENING_PUNCTUATION.exec(raw)?.[0].length ?? 0;
-  const trail = CLOSING_PUNCTUATION.exec(raw.slice(lead))?.[0].length ?? 0;
-  return { token: raw.slice(lead, raw.length - trail), lead };
+  let lead = 0;
+  while (lead < raw.length && OPENING_PUNCTUATION.includes(raw.charAt(lead))) lead += 1;
+  let end = raw.length;
+  while (end > lead && CLOSING_PUNCTUATION.includes(raw.charAt(end - 1))) end -= 1;
+  return { token: raw.slice(lead, end), lead };
 }
 
 // Splits one free segment at every whitespace-separated token that looks like a key; each such token becomes a secret piece.

@@ -1,12 +1,14 @@
 import type { PatternRule } from "./secret-patterns.js";
 
-// An email address: name characters, @, a domain with at least one dot, and an ending of 2 or more letters (R2.2).
-// The rule runs only on text that holds an @, because a long run of name characters with no @ costs a slow scan.
+// An email address: name characters, @, a domain with at least one dot, and an ending of 2 or more letters (R2.2). The character
+// before the address is captured in group 1, so a match starts only where a run of name characters begins; the address itself is
+// group 2. Without that start, every position inside a long run would rescan the run, which is quadratic. The rule runs only on
+// text that holds an @.
 export const EMAIL: PatternRule = {
   category: "email",
-  group: 0,
-  pattern: /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g,
-  needs: "@",
+  group: 2,
+  pattern: /(^|[^A-Za-z0-9._%+-])([A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,})/g,
+  needs: ["@"],
 };
 // An IBAN: 2 capitals, 2 digits, then groups of 4 capitals or digits with optional spaces; kept only when the mod-97 check passes (R2.2).
 export const IBAN: PatternRule = {
@@ -39,10 +41,11 @@ export const POSTAL_SINGAPORE: PatternRule = {
   pattern: /\b(?:singapore|s) ?\(?(\d{6})\)?(?!\d)/gi,
 };
 // A 5 or 6 digit code, with an optional -4 digit tail, after a label such as pincode, PIN, postcode or zip; only the code is replaced (R2.2).
+// The spaces around the optional separator are bounded to 16, so a long run of spaces after a label cannot backtrack.
 export const POSTAL_LABELLED: PatternRule = {
   category: "postal",
   group: 1,
-  pattern: /\b(?:postal code|postcode|post code|pin code|pincode|pin|zip code|zip)[ \t]*(?:is|:|#|-)?[ \t]*(\d{5,6}(?:-\d{4})?)(?!\d)/gi,
+  pattern: /\b(?:postal code|postcode|post code|pin code|pincode|pin|zip code|zip)[ \t]{0,16}(?:is|:|#|-)?[ \t]{0,16}(\d{5,6}(?:-\d{4})?)(?!\d)/gi,
 };
 // A US ZIP code after a two-letter state code, as in CA 94105; only the code is replaced (R2.2).
 export const POSTAL_US: PatternRule = {
