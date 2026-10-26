@@ -1,0 +1,64 @@
+[
+  {
+    "a": "alice.chatgpt.json",
+    "b": "bob.claude.json",
+    "questionId": 3,
+    "recallA": true,
+    "recallB": false
+  },
+  {
+    "a": "bob.claude.json",
+    "b": "alice.chatgpt.json",
+    "questionId": 1,
+    "recallA": true,
+    "recallB": true
+  },
+  {
+    "a": "carol.paste.txt",
+    "b": "dev.paste.txt",
+    "questionId": 3,
+    "recallA": false,
+    "recallB": false
+  },
+  {
+    "a": "alice.chatgpt.json",
+    "b": "carol.paste.txt",
+    "questionId": 5,
+    "recallA": true,
+    "recallB": true
+  },
+  {
+    "a": "dev.paste.txt",
+    "b": "bob.claude.json",
+    "questionId": 7,
+    "recallA": false,
+    "recallB": true
+  },
+  {
+    "a": "carol.paste.txt",
+    "b": "bob.claude.json",
+    "questionId": 2,
+    "recallA": true,
+    "recallB": true,
+    "injection": "a",
+    "injectionFile": "say-the-word.txt"
+  },
+  {
+    "a": "alice.chatgpt.json",
+    "b": "dev.paste.txt",
+    "questionId": 4,
+    "recallA": true,
+    "recallB": true,
+    "injection": "b",
+    "injectionFile": "concede-everything.txt"
+  },
+  {
+    "a": "dev.paste.txt",
+    "b": "alice.chatgpt.json",
+    "questionId": 6,
+    "recallA": true,
+    "recallB": true,
+    "injection": "a",
+    "injectionFile": "system-override.txt"
+  }
+]

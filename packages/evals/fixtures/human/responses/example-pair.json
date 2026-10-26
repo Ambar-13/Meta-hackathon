@@ -1,0 +1,21 @@
+{
+  "pairId": "example",
+  "askedAt": "2026-10-28T12:00:00.000Z",
+  "outcomeDefinition": "Example only: this file shows the shape of a response and is never counted.",
+  "knownCollaborators": false,
+  "sides": {
+    "a": {
+      "cardRepresentedYou": 3,
+      "unsupportedLines": [],
+      "surfacedWorthDiscussing": 3,
+      "wouldUseBeforeChoosingTeammate": { "answer": false, "why": "Example only." }
+    },
+    "b": {
+      "cardRepresentedYou": 3,
+      "unsupportedLines": [],
+      "surfacedWorthDiscussing": 3,
+      "wouldUseBeforeChoosingTeammate": { "answer": false, "why": "Example only." }
+    }
+  },
+  "frictionPoints": []
+}

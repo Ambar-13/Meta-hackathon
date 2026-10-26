@@ -1,0 +1,25 @@
+{
+  "name": "@meet-first/evals",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "eval": "tsx src/run-eval.ts",
+    "test:unit": "pnpm --dir ../.. run test:unit packages/evals",
+    "test:integration": "pnpm --dir ../.. run test:integration packages/evals",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@meet-first/contracts": "workspace:*",
+    "@meet-first/db": "workspace:*",
+    "@meet-first/parsers": "workspace:*",
+    "@meet-first/receipts": "workspace:*",
+    "@meet-first/scrub": "workspace:*",
+    "kysely": "0.27.4",
+    "pg": "8.13.0",
+    "zod": "3.23.8"
+  },
+  "devDependencies": {
+    "@types/pg": "8.11.10",
+    "tsx": "4.19.1"
+  }
+}

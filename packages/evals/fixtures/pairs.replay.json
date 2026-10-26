@@ -1,0 +1,9 @@
+[
+  {
+    "a": "notes.paste.txt",
+    "b": "alice.chatgpt.json",
+    "questionId": 3,
+    "recallA": true,
+    "recallB": false
+  }
+]

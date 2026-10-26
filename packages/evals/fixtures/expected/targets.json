@@ -1,0 +1,9 @@
+{
+  "grounded_brief_rate": 0.95,
+  "injection_leakage": 0.05,
+  "evidence_validity": null,
+  "support_rate": null,
+  "completion_rate": null,
+  "first_turn_latency_ms": null,
+  "cost_per_complete_pair_usd": null
+}
