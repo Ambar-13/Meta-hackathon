@@ -13,9 +13,9 @@ SUMMARY="$EVIDENCE/summary.txt"
 # for app_worker). It is git-ignored like every .env file, and it never sets LLM_MODE, because the deployed mode is what is checked.
 ENV_FILE="$ROOT/.env.wave3"
 # The call sites the golden path uses; comic_image is added when the comic came out ready (row 06).
-FLOW_CALL_SITES='["scrub_names","question_check","card","quiz_answer","quiz_judge","speech","receipts","brief","brief_support_judge","comic_panels"]'
+FLOW_CALL_SITES='["scrub_names","question_check","card","quiz_answer","quiz_judge","speech","receipts","brief","brief_support_judge","comic_panels","persona_answer","ask_support_judge"]'
 # Every call site that must keep at least one recording after Wave 3 (row 09).
-RECORDED_CALL_SITES="scrub_names question_check card quiz_answer quiz_judge speech receipts brief brief_support_judge comic_panels comic_image self_test"
+RECORDED_CALL_SITES="scrub_names question_check card quiz_answer quiz_judge speech receipts brief brief_support_judge comic_panels comic_image persona_answer ask_support_judge self_test"
 
 # Loads the env file and refuses an LLM_MODE in the shell or in the file (check-wave-3.md section 7).
 load_env() {
@@ -95,7 +95,7 @@ s04_self_test_log() {
   echo "ok lines $ok, schemas $schemas"
   [ "$ok" = "$schemas" ]
 }
-# Command 05: all 16 golden-path steps against the deployment with the real model; every ledger row the run wrote is live (D74).
+# Command 05: all 22 golden-path steps against the deployment with the real model; every ledger row the run wrote is live (D74).
 s05_golden_path() {
   pnpm golden-path --live --base "$APP_ORIGIN" --report "$EVIDENCE/golden-path.json"
   jq -e '.result == "pass"' "$EVIDENCE/golden-path.json" >/dev/null

@@ -6,7 +6,10 @@ export type RunMode = "live" | "mock" | "none";
 // The run options the flags make.
 export type RunOptions = { base: string; until: string | undefined; mode: RunMode; reportPath: string };
 // The step names in order, as --until takes them. Steps 9 and 10 stay in the list, because they are removed steps that keep their numbers.
-export const STEP_NAMES = ["person", "paste", "card-a", "upload-b", "quiz", "approve", "pair", "stream", "ask", "ask-timeout", "background", "decide", "brief", "comic", "share", "delete"] as const;
+export const STEP_NAMES = [
+  "person", "paste", "card-a", "upload-b", "quiz", "approve", "pair", "stream", "ask", "ask-timeout", "background", "decide", "brief", "comic", "share",
+  "sharing", "directory", "dir-decide", "dir-brief", "friend-ask", "help", "delete",
+] as const;
 // The origin the script drives when --base is not given.
 export const DEFAULT_BASE = "http://localhost:3000";
 // One step's number and name, as the runner selects them.

@@ -21,6 +21,12 @@ describe("golden path flags", () => {
     expect(names[names.length - 1]).toBe("decide");
   });
 
+  it("golden-path-T3 (design section 9): the directory, friend ask and help steps come after the share step, and the deletion is last", () => {
+    const names = selectSteps(undefined).map((step) => step.name);
+    expect(names).toHaveLength(22);
+    expect(names.slice(14)).toEqual(["share", "sharing", "directory", "dir-decide", "dir-brief", "friend-ask", "help", "delete"]);
+  });
+
   it("golden-path-T2: --live with --mock exits 2", () => {
     const caught = catchError(() => parseFlags(["--live", "--mock"]));
     expect(caught).toMatchObject({ exitCode: 2 });

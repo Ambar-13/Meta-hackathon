@@ -29,6 +29,21 @@ export const PLANNED_DISCONNECT_SEQ = 10;
 export const FREE_TEXT_QUESTION = "Where could each of us help the other most on a 10-day hackathon?";
 // The avatar B picks for the comic, the first of the fixed list (R11.3).
 export const AVATAR = AVATARS[0];
+// How many of B's items B makes public in step 16: three, because the brief writer needs three distinct quotes of a side to fill
+// a brief's nine lines, and in the directory meeting B's side may quote only public items.
+export const PUBLIC_ITEM_COUNT = 3;
+// The words of B's item that the help search of step 21 must find. Step 16 always makes this item public.
+export const HELP_ITEM_WORDS = "When I feel stuck";
+// The line B lists their persona with (design section 9).
+export const LISTING_LINE = "Plans the week on Sunday and likes one clear owner for every task.";
+// The curated question A puts to B's listed persona: question 13, a debate (design section 9).
+export const DIRECTORY_QUESTION_ID = 13;
+// A curated dating question, 17. B's listing refuses it, because B leaves the dating switch off (P8).
+export const ROMANCE_QUESTION_ID = 17;
+// The friend ask A sends about B in step 20. apps/worker/src/asks/testing/golden-path-asks.ts writes its replies for the same text.
+export const REACT_ASK_TEXT = "How would you probably react if the team moved the demo day to a Saturday?";
+// The help search A sends in step 21; its words meet B's public item about getting stuck. golden-path-asks.ts uses the same text.
+export const HELP_ASK_TEXT = "I keep getting stuck on one hard problem and go round in circles. Who could help me think it through?";
 // The consent sentence the phone gate reads on screen before any upload (A3). The script cannot see the screen.
 export const CONSENT_COPY = "Your original archive stays on your device. After you review redactions, we upload and store only the selected excerpts shown here. You can delete them at any time.";
 

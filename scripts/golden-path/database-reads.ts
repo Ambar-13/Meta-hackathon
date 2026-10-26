@@ -159,11 +159,23 @@ export async function countSteps(db: GoldenDatabase, meetingId: string): Promise
   });
 }
 
-// The two members of a meeting: their side, their go-ahead and last-seen times, and whether a frozen prefix is stored (D41).
+// The two members of a meeting: their side, their go-ahead and last-seen times, whether a frozen prefix is stored (D41), and whether
+// the member speaks from public items only, as a listed persona met through the directory does (design section 2).
 export async function readMembers(db: GoldenDatabase, meetingId: string) {
   return withMeeting(db, meetingId, async (trx) => {
-    const rows = await trx.selectFrom("meeting_members").select(["side", "ready_at", "last_seen_at", "frozen_prefix_tokens"]).where("meeting_id", "=", meetingId).orderBy("side").execute();
-    return rows.map((row) => ({ side: row.side, readyAt: row.ready_at, lastSeenAt: row.last_seen_at, hasPrefix: row.frozen_prefix_tokens !== null }));
+    const rows = await trx.selectFrom("meeting_members").select(["side", "ready_at", "last_seen_at", "frozen_prefix_tokens", "public_only"]).where("meeting_id", "=", meetingId).orderBy("side").execute();
+    return rows.map((row) => ({ side: row.side, readyAt: row.ready_at, lastSeenAt: row.last_seen_at, hasPrefix: row.frozen_prefix_tokens !== null, publicOnly: row.public_only }));
+  });
+}
+
+// The turn ids that the stored claims of one ask's answers quote, read as the asker. A claim whose quote was not found has none.
+export async function readAnswerTurnIds(db: GoldenDatabase, askerId: string, askId: string): Promise<string[]> {
+  return withPerson(db, askerId, async (trx) => {
+    const rows = await trx.selectFrom("persona_answers").select("claims").where("ask_id", "=", askId).execute();
+    return rows.flatMap((row) => (Array.isArray(row.claims) ? row.claims : [])).flatMap((claim) => {
+      const turnId = typeof claim === "object" && claim !== null && "turnId" in claim ? claim.turnId : null;
+      return typeof turnId === "string" ? [turnId] : [];
+    });
   });
 }
 

@@ -173,8 +173,8 @@ s15_origin_refused() {
   echo "$answer"
   [ "$answer" = "403" ]
 }
-# Command 16: the whole golden path, steps 1 to 16, in replay mode, with its own checks in the report. The assertion names are the
-# script's own (scripts/golden-path/steps-brief-to-deletion.ts).
+# Command 16: the whole golden path, steps 1 to 22, in replay mode, with its own checks in the report. The assertion names are the
+# script's own (scripts/golden-path/steps-brief-to-deletion.ts and steps-directory-and-asks.ts).
 s16_golden_path() {
   pnpm golden-path --mock --base "$APP_ORIGIN" --report "$EVIDENCE/golden-path.json"
   local report="$EVIDENCE/golden-path.json"
@@ -184,6 +184,9 @@ s16_golden_path() {
   jq -e '[.steps[] | select(.name == "brief") | .assertions[] | select(.name == "exactly one line is unsupported" or .name == "the unsupported line is not in decide first") | .pass] == [true, true]' "$report" >/dev/null
   jq -e '[.steps[] | select(.name == "comic") | .assertions[] | select(.name == "the comic is written after the brief") | .pass] == [true]' "$report" >/dev/null
   jq -e '[.steps[] | select(.name == "delete") | .assertions[] | select(.name == "every table is empty for A") | .pass] == [true]' "$report" >/dev/null
+  # The directory's privacy checks: B's side of the directory meeting and B's help answer quote only turns behind public items (P1).
+  jq -e '[.steps[] | select(.name == "dir-brief") | .assertions[] | select(.name == "every quote of B comes from a turn behind a public item") | .pass] == [true]' "$report" >/dev/null
+  jq -e '[.steps[] | select(.name == "help") | .assertions[] | select(.name == "every quote of the answer comes from a turn behind a public item") | .pass] == [true]' "$report" >/dev/null
 }
 # Command 17: the eval in replay mode against the api and worker of command 09: seven metrics with sample sizes, the two thresholds, the results
 # file, then the eval's two stack tests against the same pair.

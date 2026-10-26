@@ -45,6 +45,10 @@ export type RunIds = {
   secondMeetingId?: string;
   comicId?: string;
   slug?: string;
+  listingB?: string;
+  directoryMeetingId?: string;
+  reactAskId?: string;
+  helpAskId?: string;
 };
 // Values one step leaves for a later step. None of them is a secret, and none is printed.
 export type RunFacts = {
@@ -54,6 +58,8 @@ export type RunFacts = {
   cardAItemIds?: string[];
   cardAItemCount?: number;
   cardBItemCount?: number;
+  publicQuotesB?: string[];
+  publicTurnIdsB?: string[];
   unsupportedTexts: string[];
   flaggedTexts: string[];
   ledgerModes?: string[];
@@ -179,7 +185,7 @@ export function finishRun(run: RunState, startedAt: string, totalSteps: number):
   const notRun = totalSteps - run.steps.filter((step) => step.number > 0).length;
   const proxy = { firstByteMs: run.readerA?.firstByteAtMs, firstHeartbeatMs: run.readerA?.firstHeartbeatAtMs };
   const ledger = { modes: run.facts.ledgerModes ?? [], callSites: run.facts.ledgerCallSites ?? [] };
-  const ids = { ...run.ids, askIds: [] };
+  const ids = { ...run.ids, askIds: [run.ids.reactAskId, run.ids.helpAskId].filter((id) => id !== undefined) };
   writeReport(run.options.reportPath, { mode: run.options.mode, base: run.options.base, until: run.options.until ?? "all", startedAt, finishedAt: new Date().toISOString(), commit: commitOf(), ids, steps: run.steps, proxy, ledger, manual: run.manual, result: verdict, counts: { ...counts, notRun } });
   printEnd(run, { verdict, counts, notRun });
   return verdict === "pass" ? 0 : 1;

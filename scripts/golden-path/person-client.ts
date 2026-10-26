@@ -7,7 +7,7 @@ import { ExitError, StepFailure } from "./report.js";
 // The fetch the client calls. The tests pass a fake that records the requests.
 export type FetchLike = (url: string, init: RequestInit) => Promise<Response>;
 // One JSON call: the method, the path, an optional body, the status it must return, its reply schema, and whether to leave Origin off.
-export type JsonRequest<T> = { method: "GET" | "POST" | "DELETE"; path: string; body?: unknown; expect: number; schema: ZodType<T, ZodTypeDef, unknown>; omitOrigin?: boolean };
+export type JsonRequest<T> = { method: "GET" | "POST" | "PUT" | "DELETE"; path: string; body?: unknown; expect: number; schema: ZodType<T, ZodTypeDef, unknown>; omitOrigin?: boolean };
 // What a JSON call returns once the status and the reply schema match.
 export type JsonReply<T> = { status: number; headers: Headers; body: T };
 // A plain request may take 30 seconds, and the upload may take 60 (the spec's timeouts).
