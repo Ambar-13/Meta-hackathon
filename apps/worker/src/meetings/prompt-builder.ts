@@ -41,8 +41,8 @@ export function buildFrozenPrefix(input: PrefixInput): string {
     input.texts.moderator.trimEnd(),
     input.texts.speech.trimEnd(),
     input.texts.untrustedRules.trimEnd(),
-    "<meeting_question>\n" + input.question + "\n</meeting_question>",
-    "<people>\nyour human: " + input.ownName + "\nthe other human: " + input.otherName + "\nyou speak for side: " + input.side + "\n</people>",
+    "<meeting_question>\n" + escapeBlockText(input.question) + "\n</meeting_question>",
+    "<people>\nyour human: " + promptName(input.ownName) + "\nthe other human: " + promptName(input.otherName) + "\nyou speak for side: " + input.side + "\n</people>",
     "<your_card>\n" + renderItems(input.items) + "\n</your_card>",
   ];
   if (input.misses.length > 0) {
@@ -158,14 +158,14 @@ function transcriptBlock(input: VariableInput): string {
 // One committed turn: a turn of the speaking side is your_turn, a turn of the other side is other_persona.
 function turnBlock(row: PromptTurn, speakingSide: "a" | "b"): string {
   const tag = row.side === speakingSide ? "your_turn" : "other_persona";
-  return "<" + tag + ' turn="' + String(row.stepSeq) + '" phase="' + row.phase + '">\n' + row.text + "\n</" + tag + ">";
+  return "<" + tag + ' turn="' + String(row.stepSeq) + '" phase="' + row.phase + '">\n' + escapeBlockText(row.text) + "\n</" + tag + ">";
 }
 
 // The other side's claims with their labels, in step and position order.
 function otherClaimsBlock(claims: readonly PromptClaim[]): string {
   const blocks = [...claims]
     .sort((a, b) => a.stepSeq - b.stepSeq || a.position - b.position)
-    .map((claim) => "claim " + claimLabel(claim.stepSeq, claim.position) + ": " + claim.text + "\nquote: \"" + claim.quote + "\"");
+    .map((claim) => "claim " + claimLabel(claim.stepSeq, claim.position) + ": " + escapeBlockText(claim.text) + "\nquote: \"" + escapeBlockText(claim.quote) + "\"");
   return "<other_claims>\n" + blocks.join("\n\n") + "\n</other_claims>";
 }
 
@@ -195,3 +195,16 @@ function dropOneTurn(input: VariableInput): VariableInput | null {
 function tokenSize(prefix: string, input: VariableInput, charsPerToken: number): number {
   return Math.ceil((prefix.length + buildVariablePart(input).length) / charsPerToken);
 }
+
+// Escapes the three characters that could open or close a block tag. It is used on text another person can write: the
+// question, the turns and the other side's claims (R7.3; the quiz uses the same rule). A persona's own card items are not
+// escaped, because its quotes must match its own turns exactly for the receipts check.
+function escapeBlockText(text: string): string {
+  return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
+// A display name on one line with no tag characters, so a name cannot add a line or a tag to the people block.
+function promptName(name: string): string {
+  return name.replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, " ").replace(/[<>&]/g, "").replace(/ {2,}/g, " ").trim();
+}
+

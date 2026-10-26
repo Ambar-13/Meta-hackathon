@@ -3,7 +3,7 @@ import type { Kysely } from "kysely";
 import { afterAll, afterEach, beforeAll, beforeEach, expect, it } from "vitest";
 import { CommittedEvent, CURATED_QUESTIONS, MeetingCreateResponse, MeetingReadyResponse, MeetingStartResponse, MeetingView, routes, SESSION_COOKIE } from "@meet-first/contracts";
 import { makeDatabase, withMeeting, withPerson, type Database } from "@meet-first/db";
-import { createPairedMeeting, readTestDatabaseUrls } from "@meet-first/db/testing";
+import { asPerson, createPairedMeeting, readTestDatabaseUrls } from "@meet-first/db/testing";
 import { buildTestApp } from "../testing/index.js";
 import { registerMeetingsRoutes } from "./index.js";
 
@@ -142,6 +142,28 @@ it("D60-T1: a sixth meeting in one UTC day is refused with 429 meeting_daily_cap
   const refused = await request({ method: "POST", url: pathOf(routes.meetings.createMeeting, m.pairId), person: m.a, payload: { questionId: 3, cardId: m.a.cardId } });
   expect(refused.statusCode).toBe(429);
   expect(refused.json()).toMatchObject({ code: "meeting_daily_cap" });
+});
+
+it("D60-T7: a meeting request waits while another transaction holds the creator's person row", async () => {
+  let release = (): void => undefined;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  // FOR NO KEY UPDATE: the membership insert's foreign-key check does not wait on it, so only the route's own lock can.
+  const holder = asPerson(kit.db, m.a.personId, async (trx) => {
+    await trx.selectFrom("people").select("id").where("id", "=", m.a.personId).forNoKeyUpdate().execute();
+    await held;
+  });
+
+  const pending = request({ method: "POST", url: pathOf(routes.meetings.createMeeting, m.pairId), person: m.a, payload: { questionId: 3, cardId: m.a.cardId } });
+  const early = await Promise.race([pending.then(() => "finished"), new Promise((resolve) => setTimeout(() => { resolve("waiting"); }, 300))]);
+  release();
+  await holder;
+  const response = await pending;
+  if (response.statusCode === 201) started.push(MeetingCreateResponse.parse(response.json()).meetingId);
+
+  expect(early).toBe("waiting");
+  expect(response.statusCode).toBe(201);
 });
 
 it("R5.3-T3: start is refused in order until both gave their go-ahead and both prefixes exist, and needs nobody online", async () => {
