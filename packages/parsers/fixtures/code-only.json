@@ -1,0 +1,38 @@
+[
+  {
+    "title": "Code questions",
+    "messages": [
+      { "role": "user", "content": "Why does this Python list comprehension return None?", "create_time": 1769904000 },
+      { "role": "user", "content": "How do you reverse a linked list in place in Java?", "create_time": 1769904060 },
+      { "role": "user", "content": "What is the difference between let and const in JavaScript?", "create_time": 1769904120 },
+      { "role": "user", "content": "```python\nprint([x for x in range(3)])\n```", "create_time": 1769904180 },
+      { "role": "user", "content": "Explain big O notation for a binary search on a sorted array.", "create_time": 1769904240 },
+      { "role": "user", "content": "Why is this SQL query slow on a table with two million rows?", "create_time": 1769904300 },
+      { "role": "user", "content": "How can a React component avoid rendering twice in strict mode?", "create_time": 1769904360 },
+      { "role": "user", "content": "What does the borrow checker complain about in this Rust snippet?", "create_time": 1769904420 },
+      { "role": "user", "content": "```js\nconst doubled = [1, 2, 3].map((n) => n * 2);\n```", "create_time": 1769904480 },
+      { "role": "user", "content": "Convert this bash loop into a single find command with exec.", "create_time": 1769904540 },
+      { "role": "user", "content": "Is a hash map lookup always constant time in practice?", "create_time": 1769904600 },
+      { "role": "user", "content": "Why does git say the branch has diverged after a rebase?", "create_time": 1769904660 },
+      { "role": "user", "content": "What is a good regex for matching a hex colour code?", "create_time": 1769904720 },
+      { "role": "user", "content": "How do I install a specific version of a package with pnpm?", "create_time": 1769904780 },
+      { "role": "user", "content": "Write a unit test for a function that adds two numbers.", "create_time": 1769904840 },
+      { "role": "user", "content": "Why does this Go program deadlock when the channel is unbuffered?", "create_time": 1769904900 },
+      { "role": "user", "content": "```sql\nSELECT count(*) FROM orders WHERE total > 100;\n```", "create_time": 1769904960 },
+      { "role": "user", "content": "Which sorting algorithm is stable and runs in n log n time?", "create_time": 1769905020 },
+      { "role": "user", "content": "What causes a segmentation fault in this C pointer code?", "create_time": 1769905080 },
+      { "role": "user", "content": "How should a Dockerfile cache dependencies between builds?", "create_time": 1769905140 },
+      { "role": "user", "content": "Can my Python script read a CSV file without pandas?", "create_time": 1769905200 },
+      { "role": "user", "content": "Explain the event loop in Node with a short example.", "create_time": 1769905260 },
+      { "role": "user", "content": "Why does floating point addition give a strange result here?", "create_time": 1769905320 },
+      { "role": "user", "content": "What is the time complexity of inserting into a heap?", "create_time": 1769905380 },
+      { "role": "user", "content": "How do you mock a network call in a Jest test?", "create_time": 1769905440 },
+      { "role": "user", "content": "```bash\nfor f in *.log; do gzip \"$f\"; done\n```", "create_time": 1769905500 },
+      { "role": "user", "content": "Why is this CSS grid item overflowing its container?", "create_time": 1769905560 },
+      { "role": "user", "content": "What does the static keyword mean on a Java method?", "create_time": 1769905620 },
+      { "role": "user", "content": "How do I stop a Python generator early and close its file?", "create_time": 1769905680 },
+      { "role": "user", "content": "Which HTTP status code fits a request with a missing field?", "create_time": 1769905740 },
+      { "role": "assistant", "content": "Here are the answers in order." }
+    ]
+  }
+]

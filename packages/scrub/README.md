@@ -1,30 +1,37 @@
 # @meet-first/scrub
 
-This is a placeholder written at the Wave 0 freeze. The ingest builder replaces this file and the manifest in Wave 1.
+Rows: D11, D12, D13, D14, D17, R2.1, R2.2, R2.5, R2.9.
 
 ## What this does
 
-Finds and replaces personal details in turns before anything is stored.
+Finds secrets, contact details and identity numbers in a message and replaces each with a placeholder that says what was there, such as [redacted:email:00000001]. A code fence becomes one line such as [code: python, 12 lines]. The browser runs it to show the count before upload, and the API runs it again before anything is stored.
 
 ## What this never does
 
-Nothing runs here yet: the folder holds only its manifest, so the workspace and the lock file are complete before Wave 1.
+It never looks for people's names; the names pass in apps/worker does that. It never keeps what it replaced and never stores where it was. It is not perfect: a secret shorter than 20 characters with no label, or a phone number written in words, gets through.
 
 ## How it fits
 
 ```mermaid
 flowchart LR
-  contracts["@meet-first/contracts"] --> here["@meet-first/scrub"]
+  input[turn text] --> fences[replaceCodeFences] --> marks[markExistingPlaceholders] --> rules[applyPatternRule] --> entropy[applyEntropyRule] --> ids[assignPlaceholderIds]
 ```
 
-The package will read its shapes from contracts, like every other package.
+Notice that code fences go first, so nothing inside a fence is ever matched or kept.
 
 ## The main pieces
 
-`package.json` lists the dependencies the Wave 1 specs pin (design-inputs/wave-1-seams.md S8). There is no source yet.
+- scrub.ts: the one scrub function, which runs every step in order.
+- code-fences.ts: code fences become placeholders first.
+- secret-patterns.ts: keys, tokens, private keys and URLs with passwords.
+- identifier-patterns.ts: emails, phones, cards, IBANs, NRIC, Aadhaar, PAN and postal codes.
+- entropy.ts: long random-looking tokens.
+- placeholders.ts: placeholder ids, and finding and counting placeholders.
+- index.ts: what other packages may import.
+- fixtures/: the 40 planted secrets, prose that must pass untouched, and a fenced env file.
 
 ## How to test it
 
-There is nothing to test until the ingest builder writes the package.
+Run `pnpm test:unit packages/scrub` and `pnpm test:security packages/scrub` from the repo root.
 
-Not built yet: everything in this package.
+Not built yet: a rule for street addresses written in words, and a re-scrub of old sources when SCRUB_VERSION changes; a new version means a new upload (R2.9).

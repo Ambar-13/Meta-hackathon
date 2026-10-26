@@ -2,9 +2,8 @@
   "name": "@meet-first/parsers",
   "private": true,
   "type": "module",
-  "exports": {
-    ".": "./src/index.ts"
-  },
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "typecheck": "tsc --noEmit" },
   "dependencies": {
     "@meet-first/contracts": "workspace:*",
     "zod": "3.23.8"

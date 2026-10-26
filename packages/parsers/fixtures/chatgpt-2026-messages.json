@@ -1,0 +1,19 @@
+[
+  {
+    "title": "Rest week",
+    "messages": [
+      { "role": "system", "content": "You are a helpful assistant." },
+      { "role": "user", "content": "Can you help me plan a week where I actually rest?", "create_time": 1767225600 },
+      { "role": "assistant", "content": "Yes. What does rest look like for you?", "create_time": 1767225630 },
+      { "role": "user", "content": { "content_type": "text", "parts": ["Long walks, no laptop after eight, and one full day with nothing booked."] }, "create_time": 1767225700 }
+    ]
+  },
+  {
+    "title": "Saying no",
+    "messages": [
+      { "author": { "role": "user" }, "content": "I find it hard to say no to friends who ask for favours.", "create_time": 1767312000 },
+      { "author": { "role": "assistant" }, "content": "That is common. What happens when you do say no?", "create_time": 1767312030 },
+      { "author": { "role": "user" }, "content": { "parts": ["I worry they will stop asking me to things."] }, "create_time": 1767312100 }
+    ]
+  }
+]

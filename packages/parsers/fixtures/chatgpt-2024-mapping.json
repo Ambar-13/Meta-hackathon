@@ -1,0 +1,32 @@
+[
+  {
+    "title": "CV rewrite",
+    "create_time": 1704067200,
+    "current_node": "a3",
+    "mapping": {
+      "a3": { "id": "a3", "message": { "id": "a3", "author": { "role": "assistant" }, "create_time": 1704067560, "content": { "content_type": "text", "parts": ["Here is a one-page version that keeps the teaching section."] } }, "parent": "u3", "children": [] },
+      "u1": { "id": "u1", "message": { "id": "u1", "author": { "role": "user" }, "create_time": 1704067200, "content": { "content_type": "text", "parts": ["I keep rewriting my CV because I never feel it says who I am."] } }, "parent": "root", "children": ["a1"] },
+      "root": { "id": "root", "message": null, "parent": null, "children": ["u1"] },
+      "u3": { "id": "u3", "message": { "id": "u3", "author": { "role": "user" }, "create_time": 1704067500, "content": { "content_type": "text", "parts": ["Make it one page, and keep the part about teaching because I care about it most."] } }, "parent": "a2", "children": ["a3"] },
+      "a1": { "id": "a1", "message": { "id": "a1", "author": { "role": "assistant" }, "create_time": 1704067260, "content": { "content_type": "text", "parts": ["What do you want a reader to notice first?"] } }, "parent": "u1", "children": ["u2"] },
+      "u3b": { "id": "u3b", "message": { "id": "u3b", "author": { "role": "user" }, "create_time": 1704067440, "content": { "content_type": "text", "parts": ["Actually, cut the hobbies section, I never know what to put there."] } }, "parent": "a2", "children": [] },
+      "u2": { "id": "u2", "message": { "id": "u2", "author": { "role": "user" }, "create_time": 1704067320, "content": { "content_type": "multimodal_text", "parts": ["Here is the summary I wrote last night.", { "content_type": "image_asset_pointer", "asset_pointer": "file-service://file-abc123", "width": 800, "height": 600 }] } }, "parent": "a1", "children": ["a2"] },
+      "a2": { "id": "a2", "message": { "id": "a2", "author": { "role": "assistant" }, "create_time": 1704067380, "content": { "content_type": "text", "parts": ["The summary is clear. Shall I shorten it?"] } }, "parent": "u2", "children": ["u3b", "u3"] }
+    }
+  },
+  {
+    "title": "Weekend shift",
+    "create_time": 1706745600,
+    "current_node": "b6",
+    "mapping": {
+      "c0": { "id": "c0", "message": null, "parent": null, "children": ["c1"] },
+      "c1": { "id": "c1", "message": { "id": "c1", "author": { "role": "user" }, "create_time": 1706745600, "content": { "content_type": "user_editable_context", "user_profile": "I am a teacher in Pune.", "user_instructions": "Be brief." } }, "parent": "c0", "children": ["b1"] },
+      "b1": { "id": "b1", "message": { "id": "b1", "author": { "role": "user" }, "create_time": 1706745660, "content": { "content_type": "text", "parts": ["I said no to a weekend shift and felt guilty all day."] } }, "parent": "c1", "children": ["b2"] },
+      "b2": { "id": "b2", "message": { "id": "b2", "author": { "role": "assistant" }, "create_time": 1706745720, "content": { "content_type": "text", "parts": ["Guilt after a boundary is common. What did you fear would happen?"] } }, "parent": "b1", "children": ["b3"] },
+      "b3": { "id": "b3", "message": { "id": "b3", "author": { "role": "user" }, "create_time": 1706745780, "content": { "content_type": "text", "parts": ["My manager says I am reliable, but I think I am afraid to disappoint people."] } }, "parent": "b2", "children": ["b4"] },
+      "b4": { "id": "b4", "message": { "id": "b4", "author": { "role": "assistant" }, "create_time": 1706745840, "content": { "content_type": "text", "parts": ["Reliable and afraid can both be true."] } }, "parent": "b3", "children": ["b5"] },
+      "b5": { "id": "b5", "message": { "id": "b5", "author": { "role": "user" }, "create_time": 1706745900, "content": { "content_type": "text", "parts": ["Next time I want to ask for a day off before I agree to anything."] } }, "parent": "b4", "children": ["b6"] },
+      "b6": { "id": "b6", "message": { "id": "b6", "author": { "role": "assistant" }, "create_time": 1706745960, "content": { "content_type": "text", "parts": ["That is a clear plan."] } }, "parent": "b5", "children": [] }
+    }
+  }
+]

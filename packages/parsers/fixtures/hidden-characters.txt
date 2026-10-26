@@ -1,0 +1,5 @@
+﻿I​am not‮ here
+
+The second note has a zero​ width space and a byte order mark﻿ inside.
+
+The third note is plain.

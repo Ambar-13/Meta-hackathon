@@ -2,9 +2,8 @@
   "name": "@meet-first/scrub",
   "private": true,
   "type": "module",
-  "exports": {
-    ".": "./src/index.ts"
-  },
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "typecheck": "tsc --noEmit" },
   "dependencies": {
     "@meet-first/contracts": "workspace:*"
   }
