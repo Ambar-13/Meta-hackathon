@@ -102,7 +102,7 @@ function briefReplyOf(picked: Citation[]): { agree: Array<{ text: string }>; cla
   };
 }
 
-// The citations of one side with each text once, repeated in order to fill the brief's nine lines; at least three distinct
+// The citations of one side with each text once, repeated until they fill the brief's nine lines; at least three distinct
 // texts are needed so that no section cites one twice.
 function nineCitations(citations: Citation[]): Citation[] {
   const distinct = citations.filter((citation, index) => citations.findIndex((other) => other.text === citation.text) === index);
