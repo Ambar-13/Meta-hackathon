@@ -9,10 +9,15 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SELF="$ROOT/scripts/check-wave-2.sh"
 EVIDENCE="$ROOT/docs/evidence/check-wave-2"
 SUMMARY="$EVIDENCE/summary.txt"
+# --without-docker runs every row except the three that need Docker (18 to 20), records those as not run, and never prints
+# "check-wave-2: pass", so the Wave 3 gate stays closed until a run with Docker passes (check-wave-2.md section 6).
+WITHOUT_DOCKER=0
 
 # Refuses to run unless the tree is merged, clean and set up. Each refusal names its reason and exits 2.
 preconditions() {
-  for tool in jq psql curl lsof docker; do
+  local tools="jq psql curl lsof docker"
+  [ "$WITHOUT_DOCKER" = 1 ] && tools="jq psql curl lsof"
+  for tool in $tools; do
     if ! command -v "$tool" >/dev/null; then
       echo "check_wave_tool_missing: $tool is not installed" >&2
       exit 2
@@ -65,6 +70,7 @@ preconditions() {
     echo "check_wave_port_busy: stop the process on $PORT" >&2
     exit 2
   fi
+  [ "$WITHOUT_DOCKER" = 1 ] && return 0
   if ! docker info >/dev/null 2>&1; then
     echo "check_wave_2_docker_down: start Docker; rows 18 and 19 need it" >&2
     exit 2
@@ -297,15 +303,23 @@ main() {
   step 15 origin-refused 10 s15_origin_refused
   step 16 golden-path 1500 s16_golden_path
   step 17 eval 1200 s17_eval
-  step 18 docker-api 900 s18_docker_api
-  step 19 docker-worker 900 s19_docker_worker
-  step 20 production-refuses-replay 60 s20_production_refuses_replay
+  if [ "$WITHOUT_DOCKER" = 1 ]; then
+    printf '%s\n' "18 docker-api not-run --without-docker" "19 docker-worker not-run --without-docker" "20 production-refuses-replay not-run --without-docker" >> "$SUMMARY"
+  else
+    step 18 docker-api 900 s18_docker_api
+    step 19 docker-worker 900 s19_docker_worker
+    step 20 production-refuses-replay 60 s20_production_refuses_replay
+  fi
   step 21 lint 300 s21_lint
   step 22 checks 300 s22_checks
   step 23 forbidden-imports 30 s23_forbidden_imports
   step 24 no-tokens-in-logs 10 s24_no_tokens_in_logs
   step 25 stop-servers 30 s25_stop_servers
-  echo "check-wave-2: pass" >> "$SUMMARY"
+  if [ "$WITHOUT_DOCKER" = 1 ]; then
+    echo "check-wave-2: not complete; every row ran and passed except 18 to 20, which need Docker and did not run" >> "$SUMMARY"
+  else
+    echo "check-wave-2: pass" >> "$SUMMARY"
+  fi
   cat "$SUMMARY"
 }
 
@@ -318,5 +332,6 @@ if [ "${1:-}" = "--run" ]; then
   set +a
   "$2"
 else
+  [ "${1:-}" = "--without-docker" ] && WITHOUT_DOCKER=1
   main "$@"
 fi
