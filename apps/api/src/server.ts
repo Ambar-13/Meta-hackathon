@@ -8,6 +8,7 @@ import type { ApiEnv, RouteDeps, RoutePlugin } from "./app-types.js";
 import { makeApiEnqueue } from "./job-queue.js";
 import { handleNotFound, handleRouteError, replaceJsonParser } from "./route-errors.js";
 import { addOriginCheck, addSessionHook, registerAccountRateLimit, registerSessionsRoutes } from "./sessions/index.js";
+import { registerCardsRoutes } from "./cards/index.js";
 import { registerPairsRoutes } from "./pairs/index.js";
 import { registerSourcesRoutes } from "./sources/index.js";
 import { registerMeetingStreamRoutes } from "./meeting-stream/index.js";
@@ -71,7 +72,7 @@ export async function buildApp(deps: RouteDeps, options: BuildAppOptions): Promi
 export async function registerAllRoutes(app: FastifyInstance, deps: RouteDeps): Promise<void> {
   await registerSessionsRoutes(app, deps);
   await registerSourcesRoutes(app, deps);
-  // slot 3: registerCardsRoutes from "./cards/index.js", added by dossier through a request
+  await registerCardsRoutes(app, deps);
   // slot 4: registerQuizRoutes from "./quizzes/index.js", added by quiz through a request
   await registerPairsRoutes(app, deps);
   // slot 6: registerMeetingsRoutes from "./meetings/index.js", added by meeting-engine through a request
