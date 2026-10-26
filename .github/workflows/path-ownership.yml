@@ -1,6 +1,8 @@
 name: path-ownership
 on:
   pull_request:
+  push:
+    branches: [main]
 # The token every job gets can read the code and nothing else.
 permissions:
   contents: read
@@ -15,5 +17,11 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
-      # The path ownership script lands in Wave 2 (deploy-and-docs); until then this job passes.
-      - run: echo "path ownership check lands in Wave 2"
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # R13.1: a pull request from a builder branch may touch only that builder's paths. Other branches exit 0.
+      - run: pnpm tsx scripts/path-ownership.ts --branch "${{ github.head_ref }}" --base "origin/${{ github.base_ref }}"

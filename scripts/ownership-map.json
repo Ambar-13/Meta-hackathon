@@ -1,0 +1,134 @@
+{
+  "always": [
+    "requests/**",
+    "packages/evals/fixtures/model-replies/**"
+  ],
+  "waves": {
+    "w1": {
+      "database": [
+        "packages/db/**",
+        "!packages/db/migrations/0001_foundation.sql",
+        "!packages/db/migrations/global-tables.txt"
+      ],
+      "ingest": [
+        "packages/parsers/**",
+        "packages/scrub/**",
+        "apps/api/src/sources/**",
+        "apps/web/src/extract/**"
+      ],
+      "dossier": [
+        "packages/llm/**",
+        "apps/worker/src/cards/**",
+        "apps/api/src/cards/**",
+        "packages/prompts/dossier/**",
+        "packages/prompts/scrub-names/**",
+        "packages/prompts/untrusted-data-rules/**",
+        "packages/prompts/src/current.ts",
+        "packages/prompts/README.md"
+      ],
+      "quiz": [
+        "apps/worker/src/quizzes/**",
+        "apps/api/src/quizzes/**",
+        "packages/prompts/quiz-persona-answer/**",
+        "packages/prompts/quiz-judge/**"
+      ],
+      "meeting-engine": [
+        "apps/worker/src/meetings/**",
+        "apps/api/src/meetings/**",
+        "packages/prompts/meeting-moderator/**",
+        "packages/prompts/meeting-speech/**",
+        "packages/prompts/meeting-receipts/**",
+        "packages/prompts/question-check/**"
+      ],
+      "api-shell": [
+        "apps/api/src/server.ts",
+        "apps/api/src/sessions/**",
+        "apps/api/src/pairs/**",
+        "apps/api/src/meeting-stream/**",
+        "apps/api/src/web-pages/**",
+        "apps/api/src/testing/**",
+        "apps/api/README.md",
+        "apps/api/package.json"
+      ],
+      "web-shell": [
+        "apps/web/**",
+        "!apps/web/src/extract/**"
+      ]
+    },
+    "w2": {
+      "briefs": [
+        "apps/worker/src/briefs/**",
+        "apps/api/src/briefs/**",
+        "packages/prompts/brief/**",
+        "!packages/prompts/brief/v1/schema.json",
+        "packages/prompts/brief-support-judge/**",
+        "!packages/prompts/brief-support-judge/v1/schema.json",
+        "apps/web/src/screens/brief/**",
+        "packages/prompts/src/current.ts",
+        "apps/worker/src/briefs/testing/**"
+      ],
+      "comic": [
+        "apps/worker/src/comics/**",
+        "apps/api/src/comics/**",
+        "packages/prompts/comic-panels/**",
+        "!packages/prompts/comic-panels/v1/schema.json",
+        "packages/prompts/comic-image/**",
+        "apps/web/src/screens/comic/**",
+        "apps/worker/src/comics/testing/**"
+      ],
+      "share-and-consent": [
+        "apps/api/src/share/**",
+        "apps/web/src/screens/share/**",
+        "scripts/share-takedown.ts",
+        "apps/web/src/screens/share/screen.accessibility.test.tsx"
+      ],
+      "deletion": [
+        "apps/worker/src/retention/**",
+        "apps/web/src/screens/settings/**"
+      ],
+      "evals": [
+        "packages/evals/**",
+        "!packages/evals/fixtures/model-replies/**",
+        "!packages/evals/fixtures/people/alice.chatgpt.json",
+        "!packages/evals/fixtures/people/bob.claude.json",
+        "packages/evals/fixtures/pairs.replay.json"
+      ],
+      "deploy-and-docs": [
+        "render.yaml",
+        "Dockerfile.api",
+        "Dockerfile.worker",
+        ".dockerignore",
+        "scripts/release.sh",
+        "scripts/path-ownership.ts",
+        "scripts/ownership-map.json",
+        "scripts/constants-name-rows.ts",
+        ".github/workflows/path-ownership.yml",
+        ".github/workflows/secrets.yml",
+        ".github/workflows/forbidden-imports.yml",
+        ".secretlintrc.json",
+        ".gitleaks.toml",
+        "docs/**",
+        "!docs/evidence/**",
+        "!docs/ownership.md",
+        "!docs/contracts.md",
+        "README.md",
+        "tests/unit/**"
+      ]
+    },
+    "w3": {
+      "real-wire": [
+        "packages/evals/fixtures/model-replies/**",
+        "scripts/golden-path.ts",
+        "docs/evidence/wave-3/**",
+        "packages/llm/src/config.ts"
+      ],
+      "phone-fixes": [
+        "apps/web/**"
+      ],
+      "stream-fixes": [
+        "apps/api/src/meeting-stream/**",
+        "apps/worker/src/meetings/**"
+      ]
+    }
+  }
+}

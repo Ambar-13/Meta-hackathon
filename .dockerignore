@@ -1,0 +1,17 @@
+node_modules
+**/node_modules
+**/dist
+.git
+docs
+tests
+requests
+specs
+eval
+.github
+*.md
+!packages/prompts/**/*.md
+apps/web/src/testing
+packages/evals/fixtures/people
+.env
+.env.*
+!.env.example

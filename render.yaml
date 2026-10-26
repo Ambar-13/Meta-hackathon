@@ -1,0 +1,61 @@
+# D70: two production services plus Postgres, auto-deploy off, deploys only through the hooks that scripts/release.sh calls with a tag.
+services:
+  - type: web
+    name: meet-first-api
+    runtime: docker
+    plan: starter            # a paid instance (ARCHITECTURE.md 9); the plan name is a Wave 0 default [confirm]
+    region: singapore        # ARCHITECTURE.md 12: availability and latency to api.meta.ai are unverified [confirm]
+    dockerfilePath: ./Dockerfile.api
+    dockerContext: .
+    autoDeployTrigger: "off"   # D70, R12.3
+    preDeployCommand: pnpm db:migrate   # D71, R12.1: only the api migrates, under pg_advisory_lock(42)
+    healthCheckPath: /api/health        # R12.5
+    maxShutdownDelaySeconds: 120        # D70, R12.4: SIGTERM waits long enough to drain a 90 s model call
+    envVars:
+      - key: DATABASE_URL_MIGRATE
+        fromDatabase:
+          name: meet-first-db
+          property: connectionString
+      - key: DATABASE_URL_API
+        sync: false          # same host and database, role app_api; the password is set by hand after migration 0001 creates the role
+      - key: APP_ORIGIN
+        sync: false          # https://<service>.onrender.com until a domain exists (A7)
+      - key: MAX_CONCURRENT_MEETINGS
+        value: "40"          # D57
+      - key: LOG_LEVEL
+        value: info
+      - key: NODE_ENV
+        value: production
+  - type: worker
+    name: meet-first-worker
+    runtime: docker
+    plan: starter            # always on (ARCHITECTURE.md 2) [confirm]
+    region: singapore
+    dockerfilePath: ./Dockerfile.worker
+    dockerContext: .
+    autoDeployTrigger: "off"
+    maxShutdownDelaySeconds: 120
+    envVars:
+      - key: DATABASE_URL_WORKER
+        sync: false          # role app_worker
+      - key: META_API_KEY
+        sync: false
+      - key: META_API_BASE_URL
+        value: https://api.meta.ai/v1   # ARCHITECTURE.md 2
+      - key: LLM_MODE
+        value: live          # D74: production refuses replay
+      - key: DAILY_USD_CAP
+        value: "40"          # D60
+      - key: TOTAL_USD_CAP
+        value: "130"         # D60
+      - key: MAX_CONCURRENT_MEETINGS
+        value: "40"
+      - key: LOG_LEVEL
+        value: info
+      - key: NODE_ENV
+        value: production
+databases:
+  - name: meet-first-db
+    plan: basic-256mb        # the plan size is unverified (R12.5); the health route reports degraded at 80% [confirm]
+    postgresMajorVersion: "16"
+    region: singapore

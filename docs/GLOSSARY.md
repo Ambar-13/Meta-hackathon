@@ -2,51 +2,78 @@
 
 One line per word, in alphabetical order. Each line names the table, schema or file where the thing lives.
 
-- **ask**: A question a persona puts to its human during a meeting, with a 90 second deadline. Lives in the `asks` table.
+- **affiliations**: The organisations a person names as their own. The scrubber keeps them so a persona can say them (D17). Lives in the `people` table as `affiliations`.
+- **attestation**: The person's tick that the chats they upload are their own. Lives in the `sources` table as `attested_at` (R2.7).
 - **brief**: The written summary of one meeting for one person: what they agree on, where they clash, and what to decide first. Lives in the `briefs` table.
-- **canonical text**: The cleaned text of an upload after the browser and the server have both scrubbed it. Lives in the `sources` and `turns` tables.
-- **card**: The persona built from one frozen source, a list of items each with a quote. Lives in the `cards` table.
-- **card item**: One line of a card, with its quote and whether the quote was found in the turn. Lives in the `card_items` table.
-- **claim**: One point a persona made in a turn, with the quote it rests on. Lives in the `claims` table.
+- **brief point**: One line of a brief, with the quotes it copies from the turns. Lives in the `briefs` table as the `agree`, `clash` and `decide_first` lists.
+- **call site**: One kind of model call, such as the card call or a meeting turn, with its own effort, token limit, timeout and prompt. Lives in `packages/llm/src/call-sites.ts`.
+- **canonicalisation**: The cleaning of text before it is stored: the byte order mark is removed, line endings become LF, the text is put in NFC form, and format and control characters are removed (D6). Lives in `packages/parsers/src/canonicalise.ts`.
+- **card**: The persona built from one frozen source: a list of items, each with a quote. Lives in the `cards` table.
+- **card item**: One line of a card, with its gloss, its quote, and whether the quote was found in its turn. Lives in the `card_items` table.
+- **claim**: One point a persona made in a meeting turn, with the quote it rests on. Lives in the `claims` table.
+- **concede**: A decide-phase tool a persona calls to accept the other side's point. Lives in `packages/contracts/src/meetings/tools.ts`.
 - **consent**: One side's yes to publish the share page of a meeting. Lives in the `share_pages` table as `consent_a` and `consent_b`.
-- **decide first**: The brief group of points the two people should settle first. Lives in the `briefs` table as `decide_first`.
-- **delta**: A slice of a turn that is still being written. It goes over the stream and is never stored. Lives in `TurnDelta` in `packages/contracts/src/meetings/events.ts`.
-- **explore**: The middle phase of a meeting, with up to six turns. Lives in `Phase` in `packages/contracts/src/meetings/meeting.ts`.
-- **freeze**: The point after which a source's turn text cannot change, set by the names review. Lives in `sources.frozen_at`.
-- **gloss**: The English meaning of a claim that is written in another language. Lives in `card_items.gloss` and `claims.gloss`.
-- **heartbeat**: The comment line the server sends every 15 seconds so the stream stays open. Lives in `HEARTBEAT_MS` in `packages/contracts/src/meetings/events.ts`.
-- **invite**: The link that joins two people into one pair, valid for 24 hours. Lives in the `pairs` table.
-- **ledger**: One row per model call, written before the call, that every cap reads. Lives in the `ledger` table.
-- **limiter**: The check that holds back a model call when the last minute is full. Reads the `ledger` table through `ledger_window`.
-- **meeting**: One ten-minute conversation between two personas on one question. Lives in the `meetings` table.
-- **member**: One of the two people in a meeting, tied to one approved card. Lives in the `meeting_members` table.
-- **names pass**: The job that finds names in a source and rewrites them to role tokens. Lives in the `sources` table and the `scrub_names` job.
-- **offset map**: The table that maps positions in the normalised text back to positions in the original. Lives in `packages/receipts/src/offset-map.ts`.
-- **pair**: Two people joined by an invite, with the meetings between them. Lives in the `pairs` table.
-- **partial text**: The text of a turn that is still being written, saved every 250 ms. Lives in `meeting_steps.partial_text`.
-- **persona**: The model's voice for one person, built only from that person's card. Lives in the `cards` table and the meeting prompts.
-- **persona signal**: A number from 0 to 1 that says how much of an upload is the person's own voice. Lives in `sources.persona_signal`.
-- **phase**: One of open, explore, decide or close. Lives in `meetings.phase`.
-- **placeholder**: The text that replaces a redacted item, such as `[redacted:email:1a2b3c4d]`. Lives in the `redactions` table and `PLACEHOLDER_PATTERN` in `packages/contracts/src/sources/scrub-categories.ts`.
-- **prefix**: The fixed start of one side's prompt, the same on every turn. Lives in `meeting_members.frozen_prefix`.
-- **quote**: Words copied from one turn, checked against that turn only. Lives in `card_items.quote` and `claims.quote`.
-- **quiz**: The ten-question check of how well a persona knows its person. Lives in the `quizzes` and `quiz_items` tables.
-- **receipt**: The quote shown beside a claim or a brief line. Lives in the `claims` table and the `briefs` table.
-- **recall**: A lookup a persona makes in its own scrubbed notes during a meeting. Reads the `recall_corpus` view.
-- **recall corpus**: The turns a persona may look up, after the recall switch and the sensitive-category rules. Lives in the `recall_corpus` view.
-- **recovery code**: The 32-character code that signs a person back in once. Lives in `people.recovery_code_hash`.
-- **redaction**: One thing the scrubber replaced with a placeholder. Lives in the `redactions` table.
-- **replay**: Running a model call from a recorded fixture, never from the live API. Lives in `packages/llm/src/modes.ts`.
-- **role token**: The stand-in for a name in the text, such as `[person:mother]`. Lives in the `turns` table and `ROLE_TOKEN` in `packages/contracts/src/sources/scrub-categories.ts`.
-- **scrub**: Removing personal and secret text from an upload before it is stored. Lives in the `turns` and `redactions` tables and the scrub package from Wave 1.
-- **seq**: The gapless number of a committed event inside one meeting. Lives in `meeting_events.seq`.
-- **session**: One signed-in browser, identified by a hashed token. Lives in the `sessions` table.
-- **share page**: The public page of one meeting, live only while both sides consent. Lives in the `share_pages` table.
-- **side**: Side a or side b of a meeting. Lives in `meeting_members.side`.
-- **source**: One upload of a person's own turns. Lives in the `sources` table.
-- **step**: One persona turn inside a meeting. Lives in the `meeting_steps` table.
-- **support rate**: The share of a brief's quoted lines that the support judge found supported. Lives in `briefs.support_rate`.
-- **thin card**: A card with fewer than six verified items. Lives in `cards.thin`.
-- **transfer link**: A ten-minute, single-use link that moves a session into the real browser. Lives in the `transfer_links` table.
-- **turn**: One message the person wrote. Lives in the `turns` table.
-- **weak receipt**: The label on a brief line when the support judge did not confirm it. Lives in `briefs.support_reliable` and the brief lines.
+- **curated question**: One of the fixed meeting questions a pair can pick, so the question check is not needed. Lives in `packages/contracts`.
+- **decide first**: The group of brief points the two people should settle first. Lives in the `briefs` table as `decide_first`.
+- **decide phase**: The last phase of a meeting, where each persona concedes or holds. Lives in `meeting_steps` as `phase`.
+- **deletions**: The record of what one deletion removed, counted for each table. Lives in the `deletions` table.
+- **display name**: The name a person chose, which the other person of their pair sees. Lives in the `people` table as `display_name`.
+- **evidence valid**: The measure that a claim's quote is found inside the turn it names. It is one of the seven eval metrics (A2). Lives in the `claims` table as `evidence_valid`.
+- **explore phase**: The middle phase of a meeting, up to six turns, skipped once eight minutes have passed (D34). Lives in `meeting_steps` as `phase`.
+- **flagged**: Marked as having no receipt, after the claim's one regeneration failed to give a quote that is found in its turn (D27). Lives in the `claims` and `card_items` tables as `flagged`.
+- **frozen (source)**: A source whose names review is done, so its turn text can no longer change (D16). Lives in the `sources` table as `frozen_at`.
+- **gloss**: The short plain sentence that explains one card item or claim, written by the model next to its quote (D21). Lives in the `card_items` and `claims` tables as `gloss`.
+- **grounded**: A brief line or claim whose quote is found inside its own turn. Lives in the `claims` and `card_items` tables as `verified`.
+- **hold**: The decide-phase outcome where a persona keeps the question open. Lives in the output of the decide step in `meeting_steps`.
+- **invite token**: The single-use link token a pair creator shares. It is stored only as a hash (D32). Lives in the `pairs` table as `token_hash`.
+- **job**: One unit of background work the worker runs, such as `build_card` or `meeting_step`. The names and payloads live in `packages/contracts/src/operations/jobs.ts`; the queue lives in the `graphile_worker` schema.
+- **ledger**: The record of every model call: its tokens, its dollars, and the person and meeting it served. Lives in the `ledger` table.
+- **limiter**: The check before each model call that waits when the last minute of tokens or calls is already full (D58). Lives in `packages/llm/src/limiter.ts`.
+- **LLM mode**: How model calls run. `live` calls the model, `record` saves its replies as fixtures, and `replay` returns saved replies. Production refuses `replay` (D74). Lives in `packages/llm/src/modes.ts` and `packages/contracts/src/operations/env.ts`.
+- **meeting**: A ten-minute structured conversation between the two personas of a pair. Lives in the `meetings` table.
+- **meeting event**: One event in a meeting's log, such as `turn.committed`, numbered by `seq`. Lives in the `meeting_events` table.
+- **meeting step**: One turn of a meeting, with its own row, its state and its claim. Lives in the `meeting_steps` table.
+- **member**: One of the two people seated in a meeting. Lives in the `meeting_members` table.
+- **names pass**: The worker check that finds third-party names in a source and replaces them with role tokens. Lives in `apps/worker/src/cards/scrub-names-job.ts`, and its result in the `names_passes` table.
+- **no receipt**: The mark a claim shows when no quote for it could be found in its turn, even after one regeneration. Lives in the `claims` table as `flagged`.
+- **norm text**: The form of a quote used for matching: NFC, case folded, curly quotes and dashes made ASCII, and runs of spaces made one space (D24). Lives in `packages/receipts/src/norm-quote.ts`.
+- **open phase**: The first phase of a meeting, two turns, one for each side. Lives in `meeting_steps` as `phase`.
+- **pair**: Two people joined by an invite token, with one meeting for each question they pick. Lives in the `pairs` table.
+- **partial text**: The text of a turn while the model is still writing it, flushed every 250 ms (D47). Lives in the `meeting_steps` table as `partial_text`.
+- **persona**: The AI stand-in for one person, built from that person's approved card. Lives in `apps/worker/src/meetings/prompt-builder.ts`.
+- **persona signal**: A score of how much a turn reads as the person's own writing, used to rank turns before upload. Lives in `packages/parsers/src/persona-signal.ts`.
+- **placeholder (redaction)**: The text that replaces a scrubbed span, such as `[redacted:email:8hex]` (D14). Lives in `packages/scrub/src/placeholders.ts` and in the `redactions` table as `placeholder_id`.
+- **poll fallback**: The two-second poll that keeps the meeting screen current when the live stream stops (D49). Lives in `apps/web/src/streaming/poll-fallback.ts`.
+- **prefix (frozen)**: The fixed opening of a meeting prompt, stored once and cached by the model (D41). Lives in the `meeting_members` table as `frozen_prefix`.
+- **quiz**: The blind set of ten questions about a card, scored as "matched n of 10". Lives in the `quizzes` and `quiz_items` tables.
+- **quiz bank**: The fixed list of 30 questions every quiz is drawn from (D28). Lives in the `quiz_bank` table.
+- **recall**: The meeting tool that looks up the speaker's scrubbed notes, when the person has switched recall on. Lives in `apps/worker/src/meetings/recall.ts`.
+- **recall corpus**: The turns that recall may search. It shows only the turns of people who switched recall on. Lives in the `recall_corpus` view.
+- **receipt**: The quote that backs a claim or a brief point, checked by string match inside its turn. Lives in the `claims` and `card_items` tables.
+- **recovery code**: The 32-character code shown once at sign-up, which opens a new session once if the device is lost (A5). Lives in the `people` table as `recovery_code_hash`.
+- **redaction**: One scrubbed span, with its category and its placeholder id. Lives in the `redactions` table.
+- **replay (the player)**: The browser player that plays a stored meeting back in order, with no model call. Lives in `apps/web/src/transcript/replay-player.ts`.
+- **RLS**: Row level security. The database rule that shows a query only the rows its person or meeting may read (D55). It reads two settings, `app.person_id` and `app.meeting_id`, set by withPerson and withMeeting. Lives in the policies of `packages/db/migrations/0001_foundation.sql`.
+- **role token**: The label that replaces a third-party name in a turn, so the persona can refer to the person without the name (D15). Lives in the `turns` table as `text`, after the names pass.
+- **row id**: The decision id a rule or constant names in its comment, such as D44, A7, R12.3 or invariant 16 (R13.5). The full list lives in `docs/decisions.md`.
+- **scrub**: The deterministic pass that removes secrets, contacts and identifiers from text (D11). Lives in `packages/scrub`.
+- **sensitive category**: A class of content, such as health, minors, addresses, contacts or identifiers, that stays out of the card and recall unless the person opts in (D18). Lives in the `sources` table as `sensitive_opt_in`.
+- **session cookie**: The HttpOnly cookie that holds the login, named `__Host-session` (D33). Lives in `apps/api/src/sessions/cookie.ts`.
+- **share page**: The public, read-only page of a finished meeting. It shows only while both people consent. Lives in the `share_pages` table.
+- **share slug**: The public part of a share page's address, which the `share_read` and `share_revoke` functions take. Lives in the `share_pages` table as `slug`.
+- **side**: The seat a person holds in a meeting: side a or side b. Lives in the `meeting_members` and `meeting_steps` tables as `side`.
+- **snapshot**: The copy of a meeting's public content, taken at the second consent (D68). Lives in the `share_pages` table as `snapshot`.
+- **source**: One upload of a person's own turns, after the browser and the api have scrubbed it. Lives in the `sources` table.
+- **stalled**: A step that has had no event for 150 seconds and waits for the sweeper to hand it to a new job (D46). Lives in the `meeting_steps` table as `state`.
+- **support judge**: The second model check that reads the quote of a brief point and reports whether it backs that point (A1). Lives in the `briefs` table as `support_raw`.
+- **support rate**: The share of brief points the support judge marked as supported. It is a rate, not a guarantee (A1). Lives in the `briefs` table as `support_rate`.
+- **sweeper**: The `sweep_stalled` job that runs every minute, marks stalled steps and starts ready meetings (D46). Lives in `apps/worker/src/meetings/sweep-stalled-job.ts`.
+- **thin card**: A card with fewer than six verified items. Its meeting shows a badge (D23). Lives in the `cards` table as `thin`.
+- **transfer link**: The single-use link that moves a session to another browser, valid for ten minutes (D33). Lives in the `transfer_links` table.
+- **turn**: One message from a person's chat history, or one speech by a persona in a meeting. Lives in the `turns` table for sources, and in `meeting_events` for meetings.
+- **turn id**: The id of one turn. Claims and card items point at their source turn with it. Lives in the `turns` table as `id`.
+- **verified**: Found, by string match, inside the turn that a claim or card item names (D26). Lives in the `claims` and `card_items` tables as `verified`.
+- **weak receipt**: The mark on a brief point whose quote does not back the point. The point is kept out of decide-first and the share page. Lives in the `briefs` table as `support_reliable` and the support lists.
+- **withMeeting**: The database wrapper that runs one transaction for one meeting, setting `app.meeting_id`. Lives in `packages/db/src/transaction.ts`.
+- **withPerson**: The database wrapper that runs one transaction for one person, setting `app.person_id`. Lives in `packages/db/src/transaction.ts`.
+- **worker**: The background process that runs the jobs: model calls, card builds, meetings, briefs, comics and deletion. Lives in `apps/worker`.

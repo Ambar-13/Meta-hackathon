@@ -1,0 +1,14 @@
+# Gitleaks rules for Meet First. The default rules stay on; the allowlist names planted and synthetic test
+# data only, so a real key found in any other file still fails the job.
+title = "Meet First gitleaks rules"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Planted and synthetic test data, never a real credential"
+paths = [
+  '''packages/evals/fixtures/secrets/planted\.ndjson''',
+  '''packages/scrub/fixtures/planted-secrets\.ndjson''',
+  '''packages/receipts/fixtures/''',
+]
