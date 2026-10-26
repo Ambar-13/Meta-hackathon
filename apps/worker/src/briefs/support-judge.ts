@@ -2,6 +2,7 @@
 import { createHash } from "node:crypto";
 import type { BriefPoint, BriefSupportJudgeOutput } from "@meet-first/contracts";
 import type { ChatMessage } from "@meet-first/llm";
+import { escapeBlockText } from "../meetings/prompt-builder.js";
 import { LINES_PER_SECTION, promptBodyOf, type BriefSections } from "./brief-lines.js";
 
 // The most characters one judge reason keeps on a line (the contract's reason limit).
@@ -51,10 +52,11 @@ function shuffledIndexes(count: number, random: () => number): number[] {
   return order;
 }
 
-// The judge's text for one line: the statement and its quotes, in the order the flip gives.
+// The judge's text for one line: the statement and its quotes, in the order the flip gives. Both are escaped, as every block text
+// is, so a line or a quote cannot close its item and open another (R7.3).
 function slotBlock(slot: JudgeSlot): string[] {
-  const quotes = slot.point.quotes.map((quote) => `<quote>"${quote.text}"</quote>`);
-  const statement = `<statement>${slot.point.text}</statement>`;
+  const quotes = slot.point.quotes.map((quote) => `<quote>"${escapeBlockText(quote.text)}"</quote>`);
+  const statement = `<statement>${escapeBlockText(slot.point.text)}</statement>`;
   const body = slot.isFlipped ? [...quotes, statement] : [statement, ...quotes];
   return [`<item index="${String(slot.index)}">`, ...body, "</item>"];
 }

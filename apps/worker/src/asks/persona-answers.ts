@@ -67,12 +67,13 @@ async function failAnswer(context: JobContext, scope: AnswerScope, code: string)
 }
 
 // Reads one subject's material in the subject's own context, and only reads. Null when a help answer's listing is gone, names another
-// card or, for a romance ask, has its dating switch off [confirm], or when the card is gone. A help answer never reads recall (P7).
+// card or, for a romance ask, has its dating switch off [confirm]; when the card is gone or no longer approved; and, for a friend ask,
+// when the friend has turned friend asks off since the answer row was written (P3). A help answer never reads recall (P7).
 async function readSubjectMaterial(db: Kysely<Database>, ask: AskRow, row: AnswerRow): Promise<SubjectMaterial | null> {
   return withPerson(db, row.subjectPersonId, async (trx) => {
     if (ask.mode === "help" && !(await isListingCurrent(trx, ask, row))) return null;
-    const card = await trx.selectFrom("cards").select("recall_allowed").where("id", "=", row.subjectCardId).executeTakeFirst();
-    if (card === undefined) return null;
+    const card = await trx.selectFrom("cards").select(["recall_allowed", "state", "friends_can_ask"]).where("id", "=", row.subjectCardId).executeTakeFirst();
+    if (card === undefined || card.state !== "approved" || (ask.mode === "react" && !card.friends_can_ask)) return null;
     const items = await readItems(trx, row.subjectCardId, ask.mode === "help");
     const misses = await quizMisses(trx, row.subjectCardId);
     const recall = ask.mode === "react" && card.recall_allowed ? await readRecall(trx, row.subjectCardId, ask.text) : [];

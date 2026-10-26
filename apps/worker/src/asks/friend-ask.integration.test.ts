@@ -1,6 +1,6 @@
 import type { Kysely } from "kysely";
 import { afterAll, afterEach, beforeAll, expect, it } from "vitest";
-import { makeDatabase, POOL_SIZE, type Database } from "@meet-first/db";
+import { makeDatabase, POOL_SIZE, withPerson, type Database } from "@meet-first/db";
 import { freshTestDatabase, type TestDatabase } from "@meet-first/db/testing";
 import { runAsk } from "./run-ask-job.js";
 import {
@@ -119,4 +119,35 @@ it("W6-ASKW-T33 (design section 11): a friend ask about a date is stored as roma
   expect(await readAskRow(fresh.db, ana, askId)).toMatchObject({ state: "done", question_kind: "romance" });
   expect((await readAnswerRows(fresh.db, ana, askId)).map((row) => [row.subject_display_name, row.state])).toEqual([["Kai", "answered"]]);
   expect(countCalls(test, "persona_answer")).toBe(1);
+});
+
+it("W6-SEC-T3 (P3, as-built item 58): a friend who turns friend asks off after the answer row was written is never asked", async () => {
+  const mia = await createAskPerson(fresh.db, { name: "Mia", turns: ASK_TURNS.lena });
+  await allowFriendAsks(fresh.db, mia);
+  const miaPair = await joinInvitePair(fresh.db, ana, mia);
+  const askId = await insertReactAsk(fresh.db, ana, { pairId: miaPair, text: "How would Mia react if I sent her a surprise call about plans?", aboutName: "Mia" });
+  const first = await openTest({ questionCheck: [ALLOWED_REACT], personaAnswers: { Mia: LENA_REACT }, judge: [], limiterBusy: { callSite: "persona_answer", times: 1 } });
+  await runAsk({ askId, personId: ana.personId }, first.context);
+  expect((await readAnswerRows(fresh.db, ana, askId)).map((row) => row.state)).toEqual(["pending"]);
+
+  await withPerson(fresh.db, mia.personId, (trx) => trx.updateTable("cards").set({ friends_can_ask: false }).where("id", "=", mia.cardId).execute());
+  const second = await openTest({ questionCheck: [], personaAnswers: { Mia: LENA_REACT }, judge: [] });
+  await runAsk({ askId, personId: ana.personId }, second.context);
+
+  expect(countCalls(second, "persona_answer")).toBe(0);
+  expect((await readAnswerRows(fresh.db, ana, askId)).map((row) => row.state)).toEqual(["failed"]);
+});
+
+it("W6-SEC-T4 (D69, as-built item 58): a friend whose account is being deleted is never asked, and the ask fails", async () => {
+  const noa = await createAskPerson(fresh.db, { name: "Noa", turns: ASK_TURNS.lena });
+  await allowFriendAsks(fresh.db, noa);
+  const noaPair = await joinInvitePair(fresh.db, ana, noa);
+  const askId = await insertReactAsk(fresh.db, ana, { pairId: noaPair, text: "How would Noa react to a picnic on Sunday?", aboutName: "Noa" });
+  await withPerson(fresh.db, noa.personId, (trx) => trx.updateTable("people").set({ state: "deleted", deleted_at: new Date() }).where("id", "=", noa.personId).execute());
+  const test = await openTest({ questionCheck: [ALLOWED_REACT], personaAnswers: { Noa: LENA_REACT }, judge: [] });
+
+  await runAsk({ askId, personId: ana.personId }, test.context);
+
+  expect((await readAskRow(fresh.db, ana, askId)).state).toBe("failed");
+  expect(test.calls.map((call) => call.callSite)).toEqual(["question_check"]);
 });

@@ -130,8 +130,9 @@ export function checkAnswerClaims(claims: PersonaAnswerOutput["claims"], turns: 
 // items keep the order given and are not shuffled [confirm].
 export function askJudgeUserText(claims: readonly JudgeClaim[]): string {
   const blocks = claims.flatMap((claim, index) => {
-    const statement = "<statement>" + claim.text + "</statement>";
-    const quote = '<quote>"' + claim.quote + '"</quote>';
+    // Both are escaped, as every block text is, so a statement or a quote cannot close its item and open another (R7.3).
+    const statement = "<statement>" + escapeBlockText(claim.text) + "</statement>";
+    const quote = '<quote>"' + escapeBlockText(claim.quote) + '"</quote>';
     const body = isFlippedLine(judgePointOf(claim)) ? [quote, statement] : [statement, quote];
     return ['<item index="' + String(index) + '">', ...body, "</item>"];
   });

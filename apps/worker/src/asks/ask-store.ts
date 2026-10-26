@@ -56,9 +56,10 @@ export async function countAnswers(trx: DatabaseTransaction, askId: string): Pro
   return numberFromPostgres(row.total);
 }
 
-// One person's display name, read in that person's own context; null when the row is gone.
+// One person's display name, read in that person's own context; null when the row is gone or the person is being deleted, so no
+// one is asked, and no ask goes on, once a deletion has started (D69).
 export async function readDisplayName(trx: DatabaseTransaction, personId: string): Promise<string | null> {
-  const row = await trx.selectFrom("people").select("display_name").where("id", "=", personId).executeTakeFirst();
+  const row = await trx.selectFrom("people").select("display_name").where("id", "=", personId).where("state", "=", "active").executeTakeFirst();
   return row === undefined ? null : row.display_name;
 }
 
