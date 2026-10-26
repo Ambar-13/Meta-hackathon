@@ -1,2 +1,4 @@
-// The Answers page: one ask and its answers (asks-api-web). A placeholder until its Wave 6 builder lands (as-built item 49).
+// The Answers page: one ask and its answers (asks-api-web, design section 7).
 export { AskScreen } from "./screen.js";
+// One answer's claims with their quotes and receipt marks, which the friends page also shows.
+export { AnswerClaims } from "./answer-parts.js";

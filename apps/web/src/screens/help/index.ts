@@ -1,2 +1,2 @@
-// The Find help page: the help finder (asks-api-web). A placeholder until its Wave 6 builder lands (as-built item 49).
+// The Find help page: one stuck problem sent to the personas listed in the directory (asks-api-web, design section 7).
 export { HelpScreen } from "./screen.js";
