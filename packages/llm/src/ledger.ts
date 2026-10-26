@@ -1,5 +1,6 @@
 import { type CallSite, ContractError, type Effort, type LlmMode, type RecordedCall } from "@meet-first/contracts";
-import { type ColumnType, type Generated, type Kysely, sql } from "kysely";
+import { type Kysely, sql } from "kysely";
+import type { Database, LedgerTable } from "@meet-first/db";
 
 // What the ledger row holds before a model call starts (ARCHITECTURE.md 3.23). The row is written first, so a crash still counts.
 export type LedgerStart = {
@@ -20,34 +21,8 @@ export type LedgerFinish = {
   usd?: number;
 };
 
-type Timestamp = ColumnType<Date, Date | string, Date | string>;
-type NullableTimestamp = ColumnType<Date | null, Date | string | null, Date | string | null>;
-// The ledger table as migration 0001 creates it. packages/db's types.ts declares the same interface; once the database
-// builder merges, these functions take @meet-first/db's Database instead (by request, Wave 1).
-export interface LedgerTable {
-  id: Generated<string>;
-  person_id: string | null;
-  meeting_id: string | null;
-  call_site: string;
-  model: string;
-  effort: "minimal" | "low" | "medium";
-  est_tokens: number;
-  prompt_tokens: number | null;
-  cached_tokens: number | null;
-  completion_tokens: number | null;
-  reasoning_tokens: number | null;
-  usd: ColumnType<string | null, number | string | null, number | string | null>;
-  status: "started" | "ok" | "error" | "timeout" | "refused";
-  http_status: number | null;
-  request_id: string | null;
-  llm_mode: "live" | "record" | "replay";
-  started_at: Generated<Timestamp>;
-  finished_at: NullableTimestamp;
-}
-// The only table these functions touch.
-export interface Database {
-  ledger: LedgerTable;
-}
+// The database types these functions take, from @meet-first/db, so the ledger shape lives in one place (as-built item 22).
+export type { Database, LedgerTable };
 
 // Writes the ledger row before the call so a crash mid-call still counts against the caps (R3.5, invariant 14). Returns the row id.
 // The caller commits this row before it calls the model, so other workers' limiters see it.

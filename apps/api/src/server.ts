@@ -9,6 +9,7 @@ import { makeApiEnqueue } from "./job-queue.js";
 import { handleNotFound, handleRouteError, replaceJsonParser } from "./route-errors.js";
 import { addOriginCheck, addSessionHook, registerAccountRateLimit, registerSessionsRoutes } from "./sessions/index.js";
 import { registerPairsRoutes } from "./pairs/index.js";
+import { registerSourcesRoutes } from "./sources/index.js";
 import { registerMeetingStreamRoutes } from "./meeting-stream/index.js";
 import { addContentSecurityPolicy, registerWebPagesRoutes } from "./web-pages/index.js";
 
@@ -69,7 +70,7 @@ export async function buildApp(deps: RouteDeps, options: BuildAppOptions): Promi
 // Registers every feature's routes on the root instance in the fixed slot order; a missing feature keeps its slot comment until its builder's request lands (seams S2).
 export async function registerAllRoutes(app: FastifyInstance, deps: RouteDeps): Promise<void> {
   await registerSessionsRoutes(app, deps);
-  // slot 2: registerSourcesRoutes from "./sources/index.js", added by ingest through a request
+  await registerSourcesRoutes(app, deps);
   // slot 3: registerCardsRoutes from "./cards/index.js", added by dossier through a request
   // slot 4: registerQuizRoutes from "./quizzes/index.js", added by quiz through a request
   await registerPairsRoutes(app, deps);
