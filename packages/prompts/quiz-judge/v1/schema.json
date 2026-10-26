@@ -1,0 +1,20 @@
+{
+  "name": "quiz-judge",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "agree": {
+        "type": "boolean"
+      },
+      "reason": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "agree",
+      "reason"
+    ],
+    "additionalProperties": false
+  }
+}

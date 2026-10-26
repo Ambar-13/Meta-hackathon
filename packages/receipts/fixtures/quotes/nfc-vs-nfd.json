@@ -1,0 +1,9 @@
+{
+  "name": "nfc-vs-nfd",
+  "turnText": "The cafe\u0301 closed early on Sunday.",
+  "quote": "The caf\u00e9 closed early on Sunday",
+  "forbidden": [
+    "Where did you go?"
+  ],
+  "expect": "ok"
+}

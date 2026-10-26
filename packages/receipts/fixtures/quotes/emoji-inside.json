@@ -1,0 +1,10 @@
+{
+  "name": "emoji-inside",
+  "turnText": "I love this \ud83d\ude80 launch so much",
+  "quote": "I love this \ud83d\ude80 launch so much",
+  "forbidden": [
+    "How do you feel about launches?"
+  ],
+  "expect": "ok",
+  "expectOriginal": "I love this \ud83d\ude80 launch so much"
+}

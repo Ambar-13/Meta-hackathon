@@ -1,0 +1,32 @@
+{
+  "name": "comic-panels",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "panels": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "caption": {
+              "type": "string"
+            },
+            "image_prompt": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "caption",
+            "image_prompt"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": [
+      "panels"
+    ],
+    "additionalProperties": false
+  }
+}

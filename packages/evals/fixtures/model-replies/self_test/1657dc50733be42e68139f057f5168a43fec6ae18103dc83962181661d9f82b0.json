@@ -1,0 +1,56 @@
+{
+  "callSite": "self_test",
+  "promptVersion": "v1",
+  "requestHash": "1657dc50733be42e68139f057f5168a43fec6ae18103dc83962181661d9f82b0",
+  "request": {
+    "callSite": "self_test",
+    "promptVersion": "v1",
+    "body": {
+      "model": "muse-spark-1.3",
+      "messages": [
+        {
+          "role": "user",
+          "content": "ok"
+        }
+      ],
+      "max_tokens": 1,
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "quiz-persona-answer",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "answer": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "answer"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "response": {
+    "choices": [
+      {
+        "message": {
+          "content": "{"
+        },
+        "finish_reason": "length"
+      }
+    ]
+  },
+  "usage": {
+    "promptTokens": 0,
+    "cachedTokens": 0,
+    "completionTokens": 0,
+    "reasoningTokens": 0
+  },
+  "recordedAt": null,
+  "handWritten": true
+}

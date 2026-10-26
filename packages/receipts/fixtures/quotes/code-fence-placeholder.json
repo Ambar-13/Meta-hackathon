@@ -1,0 +1,9 @@
+{
+  "name": "code-fence-placeholder",
+  "turnText": "Here is the output: [code: python, 12 lines] plus ten chars here.",
+  "quote": "[code: python, 12 lines] plus ten chars here.",
+  "forbidden": [
+    "Show me the output."
+  ],
+  "expect": "ok"
+}

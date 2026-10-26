@@ -1,0 +1,9 @@
+{
+  "name": "turn-shorter-than-quote",
+  "turnText": "Short line.",
+  "quote": "this quote is much longer than the whole turn",
+  "forbidden": [
+    "Anything?"
+  ],
+  "expect": "not_in_turn"
+}

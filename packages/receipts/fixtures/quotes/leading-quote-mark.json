@@ -1,0 +1,9 @@
+{
+  "name": "leading-quote-mark",
+  "turnText": "Rule one is that nobody argues in standup.",
+  "quote": "\"Rule one is that nobody argues in standup",
+  "forbidden": [
+    "What are the rules?"
+  ],
+  "expect": "ok"
+}

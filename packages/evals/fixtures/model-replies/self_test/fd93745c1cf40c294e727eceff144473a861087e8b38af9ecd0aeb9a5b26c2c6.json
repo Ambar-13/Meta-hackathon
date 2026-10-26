@@ -1,0 +1,72 @@
+{
+  "callSite": "self_test",
+  "promptVersion": "v1",
+  "requestHash": "fd93745c1cf40c294e727eceff144473a861087e8b38af9ecd0aeb9a5b26c2c6",
+  "request": {
+    "callSite": "self_test",
+    "promptVersion": "v1",
+    "body": {
+      "model": "muse-spark-1.3",
+      "messages": [
+        {
+          "role": "user",
+          "content": "ok"
+        }
+      ],
+      "max_tokens": 1,
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "comic-panels",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "panels": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "caption": {
+                      "type": "string"
+                    },
+                    "image_prompt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "caption",
+                    "image_prompt"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "panels"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "response": {
+    "choices": [
+      {
+        "message": {
+          "content": "{"
+        },
+        "finish_reason": "length"
+      }
+    ]
+  },
+  "usage": {
+    "promptTokens": 0,
+    "cachedTokens": 0,
+    "completionTokens": 0,
+    "reasoningTokens": 0
+  },
+  "recordedAt": null,
+  "handWritten": true
+}

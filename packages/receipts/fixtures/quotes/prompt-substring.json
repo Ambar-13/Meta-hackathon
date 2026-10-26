@@ -1,0 +1,9 @@
+{
+  "name": "prompt-substring",
+  "turnText": "I remember the old bridge you remember well.",
+  "quote": "the old bridge you remember",
+  "forbidden": [
+    "Describe the old bridge you remember from childhood."
+  ],
+  "expect": "substring_of_prompt"
+}

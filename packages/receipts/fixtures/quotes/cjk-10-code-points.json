@@ -1,0 +1,9 @@
+{
+  "name": "cjk-10-code-points",
+  "turnText": "\u6211\u4eec\u4eca\u5929\u5f88\u597d\u7684\u5de5\u4f5c\u5f88\u8f9b\u82e6\u3002",
+  "quote": "\u6211\u4eec\u4eca\u5929\u5f88\u597d\u7684\u5de5\u4f5c\u5f88",
+  "forbidden": [
+    "How was work?"
+  ],
+  "expect": "ok"
+}

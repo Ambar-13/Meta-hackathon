@@ -1,0 +1,9 @@
+{
+  "name": "exactly-20",
+  "turnText": "Honestly, I think that is okay for now.",
+  "quote": "I think that is okay",
+  "forbidden": [
+    "How do you feel?"
+  ],
+  "expect": "ok"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "redaction-placeholder-inside",
+  "turnText": "Email me at [redacted:email:1a2b3c4d] when it is ready.",
+  "quote": "Email me at [redacted:email:1a2b3c4d] when it is ready",
+  "forbidden": [
+    "How do I reach you?"
+  ],
+  "expect": "ok"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "question-substring",
+  "turnText": "I wonder what do you do when a plan you cared about falls apart.",
+  "quote": "What do you do when a plan you cared about falls apart",
+  "forbidden": [
+    "What do you do when a plan you cared about falls apart?"
+  ],
+  "expect": "substring_of_prompt"
+}

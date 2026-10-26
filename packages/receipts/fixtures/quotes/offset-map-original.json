@@ -1,0 +1,10 @@
+{
+  "name": "offset-map-original",
+  "turnText": "She wrote \u201cit is done\u201d\nand then she left the room.",
+  "quote": "\u201cit is done\u201d\nand then she left",
+  "forbidden": [
+    "What did she write?"
+  ],
+  "expect": "ok",
+  "expectOriginal": "it is done\u201d\nand then she left"
+}

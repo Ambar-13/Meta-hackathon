@@ -1,0 +1,9 @@
+{
+  "name": "curly-quotes",
+  "turnText": "She said \u201cwe ship on Friday, no matter what\u201d and that was that.",
+  "quote": "\"we ship on Friday, no matter what\"",
+  "forbidden": [
+    "What did she say?"
+  ],
+  "expect": "ok"
+}

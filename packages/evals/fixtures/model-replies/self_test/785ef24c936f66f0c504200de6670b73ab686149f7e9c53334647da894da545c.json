@@ -1,0 +1,76 @@
+{
+  "callSite": "self_test",
+  "promptVersion": "v1",
+  "requestHash": "785ef24c936f66f0c504200de6670b73ab686149f7e9c53334647da894da545c",
+  "request": {
+    "callSite": "self_test",
+    "promptVersion": "v1",
+    "body": {
+      "model": "muse-spark-1.3",
+      "messages": [
+        {
+          "role": "user",
+          "content": "ok"
+        }
+      ],
+      "max_tokens": 1,
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "brief-support-judge",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "lines": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "index": {
+                      "type": "integer"
+                    },
+                    "supported": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "index",
+                    "supported",
+                    "reason"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "lines"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "response": {
+    "choices": [
+      {
+        "message": {
+          "content": "{"
+        },
+        "finish_reason": "length"
+      }
+    ]
+  },
+  "usage": {
+    "promptTokens": 0,
+    "cachedTokens": 0,
+    "completionTokens": 0,
+    "reasoningTokens": 0
+  },
+  "recordedAt": null,
+  "handWritten": true
+}

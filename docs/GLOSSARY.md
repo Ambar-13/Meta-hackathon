@@ -1,0 +1,52 @@
+# Glossary
+
+One line per word, in alphabetical order. Each line names the table, schema or file where the thing lives.
+
+- **ask**: A question a persona puts to its human during a meeting, with a 90 second deadline. Lives in the `asks` table.
+- **brief**: The written summary of one meeting for one person: what they agree on, where they clash, and what to decide first. Lives in the `briefs` table.
+- **canonical text**: The cleaned text of an upload after the browser and the server have both scrubbed it. Lives in the `sources` and `turns` tables.
+- **card**: The persona built from one frozen source, a list of items each with a quote. Lives in the `cards` table.
+- **card item**: One line of a card, with its quote and whether the quote was found in the turn. Lives in the `card_items` table.
+- **claim**: One point a persona made in a turn, with the quote it rests on. Lives in the `claims` table.
+- **consent**: One side's yes to publish the share page of a meeting. Lives in the `share_pages` table as `consent_a` and `consent_b`.
+- **decide first**: The brief group of points the two people should settle first. Lives in the `briefs` table as `decide_first`.
+- **delta**: A slice of a turn that is still being written. It goes over the stream and is never stored. Lives in `TurnDelta` in `packages/contracts/src/meetings/events.ts`.
+- **explore**: The middle phase of a meeting, with up to six turns. Lives in `Phase` in `packages/contracts/src/meetings/meeting.ts`.
+- **freeze**: The point after which a source's turn text cannot change, set by the names review. Lives in `sources.frozen_at`.
+- **gloss**: The English meaning of a claim that is written in another language. Lives in `card_items.gloss` and `claims.gloss`.
+- **heartbeat**: The comment line the server sends every 15 seconds so the stream stays open. Lives in `HEARTBEAT_MS` in `packages/contracts/src/meetings/events.ts`.
+- **invite**: The link that joins two people into one pair, valid for 24 hours. Lives in the `pairs` table.
+- **ledger**: One row per model call, written before the call, that every cap reads. Lives in the `ledger` table.
+- **limiter**: The check that holds back a model call when the last minute is full. Reads the `ledger` table through `ledger_window`.
+- **meeting**: One ten-minute conversation between two personas on one question. Lives in the `meetings` table.
+- **member**: One of the two people in a meeting, tied to one approved card. Lives in the `meeting_members` table.
+- **names pass**: The job that finds names in a source and rewrites them to role tokens. Lives in the `sources` table and the `scrub_names` job.
+- **offset map**: The table that maps positions in the normalised text back to positions in the original. Lives in `packages/receipts/src/offset-map.ts`.
+- **pair**: Two people joined by an invite, with the meetings between them. Lives in the `pairs` table.
+- **partial text**: The text of a turn that is still being written, saved every 250 ms. Lives in `meeting_steps.partial_text`.
+- **persona**: The model's voice for one person, built only from that person's card. Lives in the `cards` table and the meeting prompts.
+- **persona signal**: A number from 0 to 1 that says how much of an upload is the person's own voice. Lives in `sources.persona_signal`.
+- **phase**: One of open, explore, decide or close. Lives in `meetings.phase`.
+- **placeholder**: The text that replaces a redacted item, such as `[redacted:email:1a2b3c4d]`. Lives in the `redactions` table and `PLACEHOLDER_PATTERN` in `packages/contracts/src/sources/scrub-categories.ts`.
+- **prefix**: The fixed start of one side's prompt, the same on every turn. Lives in `meeting_members.frozen_prefix`.
+- **quote**: Words copied from one turn, checked against that turn only. Lives in `card_items.quote` and `claims.quote`.
+- **quiz**: The ten-question check of how well a persona knows its person. Lives in the `quizzes` and `quiz_items` tables.
+- **receipt**: The quote shown beside a claim or a brief line. Lives in the `claims` table and the `briefs` table.
+- **recall**: A lookup a persona makes in its own scrubbed notes during a meeting. Reads the `recall_corpus` view.
+- **recall corpus**: The turns a persona may look up, after the recall switch and the sensitive-category rules. Lives in the `recall_corpus` view.
+- **recovery code**: The 32-character code that signs a person back in once. Lives in `people.recovery_code_hash`.
+- **redaction**: One thing the scrubber replaced with a placeholder. Lives in the `redactions` table.
+- **replay**: Running a model call from a recorded fixture, never from the live API. Lives in `packages/llm/src/modes.ts`.
+- **role token**: The stand-in for a name in the text, such as `[person:mother]`. Lives in the `turns` table and `ROLE_TOKEN` in `packages/contracts/src/sources/scrub-categories.ts`.
+- **scrub**: Removing personal and secret text from an upload before it is stored. Lives in the `turns` and `redactions` tables and the scrub package from Wave 1.
+- **seq**: The gapless number of a committed event inside one meeting. Lives in `meeting_events.seq`.
+- **session**: One signed-in browser, identified by a hashed token. Lives in the `sessions` table.
+- **share page**: The public page of one meeting, live only while both sides consent. Lives in the `share_pages` table.
+- **side**: Side a or side b of a meeting. Lives in `meeting_members.side`.
+- **source**: One upload of a person's own turns. Lives in the `sources` table.
+- **step**: One persona turn inside a meeting. Lives in the `meeting_steps` table.
+- **support rate**: The share of a brief's quoted lines that the support judge found supported. Lives in `briefs.support_rate`.
+- **thin card**: A card with fewer than six verified items. Lives in `cards.thin`.
+- **transfer link**: A ten-minute, single-use link that moves a session into the real browser. Lives in the `transfer_links` table.
+- **turn**: One message the person wrote. Lives in the `turns` table.
+- **weak receipt**: The label on a brief line when the support judge did not confirm it. Lives in `briefs.support_reliable` and the brief lines.

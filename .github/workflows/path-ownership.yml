@@ -1,0 +1,16 @@
+name: path-ownership
+on:
+  pull_request:
+jobs:
+  path-ownership:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # The path ownership script lands in Wave 2 (deploy-and-docs); until then this job passes.
+      - run: echo "path ownership check lands in Wave 2"

@@ -1,0 +1,32 @@
+{
+  "name": "scrub-names",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "names": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "role": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "text",
+            "role"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": [
+      "names"
+    ],
+    "additionalProperties": false
+  }
+}

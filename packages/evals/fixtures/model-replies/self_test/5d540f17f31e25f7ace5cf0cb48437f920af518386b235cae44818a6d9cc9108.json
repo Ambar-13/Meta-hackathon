@@ -1,0 +1,72 @@
+{
+  "callSite": "self_test",
+  "promptVersion": "v1",
+  "requestHash": "5d540f17f31e25f7ace5cf0cb48437f920af518386b235cae44818a6d9cc9108",
+  "request": {
+    "callSite": "self_test",
+    "promptVersion": "v1",
+    "body": {
+      "model": "muse-spark-1.3",
+      "messages": [
+        {
+          "role": "user",
+          "content": "ok"
+        }
+      ],
+      "max_tokens": 1,
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "scrub-names",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "names": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "text",
+                    "role"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "names"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "response": {
+    "choices": [
+      {
+        "message": {
+          "content": "{"
+        },
+        "finish_reason": "length"
+      }
+    ]
+  },
+  "usage": {
+    "promptTokens": 0,
+    "cachedTokens": 0,
+    "completionTokens": 0,
+    "reasoningTokens": 0
+  },
+  "recordedAt": null,
+  "handWritten": true
+}

@@ -1,0 +1,9 @@
+{
+  "name": "cjk-with-surrogates",
+  "turnText": "\u6211\u4eec\u4eca\u5929\u5f88\u597d\u7684\ud840\udc00\u5de5\u4f5c\u3002",
+  "quote": "\u6211\u4eec\u4eca\u5929\u5f88\u597d\u7684\ud840\udc00\u5de5\u4f5c",
+  "forbidden": [
+    "How was work?"
+  ],
+  "expect": "ok"
+}

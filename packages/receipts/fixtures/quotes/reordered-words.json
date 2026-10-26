@@ -1,0 +1,9 @@
+{
+  "name": "reordered-words",
+  "turnText": "The budget review happens every single Monday morning.",
+  "quote": "every single Monday the budget review happens",
+  "forbidden": [
+    "When is the review?"
+  ],
+  "expect": "not_in_turn"
+}

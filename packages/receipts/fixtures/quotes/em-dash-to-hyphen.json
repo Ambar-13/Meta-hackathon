@@ -1,0 +1,9 @@
+{
+  "name": "em-dash-to-hyphen",
+  "turnText": "We tried it \u2014 it failed twice in a row.",
+  "quote": "we tried it - it failed twice in a row",
+  "forbidden": [
+    "What happened?"
+  ],
+  "expect": "ok"
+}

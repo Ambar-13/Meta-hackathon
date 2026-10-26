@@ -1,0 +1,11 @@
+{
+  "name": "@meet-first/scrub",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@meet-first/contracts": "workspace:*"
+  }
+}

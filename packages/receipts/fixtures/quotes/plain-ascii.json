@@ -1,0 +1,9 @@
+{
+  "name": "plain-ascii",
+  "turnText": "We agreed the budget would stay flat until June.",
+  "quote": "budget would stay flat",
+  "forbidden": [
+    "Should the budget change this year?"
+  ],
+  "expect": "ok"
+}

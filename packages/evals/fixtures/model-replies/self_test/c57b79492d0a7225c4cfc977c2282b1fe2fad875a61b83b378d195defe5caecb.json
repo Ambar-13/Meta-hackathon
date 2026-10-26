@@ -1,0 +1,60 @@
+{
+  "callSite": "self_test",
+  "promptVersion": "v1",
+  "requestHash": "c57b79492d0a7225c4cfc977c2282b1fe2fad875a61b83b378d195defe5caecb",
+  "request": {
+    "callSite": "self_test",
+    "promptVersion": "v1",
+    "body": {
+      "model": "muse-spark-1.3",
+      "messages": [
+        {
+          "role": "user",
+          "content": "ok"
+        }
+      ],
+      "max_tokens": 1,
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "quiz-judge",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "agree": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "agree",
+              "reason"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "response": {
+    "choices": [
+      {
+        "message": {
+          "content": "{"
+        },
+        "finish_reason": "length"
+      }
+    ]
+  },
+  "usage": {
+    "promptTokens": 0,
+    "cachedTokens": 0,
+    "completionTokens": 0,
+    "reasoningTokens": 0
+  },
+  "recordedAt": null,
+  "handWritten": true
+}

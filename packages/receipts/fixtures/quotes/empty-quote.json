@@ -1,0 +1,9 @@
+{
+  "name": "empty-quote",
+  "turnText": "Any turn text at all, here.",
+  "quote": "",
+  "forbidden": [
+    "Anything?"
+  ],
+  "expect": "too_short"
+}

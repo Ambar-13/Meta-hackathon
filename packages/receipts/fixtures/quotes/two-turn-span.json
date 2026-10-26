@@ -1,0 +1,9 @@
+{
+  "name": "two-turn-span",
+  "turnText": "We talked about the river and the old bridge.",
+  "quote": "the old bridge. Then I cooked rice",
+  "forbidden": [
+    "Describe your week."
+  ],
+  "expect": "not_in_turn"
+}

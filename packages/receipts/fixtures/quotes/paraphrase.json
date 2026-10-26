@@ -1,0 +1,9 @@
+{
+  "name": "paraphrase",
+  "turnText": "We agreed to move the launch to March.",
+  "quote": "we agreed to shift the launch to March",
+  "forbidden": [
+    "When is the launch?"
+  ],
+  "expect": "not_in_turn"
+}

@@ -1,0 +1,13 @@
+{
+  "about": "Files and folders that have had their style pass. Inside them, the style checks and lint rules are errors. Everywhere else they are warnings. Add a folder here in the same change that brings it up to the standard.",
+  "paths": [
+    "apps",
+    "packages",
+    "scripts",
+    "tests",
+    "docs/contracts.md",
+    "docs/ownership.md",
+    "docs/GLOSSARY.md",
+    "docs/README-TEMPLATE.md"
+  ]
+}

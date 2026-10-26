@@ -1,0 +1,9 @@
+{
+  "name": "trailing-period",
+  "turnText": "Nobody on the team wants another late night",
+  "quote": "Nobody on the team wants another late night.",
+  "forbidden": [
+    "Do you want late nights?"
+  ],
+  "expect": "ok"
+}

@@ -1,0 +1,184 @@
+{
+  "callSite": "self_test",
+  "promptVersion": "v1",
+  "requestHash": "75fe3448df67280b51b6773e65faaacbdc84c330ddde57746ffa435c01093857",
+  "request": {
+    "callSite": "self_test",
+    "promptVersion": "v1",
+    "body": {
+      "model": "muse-spark-1.3",
+      "messages": [
+        {
+          "role": "user",
+          "content": "ok"
+        }
+      ],
+      "max_tokens": 1,
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "brief",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "agree": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string"
+                    },
+                    "quotes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "text": {
+                            "type": "string"
+                          },
+                          "side": {
+                            "type": "string",
+                            "enum": [
+                              "a",
+                              "b"
+                            ]
+                          },
+                          "turn_id": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "text",
+                          "side",
+                          "turn_id"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "text",
+                    "quotes"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "clash": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string"
+                    },
+                    "quotes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "text": {
+                            "type": "string"
+                          },
+                          "side": {
+                            "type": "string",
+                            "enum": [
+                              "a",
+                              "b"
+                            ]
+                          },
+                          "turn_id": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "text",
+                          "side",
+                          "turn_id"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "text",
+                    "quotes"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "decide_first": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string"
+                    },
+                    "quotes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "text": {
+                            "type": "string"
+                          },
+                          "side": {
+                            "type": "string",
+                            "enum": [
+                              "a",
+                              "b"
+                            ]
+                          },
+                          "turn_id": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "text",
+                          "side",
+                          "turn_id"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "text",
+                    "quotes"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "agree",
+              "clash",
+              "decide_first"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "response": {
+    "choices": [
+      {
+        "message": {
+          "content": "{"
+        },
+        "finish_reason": "length"
+      }
+    ]
+  },
+  "usage": {
+    "promptTokens": 0,
+    "cachedTokens": 0,
+    "completionTokens": 0,
+    "reasoningTokens": 0
+  },
+  "recordedAt": null,
+  "handWritten": true
+}

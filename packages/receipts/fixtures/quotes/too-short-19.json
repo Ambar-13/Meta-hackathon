@@ -1,0 +1,9 @@
+{
+  "name": "too-short-19",
+  "turnText": "Maybe I think it is, but I am not sure.",
+  "quote": "maybe I think it is",
+  "forbidden": [
+    "Are you sure?"
+  ],
+  "expect": "too_short"
+}

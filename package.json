@@ -1,0 +1,42 @@
+{
+  "name": "meet-first",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=22 <23"
+  },
+  "scripts": {
+    "typecheck": "pnpm -r --parallel typecheck",
+    "lint": "eslint . --max-warnings 0",
+    "checks": "tsx scripts/checks/run-all.ts",
+    "test:unit": "vitest run --project unit",
+    "test:contracts": "vitest run --project contracts",
+    "test:integration": "vitest run --project integration",
+    "test:journeys": "vitest run --project journeys",
+    "test:accessibility": "vitest run --project accessibility",
+    "test:security": "vitest run --project security",
+    "test:reliability": "vitest run --project reliability",
+    "db:migrate": "pnpm --filter @meet-first/db migrate",
+    "db:fresh": "pnpm --filter @meet-first/db fresh",
+    "db:count-person": "pnpm --filter @meet-first/db count-person",
+    "eval": "pnpm --filter @meet-first/evals run eval",
+    "golden-path": "tsx scripts/golden-path.ts",
+    "replay:export": "tsx scripts/replay-export.ts",
+    "replay:serve": "tsx scripts/replay-serve.ts"
+  },
+  "devDependencies": {
+    "@secretlint/secretlint-rule-preset-recommend": "13.0.6",
+    "@types/node": "22.7.4",
+    "@vitest/coverage-v8": "2.1.2",
+    "eslint": "9.12.0",
+    "eslint-plugin-vitest": "0.5.4",
+    "secretlint": "13.0.6",
+    "tsx": "4.19.1",
+    "typescript": "5.6.3",
+    "typescript-eslint": "8.8.1",
+    "vitest": "2.1.2",
+    "zod": "3.23.8",
+    "zod-to-json-schema": "3.23.3"
+  }
+}

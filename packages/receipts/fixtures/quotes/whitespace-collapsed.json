@@ -1,0 +1,9 @@
+{
+  "name": "whitespace-collapsed",
+  "turnText": "The notes say: the team\nmeets every\tMonday at nine.",
+  "quote": "the team meets every Monday at nine",
+  "forbidden": [
+    "When do you meet?"
+  ],
+  "expect": "ok"
+}

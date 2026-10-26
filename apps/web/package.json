@@ -1,0 +1,25 @@
+{
+  "name": "@meet-first/web",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@meet-first/contracts": "workspace:*",
+    "@meet-first/parsers": "workspace:*",
+    "@meet-first/scrub": "workspace:*",
+    "fflate": "0.8.2",
+    "qrcode-generator": "1.4.4",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-router-dom": "6.28.0"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "10.4.0",
+    "@testing-library/react": "16.0.1",
+    "@types/react": "19.0.0",
+    "@types/react-dom": "19.0.0",
+    "@vitejs/plugin-react": "4.3.2",
+    "jsdom": "25.0.1",
+    "msw": "2.4.9",
+    "vite": "5.4.8"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "quote-with-ellipsis",
+  "turnText": "We kept waiting for the answer from legal.",
+  "quote": "waiting for the answer ... from legal",
+  "forbidden": [
+    "What are you waiting for?"
+  ],
+  "expect": "not_in_turn"
+}

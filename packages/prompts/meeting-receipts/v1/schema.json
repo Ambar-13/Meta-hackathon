@@ -1,0 +1,44 @@
+{
+  "name": "meeting-receipts",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "claims": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "quote": {
+              "type": "string"
+            },
+            "turn_id": {
+              "type": "string"
+            },
+            "lang": {
+              "type": "string"
+            },
+            "gloss": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "text",
+            "quote",
+            "turn_id",
+            "lang",
+            "gloss"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": [
+      "claims"
+    ],
+    "additionalProperties": false
+  }
+}

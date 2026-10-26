@@ -1,0 +1,9 @@
+{
+  "name": "case-differs",
+  "turnText": "Our Team Lead Said The Report Was Late.",
+  "quote": "our team lead said the report was late",
+  "forbidden": [
+    "Who said what?"
+  ],
+  "expect": "ok"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "curly-quotes-reverse",
+  "turnText": "He wrote \"the plan is ready for review today\" in the doc.",
+  "quote": "\u201cthe plan is ready for review today\u201d",
+  "forbidden": [
+    "What did he write?"
+  ],
+  "expect": "ok"
+}

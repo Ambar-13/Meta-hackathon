@@ -1,0 +1,55 @@
+{
+  "name": "dossier",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "value",
+                "preference",
+                "habit",
+                "boundary",
+                "goal"
+              ]
+            },
+            "claim": {
+              "type": "string"
+            },
+            "lang": {
+              "type": "string"
+            },
+            "gloss": {
+              "type": "string"
+            },
+            "turn_id": {
+              "type": "string"
+            },
+            "quote": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "claim",
+            "lang",
+            "gloss",
+            "turn_id",
+            "quote"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": [
+      "items"
+    ],
+    "additionalProperties": false
+  }
+}
