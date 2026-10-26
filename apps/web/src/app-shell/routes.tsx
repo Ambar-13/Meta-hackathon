@@ -1,0 +1,54 @@
+import type { ReactElement } from "react";
+import { createBrowserRouter, Link, type RouteObject } from "react-router-dom";
+import { APP_PATHS, ROUTE_PATTERNS } from "./app-paths.js";
+import { ScreenFrame } from "./screen-parts.js";
+import { WelcomeScreen, ClaimScreen } from "../screens/welcome/index.js";
+import { UploadScreen } from "../screens/upload/index.js";
+import { PairScreen, JoinScreen } from "../screens/pair/index.js";
+import { NamesReviewScreen } from "../screens/names-review/index.js";
+import { CardScreen } from "../screens/card/index.js";
+import { QuizScreen } from "../screens/quiz/index.js";
+import { LobbyScreen } from "../screens/lobby/index.js";
+import { MeetingScreen } from "../screens/meeting/index.js";
+import { BriefScreen } from "../screens/brief/index.js";
+import { ComicScreen } from "../screens/comic/index.js";
+import { ConsentScreen, PublicSharePage } from "../screens/share/index.js";
+import { SettingsScreen } from "../screens/settings/index.js";
+
+// Every client path the app links to, re-exported for the screens that read the route table.
+export { APP_PATHS } from "./app-paths.js";
+
+// The page for a path the app does not know.
+const NotFoundScreen = (): ReactElement => {
+  return (
+    <ScreenFrame title="No page here">
+      <p>This address does not match a page.</p>
+      <Link to={APP_PATHS.welcome}>Go to the start page</Link>
+    </ScreenFrame>
+  );
+};
+
+// The route table: one route per ROUTE_PATTERNS entry, in that order, then the not-found route.
+export const APP_ROUTES: RouteObject[] = [
+  { path: ROUTE_PATTERNS.welcome, element: <WelcomeScreen /> },
+  { path: ROUTE_PATTERNS.upload, element: <UploadScreen /> },
+  { path: ROUTE_PATTERNS.pair, element: <PairScreen /> },
+  { path: ROUTE_PATTERNS.join, element: <JoinScreen /> },
+  { path: ROUTE_PATTERNS.claim, element: <ClaimScreen /> },
+  { path: ROUTE_PATTERNS.settings, element: <SettingsScreen /> },
+  { path: ROUTE_PATTERNS.namesReview, element: <NamesReviewScreen /> },
+  { path: ROUTE_PATTERNS.card, element: <CardScreen /> },
+  { path: ROUTE_PATTERNS.quiz, element: <QuizScreen /> },
+  { path: ROUTE_PATTERNS.lobby, element: <LobbyScreen /> },
+  { path: ROUTE_PATTERNS.meeting, element: <MeetingScreen /> },
+  { path: ROUTE_PATTERNS.brief, element: <BriefScreen /> },
+  { path: ROUTE_PATTERNS.comic, element: <ComicScreen /> },
+  { path: ROUTE_PATTERNS.consent, element: <ConsentScreen /> },
+  { path: ROUTE_PATTERNS.sharePage, element: <PublicSharePage /> },
+  { path: "*", element: <NotFoundScreen /> },
+];
+
+// Builds the browser router for the running app.
+export function createAppRouter(): ReturnType<typeof createBrowserRouter> {
+  return createBrowserRouter(APP_ROUTES);
+}
