@@ -72,12 +72,12 @@ s05_tables() {
   echo "$count"
   [ "$count" = "27" ]
 }
-# Command 06: the security definer functions are exactly the 15 of 0001 (as-built item 6).
+# Command 06: the security definer functions are exactly the 16 of 0001 and 0003 (as-built items 6 and 34).
 s06_definer_functions() {
   local count
   count=$(psql "$DATABASE_URL_MIGRATE" -Atc "SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname = 'public' AND p.prosecdef")
   echo "$count"
-  [ "$count" = "15" ]
+  [ "$count" = "16" ]
 }
 # Command 07: the quiz bank is seeded with its 30 questions (D28).
 s07_quiz_bank() {

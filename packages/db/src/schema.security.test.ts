@@ -17,8 +17,8 @@ const USER_DATA_TABLES = ["people", "sessions", "transfer_links", "sources", "tu
 const REFERENCE_TABLES = ["quiz_bank", "service_heartbeats", "schema_migrations"] as const;
 // The tables keyed by meeting_id that a member of another meeting must not read (R8.7-T1, R8.7-T2).
 const MEETING_TABLES = ["meeting_members", "meeting_steps", "meeting_events", "claims", "briefs", "comics", "comic_panels", "share_pages", "ledger"] as const;
-// The functions of migration 0001 and 0002 that run as app_definer, in byte order.
-const DEFINER_FUNCTIONS = ["app_shares_meeting", "auth_claim_transfer", "auth_create_person", "auth_person_for_session", "auth_redeem_recovery", "claim_meeting_slot", "ledger_meeting_tokens", "ledger_usd_since", "ledger_window", "meeting_create", "pair_display_names", "pairs_join", "purge_expired_rows", "share_read", "sweep_candidates"];
+// The functions of migrations 0001 to 0003 that run as app_definer, in byte order.
+const DEFINER_FUNCTIONS = ["app_shares_meeting", "auth_claim_transfer", "auth_create_person", "auth_person_for_session", "auth_redeem_recovery", "claim_meeting_slot", "ledger_meeting_tokens", "ledger_usd_since", "ledger_window", "meeting_create", "pair_display_names", "pairs_join", "purge_expired_rows", "share_read", "share_revoke", "sweep_candidates"];
 
 // Returns the item at index, and throws when the list is shorter.
 function at<T>(items: readonly T[], index: number): T {
@@ -116,7 +116,7 @@ describe("schema security", () => {
     expect(Object.fromEntries(owned.map((row) => [row.owner, numberFromPostgres(row.n)]))).toEqual({ app_migrate: 28 });
   });
 
-  it("R9.1-T4: the security definer functions are exactly the fifteen of migrations 0001 and 0002", async () => {
+  it("R9.1-T4: the security definer functions are exactly the sixteen of migrations 0001 to 0003", async () => {
     const rows = await catalog<{ name: string }>(`SELECT p.proname AS name FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname = 'public' AND p.prosecdef ORDER BY p.proname COLLATE "C"`);
 
     expect(rows.map((row) => row.name)).toEqual(DEFINER_FUNCTIONS);
@@ -127,7 +127,7 @@ describe("schema security", () => {
 
     expect(rows.every((row) => row.owner === "app_definer")).toBe(true);
     expect(rows.filter((row) => row.api).map((row) => row.name)).toEqual(["app_shares_meeting", "auth_claim_transfer", "auth_create_person", "auth_person_for_session", "auth_redeem_recovery", "claim_meeting_slot", "meeting_create", "pair_display_names", "pairs_join", "share_read"]);
-    expect(rows.filter((row) => row.worker).map((row) => row.name)).toEqual(["app_shares_meeting", "claim_meeting_slot", "ledger_meeting_tokens", "ledger_usd_since", "ledger_window", "purge_expired_rows", "sweep_candidates"]);
+    expect(rows.filter((row) => row.worker).map((row) => row.name)).toEqual(["app_shares_meeting", "claim_meeting_slot", "ledger_meeting_tokens", "ledger_usd_since", "ledger_window", "purge_expired_rows", "share_revoke", "sweep_candidates"]);
   });
 
   it("R9.1-T6: after the rebuild app_migrate is no longer a member of app_definer", async () => {
