@@ -9,6 +9,7 @@ import { definePayloadTask, makeJobContext, type JobContext, type JobTask, type 
 import { cardTasks } from "./cards/index.js";
 import { meetingTasks } from "./meetings/index.js";
 import { quizTasks } from "./quizzes/index.js";
+import { retentionTasks } from "./retention/index.js";
 
 // Every task the worker runs, one spread per feature folder, in slot order (seams S3).
 export const TASKS: TaskList = {
@@ -17,7 +18,7 @@ export const TASKS: TaskList = {
   ...meetingTasks,
   // slot 4: briefTasks from "./briefs/index.js", added by briefs through a request
   // slot 5: comicTasks from "./comics/index.js", added by comic through a request
-  // slot 6: retentionTasks from "./retention/index.js", added by deletion through a request
+  ...retentionTasks,
 };
 
 // Wraps every task of the list for Graphile, in JOB_NAMES order, so each payload is parsed before its job runs.
