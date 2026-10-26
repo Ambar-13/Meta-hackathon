@@ -5,9 +5,6 @@
     "packages",
     "scripts",
     "tests",
-    "docs/contracts.md",
-    "docs/ownership.md",
-    "docs/GLOSSARY.md",
-    "docs/README-TEMPLATE.md"
+    "docs"
   ]
 }

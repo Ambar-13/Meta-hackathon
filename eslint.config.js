@@ -44,7 +44,7 @@ export default tseslint.config(
   ...tseslint.configs.strictTypeChecked.map((config) => ({ ...config, files: ["**/*.ts", "**/*.tsx"] })),
   {
     files: ["**/*.ts", "**/*.tsx"],
-    languageOptions: { parserOptions: { projectService: { allowDefaultProject: ["scripts/checks/*.ts", "vitest.workspace.ts"], defaultProject: "tsconfig.base.json", maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 20 } } },
+    languageOptions: { parserOptions: { projectService: { allowDefaultProject: ["vitest.workspace.ts"], defaultProject: "tsconfig.base.json", maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 20 } } },
     rules: {
       ...sizeRules,
       "@typescript-eslint/no-explicit-any": "error",

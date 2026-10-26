@@ -6,6 +6,7 @@
 // - a bracket or a quote left open, or a bracket closed that was never opened
 // - a block (subgraph, alt, loop and the like) with no matching "end"
 // - a mermaid fence that is never closed
+// - a diagram with more than 15 boxes, which no longer reads at a glance
 
 /** One ```mermaid block: the Markdown line of its opening fence (from 1), its lines, and whether the fence closes. */
 export type MermaidBlock = { fenceLine: number; lines: string[]; isClosed: boolean };
@@ -135,6 +136,90 @@ function checkLines(block: MermaidBlock, kind: string, firstLine: number): Diagr
   return problems;
 }
 
+/** The most boxes one diagram may hold: the style rule of at most 15 boxes (IMPLEMENTATION.md 1). */
+export const MAX_BOXES = 15;
+
+// Lines that name no box: block openers and closers, styling, notes and activations.
+const NO_BOX_LINE = /^(subgraph|end|direction|classDef|class|style|linkStyle|click|note|Note|alt|else|opt|loop|par|and|critical|break|rect|box|activate|deactivate|autonumber|title)\b/;
+
+// The words of a flowchart line that are never a node name: its own keywords and directions.
+const FLOWCHART_WORDS: ReadonlySet<string> = new Set(["flowchart", "graph", "TB", "TD", "BT", "RL", "LR"]);
+
+// Removes quoted text and every bracketed shape, innermost first, so a label never reads as a box name.
+function withoutShapes(text: string): string {
+  let result = text.replace(/"[^"]*"/g, "");
+  for (let previous = ""; previous !== result; ) {
+    previous = result;
+    result = result.replace(/\[[^[\]]*\]|\([^()]*\)|\{[^{}]*\}/g, "");
+  }
+  return result;
+}
+
+// The node names of one flowchart line: the ids on either side of each arrow, with edge labels and class marks removed.
+function flowchartNames(text: string): string[] {
+  const bare = withoutShapes(text)
+    .replace(/\|[^|]*\|/g, "")
+    .replace(/(?:--|==|-\.)[^>]*?(?:-->|==>|\.->)/g, " --> ")
+    .replace(/:::\w+/g, "");
+  return (bare.match(/[A-Za-z_]\w*/g) ?? []).filter((word) => !FLOWCHART_WORDS.has(word));
+}
+
+// The state names of one state diagram line: the states on either side of each arrow, or the one a state line declares.
+function stateNames(text: string): string[] {
+  const head = (text.split(":")[0] ?? "").replace(/\[\*\]/g, "");
+  const alias = /^state\s+"[^"]*"\s+as\s+(\w+)/.exec(head);
+  if (alias?.[1] !== undefined) return [alias[1]];
+  return (withoutShapes(head).match(/[A-Za-z_]\w*/g) ?? []).filter((word) => word !== "state");
+}
+
+// The participant names of one sequence diagram line: a declared participant, or the sender and the receiver of a message.
+function sequenceNames(text: string): string[] {
+  const declared = /^(?:participant|actor)\s+(\w+)/.exec(text);
+  if (declared?.[1] !== undefined) return [declared[1]];
+  const head = text.split(":")[0] ?? "";
+  return head
+    .split(/--?>>|--?>|--?x|--?\)/)
+    .map((part) => /\w+/.exec(part.replace(/^\s*[+-]/, ""))?.[0])
+    .filter((name): name is string => name !== undefined);
+}
+
+// The entity names of one data diagram line: the entity a block opens, or the two entities of a relationship.
+function entityNames(text: string): string[] {
+  const words = (text.split(":")[0] ?? "").trim().split(/\s+/);
+  if (text.endsWith("{")) return words.slice(0, 1);
+  const first = words[0];
+  const last = words[words.length - 1];
+  return words.length >= 3 && first !== undefined && last !== undefined ? [first, last] : [];
+}
+
+// The box names of one line, by the kind of diagram it is in. Kinds without a rule here count no boxes.
+function lineNames(text: string, kind: string): string[] {
+  if (kind === "flowchart") return flowchartNames(text);
+  if (kind === "stateDiagram") return stateNames(text);
+  if (kind === "sequenceDiagram") return sequenceNames(text);
+  if (kind === "erDiagram") return entityNames(text);
+  return [];
+}
+
+/** The distinct box names of a diagram body (the lines after its type line): nodes, states, participants or entities. */
+export function boxNames(lines: readonly string[], kind: string): Set<string> {
+  const names = new Set<string>();
+  let isInEntity = false;
+  for (const raw of lines) {
+    const text = raw.trim();
+    if (!isContent(text) || NO_BOX_LINE.test(text)) continue;
+    if (kind === "erDiagram") {
+      if (text === "}" || isInEntity) {
+        isInEntity = text !== "}" && isInEntity;
+        continue;
+      }
+      isInEntity = text.endsWith("{");
+    }
+    for (const name of lineNames(text, kind)) names.add(name);
+  }
+  return names;
+}
+
 /** Every structure problem in one diagram. An empty list means the diagram passed. */
 export function diagramProblems(block: MermaidBlock): DiagramProblem[] {
   const firstLine = block.fenceLine + 1;
@@ -152,6 +237,9 @@ export function diagramProblems(block: MermaidBlock): DiagramProblem[] {
   const body = block.lines.slice(found.index + 1);
   if (!body.some(isContent))
     problems.push({ line: firstLine + found.index, message: "the diagram has a type but nothing in it" });
+  const boxes = boxNames(body, found.kind);
+  if (boxes.size > MAX_BOXES)
+    problems.push({ line: block.fenceLine, message: `the diagram has ${String(boxes.size)} boxes; the limit is ${String(MAX_BOXES)}` });
   const bodyBlock = { ...block, lines: body };
   const bodyFirstLine = firstLine + found.index + 1;
   return [

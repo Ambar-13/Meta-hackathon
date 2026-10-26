@@ -37,3 +37,4 @@ An anonymous session cannot be recovered once device and recovery code are both 
 - A URL password longer than 1,024 characters is caught only by the entropy rule; the limit lives in `packages/scrub/src/secret-patterns.ts`.
 - A secret value of 1 to 3 characters after a name such as PASSWORD= stays visible, because the scrubber hides values of 4 or more; the rule lives in `packages/scrub/src/secret-patterns.ts`.
 - Every recorded model reply is hand-written until Wave 3 records them; the fixtures live in `packages/evals/fixtures/model-replies`.
+- The api's environment holds the app_migrate URL, because Render gives the pre-deploy migrate the service's own variables; a one-off migrate job of its own would take it out of the api (render.yaml).

@@ -206,10 +206,11 @@ describe("repo checks", () => {
     const boxes = (count: number): string =>
       ["# How it is built", "", "```mermaid", "flowchart LR", ...[...Array(count).keys()].map((i) => `  N${String(i)}[Box ${String(i)}]`), "```", ""].join("\n");
 
-    const fifteen = runChecks({ files: { "docs/architecture/OVERVIEW.md": boxes(15) } });
+    // A docs file of its own: OVERVIEW.md must also hold its sequence and data diagrams, which would fail the 15-box case for another reason.
+    const fifteen = runChecks({ files: { "docs/box-count.md": boxes(15) } });
     expect(fifteen.status).toBe(0);
 
-    const sixteen = runChecks({ files: { "docs/architecture/OVERVIEW.md": boxes(16) } });
+    const sixteen = runChecks({ files: { "docs/box-count.md": boxes(16) } });
     expect(sixteen.status).not.toBe(0);
   }, TEST_TIMEOUT_MS);
 

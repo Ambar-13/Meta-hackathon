@@ -13,9 +13,8 @@ services:
     maxShutdownDelaySeconds: 120        # D70, R12.4: SIGTERM waits long enough to drain a 90 s model call
     envVars:
       - key: DATABASE_URL_MIGRATE
-        fromDatabase:
-          name: meet-first-db
-          property: connectionString
+        sync: false          # the app_migrate URL, set by hand, never the database owner's: migrations run as app_migrate (as-built item 9),
+                             # and Render gives the pre-deploy command the service's variables, so whatever is here is also in the api's environment
       - key: DATABASE_URL_API
         sync: false          # same host and database, role app_api; the password is set by hand after migration 0001 creates the role
       - key: APP_ORIGIN

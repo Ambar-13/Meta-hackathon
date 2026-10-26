@@ -6,7 +6,7 @@ The api is the one web server of Meet First. It answers every route under `/api`
 
 ## What this never does
 
-- It never calls the model, never imports `packages/llm` and never reads `META_API_KEY`.
+- It never calls the model, never imports `packages/llm` and never reads the model key.
 - It never stores a session token, a transfer token, an invite token or a recovery code, only their sha256.
 - It never puts the session token in a response body, a URL or a log line.
 - It never accepts a POST, PUT, PATCH or DELETE whose `Origin` header is not `APP_ORIGIN`.

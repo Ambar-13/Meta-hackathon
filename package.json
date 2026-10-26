@@ -23,6 +23,9 @@
     "eval": "pnpm --filter @meet-first/evals run eval",
     "golden-path": "tsx scripts/golden-path.ts",
     "share:takedown": "tsx scripts/share-takedown.ts",
+    "release": "bash scripts/release.sh",
+    "path-ownership": "tsx scripts/path-ownership.ts",
+    "constants-name-rows": "tsx scripts/constants-name-rows.ts",
     "replay:export": "tsx scripts/replay-export.ts",
     "replay:serve": "tsx scripts/replay-serve.ts"
   },
