@@ -1,0 +1,53 @@
+import { useEffect, useRef, type KeyboardEvent, type ReactElement } from "react";
+
+// The dialog title, byte for byte as the settings spec gives it.
+export const DIALOG_TITLE = "Delete everything we hold about you?";
+// The dialog body: what the person loses and what the other person keeps (R9.7).
+export const DIALOG_BODY = "This removes your uploaded excerpts, your card, your quizzes, your meetings, briefs, comics and any share page from our database. Anyone you met keeps their own excerpts and card, and loses the shared meeting, brief and share page. Your recovery code stops working. This cannot be undone.";
+// The line shown while the request is running.
+export const DELETING_COPY = "Deleting. This takes a few seconds.";
+
+// The id of the dialog title, which names the dialog for screen readers.
+const TITLE_ID = "delete-account-dialog-title";
+// Full width and at least 44 px tall: a comfortable touch target at phone width.
+const BUTTON_STYLE = { width: "100%", minHeight: 44 } as const;
+
+// The props of the dialog: whether a delete is running, the failure sentence if any, and the two actions.
+type DeleteAccountDialogProps = { isBusy: boolean; errorText: string | null; onCancel: () => void; onConfirm: () => void };
+
+// The modal dialog that asks before a delete. Focus starts on Keep my account, Tab stays inside the dialog, and Escape keeps the account.
+export const DeleteAccountDialog = (props: DeleteAccountDialogProps): ReactElement => {
+  const keepRef = useRef<HTMLButtonElement | null>(null);
+  const confirmRef = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    keepRef.current?.focus();
+  }, []);
+  // Keeps Tab and Shift+Tab inside the two buttons, and closes the dialog on Escape when no delete is running.
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
+    if (event.key === "Escape" && !props.isBusy) props.onCancel();
+    const first = keepRef.current;
+    const last = confirmRef.current;
+    if (event.key !== "Tab" || first === null || last === null) return;
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+  return (
+    <div role="dialog" aria-modal="true" aria-labelledby={TITLE_ID} className="panel" onKeyDown={onKeyDown}>
+      <h3 id={TITLE_ID}>{DIALOG_TITLE}</h3>
+      <p>{DIALOG_BODY}</p>
+      {props.isBusy ? <p role="status">{DELETING_COPY}</p> : null}
+      {props.errorText === null ? null : <p role="alert">{props.errorText}</p>}
+      <button ref={keepRef} type="button" disabled={props.isBusy} onClick={props.onCancel} style={BUTTON_STYLE}>
+        Keep my account
+      </button>
+      <button ref={confirmRef} type="button" disabled={props.isBusy} onClick={props.onConfirm} style={BUTTON_STYLE}>
+        Delete my account
+      </button>
+    </div>
+  );
+};

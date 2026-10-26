@@ -1,2 +1,2 @@
-// The settings page placeholder, with the one-time Safari link.
+// The settings page: the one-time Safari link and the delete-account flow.
 export { SettingsScreen } from "./screen.js";
