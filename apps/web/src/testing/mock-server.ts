@@ -36,8 +36,8 @@ export function stubRoute(route: { method: string; path: string }, replies: Stub
   const list: StubReply[] = (Array.isArray(replies) ? replies : [replies]).map(asStubReply);
   if (list.length === 0) throw new ContractError("stub_replies_empty", "Give stubRoute at least one reply.");
   const key = `${route.method} ${route.path}`;
-  const method = { GET: http.get, POST: http.post, DELETE: http.delete }[route.method];
-  if (method === undefined) throw new ContractError("stub_method_unknown", "Stub only GET, POST or DELETE routes.");
+  const method = { GET: http.get, POST: http.post, PUT: http.put, DELETE: http.delete }[route.method];
+  if (method === undefined) throw new ContractError("stub_method_unknown", "Stub only GET, POST, PUT or DELETE routes.");
   let served = 0;
   server.use(
     method(new URL(route.path, window.location.origin).href, async ({ request }) => {

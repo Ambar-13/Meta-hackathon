@@ -18,10 +18,13 @@ const QUESTION_GROUPS: ReadonlyArray<{ title: string; kinds: readonly QuestionKi
   { title: "Would you get on as a couple?", kinds: ["romance"] },
 ];
 
-// The 20 curated questions in their five groups, and a free-text choice (R10.5).
-export const QuestionPicker = (props: { isSending: boolean; error: string | null; onCreate: (pick: QuestionPick) => void }): ReactElement => {
+// The 20 curated questions in their five groups, and a free-text choice (R10.5). A kind in leaveOutKinds is not offered, and a group
+// left with no question is not shown, so a listing closed to dating questions gets no couple group (design section 11).
+export const QuestionPicker = (props: { isSending: boolean; error: string | null; onCreate: (pick: QuestionPick) => void; leaveOutKinds?: readonly QuestionKind[] }): ReactElement => {
   const [choice, setChoice] = useState<string | null>(null);
   const [freeText, setFreeText] = useState("");
+  const hiddenKinds = props.leaveOutKinds ?? [];
+  const groups = QUESTION_GROUPS.filter((group) => group.kinds.some((kind) => !hiddenKinds.includes(kind)));
   const onSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
     if (choice === null) return;
@@ -32,10 +35,10 @@ export const QuestionPicker = (props: { isSending: boolean; error: string | null
     <form onSubmit={onSubmit}>
       <fieldset>
         <legend>Pick a question for the meeting</legend>
-        {QUESTION_GROUPS.map((group) => (
+        {groups.map((group) => (
           <div key={group.title} role="group" aria-label={group.title}>
             <p>{group.title}</p>
-            {CURATED_QUESTIONS.filter((question) => group.kinds.includes(question.kind)).map((question) => (
+            {CURATED_QUESTIONS.filter((question) => group.kinds.includes(question.kind) && !hiddenKinds.includes(question.kind)).map((question) => (
               <label className="inline" key={question.id}>
                 <input type="radio" name="question" value={String(question.id)} checked={choice === String(question.id)} onChange={() => { setChoice(String(question.id)); }} />
                 {question.text}

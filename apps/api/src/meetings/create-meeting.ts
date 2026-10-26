@@ -35,12 +35,13 @@ export function startOfUtcDay(now: Date): Date {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 }
 
-// Refuses a sixth meeting membership in one UTC day for this person (D60: 5 meetings per day).
+// Refuses a sixth meeting membership in one UTC day for this person (D60: 5 meetings per day). Being met as a listed persona in the
+// directory does not count: those rows have their own cap, and they would otherwise stop the person starting meetings of their own.
 export async function assertUnderDailyMeetingCap(trx: Transaction<Database>, personId: string, now: Date): Promise<void> {
   // The person's own row is locked first, so meeting requests sent at once take turns and the count cannot be passed.
   await trx.selectFrom("people").select("id").where("id", "=", personId).forUpdate().execute();
   const row = await trx.selectFrom("meeting_members").select((eb) => eb.fn.countAll<string>().as("count"))
-    .where("person_id", "=", personId).where("created_at", ">=", startOfUtcDay(now)).executeTakeFirstOrThrow();
+    .where("person_id", "=", personId).where("public_only", "=", false).where("created_at", ">=", startOfUtcDay(now)).executeTakeFirstOrThrow();
   if (Number(row.count) >= MEETINGS_PER_PERSON_PER_DAY) {
     throw new ContractError("meeting_daily_cap", "You have been in 5 meetings today. Try again tomorrow.", HTTP.tooMany);
   }

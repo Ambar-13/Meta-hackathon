@@ -145,6 +145,24 @@ it("D60-T1: a sixth meeting in one UTC day is refused with 429 meeting_daily_cap
   expect(refused.json()).toMatchObject({ code: "meeting_daily_cap" });
 });
 
+it("W5-DIR-T12: being met as a listed persona does not use up a person's own five meetings a day", async () => {
+  // The seeded meeting is the first of today's five; four more fill both people's day.
+  const meetingIds = [m.meetingId];
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const response = await request({ method: "POST", url: pathOf(routes.meetings.createMeeting, m.pairId), person: m.a, payload: { questionId: 3, cardId: m.a.cardId } });
+    meetingIds.push(MeetingCreateResponse.parse(response.json()).meetingId);
+  }
+  started.push(...meetingIds.slice(1));
+  for (const meetingId of meetingIds) {
+    await withMeeting(workerDb, meetingId, (trx) => trx.updateTable("meeting_members").set({ public_only: true }).where("meeting_id", "=", meetingId).where("side", "=", "b").execute());
+  }
+  const own = await request({ method: "POST", url: pathOf(routes.meetings.createMeeting, m.pairId), person: m.b, payload: { questionId: 3, cardId: m.b.cardId } });
+  expect(own.statusCode).toBe(201);
+  started.push(MeetingCreateResponse.parse(own.json()).meetingId);
+  const capped = await request({ method: "POST", url: pathOf(routes.meetings.createMeeting, m.pairId), person: m.a, payload: { questionId: 3, cardId: m.a.cardId } });
+  expect(capped.statusCode).toBe(429);
+});
+
 it("D60-T7: a meeting request waits while another transaction holds the creator's person row", async () => {
   let release = (): void => undefined;
   const held = new Promise<void>((resolve) => {
