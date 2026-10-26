@@ -1,22 +1,48 @@
 import { useEffect, useState, type ReactElement, type ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ApiError } from "./api-fetch.js";
 import { APP_PATHS } from "./app-paths.js";
 
 // How long the copy button says Copied, 2 s [confirm] (no input gives this duration).
 export const COPIED_MS = 2_000;
+// The pages a visitor may open before they have a session: the start page, the claim page and the join page. The session cookie is
+// HttpOnly, so the browser cannot tell whether a session exists, and the frame goes by the page instead [confirm].
+const NO_SESSION_PATHS: readonly string[] = [APP_PATHS.welcome, APP_PATHS.claim, APP_PATHS.join];
 
-// The frame of every screen: one h1, the content, and a footer link to Settings unless the screen is Settings itself.
+// True on every page except the three above and the public share pages, which anyone with the link may open (design section 7).
+function showsAppLinks(pathname: string): boolean {
+  return !NO_SESSION_PATHS.includes(pathname) && !pathname.startsWith(APP_PATHS.sharePage(""));
+}
+
+// The links to the directory, the help finder and the friends list, in that order (design section 7).
+const AppLinks = (): ReactElement => {
+  return (
+    <>
+      <Link to={APP_PATHS.directory}>Directory</Link>
+      <Link to={APP_PATHS.help}>Find help</Link>
+      <Link to={APP_PATHS.friends}>Friends</Link>
+    </>
+  );
+};
+
+// The frame of every screen: one h1, the content, then a footer with Directory, Find help and Friends on pages that need a session,
+// and Settings unless the screen is Settings itself.
 export const ScreenFrame = (props: { title: string; children: ReactNode; hideSettingsLink?: boolean }): ReactElement => {
+  const location = useLocation();
+  const hasAppLinks = showsAppLinks(location.pathname);
+  const hasSettingsLink = props.hideSettingsLink !== true;
   return (
     <main className="screen">
       <h1>{props.title}</h1>
       {props.children}
-      {props.hideSettingsLink === true ? null : (
+      {hasAppLinks || hasSettingsLink ? (
         <footer className="screen-footer">
-          <Link to={APP_PATHS.settings}>Settings</Link>
+          <nav className="actions" aria-label="Pages">
+            {hasAppLinks ? <AppLinks /> : null}
+            {hasSettingsLink ? <Link to={APP_PATHS.settings}>Settings</Link> : null}
+          </nav>
         </footer>
-      )}
+      ) : null}
     </main>
   );
 };

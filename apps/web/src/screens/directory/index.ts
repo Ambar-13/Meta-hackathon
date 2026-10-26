@@ -1,2 +1,2 @@
-// The Directory page: the open directory and your own listing (directory-web). A placeholder until its Wave 6 builder lands (as-built item 49).
+// The Directory page: search the open directory, meet a listed persona, and see your own listing (design section 7).
 export { DirectoryScreen } from "./screen.js";

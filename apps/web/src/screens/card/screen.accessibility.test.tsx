@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { APP_PATHS, readApprovedCard, ROUTE_PATTERNS, routes } from "../../app-shell/index.js";
 import { renderScreen, requestsTo, stubRoute } from "../../testing/index.js";
@@ -6,6 +6,13 @@ import { unlabelledControls } from "../../testing/render-screen.js";
 import { cardView, IDS, itemId } from "../../testing/fixtures.js";
 import { RECALL_SWITCH_COPY } from "@meet-first/contracts";
 import { CardScreen } from "./screen.js";
+
+// An approved card shows the Sharing section, which reads the card's sharing settings and the person's listing; these two answers
+// keep the card tests below as they were: nothing shared, not listed.
+beforeEach(() => {
+  stubRoute(routes.directory.readSharing, { friendsCanAsk: false, publicPositions: [] });
+  stubRoute(routes.directory.readMyListing, { status: 404, body: { code: "not_listed", message: "You are not in the directory." } });
+});
 
 afterEach(() => {
   cleanup();

@@ -4,6 +4,7 @@ import type { CardView } from "@meet-first/contracts";
 import { elapsedSeconds, ErrorNotice, pairPathWithCard, ScreenFrame } from "../../app-shell/index.js";
 import { CardItemList, RecallSwitch } from "./card-items.js";
 import { useCardScreen, type CardActionState } from "./card-state.js";
+import { SharingSection } from "./sharing-section.js";
 
 // The page while the card builds: the seconds so far, counted on the server clock (R3.4).
 const BuildingBody = (props: { seconds: number }): ReactElement => {
@@ -35,7 +36,7 @@ const ApproveBody = (props: { isNothingTicked: boolean; isSending: boolean; onAp
   );
 };
 
-// The approved state: the quiz button (left out for a thin card) and the link to pair.
+// The approved state: the quiz button (left out for a thin card), the link to pair, and the Sharing section (design section 7).
 const ApprovedBody = (props: { card: CardView; isSending: boolean; onQuiz: () => void }): ReactElement => {
   return (
     <>
@@ -46,6 +47,7 @@ const ApprovedBody = (props: { card: CardView; isSending: boolean; onQuiz: () =>
         </button>
       )}
       <Link to={pairPathWithCard(props.card.id)}>Pair with someone</Link>
+      <SharingSection cardId={props.card.id} items={props.card.items} />
     </>
   );
 };
@@ -56,7 +58,7 @@ const ThinNote = (props: { isThin: boolean }): ReactElement | null => {
   return <p className="notice">Thin card: fewer than 6 items had a quote that checked out. Meetings still work; the quiz is skipped.</p>;
 };
 
-// The card page: watch it build, read and approve items, set the recall switch, then quiz or pair (R3.4, R7.1, D23).
+// The card page: watch it build, read and approve items, set the recall switch, then quiz, pair or choose what to share (R3.4, R7.1, D23, design section 7).
 export const CardScreen = (): ReactElement => {
   const navigate = useNavigate();
   const cardId = useParams()["cardId"] ?? "";
