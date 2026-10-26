@@ -26,3 +26,6 @@ v3 cases:
 - Kind deal: agree lines name terms the deal would rest on, clash lines what blocks it, decide-first lines what to offer first; no line says the deal will close.
 - Kind debate: decide-first holds the recipient's strongest point, the other person's strongest point and the question that would settle the split; no line names a winner.
 - Kind get_along with a likely clash: a clash line says "you would probably clash over ..." plainly.
+
+v4 cases:
+- Kind romance: agree lines are likely clicks, clash lines likely rubs said plainly, decide-first lines what to talk about first; no line says "meant to be" or "soulmates".

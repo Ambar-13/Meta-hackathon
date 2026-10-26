@@ -1,5 +1,5 @@
 import type { Transaction } from "kysely";
-import { QuestionCheckOutput, toStrictJsonSchema } from "@meet-first/contracts";
+import { QuestionCheckOutput, ROMANCE_NOT_OPEN_REASON, toStrictJsonSchema } from "@meet-first/contracts";
 import { withMeeting, type Database } from "@meet-first/db";
 import { DEFAULT_CHARS_PER_TOKEN, LimiterBusy, reenqueueAfterLimiter, type ChatMessage, type CompleteArgs } from "@meet-first/llm";
 import { readPrompt } from "@meet-first/prompts";
@@ -107,6 +107,14 @@ async function applyVerdict(trx: Transaction<Database>, scope: VerdictScope, ver
   if (verdict !== undefined && !verdict.allowed) {
     await trx.updateTable("meetings").set({ question_rejected_reason: verdict.reason }).where("id", "=", meetingId).execute();
     return "refused";
+  }
+  // A romance question to a listed persona whose owner has not switched on dating questions is refused (as-built item 54).
+  if (verdict?.kind === "romance") {
+    const meeting = await trx.selectFrom("meetings").select("romance_allowed").where("id", "=", meetingId).executeTakeFirstOrThrow();
+    if (!meeting.romance_allowed) {
+      await trx.updateTable("meetings").set({ question_rejected_reason: ROMANCE_NOT_OPEN_REASON }).where("id", "=", meetingId).execute();
+      return "refused";
+    }
   }
   if (verdict !== undefined) {
     // The kind is written before the prefixes below are built, so both personas read the kind the check gave.

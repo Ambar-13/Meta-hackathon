@@ -175,7 +175,7 @@ describe("schema security", () => {
     }
 
     expect(raised).toEqual(new Set(TRIGGER_CODES));
-    expect(TRIGGER_CODES).toHaveLength(14);
+    expect(TRIGGER_CODES).toHaveLength(15);
   });
 
   it("INV15-T1: with no context every user-data table and the recall view read zero rows as app_api", async () => {

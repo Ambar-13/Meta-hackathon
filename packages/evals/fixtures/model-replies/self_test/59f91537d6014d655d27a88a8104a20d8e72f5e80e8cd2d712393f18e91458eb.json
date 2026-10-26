@@ -1,7 +1,7 @@
 {
   "callSite": "self_test",
   "promptVersion": "v1",
-  "requestHash": "340387bc5ee51e104d59c10292be69165c50bcb937ed364c89b29d44676821db",
+  "requestHash": "59f91537d6014d655d27a88a8104a20d8e72f5e80e8cd2d712393f18e91458eb",
   "request": {
     "callSite": "self_test",
     "promptVersion": "v1",
@@ -36,7 +36,8 @@
                   "situation",
                   "decision",
                   "deal",
-                  "debate"
+                  "debate",
+                  "romance"
                 ]
               }
             },

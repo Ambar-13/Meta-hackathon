@@ -2,6 +2,10 @@
 
 A simulation of how two people would probably react, not a guarantee; it gives no score.
 
+For adults only: Meet First is for people 18 and over, as the Meta terms and the hackathon require.
+
+No sexually explicit questions: dating and romance questions are allowed, but the question check refuses anything that asks for sexual content.
+
 No compatibility score.
 
 A matching quote proves provenance, not truth.

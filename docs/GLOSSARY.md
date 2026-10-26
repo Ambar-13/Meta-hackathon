@@ -49,7 +49,7 @@ One line per word, in alphabetical order. Each line names the table, schema or f
 - **poll fallback**: The two-second poll that keeps the meeting screen current when the live stream stops (D49). Lives in `apps/web/src/streaming/poll-fallback.ts`.
 - **prefix (frozen)**: The fixed opening of a meeting prompt, stored once and cached by the model (D41). Lives in the `meeting_members` table as `frozen_prefix`.
 - **public item**: A card item its owner marked public: the directory shows it, and strangers' meetings and help answers may use it. Lives in the `card_items` table as `is_public`.
-- **question kind**: What a meeting question asks the two personas to play out: get_along, help, situation or decision. A curated question has its kind; the question check gives a typed one its kind. Lives in the `meetings` table as `question_kind`.
+- **question kind**: What a meeting question asks the two personas to play out: get_along, help, situation, decision, deal, debate or romance. A curated question has its kind; the question check gives a typed one its kind. Lives in the `meetings` table as `question_kind`.
 - **quiz**: The blind set of ten questions about a card, scored as "matched n of 10". Lives in the `quizzes` and `quiz_items` tables.
 - **quiz bank**: The fixed list of 30 questions every quiz is drawn from (D28). Lives in the `quiz_bank` table.
 - **recall**: The meeting tool that looks up the speaker's scrubbed notes, when the person has switched recall on. Lives in `apps/worker/src/meetings/recall.ts`.

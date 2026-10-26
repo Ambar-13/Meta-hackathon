@@ -6,6 +6,7 @@ import { makeDatabase, POOL_SIZE, withMeeting, type Database } from "@meet-first
 import { freshTestDatabase, SEED_TURNS_B, type SeededMeeting, type TestDatabase } from "@meet-first/db/testing";
 import { CHAT_MODEL, LimiterBusy, makeLlmClient, type LlmClient } from "@meet-first/llm";
 import { makeReplayFolder, testWorkerEnv } from "@meet-first/llm/testing";
+import { readPrompt } from "@meet-first/prompts";
 import { definePayloadTask } from "../job-context.js";
 import { makeTestJobContext } from "../testing/index.js";
 import { seedBriefMeeting } from "./testing/golden-path-briefs.js";
@@ -83,7 +84,7 @@ describe("write_briefs job", () => {
     const quotes = points.flatMap((point) => point.quotes);
     expect(points).toHaveLength(18);
     expect(quotes.every((quote) => quote.verified && turnIds.has(quote.turnId))).toBe(true);
-    expect(rows.every((row) => row.model === CHAT_MODEL && row.prompt_version === "v3")).toBe(true);
+    expect(rows.every((row) => row.model === CHAT_MODEL && row.prompt_version === readPrompt("brief").version)).toBe(true);
     const ledger = await ledgerRows(seeded.meetingId, "brief");
     expect(ledger.map((entry) => entry.model)).toEqual([CHAT_MODEL, CHAT_MODEL]);
   });

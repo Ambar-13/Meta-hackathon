@@ -65,4 +65,5 @@ export const BRIEF_SECTION_LABELS: Record<QuestionKind, { agree: string; clash: 
   decision: { agree: "Where you agree", clash: "Where you clash", decideFirst: "Decide this first" },
   deal: { agree: "Where a deal is likely", clash: "What blocks it", decideFirst: "What to offer first" },
   debate: { agree: "Where you agree", clash: "Where you split", decideFirst: "The strongest point on each side" },
+  romance: { agree: "Where you'd click", clash: "Where you'd rub", decideFirst: "What to talk about first" },
 };

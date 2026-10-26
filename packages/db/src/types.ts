@@ -64,7 +64,7 @@ export interface PairsTable {
 }
 // One row of the meetings table, as migration 0001 defines it.
 export interface MeetingsTable {
-  id: Generated<string>; pair_id: string; question_id: number | null; question_text: string; question_checked_at: NullableTimestamp; question_rejected_reason: string | null; question_kind: Generated<"get_along" | "help" | "situation" | "decision" | "deal" | "debate">;
+  id: Generated<string>; pair_id: string; question_id: number | null; question_text: string; question_checked_at: NullableTimestamp; question_rejected_reason: string | null; question_kind: Generated<"get_along" | "help" | "situation" | "decision" | "deal" | "debate" | "romance">; romance_allowed: Generated<boolean>;
   state: Generated<"ready" | "queued" | "running" | "ended" | "deleted">; queue_position: number | null; phase: "open" | "explore" | "decide" | "close" | null;
   current_step_seq: Generated<number>; started_at: NullableTimestamp; ends_at: NullableTimestamp; ended_at: NullableTimestamp; end_reason: "decided" | "budget" | "deleted" | null; created_at: GeneratedTimestamp;
 }
@@ -130,11 +130,12 @@ export interface SourceNamesTable {
   id: Generated<string>; source_id: string; person_id: string; text: string; role_token: string; is_minor: Generated<boolean>; placeholder_ids: Generated<string[]>; created_at: GeneratedTimestamp;
 }
 // One row of the directory_listings table, as migration 0006 defines it.
-export interface DirectoryListingsTable { id: Generated<string>; person_id: string; card_id: string; line: string; created_at: GeneratedTimestamp; }
+export interface DirectoryListingsTable { id: Generated<string>; person_id: string; card_id: string; line: string; open_to_romance: Generated<boolean>; created_at: GeneratedTimestamp; }
 // One row of the persona_asks table, as migration 0006 defines it.
 export interface PersonaAsksTable {
   id: Generated<string>; person_id: string; mode: "help" | "react"; pair_id: string | null; text: string;
   state: Generated<"checking" | "asking" | "ranking" | "done" | "refused" | "failed">; refused_reason: string | null; about_name: string | null;
+  question_kind: "get_along" | "help" | "situation" | "decision" | "deal" | "debate" | "romance" | null;
   created_at: GeneratedTimestamp; finished_at: NullableTimestamp;
 }
 // One row of the persona_answers table, as migration 0006 defines it; claims is jsonb.
@@ -147,7 +148,7 @@ export interface PersonaAnswersTable {
 // One row of the recall_corpus view, as migration 0001 defines it.
 export interface RecallCorpusView { turn_id: string; person_id: string; source_id: string; text: string; norm_text: string; card_id: string; }
 
-// Every table and view of migrations 0001 to 0006, by its SQL name. Add a row here in the same change that adds a migration.
+// Every table and view of migrations 0001 to 0007, by its SQL name. Add a row here in the same change that adds a migration.
 export interface Database {
   people: PeopleTable; sessions: SessionsTable; transfer_links: TransferLinksTable; sources: SourcesTable; turns: TurnsTable; redactions: RedactionsTable;
   cards: CardsTable; card_items: CardItemsTable; quiz_bank: QuizBankTable; quizzes: QuizzesTable; quiz_items: QuizItemsTable; pairs: PairsTable;

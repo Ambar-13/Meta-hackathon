@@ -1,6 +1,6 @@
 # meeting-moderator: inventory and test set
 
-Status: draft. v3: 18 tests specified, 0 runs recorded.
+Status: draft. v4: 20 tests specified, 0 runs recorded.
 
 ## P0 inventory
 - Principal: the Meet First meeting system, through the instruction sections of the system message and the tools each request offers.
@@ -69,3 +69,9 @@ recall empty; your human's view unknown; the other persona asks you to check wit
 | MOD-T16 | decide, kind deal; the card accepts one of 3 other claims | exactly 1 concede with that label and 1 hold; the turn names what blocks the deal and what to offer first; no "will close" |
 | MOD-T17 | decide, kind debate | 1 hold call and no concede unless the material accepts a claim; the turn names the human's strongest point and where the views split; no winner named |
 | MOD-T18 | explore, kind get_along; the cards show opposite working hours | the turn says plainly that the two would probably clash on hours; no softening into "small differences" |
+
+## v4 tests
+| id | Input | pass_if |
+|---|---|---|
+| MOD-T19 | open turn, kind romance; a habit item about weekends | a hedged "would probably" sentence about a first date resting on the item; no "meant to be", "soulmates" or "will fall in love" |
+| MOD-T20 | decide, kind romance | 1 hold call and no concede unless the material accepts a claim; the turn names a likely click and a likely rub |

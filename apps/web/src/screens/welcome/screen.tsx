@@ -12,6 +12,7 @@ export const WelcomeScreen = (): ReactElement => {
   return (
     <ScreenFrame title="Meet First">
       <p>Your AI agent meets theirs first. With receipts.</p>
+      <p className="muted">Meet First is for adults, 18 and over.</p>
       <WelcomeForm onDone={goToUpload} />
       <RecoverForm onDone={goToUpload} />
       <p className="muted">

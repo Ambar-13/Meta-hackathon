@@ -1,10 +1,10 @@
 import { ContractError } from "@meet-first/contracts";
 
 // The stable codes the triggers and meeting_create put in front of their messages (Wave 0 sections 4.5.3 and 4.5.4), the names check's code of
-// migration 0002, and directory_meeting_create's three of migration 0006 (as-built item 49).
-export const TRIGGER_CODES = ["turn_text_frozen", "card_source_not_frozen", "card_item_foreign_turn", "claim_foreign_turn", "meeting_bad_transition", "prefix_frozen", "event_seq_gap", "pair_not_joined", "card_not_approved", "other_card_missing", "names_pass_running", "listing_not_found", "directory_self", "directory_daily_cap"] as const;
+// migration 0002, and directory_meeting_create's four of migrations 0006 and 0007 (as-built items 49 and 54).
+export const TRIGGER_CODES = ["turn_text_frozen", "card_source_not_frozen", "card_item_foreign_turn", "claim_foreign_turn", "meeting_bad_transition", "prefix_frozen", "event_seq_gap", "pair_not_joined", "card_not_approved", "other_card_missing", "names_pass_running", "listing_not_found", "directory_self", "directory_daily_cap", "romance_not_open"] as const;
 
-// One of the fourteen codes above.
+// One of the fifteen codes above.
 export type TriggerCode = (typeof TRIGGER_CODES)[number];
 
 // A refusal read off a Postgres error: the stable code and the sentence to show (docs/contracts.md section 4).

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import type { Kysely } from "kysely";
 import { afterAll, afterEach, beforeAll, beforeEach, expect, it } from "vitest";
-import { QUIZ_BANK, RecordedCall, sampleQuiz, rowToEvent, type CommittedEvent } from "@meet-first/contracts";
+import { QUIZ_BANK, RecordedCall, ROMANCE_NOT_OPEN_REASON, sampleQuiz, rowToEvent, type CommittedEvent } from "@meet-first/contracts";
 import { readPrompt } from "@meet-first/prompts";
 import { makeDatabase, parseDatabaseError, POOL_SIZE, withMeeting, withPerson, type Database } from "@meet-first/db";
 import { createPairedMeeting, freshTestDatabase, type TestDatabase } from "@meet-first/db/testing";
@@ -125,6 +125,17 @@ it("R10.5-T2: a refused free-text question keeps its reason and gets no prefix",
     expect(side.frozen_prefix).toBeNull();
     expect(side.frozen_prefix_tokens).toBeNull();
   }
+});
+
+it("W5-DIR-T10: a free-text question the check calls romance is refused in a meeting whose listed person has dating questions off", async () => {
+  await freeText(m.meetingId);
+  await withMeeting(workerDb, m.meetingId, (trx) => trx.updateTable("meetings").set({ romance_allowed: false }).where("id", "=", m.meetingId).execute());
+  const t = await openTest(questionCheck({ allowed: true, reason: "A question about whether two people would enjoy a first date.", kind: "romance" }));
+  await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
+  const meeting = await meetingOf(m.meetingId);
+  expect(meeting.question_rejected_reason).toBe(ROMANCE_NOT_OPEN_REASON);
+  expect(meeting.question_checked_at).toBeNull();
+  for (const side of await membersOf(m.meetingId)) expect(side.frozen_prefix).toBeNull();
 });
 
 it("D41-T4: a curated question needs no model call and gets both prefixes, which carry the curated question's kind", async () => {

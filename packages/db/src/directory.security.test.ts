@@ -31,9 +31,15 @@ async function caught(run: () => Promise<unknown>): Promise<unknown> {
   }
 }
 
-// Starts a meeting with a listed persona as this person, with a cap; returns the meeting id.
-async function meetListing(me: { personId: string; cardId: string }, listingId: string, cap: number): Promise<string | null> {
-  const result = await asPerson(t.db, me.personId, (trx) => sql<{ id: string | null }>`SELECT directory_meeting_create(${listingId}::uuid, ${me.personId}::uuid, ${me.cardId}::uuid, 1, ${"Would we enjoy a 10-day hackathon together?"}, true, ${cap}) AS id`.execute(trx));
+// A question a directory meeting is started on: a curated id with its kind, or free text with no id and no kind yet.
+type MeetingAsk = { questionId: number | null; text: string; kind: string | null };
+// Curated question 1, a get-along question.
+const HACKATHON: MeetingAsk = { questionId: 1, text: "Would we enjoy a 10-day hackathon together?", kind: "get_along" };
+
+// Starts a meeting with a listed persona as this person, with a question and a cap; returns the meeting id.
+async function meetListing(me: { personId: string; cardId: string }, listing: { id: string; ask?: MeetingAsk }, cap: number): Promise<string | null> {
+  const ask = listing.ask ?? HACKATHON;
+  const result = await asPerson(t.db, me.personId, (trx) => sql<{ id: string | null }>`SELECT directory_meeting_create(${listing.id}::uuid, ${me.personId}::uuid, ${me.cardId}::uuid, ${ask.questionId}::int, ${ask.text}, ${ask.questionId !== null}, ${ask.kind}::text, ${cap}) AS id`.execute(trx));
   return result.rows[0]?.id ?? null;
 }
 
@@ -65,7 +71,8 @@ describe("directory and asks", () => {
     await list(pair.b.personId, pair.b.cardId, "Happy to talk about planning.");
     const seenByA = await asPerson(t.db, pair.a.personId, (trx) => sql<Record<string, unknown>>`SELECT * FROM directory_browse(${""}, 20, 0)`.execute(trx));
     const listingB = seenByA.rows.find((row) => row.display_name === "Test B");
-    expect(Object.keys(listingB ?? {}).sort()).toEqual(["display_name", "items", "line", "listing_id"]);
+    expect(Object.keys(listingB ?? {}).sort()).toEqual(["display_name", "items", "line", "listing_id", "open_to_romance"]);
+    expect(listingB?.open_to_romance).toBe(false);
     const items = listingB?.items as Array<Record<string, unknown>>;
     expect(items).toHaveLength(1);
     expect(Object.keys(items[0] ?? {}).sort()).toEqual(["claim", "kind", "quote"]);
@@ -80,22 +87,24 @@ describe("directory and asks", () => {
 
   it("W5-DIR-T4: directory_meeting_create gives both sides their go-ahead, marks the listed side public-only, refuses one's own or a missing listing, and caps meetings a day", async () => {
     const listingId = await asPerson(t.db, carol.personId, (trx) => trx.selectFrom("directory_listings").select("id").executeTakeFirstOrThrow());
-    const meetingId = await meetListing(pair.a, listingId.id, 1);
+    const meetingId = await meetListing(pair.a, { id: listingId.id }, 1);
     if (meetingId === null) throw new Error("no meeting");
     const members = await asPerson(t.db, pair.a.personId, (trx) => sql<{ side: string; ready: boolean; public_only: boolean }>`SELECT side, ready_at IS NOT NULL AS ready, public_only FROM meeting_members WHERE meeting_id = ${meetingId}::uuid ORDER BY side`.execute(trx));
     expect(members.rows).toEqual([{ side: "a", ready: true, public_only: false }, { side: "b", ready: true, public_only: true }]);
     const viaDirectory = await asPerson(t.db, pair.a.personId, (trx) => sql<{ via_directory: boolean }>`SELECT p.via_directory FROM pairs p JOIN meetings m ON m.pair_id = p.id WHERE m.id = ${meetingId}::uuid`.execute(trx));
     expect(viaDirectory.rows[0]?.via_directory).toBe(true);
-    expect(parseDatabaseError(await caught(() => meetListing(pair.a, listingId.id, 1)))?.code).toBe("directory_daily_cap");
-    expect(parseDatabaseError(await caught(() => meetListing(carol, listingId.id, 10)))?.code).toBe("directory_self");
-    expect(parseDatabaseError(await caught(() => meetListing(pair.a, "00000000-0000-4000-8000-000000000999", 10)))?.code).toBe("listing_not_found");
+    expect(parseDatabaseError(await caught(() => meetListing(pair.a, { id: listingId.id }, 1)))?.code).toBe("directory_daily_cap");
+    expect(parseDatabaseError(await caught(() => meetListing(carol, { id: listingId.id }, 10)))?.code).toBe("directory_self");
+    expect(parseDatabaseError(await caught(() => meetListing(pair.a, { id: "00000000-0000-4000-8000-000000000999" }, 10)))?.code).toBe("listing_not_found");
   });
 
   it("W5-DIR-T5: the help shortlist matches public items of listed people and leaves out the asker", async () => {
-    const result = await worker.transaction().execute((trx) => sql<{ display_name: string; match_rank: number }>`SELECT display_name, match_rank FROM directory_shortlist(${["test", "claim"]}::text[], ${carol.personId}::uuid, 20)`.execute(trx));
+    const result = await worker.transaction().execute((trx) => sql<{ display_name: string; match_rank: number }>`SELECT display_name, match_rank FROM directory_shortlist(${["test", "claim"]}::text[], ${carol.personId}::uuid, 20, false)`.execute(trx));
     expect(result.rows).toEqual([{ display_name: "Test B", match_rank: 1 }]);
-    const none = await worker.transaction().execute((trx) => sql<{ n: string }>`SELECT count(*) AS n FROM directory_shortlist(${[]}::text[], ${carol.personId}::uuid, 20)`.execute(trx));
+    const none = await worker.transaction().execute((trx) => sql<{ n: string }>`SELECT count(*) AS n FROM directory_shortlist(${[]}::text[], ${carol.personId}::uuid, 20, false)`.execute(trx));
     expect(none.rows[0]?.n).toBe("0");
+    const romanceOnly = await worker.transaction().execute((trx) => sql<{ n: string }>`SELECT count(*) AS n FROM directory_shortlist(${["test", "claim"]}::text[], ${carol.personId}::uuid, 20, true)`.execute(trx));
+    expect(romanceOnly.rows[0]?.n).toBe("0");
   });
 
   it("W5-DIR-T6: friend_list names each invite friend once with their ask switch, and never a directory pair", async () => {
@@ -115,5 +124,18 @@ describe("directory and asks", () => {
     expect(changed.numUpdatedRows).toBe(0n);
     expect(await asPerson(t.db, carol.personId, (trx) => trx.selectFrom("persona_answers").select("id").execute())).toHaveLength(0);
     expect(await asPerson(t.db, pair.b.personId, (trx) => trx.selectFrom("persona_asks").select("id").execute())).toHaveLength(0);
+  });
+
+  it("W5-DIR-T9: a romance question reaches a listed persona only when its owner switched on dating questions, and the meeting copies the switch", async () => {
+    const listing = await asPerson(t.db, pair.b.personId, (trx) => trx.selectFrom("directory_listings").select("id").executeTakeFirstOrThrow());
+    const date: MeetingAsk = { questionId: 17, text: "Would we enjoy a first date, and what would we talk about?", kind: "romance" };
+    expect(parseDatabaseError(await caught(() => meetListing(carol, { id: listing.id, ask: date }, 10)))?.code).toBe("romance_not_open");
+    const freeText = await meetListing(carol, { id: listing.id, ask: { questionId: null, text: "Would we enjoy cooking together?", kind: null } }, 10);
+    const closed = await asPerson(t.db, carol.personId, (trx) => sql<{ question_kind: string; romance_allowed: boolean }>`SELECT question_kind, romance_allowed FROM meetings WHERE id = ${freeText}::uuid`.execute(trx));
+    expect(closed.rows).toEqual([{ question_kind: "situation", romance_allowed: false }]);
+    await asPerson(t.db, pair.b.personId, (trx) => trx.updateTable("directory_listings").set({ open_to_romance: true }).where("person_id", "=", pair.b.personId).execute());
+    const opened = await meetListing(carol, { id: listing.id, ask: date }, 10);
+    const romance = await asPerson(t.db, carol.personId, (trx) => sql<{ question_kind: string; romance_allowed: boolean }>`SELECT question_kind, romance_allowed FROM meetings WHERE id = ${opened}::uuid`.execute(trx));
+    expect(romance.rows).toEqual([{ question_kind: "romance", romance_allowed: true }]);
   });
 });

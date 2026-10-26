@@ -24,6 +24,11 @@ describe("welcome screens", () => {
     expect(screen.queryByLabelText("Your display name")).toBeNull();
   });
 
+  it("W5-AGE-T1: the start page says Meet First is for adults", () => {
+    renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/" });
+    expect(screen.getByText("Meet First is for adults, 18 and over.")).toBeTruthy();
+  });
+
   it("A5-T2: continuing opens the upload page and the code is gone for good", async () => {
     stubRoute(routes.people.createPerson, { status: 201, body: personCreated() });
     renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/" });

@@ -11,6 +11,8 @@ export const LISTING_LINE_MAX_CHARS = 140;
 export const DIRECTORY_PAGE_SIZE = 20;
 // The words next to the directory switch on the card screen. Off by default; turning it on is the consent to be met.
 export const DIRECTORY_SWITCH_COPY = "List my persona in the directory. Anyone in the directory can have their AI agent meet yours, and your persona may answer when someone asks the directory for help, using only the items you mark public. You get every brief and every answer. You can leave at any time.";
+// The words next to the dating switch on the card screen, under the directory switch. Off by default, and on only while listed (as-built item 54).
+export const ROMANCE_SWITCH_COPY = "Open to dating questions: people in the directory can ask how my persona would get on with them romantically. I get every brief.";
 // The words next to the friends switch on the card screen. Off by default.
 export const FRIENDS_ASK_SWITCH_COPY = "Let friends I've met here ask my persona how I would probably react to something. I get a copy of every answer. I can turn this off at any time.";
 
@@ -19,7 +21,7 @@ export const PublicItem = z.object({ kind: ItemKind, claim: z.string(), quote: z
 // The type of PublicItem, read from the schema above.
 export type PublicItem = z.infer<typeof PublicItem>;
 // One listing as anyone in the directory sees it: only listing fields, never a person id, a turn or an item that is not public.
-export const DirectoryListing = z.object({ listingId: Uuid, displayName: z.string(), line: z.string(), items: z.array(PublicItem) });
+export const DirectoryListing = z.object({ listingId: Uuid, displayName: z.string(), line: z.string(), openToRomance: z.boolean(), items: z.array(PublicItem) });
 // The type of DirectoryListing, read from the schema above.
 export type DirectoryListing = z.infer<typeof DirectoryListing>;
 // What GET /api/directory returns: one page of listings, newest first or best match first when there is a query. The caller's own listing is left out.
@@ -31,11 +33,12 @@ export const DirectoryQuery = z.object({ query: z.string().trim().max(200).optio
 // The type of DirectoryQuery, read from the schema above.
 export type DirectoryQuery = z.infer<typeof DirectoryQuery>;
 // The caller's own listing, as GET /api/directory/me and PUT /api/directory/me return it.
-export const MyListing = z.object({ listingId: Uuid, cardId: Uuid, line: z.string(), items: z.array(PublicItem), createdAt: IsoTime });
+export const MyListing = z.object({ listingId: Uuid, cardId: Uuid, line: z.string(), openToRomance: z.boolean(), items: z.array(PublicItem), createdAt: IsoTime });
 // The type of MyListing, read from the schema above.
 export type MyListing = z.infer<typeof MyListing>;
-// The body of PUT /api/directory/me: join or change the listing. The card must be the caller's, approved, with at least one public item.
-export const ListingUpsert = z.object({ cardId: Uuid, line: z.string().trim().min(1).max(LISTING_LINE_MAX_CHARS) });
+// The body of PUT /api/directory/me: join or change the listing, and the dating switch. The card must be the caller's, approved, with at
+// least one public item.
+export const ListingUpsert = z.object({ cardId: Uuid, line: z.string().trim().min(1).max(LISTING_LINE_MAX_CHARS), openToRomance: z.boolean() });
 // The type of ListingUpsert, read from the schema above.
 export type ListingUpsert = z.infer<typeof ListingUpsert>;
 // One meeting a listed persona took part in, for the listed person's own list (GET /api/directory/me/meetings).

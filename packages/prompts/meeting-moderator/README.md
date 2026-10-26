@@ -14,7 +14,7 @@ It never carries meeting data: the question, the names, the card and the transcr
 
 ```mermaid
 flowchart LR
-  M[meeting-moderator v3] --> P[buildFrozenPrefix]
+  M[meeting-moderator v4] --> P[buildFrozenPrefix]
   S[meeting-speech v2] --> P
   U[untrusted-data-rules v1] --> P
   P --> F[meeting_members.frozen_prefix]

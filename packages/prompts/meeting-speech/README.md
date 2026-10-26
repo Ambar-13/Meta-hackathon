@@ -14,7 +14,7 @@ It never lists meeting data and never sets the agenda: those come from the moder
 
 ```mermaid
 flowchart LR
-  M[meeting-moderator v3] --> P[buildFrozenPrefix]
+  M[meeting-moderator v4] --> P[buildFrozenPrefix]
   S[meeting-speech v2] --> P
   P --> R[speech request]
   R --> T[turn.committed]
