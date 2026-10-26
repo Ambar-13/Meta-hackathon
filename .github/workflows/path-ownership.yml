@@ -1,6 +1,9 @@
 name: path-ownership
 on:
   pull_request:
+# The token every job gets can read the code and nothing else.
+permissions:
+  contents: read
 jobs:
   path-ownership:
     runs-on: ubuntu-latest
@@ -9,7 +12,7 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
       # The path ownership script lands in Wave 2 (deploy-and-docs); until then this job passes.
