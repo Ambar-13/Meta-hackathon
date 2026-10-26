@@ -94,19 +94,19 @@ function deltaChecks(a: EventStreamReader, isMock: boolean, notes: string[]): As
   return checks;
 }
 
-// The cut at seq 20: under mock the stream must reach it, and the first event after it must be seq 21.
+// The planned cut: under mock the stream must reach its seq, and the first event after it must be the next seq.
 function cutChecks(a: EventStreamReader, isMock: boolean, notes: string[]): Assertion[] {
   const hasCut = a.committed.some((event) => event.seq === PLANNED_DISCONNECT_SEQ);
   if (!hasCut) {
-    notes.push("seq 20 not reached before the meeting ended (not exercised)");
-    return isMock ? [check("A's stream reaches seq 20 before the meeting ends", true, false)] : [];
+    notes.push(`seq ${String(PLANNED_DISCONNECT_SEQ)} not reached before the meeting ended (not exercised)`);
+    return isMock ? [check(`A's stream reaches seq ${String(PLANNED_DISCONNECT_SEQ)} before the meeting ends`, true, false)] : [];
   }
   const index = a.committed.findIndex((event) => event.seq === PLANNED_DISCONNECT_SEQ);
-  return [check("seq-20 reconnect", RESUMED_SEQ, a.committed[index + 1]?.seq)];
+  return [check(`seq-${String(PLANNED_DISCONNECT_SEQ)} reconnect`, RESUMED_SEQ, a.committed[index + 1]?.seq)];
 }
 
-// Step 8: both screens show the same turns, the recall switch works on A's side only, deltas arrive before the commit, and the cut at seq 20 resumes with 21.
-// Under a live run a missing recall call, missing deltas or a meeting that ends before seq 20 are noted, not failed (R8.2, model choice).
+// Step 8: both screens show the same turns, the recall switch works on A's side only, deltas arrive before the commit, and the planned cut resumes with the next seq.
+// Under a live run a missing recall call, missing deltas or a meeting that ends before the cut are noted, not failed (R8.2, model choice).
 export async function step08Stream(run: RunState): Promise<StepResult> {
   const { a, b } = readers(run);
   const isMock = run.options.mode === "mock";
@@ -122,7 +122,7 @@ export async function step08Stream(run: RunState): Promise<StepResult> {
   a.assertGapless();
   return finishStep(8, "stream", {
     rows: ["R5.7", "R7.1", "D47", "R8.1"],
-    detail: [`commits=${String(turnsOf(a).length)}`, `cut at seq 20 ${a.hasPlannedDisconnect ? "made" : "not made"}`, ...notes].join("; "),
+    detail: [`commits=${String(turnsOf(a).length)}`, `cut at seq ${String(PLANNED_DISCONNECT_SEQ)} ${a.hasPlannedDisconnect ? "made" : "not made"}`, ...notes].join("; "),
     assertions,
   });
 }
@@ -133,11 +133,13 @@ export function removedStep(number: number, name: string): StepResult {
 }
 
 // Step 11: A backgrounds the page during B's turn. The replay after the return has no gap and no duplicate, and the mid-turn text comes back.
+// It waits for a delta of B's that arrives after the step starts, so A closes while B is writing; a delta seen earlier could be from a
+// meeting that has already ended, and then nothing comes back after the return.
 export async function step11Background(run: RunState): Promise<StepResult> {
   const { a } = readers(run);
   const meetingId = need(run.ids.meetingId, "meetingId");
   const assertions: Assertion[] = [];
-  const isMidTurn = await a.waitFor((event) => event.type === "turn.delta" && event.side === "b", MID_TURN_TIMEOUT_MS).then(
+  const isMidTurn = await a.waitForNext((event) => event.type === "turn.delta" && event.side === "b", MID_TURN_TIMEOUT_MS).then(
     () => true,
     () => false,
   );

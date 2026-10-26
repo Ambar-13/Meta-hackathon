@@ -3,7 +3,7 @@ import { CommittedEvent, EVENT_VERSION, MeetingEvent, RECONNECT, TurnDelta } fro
 import type { PersonClient } from "./person-client.js";
 import { StepFailure } from "./report.js";
 
-// Options for one reader. Reader A sets plannedDisconnectAtSeq to 20, so the stream is cut and resumed once (step 8).
+// Options for one reader. Reader A sets plannedDisconnectAtSeq to PLANNED_DISCONNECT_SEQ, so the stream is cut and resumed once (step 8).
 export type ReaderOptions = { plannedDisconnectAtSeq?: number };
 // The planned disconnect reopens the stream after this many milliseconds (the spec's 500).
 const PLANNED_RECONNECT_MS = 500;
@@ -138,6 +138,11 @@ export class EventStreamReader {
   waitFor(predicate: (event: MeetingEvent) => boolean, timeoutMs: number): Promise<MeetingEvent> {
     const found = this.arrivalLog.find(predicate);
     if (found !== undefined) return Promise.resolve(found);
+    return this.waitForNext(predicate, timeoutMs);
+  }
+
+  // Resolves with the first matching event that arrives from now on; events seen earlier do not count. Rejects like waitFor.
+  waitForNext(predicate: (event: MeetingEvent) => boolean, timeoutMs: number): Promise<MeetingEvent> {
     const [problem] = this.problems;
     if (problem !== undefined) return Promise.reject(new StepFailure(problem));
     return new Promise<MeetingEvent>((resolve, reject) => {

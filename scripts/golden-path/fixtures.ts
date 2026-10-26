@@ -22,8 +22,9 @@ export const ANSWER_TEXT = "golden path answer: Tuesday evenings only";
 export const EXPIRY_TEXT = "my human is away, going with what I know";
 // The curated question both people pick (R10.5).
 export const QUESTION_ID = 3;
-// The seq at which reader A's connection is cut on purpose, so the replay after it is tested (step 8, D52).
-export const PLANNED_DISCONNECT_SEQ = 20;
+// The seq at which reader A's connection is cut on purpose, so the replay after it is tested (step 8, D52). Seq 10 is the middle of the
+// recorded meeting's 23 events, so the meeting is still running when the stream resumes and when step 11 closes it.
+export const PLANNED_DISCONNECT_SEQ = 10;
 // The free-text question the question check must allow (R10.5). It starts a second meeting that is never started.
 export const FREE_TEXT_QUESTION = "Should we split the work by strengths or by interest?";
 // The avatar B picks for the comic, the first of the fixed list (R11.3).

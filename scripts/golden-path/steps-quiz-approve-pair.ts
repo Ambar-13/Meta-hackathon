@@ -170,7 +170,7 @@ async function checkStartedRows(run: RunState, meetingId: string, assertions: As
   );
 }
 
-// Opens both readers. Reader A is cut at seq 20 on purpose. Both must see meeting.started as the first event with seq 1.
+// Opens both readers. Reader A is cut at PLANNED_DISCONNECT_SEQ on purpose. Both must see meeting.started as the first event with seq 1.
 async function openReaders(run: RunState, meetingId: string, assertions: Assertion[]): Promise<void> {
   run.readerA = new EventStreamReader(run.a, meetingId, { plannedDisconnectAtSeq: PLANNED_DISCONNECT_SEQ });
   run.readerB = new EventStreamReader(run.b, meetingId);
