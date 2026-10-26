@@ -21,15 +21,14 @@ preconditions() {
     echo "check_wave_dirty_tree: commit or stash first; the check runs on the merged tree only" >&2
     exit 2
   fi
-  local merges
-  merges=$(git -C "$ROOT" log --merges --first-parent --format='%s' -n 20)
-  case "$merges" in
-    *"Merge branch 'build/w1-"*) ;;
-    *)
-      echo "check_wave_nothing_merged: no Wave 1 builder branch is merged on main" >&2
+  # Each Wave 1 builder branch must be part of this tree; the integrator fast-forwards, so there are no merge commits to read.
+  local builder
+  for builder in database api-shell ingest dossier quiz meeting-engine web-shell; do
+    if ! git -C "$ROOT" merge-base --is-ancestor "refs/heads/build/w1-$builder" HEAD 2>/dev/null; then
+      echo "check_wave_nothing_merged: build/w1-$builder is not merged into this tree" >&2
       exit 2
-      ;;
-  esac
+    fi
+  done
   if [ ! -f "$ROOT/.env.check" ]; then
     echo "check_wave_env_missing: copy .env.example to .env.check and fill the three database URLs" >&2
     exit 2
