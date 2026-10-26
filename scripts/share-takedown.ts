@@ -64,8 +64,8 @@ export async function runTakedown(argv: readonly string[], db: Db, output: Taked
     output.out(String(await revokeShareByMeeting(db, target.meetingId)));
     return EXIT_OK;
   }
-  const revoked = await revokeShareBySlug(db, target.slug);
-  output.out(revoked === true ? "revoked" : "not found");
+  const wasRevoked = await revokeShareBySlug(db, target.slug);
+  output.out(wasRevoked === true ? "revoked" : "not found");
   return EXIT_OK;
 }
 

@@ -22,6 +22,7 @@
     "db:count-person": "pnpm --filter @meet-first/db count-person",
     "eval": "pnpm --filter @meet-first/evals run eval",
     "golden-path": "tsx scripts/golden-path.ts",
+    "share:takedown": "tsx scripts/share-takedown.ts",
     "replay:export": "tsx scripts/replay-export.ts",
     "replay:serve": "tsx scripts/replay-serve.ts"
   },
