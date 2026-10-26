@@ -151,3 +151,20 @@ it("W6-SEC-T4 (D69, as-built item 58): a friend whose account is being deleted i
   expect((await readAskRow(fresh.db, ana, askId)).state).toBe("failed");
   expect(test.calls.map((call) => call.callSite)).toEqual(["question_check"]);
 });
+
+it("W6-SEC-T5 (D69, as-built item 58): a friend whose account deletion starts after the answer row was written is never asked", async () => {
+  const ola = await createAskPerson(fresh.db, { name: "Ola", turns: ASK_TURNS.lena });
+  await allowFriendAsks(fresh.db, ola);
+  const olaPair = await joinInvitePair(fresh.db, ana, ola);
+  const askId = await insertReactAsk(fresh.db, ana, { pairId: olaPair, text: "How would Ola react if the book club moved to Monday?", aboutName: "Ola" });
+  const first = await openTest({ questionCheck: [ALLOWED_REACT], personaAnswers: { Ola: LENA_REACT }, judge: [], limiterBusy: { callSite: "persona_answer", times: 1 } });
+  await runAsk({ askId, personId: ana.personId }, first.context);
+  expect((await readAnswerRows(fresh.db, ana, askId)).map((row) => row.state)).toEqual(["pending"]);
+
+  await withPerson(fresh.db, ola.personId, (trx) => trx.updateTable("people").set({ state: "deleted", deleted_at: new Date() }).where("id", "=", ola.personId).execute());
+  const second = await openTest({ questionCheck: [], personaAnswers: { Ola: LENA_REACT }, judge: [] });
+  await runAsk({ askId, personId: ana.personId }, second.context);
+
+  expect(countCalls(second, "persona_answer")).toBe(0);
+  expect((await readAnswerRows(fresh.db, ana, askId)).map((row) => row.state)).toEqual(["failed"]);
+});
