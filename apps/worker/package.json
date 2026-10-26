@@ -2,6 +2,12 @@
   "name": "@meet-first/worker",
   "private": true,
   "type": "module",
+  "scripts": {
+    "start": "tsx src/runner.ts",
+    "self-test": "tsx ../../packages/llm/src/self-test.ts",
+    "golden-fixture": "tsx src/testing/golden-path-fixtures.ts",
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "@meet-first/contracts": "workspace:*",
     "@meet-first/db": "workspace:*",

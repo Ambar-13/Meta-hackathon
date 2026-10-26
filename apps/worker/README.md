@@ -1,30 +1,30 @@
 # @meet-first/worker
 
-This is a placeholder written at the Wave 0 freeze. The dossier builder replaces this file and the manifest in Wave 1.
+The background worker. It starts Graphile Worker with every job of the product after it has checked the environment, refused replay in production, checked the database schema version and run the model self-test.
 
 ## What this does
 
-The background jobs: names review, cards, quizzes, meetings and the model client wiring.
+The background worker. It starts Graphile Worker with every job of the product after it has checked the environment, refused replay in production, checked the database schema version and run the model self-test.
 
 ## What this never does
 
-Nothing runs here yet: the folder holds only its manifest, so the workspace and the lock file are complete before Wave 1.
+It never serves a web route, never runs a migration, never starts when the self-test refuses a schema, and never registers a task that a feature folder does not export.
 
 ## How it fits
 
 ```mermaid
 flowchart LR
-  contracts["@meet-first/contracts"] --> here["@meet-first/worker"]
+  A[workerEnv.parse] --> B[assertWorkerModeAllowed] --> C[assertSchemaVersion] --> D[runBootSelfTest] --> E[graphileTaskList] --> F[run]
 ```
 
-The package will read its shapes from contracts, like every other package.
+Notice that the self-test runs before any task is registered, so a bad schema stops the worker at boot, not mid-meeting.
 
 ## The main pieces
 
-`package.json` lists the dependencies the Wave 1 specs pin (design-inputs/wave-1-seams.md S8). There is no source yet.
+`src/runner.ts` holds the boot order, the task slots and the crontab filter. `src/job-context.ts` builds the context every job gets, the payload wrapper and the enqueue. `src/cards/` holds the names pass (`scrub-names-job.ts`), the card build (`build-card-job.ts`), the sampler, the quote check and the request builders. `src/testing/` holds the test runner, the fake clock, the recorded reply helpers, the fixture cases and the golden path rules.
 
 ## How to test it
 
-There is nothing to test until the dossier builder writes the package.
+`pnpm test:unit apps/worker/src` and `pnpm test:integration apps/worker/src/cards`.
 
-Not built yet: everything in this package.
+Not built yet: quizzes, meetings, briefs, comics, retention task lists; each lands with its builder.

@@ -2,10 +2,7 @@
   "name": "@meet-first/prompts",
   "private": true,
   "type": "module",
-  "exports": {
-    ".": "./src/index.ts"
-  },
-  "dependencies": {
-    "@meet-first/contracts": "workspace:*"
-  }
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "typecheck": "tsc --noEmit" },
+  "dependencies": { "@meet-first/contracts": "workspace:*" }
 }

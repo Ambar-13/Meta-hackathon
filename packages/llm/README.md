@@ -1,34 +1,50 @@
 # @meet-first/llm
 
-The model client lives here. Wave 0 wrote the call-site table, the three modes (live, record and replay) and the ledger functions; the dossier builder adds the client, the limiter, the caps and the retries in Wave 1 and rewrites this file.
+The one door to the Meta Model API. Every model call of the worker goes through this package, which writes a ledger row first, checks the dollar caps and the shared token window, runs the call in live, record or replay mode, retries 429 and 5xx itself, and writes the usage back.
 
 ## What this does
 
-Every model call in the product goes through this package. It writes a ledger row before each call and answers from recorded replies in replay mode.
+The one door to the Meta Model API. Every model call of the worker goes through this package, which writes a ledger row first, checks the dollar caps and the shared token window, runs the call in live, record or replay mode, retries 429 and 5xx itself, and writes the usage back.
 
 ## What this never does
 
-It never calls the model from anywhere but `apps/worker`, and it never skips the ledger row, because the spending caps read only the ledger.
+It never calls the vendor without a ledger row already committed; it never retries inside the SDK; it never boots in replay in production; and it is never imported by apps/web or apps/api.
 
 ## How it fits
 
 ```mermaid
 flowchart LR
-  worker["apps/worker jobs"] --> client["llm client"]
-  client --> ledger["ledger row first"]
-  client --> mode{"LLM_MODE"}
-  mode --> live["Meta Model API"]
-  mode --> replay["recorded replies in packages/evals"]
+  call["complete call"] --> caps["assertUnderCaps"]
+  caps --> window["assertWindowHasRoom"]
+  window --> start["startLedgerRow"]
+  start --> run["runInMode"]
+  run --> retry["withTransportRetries"]
+  retry --> finish["finishLedgerRow"]
 ```
 
-A call always writes its ledger row before the mode decides where the reply comes from.
+Notice that the ledger row exists before runInMode and is the only thing the limiter and the caps read.
+
+```mermaid
+sequenceDiagram
+  participant Job
+  participant Client
+  participant Ledger
+  participant Vendor
+  Job->>Client: complete(args)
+  Client->>Ledger: assertUnderCaps and window
+  Client->>Ledger: startLedgerRow (committed)
+  Client->>Vendor: runInMode call
+  Vendor-->>Client: reply or error
+  Client->>Ledger: finishLedgerRow with usage and dollars
+  Client-->>Job: text, parsed, usage, ledgerId
+```
 
 ## The main pieces
 
-`src/call-sites.ts` holds the settings for each call site. `src/modes.ts` runs one call in live, record or replay mode and computes the request hash. `src/ledger.ts` starts and finishes ledger rows and reads the three cross-person sums. `src/testing/replay-folder.ts` makes a fake fixture folder for tests.
+`src/client.ts` is the client every job calls, with the live callers and the streamed and image paths. `src/caps.ts` holds the two dollar caps and their copy. `src/limiter.ts` holds the shared token window and the re-enqueue. `src/self-test.ts` sends every output schema in a one-token call at boot. `src/config.ts` holds the model names, the prices and the limits. `src/chat-request.ts` builds the body of each call. `src/stream-reader.ts` reads and replays streamed replies. `src/retries.ts` holds our own retry rule. `src/ledger.ts` starts and finishes ledger rows. `src/testing/` holds the fake live caller, the environment for tests and the fixture writer.
 
 ## How to test it
 
-`pnpm test:unit packages/llm`
+`pnpm test:unit packages/llm` and `pnpm test:integration packages/llm`.
 
-Not built yet: the client, the limiter, the caps, the retries and the self-test, which the dossier builder writes in Wave 1.
+Not built yet: the price check against the dashboard (Ambar); recordings over the hand-written fixtures (Wave 3).
