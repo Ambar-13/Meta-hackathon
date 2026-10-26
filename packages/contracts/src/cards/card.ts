@@ -36,6 +36,17 @@ export const CardItem = z.object({
 });
 // The type of CardItem, read from the schema above.
 export type CardItem = z.infer<typeof CardItem>;
+// The source message of one card item, for its owner's card screen: tapping a quote shows the message it came from
+// with the quote marked (R3.2). highlight is the quote's range in text, found through the receipts offset map, or null
+// when the quote is not in the message (a flagged item). Only the card's owner reads this. A meeting citation shows the
+// quote alone, because approving an item lets the persona quote it, not show the whole message.
+export const CardItemSource = z.object({
+  turnIndex: z.number().int(),
+  text: z.string(),
+  highlight: z.object({ start: z.number().int().min(0), end: z.number().int().min(0) }).nullable(),
+});
+// The type of CardItemSource, read from the schema above.
+export type CardItemSource = z.infer<typeof CardItemSource>;
 // What GET /api/cards/:id returns.
 export const CardView = z.object({
   id: Uuid,
