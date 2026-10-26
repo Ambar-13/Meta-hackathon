@@ -83,14 +83,31 @@ function citationsOf(snapshot: BriefSnapshot, side: "a" | "b"): Citation[] {
   return [...fromClaims, ...fromItems].flatMap((citation) => (citation.turnIndex === undefined ? [] : [{ ...citation, turnIndex: citation.turnIndex }]));
 }
 
-// One brief line that cites one citation.
-function lineOf(citation: Citation): Record<string, unknown> {
-  return { text: citation.text, quotes: [{ text: citation.quote, side: citation.side, turn_id: sourceTurnLabel(citation.turnIndex) }] };
+// The words each section's lines start with, so no line text repeats inside a brief even when a citation is used twice. The golden
+// path matches lines by text: a repeated text would put the one unsupported line's words on a supported line as well.
+const SECTION_LEADS = { agree: "On this you agree", clash: "On this you differ", decide_first: "Settle first" } as const;
+
+// One brief line of a section that cites one citation.
+function lineOf(citation: Citation, section: keyof typeof SECTION_LEADS): { text: string; quotes: unknown[] } {
+  const point = citation.text.charAt(0).toLowerCase() + citation.text.slice(1);
+  return { text: `${SECTION_LEADS[section]}: ${point}`, quotes: [{ text: citation.quote, side: citation.side, turn_id: sourceTurnLabel(citation.turnIndex) }] };
 }
 
 // The reply for one side's brief: three agree, three clash and three decide-first lines, nine citations in all.
-function briefReplyOf(picked: Citation[]): Record<string, unknown> {
-  return { agree: picked.slice(0, 3).map(lineOf), clash: picked.slice(3, 6).map(lineOf), decide_first: picked.slice(6, 9).map(lineOf) };
+function briefReplyOf(picked: Citation[]): { agree: Array<{ text: string }>; clash: unknown[]; decide_first: unknown[] } {
+  return {
+    agree: picked.slice(0, 3).map((citation) => lineOf(citation, "agree")),
+    clash: picked.slice(3, 6).map((citation) => lineOf(citation, "clash")),
+    decide_first: picked.slice(6, 9).map((citation) => lineOf(citation, "decide_first")),
+  };
+}
+
+// The citations of one side with each text once, repeated in order to fill the brief's nine lines; at least three distinct
+// texts are needed so that no section cites one twice.
+function nineCitations(citations: Citation[]): Citation[] {
+  const distinct = citations.filter((citation, index) => citations.findIndex((other) => other.text === citation.text) === index);
+  if (distinct.length < 3) throw new ContractError("golden_citations_short", "A side has fewer than three distinct verified claims or items to cite. Check the claims and the card build.", 500);
+  return Array.from(Array(LINE_COUNT).keys(), (index) => distinct[index % distinct.length]).filter((citation): citation is Citation => citation !== undefined);
 }
 
 // The judge reply for one side: every line supported, except the first agree line of side a, which is the one unsupported line of the run.
@@ -98,18 +115,11 @@ function judgeReplyOf(side: "a" | "b"): Record<string, unknown> {
   return { lines: Array.from(Array(LINE_COUNT).keys(), (index) => ({ index, supported: !(side === "a" && index === 0), reason: "The quote carries the point of the line." })) };
 }
 
-// The reply plan of one meeting: nine citations per side, or a refusal when a side has fewer.
+// The reply plan of one meeting: nine citations per side, or a refusal when a side has fewer than three distinct ones.
 function planFor(snapshot: BriefSnapshot): ReplyPlan {
-  const picked = { a: citationsOf(snapshot, "a"), b: citationsOf(snapshot, "b") };
-  for (const side of ["a", "b"] as const) {
-    if (picked[side].length < LINE_COUNT) throw new ContractError("golden_citations_short", "A side has fewer than nine verified claims or items to cite. Check the claims and the card build.", 500);
-  }
-  const first = { a: picked.a[0]?.text ?? "", b: picked.b[0]?.text ?? "" };
-  return {
-    brief: { a: briefReplyOf(picked.a.slice(0, LINE_COUNT)), b: briefReplyOf(picked.b.slice(0, LINE_COUNT)) },
-    judge: { a: judgeReplyOf("a"), b: judgeReplyOf("b") },
-    firstStatement: first,
-  };
+  const brief = { a: briefReplyOf(nineCitations(citationsOf(snapshot, "a"))), b: briefReplyOf(nineCitations(citationsOf(snapshot, "b"))) };
+  const first = { a: brief.a.agree[0]?.text ?? "", b: brief.b.agree[0]?.text ?? "" };
+  return { brief, judge: { a: judgeReplyOf("a"), b: judgeReplyOf("b") }, firstStatement: first };
 }
 
 // The reply the plan gives a brief call: the brief of the side the call writes for, read from the call's system message.
