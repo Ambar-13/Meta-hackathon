@@ -118,7 +118,8 @@ export async function prepareEmptyDatabase(urls: RebuildUrls): Promise<() => Pro
     } finally {
       await target.end();
     }
-    await admin.query("GRANT app_definer TO app_migrate WITH ADMIN OPTION");
+    // INHERIT FALSE: during the run app_migrate may become app_definer to hand it functions, but never reads through its policies.
+    await admin.query("GRANT app_definer TO app_migrate WITH ADMIN OPTION, INHERIT FALSE, SET TRUE");
   } finally {
     await admin.end();
   }
@@ -154,14 +155,33 @@ export async function dropDatabase(adminUrl: string, databaseName: string): Prom
   }
 }
 
+// The advisory lock every rebuild on this Postgres takes on the admin database. The grant and the release of app_definer
+// are cluster-wide, so a second rebuild running at the same time (another worktree's tests) could take the grant away
+// halfway through the first one's migrations; one rebuild at a time keeps both correct.
+const REBUILD_LOCK_KEY = 4_171_026;
+
+// Runs one step while holding the rebuild lock, so no other rebuild on this Postgres is halfway through. Ending the
+// connection releases the lock, also when the step throws.
+export async function withRebuildLock<T>(adminUrl: string, run: () => Promise<T>): Promise<T> {
+  const lock = await connectTo(adminUrl);
+  try {
+    await lock.query("SELECT pg_advisory_lock($1)", [REBUILD_LOCK_KEY]);
+    return await run();
+  } finally {
+    await lock.end();
+  }
+}
+
 // Rebuilds the target database from nothing and applies every migration; pnpm db:fresh and freshTestDatabase both call it.
 export async function recreateDatabase(urls: RebuildUrls): Promise<MigrationReport> {
-  const releaseGrants = await prepareEmptyDatabase(urls);
-  try {
-    return await migrateDatabase(urls.migrateUrl);
-  } finally {
-    await releaseGrants();
-  }
+  return withRebuildLock(urls.adminUrl, async () => {
+    const releaseGrants = await prepareEmptyDatabase(urls);
+    try {
+      return await migrateDatabase(urls.migrateUrl);
+    } finally {
+      await releaseGrants();
+    }
+  });
 }
 
 // The variables the rebuild reads: the admin URL beside the three app URLs and the migrate URL.

@@ -5,8 +5,9 @@ import { AVATARS } from "@meet-first/contracts";
 import { makeDatabase, numberFromPostgres } from "./client.js";
 import { TRIGGER_CODES } from "./database-errors.js";
 import { appendMeetingEvent } from "./event-seq.js";
+import { withRebuildLock } from "./fresh.js";
 import { listMigrationFiles, MIGRATIONS_FOLDER } from "./migrate.js";
-import { asMeeting, asPerson, countVisibleRows, createPairedMeetingWithTurns, freshTestDatabase, sha256Text, SEED_TURNS_A, withNoContext, type SeededMeeting, type TestDatabase } from "./testing/index.js";
+import { asMeeting, asPerson, countVisibleRows, createPairedMeetingWithTurns, freshTestDatabase, readTestDatabaseUrls, sha256Text, SEED_TURNS_A, withNoContext, type SeededMeeting, type TestDatabase } from "./testing/index.js";
 import { withMeeting, withPerson, type DatabaseTransaction } from "./transaction.js";
 import type { Database } from "./types.js";
 
@@ -130,7 +131,8 @@ describe("schema security", () => {
   });
 
   it("R9.1-T6: after the rebuild app_migrate is no longer a member of app_definer", async () => {
-    const rows = await catalog<{ n: string }>(`SELECT count(*) AS n FROM pg_auth_members m JOIN pg_roles r ON r.oid = m.roleid JOIN pg_roles u ON u.oid = m.member WHERE r.rolname = 'app_definer' AND u.rolname = 'app_migrate'`);
+    // Held under the rebuild lock: another worktree's rebuild grants the membership for its own run, cluster-wide.
+    const rows = await withRebuildLock(readTestDatabaseUrls(process.env).adminUrl, () => catalog<{ n: string }>(`SELECT count(*) AS n FROM pg_auth_members m JOIN pg_roles r ON r.oid = m.roleid JOIN pg_roles u ON u.oid = m.member WHERE r.rolname = 'app_definer' AND u.rolname = 'app_migrate'`));
 
     expect(numberFromPostgres(rows[0]?.n)).toBe(0);
   });
