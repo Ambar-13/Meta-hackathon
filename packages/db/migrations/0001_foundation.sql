@@ -891,6 +891,8 @@ REVOKE INSERT, UPDATE, DELETE ON ledger FROM app_api;
 -- frozen_prefix holds a person's approved card items and quiz misses. The API never reads it; the worker builds and reads it.
 REVOKE SELECT ON meeting_members FROM app_api;
 GRANT SELECT (meeting_id, person_id, side, card_id, ready_at, last_seen_at, frozen_prefix_tokens, created_at) ON meeting_members TO app_api;
+REVOKE INSERT, UPDATE, DELETE ON meeting_members FROM app_api;
+GRANT UPDATE (ready_at, last_seen_at) ON meeting_members TO app_api;
 GRANT USAGE ON SCHEMA graphile_worker TO app_api, app_worker;
 GRANT ALL ON ALL TABLES IN SCHEMA graphile_worker TO app_worker;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA graphile_worker TO app_worker;
@@ -899,9 +901,10 @@ GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA graphile_worker TO app_api, app_worker;
 CREATE POLICY schema_migrations_read ON schema_migrations FOR SELECT TO app_api, app_worker USING (true);
 CREATE POLICY schema_migrations_owner ON schema_migrations FOR ALL TO app_migrate USING (true) WITH CHECK (true);
 
-CREATE POLICY people_own ON people FOR ALL TO app_api, app_worker
-  USING (id = app_person() OR app_meeting_person(id))
-  WITH CHECK (id = app_person() OR app_meeting_person(id));
+-- A person changes only their own rows. A meeting context (a meeting job, or a route that has already checked
+-- membership) may read both members' rows and never change or delete them.
+CREATE POLICY people_own ON people FOR ALL TO app_api, app_worker USING (id = app_person()) WITH CHECK (id = app_person());
+CREATE POLICY people_meeting_read ON people FOR SELECT TO app_api, app_worker USING (app_meeting_person(id));
 CREATE POLICY people_definer ON people FOR ALL TO app_definer USING (true) WITH CHECK (true);
 
 CREATE POLICY sessions_own ON sessions FOR ALL TO app_api, app_worker USING (person_id = app_person()) WITH CHECK (person_id = app_person());
@@ -910,23 +913,23 @@ CREATE POLICY sessions_definer ON sessions FOR ALL TO app_definer USING (true) W
 CREATE POLICY transfer_links_own ON transfer_links FOR ALL TO app_api, app_worker USING (person_id = app_person()) WITH CHECK (person_id = app_person());
 CREATE POLICY transfer_links_definer ON transfer_links FOR ALL TO app_definer USING (true) WITH CHECK (true);
 
-CREATE POLICY sources_own ON sources FOR ALL TO app_api, app_worker
-  USING (person_id = app_person() OR app_meeting_person(person_id)) WITH CHECK (person_id = app_person() OR app_meeting_person(person_id));
-CREATE POLICY turns_own ON turns FOR ALL TO app_api, app_worker
-  USING (person_id = app_person() OR app_meeting_person(person_id)) WITH CHECK (person_id = app_person() OR app_meeting_person(person_id));
+CREATE POLICY sources_own ON sources FOR ALL TO app_api, app_worker USING (person_id = app_person()) WITH CHECK (person_id = app_person());
+CREATE POLICY sources_meeting_read ON sources FOR SELECT TO app_api, app_worker USING (app_meeting_person(person_id));
+CREATE POLICY turns_own ON turns FOR ALL TO app_api, app_worker USING (person_id = app_person()) WITH CHECK (person_id = app_person());
+CREATE POLICY turns_meeting_read ON turns FOR SELECT TO app_api, app_worker USING (app_meeting_person(person_id));
 CREATE POLICY redactions_own ON redactions FOR ALL TO app_api, app_worker USING (person_id = app_person()) WITH CHECK (person_id = app_person());
-CREATE POLICY cards_own ON cards FOR ALL TO app_api, app_worker
-  USING (person_id = app_person() OR app_meeting_person(person_id)) WITH CHECK (person_id = app_person() OR app_meeting_person(person_id));
+CREATE POLICY cards_own ON cards FOR ALL TO app_api, app_worker USING (person_id = app_person()) WITH CHECK (person_id = app_person());
+CREATE POLICY cards_meeting_read ON cards FOR SELECT TO app_api, app_worker USING (app_meeting_person(person_id));
 CREATE POLICY cards_definer ON cards FOR SELECT TO app_definer USING (true);
-CREATE POLICY card_items_own ON card_items FOR ALL TO app_api, app_worker
-  USING (person_id = app_person() OR app_meeting_person(person_id)) WITH CHECK (person_id = app_person() OR app_meeting_person(person_id));
+CREATE POLICY card_items_own ON card_items FOR ALL TO app_api, app_worker USING (person_id = app_person()) WITH CHECK (person_id = app_person());
+CREATE POLICY card_items_meeting_read ON card_items FOR SELECT TO app_api, app_worker USING (app_meeting_person(person_id));
 
 CREATE POLICY quiz_bank_read ON quiz_bank FOR SELECT TO app_api, app_worker USING (true);
 CREATE POLICY quiz_bank_seed ON quiz_bank FOR INSERT TO app_migrate WITH CHECK (true);
-CREATE POLICY quizzes_own ON quizzes FOR ALL TO app_api, app_worker
-  USING (person_id = app_person() OR app_meeting_person(person_id)) WITH CHECK (person_id = app_person() OR app_meeting_person(person_id));
-CREATE POLICY quiz_items_own ON quiz_items FOR ALL TO app_api, app_worker
-  USING (person_id = app_person() OR app_meeting_person(person_id)) WITH CHECK (person_id = app_person() OR app_meeting_person(person_id));
+CREATE POLICY quizzes_own ON quizzes FOR ALL TO app_api, app_worker USING (person_id = app_person()) WITH CHECK (person_id = app_person());
+CREATE POLICY quizzes_meeting_read ON quizzes FOR SELECT TO app_api, app_worker USING (app_meeting_person(person_id));
+CREATE POLICY quiz_items_own ON quiz_items FOR ALL TO app_api, app_worker USING (person_id = app_person()) WITH CHECK (person_id = app_person());
+CREATE POLICY quiz_items_meeting_read ON quiz_items FOR SELECT TO app_api, app_worker USING (app_meeting_person(person_id));
 
 CREATE POLICY pairs_own ON pairs FOR ALL TO app_api, app_worker
   USING (creator_person_id = app_person() OR joiner_person_id = app_person())
@@ -947,9 +950,15 @@ REVOKE ALL ON FUNCTION app_shares_meeting(uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION app_shares_meeting(uuid) TO app_api, app_worker;
 ALTER FUNCTION app_shares_meeting(uuid) OWNER TO app_definer;
 REVOKE CREATE ON SCHEMA public FROM app_definer;
-CREATE POLICY meeting_members_member ON meeting_members FOR ALL TO app_api, app_worker
+-- Membership rows are made only by meeting_create and removed only by cascades. The worker may write them in a meeting
+-- context; the API may read them and change only its own ready and seen times (column grants below the table grants).
+CREATE POLICY meeting_members_worker ON meeting_members FOR ALL TO app_worker
   USING (meeting_id = app_meeting() OR person_id = app_person() OR app_shares_meeting(meeting_id))
   WITH CHECK (meeting_id = app_meeting() OR person_id = app_person());
+CREATE POLICY meeting_members_api_read ON meeting_members FOR SELECT TO app_api
+  USING (meeting_id = app_meeting() OR person_id = app_person() OR app_shares_meeting(meeting_id));
+CREATE POLICY meeting_members_api_update ON meeting_members FOR UPDATE TO app_api
+  USING (person_id = app_person()) WITH CHECK (person_id = app_person());
 CREATE POLICY meeting_members_definer ON meeting_members FOR ALL TO app_definer USING (true) WITH CHECK (true);
 
 CREATE POLICY meeting_steps_member ON meeting_steps FOR ALL TO app_api, app_worker
