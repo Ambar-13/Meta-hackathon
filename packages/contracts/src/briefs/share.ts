@@ -38,5 +38,5 @@ export type ConsentResponse = z.infer<typeof ConsentResponse>;
 export const ConsentWithdrawResponse = z.object({ published: z.literal(false) });
 // The type of ConsentWithdrawResponse, read from the schema above.
 export type ConsentWithdrawResponse = z.infer<typeof ConsentWithdrawResponse>;
-// Random bytes in a share slug: 96 bits, which is 16 URL-safe base64 characters. Picked here [confirm].
-export const SHARE_SLUG_BYTES = 12;
+// Random bytes in a share slug: 128 bits, which is 22 URL-safe base64 characters (R9.4; the share spec's value, as-built item 37).
+export const SHARE_SLUG_BYTES = 16;
