@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { CardBuildOutput, MODEL_OUTPUT_SCHEMAS, NamesPassOutput, QUIZ_BANK, toStrictJsonSchema } from "@meet-first/contracts";
+import { BriefOutput, CardBuildOutput, MODEL_OUTPUT_SCHEMAS, NamesPassOutput, QUIZ_BANK, QuestionCheckOutput, toStrictJsonSchema } from "@meet-first/contracts";
 import { PROMPT_NAMES, currentVersion, promptFilePath, readPrompt } from "./index.js";
 
 // The system message the card call sends: the dossier prompt, then the untrusted-data rules.
@@ -16,10 +16,10 @@ function walk(node: unknown, depth: number, visit: (node: Record<string, unknown
   return Math.max(depth, ...children.map((child) => walk(child, depth + 1, visit)));
 }
 
-describe("v1 schema files", () => {
-  it("R3.1-T4: every v1/schema.json under packages/prompts is strict", () => {
-    for (const name of Object.keys(MODEL_OUTPUT_SCHEMAS)) {
-      const file = JSON.parse(readFileSync(promptFilePath(name as keyof typeof MODEL_OUTPUT_SCHEMAS, "v1", "schema.json"), "utf8")) as Record<string, unknown>;
+describe("schema files", () => {
+  it("R3.1-T4: the schema.json of every current version under packages/prompts is strict", () => {
+    for (const name of Object.keys(MODEL_OUTPUT_SCHEMAS) as (keyof typeof MODEL_OUTPUT_SCHEMAS)[]) {
+      const file = JSON.parse(readFileSync(promptFilePath(name, currentVersion(name), "schema.json"), "utf8")) as Record<string, unknown>;
       expect(file.strict).toBe(true);
       expect(file.name).toBe(name);
       let combinators = 0;
@@ -38,9 +38,11 @@ describe("v1 schema files", () => {
     }
   });
 
-  it("R3.1-T5: the dossier and scrub-names schemas read by readPrompt are the converted contracts schemas", () => {
+  it("R3.1-T5: the dossier, scrub-names, question-check and brief schemas read by readPrompt are the converted contracts schemas", () => {
     expect(readPrompt("dossier").schema).toEqual(toStrictJsonSchema(CardBuildOutput, "dossier"));
     expect(readPrompt("scrub-names").schema).toEqual(toStrictJsonSchema(NamesPassOutput, "scrub-names"));
+    expect(readPrompt("question-check").schema).toEqual(toStrictJsonSchema(QuestionCheckOutput, "question-check"));
+    expect(readPrompt("brief").schema).toEqual(toStrictJsonSchema(BriefOutput, "brief"));
     expect(readPrompt("untrusted-data-rules").schema).toBeNull();
   });
 });
@@ -57,7 +59,7 @@ describe("prompt texts", () => {
     expect(text).toContain("Never invent a quote to reach 6.");
   });
 
-  it("R3.9-T2: current.ts names every prompt folder at v1, and readPrompt reads that version", () => {
+  it("R3.9-T2: current.ts names every prompt folder, the four question-kind prompts at v2 and the rest at v1, and readPrompt reads that version", () => {
     expect(PROMPT_NAMES).toEqual([
       "dossier",
       "scrub-names",
@@ -73,10 +75,11 @@ describe("prompt texts", () => {
       "comic-image",
       "untrusted-data-rules",
     ]);
-    for (const name of PROMPT_NAMES) expect(currentVersion(name)).toBe("v1");
-    for (const name of ["dossier", "scrub-names", "untrusted-data-rules"] as const) {
+    const atV2 = new Set(["question-check", "meeting-moderator", "meeting-speech", "brief"]);
+    for (const name of PROMPT_NAMES) expect(currentVersion(name)).toBe(atV2.has(name) ? "v2" : "v1");
+    for (const name of ["dossier", "scrub-names", "untrusted-data-rules", "question-check", "meeting-moderator", "meeting-speech"] as const) {
       const prompt = readPrompt(name);
-      expect(prompt.version).toBe("v1");
+      expect(prompt.version).toBe(currentVersion(name));
       expect(prompt.text.startsWith("<version>")).toBe(true);
       expect(prompt.text).toContain("Status: draft");
     }

@@ -1,13 +1,9 @@
 import type { ReactElement } from "react";
-import type { ShareSnapshot } from "@meet-first/contracts";
+import { BRIEF_SECTION_LABELS, type ShareSnapshot } from "@meet-first/contracts";
 import { SafeMarkdown } from "../../transcript/index.js";
 
-// The three sections of the brief, in the order the page shows them, with the label each carries.
-const BRIEF_SECTIONS = [
-  { key: "agree", label: "Agree" },
-  { key: "clash", label: "Clash" },
-  { key: "decideFirst", label: "Decide first" },
-] as const;
+// The three sections of the brief, in the order the page shows them; each one's heading follows the meeting's question kind.
+const BRIEF_SECTIONS = ["agree", "clash", "decideFirst"] as const;
 
 // The style of one panel image: never wider than its column, so the page has no sideways scroll at 375 px.
 const PANEL_IMAGE_STYLE = { display: "block", maxWidth: "100%", height: "auto" } as const;
@@ -76,14 +72,14 @@ const BriefSection = (props: { snapshot: ShareSnapshot }): ReactElement => {
     <section>
       <h2>The brief, lines the support check backed</h2>
       {BRIEF_SECTIONS.map((section) => (
-        <div key={section.key}>
-          <h3>{section.label}</h3>
+        <div key={section}>
+          <h3>{BRIEF_SECTION_LABELS[snapshot.questionKind][section]}</h3>
           <ul>
-            {snapshot.brief[section.key].map((line, index) => (
-              <li key={`${section.key}-${String(index)}`}>
+            {snapshot.brief[section].map((line, index) => (
+              <li key={`${section}-${String(index)}`}>
                 <p>{line.text}</p>
                 {line.quotes.map((quote, quoteIndex) => (
-                  <q key={`${section.key}-${String(index)}-${String(quoteIndex)}`}>{quote.text}</q>
+                  <q key={`${section}-${String(index)}-${String(quoteIndex)}`}>{quote.text}</q>
                 ))}
               </li>
             ))}

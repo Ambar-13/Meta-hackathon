@@ -3,18 +3,18 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { BriefPoint, JOB_MAX_ATTEMPTS, type BriefSupportJudgeOutput } from "@meet-first/contracts";
 import { makeDatabase, POOL_SIZE, withMeeting, type Database } from "@meet-first/db";
-import { freshTestDatabase, type SeededMeeting, type TestDatabase } from "@meet-first/db/testing";
+import { freshTestDatabase, SEED_TURNS_B, type SeededMeeting, type TestDatabase } from "@meet-first/db/testing";
 import { CHAT_MODEL, LimiterBusy, makeLlmClient, type LlmClient } from "@meet-first/llm";
 import { makeReplayFolder, testWorkerEnv } from "@meet-first/llm/testing";
 import { definePayloadTask } from "../job-context.js";
 import { makeTestJobContext } from "../testing/index.js";
-import { SEED_STEPS, seedBriefMeeting } from "./testing/golden-path-briefs.js";
+import { seedBriefMeeting } from "./testing/golden-path-briefs.js";
 import { writeBriefsTask } from "./write-briefs-job.js";
 
 // The time every job in this file runs at, fixed so the fake clock is the same on every run.
 const NOW = new Date("2026-10-26T12:00:00.000Z");
-// The first claim of side b: the statement the judge sees first for side b.
-const SIDE_B_FIRST_STATEMENT = SEED_STEPS[1]?.claims[0] ?? "";
+// The first note turn of side b: a quote only side b's judge call carries.
+const SIDE_B_FIRST_QUOTE = SEED_TURNS_B[0];
 // The row of a brief as the test reads it.
 const BriefRow = z.object({ person_id: z.string(), agree: z.array(BriefPoint), clash: z.array(BriefPoint), decide_first: z.array(BriefPoint), model: z.string(), prompt_version: z.string(), support_rate: z.union([z.string(), z.number()]).nullable(), support_reliable: z.boolean().nullable(), support_raw: z.record(z.unknown()).nullable() });
 
@@ -57,9 +57,9 @@ function readyEvents(meetingId: string) {
   return withMeeting(workerDb, meetingId, (trx) => trx.selectFrom("meeting_events").select(["seq", "payload"]).where("meeting_id", "=", meetingId).where("type", "=", "brief.ready").execute());
 }
 
-// Whether a judge call is the one for side b, read from the statement it carries.
+// Whether a judge call is the one for side b, read from the side b quote it carries.
 function isSideBJudge(args: { callSite: string; messages: Array<{ content: string | null }> }): boolean {
-  return args.callSite === "brief_support_judge" && (args.messages[1]?.content ?? "").includes(`<statement>${SIDE_B_FIRST_STATEMENT}</statement>`);
+  return args.callSite === "brief_support_judge" && (args.messages[1]?.content ?? "").includes(`<quote>"${SIDE_B_FIRST_QUOTE}"</quote>`);
 }
 
 // A replay client over the repository fixtures, or over a given fixture folder.
@@ -83,7 +83,7 @@ describe("write_briefs job", () => {
     const quotes = points.flatMap((point) => point.quotes);
     expect(points).toHaveLength(18);
     expect(quotes.every((quote) => quote.verified && turnIds.has(quote.turnId))).toBe(true);
-    expect(rows.every((row) => row.model === CHAT_MODEL && row.prompt_version === "v1")).toBe(true);
+    expect(rows.every((row) => row.model === CHAT_MODEL && row.prompt_version === "v2")).toBe(true);
     const ledger = await ledgerRows(seeded.meetingId, "brief");
     expect(ledger.map((entry) => entry.model)).toEqual([CHAT_MODEL, CHAT_MODEL]);
   });

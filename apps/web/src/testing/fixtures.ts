@@ -168,6 +168,7 @@ export function meetingView(overrides: Partial<MeetingView>): MeetingView {
     id: IDS.meeting,
     state: "ready",
     questionText: curatedText(),
+    questionKind: "get_along",
     questionChecked: true,
     members: [
       { side: "a", displayName: "A", ready: false, connected: false },

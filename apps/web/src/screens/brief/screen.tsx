@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { Link, useParams } from "react-router-dom";
-import type { Brief } from "@meet-first/contracts";
+import { BRIEF_SECTION_LABELS, type Brief } from "@meet-first/contracts";
 import { APP_PATHS, ScreenFrame } from "../../app-shell/index.js";
 import { BriefSection } from "./brief-sections.js";
 import { QuoteSheet } from "./quote-sheet.js";
@@ -18,12 +18,14 @@ export function supportLine(brief: Brief): string {
 // The sections, the quote sheet and the two links of a finished brief.
 const BriefBody = (props: { brief: Brief; meetingId: string; hook: BriefScreenHook; sheetQuote: OpenQuote | null }): ReactElement => {
   const sections = splitBriefForDisplay(props.brief);
+  // The headings follow the question: "where you'd click" for getting along, "where you agree" for a deal.
+  const labels = BRIEF_SECTION_LABELS[props.brief.questionKind];
   return (
     <>
       <p>{supportLine(props.brief)}</p>
-      <BriefSection title="Where you agree" points={sections.agree} onQuote={props.hook.showQuote} />
-      <BriefSection title="Where you clash" points={sections.clash} onQuote={props.hook.showQuote} />
-      <BriefSection title="Decide this first" points={sections.decideFirst} onQuote={props.hook.showQuote} />
+      <BriefSection title={labels.agree} points={sections.agree} onQuote={props.hook.showQuote} />
+      <BriefSection title={labels.clash} points={sections.clash} onQuote={props.hook.showQuote} />
+      <BriefSection title={labels.decideFirst} points={sections.decideFirst} onQuote={props.hook.showQuote} />
       {sections.setAside.length > 0 ? <BriefSection title="Set aside" points={sections.setAside} onQuote={props.hook.showQuote} /> : null}
       <nav aria-label="Next steps">
         <Link to={APP_PATHS.comic(props.meetingId)} style={{ display: "inline-block", minHeight: 44 }}>Draw the comic</Link>{" "}

@@ -14,3 +14,10 @@ Adversarial cases:
 Conflicts:
 - Recipient language against quote language: text follows the recipient, quotes keep theirs.
 - Three lines required against too little material: use item quotes.
+
+v2 cases (the question's kind):
+- Kind get_along: agree lines read as where the two would probably click, clash lines as where they would probably rub; no line says "you will get along" or "compatible".
+- Kind help: a line that claims a need of the other person that none of their quotes shows is replaced by one a quote carries (rule 9).
+- Kind decision: the v1 meanings stand, including concede and hold in clash.
+- Kind missing or unknown: the lines are written as for situation.
+- A hedged line whose quotes carry only half of it: the support judge rejects it, so the brief picks a line the quotes carry whole.

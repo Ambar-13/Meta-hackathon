@@ -24,10 +24,9 @@ Notice that the version comes from `current.ts` on every call, so one changed li
 
 ## The main pieces
 
-`src/current.ts` holds the version of each prompt and the list of prompt names. `src/read-prompt.ts` reads one prompt version from disk on every call. `src/index.ts` is the package's public surface. The prompt folders are `dossier`, `scrub-names` and `untrusted-data-rules` in this wave; each holds its `v1` text, a README, a CHANGELOG and its test cases.
+`src/current.ts` holds the version of each prompt and the list of prompt names. `src/read-prompt.ts` reads one prompt version from disk on every call. `src/index.ts` is the package's public surface. There is one folder per prompt, 13 in all; each holds its version folders, a README, a CHANGELOG and its test cases. question-check, meeting-moderator, meeting-speech and brief send `v2`, the rest `v1`.
 
 ## How to test it
 
 `pnpm test:contracts packages/prompts` and `pnpm test:integration apps/worker/src/cards`.
 
-Not built yet: the quiz, meeting, brief and comic prompt texts; each arrives with its builder, and `current.ts` already names them.

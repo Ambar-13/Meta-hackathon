@@ -1,5 +1,5 @@
 // Turns a meeting's turns, claims and approved items into the brief prompt, and the model's lines into checked brief points.
-import type { BriefOutput, BriefPoint, Claim } from "@meet-first/contracts";
+import type { QuestionKind, BriefOutput, BriefPoint, Claim } from "@meet-first/contracts";
 import type { ChatMessage } from "@meet-first/llm";
 import { verifyQuote } from "@meet-first/receipts";
 
@@ -20,7 +20,7 @@ export type TranscriptTurn = { stepSeq: number; side: "a" | "b"; phase: string; 
 export type CitableQuote = { side: "a" | "b"; turnId: string; text: string; origin: "claim" | "item" };
 // Everything one recipient's brief prompt is built from.
 export type BriefPromptInput = {
-  recipient: BriefSide; other: BriefSide; questionText: string; sourceTurns: SourceTurn[]; transcript: TranscriptTurn[];
+  recipient: BriefSide; other: BriefSide; questionText: string; questionKind: QuestionKind; sourceTurns: SourceTurn[]; transcript: TranscriptTurn[];
   items: ApprovedItem[]; promptText: string; untrustedRulesText: string;
 };
 // The three sections of one brief, each a list of points.
@@ -88,7 +88,7 @@ export function buildBriefPromptInput(input: BriefPromptInput): { messages: Chat
   const people = input.recipient.side === "a" ? [input.recipient, input.other] : [input.other, input.recipient];
   const system = promptBodyOf(input.promptText).replaceAll("{{untrusted_data_rules}}", input.untrustedRulesText).replaceAll("{{recipient_side}}", input.recipient.side);
   const body = [
-    `<question>${input.questionText}</question>`,
+    `<question kind="${input.questionKind}">${input.questionText}</question>`,
     `<people>${people.map((person) => `side ${person.side}: ${person.displayName}`).join("; ")}; you are writing for side ${input.recipient.side}</people>`,
     ...cardLines("a", input.items, context),
     ...cardLines("b", input.items, context),

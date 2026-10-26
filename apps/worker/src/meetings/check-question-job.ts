@@ -56,7 +56,7 @@ export function questionCheckCallArgs(input: { meetingId: string; promptVersion:
 
 // Builds and stores the frozen prefix of each side that has none, inside the caller's transaction (D41, invariant 17).
 export async function storeFrozenPrefixes(trx: Transaction<Database>, meetingId: string, prompts: MeetingPrompts): Promise<number> {
-  const question = await trx.selectFrom("meetings").select("question_text").where("id", "=", meetingId).executeTakeFirstOrThrow();
+  const question = await trx.selectFrom("meetings").select(["question_text", "question_kind"]).where("id", "=", meetingId).executeTakeFirstOrThrow();
   const members = await trx.selectFrom("meeting_members as mm").innerJoin("people as p", "p.id", "mm.person_id")
     .select(["mm.side", "mm.person_id", "mm.card_id", "mm.frozen_prefix", "p.display_name"]).where("mm.meeting_id", "=", meetingId).orderBy("mm.side").execute();
   let written = 0;
@@ -70,7 +70,7 @@ export async function storeFrozenPrefixes(trx: Transaction<Database>, meetingId:
     const misses = await quizMisses(trx, member.card_id);
     const prefix = buildFrozenPrefix({
       texts: { moderator: prompts.moderator.text, speech: prompts.speech.text, untrustedRules: prompts.untrustedRules.text },
-      question: question.question_text, side: member.side, ownName: member.display_name, otherName: other.display_name, items: items.map(toPrefixItem), misses,
+      question: question.question_text, questionKind: question.question_kind, side: member.side, ownName: member.display_name, otherName: other.display_name, items: items.map(toPrefixItem), misses,
     });
     const estimate = Math.ceil(prefix.length / DEFAULT_CHARS_PER_TOKEN);
     await trx.updateTable("meeting_members").set({ frozen_prefix: prefix, frozen_prefix_tokens: estimate })
@@ -106,7 +106,8 @@ async function applyVerdict(trx: Transaction<Database>, scope: VerdictScope, ver
     return "refused";
   }
   if (verdict !== undefined) {
-    await trx.updateTable("meetings").set({ question_checked_at: context.now() }).where("id", "=", meetingId).where("question_checked_at", "is", null).execute();
+    // The kind is written before the prefixes below are built, so both personas read the kind the check gave.
+    await trx.updateTable("meetings").set({ question_checked_at: context.now(), question_kind: verdict.kind }).where("id", "=", meetingId).where("question_checked_at", "is", null).execute();
   }
   await storeFrozenPrefixes(trx, meetingId, scope.prompts);
   return startIfReady(trx, { meetingId, now: context.now(), maxRunning: context.env.MAX_CONCURRENT_MEETINGS });

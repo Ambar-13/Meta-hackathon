@@ -33,6 +33,12 @@ function nestingDepth(node: unknown): number {
   return childDepths.length === 0 ? 0 : Math.max(...childDepths);
 }
 
+/** The highest vN folder of one prompt, such as "v2". */
+function newestVersion(name: string): string {
+  const numbers = readdirSync(`${PROMPTS_FOLDER}${name}`).filter((entry) => /^v\d+$/.test(entry)).map((entry) => Number(entry.slice(1)));
+  return `v${String(Math.max(...numbers))}`;
+}
+
 describe("model output schemas", () => {
   it("R3.1-T1: every model output schema converts to strict JSON schema", () => {
     const converted = Object.entries(MODEL_OUTPUT_SCHEMAS).map(([name, schema]) => toStrictJsonSchema(schema, name));
@@ -79,11 +85,11 @@ describe("model output schemas", () => {
     expect(caught).toMatchObject({ code: "schema_not_strict" });
   });
 
-  it("R3.1-T5: each packages/prompts/<name>/v1/schema.json equals the converted schema", () => {
+  it("R3.1-T5: the newest packages/prompts/<name>/vN/schema.json equals the converted schema; older versions keep the schema they shipped with", () => {
     const folders = readdirSync(PROMPTS_FOLDER).filter((name) => name in MODEL_OUTPUT_SCHEMAS);
 
     const mismatches = folders.filter((name) => {
-      const saved: unknown = JSON.parse(readFileSync(`${PROMPTS_FOLDER}${name}/v1/schema.json`, "utf8"));
+      const saved: unknown = JSON.parse(readFileSync(`${PROMPTS_FOLDER}${name}/${newestVersion(name)}/schema.json`, "utf8"));
       const schema = MODEL_OUTPUT_SCHEMAS[name as keyof typeof MODEL_OUTPUT_SCHEMAS];
       return JSON.stringify(saved) !== JSON.stringify(toStrictJsonSchema(schema, name));
     });

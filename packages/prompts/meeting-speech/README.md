@@ -1,6 +1,6 @@
 # meeting-speech prompt
 
-How a persona speaks in a meeting: its voice, how it uses its card, languages, people and privacy, honesty and refusals (D43, R6.3, R7.3).
+How a persona speaks in a meeting: its voice, how it uses its card, how it says a likely reaction, languages, people and privacy, honesty and refusals (D43, R6.3, R7.3).
 
 ## What this does
 
@@ -14,8 +14,8 @@ It never lists meeting data and never sets the agenda: those come from the moder
 
 ```mermaid
 flowchart LR
-  M[meeting-moderator v1] --> P[buildFrozenPrefix]
-  S[meeting-speech v1] --> P
+  M[meeting-moderator v2] --> P[buildFrozenPrefix]
+  S[meeting-speech v2] --> P
   P --> R[speech request]
   R --> T[turn.committed]
 ```

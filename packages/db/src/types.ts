@@ -64,7 +64,7 @@ export interface PairsTable {
 }
 // One row of the meetings table, as migration 0001 defines it.
 export interface MeetingsTable {
-  id: Generated<string>; pair_id: string; question_id: number | null; question_text: string; question_checked_at: NullableTimestamp; question_rejected_reason: string | null;
+  id: Generated<string>; pair_id: string; question_id: number | null; question_text: string; question_checked_at: NullableTimestamp; question_rejected_reason: string | null; question_kind: Generated<"get_along" | "help" | "situation" | "decision">;
   state: Generated<"ready" | "queued" | "running" | "ended" | "deleted">; queue_position: number | null; phase: "open" | "explore" | "decide" | "close" | null;
   current_step_seq: Generated<number>; started_at: NullableTimestamp; ends_at: NullableTimestamp; ended_at: NullableTimestamp; end_reason: "decided" | "budget" | "deleted" | null; created_at: GeneratedTimestamp;
 }

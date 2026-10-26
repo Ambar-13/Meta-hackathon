@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { QuestionKind } from "../meetings/meeting.js";
 import { Side, Uuid } from "../primitives.js";
 
 // A quote a brief line rests on, with the side it came from and whether it was found in the turn.
@@ -21,6 +22,7 @@ export const Brief = z.object({
   decideFirst: z.array(BriefPoint).length(3),
   supportRate: z.number().min(0).max(1).nullable(),
   supportReliable: z.boolean().nullable(),
+  questionKind: QuestionKind,
 });
 // The type of Brief, read from the schema above.
 export type Brief = z.infer<typeof Brief>;
@@ -54,3 +56,11 @@ export type BriefSupportJudgeOutput = z.infer<typeof BriefSupportJudgeOutput>;
 export const WEAK_RECEIPT_COPY = "weak receipt";
 // The label shown when a line has no quote at all (R6.5).
 export const NO_RECEIPT_COPY = "no receipt";
+// The three section headings of a brief for each kind of question. The data stays agree, clash and decideFirst; only the words
+// change, so a get-along brief reads "where you'd click" and a deal reads "where you agree". The brief screen and the share page read it.
+export const BRIEF_SECTION_LABELS: Record<QuestionKind, { agree: string; clash: string; decideFirst: string }> = {
+  get_along: { agree: "Where you'd click", clash: "Where you'd rub", decideFirst: "What to talk about first" },
+  help: { agree: "Where help would work", clash: "Where it wouldn't", decideFirst: "What to ask first" },
+  situation: { agree: "How you'd each probably react", clash: "Where you'd differ", decideFirst: "What to settle first" },
+  decision: { agree: "Where you agree", clash: "Where you clash", decideFirst: "Decide this first" },
+};

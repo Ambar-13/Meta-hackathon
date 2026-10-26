@@ -31,6 +31,7 @@ function briefFixture(): Brief {
     decideFirst: [point({ text: "Settle who writes the plan", side: "a", supported: true }), point({ text: "Settle the deadline rule", side: "b", supported: true }), point({ text: "Settle the weekend rule", side: "a", supported: true })],
     supportRate: 0.889,
     supportReliable: true,
+    questionKind: "decision",
   });
 }
 
@@ -103,6 +104,13 @@ describe("brief screen", () => {
     });
     expect(screen.getByRole("heading", { name: "Where you agree" })).toBeTruthy();
     expect(screen.queryByText("Writing your brief. This takes about a minute.")).toBeNull();
+  });
+
+  it("R10.5-T6: a get-along brief names its sections for getting along", async () => {
+    stubRoute(routes.briefs.readBrief, { ...briefFixture(), questionKind: "get_along" });
+    renderScreen(<BriefScreen />, { pattern: ROUTE_PATTERNS.brief, url: APP_PATHS.brief(MEETING) });
+    for (const name of ["Where you'd click", "Where you'd rub", "What to talk about first"]) expect(await screen.findByRole("heading", { name })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "Where you agree" })).toBeNull();
   });
 
   it("W2-BRIEF-T22: every control has a label and the screen has no horizontal overflow at 375 px", async () => {

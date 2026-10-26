@@ -1,6 +1,6 @@
 # What Meet First does not do
 
-No prediction of whether a relationship succeeds.
+A simulation of how two people would probably react, not a guarantee; it gives no score.
 
 No compatibility score.
 

@@ -19,6 +19,7 @@ const QUESTION = "Who decides when we disagree and cannot wait?";
 function snapshotFixture(overrides: Partial<ShareSnapshot> = {}): ShareSnapshot {
   return ShareSnapshot.parse({
     question: QUESTION,
+    questionKind: "decision",
     people: [
       { side: "a", displayName: "Test A" },
       { side: "b", displayName: "Test B" },
@@ -76,7 +77,7 @@ describe("public share page", () => {
     for (const heading of ["Who met", "What the personas said", "The brief, lines the support check backed"]) {
       expect(screen.getByRole("heading", { level: 2, name: heading })).toBeTruthy();
     }
-    for (const section of ["Agree", "Clash", "Decide first"]) {
+    for (const section of ["Where you agree", "Where you clash", "Decide this first"]) {
       expect(screen.getByRole("heading", { level: 3, name: section })).toBeTruthy();
     }
     const report = screen.getByRole("link", { name: "Report this page" });

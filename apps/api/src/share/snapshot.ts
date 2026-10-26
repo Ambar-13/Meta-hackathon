@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { BriefPoint, ContractError, FORBIDDEN_SHARE_KEYS, HTTP, rowToEvent, SHARE_SLUG_BYTES, ShareSnapshot } from "@meet-first/contracts";
+import { type QuestionKind, BriefPoint, ContractError, FORBIDDEN_SHARE_KEYS, HTTP, rowToEvent, SHARE_SLUG_BYTES, ShareSnapshot } from "@meet-first/contracts";
 import type { DatabaseTransaction } from "@meet-first/db";
 
 // Random bytes in a share slug, from the contracts: 16 bytes, which is 22 URL-safe base64 characters (R9.4, D68).
@@ -51,10 +51,10 @@ export function isShareableLine(point: BriefPoint): boolean {
   return point.supported === true && point.quotes.length > 0 && point.quotes.every((quote) => quote.verified);
 }
 
-// Reads the question the meeting was asked.
-async function readQuestion(trx: DatabaseTransaction, meetingId: string): Promise<string> {
-  const meeting = await trx.selectFrom("meetings").select("question_text").where("id", "=", meetingId).executeTakeFirstOrThrow();
-  return meeting.question_text;
+// Reads the question the meeting was asked and its kind, which picks the public page's section labels.
+async function readQuestion(trx: DatabaseTransaction, meetingId: string): Promise<{ text: string; kind: QuestionKind }> {
+  const meeting = await trx.selectFrom("meetings").select(["question_text", "question_kind"]).where("id", "=", meetingId).executeTakeFirstOrThrow();
+  return { text: meeting.question_text, kind: meeting.question_kind };
 }
 
 // Reads both members with their sides and display names; the names come from people, which the meeting context may read.
@@ -167,7 +167,8 @@ export async function buildShareSnapshot(trx: DatabaseTransaction, meetingId: st
   const turns = await readTurns(trx, meetingId);
   const comic = await readComic(trx, meetingId);
   const candidate = {
-    question,
+    question: question.text,
+    questionKind: question.kind,
     people: members.map((member) => ({ side: member.side, displayName: member.displayName })),
     items,
     turns,

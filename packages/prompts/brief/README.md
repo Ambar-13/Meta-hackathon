@@ -2,11 +2,11 @@
 
 ## What this does
 
-Writes one recipient's nine brief lines: three where the two people agree, three where they clash, and three things to decide first. Every line carries one or two quotes copied from the meeting or the person's approved card.
+Writes one recipient's nine brief lines in three sections whose meaning follows the question's kind: for a get-along question, where the two would probably click, where they would probably rub and what to talk about first; for a decision, where they agree, where they clash and what to decide first. Every line carries one or two quotes copied from the meeting or the person's approved card.
 
 ## What this never does
 
-It never gives a score, a percentage, a verdict on whether the two people should work together, an invented quote, or a line without a quote.
+It never gives a score, a percentage, a sure verdict on whether the two people will get along or should work together, an invented quote, or a line without a quote.
 
 ## How it fits
 

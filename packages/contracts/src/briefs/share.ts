@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ItemKind } from "../cards/card.js";
+import { QuestionKind } from "../meetings/meeting.js";
 import { Side } from "../primitives.js";
 
 // Keys a share page must never send, because they would reveal who the people are (R9.4).
@@ -10,6 +11,7 @@ const SharedPoint = z.object({ text: z.string(), quotes: z.array(z.object({ text
 export const ShareSnapshot = z
   .object({
     question: z.string(),
+    questionKind: QuestionKind,
     people: z.array(z.object({ side: Side, displayName: z.string() })).length(2),
     items: z.array(z.object({ side: Side, kind: ItemKind, claim: z.string(), quote: z.string() })),
     turns: z.array(

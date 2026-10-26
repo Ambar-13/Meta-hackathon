@@ -11,6 +11,12 @@ export const EXPLORE_CUTOFF_MINUTES = 8;
 export const AGENDA = { open: 2, exploreMax: 6, decide: 2 } as const;
 // A person counts as present when they were seen this many seconds ago, D53.
 export const PRESENCE_WINDOW_SECONDS = 30;
+// What a meeting question asks the two personas to play out: whether the two people would get along, whether one could help the
+// other, how each would react to a situation or what each thinks of a view, or a decision or deal between them. It sets the
+// meeting's decide turns and the brief's three section labels; no kind ever yields a score or a verdict.
+export const QuestionKind = z.enum(["get_along", "help", "situation", "decision"]);
+// The type of QuestionKind, read from the schema above.
+export type QuestionKind = z.infer<typeof QuestionKind>;
 // Where a meeting is in its life, from ready to ended or deleted.
 export const MeetingState = z.enum(["ready", "queued", "running", "ended", "deleted"]);
 // The type of MeetingState, read from the schema above.
@@ -46,6 +52,7 @@ export const MeetingView = z.object({
   state: MeetingState,
   phase: Phase.optional(),
   questionText: z.string(),
+  questionKind: QuestionKind,
   questionChecked: z.boolean(),
   members: z.array(MeetingMember).length(2),
   viewerSide: Side, // the side of the person who asked for this view, from their meeting_members row
@@ -67,22 +74,24 @@ export const MeetingStartResponse = z.object({
 });
 // The type of MeetingStartResponse, read from the schema above.
 export type MeetingStartResponse = z.infer<typeof MeetingStartResponse>;
-// What the question check model returns: whether the question may be used, and why (R10.5).
-export const QuestionCheckOutput = z.object({ allowed: z.boolean(), reason: z.string().min(1).max(200) });
+// What the question check model returns: whether the question may be used, why, and which kind it is (R10.5). The kind matters only
+// when the question is allowed.
+export const QuestionCheckOutput = z.object({ allowed: z.boolean(), reason: z.string().min(1).max(200), kind: QuestionKind });
 // The type of QuestionCheckOutput, read from the schema above.
 export type QuestionCheckOutput = z.infer<typeof QuestionCheckOutput>;
-// The 12 curated meeting questions, ids 1 to 12, drafted for the Wave 0 review (R10.5, no input lists them).
-export const CURATED_QUESTIONS: ReadonlyArray<{ id: number; text: string }> = [
-  { id: 1, text: "Should we build this as a side project or commit full time?" },
-  { id: 2, text: "Who decides when we disagree and cannot wait?" },
-  { id: 3, text: "How do we split money if one of us does more of the work this month?" },
-  { id: 4, text: "What hours do we both promise to be reachable?" },
-  { id: 5, text: "Which of our two ideas do we try first, and how do we know it failed?" },
-  { id: 6, text: "How much of our own money are we each willing to lose on this?" },
-  { id: 7, text: "Do we take outside money early, or stay small until it works?" },
-  { id: 8, text: "What would make either of us walk away, and how would we part?" },
-  { id: 9, text: "Who talks to customers and who builds, or do we both do both?" },
-  { id: 10, text: "How do we give each other hard feedback without it getting personal?" },
-  { id: 11, text: "What do we do when one of us wants to ship and the other wants to polish?" },
-  { id: 12, text: "If this works, what does each of us want it to become?" },
+// The 12 curated meeting questions, ids 1 to 12, in three groups of 4 as the lobby shows them: getting along (1 to 4), help (5 to 8),
+// and situations and views (9 to 12), where 11 and 12 are decisions. Each is about the two people only (R10.5).
+export const CURATED_QUESTIONS: ReadonlyArray<{ id: number; text: string; kind: QuestionKind }> = [
+  { id: 1, text: "Would we enjoy a 10-day hackathon together?", kind: "get_along" },
+  { id: 2, text: "Would we get along on a small team, day to day?", kind: "get_along" },
+  { id: 3, text: "What would each of us find hard about working with the other?", kind: "get_along" },
+  { id: 4, text: "Where would we probably argue, and how would it go?", kind: "get_along" },
+  { id: 5, text: "Where could each of us help the other most?", kind: "help" },
+  { id: 6, text: "What could each of us teach the other?", kind: "help" },
+  { id: 7, text: "Would we be useful to each other on a side project, and how?", kind: "help" },
+  { id: 8, text: "If one of us got stuck, how would the other probably help?", kind: "help" },
+  { id: 9, text: "How would we each react if our demo broke an hour before judging?", kind: "situation" },
+  { id: 10, text: "Do we see the future of AI the same way?", kind: "situation" },
+  { id: 11, text: "Would we make a deal on how to split a hackathon prize?", kind: "decision" },
+  { id: 12, text: "What do we do when one of us wants to ship and the other wants to polish?", kind: "decision" },
 ];

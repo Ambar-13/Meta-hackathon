@@ -4,7 +4,7 @@ One line per word, in alphabetical order. Each line names the table, schema or f
 
 - **affiliations**: The organisations a person names as their own. The scrubber keeps them so a persona can say them (D17). Lives in the `people` table as `affiliations`.
 - **attestation**: The person's tick that the chats they upload are their own. Lives in the `sources` table as `attested_at` (R2.7).
-- **brief**: The written summary of one meeting for one person: what they agree on, where they clash, and what to decide first. Lives in the `briefs` table.
+- **brief**: The written summary of one meeting for one person, in three groups whose headings follow the question kind: for a decision, what they agree on, where they clash and what to decide first; for getting along, where they would click, where they would rub and what to talk about first. Lives in the `briefs` table.
 - **brief point**: One line of a brief, with the quotes it copies from the turns. Lives in the `briefs` table as the `agree`, `clash` and `decide_first` lists.
 - **call site**: One kind of model call, such as the card call or a meeting turn, with its own effort, token limit, timeout and prompt. Lives in `packages/llm/src/call-sites.ts`.
 - **canonicalisation**: The cleaning of text before it is stored: the byte order mark is removed, line endings become LF, the text is put in NFC form, and format and control characters are removed (D6). Lives in `packages/parsers/src/canonicalise.ts`.
@@ -45,6 +45,7 @@ One line per word, in alphabetical order. Each line names the table, schema or f
 - **placeholder (redaction)**: The text that replaces a scrubbed span, such as `[redacted:email:8hex]` (D14). Lives in `packages/scrub/src/placeholders.ts` and in the `redactions` table as `placeholder_id`.
 - **poll fallback**: The two-second poll that keeps the meeting screen current when the live stream stops (D49). Lives in `apps/web/src/streaming/poll-fallback.ts`.
 - **prefix (frozen)**: The fixed opening of a meeting prompt, stored once and cached by the model (D41). Lives in the `meeting_members` table as `frozen_prefix`.
+- **question kind**: What a meeting question asks the two personas to play out: get_along, help, situation or decision. A curated question has its kind; the question check gives a typed one its kind. Lives in the `meetings` table as `question_kind`.
 - **quiz**: The blind set of ten questions about a card, scored as "matched n of 10". Lives in the `quizzes` and `quiz_items` tables.
 - **quiz bank**: The fixed list of 30 questions every quiz is drawn from (D28). Lives in the `quiz_bank` table.
 - **recall**: The meeting tool that looks up the speaker's scrubbed notes, when the person has switched recall on. Lives in `apps/worker/src/meetings/recall.ts`.

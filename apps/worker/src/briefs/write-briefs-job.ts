@@ -1,6 +1,6 @@
 // Writes both humans' briefs after a meeting ends, checks each line's quote with a second model call, then tells both browsers with one brief.ready event.
 import type { Kysely } from "kysely";
-import { BriefOutput, BriefSupportJudgeOutput, type CommittedEvent, ContractError, EVENT_VERSION, rowToEvent, toStrictJsonSchema, type TurnCommitted } from "@meet-first/contracts";
+import { type QuestionKind, BriefOutput, BriefSupportJudgeOutput, type CommittedEvent, ContractError, EVENT_VERSION, rowToEvent, toStrictJsonSchema, type TurnCommitted } from "@meet-first/contracts";
 import { appendMeetingEvent, numberFromPostgres, withMeeting, type Database, type DatabaseTransaction } from "@meet-first/db";
 import { CapReached, CHAT_MODEL, LimiterBusy } from "@meet-first/llm";
 import { readPrompt } from "@meet-first/prompts";
@@ -19,7 +19,7 @@ const SIDES = ["a", "b"] as const;
 type Side = (typeof SIDES)[number];
 // The meeting as the brief job reads it once: who the members are, the notes, the transcript, the items and what is written already.
 export type BriefSnapshot = {
-  meetingId: string; questionText: string; sides: Record<Side, BriefSide>; sourceTurns: SourceTurn[]; transcript: TranscriptTurn[];
+  meetingId: string; questionText: string; questionKind: QuestionKind; sides: Record<Side, BriefSide>; sourceTurns: SourceTurn[]; transcript: TranscriptTurn[];
   items: ApprovedItem[]; writtenSides: Side[]; hasReadyEvent: boolean;
 };
 // What the snapshot read gives: the meeting to work on, or the reason there is nothing to write.
@@ -51,7 +51,7 @@ export const writeBriefsTask: JobTask<"write_briefs"> = async (payload, context)
 // Reads the meeting, its members, notes, transcript, approved items and written briefs in one meeting context (ARCHITECTURE.md 3.27).
 export async function readBriefSnapshot(db: Kysely<Database>, meetingId: string): Promise<SnapshotRead> {
   return withMeeting(db, meetingId, async (trx) => {
-    const meeting = await trx.selectFrom("meetings").select(["id", "state", "question_text"]).where("id", "=", meetingId).executeTakeFirst();
+    const meeting = await trx.selectFrom("meetings").select(["id", "state", "question_text", "question_kind"]).where("id", "=", meetingId).executeTakeFirst();
     if (meeting === undefined) return { kind: "skipped", reason: "meeting_gone" };
     if (meeting.state !== "ended") return { kind: "skipped", reason: "meeting_not_ended" };
     const members = await readMembers(trx, meetingId);
@@ -62,7 +62,7 @@ export async function readBriefSnapshot(db: Kysely<Database>, meetingId: string)
     const briefs = await trx.selectFrom("briefs").select("person_id").where("meeting_id", "=", meetingId).execute();
     const writtenSides = members.filter((member) => briefs.some((brief) => brief.person_id === member.person_id)).map((member) => member.side);
     const snapshot: BriefSnapshot = {
-      meetingId, questionText: meeting.question_text, sides, sourceTurns, transcript: transcriptOf(events), items, writtenSides,
+      meetingId, questionText: meeting.question_text, questionKind: meeting.question_kind, sides, sourceTurns, transcript: transcriptOf(events), items, writtenSides,
       hasReadyEvent: events.some((event) => event.type === "brief.ready"),
     };
     return { kind: "ready", snapshot };
@@ -110,7 +110,7 @@ async function writeSideBrief(context: JobContext, snapshot: BriefSnapshot, side
   const recipient = snapshot.sides[side];
   const other = snapshot.sides[side === "a" ? "b" : "a"];
   const prompt = readPrompt("brief");
-  const input = buildBriefPromptInput({ recipient, other, questionText: snapshot.questionText, sourceTurns: snapshot.sourceTurns, transcript: snapshot.transcript, items: snapshot.items, promptText: prompt.text, untrustedRulesText: readPrompt("untrusted-data-rules").text });
+  const input = buildBriefPromptInput({ recipient, other, questionText: snapshot.questionText, questionKind: snapshot.questionKind, sourceTurns: snapshot.sourceTurns, transcript: snapshot.transcript, items: snapshot.items, promptText: prompt.text, untrustedRulesText: readPrompt("untrusted-data-rules").text });
   const reply = await context.llm.complete({ callSite: "brief", promptVersion: prompt.version, messages: input.messages, schema: toStrictJsonSchema(BriefOutput, "brief"), ledger: { personId: null, meetingId: snapshot.meetingId } });
   const output = BriefOutput.safeParse(reply.parsed);
   if (!output.success) throw new ContractError("write_briefs_reply_invalid", "The brief reply did not match the brief schema. The job runs once more.", 502);

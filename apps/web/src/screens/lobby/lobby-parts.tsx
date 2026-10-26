@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ReactElement } from "react";
 import { Link } from "react-router-dom";
-import { CURATED_QUESTIONS, type MeetingView, type PairMeetingRow } from "@meet-first/contracts";
+import { CURATED_QUESTIONS, type MeetingView, type PairMeetingRow, type QuestionKind } from "@meet-first/contracts";
 import { ApiError, ErrorNotice, meetingPathWithSide, readViewerSide } from "../../app-shell/index.js";
 import { MEETING_STATE_LABELS, type QuestionPick } from "./lobby-state.js";
 
@@ -9,7 +9,14 @@ const FREE_TEXT_LABEL = "Your question (5 to 300 characters)";
 // The longest free-text question the picker accepts (R10.5).
 const FREE_TEXT_MAX_CHARS = 300;
 
-// The 12 curated questions and a free-text choice (R10.5).
+// The three groups the picker shows the 12 curated questions in, by kind; the two decisions sit with situations and views.
+const QUESTION_GROUPS: ReadonlyArray<{ title: string; kinds: readonly QuestionKind[] }> = [
+  { title: "Would you get along?", kinds: ["get_along"] },
+  { title: "Could you help each other?", kinds: ["help"] },
+  { title: "How would you each react?", kinds: ["situation", "decision"] },
+];
+
+// The 12 curated questions in their three groups, and a free-text choice (R10.5).
 export const QuestionPicker = (props: { isSending: boolean; error: string | null; onCreate: (pick: QuestionPick) => void }): ReactElement => {
   const [choice, setChoice] = useState<string | null>(null);
   const [freeText, setFreeText] = useState("");
@@ -23,11 +30,16 @@ export const QuestionPicker = (props: { isSending: boolean; error: string | null
     <form onSubmit={onSubmit}>
       <fieldset>
         <legend>Pick a question for the meeting</legend>
-        {CURATED_QUESTIONS.map((question) => (
-          <label className="inline" key={question.id}>
-            <input type="radio" name="question" value={String(question.id)} checked={choice === String(question.id)} onChange={() => { setChoice(String(question.id)); }} />
-            {question.text}
-          </label>
+        {QUESTION_GROUPS.map((group) => (
+          <div key={group.title} role="group" aria-label={group.title}>
+            <p>{group.title}</p>
+            {CURATED_QUESTIONS.filter((question) => group.kinds.includes(question.kind)).map((question) => (
+              <label className="inline" key={question.id}>
+                <input type="radio" name="question" value={String(question.id)} checked={choice === String(question.id)} onChange={() => { setChoice(String(question.id)); }} />
+                {question.text}
+              </label>
+            ))}
+          </div>
         ))}
         <label className="inline">
           <input type="radio" name="question" value="free" checked={choice === "free"} onChange={() => { setChoice("free"); }} />

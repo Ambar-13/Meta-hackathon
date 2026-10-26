@@ -26,7 +26,8 @@ async function readOwnBrief(deps: RouteDeps, personId: string, meetingId: string
     if (member === undefined) throw makeBriefNotFoundError();
     const row = await trx.selectFrom("briefs").select(["agree", "clash", "decide_first", "support_rate", "support_reliable"]).where("meeting_id", "=", meetingId).where("person_id", "=", personId).executeTakeFirst();
     if (row === undefined) throw makeBriefNotReadyError();
-    return toBriefView(row);
+    const meeting = await trx.selectFrom("meetings").select("question_kind").where("id", "=", meetingId).executeTakeFirstOrThrow();
+    return toBriefView(row, meeting.question_kind);
   });
 }
 

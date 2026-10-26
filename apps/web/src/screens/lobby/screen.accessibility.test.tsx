@@ -98,6 +98,15 @@ describe("lobby screen", () => {
     expect(requestsTo(routes.meetings.createMeeting)[0]?.body).toEqual({ freeText: "Should we split work by strengths?", cardId: IDS.card });
   });
 
+  it("R10.5-T7: the curated questions sit in three named groups of four", async () => {
+    stubRoute(routes.meetings.readPair, pairView({ hasJoiner: true, meetings: [] }));
+    renderLobby();
+    await screen.findByRole("group", { name: "Pick a question for the meeting" });
+    for (const name of ["Would you get along?", "Could you help each other?", "How would you each react?"]) {
+      expect(screen.getByRole("group", { name }).querySelectorAll('input[type="radio"]')).toHaveLength(4);
+    }
+  });
+
   it("D53-T2: when the meeting starts the lobby opens the meeting page, using fake timers", async () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] });
     stubRoute(routes.meetings.readPair, pairView({ hasJoiner: true, meetings: [READY_ROW] }));

@@ -11,8 +11,8 @@ import { claimLabel } from "../prompt-builder.js";
 import { drainJobs, makeMeetingTestContext, readSideItems } from "./meeting-test-context.js";
 import { chatBodyFor, scriptedRecordedCall, structuredReplyLayout, type ReplyScript, type ScriptedSpeech } from "./scripted-replies.js";
 
-// The golden path's free-text question (specs/checks/golden-path.md step 7.3b).
-export const GOLDEN_PATH_FREE_TEXT = "Should we split the work by strengths or by interest?";
+// The golden path's free-text question (specs/checks/golden-path.md step 7.3b), a help question.
+export const GOLDEN_PATH_FREE_TEXT = "Where could each of us help the other most on a 10-day hackathon?";
 // The repository root, from this file's folder five levels down.
 const REPO_ROOT = fileURLToPath(new URL("../../../../../", import.meta.url));
 // The folder of the recorded replies, relative to the repository root.
@@ -36,18 +36,22 @@ export async function goldenPathScript(db: Kysely<Database>, meetingId: string):
   const b0 = pick(sideB, 0);
   const speech: ScriptedSpeech[] = [
     { text: "", toolCalls: [{ name: "recall", arguments: { query: firstWords(a0.quote) } }] },
-    { text: "My human's starting point is that money should follow the work that was agreed, not the hours anyone happened to put in. They care about clear ownership, so each of you owns whole pieces and nobody waits on the other for small calls. If one of you carries more this month, my human wants that said early and written down, then the split adjusted for that month only." },
+    { text: "My human would probably enjoy a 10-day hackathon, as long as the mornings stay quiet. They do deep work in the morning and keep meetings for the afternoon, so long build days suit them when the talking happens after lunch. They would likely find a chat that pings all day harder, since they answer messages in batches twice a day. What my human has not said is how they feel about late nights near the deadline." },
     { text: "", toolCalls: [{ name: "recall", arguments: { query: firstWords(b0.quote) } }] },
-    { text: "My human agrees that ownership should be clear, and differs on one point: they would rather keep the money split equal and balance the work over the next month instead. A month where one person does more is normal for them, and they do not want to reopen the split every time it happens. What my human has not said is how long an imbalance can last before it should change." },
-    { text: "On your point about balancing over time, my human can accept an equal split as the default, as long as a month that runs far over is named in writing at the time, not remembered later. Which evenings my human can give in a heavy month is something my human has not said, so that stays open between the two of you." },
-    { text: "That works as a default for my human too: equal split, with a heavy month named in writing when it happens. My human would add that the person doing more chooses which piece the other takes next, so the balance comes back through the work and not through money. They want this to stay simple enough that nobody keeps a ledger of hours." },
-    { text: "My human likes the idea that the balance comes back through the work. Their worry is the case where one of you cannot take the next piece in time. In that case my human would rather adjust the money for that month than stretch into evenings they cannot give. So the open question is who decides when a month counts as far over." },
-    { text: "My human would decide that together, at the end of the month, with both of you looking at what was agreed and what was delivered. They do not want one person to judge it alone. If the two of you disagree, my human would keep the equal split for that month and talk again before the next one starts." },
-    { text: "That is close to my human's view. The one difference left is timing: my human wants the heavy month named when it starts, not only judged at the end, so neither of you is surprised. Everything else lines up: equal by default, adjusted only by agreement, and written down each time." },
-    { text: "My human can name a heavy month when it starts, as long as naming it does not change the money by itself. The end-of-month look still decides. So the two of you agree on the default and on writing things down, and differ only on whether an early warning should already move the split." },
-    { text: "", toolCalls: [{ name: "concede", arguments: { claimId: claimLabel(2, 1), reason: "My human can accept the other side's point on this." } }] },
-    { text: "My human accepts the equal split as the default and the end-of-month look as the decision point. They keep one thing: a heavy month is named in writing when it starts. The first thing to settle is who writes that note and where it lives." },
-    { text: "My human keeps the equal split unless both of you agree at the end of the month, and accepts naming a heavy month early as a warning only. The first thing to settle is the same: one shared place where those notes are written." },
+    { text: "My human would likely enjoy it too, for a close reason: the first hour of their day has no calls and no chat messages at all. So the two of you would probably click on quiet mornings. Where you might rub is the evening. My human stops working at six most days, because the evening is when they cook and read, so ten days of late pushes would probably be hard for them." },
+    { text: "On your point about evenings: my human has not said they work late, so that may not clash at all. What they have said is that they are happiest when a project has one clear owner and a small group that can decide quickly. In a hackathon that would probably mean splitting the build into pieces with one owner each, so nobody waits on the other for small calls." },
+    { text: "That fits my human well. They like a clear owner for every task and write the owner's name next to each line of their plan. They would likely want that plan on one page, written on the first evening, so they actually read it. Where you might differ is pace: my human finishes one task completely before starting the next, even when a small thing is waiting." },
+    { text: "My human would probably be fine with that pace inside their own piece. The harder moment is feedback. They would rather give hard feedback in writing, with time to think, than across a crowded table. In a fast hackathon that might feel slow to someone who wants an answer on the spot, so it is worth naming early. My human would also want the reason behind a task before they start it." },
+    { text: "Here the two of you would probably click again. My human wants feedback in private and in writing first, and then wants to talk it through once. So written feedback suits you both. How long a written answer can wait during the last two days is something my human has not said, so that stays open. The pace difference from earlier would probably matter less if each of you owns whole pieces." },
+    { text: "My human has not said that either, so it stays open for the two of you. One more likely rub: my human does not enjoy status meetings that repeat what everyone already read. Ten days of daily stand-ups would probably wear on them, while a short written update each day would not. They also keep Wednesday afternoons free for reading and small fixes, which a hackathon would probably squeeze." },
+    { text: "My human would likely agree. They dislike long agendas and ask for a three line agenda before any meeting longer than thirty minutes. So a short written update instead of a stand-up would probably suit you both. What remains is the evening question: whether the last days of the hackathon run past six. My human plans the week on Sunday evening, so a short plan on day one would probably feel natural to them." },
+    { text: "", toolCalls: [
+      { name: "concede", arguments: { claimId: claimLabel(2, 1), reason: "My human can accept the other side's point on this." } },
+      { name: "hold", arguments: { reason: "My human would likely enjoy the hackathon if mornings stay quiet and feedback stays written." } },
+    ] },
+    { text: "My human would likely enjoy the 10 days, if mornings stay quiet and feedback stays in writing. You would probably click on clear owners and short written updates, and rub on late work near the end. The thing to talk through first is whether the last two days run past six." },
+    { text: "", toolCalls: [{ name: "hold", arguments: { reason: "My human would likely enjoy it if most evenings stay free after six." } }] },
+    { text: "My human would likely enjoy it too: quiet mornings, one owner per piece and written feedback all suit them. They keep one limit, stopping at six most days. So you would probably click on how you work and rub on how late you work. Talk first about the last two days and who covers the evenings, if anyone does." },
   ];
   const receipts: unknown[] = [
     { claims: [claimOf(pick(sideA, 0))] },
@@ -71,7 +75,7 @@ export async function writeQuestionCheckFixture(): Promise<string> {
   const body = chatBodyFor(args, false);
   const folder = join(FIXTURE_DIR, "question_check");
   const path = join(folder, requestHash(body) + ".json");
-  const response = structuredReplyLayout({ allowed: true, reason: "A plain question about how two people would share work." });
+  const response = structuredReplyLayout({ allowed: true, reason: "A question about how two people could help each other.", kind: "help" });
   await mkdir(folder, { recursive: true });
   await writeFile(path, JSON.stringify(scriptedRecordedCall({ callSite: "question_check", promptVersion: prompt.version, body }, response), null, 2) + "\n");
   return path;
@@ -93,7 +97,10 @@ export async function writeMeetingFixtures(options: { workerUrl: string; meeting
       }
       if (!(await isEnded(db, options.meetingId))) throw new ContractError("golden_meeting_did_not_end", "The scripted golden meeting did not end within 30 rounds. Check the script against the steps.", 500);
       const remaining = test.client.remaining();
-      if (remaining.speech + remaining.receipts + remaining.questionCheck > 0) throw new ContractError("golden_script_unused", "The golden script has replies that were not used. Check the meeting's step count.", 500);
+      if (remaining.speech + remaining.receipts + remaining.questionCheck > 0) {
+        const counts = `speech ${String(remaining.speech)}, receipts ${String(remaining.receipts)}, question checks ${String(remaining.questionCheck)}`;
+        throw new ContractError("golden_script_unused", `The golden script has replies that were not used (${counts}). Check the meeting's step count.`, 500);
+      }
       return test.client.written;
     } finally {
       await test.close();

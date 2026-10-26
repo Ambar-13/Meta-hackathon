@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { sql, type Transaction } from "kysely";
 import { z } from "zod";
-import { ContractError, CURATED_QUESTIONS, HTTP, MeetingCreate, MeetingCreateResponse, MEETINGS_PER_PERSON_PER_DAY, routes, Uuid } from "@meet-first/contracts";
+import { ContractError, CURATED_QUESTIONS, HTTP, MeetingCreate, MeetingCreateResponse, MEETINGS_PER_PERSON_PER_DAY, routes, Uuid, type QuestionKind } from "@meet-first/contracts";
 import { parseDatabaseError, withPerson, type Database } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { makeNotFoundError, makePayloadInvalidError } from "../route-errors.js";
@@ -16,15 +16,19 @@ export const MEETING_CREATE_REFUSALS: Readonly<Record<"pair_not_joined" | "card_
 // The :id of POST /api/pairs/:id/meetings: a uuid, or the pair cannot exist.
 const PairParams = z.object({ id: Uuid });
 
-// The question a new meeting discusses: a curated one is checked at insert, free text waits for check_question (R10.5).
-export function questionFromBody(body: MeetingCreate): { questionId: number | null; text: string; isChecked: boolean } {
+// The question a new meeting discusses. A curated one is checked at insert and brings its kind; free text waits for check_question,
+// which sets both (R10.5).
+export function questionFromBody(body: MeetingCreate): MeetingQuestion {
   if ("questionId" in body) {
     const row = CURATED_QUESTIONS.find((candidate) => candidate.id === body.questionId);
     if (row === undefined) throw makePayloadInvalidError();
-    return { questionId: body.questionId, text: row.text, isChecked: true };
+    return { questionId: body.questionId, text: row.text, isChecked: true, kind: row.kind };
   }
-  return { questionId: null, text: body.freeText, isChecked: false };
+  return { questionId: null, text: body.freeText, isChecked: false, kind: null };
 }
+
+// One meeting's question as the insert takes it; kind is null for free text until the check classifies it.
+type MeetingQuestion = { questionId: number | null; text: string; isChecked: boolean; kind: QuestionKind | null };
 
 // Midnight UTC of the given time, where the per-person meeting count starts again (D60) [confirm] (the same zone as the dollar caps).
 export function startOfUtcDay(now: Date): Date {
@@ -61,7 +65,7 @@ export function registerCreateMeeting(app: FastifyInstance, deps: RouteDeps): vo
 }
 
 // Calls meeting_create and turns its refusals into 409 errors with the sentence the screen shows.
-async function createMeetingRow(trx: Transaction<Database>, input: { pairId: string; personId: string; cardId: string; question: { questionId: number | null; text: string; isChecked: boolean } }): Promise<string> {
+async function createMeetingRow(trx: Transaction<Database>, input: { pairId: string; personId: string; cardId: string; question: MeetingQuestion }): Promise<string> {
   const { question } = input;
   let meetingId: string | undefined;
   try {
@@ -75,5 +79,7 @@ async function createMeetingRow(trx: Transaction<Database>, input: { pairId: str
     throw error;
   }
   if (meetingId === undefined) throw new ContractError("meeting_create_failed", "The meeting could not be created. Try again.", HTTP.internal);
+  // A curated question's kind is known now; the creator is a member, so the member policy lets this transaction write it.
+  if (question.kind !== null) await trx.updateTable("meetings").set({ question_kind: question.kind }).where("id", "=", meetingId).execute();
   return meetingId;
 }

@@ -104,7 +104,7 @@ it("R10.5-T3: a curated question gives 201 and a checked meeting with both membe
   const response = await request({ method: "GET", url: pathOf(routes.meetings.readMeeting, meetingId), person: m.a });
   expect(response.statusCode).toBe(200);
   const view = MeetingView.parse(response.json());
-  expect(view).toMatchObject({ state: "ready", questionChecked: true, questionText: CURATED_QUESTIONS[2]?.text, viewerSide: "a" });
+  expect(view).toMatchObject({ state: "ready", questionChecked: true, questionText: CURATED_QUESTIONS[2]?.text, questionKind: CURATED_QUESTIONS[2]?.kind, viewerSide: "a" });
   expect(view.members.map((member) => member.side)).toEqual(["a", "b"]);
   expect(view.members.map((member) => member.ready)).toEqual([false, false]);
   expect(view.members.map((member) => member.connected)).toEqual([false, false]);
@@ -120,6 +120,7 @@ it("R10.5-T4: a free-text question gives 201 and an unchecked meeting", async ()
   const view = MeetingView.parse((await request({ method: "GET", url: pathOf(routes.meetings.readMeeting, meetingId), person: m.a })).json());
   expect(view.questionChecked).toBe(false);
   expect(view.questionText).toBe("Should we split the work by strengths or by interest?");
+  expect(view.questionKind).toBe("situation");
 });
 
 it("R9.3-T1: a meeting on a pair nobody joined is refused with 409 pair_not_joined", async () => {

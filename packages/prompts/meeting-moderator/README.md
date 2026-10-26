@@ -1,6 +1,6 @@
 # meeting-moderator prompt
 
-The rules every persona follows in a meeting: the agenda, the tools, what not to guess and the decide turn (D31, D34, D37, D42, D43).
+The rules every persona follows in a meeting: the agenda, the question's kind, the tools, likely reactions and what not to guess, and the decide turn (D31, D34, D37, D42, D43).
 
 ## What this does
 
@@ -14,8 +14,8 @@ It never carries meeting data: the question, the names, the card and the transcr
 
 ```mermaid
 flowchart LR
-  M[meeting-moderator v1] --> P[buildFrozenPrefix]
-  S[meeting-speech v1] --> P
+  M[meeting-moderator v2] --> P[buildFrozenPrefix]
+  S[meeting-speech v2] --> P
   U[untrusted-data-rules v1] --> P
   P --> F[meeting_members.frozen_prefix]
   F --> R[speech request]

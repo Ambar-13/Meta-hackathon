@@ -46,7 +46,7 @@ const RULES_TEXT = readPrompt("untrusted-data-rules").text;
 
 // The prompt input for side a, from the fixtures above.
 function inputForA(): Parameters<typeof buildBriefPromptInput>[0] {
-  return { recipient: SIDE_A, other: SIDE_B, questionText: QUESTION, sourceTurns: SOURCE_TURNS, transcript: TRANSCRIPT, items: ITEMS, promptText: PROMPT_TEXT, untrustedRulesText: RULES_TEXT };
+  return { recipient: SIDE_A, other: SIDE_B, questionText: QUESTION, questionKind: "situation", sourceTurns: SOURCE_TURNS, transcript: TRANSCRIPT, items: ITEMS, promptText: PROMPT_TEXT, untrustedRulesText: RULES_TEXT };
 }
 
 describe("brief prompt input", () => {
@@ -61,6 +61,7 @@ describe("brief prompt input", () => {
     expect(system).toContain(RULES_TEXT);
     expect(system).not.toContain("{{untrusted_data_rules}}");
     expect(system).toContain("You write for the human on side a.");
+    expect(user.startsWith('<question kind="situation">How do you handle a missed deadline?</question>')).toBe(true);
   });
 
   it("W2-BRIEF-T7 (D20 replay): buildBriefPromptInput is deterministic across two calls", () => {

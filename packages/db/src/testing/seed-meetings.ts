@@ -43,6 +43,8 @@ export async function createPairedMeetingWithTurns(db: Kysely<Database>, options
   const created = await sql<{ meeting_id: string | null }>`SELECT meeting_create(${pair.id}::uuid, ${a.personId}::uuid, ${cardA.cardId}::uuid, ${questionId}::int, ${question.text}, true) AS meeting_id`.execute(db);
   const meetingId = created.rows[0]?.meeting_id;
   if (meetingId === null || meetingId === undefined) throw new Error("meeting_create returned no id. Check that migration 0001 ran.");
+  // The route writes a curated question's kind after meeting_create; the seed does the same, so seeded meetings match real ones.
+  await withPerson(db, a.personId, (trx) => trx.updateTable("meetings").set({ question_kind: question.kind }).where("id", "=", meetingId).execute());
   return {
     meetingId, pairId: pair.id, inviteToken,
     a: { personId: a.personId, sessionToken: a.sessionToken, recoveryCode: a.recoveryCode, sourceId: sourceA.sourceId, turnIds: sourceA.turnIds, cardId: cardA.cardId },

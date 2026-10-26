@@ -1,5 +1,5 @@
-import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
+import { readPrompt } from "@meet-first/prompts";
 import {
   CLAIM_LABEL_PREFIX,
   PREFIX_MIN_CHARS,
@@ -35,6 +35,7 @@ function item(n: number) {
 const prefixInput: PrefixInput = {
   texts,
   question: "How do we split money if one of us does more of the work this month?",
+  questionKind: "decision",
   side: "a",
   ownName: "A",
   otherName: "B",
@@ -54,7 +55,7 @@ it("invariant-17-T1: the prefix is the same bytes on two builds from equal input
   const first = buildFrozenPrefix(prefixInput);
   const second = buildFrozenPrefix(structuredClone(prefixInput));
   expect(Buffer.from(first).equals(Buffer.from(second))).toBe(true);
-  expect(first.startsWith("MODERATOR RULES\n\nSPEECH RULES\n\nDATA RULES\n\n<meeting_question>\n")).toBe(true);
+  expect(first.startsWith("MODERATOR RULES\n\nSPEECH RULES\n\nDATA RULES\n\n<meeting_question kind=\"decision\">\n")).toBe(true);
   expect(first.indexOf("item 1")).toBeLessThan(first.indexOf("item 2"));
   expect(first.endsWith("</your_card>\n")).toBe(true);
 });
@@ -70,14 +71,23 @@ it("D41-T2: the cache key is a 32-hex hash of the prefix and the side, with no m
 });
 
 it("D41-T3: the moderator and speech prompts hold at least 16,000 characters together", () => {
-  const moderator = readFileSync(new URL("../../../../packages/prompts/meeting-moderator/v1/prompt.md", import.meta.url), "utf8");
-  const speech = readFileSync(new URL("../../../../packages/prompts/meeting-speech/v1/prompt.md", import.meta.url), "utf8");
+  const moderator = readPrompt("meeting-moderator").text;
+  const speech = readPrompt("meeting-speech").text;
   expect(moderator.length + speech.length).toBeGreaterThanOrEqual(PREFIX_MIN_CHARS);
   expect(moderator).toContain("Status: draft");
   expect(speech).toContain("Status: draft");
   const emDash = String.fromCodePoint(0x2014);
   expect(moderator).not.toContain(emDash);
   expect(speech).not.toContain(emDash);
+});
+
+it("R10.5-T5: the question block carries the question's kind, and the meeting prompts say what each kind asks of the decide turn", () => {
+  expect(buildFrozenPrefix({ ...prefixInput, questionKind: "get_along" })).toContain('<meeting_question kind="get_along">\nHow do we split money');
+  const moderator = readPrompt("meeting-moderator").text;
+  for (const kind of ["get_along", "help", "situation", "decision"]) expect(moderator).toContain("- " + kind + ":");
+  expect(moderator).toContain("For get_along, help and situation:");
+  expect(moderator).toContain("When the attribute is missing or holds another value, treat the question as situation.");
+  expect(readPrompt("meeting-speech").text).toContain("<likely_reactions>");
 });
 
 it("D31-T1: the do-not-guess block appears only when there are misses", () => {

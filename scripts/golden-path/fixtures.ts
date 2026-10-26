@@ -20,13 +20,13 @@ export const FIXTURE_EMAIL = "rohan.mehta@example.com";
 export const ANSWER_TEXT = "golden path answer: Tuesday evenings only";
 // The expiry text the removed ask step would have shown. Kept with its value for the record.
 export const EXPIRY_TEXT = "my human is away, going with what I know";
-// The curated question both people pick (R10.5).
-export const QUESTION_ID = 3;
-// The seq at which reader A's connection is cut on purpose, so the replay after it is tested (step 8, D52). Seq 10 is the middle of the
-// recorded meeting's 23 events, so the meeting is still running when the stream resumes and when step 11 closes it.
+// The curated question both people pick (R10.5): question 1, a get-along question.
+export const QUESTION_ID = 1;
+// The seq at which reader A's connection is cut on purpose, so the replay after it is tested (step 8, D52). Seq 10 falls in the first
+// half of the recorded meeting's 28 events, so the meeting is still running when the stream resumes and when step 11 closes it.
 export const PLANNED_DISCONNECT_SEQ = 10;
-// The free-text question the question check must allow (R10.5). It starts a second meeting that is never started.
-export const FREE_TEXT_QUESTION = "Should we split the work by strengths or by interest?";
+// The free-text question the question check must allow (R10.5), a help question. It starts a second meeting that is never started.
+export const FREE_TEXT_QUESTION = "Where could each of us help the other most on a 10-day hackathon?";
 // The avatar B picks for the comic, the first of the fixed list (R11.3).
 export const AVATAR = AVATARS[0];
 // The consent sentence the phone gate reads on screen before any upload (A3). The script cannot see the screen.

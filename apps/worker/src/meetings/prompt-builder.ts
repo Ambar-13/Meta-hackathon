@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { ReceiptsOutput, toStrictJsonSchema, type ToolDefinition } from "@meet-first/contracts";
+import type { QuestionKind } from "@meet-first/contracts";
 import type { ChatMessage, CompleteArgs, StreamArgs } from "@meet-first/llm";
 import { MEETING_TURNS_MAX, type StepPhase } from "./agenda.js";
 
@@ -19,7 +20,7 @@ export type PromptTexts = { moderator: string; speech: string; untrustedRules: s
 // One approved card item as the prefix shows it; turnIndex is turns.turn_index of the item's turn.
 export type PrefixItem = { position: number; kind: string; claim: string; lang: string; gloss: string; quote: string; turnIndex: number };
 // Everything one side's prefix holds (ARCHITECTURE.md 4.7).
-export type PrefixInput = { texts: PromptTexts; question: string; side: "a" | "b"; ownName: string; otherName: string; items: readonly PrefixItem[]; misses: readonly string[] };
+export type PrefixInput = { texts: PromptTexts; question: string; questionKind: QuestionKind; side: "a" | "b"; ownName: string; otherName: string; items: readonly PrefixItem[]; misses: readonly string[] };
 // One committed turn as a later request shows it.
 export type PromptTurn = { stepSeq: number; side: "a" | "b"; phase: StepPhase; text: string };
 // One claim of the other side, shown in the decide phase so a concede can name it.
@@ -41,7 +42,7 @@ export function buildFrozenPrefix(input: PrefixInput): string {
     input.texts.moderator.trimEnd(),
     input.texts.speech.trimEnd(),
     input.texts.untrustedRules.trimEnd(),
-    "<meeting_question>\n" + escapeBlockText(input.question) + "\n</meeting_question>",
+    "<meeting_question kind=\"" + input.questionKind + "\">\n" + escapeBlockText(input.question) + "\n</meeting_question>",
     "<people>\nyour human: " + promptName(input.ownName) + "\nthe other human: " + promptName(input.otherName) + "\nyou speak for side: " + input.side + "\n</people>",
     "<your_card>\n" + renderItems(input.items) + "\n</your_card>",
   ];

@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import type { Kysely } from "kysely";
 import { afterAll, afterEach, beforeAll, beforeEach, expect, it } from "vitest";
 import { QUIZ_BANK, RecordedCall, sampleQuiz, rowToEvent, type CommittedEvent } from "@meet-first/contracts";
+import { readPrompt } from "@meet-first/prompts";
 import { makeDatabase, parseDatabaseError, POOL_SIZE, withMeeting, withPerson, type Database } from "@meet-first/db";
 import { createPairedMeeting, freshTestDatabase, type TestDatabase } from "@meet-first/db/testing";
 import { makeMeetingTestContext, runMeetingJob, startTestMeeting, type MeetingTestContext } from "./testing/meeting-test-context.js";
@@ -53,10 +54,10 @@ function questionCheck(verdict: unknown): ReplyScript {
   return { speech: [], receipts: [], questionCheck: [verdict] };
 }
 
-// Makes the test meeting free text that has not been checked yet (ARCHITECTURE.md 4.1).
+// Makes the test meeting free text that has not been checked yet, with the kind a new free-text meeting has (ARCHITECTURE.md 4.1).
 async function freeText(meetingId: string): Promise<void> {
   await withMeeting(workerDb, meetingId, (trx) => trx.updateTable("meetings")
-    .set({ question_id: null, question_text: FREE_TEXT, question_checked_at: null }).where("id", "=", meetingId).execute());
+    .set({ question_id: null, question_text: FREE_TEXT, question_checked_at: null, question_kind: "situation" }).where("id", "=", meetingId).execute());
 }
 
 // One meeting row, as the checks read it.
@@ -86,16 +87,18 @@ async function sidesOf(meetingId: string): Promise<{ a: Member; b: Member }> {
 // One member row of a meeting.
 type Member = Awaited<ReturnType<typeof membersOf>>[number];
 
-// The text of the moderator prompt file, read the same way the job reads it.
+// The text of the moderator prompt, read the same way the job reads it.
 function moderatorText(): string {
-  return readFileSync(new URL("../../../../packages/prompts/meeting-moderator/v1/prompt.md", import.meta.url), "utf8");
+  return readPrompt("meeting-moderator").text;
 }
 
 it("R10.5-T1: an allowed free-text question is marked checked and both prefixes are stored", async () => {
   await freeText(m.meetingId);
-  const t = await openTest(questionCheck({ allowed: true, reason: "A question about splitting work." }));
+  const t = await openTest(questionCheck({ allowed: true, reason: "A question about splitting work.", kind: "decision" }));
   await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
-  expect((await meetingOf(m.meetingId)).question_checked_at).not.toBeNull();
+  const checked = await meetingOf(m.meetingId);
+  expect(checked.question_checked_at).not.toBeNull();
+  expect(checked.question_kind).toBe("decision");
   const { a, b } = await sidesOf(m.meetingId);
   const prefix = a.frozen_prefix ?? "";
   expect(prefix.startsWith(moderatorText().slice(0, 40))).toBe(true);
@@ -103,6 +106,7 @@ it("R10.5-T1: an allowed free-text question is marked checked and both prefixes 
   expect(a.frozen_prefix_tokens).toBe(Math.ceil(prefix.length / 1.33));
   expect(b.frozen_prefix_tokens).toBe(Math.ceil((b.frozen_prefix ?? "").length / 1.33));
   expect(prefix).toContain("your human: Test A");
+  expect(prefix).toContain('<meeting_question kind="decision">\n' + FREE_TEXT + "\n</meeting_question>");
   const ledger = await withMeeting(workerDb, m.meetingId, (trx) => trx.selectFrom("ledger").select("call_site").where("meeting_id", "=", m.meetingId).execute());
   expect(ledger.map((row) => row.call_site)).toEqual(["question_check"]);
   const call = RecordedCall.parse(JSON.parse(readFileSync(t.client.written[0] ?? "", "utf8")) as unknown);
@@ -111,21 +115,22 @@ it("R10.5-T1: an allowed free-text question is marked checked and both prefixes 
 
 it("R10.5-T2: a refused free-text question keeps its reason and gets no prefix", async () => {
   await freeText(m.meetingId);
-  const t = await openTest(questionCheck({ allowed: false, reason: "Questions about health are not allowed." }));
+  const t = await openTest(questionCheck({ allowed: false, reason: "Questions about health are not allowed.", kind: "situation" }));
   await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
   const meeting = await meetingOf(m.meetingId);
   expect(meeting.question_rejected_reason).toBe("Questions about health are not allowed.");
   expect(meeting.question_checked_at).toBeNull();
+  expect(meeting.question_kind).toBe("situation");
   for (const side of await membersOf(m.meetingId)) {
     expect(side.frozen_prefix).toBeNull();
     expect(side.frozen_prefix_tokens).toBeNull();
   }
 });
 
-it("D41-T4: a curated question needs no model call and gets both prefixes", async () => {
+it("D41-T4: a curated question needs no model call and gets both prefixes, which carry the curated question's kind", async () => {
   const t = await openTest({ speech: [], receipts: [], questionCheck: [] });
   await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
-  for (const side of await membersOf(m.meetingId)) expect(side.frozen_prefix).not.toBeNull();
+  for (const side of await membersOf(m.meetingId)) expect(side.frozen_prefix).toContain('<meeting_question kind="get_along">');
   expect(t.client.written).toHaveLength(0);
   const ledger = await withMeeting(workerDb, m.meetingId, (trx) => trx.selectFrom("ledger").select("id").where("meeting_id", "=", m.meetingId).execute());
   expect(ledger).toHaveLength(0);
