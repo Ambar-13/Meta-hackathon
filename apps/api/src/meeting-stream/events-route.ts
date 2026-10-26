@@ -1,0 +1,104 @@
+import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { z } from "zod";
+import { ContractError, HTTP, routes } from "@meet-first/contracts";
+import type { RouteDeps } from "../app-types.js";
+import { makeNotFoundError } from "../route-errors.js";
+import { requirePerson } from "../sessions/index.js";
+import { MAX_INT_COLUMN, type FanOut } from "./listen-fan-out.js";
+import { readPollResponse, type StreamReads } from "./replay-and-poll.js";
+import { connectionKey, createSubscriber, SSE_HEADERS, SSE_PADDING, type ConnectionLimit, type StreamTiming, type Subscriber } from "./subscriber.js";
+
+// A seq as text: 0, or a whole number with no leading zero, at most ten digits (D52).
+export const SEQ_TEXT_PATTERN = /^(0|[1-9][0-9]{0,9})$/;
+// The :id parameter of the stream (R8.7). A value that is not a uuid is not_found; the schema is local because contracts has no params schemas.
+export const MeetingParams = z.object({ id: z.string().uuid() });
+// The query: ?after=n switches the route to the JSON poll (D49). A repeated after is an array, which fails this schema.
+export const EventsQuery = z.object({ after: z.string().optional() });
+// The parts one process shares across its streams.
+export type StreamParts = { fanOut: FanOut; connections: ConnectionLimit<Subscriber>; reads: StreamReads; timing: StreamTiming };
+
+// Reads a seq from text; null when it is not a whole number between 0 and MAX_INT_COLUMN (D52).
+export function readSeqText(text: string): number | null {
+  return SEQ_TEXT_PATTERN.test(text) && Number(text) <= MAX_INT_COLUMN ? Number(text) : null;
+}
+
+// Reads Last-Event-ID: absent is 0, so the stream replays from the start (D52); a seq is that seq; anything else is last_event_id_invalid [confirm] (no input says what a bad header does).
+export function readLastEventId(header: string | string[] | undefined): number {
+  if (header === undefined) {
+    return 0;
+  }
+  const seq = typeof header === "string" ? readSeqText(header) : null;
+  if (seq === null) {
+    throw new ContractError("last_event_id_invalid", "The Last-Event-ID header must be a whole number. Reconnect without it to replay from the start.", HTTP.badRequest);
+  }
+  return seq;
+}
+
+// The error for an after value that is not a whole number (D49).
+function makePollAfterInvalidError(): ContractError {
+  return new ContractError("poll_after_invalid", "The after value must be a whole number. Poll with the last seq you received.", HTTP.badRequest);
+}
+
+// What one stream needs from its request, to open and to close.
+type StreamInput = { request: FastifyRequest; reply: FastifyReply; parts: StreamParts; deps: RouteDeps; meetingId: string; personId: string; lastSeq: number };
+
+// Writes the padding and wires the subscriber to the response, the fan-out and the connection limit (D50, D51, D52).
+function openStream(input: StreamInput): void {
+  const { request, reply, parts, deps, meetingId, personId, lastSeq } = input;
+  reply.hijack();
+  reply.raw.writeHead(200, SSE_HEADERS);
+  reply.raw.write(SSE_PADDING);
+  const write = (chunk: string): void => {
+    if (!reply.raw.writableEnded && !reply.raw.destroyed) {
+      reply.raw.write(chunk);
+    }
+  };
+  const end = (): void => {
+    if (!reply.raw.writableEnded) {
+      reply.raw.end();
+    }
+  };
+  const subscriber = createSubscriber({ personId, meetingId, lastSeq, reads: parts.reads, write, end, now: deps.now, log: request.log, timing: parts.timing });
+  const key = connectionKey(personId, meetingId);
+  parts.connections.admit(key, subscriber);
+  const unsubscribe = parts.fanOut.subscribe(meetingId, (signal) => {
+    subscriber.wake(signal);
+  });
+  reply.raw.on("close", () => {
+    subscriber.stop();
+    unsubscribe();
+    parts.connections.release(key, subscriber);
+  });
+  subscriber.start();
+}
+
+// Registers GET /api/meetings/:id/events: the SSE stream (ARCHITECTURE.md 6.1), or the JSON poll when ?after= is present (6.4).
+export function registerEventsRoute(app: FastifyInstance, deps: RouteDeps, parts: StreamParts): void {
+  app.get(routes.meetings.events.path, async (request, reply) => {
+    const personId = requirePerson(request);
+    const params = MeetingParams.safeParse(request.params);
+    if (!params.success) {
+      throw makeNotFoundError();
+    }
+    const meetingId = params.data.id.toLowerCase();
+    const query = EventsQuery.safeParse(request.query);
+    if (!query.success) {
+      throw makePollAfterInvalidError();
+    }
+    const membership = await parts.reads.readMembership(personId, meetingId);
+    if (membership === null || membership.state === "deleted") {
+      throw makeNotFoundError();
+    }
+    if (query.data.after !== undefined) {
+      const afterSeq = readSeqText(query.data.after);
+      if (afterSeq === null) {
+        throw makePollAfterInvalidError();
+      }
+      const body = await readPollResponse(parts.reads, { personId, meetingId, afterSeq, now: deps.now() });
+      await parts.reads.touchPresence(personId, meetingId);
+      return reply.code(200).send(body);
+    }
+    const lastSeq = readLastEventId(request.headers["last-event-id"]);
+    openStream({ request, reply, parts, deps, meetingId, personId, lastSeq });
+  });
+}

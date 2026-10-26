@@ -1,0 +1,35 @@
+import { randomInt } from "node:crypto";
+import type { FastifyInstance } from "fastify";
+import { sql, type Kysely } from "kysely";
+import { PersonCreate, PersonCreateResponse, RECOVERY_CODE_ALPHABET, RECOVERY_CODE_LENGTH, routes, SESSION_TOKEN_BYTES } from "@meet-first/contracts";
+import type { Database } from "@meet-first/db";
+import type { RouteDeps } from "../app-types.js";
+import { hashToken, newHexToken, setSessionCookie } from "./cookie.js";
+import { ACCOUNT_RATE_LIMIT } from "./rate-limit.js";
+
+// A 32-character recovery code from RECOVERY_CODE_ALPHABET; each character is drawn with crypto.randomInt, which gives each of the 31 symbols the same chance (A5).
+export function makeRecoveryCode(): string {
+  return Array.from({ length: RECOVERY_CODE_LENGTH }, () => RECOVERY_CODE_ALPHABET.charAt(randomInt(RECOVERY_CODE_ALPHABET.length))).join("");
+}
+
+// Creates the person and the first session from the two hashes; the tokens themselves never reach the database (A5, D33).
+export async function insertPerson(db: Kysely<Database>, input: { displayName: string; affiliations: string[]; recoveryCode: string; sessionToken: string }): Promise<string> {
+  const result = await sql<{ person_id: string }>`SELECT auth_create_person(${input.displayName}, ${input.affiliations}, ${hashToken(input.recoveryCode)}, ${hashToken(input.sessionToken)}) AS person_id`.execute(db);
+  const personId = result.rows[0]?.person_id;
+  if (personId === undefined) {
+    throw new Error("auth_create_person returned no row");
+  }
+  return personId;
+}
+
+// Registers POST /api/people: 201 {personId, recoveryCode} with the session cookie; counted by the account limit (A5, A7, R9.5).
+export function registerCreatePerson(app: FastifyInstance, deps: RouteDeps): void {
+  app.post(routes.people.createPerson.path, { config: { rateLimit: ACCOUNT_RATE_LIMIT } }, async (request, reply) => {
+    const body = PersonCreate.parse(request.body);
+    const recoveryCode = makeRecoveryCode();
+    const sessionToken = newHexToken(SESSION_TOKEN_BYTES);
+    const personId = await insertPerson(deps.db, { displayName: body.displayName, affiliations: body.affiliations ?? [], recoveryCode, sessionToken });
+    setSessionCookie(reply, sessionToken);
+    return reply.code(201).send(PersonCreateResponse.parse({ personId, recoveryCode }));
+  });
+}

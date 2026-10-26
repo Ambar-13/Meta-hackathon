@@ -2,6 +2,10 @@
   "name": "@meet-first/api",
   "private": true,
   "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "start": "tsx src/server.ts"
+  },
   "dependencies": {
     "@fastify/cookie": "10.0.1",
     "@fastify/rate-limit": "10.1.1",
