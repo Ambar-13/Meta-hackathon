@@ -344,7 +344,7 @@ CREATE TABLE meeting_events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   meeting_id uuid NOT NULL REFERENCES meetings (id) ON DELETE CASCADE,
   seq int NOT NULL,
-  type text NOT NULL CHECK (type IN ('meeting.started','phase.changed','turn.committed','tool.called','tool.result','ask.opened','ask.answered','ask.expired','concede','hold','meeting.ended','brief.ready','comic.ready','comic.skipped')),
+  type text NOT NULL CHECK (type IN ('meeting.started','phase.changed','turn.committed','tool.called','tool.result','concede','hold','meeting.ended','brief.ready','comic.ready','comic.skipped')),
   v int NOT NULL,
   payload jsonb NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
@@ -355,29 +355,6 @@ COMMENT ON COLUMN meeting_events.v IS 'Event schema version, so an old browser c
 ALTER TABLE meeting_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE meeting_events FORCE ROW LEVEL SECURITY;
 
-CREATE TABLE asks (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  meeting_id uuid NOT NULL REFERENCES meetings (id) ON DELETE CASCADE,
-  step_seq int NOT NULL,
-  side char(1) NOT NULL CHECK (side IN ('a', 'b')),
-  person_id uuid NOT NULL REFERENCES people (id) ON DELETE CASCADE,
-  tool_call_id text NOT NULL,
-  question text NOT NULL,
-  state text NOT NULL DEFAULT 'pending' CHECK (state IN ('pending', 'answered', 'expired')),
-  deadline_at timestamptz NOT NULL,
-  answer text,
-  late_answer text,
-  answered_at timestamptz,
-  expired_at timestamptz,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (meeting_id, step_seq),
-  CHECK ((answered_at IS NOT NULL) = (state = 'answered')),
-  CHECK (state <> 'expired' OR expired_at IS NOT NULL)
-);
-COMMENT ON TABLE asks IS 'A persona''s question to its human, with a 90-second server deadline. The answer and the timeout job race on one conditional UPDATE (D35).';
-COMMENT ON COLUMN asks.late_answer IS 'An answer that arrived after expiry; it goes into the side''s next turn (D36).';
-ALTER TABLE asks ENABLE ROW LEVEL SECURITY;
-ALTER TABLE asks FORCE ROW LEVEL SECURITY;
 
 CREATE TABLE claims (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -641,27 +618,6 @@ END
 $$;
 CREATE TRIGGER events_notify AFTER INSERT ON meeting_events FOR EACH ROW EXECUTE FUNCTION events_notify();
 
-CREATE OR REPLACE FUNCTION asks_cap_per_side() RETURNS trigger
-LANGUAGE plpgsql AS $$
-BEGIN
-  IF (SELECT count(*) FROM asks WHERE meeting_id = NEW.meeting_id AND side = NEW.side) >= 2 THEN
-    RAISE EXCEPTION 'ask_budget_spent: this side already asked its human twice in this meeting (D35).' USING ERRCODE = 'check_violation';
-  END IF;
-  RETURN NEW;
-END
-$$;
-CREATE TRIGGER asks_cap_per_side BEFORE INSERT ON asks FOR EACH ROW EXECUTE FUNCTION asks_cap_per_side();
-
-CREATE OR REPLACE FUNCTION asks_expiry_after_deadline() RETURNS trigger
-LANGUAGE plpgsql AS $$
-BEGIN
-  IF NEW.state = 'expired' AND OLD.state <> 'expired' AND NEW.deadline_at > now() THEN
-    RAISE EXCEPTION 'ask_not_due: an ask cannot expire before its deadline (D35).' USING ERRCODE = 'check_violation';
-  END IF;
-  RETURN NEW;
-END
-$$;
-CREATE TRIGGER asks_expiry_after_deadline BEFORE UPDATE ON asks FOR EACH ROW EXECUTE FUNCTION asks_expiry_after_deadline();
 
 CREATE OR REPLACE FUNCTION auth_person_for_session(h bytea) RETURNS uuid
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp AS $$
@@ -966,8 +922,6 @@ CREATE POLICY meeting_steps_member ON meeting_steps FOR ALL TO app_api, app_work
 CREATE POLICY meeting_events_member ON meeting_events FOR ALL TO app_api, app_worker
   USING (meeting_id = app_meeting() OR app_is_member(meeting_id)) WITH CHECK (meeting_id = app_meeting() OR app_is_member(meeting_id));
 CREATE POLICY meeting_events_definer ON meeting_events FOR SELECT TO app_definer USING (true);
-CREATE POLICY asks_member ON asks FOR ALL TO app_api, app_worker
-  USING (person_id = app_person() OR meeting_id = app_meeting()) WITH CHECK (person_id = app_person() OR meeting_id = app_meeting());
 CREATE POLICY claims_member ON claims FOR ALL TO app_api, app_worker
   USING (meeting_id = app_meeting() OR app_is_member(meeting_id)) WITH CHECK (meeting_id = app_meeting() OR app_is_member(meeting_id));
 CREATE POLICY briefs_member ON briefs FOR ALL TO app_api, app_worker

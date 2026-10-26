@@ -3,7 +3,7 @@ import { Uuid } from "../primitives.js";
 
 // Every background job name, in the order of IMPLEMENTATION.md 2.3.
 export const JOB_NAMES = [
-  "scrub_names", "build_card", "check_question", "answer_quiz", "judge_quiz", "meeting_step", "ask_timeout",
+  "scrub_names", "build_card", "check_question", "answer_quiz", "judge_quiz", "meeting_step",
   "write_briefs", "render_comic", "delete_person", "sweep_stalled", "purge_expired",
 ] as const;
 // One job name, checked against the list above.
@@ -19,7 +19,6 @@ export const JobPayloads = {
   answer_quiz: z.object({ quizId: Uuid, personId: Uuid }),
   judge_quiz: z.object({ quizId: Uuid, personId: Uuid }),
   meeting_step: z.object({ meetingId: Uuid, stepSeq: z.number().int().min(1) }),
-  ask_timeout: z.object({ askId: Uuid, meetingId: Uuid }),
   write_briefs: z.object({ meetingId: Uuid }),
   render_comic: z.object({ comicId: Uuid, meetingId: Uuid }),
   delete_person: z.object({ personId: Uuid }),
@@ -28,8 +27,8 @@ export const JobPayloads = {
 } as const;
 // The parsed payload of one job, by job name.
 export type JobPayload<N extends JobName> = z.infer<(typeof JobPayloads)[N]>;
-// Adds one job. Both apps implement it the same way: JOB_MAX_ATTEMPTS[name] always, a job key only for ask_timeout (D45).
-export type Enqueue = <N extends JobName>(name: N, payload: JobPayload<N>, options?: { runAt?: Date; jobKey?: string }) => Promise<void>;
+// Adds one job. Both apps implement it the same way: JOB_MAX_ATTEMPTS[name] always, and no job key on any job (D45).
+export type Enqueue = <N extends JobName>(name: N, payload: JobPayload<N>, options?: { runAt?: Date }) => Promise<void>;
 // How many times each job may run before it fails. Every enqueue passes this value (IMPLEMENTATION.md 2.3).
 // Values marked "default" in the spec are builder defaults for the Wave 0 review; D-row values are as the design gives.
 export const JOB_MAX_ATTEMPTS = {
@@ -39,7 +38,6 @@ export const JOB_MAX_ATTEMPTS = {
   answer_quiz: 2, // default [confirm]
   judge_quiz: 2, // default [confirm]
   meeting_step: 1, // D59
-  ask_timeout: 5, // D35
   write_briefs: 2, // default [confirm]
   render_comic: 1, // D64
   delete_person: 5, // default [confirm]
@@ -48,8 +46,6 @@ export const JOB_MAX_ATTEMPTS = {
 } as const satisfies Record<JobName, number>;
 // The cron lines: sweep stalled meetings every minute, purge expired rows every hour, D46.
 export const CRONTAB = "* * * * * sweep_stalled ?max=1\n0 * * * * purge_expired ?max=1\n";
-// The job key of an ask timeout, so one ask has one timeout job, D45. A meeting step has no key.
-export const askTimeoutJobKey = (askId: string): string => `ask_timeout:${askId}`;
 // Milliseconds before a job tries again when the limiter window is full, D58.
 export const LIMITER_RETRY_MS = 5_000;
 // Jobs one worker runs at the same time, D57.

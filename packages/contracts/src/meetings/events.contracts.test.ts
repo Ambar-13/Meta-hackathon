@@ -7,7 +7,6 @@ import { COMMITTED_EVENT_TYPES, CommittedEvent, MeetingEvent, eventToPayload, ro
 
 const MIGRATION_FILE = fileURLToPath(new URL("../../../db/migrations/0001_foundation.sql", import.meta.url));
 const MEETING_ID = "0f2b9d0c-4f0e-4f7e-9a63-5e8b2b1a9c11";
-const ASK_ID = "7c9e6679-7425-40de-944b-e07fc1f90ae7";
 const CLAIM_ID = "3f2504e0-4f89-41d3-9a0c-0305e82c3301";
 const AT = "2026-10-27T08:00:00.000Z";
 const BASE = { v: 1, meetingId: MEETING_ID, at: AT };
@@ -24,22 +23,19 @@ const COMMITTED_SAMPLES: unknown[] = [
   { ...BASE, seq: 3, type: "turn.committed", stepSeq: 1, side: "a", phase: "open", text: "Hello.", claims: [] },
   { ...BASE, seq: 4, type: "tool.called", stepSeq: 1, side: "a", tool: "recall", args: { query: "rent" } },
   { ...BASE, seq: 5, type: "tool.result", stepSeq: 1, side: "a", tool: "recall", result: { turns: [] } },
-  { ...BASE, seq: 6, type: "ask.opened", askId: ASK_ID, stepSeq: 2, side: "a", question: "Rent?", deadlineAt: AT, serverNow: AT },
-  { ...BASE, seq: 7, type: "ask.answered", askId: ASK_ID, stepSeq: 2 },
-  { ...BASE, seq: 8, type: "ask.expired", askId: ASK_ID, stepSeq: 2, text: "my human is away, going with what I know" },
-  { ...BASE, seq: 9, type: "concede", stepSeq: 3, side: "b", claimId: CLAIM_ID, reason: "Fair point." },
-  { ...BASE, seq: 10, type: "hold", stepSeq: 3, side: "a", reason: "Still my view." },
-  { ...BASE, seq: 11, type: "meeting.ended", reason: "decided", endedAt: AT },
-  { ...BASE, seq: 12, type: "brief.ready", supportRate: { a: null, b: null } },
-  { ...BASE, seq: 13, type: "comic.ready", comicId: MEETING_ID },
-  { ...BASE, seq: 14, type: "comic.skipped", comicId: MEETING_ID, reason: "panel too large" },
+  { ...BASE, seq: 6, type: "concede", stepSeq: 3, side: "b", claimId: CLAIM_ID, reason: "Fair point." },
+  { ...BASE, seq: 7, type: "hold", stepSeq: 3, side: "a", reason: "Still my view." },
+  { ...BASE, seq: 8, type: "meeting.ended", reason: "decided", endedAt: AT },
+  { ...BASE, seq: 9, type: "brief.ready", supportRate: { a: null, b: null } },
+  { ...BASE, seq: 10, type: "comic.ready", comicId: MEETING_ID },
+  { ...BASE, seq: 11, type: "comic.skipped", comicId: MEETING_ID, reason: "panel too large" },
 ];
 
 describe("meeting events", () => {
   it("R5.11-T1: every committed event carries v, seq, meetingId and at", () => {
     const results = COMMITTED_SAMPLES.map((sample) => CommittedEvent.safeParse(sample));
 
-    expect(COMMITTED_SAMPLES).toHaveLength(14);
+    expect(COMMITTED_SAMPLES).toHaveLength(11);
     expect(results.map((result) => result.success)).toEqual(COMMITTED_SAMPLES.map(() => true));
   });
 
@@ -56,7 +52,7 @@ describe("meeting events", () => {
     const names = checkNames(sql, /type text NOT NULL CHECK \(type IN \(([^)]*)\)\)/);
 
     expect([...names].sort()).toEqual([...COMMITTED_EVENT_TYPES].sort());
-    expect(COMMITTED_EVENT_TYPES).toHaveLength(14);
+    expect(COMMITTED_EVENT_TYPES).toHaveLength(11);
   });
 
   it("R13.2-T2: CALL_SITES equals the ledger call_site CHECK list in 0001", () => {

@@ -16,9 +16,9 @@ Read this page after the spec. Every name below is the name in code. It was froz
 | `cards/quiz.ts` (judge records) | `QuizJudgeRaw {run: 1|2, isHumanFirst, output: QuizJudgeOutput, ledgerId}` for `quiz_items.judge_raw`; `QuizCalibrationRun {run, entryIndex: 0..7, isPassed, pairs: [{pair: 'identical'|'contradicting', shouldAgree, output|null, isPassed, ledgerId}] length 2}`; `QuizCalibrationRaw` = 1 or 2 runs, for `quizzes.calibration_raw` |
 | `cards/quiz-bank.ts`, `cards/seeded-sample.ts` | `QUIZ_BANK_VERSION = 1`; `QUIZ_BANK: {id: 1..30, text}[]`; `QUIZ_SAMPLE_SIZE = 10`; `sampleQuiz(cardId): number[10]` ascending, seeded by the lower-case card id: the first 8 bytes of its sha256, SplitMix64, Fisher-Yates from the last place down (D28). The same in Node and the browser |
 | `meetings/pair.ts` | `PairCreateResponse {pairId, inviteUrl, expiresAt}`; `PairJoin {token}`; `PairView {id, creator: {displayName}, joiner?: {displayName}, meetings: [{id, state, questionText, queuePosition?, createdAt}] newest first, expiresAt, serverNow}` |
-| `meetings/meeting.ts` | `MeetingCreate ({questionId: 1..12} | {freeText: string}) & {cardId}`; `MeetingView {id, state, phase?, questionText, questionChecked: boolean, members: [{side, displayName, ready, connected}], viewerSide, startedAt?, endsAt?, queuePosition?, serverNow}`; `CURATED_QUESTIONS: {id: 1..12, text}[]` (R10.5) |
-| `meetings/events.ts` | `EVENT_VERSION = 1`; the 15 event schemas in 2.4; `MeetingEvent` union on `type`; committed events carry `seq`; `MeetingEventRow`, `rowToEvent(row)` (throws `event_row_invalid`, 500) and `eventToPayload(event)` |
-| `meetings/tools.ts` | `recallArgs {query}`, `recallResult {turns: [{turnId, text}] max 5}`; `askArgs {question}`, `askResult {answer} | {expired: true, text}`; `concedeArgs {claimId, reason}`; `holdArgs {reason}`; `toolsForPhase(phase, askBudgetLeft, round)` returns the `tools` array or undefined (D35, D37, D42) |
+| `meetings/meeting.ts` | `MeetingCreate ({questionId: 1..12} | {freeText: string}) & {cardId}`; `MeetingView {id, state, phase?, questionText, questionChecked: boolean, members: [{side, displayName, ready (their go-ahead), connected (watching now, shown only)}], viewerSide, startedAt?, endsAt?, queuePosition?, serverNow}`; `CURATED_QUESTIONS: {id: 1..12, text}[]` (R10.5) |
+| `meetings/events.ts` | `EVENT_VERSION = 1`; the 12 event schemas in 2.4 (11 committed plus `turn.delta`; the three ask events were dropped on 26 Oct); `MeetingEvent` union on `type`; committed events carry `seq`; `MeetingEventRow`, `rowToEvent(row)` (throws `event_row_invalid`, 500) and `eventToPayload(event)` |
+| `meetings/tools.ts` | `recallArgs {query}`, `recallResult {turns: [{turnId, text}] max 5}`; `concedeArgs {claimId, reason}`; `holdArgs {reason}`; `toolsForPhase(phase, round)` returns the `tools` array (recall in open and explore, concede and hold in decide) or undefined from round 5 (D37, D42) |
 | `meetings/claims.ts` | `Claim {id, side, position, text, quote, gloss?, lang, turnId, verified, flagged, evidenceValid}`; `ReceiptsOutput {claims: [{text, quote, turn_id, lang, gloss}]}` |
 | `briefs/brief.ts` | `Quote {text, side, turnId, verified}`; `BriefPoint {text, quotes: Quote[], supported: boolean | null, supportReason?}`; `Brief {agree: BriefPoint[3], clash: BriefPoint[3], decideFirst: BriefPoint[3], supportRate: number | null, supportReliable: boolean | null}` |
 | `briefs/comic.ts` | `AVATARS: 6 fixed descriptors` (one is "fox in a hoodie"; the other five are written in Wave 0); `ComicRequest {avatar: Avatar}`; `ComicView {state, panels: [{position, caption, imageUrl}]}` |
@@ -53,10 +53,9 @@ Read this page after the spec. Every name below is the name in code. It was froz
 | `POST /api/pairs/:id/meetings` | `MeetingCreate` | 201 `{meetingId}`; 429 over 5 per day | free text enqueues `check_question` |
 | `GET /api/meetings/:id` | none | `MeetingView` | |
 | `POST /api/meetings/:id/ready` | none | `{ready: true}` | |
-| `POST /api/meetings/:id/start` | none | `{state: 'running' | 'queued', queuePosition?}`; 409 unless both ready, both connected within 30 s, question checked | `claim_meeting_slot` (R5.3, R5.9, D53) |
+| `POST /api/meetings/:id/start` | none | `{state: 'running' | 'queued', queuePosition?}`; 409 unless both ready and the question checked; nobody needs to be online | `claim_meeting_slot` (R5.3, R5.9); the sweeper also starts a meeting that is ready on both sides, so nobody has to press start |
 | `GET /api/meetings/:id/events` | header `Last-Event-ID` | SSE stream | section 6 of ARCHITECTURE.md |
 | `GET /api/meetings/:id/events?after=seq` | none | `{v, events, partial, serverNow}` | the poll fallback (D49) |
-| `POST /api/asks/:id/answer` | `{answer}` | `{state: 'answered'}`; 409 `{state: 'expired', storedAsLate: true}` | conditional UPDATE (R5.6); this 409 is the one error body that is not `ErrorBody` |
 | `GET /api/meetings/:id/brief` | none | `Brief` (the caller's) ; 404 until ready | |
 | `POST /api/meetings/:id/comic` | `ComicRequest` | 202 `{comicId}` | after `brief.ready` only |
 | `GET /api/meetings/:id/comic` | none | `ComicView` | |
@@ -71,7 +70,7 @@ Read this page after the spec. Every name below is the name in code. It was froz
 
 ## 3. Jobs and events
 
-Jobs (IMPLEMENTATION.md 2.3). The `max_attempts` value is set on every enqueue. Every payload carries the id its context needs before the first read (D55): `personId` for the `withPerson` jobs, `meetingId` for the `withMeeting` jobs.
+Jobs (IMPLEMENTATION.md 2.3). There is no `ask_timeout` job: ask my human was dropped on 26 Oct, so a meeting runs persona to persona with nobody online. The `max_attempts` value is set on every enqueue. Every payload carries the id its context needs before the first read (D55): `personId` for the `withPerson` jobs, `meetingId` for the `withMeeting` jobs.
 
 | Job | Payload | max_attempts | run_at / key | Context | What it does |
 |---|---|---|---|---|---|
@@ -81,7 +80,6 @@ Jobs (IMPLEMENTATION.md 2.3). The `max_attempts` value is set on every enqueue. 
 | `answer_quiz` | `{quizId, personId}` | 2 (default) | now | `withPerson` | 10 persona answers at effort low; state to `waiting_human` |
 | `judge_quiz` | `{quizId, personId}` | 2 (default) | now | `withPerson` | blind A/B, 2 calibration pairs, rerun once, `reliable` |
 | `meeting_step` | `{meetingId, stepSeq}` | 1 (D59: fails closed to stalled) | now; no job key (D45) | `withMeeting` | claim row, two-call turn, tools, one-transaction commit, next step enqueue |
-| `ask_timeout` | `{askId, meetingId}` | 5 (D35) | `run_at = deadline_at`; key `ask_timeout:{askId}` | `withMeeting` | expiry UPDATE, `ask.expired`, re-enqueue the step |
 | `write_briefs` | `{meetingId}` | 2 (default) | now | `withMeeting` | brief per side, support judge per brief, `brief.ready` |
 | `render_comic` | `{comicId, meetingId}` | 1 (D64: all 6 or failed) | now | `withMeeting` | panels prompt, scrubber on the final prompt, 6 parallel image calls, `comic.ready` or `comic.skipped` |
 | `delete_person` | `{personId}` | 5 (default) | now | `withPerson` | state deleted, meetings deleted, cascades, ledger nulls, counts |
@@ -98,9 +96,6 @@ Events (IMPLEMENTATION.md 2.4). Every event has `v: 1`, `type`, `meetingId` and 
 | `turn.committed` | `{stepSeq, side, phase, text, claims: Claim[]}` | step job, same transaction as `done` |
 | `tool.called` | `{stepSeq, side, tool, args}` | step job |
 | `tool.result` | `{stepSeq, side, tool, result}` | step job |
-| `ask.opened` | `{askId, stepSeq, side, question, deadlineAt, serverNow}` | step job |
-| `ask.answered` | `{askId, stepSeq}` | answer route |
-| `ask.expired` | `{askId, stepSeq, text}` | ask_timeout job |
 | `concede` | `{stepSeq, side, claimId, reason}` | step job |
 | `hold` | `{stepSeq, side, reason}` | step job |
 | `meeting.ended` | `{reason: 'decided' | 'budget' | 'deleted', endedAt}` | step job or sweeper |
@@ -133,7 +128,7 @@ export function createPairedMeeting(db, options?: { questionId?: number }): Prom
 
 // packages/contracts (frozen in Wave 0): both apps import these two, and neither app declares its own copy
 export type JobPayload<N extends JobName> = z.infer<(typeof JobPayloads)[N]>;
-export type Enqueue = <N extends JobName>(name: N, payload: JobPayload<N>, options?: { runAt?: Date; jobKey?: string }) => Promise<void>;   // always passes JOB_MAX_ATTEMPTS[name]; a job key only for ask_timeout (D45)
+export type Enqueue = <N extends JobName>(name: N, payload: JobPayload<N>, options?: { runAt?: Date }) => Promise<void>;   // always passes JOB_MAX_ATTEMPTS[name]; no job has a key (D45)
 
 // apps/api (api-shell builder); every other api builder registers routes through this shape, from apps/api/src/app-types.ts
 declare module "fastify" { interface FastifyRequest { personId: string | null } }   // set by the sessions plugin from the cookie; null when absent
@@ -182,22 +177,22 @@ export class CapReached extends ContractError {}    // code daily_cap_reached or
 | `not_found` | 404 | This no longer exists or is not yours. |
 | `payload_invalid` | 400 | The request body did not match the expected shape. Reload and try again. |
 
-Every route error body has the shape `ErrorBody` from `packages/contracts/src/operations/errors.ts`, except the 409 of `POST /api/asks/:id/answer` (section 2). Two more codes are server faults with status 500: `event_row_invalid` (a stored event no longer matches its schema) and `ledger_row_missing` (a ledger row could not be finished).
+Every route error body has the shape `ErrorBody` from `packages/contracts/src/operations/errors.ts`. Two more codes are server faults with status 500: `event_row_invalid` (a stored event no longer matches its schema) and `ledger_row_missing` (a ledger row could not be finished).
 
 ## 6. Trigger messages
 
 A trigger in `0001_foundation.sql` raises a message that starts with a stable code, a colon, then a sentence. `parseDatabaseError` reads the code off the front. The codes raised by the triggers are:
 
-- `turn_text_frozen`, `card_source_not_frozen`, `card_item_foreign_turn`, `claim_foreign_turn`, `meeting_bad_transition`, `prefix_frozen`, `event_seq_gap`, `ask_budget_spent`, `ask_not_due`.
+- `turn_text_frozen`, `card_source_not_frozen`, `card_item_foreign_turn`, `claim_foreign_turn`, `meeting_bad_transition`, `prefix_frozen`, `event_seq_gap`.
 
-`meeting_create` raises `pair_not_joined`, `card_not_approved` and `other_card_missing`. That makes twelve codes in all.
+`meeting_create` raises `pair_not_joined`, `card_not_approved` and `other_card_missing`. That makes ten codes in all.
 
 ## 6a. Who may read and write what, as built
 
 These are the rules of `0001_foundation.sql` after the Wave 0 check. A builder relies on them and never works around them.
 
 - `people`: a person sees and changes only their own row; a meeting job sees both members. The other person's display name comes only from `SELECT * FROM pair_display_names(pairId)` (columns `creator_display_name`, `joiner_display_name`), inside `withPerson`. That is how `PairView`, `MeetingView.members[].displayName` and `MeetingStarted.members` get the other name.
-- `asks` and `briefs`: inside `withPerson` a person sees only their own rows (`person_id`); a meeting job sees both sides. A feature that needs both briefs, such as the share snapshot, reads them inside `withMeeting`.
+- `briefs`: inside `withPerson` a person sees only their own brief (`person_id`); a meeting job sees both sides. A feature that needs both briefs, such as the share snapshot, reads them inside `withMeeting`.
 - `meeting_members`: `app_api` may not read `frozen_prefix`, because it holds a person's approved card items and quiz misses. API code names its columns and never selects all of them; a route that needs to know whether the prefix exists reads `frozen_prefix_tokens`. The worker reads and writes the prefix.
 - `ledger`: `app_api` may only read it; the worker writes every row. A worker with no context may write, read back and finish a row only when it is a `self_test` row with no person and no meeting.
 - The fifteen SECURITY DEFINER functions are owned by `app_definer`, and PUBLIC may run none of them. `app_api` may run the four `auth_*` functions, `pairs_join`, `share_read`, `claim_meeting_slot`, `meeting_create`, `pair_display_names` and `app_shares_meeting`. `app_worker` may run `ledger_window`, `ledger_usd_since`, `ledger_meeting_tokens`, `claim_meeting_slot`, `sweep_candidates`, `purge_expired_rows` and `app_shares_meeting`. `app_shares_meeting` exists only for the `meeting_members` policy.

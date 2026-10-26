@@ -88,33 +88,6 @@ export const ToolResult = z.object({
 });
 // The type of ToolResult, read from the schema above.
 export type ToolResult = z.infer<typeof ToolResult>;
-// A persona asked its human a question.
-export const AskOpened = z.object({
-  ...committed,
-  type: z.literal("ask.opened"),
-  askId: Uuid,
-  stepSeq: z.number().int(),
-  side: Side,
-  question: z.string(),
-  deadlineAt: IsoTime,
-  serverNow: IsoTime,
-});
-// The type of AskOpened, read from the schema above.
-export type AskOpened = z.infer<typeof AskOpened>;
-// The human answered the ask in time.
-export const AskAnswered = z.object({ ...committed, type: z.literal("ask.answered"), askId: Uuid, stepSeq: z.number().int() });
-// The type of AskAnswered, read from the schema above.
-export type AskAnswered = z.infer<typeof AskAnswered>;
-// The ask ran out of time; the persona goes on with the expired text, D36.
-export const AskExpired = z.object({
-  ...committed,
-  type: z.literal("ask.expired"),
-  askId: Uuid,
-  stepSeq: z.number().int(),
-  text: z.string(),
-});
-// The type of AskExpired, read from the schema above.
-export type AskExpired = z.infer<typeof AskExpired>;
 // A persona accepted the other side's claim.
 export const Concede = z.object({
   ...committed,
@@ -162,9 +135,6 @@ export const CommittedEvent = z.discriminatedUnion("type", [
   TurnCommitted,
   ToolCalled,
   ToolResult,
-  AskOpened,
-  AskAnswered,
-  AskExpired,
   Concede,
   Hold,
   MeetingEnded,
@@ -178,7 +148,7 @@ export type CommittedEvent = z.infer<typeof CommittedEvent>;
 export const MeetingEvent = z.union([CommittedEvent, TurnDelta]);
 // The type of MeetingEvent, read from the schema above.
 export type MeetingEvent = z.infer<typeof MeetingEvent>;
-// The 14 committed type names, for the CHECK list in 0001 (R13.2).
+// The 11 committed type names, for the CHECK list in 0001 (R13.2).
 export const COMMITTED_EVENT_TYPES = CommittedEvent.options.map((option) => option.shape.type.value);
 // The keys of a committed event that live in their own meeting_events columns, not in payload.
 const KEYS_STORED_APART = new Set(["v", "type", "meetingId", "seq", "at"]);
@@ -213,8 +183,6 @@ export const PollResponse = z.object({
 });
 // The type of PollResponse, read from the schema above.
 export type PollResponse = z.infer<typeof PollResponse>;
-// The text a persona hears when the ask expired. It is defined in tools.ts so that tools and events can share it.
-export { ASK_EXPIRED_TEXT } from "./tools.js";
 // The words a person sees when the model refused to answer. The text is fixed by D43.
 export const REFUSAL_TEXT = "I'd rather my human speak to this";
 // The words shown when a browser is on an older event version, R5.11.

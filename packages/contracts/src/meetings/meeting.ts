@@ -35,8 +35,8 @@ export type MeetingCreateResponse = z.infer<typeof MeetingCreateResponse>;
 export const MeetingMember = z.object({
   side: Side,
   displayName: z.string(),
-  ready: z.boolean(),
-  connected: z.boolean(),
+  ready: z.boolean(), // the person gave their go-ahead; when both have, the meeting starts with nobody online
+  connected: z.boolean(), // watching now (seen in the last 30 seconds); shown only, never a condition to start
 });
 // The type of MeetingMember, read from the schema above.
 export type MeetingMember = z.infer<typeof MeetingMember>;
@@ -67,17 +67,6 @@ export const MeetingStartResponse = z.object({
 });
 // The type of MeetingStartResponse, read from the schema above.
 export type MeetingStartResponse = z.infer<typeof MeetingStartResponse>;
-// The body of POST /api/asks/:id/answer. The 500 bound on the answer is picked here [confirm].
-export const AskAnswer = z.object({ answer: z.string().trim().min(1).max(500) });
-// The type of AskAnswer, read from the schema above.
-export type AskAnswer = z.infer<typeof AskAnswer>;
-// What answering an ask returns: answered in time, or expired and stored for the next turn (R5.6).
-export const AskAnswerResponse = z.union([
-  z.object({ state: z.literal("answered") }),
-  z.object({ state: z.literal("expired"), storedAsLate: z.literal(true) }),
-]);
-// The type of AskAnswerResponse, read from the schema above.
-export type AskAnswerResponse = z.infer<typeof AskAnswerResponse>;
 // What the question check model returns: whether the question may be used, and why (R10.5).
 export const QuestionCheckOutput = z.object({ allowed: z.boolean(), reason: z.string().min(1).max(200) });
 // The type of QuestionCheckOutput, read from the schema above.
