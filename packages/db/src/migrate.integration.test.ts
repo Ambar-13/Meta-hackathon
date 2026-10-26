@@ -259,4 +259,25 @@ describe("migrate", () => {
       await worker.destroy();
     }
   });
+
+  it("R9.1-T14: app_api can write only Graphile tables that have row security on, and nothing in the migrations table or the jobs view", async () => {
+    await migratedDatabase();
+    const admin = makeDatabase(urls.migrateUrl, 1);
+    try {
+      const rows = await sql<{ relname: string; relrowsecurity: boolean; can_read: boolean; can_write: boolean }>`
+        SELECT c.relname, c.relrowsecurity,
+          has_table_privilege('app_api', c.oid, 'SELECT') AS can_read,
+          has_table_privilege('app_api', c.oid, 'INSERT') OR has_table_privilege('app_api', c.oid, 'UPDATE') OR has_table_privilege('app_api', c.oid, 'DELETE') AS can_write
+        FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE n.nspname = 'graphile_worker' AND c.relkind IN ('r', 'v')
+        ORDER BY c.relname`.execute(admin);
+      const writable = rows.rows.filter((row) => row.can_write);
+      const touched = rows.rows.filter((row) => row.can_read || row.can_write).map((row) => row.relname);
+
+      expect(writable.every((row) => row.relrowsecurity)).toBe(true);
+      expect(touched).toEqual(["_private_job_queues", "_private_jobs", "_private_tasks"]);
+    } finally {
+      await admin.destroy();
+    }
+  });
 });

@@ -25,13 +25,16 @@ export type MigrationFile = { number: number; name: string; path: string };
 export type MigrationReport = { applied: string[]; schemaVersion: number };
 
 // The grants to the app roles on Graphile's tables. They exist only after Graphile's own migrations have run (Wave 0 section 4.5, item 9).
-// The worker keeps every right. The API reads and inserts. add_job also runs an UPDATE on the jobs table on every call, so the API gets UPDATE on that one table; with no UPDATE policy for app_api, that UPDATE matches no row.
+// The worker keeps every right. The API gets only what add_job needs: read and insert on the three tables add_job touches,
+// all of which have row security on. add_job also runs an UPDATE on the jobs table on every call, so the API gets UPDATE on
+// that one table; with no UPDATE policy for app_api, that UPDATE matches no row. Graphile's migrations table, its crontab
+// table and its jobs view get nothing, because the migrations table and the view have no row security.
 const GRAPHILE_GRANTS = `
 GRANT ALL ON ALL TABLES IN SCHEMA graphile_worker TO app_worker;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA graphile_worker TO app_worker;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA graphile_worker TO app_api, app_worker;
 REVOKE ALL ON ALL TABLES IN SCHEMA graphile_worker FROM app_api;
-GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA graphile_worker TO app_api;
+GRANT SELECT, INSERT ON graphile_worker._private_jobs, graphile_worker._private_tasks, graphile_worker._private_job_queues TO app_api;
 GRANT UPDATE ON graphile_worker._private_jobs TO app_api;
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA graphile_worker TO app_api;
 `;
