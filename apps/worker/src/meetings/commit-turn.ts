@@ -133,7 +133,7 @@ async function evidenceTurnIds(trx: Transaction<Database>, turn: FinishedTurn): 
   const isPublicOnly = await isPublicOnlyCard(trx, turn.meetingId, turn.cardId);
   const approved = await trx.selectFrom("card_items").select("turn_id").where("card_id", "=", turn.cardId).where("approved", "=", true)
     .$if(isPublicOnly, (query) => query.where("is_public", "=", true)).execute();
-  if (turn.claims.length === 0) return new Set(approved.map((row) => row.turn_id));
+  if (turn.claims.length === 0 || isPublicOnly) return new Set(approved.map((row) => row.turn_id));
   const corpus = await trx.selectFrom("recall_corpus").select("turn_id").where("card_id", "=", turn.cardId).where("turn_id", "in", turn.claims.map((claim) => claim.turnId)).execute();
   return new Set([...approved, ...corpus].map((row) => row.turn_id));
 }

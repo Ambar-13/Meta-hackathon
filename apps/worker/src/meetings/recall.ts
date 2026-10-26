@@ -24,6 +24,11 @@ export async function runRecall(trx: Transaction<Database>, args: { cardId: stri
   return { result, messageText, turns };
 }
 
+// The recall a listed persona met through the directory gets: no turns, because strangers see only its owner's public items (as-built item 53).
+export function noRecall(): RecallRun {
+  return { result: { turns: [] }, messageText: formatRecallMessage([]), turns: [] };
+}
+
 // The tool message the model reads: the turns as labelled lines inside recall_result tags, declared data (R7.3).
 export function formatRecallMessage(turns: ReadonlyArray<{ turnIndex: number; text: string }>): string {
   const body = turns.length === 0 ? "no matching turns" : turns.map((turn) => "[" + turnLabel(turn.turnIndex) + "] " + turn.text).join("\n");

@@ -230,6 +230,24 @@ it("D38-T1: recall returns up to 5 turns for a side with recall on and none for 
   expect(JSON.stringify(step2.messages)).toContain("<recall_result>\\nno matching turns\\n</recall_result>");
 });
 
+it("W5-DIR-T8: a listed persona met through the directory finds no recall turns with recall on, and its prefix holds only its public items, using the drain", async () => {
+  await withMeeting(workerDb, m.meetingId, (trx) => trx.updateTable("meeting_members").set({ public_only: true }).where("meeting_id", "=", m.meetingId).where("side", "=", "b").execute());
+  await withPerson(workerDb, m.b.personId, (trx) => trx.updateTable("card_items").set({ is_public: true }).where("card_id", "=", m.b.cardId).where("position", "=", 1).execute());
+  const t = await openTest({
+    speech: [recall(firstWords(first(itemsA).quote)), text(S1), recall(firstWords(first(itemsB).quote)), text(S2)],
+    receipts: [{ claims: [] }, { claims: [] }],
+    questionCheck: [],
+  });
+  await startTestMeeting(t, m.meetingId);
+  await drainJobs(t, { limit: 2, names: ["meeting_step"] });
+  const sideB = (await eventsOf()).find((event) => event.type === "tool.result" && event.tool === "recall" && event.side === "b");
+  expect(sideB?.type === "tool.result" ? sideB.result.turns : undefined).toEqual([]);
+  const member = await withMeeting(workerDb, m.meetingId, (trx) => trx.selectFrom("meeting_members").select("frozen_prefix").where("meeting_id", "=", m.meetingId).where("side", "=", "b").executeTakeFirstOrThrow());
+  const prefix = member.frozen_prefix ?? "";
+  expect(prefix).toContain(first(itemsB).claim);
+  for (const item of itemsB.slice(1)) expect(prefix).not.toContain(item.claim);
+});
+
 it("R5.1-T7: a step that failed after a tool round resumes from its saved messages without sending that round again, using the drain", async () => {
   const script: ReplyScript = { speech: [recall(firstWords(first(itemsA).quote))], receipts: [], questionCheck: [] };
   const t = await openTest(script);

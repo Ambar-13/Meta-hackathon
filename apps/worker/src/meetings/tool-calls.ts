@@ -7,7 +7,8 @@ import { saveRound } from "./claim-step.js";
 import { appendMeetingEvent } from "./commit-turn.js";
 import type { AssistantMessage, ToolMessage } from "./history-validator.js";
 import { parseClaimLabel } from "./prompt-builder.js";
-import { runRecall } from "./recall.js";
+import { noRecall, runRecall } from "./recall.js";
+import { isPublicOnlyCard } from "./public-items.js";
 import type { RoundResult } from "./tool-loop.js";
 
 // The step this runner holds, with what a round needs to know about it.
@@ -55,7 +56,8 @@ async function runOneCall(scope: Scope, call: ToolCall, offered: ReadonlySet<str
 // The recall tool: search the speaker's notes, record the call and its result, and answer with the labelled turns.
 async function runRecallCall(scope: Scope, call: ToolCall, parsed: ReturnType<typeof recallArgs.safeParse>): Promise<CallOutcome> {
   if (!parsed.success) return argsRefusal(call, "recall");
-  const run = await runRecall(scope.trx, { cardId: scope.held.cardId, query: parsed.data.query });
+  const isPublicOnly = await isPublicOnlyCard(scope.trx, scope.held.meetingId, scope.held.cardId);
+  const run = isPublicOnly ? noRecall() : await runRecall(scope.trx, { cardId: scope.held.cardId, query: parsed.data.query });
   await recordCall(scope, "recall", parsed.data);
   await recordResult(scope, "recall", run.result);
   return { message: { role: "tool", tool_call_id: call.id, content: run.messageText }, isDecision: false };
