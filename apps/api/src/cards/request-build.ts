@@ -44,7 +44,8 @@ export function registerRequestBuild(app: FastifyInstance, deps: RouteDeps): Pro
     if (!params.success) throw makeNotFoundError();
     const sourceId = params.data.id;
     const cardId = await withPerson(deps.db, personId, async (trx) => {
-      const source = await trx.selectFrom("sources").select(["id", "frozen_at"]).where("id", "=", sourceId).executeTakeFirst();
+      // The source row is locked first, so requests for one source take turns and the daily count cannot be passed by sending several at once.
+      const source = await trx.selectFrom("sources").select(["id", "frozen_at"]).where("id", "=", sourceId).forUpdate().executeTakeFirst();
       const count = await trx.selectFrom("cards").select((eb) => eb.fn.countAll<string>().as("builds")).where("source_id", "=", sourceId).where("created_at", ">=", utcDayStart(deps.now())).executeTakeFirstOrThrow();
       assertCanRequestCard(source, numberFromPostgres(count.builds));
       return insertBuildingCard(trx, { sourceId, personId });

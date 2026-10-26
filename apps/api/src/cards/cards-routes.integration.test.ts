@@ -108,6 +108,37 @@ describe("the card routes", () => {
     expect(await cardsOf(owner, sourceId)).toHaveLength(2);
   });
 
+  it("D60-T7: five card requests for one source sent at once still make only 2 builds", async () => {
+    const { owner, sourceId } = await ownerWithSource();
+
+    const replies = await Promise.all(Array.from({ length: 5 }, () => postAs(owner, requestCardPath(sourceId))));
+
+    expect(replies.map((reply) => reply.statusCode).sort()).toEqual([202, 202, 429, 429, 429]);
+    expect(await cardsOf(owner, sourceId)).toHaveLength(2);
+  });
+
+  it("D60-T8: a card request waits while another transaction holds its source row", async () => {
+    const { owner, sourceId } = await ownerWithSource();
+    let release = (): void => undefined;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    // FOR NO KEY UPDATE: the card insert's foreign-key check does not wait on it, so only the route's own row lock can make the request wait.
+    const holder = asPerson(t.db, owner.personId, async (trx) => {
+      await trx.selectFrom("sources").select("id").where("id", "=", sourceId).forNoKeyUpdate().execute();
+      await held;
+    });
+
+    const request = postAs(owner, requestCardPath(sourceId));
+    const early = await Promise.race([request.then(() => "finished"), new Promise((resolve) => setTimeout(() => { resolve("waiting"); }, 300))]);
+    release();
+    await holder;
+    const reply = await request;
+
+    expect(early).toBe("waiting");
+    expect(reply.statusCode).toBe(202);
+  });
+
   it("R3.4-T3: another person's source and a malformed id are 404 not_found", async () => {
     const { owner, stranger, sourceId } = await ownerWithSource();
     const other = await postAs(stranger, requestCardPath(sourceId));
