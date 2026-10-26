@@ -7,11 +7,12 @@ import { assertSchemaVersion, makeDatabase, POOL_SIZE, SCHEMA_VERSION } from "@m
 import { assertWorkerModeAllowed, runBootSelfTest, selfTestExitCode } from "@meet-first/llm";
 import { definePayloadTask, makeJobContext, type JobContext, type JobTask, type TaskList } from "./job-context.js";
 import { cardTasks } from "./cards/index.js";
+import { quizTasks } from "./quizzes/index.js";
 
 // Every task the worker runs, one spread per feature folder, in slot order (seams S3).
 export const TASKS: TaskList = {
   ...cardTasks,
-  // slot 2: quizTasks from "./quizzes/index.js", added by quiz through a request
+  ...quizTasks,
   // slot 3: meetingTasks from "./meetings/index.js", added by meeting-engine through a request
   // slot 4: briefTasks from "./briefs/index.js", added by briefs through a request
   // slot 5: comicTasks from "./comics/index.js", added by comic through a request

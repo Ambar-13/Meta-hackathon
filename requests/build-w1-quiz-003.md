@@ -11,3 +11,5 @@ The import line goes first in the file's import block. The `...quizTasks,` line 
 Why: the golden path needs Graphile to find the answer_quiz and judge_quiz tasks, so the golden path needs this line. Tests R4.1-T4 and R4.4-T1 call the tasks directly and do not need it.
 
 Until then: the quiz jobs run only in the quiz builder's tests. No value is used.
+
+Resolved at merge, 26 Oct: applied on main with the quiz merge.

@@ -10,6 +10,7 @@ import { handleNotFound, handleRouteError, replaceJsonParser } from "./route-err
 import { addOriginCheck, addSessionHook, registerAccountRateLimit, registerSessionsRoutes } from "./sessions/index.js";
 import { registerCardsRoutes } from "./cards/index.js";
 import { registerPairsRoutes } from "./pairs/index.js";
+import { registerQuizRoutes } from "./quizzes/index.js";
 import { registerSourcesRoutes } from "./sources/index.js";
 import { registerMeetingStreamRoutes } from "./meeting-stream/index.js";
 import { addContentSecurityPolicy, registerWebPagesRoutes } from "./web-pages/index.js";
@@ -73,7 +74,7 @@ export async function registerAllRoutes(app: FastifyInstance, deps: RouteDeps): 
   await registerSessionsRoutes(app, deps);
   await registerSourcesRoutes(app, deps);
   await registerCardsRoutes(app, deps);
-  // slot 4: registerQuizRoutes from "./quizzes/index.js", added by quiz through a request
+  await registerQuizRoutes(app, deps);
   await registerPairsRoutes(app, deps);
   // slot 6: registerMeetingsRoutes from "./meetings/index.js", added by meeting-engine through a request
   await registerMeetingStreamRoutes(app, deps);
