@@ -6,6 +6,12 @@
     ".": "./src/index.ts",
     "./testing": "./src/testing/index.ts"
   },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "migrate": "tsx src/migrate.ts",
+    "fresh": "tsx src/fresh.ts",
+    "count-person": "tsx src/count-person.ts"
+  },
   "dependencies": {
     "@meet-first/contracts": "workspace:*",
     "@meet-first/receipts": "workspace:*",

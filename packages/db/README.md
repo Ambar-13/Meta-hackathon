@@ -1,30 +1,55 @@
-# @meet-first/db
+# packages/db
 
-This is a placeholder written at the Wave 0 freeze. The database builder replaces this file and the manifest in Wave 1.
+Rows D55, D56, D69, D71, and invariants 1 to 16 and 20.
 
 ## What this does
 
-The database layer: migrations, the typed connection, the two transaction wrappers and the test helpers.
+Every request and job reaches Postgres through this package. It opens the pooled client, runs each piece of work in one transaction that names the person or the meeting it acts for, and gives the Kysely types for every table of migrations 0001 and 0002. It also holds three commands (migrate, rebuild, count a person's rows) and the test seeds that other packages' Postgres tests start from.
 
 ## What this never does
 
-Nothing runs here yet: the folder holds only its manifest, so the workspace and the lock file are complete before Wave 1.
+It never sets both settings, or neither, in one transaction: the wrappers refuse. It never lets a role skip row security, and it never edits 0001_foundation.sql; a later change is a new numbered file that the integrator reviews. pnpm db:fresh never touches a database on another machine. It stores no session token and no recovery code, only their hashes.
 
 ## How it fits
 
 ```mermaid
 flowchart LR
-  contracts["@meet-first/contracts"] --> here["@meet-first/db"]
+  api[apps/api] --> wrappers[withPerson and withMeeting]
+  worker[apps/worker] --> wrappers
+  wrappers --> pg[(Postgres with forced row security)]
+  migrate[pnpm db:migrate] --> pg
+  fresh[pnpm db:fresh] --> migrate
+  count[pnpm db:count-person] --> wrappers
+  tests[Postgres tests] --> seeds[db/testing seeds] --> fresh
 ```
 
-The package will read its shapes from contracts, like every other package.
+Notice that every arrow into Postgres passes through a wrapper or the migrate command, so nothing reads a table without naming a person or a meeting.
 
 ## The main pieces
 
-`package.json` lists the dependencies the Wave 1 specs pin (design-inputs/wave-1-seams.md S8). There is no source yet.
+- `src/client.ts`: the pooled client and the pool sizes, 10 for the api and 8 for the worker (D56).
+- `src/transaction.ts`: withPerson and withMeeting, which set exactly one setting per transaction (D55).
+- `src/types.ts`: one Kysely interface per table and view of migrations 0001 and 0002.
+- `src/migrate.ts`: pnpm db:migrate under advisory lock 42, and the schema version check the worker runs at boot (D71).
+- `src/fresh.ts`: pnpm db:fresh, which rebuilds a database on this machine from nothing.
+- `src/count-person.ts`: pnpm db:count-person, which prints how many rows still point at a person (D69).
+- `src/database-errors.ts`: turns a trigger message or a duplicate into a stable code and a sentence.
+- `src/recall-search.ts`: the recall lookup, full text first and trigram second (D38).
+- `src/event-seq.ts`: the next seq of a meeting's event log, and the event append.
+- `src/testing/`: freshTestDatabase, the context helpers and the seeds, imported as @meet-first/db/testing.
+- `migrations/`: 0001_foundation.sql and 0002_names_review.sql (both frozen), ranges.txt and global-tables.txt.
 
 ## How to test it
 
-There is nothing to test until the database builder writes the package.
+Load the variables, then run these from the repository root:
 
-Not built yet: everything in this package.
+```
+set -a; . ./.env; set +a
+pnpm db:fresh
+pnpm test:security packages/db
+pnpm test:integration packages/db
+```
+
+The .env needs DATABASE_URL_MIGRATE, DATABASE_URL_API, DATABASE_URL_WORKER, DATABASE_URL_TEST and DATABASE_URL_ADMIN. DATABASE_URL_ADMIN is a superuser of the Postgres on this machine, connected to its maintenance database, because only such a role may create the four roles and the databases.
+
+Not built yet: migrations 0003 onward, which arrive only through requests/; and the one-time role setup on Render, which Ambar does by hand.
