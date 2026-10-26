@@ -66,10 +66,10 @@ const ASK_TEXT = "Our deploys fail at night and nobody knows why.";
 const NOT_MEETABLE = { code: "helper_not_meetable", message: "This person can no longer be met from these results." };
 
 // Writes a help ask of the asker in the given state with one answered row for the helper, and returns both ids (design section 4).
-async function seedHelpAnswer(input: { asker: Person; helper: Person; listingId: string | null; position: number | null; askState?: "done" | "ranking" }): Promise<{ askId: string; answerId: string }> {
+async function seedHelpAnswer(input: { asker: Person; helper: Person; listingId: string | null; position: number | null; askState?: "done" | "ranking"; questionKind?: "help" | "romance" }): Promise<{ askId: string; answerId: string }> {
   return withPerson(t.db, input.asker.personId, async (trx) => {
     const askState = input.askState ?? "done";
-    const ask = await trx.insertInto("persona_asks").values({ person_id: input.asker.personId, mode: "help", text: ASK_TEXT, state: askState, finished_at: askState === "done" ? new Date() : null }).returning("id").executeTakeFirstOrThrow();
+    const ask = await trx.insertInto("persona_asks").values({ person_id: input.asker.personId, mode: "help", text: ASK_TEXT, state: askState, finished_at: askState === "done" ? new Date() : null, question_kind: input.questionKind ?? "help" }).returning("id").executeTakeFirstOrThrow();
     const answer = await trx.insertInto("persona_answers").values({
       ask_id: ask.id, asker_person_id: input.asker.personId, subject_person_id: input.helper.personId, subject_card_id: input.helper.cardId, listing_id: input.listingId,
       mode: "help", ask_text: ASK_TEXT, asker_display_name: input.asker.name, subject_display_name: input.helper.name, subject_line: "I fix flaky deploys.",
@@ -241,5 +241,24 @@ describe("POST /api/asks/:id/answers/:answerId/meeting", () => {
       expect(ErrorBody.parse(response.body)).toEqual({ code: "not_found", message: "This no longer exists or is not yours." });
     }
     expect(await countMemberships({ personId: asker.personId, isPublicOnly: false })).toBe(0);
+  });
+
+  it("W6-ASKA-T45 (design section 11, P8, as-built item 57): meeting a helper from a dating ask makes a romance meeting, and is refused once the helper's dating switch is off", async () => {
+    const asker = await seedPerson("Asker A");
+    const helper = await seedPerson("Helper H");
+    const listingId = await listInDirectory(helper);
+    const ids = await seedHelpAnswer({ asker, helper, listingId, position: 1, questionKind: "romance" });
+
+    const refused = await meet({ person: asker, ...ids });
+
+    expect(refused.statusCode).toBe(409);
+    expect(ErrorBody.parse(refused.body)).toEqual({ code: "romance_not_open", message: "this person has not opened their persona to dating questions." });
+    expect(await countMemberships({ personId: asker.personId, isPublicOnly: false })).toBe(0);
+    await withPerson(t.db, helper.personId, (trx) => trx.updateTable("directory_listings").set({ open_to_romance: true }).where("id", "=", listingId).execute());
+    const accepted = await meet({ person: asker, ...ids });
+    expect(accepted.statusCode).toBe(201);
+    const { meetingId } = MeetingCreateResponse.parse(accepted.body);
+    const meeting = await withPerson(t.db, asker.personId, (trx) => trx.selectFrom("meetings").select(["question_kind", "romance_allowed"]).where("id", "=", meetingId).executeTakeFirstOrThrow());
+    expect(meeting).toEqual({ question_kind: "romance", romance_allowed: true });
   });
 });

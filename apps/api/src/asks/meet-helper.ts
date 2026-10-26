@@ -19,8 +19,8 @@ import type { AskDeps } from "./create-ask.js";
 // The :id and :answerId of the meeting route; a value that is not a uuid is not_found.
 const AnswerParams = z.object({ id: Uuid, answerId: Uuid });
 
-// What the meeting takes from the ask and its answer: the ask's text as the question, and the helper's listing.
-type MeetTarget = { askText: string; listingId: string };
+// What the meeting takes from the ask and its answer: the ask's text as the question, its kind, and the helper's listing.
+type MeetTarget = { askText: string; kind: "help" | "romance"; listingId: string };
 
 // The refusal for every answer that cannot be met from these results (design section 6).
 function makeHelperNotMeetableError(): ContractError {
@@ -29,11 +29,12 @@ function makeHelperNotMeetableError(): ContractError {
 
 // Reads the caller's ask and the answer as the caller, and refuses unless the answer is meetable (design section 6).
 async function readMeetTarget(trx: Transaction<Database>, input: { personId: string; askId: string; answerId: string }): Promise<MeetTarget> {
-  const ask = await trx.selectFrom("persona_asks").select(["mode", "state", "text"]).where("id", "=", input.askId).where("person_id", "=", input.personId).executeTakeFirst();
+  const ask = await trx.selectFrom("persona_asks").select(["mode", "state", "text", "question_kind"]).where("id", "=", input.askId).where("person_id", "=", input.personId).executeTakeFirst();
   const answer = await trx.selectFrom("persona_answers").select(["state", "position", "listing_id"])
     .where("id", "=", input.answerId).where("ask_id", "=", input.askId).where("asker_person_id", "=", input.personId).executeTakeFirst();
   if (ask === undefined || answer === undefined || answer.listing_id === null || !isMeetableAnswer(ask, answer)) throw makeHelperNotMeetableError();
-  return { askText: ask.text, listingId: answer.listing_id };
+  // A dating ask stays a dating question in the meeting, so the listing's dating switch is checked again when the meeting is made.
+  return { askText: ask.text, kind: ask.question_kind === "romance" ? "romance" : "help", listingId: answer.listing_id };
 }
 
 // Turns a refusal of directory_meeting_create into this route's error, or returns null for any other error, which goes on unchanged
@@ -43,17 +44,18 @@ function toMeetRefusal(error: unknown): ContractError | null {
   const refusal = parseDatabaseError(error);
   if (refusal === null) return null;
   if (refusal.code === "listing_not_found" || refusal.code === "directory_self") return makeHelperNotMeetableError();
-  if (refusal.code === "card_not_approved") return new ContractError(refusal.code, refusal.message, HTTP.conflict);
+  if (refusal.code === "card_not_approved" || refusal.code === "romance_not_open") return new ContractError(refusal.code, refusal.message, HTTP.conflict);
   if (refusal.code === "directory_daily_cap") return new ContractError(refusal.code, refusal.message, HTTP.tooMany);
   return null;
 }
 
-// Starts the meeting with the ask's text as an already checked question of kind help (design sections 6 and 11).
-async function createDirectoryMeeting(trx: Transaction<Database>, input: { listingId: string; personId: string; cardId: string; askText: string }): Promise<string> {
+// Starts the meeting with the ask's text as an already checked question of kind help, or romance for a dating ask (design sections 6
+// and 11, as-built item 57).
+async function createDirectoryMeeting(trx: Transaction<Database>, input: { listingId: string; personId: string; cardId: string; askText: string; kind: MeetTarget["kind"] }): Promise<string> {
   let meetingId: string | null | undefined;
   try {
-    // In words: meet the listing's person as side a with this card, on the ask's text, checked now, kind help, at most 10 a day for that person.
-    const result = await sql<{ meeting_id: string | null }>`SELECT directory_meeting_create(${input.listingId}::uuid, ${input.personId}::uuid, ${input.cardId}::uuid, NULL::int, ${input.askText}::text, true, 'help'::text, ${DIRECTORY_MEETINGS_PER_LISTING_PER_DAY}::int) AS meeting_id`.execute(trx);
+    // In words: meet the listing's person as side a with this card, on the ask's text, checked now, of the ask's kind, at most 10 a day for that person.
+    const result = await sql<{ meeting_id: string | null }>`SELECT directory_meeting_create(${input.listingId}::uuid, ${input.personId}::uuid, ${input.cardId}::uuid, NULL::int, ${input.askText}::text, true, ${input.kind}::text, ${DIRECTORY_MEETINGS_PER_LISTING_PER_DAY}::int) AS meeting_id`.execute(trx);
     meetingId = result.rows[0]?.meeting_id;
   } catch (error) {
     throw toMeetRefusal(error) ?? error;
@@ -67,14 +69,14 @@ async function meetHelper(deps: AskDeps, input: { personId: string; askId: strin
   const meetingId = await withPerson(deps.db, input.personId, async (trx) => {
     const target = await readMeetTarget(trx, input);
     await assertUnderDailyMeetingCap(trx, input.personId, deps.now());
-    return createDirectoryMeeting(trx, { listingId: target.listingId, personId: input.personId, cardId: input.cardId, askText: target.askText });
+    return createDirectoryMeeting(trx, { listingId: target.listingId, personId: input.personId, cardId: input.cardId, askText: target.askText, kind: target.kind });
   });
   await deps.enqueue("check_question", { meetingId });
   return meetingId;
 }
 
 // Registers POST /api/asks/:id/answers/:answerId/meeting: 201 {meetingId}; 400 payload_invalid; 404 not_found for a bad id; 409
-// helper_not_meetable or card_not_approved; 429 meeting_daily_cap or directory_daily_cap (design sections 5 and 6).
+// helper_not_meetable, card_not_approved or romance_not_open; 429 meeting_daily_cap or directory_daily_cap (design sections 5 and 6).
 export function registerMeetHelper(app: FastifyInstance, deps: RouteDeps): void {
   app.post(routes.asks.meetHelper.path, async (request, reply) => {
     const personId = requirePerson(request);
