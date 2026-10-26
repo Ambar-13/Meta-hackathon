@@ -81,7 +81,8 @@ s06_definer_functions() {
 # Command 07: the quiz bank is seeded with its 30 questions (D28).
 s07_quiz_bank() {
   local count
-  count=$(psql "$DATABASE_URL_MIGRATE" -Atc "SELECT count(*) FROM quiz_bank WHERE bank_version = 1")
+  # Read as app_api, the role that reads the bank; the owner app_migrate sees no rows under forced row security.
+  count=$(psql "$DATABASE_URL_API" -Atc "SELECT count(*) FROM quiz_bank WHERE bank_version = 1")
   echo "$count"
   [ "$count" = "30" ]
 }
