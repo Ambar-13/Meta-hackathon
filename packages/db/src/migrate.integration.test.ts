@@ -260,7 +260,7 @@ describe("migrate", () => {
     }
   });
 
-  it("R9.1-T14: app_api can write only Graphile tables that have row security on, and nothing in the migrations table or the jobs view", async () => {
+  it("R9.1-T14: app_api can write only Graphile tables that have row security on, may only read the migrations table, and gets nothing of the jobs view", async () => {
     await migratedDatabase();
     const admin = makeDatabase(urls.migrateUrl, 1);
     try {
@@ -275,7 +275,8 @@ describe("migrate", () => {
       const touched = rows.rows.filter((row) => row.can_read || row.can_write).map((row) => row.relname);
 
       expect(writable.every((row) => row.relrowsecurity)).toBe(true);
-      expect(touched).toEqual(["_private_job_queues", "_private_jobs", "_private_tasks"]);
+      expect(touched).toEqual(["_private_job_queues", "_private_jobs", "_private_tasks", "migrations"]);
+      expect(writable.map((row) => row.relname)).toEqual(["_private_job_queues", "_private_jobs", "_private_tasks"]);
     } finally {
       await admin.destroy();
     }
