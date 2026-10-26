@@ -79,7 +79,7 @@ describe("recall search", () => {
 
   it("D38-T7: turns that rank the same come back in their order in the file", async () => {
     const d = await createTestPerson(t.db, "Test D");
-    const source = await createFrozenSource(t.db, d.personId, Array.from({ length: 7 }, (_, index) => `budget note ${String(index)}`));
+    const source = await createFrozenSource(t.db, d.personId, [0, 1, 2, 3, 4, 5, 6].map((index) => `budget note ${String(index)}`));
     const card = await createApprovedCard(t.db, source.sourceId, { recallAllowed: true });
 
     const fullText = await searchAsOwner(t.db, { personId: d.personId, cardId: card.cardId }, "budget");
