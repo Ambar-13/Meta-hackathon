@@ -325,6 +325,9 @@ main() {
     echo "check-wave-2: pass" >> "$SUMMARY"
   fi
   cat "$SUMMARY"
+  # Exit 0 only when every row ran and passed (check-wave-2.md section 1); a run without the Docker rows exits 3, so a caller that
+  # reads only the exit code never takes it for a pass.
+  if [ "$WITHOUT_DOCKER" = 1 ]; then exit 3; fi
 }
 
 if [ "${1:-}" = "--run" ]; then
