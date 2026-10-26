@@ -21,3 +21,8 @@ v2 cases (the question's kind):
 - Kind decision: the v1 meanings stand, including concede and hold in clash.
 - Kind missing or unknown: the lines are written as for situation.
 - A hedged line whose quotes carry only half of it: the support judge rejects it, so the brief picks a line the quotes carry whole.
+
+v3 cases:
+- Kind deal: agree lines name terms the deal would rest on, clash lines what blocks it, decide-first lines what to offer first; no line says the deal will close.
+- Kind debate: decide-first holds the recipient's strongest point, the other person's strongest point and the question that would settle the split; no line names a winner.
+- Kind get_along with a likely clash: a clash line says "you would probably clash over ..." plainly.

@@ -14,6 +14,10 @@ import { BriefScreen } from "../screens/brief/index.js";
 import { ComicScreen } from "../screens/comic/index.js";
 import { ConsentScreen, PublicSharePage } from "../screens/share/index.js";
 import { SettingsScreen } from "../screens/settings/index.js";
+import { DirectoryScreen } from "../screens/directory/index.js";
+import { HelpScreen } from "../screens/help/index.js";
+import { FriendsScreen } from "../screens/friends/index.js";
+import { AskScreen } from "../screens/ask/index.js";
 
 // Every client path the app links to, re-exported for the screens that read the route table.
 export { APP_PATHS } from "./app-paths.js";
@@ -45,6 +49,10 @@ export const APP_ROUTES: RouteObject[] = [
   { path: ROUTE_PATTERNS.comic, element: <ComicScreen /> },
   { path: ROUTE_PATTERNS.consent, element: <ConsentScreen /> },
   { path: ROUTE_PATTERNS.sharePage, element: <PublicSharePage /> },
+  { path: ROUTE_PATTERNS.directory, element: <DirectoryScreen /> },
+  { path: ROUTE_PATTERNS.help, element: <HelpScreen /> },
+  { path: ROUTE_PATTERNS.friends, element: <FriendsScreen /> },
+  { path: ROUTE_PATTERNS.ask, element: <AskScreen /> },
   { path: "*", element: <NotFoundScreen /> },
 ];
 

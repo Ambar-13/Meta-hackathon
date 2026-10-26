@@ -16,6 +16,8 @@ export const APP_PATHS = {
   comic: (meetingId: string) => `/meetings/${meetingId}/comic`,
   consent: (meetingId: string) => `/meetings/${meetingId}/share`,
   sharePage: (slug: string) => `/share/${slug}`,
+  directory: "/directory", help: "/help", friends: "/friends",
+  ask: (askId: string) => `/asks/${askId}`,
 } as const;
 
 // The route patterns, with the keys and parameter names of APP_PATHS, in the same order (seams S11).
@@ -24,6 +26,7 @@ export const ROUTE_PATTERNS = {
   namesReview: "/sources/:sourceId/names", card: "/cards/:cardId", quiz: "/quizzes/:quizId", lobby: "/pairs/:pairId",
   meeting: "/meetings/:meetingId", brief: "/meetings/:meetingId/brief", comic: "/meetings/:meetingId/comic",
   consent: "/meetings/:meetingId/share", sharePage: "/share/:slug",
+  directory: "/directory", help: "/help", friends: "/friends", ask: "/asks/:askId",
 } as const;
 
 // The query name that carries the approved card a meeting is created with, so a reload keeps it [confirm] (no contract field carries it).

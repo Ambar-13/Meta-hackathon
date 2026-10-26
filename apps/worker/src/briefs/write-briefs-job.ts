@@ -29,7 +29,7 @@ type SideBrief = { side: Side; personId: string; sections: BriefSections; reliab
 // The outcome of the support check for one brief.
 type JudgeOutcome = { sections: BriefSections; reliable: boolean; rate: number | null; raw: Record<string, unknown> };
 // One member row with the person's display name.
-type MemberRow = { side: Side; person_id: string; card_id: string; display_name: string };
+type MemberRow = { side: Side; person_id: string; card_id: string; display_name: string; public_only: boolean };
 
 // Writes the briefs of an ended meeting that are not written yet, then the brief.ready event once both exist (R11.2, A1).
 export const writeBriefsTask: JobTask<"write_briefs"> = async (payload, context) => {
@@ -71,7 +71,7 @@ export async function readBriefSnapshot(db: Kysely<Database>, meetingId: string)
 
 // The two members of the meeting with their names, or a refusal when the meeting does not have two.
 async function readMembers(trx: DatabaseTransaction, meetingId: string): Promise<MemberRow[]> {
-  const members = await trx.selectFrom("meeting_members as mm").innerJoin("people as p", "p.id", "mm.person_id").select(["mm.side", "mm.person_id", "mm.card_id", "p.display_name"]).where("mm.meeting_id", "=", meetingId).orderBy("mm.side", "asc").execute();
+  const members = await trx.selectFrom("meeting_members as mm").innerJoin("people as p", "p.id", "mm.person_id").select(["mm.side", "mm.person_id", "mm.card_id", "p.display_name", "mm.public_only"]).where("mm.meeting_id", "=", meetingId).orderBy("mm.side", "asc").execute();
   if (members.length !== SIDES.length) throw new ContractError("write_briefs_members_missing", "The meeting does not have two members. Nothing to write; check the pair.", 500);
   return members;
 }
@@ -87,12 +87,13 @@ async function readSourceTurns(trx: DatabaseTransaction, members: MemberRow[]): 
   });
 }
 
-// The approved items of both cards, with the side each belongs to (R7.1, A1).
+// The approved items of both cards, with the side each belongs to (R7.1, A1). A listed persona met through the directory brings only its public items (as-built item 49).
 async function readApprovedItems(trx: DatabaseTransaction, members: MemberRow[]): Promise<ApprovedItem[]> {
-  const rows = await trx.selectFrom("card_items").select(["card_id", "position", "kind", "claim", "lang", "quote", "turn_id", "verified"]).where("card_id", "in", members.map((member) => member.card_id)).where("approved", "=", true).orderBy("position", "asc").execute();
+  const rows = await trx.selectFrom("card_items").select(["card_id", "position", "kind", "claim", "lang", "quote", "turn_id", "verified", "is_public"]).where("card_id", "in", members.map((member) => member.card_id)).where("approved", "=", true).orderBy("position", "asc").execute();
   return rows.flatMap((row) => {
-    const side = members.find((member) => member.card_id === row.card_id)?.side;
-    return side === undefined ? [] : [{ side, position: row.position, kind: row.kind, claim: row.claim, lang: row.lang, quote: row.quote, turnId: row.turn_id, verified: row.verified }];
+    const member = members.find((candidate) => candidate.card_id === row.card_id);
+    if (member === undefined || (member.public_only && !row.is_public)) return [];
+    return [{ side: member.side, position: row.position, kind: row.kind, claim: row.claim, lang: row.lang, quote: row.quote, turnId: row.turn_id, verified: row.verified }];
   });
 }
 

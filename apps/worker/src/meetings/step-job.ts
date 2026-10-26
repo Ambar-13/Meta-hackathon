@@ -13,6 +13,7 @@ import { buildReceiptsMessages, runReceipts, type CitableTurn, type ReceiptsInpu
 import { runRoundTransaction, type HeldStep } from "./tool-calls.js";
 import { joinTurnText, PartialTextWriter, runSpeechRounds, type RoundResult, type SpeakResult } from "./tool-loop.js";
 import type { AssistantMessage } from "./history-validator.js";
+import { isPublicOnlyCard } from "./public-items.js";
 
 // What the begin transaction decided: nothing to do, the token stop ended the meeting, or this runner holds the step.
 type BeginOutcome = { kind: "skip" } | { kind: "budget" } | { kind: "run"; plan: StepPlan };
@@ -182,9 +183,11 @@ async function checkReceipts(context: JobContext, request: { plan: StepPlan; pro
 // Reads the speaker's approved card quotes and this step's recall results, in one transaction, with the full turns they cite.
 async function readReceiptsSource(db: Kysely<Database>, held: HeldStep): Promise<ReceiptsSource> {
   return withMeeting(db, held.meetingId, async (trx) => {
+    const isPublicOnly = await isPublicOnlyCard(trx, held.meetingId, held.cardId);
     const items = await trx.selectFrom("card_items as ci").innerJoin("turns as t", "t.id", "ci.turn_id")
       .select(["ci.position", "ci.claim", "ci.quote", "t.id as turn_id", "t.turn_index", "t.text", "t.norm_text"])
-      .where("ci.card_id", "=", held.cardId).where("ci.approved", "=", true).orderBy("ci.position").execute();
+      .where("ci.card_id", "=", held.cardId).where("ci.approved", "=", true)
+      .$if(isPublicOnly, (query) => query.where("ci.is_public", "=", true)).orderBy("ci.position").execute();
     const recall = await recallSnippets(trx, held);
     const turns = new Map<number, CitableTurn>();
     for (const row of items) turns.set(row.turn_index, { turnId: row.turn_id, turnIndex: row.turn_index, text: row.text, normText: row.norm_text });

@@ -78,10 +78,11 @@ export async function startTestMeeting(test: MeetingTestContext, meetingId: stri
 // One side's approved card items with their turn_index and turn id, in position order, for scripts that quote the card.
 export async function readSideItems(db: Kysely<Database>, meetingId: string, side: "a" | "b"): Promise<Array<{ position: number; claim: string; quote: string; lang: string; gloss: string; turnIndex: number; turnId: string }>> {
   return withMeeting(db, meetingId, async (trx) => {
-    const member = await trx.selectFrom("meeting_members").select("card_id").where("meeting_id", "=", meetingId).where("side", "=", side).executeTakeFirstOrThrow();
+    const member = await trx.selectFrom("meeting_members").select(["card_id", "public_only"]).where("meeting_id", "=", meetingId).where("side", "=", side).executeTakeFirstOrThrow();
     const rows = await trx.selectFrom("card_items as ci").innerJoin("turns as t", "t.id", "ci.turn_id")
       .select(["ci.position", "ci.claim", "ci.quote", "ci.lang", "ci.gloss", "t.turn_index", "t.id as turn_id"])
-      .where("ci.card_id", "=", member.card_id).where("ci.approved", "=", true).orderBy("ci.position").execute();
+      .where("ci.card_id", "=", member.card_id).where("ci.approved", "=", true)
+      .$if(member.public_only, (query) => query.where("ci.is_public", "=", true)).orderBy("ci.position").execute();
     return rows.map((row) => ({ position: row.position, claim: row.claim, quote: row.quote, lang: row.lang, gloss: row.gloss, turnIndex: row.turn_index, turnId: row.turn_id }));
   });
 }

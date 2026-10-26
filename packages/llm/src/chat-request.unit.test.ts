@@ -23,12 +23,12 @@ describe("buildChatRequest", () => {
       const config = CALL_SITE_CONFIG[callSite];
       const body = buildChatRequest({ callSite, messages, stream: config.streams });
       expect(body.reasoning_effort).toBe(config.effort);
-      if (callSite === "quiz_judge" || callSite === "brief_support_judge") expect(body.temperature).toBe(0);
+      if (callSite === "quiz_judge" || callSite === "brief_support_judge" || callSite === "ask_support_judge") expect(body.temperature).toBe(0);
       else expect(Object.keys(body)).not.toContain("temperature");
     }
   });
 
-  it("R3.1-T2: the nine self-test bodies hash to the nine Wave 0 fixture file names", () => {
+  it("R3.1-T2: the self-test bodies of every model output schema hash to fixture file names", () => {
     for (const [name, schema] of Object.entries(MODEL_OUTPUT_SCHEMAS)) {
       const body = buildChatRequest({
         callSite: "self_test",

@@ -12,6 +12,7 @@ import { comicTasks } from "./comics/index.js";
 import { meetingTasks } from "./meetings/index.js";
 import { quizTasks } from "./quizzes/index.js";
 import { retentionTasks } from "./retention/index.js";
+import { askTasks } from "./asks/index.js";
 
 // Every task the worker runs, one spread per feature folder, in slot order (seams S3).
 export const TASKS: TaskList = {
@@ -21,6 +22,7 @@ export const TASKS: TaskList = {
   ...briefTasks,
   ...comicTasks,
   ...retentionTasks,
+  ...askTasks,
 };
 
 // Wraps every task of the list for Graphile, in JOB_NAMES order, so each payload is parsed before its job runs.

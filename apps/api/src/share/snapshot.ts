@@ -69,7 +69,8 @@ async function readMembers(trx: DatabaseTransaction, meetingId: string): Promise
   return rows.map((row) => ({ side: row.side, personId: row.person_id, displayName: row.display_name }));
 }
 
-// Reads the approved, verified card items of both sides, in side order and then in card position order.
+// Reads the approved, verified card items of both sides, in side order and then in card position order; a listed persona met through the
+// directory shows only its public items (as-built item 49).
 async function readItems(trx: DatabaseTransaction, meetingId: string): Promise<Array<{ side: Side; kind: "value" | "preference" | "habit" | "boundary" | "goal"; claim: string; quote: string }>> {
   const rows = await trx
     .selectFrom("card_items as ci")
@@ -78,6 +79,7 @@ async function readItems(trx: DatabaseTransaction, meetingId: string): Promise<A
     .where("mm.meeting_id", "=", meetingId)
     .where("ci.approved", "=", true)
     .where("ci.verified", "=", true)
+    .where((eb) => eb.or([eb("mm.public_only", "=", false), eb("ci.is_public", "=", true)]))
     .orderBy("mm.side")
     .orderBy("ci.position")
     .execute();

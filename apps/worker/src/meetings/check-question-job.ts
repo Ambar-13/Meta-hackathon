@@ -58,15 +58,18 @@ export function questionCheckCallArgs(input: { meetingId: string; promptVersion:
 export async function storeFrozenPrefixes(trx: Transaction<Database>, meetingId: string, prompts: MeetingPrompts): Promise<number> {
   const question = await trx.selectFrom("meetings").select(["question_text", "question_kind"]).where("id", "=", meetingId).executeTakeFirstOrThrow();
   const members = await trx.selectFrom("meeting_members as mm").innerJoin("people as p", "p.id", "mm.person_id")
-    .select(["mm.side", "mm.person_id", "mm.card_id", "mm.frozen_prefix", "p.display_name"]).where("mm.meeting_id", "=", meetingId).orderBy("mm.side").execute();
+    .select(["mm.side", "mm.person_id", "mm.card_id", "mm.frozen_prefix", "mm.public_only", "p.display_name"]).where("mm.meeting_id", "=", meetingId).orderBy("mm.side").execute();
   let written = 0;
   for (const member of members) {
     if (member.frozen_prefix !== null) continue;
     const other = members.find((candidate) => candidate.side !== member.side);
     if (other === undefined) continue;
+    // A listed persona met through the directory speaks only from the items its owner marked public (as-built item 49).
     const items = await trx.selectFrom("card_items as ci").innerJoin("turns as t", "t.id", "ci.turn_id")
       .select(["ci.position", "ci.kind", "ci.claim", "ci.lang", "ci.gloss", "ci.quote", "t.turn_index"])
-      .where("ci.card_id", "=", member.card_id).where("ci.approved", "=", true).orderBy("ci.position").execute();
+      .where("ci.card_id", "=", member.card_id).where("ci.approved", "=", true)
+      .$if(member.public_only, (query) => query.where("ci.is_public", "=", true))
+      .orderBy("ci.position").execute();
     const misses = await quizMisses(trx, member.card_id);
     const prefix = buildFrozenPrefix({
       texts: { moderator: prompts.moderator.text, speech: prompts.speech.text, untrustedRules: prompts.untrustedRules.text },

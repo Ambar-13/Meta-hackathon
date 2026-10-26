@@ -39,7 +39,7 @@ export async function createPairedMeetingWithTurns(db: Kysely<Database>, options
   if (joined.rows[0]?.pair_id !== pair.id) throw new ContractError("seed_pair_join_failed", "pairs_join did not join the seeded pair. Check that migration 0001 ran.", 500);
   const questionId = options.questionId ?? 3;
   const question = CURATED_QUESTIONS.find((row) => row.id === questionId);
-  if (question === undefined) throw new ContractError("seed_question_unknown", "questionId must be one of the 12 curated question ids.", 500);
+  if (question === undefined) throw new ContractError("seed_question_unknown", `questionId must be one of the ${String(CURATED_QUESTIONS.length)} curated question ids.`, 500);
   const created = await sql<{ meeting_id: string | null }>`SELECT meeting_create(${pair.id}::uuid, ${a.personId}::uuid, ${cardA.cardId}::uuid, ${questionId}::int, ${question.text}, true) AS meeting_id`.execute(db);
   const meetingId = created.rows[0]?.meeting_id;
   if (meetingId === null || meetingId === undefined) throw new Error("meeting_create returned no id. Check that migration 0001 ran.");

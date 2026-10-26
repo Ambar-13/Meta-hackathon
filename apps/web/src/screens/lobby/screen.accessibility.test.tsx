@@ -79,12 +79,12 @@ describe("lobby screen", () => {
     expect(requestsTo(routes.meetings.start)).toHaveLength(0);
   });
 
-  it("R10.5-T1: the picker offers the 12 curated questions and free text of 5 to 300 characters", async () => {
+  it("R10.5-T1: the picker offers the 16 curated questions and free text of 5 to 300 characters", async () => {
     stubRoute(routes.meetings.readPair, pairView({ hasJoiner: true, meetings: [] }));
     stubRoute(routes.meetings.createMeeting, { status: 201, body: { meetingId: IDS.meeting } });
     renderLobby();
     const picker = await screen.findByRole("group", { name: "Pick a question for the meeting" });
-    expect(picker.querySelectorAll('input[type="radio"]')).toHaveLength(13);
+    expect(picker.querySelectorAll('input[type="radio"]')).toHaveLength(CURATED_QUESTIONS.length + 1);
     fireEvent.click(screen.getByRole("radio", { name: "Write your own question" }));
     fireEvent.change(screen.getByLabelText("Your question (5 to 300 characters)"), { target: { value: "Hm?" } });
     fireEvent.click(screen.getByRole("button", { name: "Create the meeting" }));
@@ -98,11 +98,11 @@ describe("lobby screen", () => {
     expect(requestsTo(routes.meetings.createMeeting)[0]?.body).toEqual({ freeText: "Should we split work by strengths?", cardId: IDS.card });
   });
 
-  it("R10.5-T7: the curated questions sit in three named groups of four", async () => {
+  it("R10.5-T7: the curated questions sit in four named groups of four", async () => {
     stubRoute(routes.meetings.readPair, pairView({ hasJoiner: true, meetings: [] }));
     renderLobby();
     await screen.findByRole("group", { name: "Pick a question for the meeting" });
-    for (const name of ["Would you get along?", "Could you help each other?", "How would you each react?"]) {
+    for (const name of ["Would you get along?", "Could you help each other?", "Would you make a deal?", "Where would your views split?"]) {
       expect(screen.getByRole("group", { name }).querySelectorAll('input[type="radio"]')).toHaveLength(4);
     }
   });

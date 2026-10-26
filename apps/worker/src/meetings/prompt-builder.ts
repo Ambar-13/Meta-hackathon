@@ -200,7 +200,7 @@ function tokenSize(prefix: string, input: VariableInput, charsPerToken: number):
 // Escapes the three characters that could open or close a block tag. It is used on text another person can write: the
 // question, the turns and the other side's claims (R7.3; the quiz uses the same rule). A persona's own card items are not
 // escaped, because its quotes must match its own turns exactly for the receipts check.
-function escapeBlockText(text: string): string {
+export function escapeBlockText(text: string): string {
   return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 

@@ -1,0 +1,72 @@
+{
+  "callSite": "self_test",
+  "promptVersion": "v1",
+  "requestHash": "340387bc5ee51e104d59c10292be69165c50bcb937ed364c89b29d44676821db",
+  "request": {
+    "callSite": "self_test",
+    "promptVersion": "v1",
+    "body": {
+      "model": "muse-spark-1.3",
+      "messages": [
+        {
+          "role": "user",
+          "content": "ok"
+        }
+      ],
+      "max_tokens": 1,
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "question-check",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "allowed": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "get_along",
+                  "help",
+                  "situation",
+                  "decision",
+                  "deal",
+                  "debate"
+                ]
+              }
+            },
+            "required": [
+              "allowed",
+              "reason",
+              "kind"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "response": {
+    "choices": [
+      {
+        "message": {
+          "content": "{"
+        },
+        "finish_reason": "length"
+      }
+    ]
+  },
+  "usage": {
+    "promptTokens": 0,
+    "cachedTokens": 0,
+    "completionTokens": 0,
+    "reasoningTokens": 0
+  },
+  "recordedAt": null,
+  "handWritten": true
+}

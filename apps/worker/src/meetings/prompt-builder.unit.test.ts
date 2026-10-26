@@ -84,8 +84,9 @@ it("D41-T3: the moderator and speech prompts hold at least 16,000 characters tog
 it("R10.5-T5: the question block carries the question's kind, and the meeting prompts say what each kind asks of the decide turn", () => {
   expect(buildFrozenPrefix({ ...prefixInput, questionKind: "get_along" })).toContain('<meeting_question kind="get_along">\nHow do we split money');
   const moderator = readPrompt("meeting-moderator").text;
-  for (const kind of ["get_along", "help", "situation", "decision"]) expect(moderator).toContain("- " + kind + ":");
-  expect(moderator).toContain("For get_along, help and situation:");
+  for (const kind of ["get_along", "help", "situation", "decision", "deal", "debate"]) expect(moderator).toContain("- " + kind + ":");
+  expect(moderator).toContain("For decision and deal:");
+  expect(moderator).toContain("For get_along, help, situation and debate:");
   expect(moderator).toContain("When the attribute is missing or holds another value, treat the question as situation.");
   expect(readPrompt("meeting-speech").text).toContain("<likely_reactions>");
 });

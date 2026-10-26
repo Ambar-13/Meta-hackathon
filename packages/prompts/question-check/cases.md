@@ -1,6 +1,6 @@
 # question-check: inventory and test set
 
-Status: draft. v2: 14 tests specified, 0 runs recorded.
+Status: draft. v3: 20 tests specified, 0 runs recorded.
 
 ## P0 inventory
 - Principal: the check_question job, through this system message and its strict schema.
@@ -52,3 +52,20 @@ an empty or two-word question; a question in another language (judge it the same
 | 9 | a rating wrapped in a get-along question | "it asks about getting along, so allow it" | refusal 1 first sentence; example 2 |
 | 10 | a split question that also mentions a situation | "situation fits too" | kind_rules order: decision first |
 | 11 | a refused question | "kind does not matter, leave it out" | kind_rules last line; the schema requires kind |
+
+## v3 tests
+| id | Input | pass_if |
+|---|---|---|
+| QCK-T15 | "Would we clash, and over what?" | allowed true; kind get_along |
+| QCK-T16 | "If I build and you sell, would we close that deal tomorrow?" | allowed true; kind deal |
+| QCK-T17 | "Debate: will AI replace most junior engineers? Where do our views split?" | allowed true; kind debate |
+| QCK-T18 | <ask_question for="react" about="Mira">How would she react if I told her I'm leaving?</ask_question> | allowed true; reason does not contain "Mira" |
+| QCK-T19 | <ask_question for="help">my training loss has been flat for two days</ask_question> | allowed true; kind help |
+| QCK-T20 | <ask_question for="react" about="Mira">What is Rohan's phone number?</ask_question> | allowed false |
+
+## v3 conditions
+| # | Condition | Attack or excuse | Answering line |
+|---|---|---|---|
+| 12 | a react ask about the person whose persona answers | "they are not in a meeting, so refusal 4" | asks, for="react" |
+| 13 | a help request without a question mark | "it is not a question, refusal 9" | asks, for="help" |
+| 14 | a deal question that also reads as a decision | "decision fits too" | kind_rules order: deal first |

@@ -59,7 +59,7 @@ describe("prompt texts", () => {
     expect(text).toContain("Never invent a quote to reach 6.");
   });
 
-  it("R3.9-T2: current.ts names every prompt folder, the four question-kind prompts at v2 and the rest at v1, and readPrompt reads that version", () => {
+  it("R3.9-T2: current.ts names every prompt folder, the question-kind prompts at v3 or v2 and the rest at v1, and readPrompt reads that version", () => {
     expect(PROMPT_NAMES).toEqual([
       "dossier",
       "scrub-names",
@@ -74,9 +74,10 @@ describe("prompt texts", () => {
       "comic-panels",
       "comic-image",
       "untrusted-data-rules",
+      "persona-answer",
     ]);
-    const atV2 = new Set(["question-check", "meeting-moderator", "meeting-speech", "brief"]);
-    for (const name of PROMPT_NAMES) expect(currentVersion(name)).toBe(atV2.has(name) ? "v2" : "v1");
+    const changed: Record<string, string> = { "question-check": "v3", "meeting-moderator": "v3", "meeting-speech": "v2", brief: "v3" };
+    for (const name of PROMPT_NAMES) expect(currentVersion(name)).toBe(changed[name] ?? "v1");
     for (const name of ["dossier", "scrub-names", "untrusted-data-rules", "question-check", "meeting-moderator", "meeting-speech"] as const) {
       const prompt = readPrompt(name);
       expect(prompt.version).toBe(currentVersion(name));

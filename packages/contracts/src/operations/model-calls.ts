@@ -4,16 +4,17 @@ import { CardBuildOutput } from "../cards/card.js";
 import { QuizJudgeOutput, QuizPersonaAnswerOutput } from "../cards/quiz.js";
 import { BriefOutput, BriefSupportJudgeOutput } from "../briefs/brief.js";
 import { ComicPanelsOutput } from "../briefs/comic.js";
+import { PersonaAnswerOutput } from "../directory/asks.js";
 import { ReceiptsOutput } from "../meetings/claims.js";
 import { QuestionCheckOutput } from "../meetings/meeting.js";
 import { NamesPassOutput } from "../sources/scrub-categories.js";
 import { IsoTime } from "../primitives.js";
 import { ContractError } from "./errors.js";
 
-// The call sites that reach the model, ARCHITECTURE.md 3.23. The ledger CHECK in 0001 lists the same names.
+// The call sites that reach the model, ARCHITECTURE.md 3.23. The ledger CHECK in 0001, widened in 0006, lists the same names.
 export const CALL_SITES = [
   "scrub_names", "question_check", "card", "quiz_answer", "quiz_judge", "speech", "receipts", "brief",
-  "brief_support_judge", "comic_panels", "comic_image", "self_test",
+  "brief_support_judge", "comic_panels", "comic_image", "self_test", "persona_answer", "ask_support_judge",
 ] as const;
 // One call site, checked against the list above.
 export const CallSite = z.enum(CALL_SITES);
@@ -121,4 +122,5 @@ export const MODEL_OUTPUT_SCHEMAS = {
   brief: BriefOutput,
   "brief-support-judge": BriefSupportJudgeOutput,
   "comic-panels": ComicPanelsOutput,
+  "persona-answer": PersonaAnswerOutput,
 } as const;

@@ -6,6 +6,7 @@ import { nextStep, startsNewPhase, type StepPhase } from "./agenda.js";
 import { StepOutput } from "./claim-step.js";
 import type { StoredClaim } from "./receipts.js";
 import { NO_DECISION_REASON } from "./tool-loop.js";
+import { isPublicOnlyCard } from "./public-items.js";
 
 // A committed event's own fields: everything except the five the log adds (v, type, meetingId, seq, at).
 export type EventFields<T extends CommittedEvent["type"]> = Omit<Extract<CommittedEvent, { type: T }>, "v" | "type" | "meetingId" | "seq" | "at">;
@@ -129,7 +130,9 @@ async function insertClaims(trx: Transaction<Database>, turn: FinishedTurn): Pro
 
 // The turn ids a claim may rest on: the approved items of the speaker's card and the recall corpus of that card (ARCHITECTURE.md 3.18, 3.28).
 async function evidenceTurnIds(trx: Transaction<Database>, turn: FinishedTurn): Promise<Set<string>> {
-  const approved = await trx.selectFrom("card_items").select("turn_id").where("card_id", "=", turn.cardId).where("approved", "=", true).execute();
+  const isPublicOnly = await isPublicOnlyCard(trx, turn.meetingId, turn.cardId);
+  const approved = await trx.selectFrom("card_items").select("turn_id").where("card_id", "=", turn.cardId).where("approved", "=", true)
+    .$if(isPublicOnly, (query) => query.where("is_public", "=", true)).execute();
   if (turn.claims.length === 0) return new Set(approved.map((row) => row.turn_id));
   const corpus = await trx.selectFrom("recall_corpus").select("turn_id").where("card_id", "=", turn.cardId).where("turn_id", "in", turn.claims.map((claim) => claim.turnId)).execute();
   return new Set([...approved, ...corpus].map((row) => row.turn_id));

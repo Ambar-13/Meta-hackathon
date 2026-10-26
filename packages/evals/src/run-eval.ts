@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { z } from "zod";
-import { Health, routes } from "@meet-first/contracts";
+import { CURATED_QUESTION_COUNT, Health, routes } from "@meet-first/contracts";
 import { makeDatabase, POOL_SIZE, type Database } from "@meet-first/db";
 import type { Kysely } from "kysely";
 import { collectRows } from "./collect-rows.js";
@@ -29,7 +29,7 @@ const PairsFile = z
       .object({
         a: z.string(),
         b: z.string(),
-        questionId: z.number().int().min(1).max(12),
+        questionId: z.number().int().min(1).max(CURATED_QUESTION_COUNT),
         recallA: z.boolean(),
         recallB: z.boolean(),
         injection: z.enum(["a", "b"]).optional(),

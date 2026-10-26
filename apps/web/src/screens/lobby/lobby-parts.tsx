@@ -9,14 +9,15 @@ const FREE_TEXT_LABEL = "Your question (5 to 300 characters)";
 // The longest free-text question the picker accepts (R10.5).
 const FREE_TEXT_MAX_CHARS = 300;
 
-// The three groups the picker shows the 12 curated questions in, by kind; the two decisions sit with situations and views.
+// The four groups the picker shows the 16 curated questions in, by kind; the decision sits with the deals and the two situations with the debates.
 const QUESTION_GROUPS: ReadonlyArray<{ title: string; kinds: readonly QuestionKind[] }> = [
   { title: "Would you get along?", kinds: ["get_along"] },
   { title: "Could you help each other?", kinds: ["help"] },
-  { title: "How would you each react?", kinds: ["situation", "decision"] },
+  { title: "Would you make a deal?", kinds: ["deal", "decision"] },
+  { title: "Where would your views split?", kinds: ["debate", "situation"] },
 ];
 
-// The 12 curated questions in their three groups, and a free-text choice (R10.5).
+// The 16 curated questions in their four groups, and a free-text choice (R10.5).
 export const QuestionPicker = (props: { isSending: boolean; error: string | null; onCreate: (pick: QuestionPick) => void }): ReactElement => {
   const [choice, setChoice] = useState<string | null>(null);
   const [freeText, setFreeText] = useState("");

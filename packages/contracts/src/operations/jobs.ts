@@ -4,7 +4,7 @@ import { Uuid } from "../primitives.js";
 // Every background job name, in the order of IMPLEMENTATION.md 2.3.
 export const JOB_NAMES = [
   "scrub_names", "build_card", "check_question", "answer_quiz", "judge_quiz", "meeting_step",
-  "write_briefs", "render_comic", "delete_person", "sweep_stalled", "purge_expired",
+  "write_briefs", "render_comic", "delete_person", "sweep_stalled", "purge_expired", "run_ask",
 ] as const;
 // One job name, checked against the list above.
 export const JobName = z.enum(JOB_NAMES);
@@ -24,6 +24,7 @@ export const JobPayloads = {
   delete_person: z.object({ personId: Uuid }),
   sweep_stalled: z.object({}),
   purge_expired: z.object({}),
+  run_ask: z.object({ askId: Uuid, personId: Uuid }), // personId is the asker; the job reads each answering persona in that person's own context
 } as const;
 // The parsed payload of one job, by job name.
 export type JobPayload<N extends JobName> = z.infer<(typeof JobPayloads)[N]>;
@@ -43,6 +44,7 @@ export const JOB_MAX_ATTEMPTS = {
   delete_person: 5, // default [confirm]
   sweep_stalled: 1,
   purge_expired: 1,
+  run_ask: 2, // answers already written are kept, so a second run asks only the personas still pending [confirm]
 } as const satisfies Record<JobName, number>;
 // The cron lines: sweep stalled meetings every minute, purge expired rows every hour, D46.
 export const CRONTAB = "* * * * * sweep_stalled ?max=1\n0 * * * * purge_expired ?max=1\n";

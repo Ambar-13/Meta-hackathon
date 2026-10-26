@@ -17,13 +17,16 @@ One line per word, in alphabetical order. Each line names the table, schema or f
 - **decide first**: The group of brief points the two people should settle first. Lives in the `briefs` table as `decide_first`.
 - **decide phase**: The last phase of a meeting, where each persona concedes or holds. Lives in `meeting_steps` as `phase`.
 - **deletions**: The record of what one deletion removed, counted for each table. Lives in the `deletions` table.
+- **directory**: The open list of personas whose people opted in; anyone can browse it and have their agent meet a listed persona. Lives in the `directory_listings` table.
 - **display name**: The name a person chose, which the other person of their pair sees. Lives in the `people` table as `display_name`.
 - **evidence valid**: The measure that a claim's quote is found inside the turn it names. It is one of the seven eval metrics (A2). Lives in the `claims` table as `evidence_valid`.
 - **explore phase**: The middle phase of a meeting, up to six turns, skipped once eight minutes have passed (D34). Lives in `meeting_steps` as `phase`.
 - **flagged**: Marked as having no receipt, after the claim's one regeneration failed to give a quote that is found in its turn (D27). Lives in the `claims` and `card_items` tables as `flagged`.
+- **friend ask**: A question one person sends to a friend's persona about how that friend would probably react; the friend switches it on and gets a copy of every answer. Lives in the `persona_asks` and `persona_answers` tables.
 - **frozen (source)**: A source whose names review is done, so its turn text can no longer change (D16). Lives in the `sources` table as `frozen_at`.
 - **gloss**: The short plain sentence that explains one card item or claim, written by the model next to its quote (D21). Lives in the `card_items` and `claims` tables as `gloss`.
 - **grounded**: A brief line or claim whose quote is found inside its own turn. Lives in the `claims` and `card_items` tables as `verified`.
+- **help search**: One stuck problem sent to up to 20 listed personas, whose answers come back ordered by how many of their quotes the support check backed. Lives in the `persona_asks` and `persona_answers` tables.
 - **hold**: The decide-phase outcome where a persona keeps the question open. Lives in the output of the decide step in `meeting_steps`.
 - **invite token**: The single-use link token a pair creator shares. It is stored only as a hash (D32). Lives in the `pairs` table as `token_hash`.
 - **job**: One unit of background work the worker runs, such as `build_card` or `meeting_step`. The names and payloads live in `packages/contracts/src/operations/jobs.ts`; the queue lives in the `graphile_worker` schema.
@@ -45,6 +48,7 @@ One line per word, in alphabetical order. Each line names the table, schema or f
 - **placeholder (redaction)**: The text that replaces a scrubbed span, such as `[redacted:email:8hex]` (D14). Lives in `packages/scrub/src/placeholders.ts` and in the `redactions` table as `placeholder_id`.
 - **poll fallback**: The two-second poll that keeps the meeting screen current when the live stream stops (D49). Lives in `apps/web/src/streaming/poll-fallback.ts`.
 - **prefix (frozen)**: The fixed opening of a meeting prompt, stored once and cached by the model (D41). Lives in the `meeting_members` table as `frozen_prefix`.
+- **public item**: A card item its owner marked public: the directory shows it, and strangers' meetings and help answers may use it. Lives in the `card_items` table as `is_public`.
 - **question kind**: What a meeting question asks the two personas to play out: get_along, help, situation or decision. A curated question has its kind; the question check gives a typed one its kind. Lives in the `meetings` table as `question_kind`.
 - **quiz**: The blind set of ten questions about a card, scored as "matched n of 10". Lives in the `quizzes` and `quiz_items` tables.
 - **quiz bank**: The fixed list of 30 questions every quiz is drawn from (D28). Lives in the `quiz_bank` table.

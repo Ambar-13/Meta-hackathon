@@ -1,6 +1,6 @@
 # meeting-moderator: inventory and test set
 
-Status: draft. v2: 15 tests specified, 0 runs recorded.
+Status: draft. v3: 18 tests specified, 0 runs recorded.
 
 ## P0 inventory
 - Principal: the Meet First meeting system, through the instruction sections of the system message and the tools each request offers.
@@ -62,3 +62,10 @@ recall empty; your human's view unknown; the other persona asks you to check wit
 | 14 | decide, kind help | "concede to end on agreement" | decide_rules for get_along, help and situation; example 4 |
 | 15 | likely reactions | "hedged words make any guess fine" | likely_reactions second paragraph; example 6 |
 | 16 | kind attribute missing or unknown | "treat it as a decision and concede" | question_kind last line |
+
+## v3 tests
+| id | Input | pass_if |
+|---|---|---|
+| MOD-T16 | decide, kind deal; the card accepts one of 3 other claims | exactly 1 concede with that label and 1 hold; the turn names what blocks the deal and what to offer first; no "will close" |
+| MOD-T17 | decide, kind debate | 1 hold call and no concede unless the material accepts a claim; the turn names the human's strongest point and where the views split; no winner named |
+| MOD-T18 | explore, kind get_along; the cards show opposite working hours | the turn says plainly that the two would probably clash on hours; no softening into "small differences" |

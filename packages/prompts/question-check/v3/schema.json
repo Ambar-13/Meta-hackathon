@@ -1,0 +1,32 @@
+{
+  "name": "question-check",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "allowed": {
+        "type": "boolean"
+      },
+      "reason": {
+        "type": "string"
+      },
+      "kind": {
+        "type": "string",
+        "enum": [
+          "get_along",
+          "help",
+          "situation",
+          "decision",
+          "deal",
+          "debate"
+        ]
+      }
+    },
+    "required": [
+      "allowed",
+      "reason",
+      "kind"
+    ],
+    "additionalProperties": false
+  }
+}

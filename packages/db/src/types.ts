@@ -38,13 +38,13 @@ export interface RedactionsTable {
 // One row of the cards table, as migration 0001 defines it.
 export interface CardsTable {
   id: Generated<string>; source_id: string; person_id: string; state: "building" | "ready" | "thin" | "failed" | "approved"; model: string; prompt_version: string;
-  items_total: number | null; items_verified: number | null; thin: Generated<boolean>; recall_allowed: Generated<boolean>;
+  items_total: number | null; items_verified: number | null; thin: Generated<boolean>; recall_allowed: Generated<boolean>; friends_can_ask: Generated<boolean>;
   built_at: NullableTimestamp; approved_at: NullableTimestamp; error: string | null; created_at: GeneratedTimestamp;
 }
 // One row of the card_items table, as migration 0001 defines it.
 export interface CardItemsTable {
   id: Generated<string>; card_id: string; person_id: string; position: number; kind: "value" | "preference" | "habit" | "boundary" | "goal"; claim: string; lang: string; gloss: string;
-  turn_id: string; quote: string; norm_quote: string; verified: boolean; flagged: boolean; approved: Generated<boolean>; sensitive: Generated<boolean>; created_at: GeneratedTimestamp;
+  turn_id: string; quote: string; norm_quote: string; verified: boolean; flagged: boolean; approved: Generated<boolean>; sensitive: Generated<boolean>; is_public: Generated<boolean>; created_at: GeneratedTimestamp;
 }
 // One row of the quiz_bank table, as migration 0001 defines it.
 export interface QuizBankTable { bank_version: number; question_id: number; text: string; }
@@ -60,18 +60,18 @@ export interface QuizItemsTable {
 }
 // One row of the pairs table, as migration 0001 defines it.
 export interface PairsTable {
-  id: Generated<string>; creator_person_id: string; joiner_person_id: string | null; token_hash: Bytes; expires_at: Timestamp; joined_at: NullableTimestamp; created_at: GeneratedTimestamp;
+  id: Generated<string>; creator_person_id: string; joiner_person_id: string | null; token_hash: Bytes; expires_at: Timestamp; joined_at: NullableTimestamp; via_directory: Generated<boolean>; created_at: GeneratedTimestamp;
 }
 // One row of the meetings table, as migration 0001 defines it.
 export interface MeetingsTable {
-  id: Generated<string>; pair_id: string; question_id: number | null; question_text: string; question_checked_at: NullableTimestamp; question_rejected_reason: string | null; question_kind: Generated<"get_along" | "help" | "situation" | "decision">;
+  id: Generated<string>; pair_id: string; question_id: number | null; question_text: string; question_checked_at: NullableTimestamp; question_rejected_reason: string | null; question_kind: Generated<"get_along" | "help" | "situation" | "decision" | "deal" | "debate">;
   state: Generated<"ready" | "queued" | "running" | "ended" | "deleted">; queue_position: number | null; phase: "open" | "explore" | "decide" | "close" | null;
   current_step_seq: Generated<number>; started_at: NullableTimestamp; ends_at: NullableTimestamp; ended_at: NullableTimestamp; end_reason: "decided" | "budget" | "deleted" | null; created_at: GeneratedTimestamp;
 }
 // One row of the meeting_members table, as migration 0001 defines it.
 export interface MeetingMembersTable {
   meeting_id: string; person_id: string; side: "a" | "b"; card_id: string; ready_at: NullableTimestamp; last_seen_at: NullableTimestamp;
-  frozen_prefix: string | null; frozen_prefix_tokens: number | null; created_at: GeneratedTimestamp;
+  frozen_prefix: string | null; frozen_prefix_tokens: number | null; public_only: Generated<boolean>; created_at: GeneratedTimestamp;
 }
 // One row of the meeting_steps table, as migration 0001 defines it.
 export interface MeetingStepsTable {
@@ -129,14 +129,30 @@ export interface NamesPassesTable { source_id: string; person_id: string; finish
 export interface SourceNamesTable {
   id: Generated<string>; source_id: string; person_id: string; text: string; role_token: string; is_minor: Generated<boolean>; placeholder_ids: Generated<string[]>; created_at: GeneratedTimestamp;
 }
+// One row of the directory_listings table, as migration 0006 defines it.
+export interface DirectoryListingsTable { id: Generated<string>; person_id: string; card_id: string; line: string; created_at: GeneratedTimestamp; }
+// One row of the persona_asks table, as migration 0006 defines it.
+export interface PersonaAsksTable {
+  id: Generated<string>; person_id: string; mode: "help" | "react"; pair_id: string | null; text: string;
+  state: Generated<"checking" | "asking" | "ranking" | "done" | "refused" | "failed">; refused_reason: string | null; about_name: string | null;
+  created_at: GeneratedTimestamp; finished_at: NullableTimestamp;
+}
+// One row of the persona_answers table, as migration 0006 defines it; claims is jsonb.
+export interface PersonaAnswersTable {
+  id: Generated<string>; ask_id: string; asker_person_id: string; subject_person_id: string; subject_card_id: string; listing_id: string | null;
+  mode: "help" | "react"; ask_text: string; asker_display_name: string; subject_display_name: string; subject_line: string | null; shortlist_rank: number;
+  state: Generated<"pending" | "answered" | "failed">; answer: string | null; has_sign: boolean | null; claims: JSONColumnType<unknown[], string | undefined>;
+  supported_count: number | null; position: number | null; created_at: GeneratedTimestamp; answered_at: NullableTimestamp;
+}
 // One row of the recall_corpus view, as migration 0001 defines it.
 export interface RecallCorpusView { turn_id: string; person_id: string; source_id: string; text: string; norm_text: string; card_id: string; }
 
-// Every table and view of migrations 0001 and 0002, by its SQL name. Add a row here in the same change that adds a migration.
+// Every table and view of migrations 0001 to 0006, by its SQL name. Add a row here in the same change that adds a migration.
 export interface Database {
   people: PeopleTable; sessions: SessionsTable; transfer_links: TransferLinksTable; sources: SourcesTable; turns: TurnsTable; redactions: RedactionsTable;
   cards: CardsTable; card_items: CardItemsTable; quiz_bank: QuizBankTable; quizzes: QuizzesTable; quiz_items: QuizItemsTable; pairs: PairsTable;
   meetings: MeetingsTable; meeting_members: MeetingMembersTable; meeting_steps: MeetingStepsTable; meeting_events: MeetingEventsTable; claims: ClaimsTable;
   briefs: BriefsTable; comics: ComicsTable; comic_panels: ComicPanelsTable; share_pages: SharePagesTable; ledger: LedgerTable; deletions: DeletionsTable;
   service_heartbeats: ServiceHeartbeatsTable; schema_migrations: SchemaMigrationsTable; names_passes: NamesPassesTable; source_names: SourceNamesTable; recall_corpus: RecallCorpusView;
+  directory_listings: DirectoryListingsTable; persona_asks: PersonaAsksTable; persona_answers: PersonaAnswersTable;
 }

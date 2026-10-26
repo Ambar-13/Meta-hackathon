@@ -83,7 +83,7 @@ describe("write_briefs job", () => {
     const quotes = points.flatMap((point) => point.quotes);
     expect(points).toHaveLength(18);
     expect(quotes.every((quote) => quote.verified && turnIds.has(quote.turnId))).toBe(true);
-    expect(rows.every((row) => row.model === CHAT_MODEL && row.prompt_version === "v2")).toBe(true);
+    expect(rows.every((row) => row.model === CHAT_MODEL && row.prompt_version === "v3")).toBe(true);
     const ledger = await ledgerRows(seeded.meetingId, "brief");
     expect(ledger.map((entry) => entry.model)).toEqual([CHAT_MODEL, CHAT_MODEL]);
   });

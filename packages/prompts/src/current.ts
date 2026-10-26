@@ -2,17 +2,18 @@
 export const CURRENT_PROMPTS = {
   dossier: "v1",
   "scrub-names": "v1",
-  "question-check": "v2",
+  "question-check": "v3",
   "quiz-persona-answer": "v1",
   "quiz-judge": "v1",
-  "meeting-moderator": "v2",
+  "meeting-moderator": "v3",
   "meeting-speech": "v2",
   "meeting-receipts": "v1",
-  brief: "v2",
+  brief: "v3",
   "brief-support-judge": "v1",
   "comic-panels": "v1",
   "comic-image": "v1",
   "untrusted-data-rules": "v1",
+  "persona-answer": "v1",
 } as const;
 // The name of one prompt folder under packages/prompts.
 export type PromptName = keyof typeof CURRENT_PROMPTS;

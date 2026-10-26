@@ -26,6 +26,8 @@ export const CALL_SITE_CONFIG: Record<CallSite, CallSiteConfig> = {
   comic_panels: { effort: "low", maxTokens: 2_000 /* [confirm] */, timeoutMs: 60_000 /* [confirm] */, retries: 1, prompt: "comic-panels", structured: true, streams: false },
   comic_image: { effort: "minimal", maxTokens: 0, timeoutMs: 30_000, retries: 0, prompt: "comic-image", structured: false, streams: false }, // D64; effort is a ledger placeholder for an image call
   self_test: { effort: "minimal", maxTokens: 1, timeoutMs: 30_000, retries: 0, prompt: null, structured: true, streams: false }, // R3.1
+  persona_answer: { effort: "low", maxTokens: 1_500 /* [confirm] */, timeoutMs: 60_000 /* [confirm] */, retries: 1, prompt: "persona-answer", structured: true, streams: false }, // as-built 49; with 20 calls per help search this bounds one search's spend
+  ask_support_judge: { effort: "minimal", maxTokens: 2_000, timeoutMs: 30_000, retries: 1, prompt: "brief-support-judge", temperature: 0, structured: true, streams: false }, // as-built 49: the brief support check, reused on answer claims
 };
 // Ledger estimate for one image call, in tokens (R11.4).
 export const IMAGE_CALL_EST_TOKENS = 1_000;
