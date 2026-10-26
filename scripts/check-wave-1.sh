@@ -17,7 +17,8 @@ preconditions() {
       exit 2
     fi
   done
-  if [ -n "$(git -C "$ROOT" status --porcelain)" ]; then
+  # The evidence folder is this check's own output, so a rerun does not count it as an uncommitted change.
+  if [ -n "$(git -C "$ROOT" status --porcelain -- . ':!docs/evidence')" ]; then
     echo "check_wave_dirty_tree: commit or stash first; the check runs on the merged tree only" >&2
     exit 2
   fi
