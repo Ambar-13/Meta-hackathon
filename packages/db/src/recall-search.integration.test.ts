@@ -77,6 +77,18 @@ describe("recall search", () => {
     expect(rows[0]?.text.length).toBe(599);
   });
 
+  it("D38-T7: turns that rank the same come back in their order in the file", async () => {
+    const d = await createTestPerson(t.db, "Test D");
+    const source = await createFrozenSource(t.db, d.personId, Array.from({ length: 7 }, (_, index) => `budget note ${String(index)}`));
+    const card = await createApprovedCard(t.db, source.sourceId, { recallAllowed: true });
+
+    const fullText = await searchAsOwner(t.db, { personId: d.personId, cardId: card.cardId }, "budget");
+    const trigram = await searchAsOwner(t.db, { personId: d.personId, cardId: card.cardId }, "budgt");
+
+    expect(fullText.map((row) => row.turnId)).toEqual(source.turnIds.slice(0, 5));
+    expect(trigram.map((row) => row.turnId)).toEqual(source.turnIds.slice(0, 5));
+  });
+
   it("INV16-T1: a card with recall off yields nothing", async () => {
     const result = await asPerson(t.db, m.b.personId, async (trx) => ({
       rows: await searchRecallCorpus(trx, { cardId: m.b.cardId, query: "deadlines", limit: 5 }),

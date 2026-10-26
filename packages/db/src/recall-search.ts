@@ -22,18 +22,19 @@ function snippetOf(text: string): string {
 }
 
 // The full-text step: a turn matches when it shares a word with the query, and more shared words rank first (D38).
+// Equal ranks keep the turns' order in the person's file. A turn's id is random, so ordering by it gave another list on each rebuild.
 async function fullTextRows(trx: Transaction<Database>, search: { cardId: string; words: string[]; limit: number }): Promise<Array<{ turn_id: string; text: string }>> {
   const { cardId, limit } = search;
   const query = search.words.join(" or ");
-  const result = await sql<{ turn_id: string; text: string }>`SELECT turn_id, text FROM recall_corpus WHERE card_id = ${cardId} AND to_tsvector('simple', norm_text) @@ websearch_to_tsquery('simple', ${query}) ORDER BY ts_rank(to_tsvector('simple', norm_text), websearch_to_tsquery('simple', ${query})) DESC, turn_id LIMIT ${limit}`.execute(trx);
+  const result = await sql<{ turn_id: string; text: string }>`SELECT r.turn_id, r.text FROM recall_corpus r JOIN turns t ON t.id = r.turn_id WHERE r.card_id = ${cardId} AND to_tsvector('simple', r.norm_text) @@ websearch_to_tsquery('simple', ${query}) ORDER BY ts_rank(to_tsvector('simple', r.norm_text), websearch_to_tsquery('simple', ${query})) DESC, t.turn_index LIMIT ${limit}`.execute(trx);
   return result.rows;
 }
 
-// The trigram step: turns close to the query, most similar first, none under the floor (D38).
+// The trigram step: turns close to the query, most similar first, none under the floor, equal scores in file order (D38).
 async function trigramRows(trx: Transaction<Database>, search: { cardId: string; words: string[]; limit: number }): Promise<Array<{ turn_id: string; text: string }>> {
   const { cardId, limit } = search;
   const query = search.words.join(" ");
-  const result = await sql<{ turn_id: string; text: string }>`SELECT turn_id, text FROM recall_corpus WHERE card_id = ${cardId} AND word_similarity(${query}, norm_text) >= ${RECALL_TRIGRAM_MIN} ORDER BY word_similarity(${query}, norm_text) DESC, turn_id LIMIT ${limit}`.execute(trx);
+  const result = await sql<{ turn_id: string; text: string }>`SELECT r.turn_id, r.text FROM recall_corpus r JOIN turns t ON t.id = r.turn_id WHERE r.card_id = ${cardId} AND word_similarity(${query}, r.norm_text) >= ${RECALL_TRIGRAM_MIN} ORDER BY word_similarity(${query}, r.norm_text) DESC, t.turn_index LIMIT ${limit}`.execute(trx);
   return result.rows;
 }
 
