@@ -5,8 +5,9 @@ import type { EventStreamReader } from "./event-stream-reader.js";
 import { PLANNED_DISCONNECT_SEQ } from "./fixtures.js";
 import { check, finishStep, need, pollUntil, readers, routePath, sleep, type Assertion, type RunState, type StepResult } from "./report.js";
 
-// The first and second turns may take 120 s each (first token 20 s plus the 90 s speech cap, D39).
-const TURN_TIMEOUT_MS = 120_000;
+// The first and second turns may take 210 s each: one first-token retry (45 s), a 120 s speech call and 30 s of receipts, rounded up
+// (D39 as measured on the live model on 27 Oct 2026: Muse Spark reasons silently before its first word).
+const TURN_TIMEOUT_MS = 210_000;
 // The meeting may run for 14 minutes from its start: the 13-minute worst case plus a minute (design step 12).
 const MEETING_WAIT_MS = 840_000;
 // The longest a meeting may last before it must have ended, in seconds (design step 12).

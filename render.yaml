@@ -10,7 +10,7 @@ services:
     autoDeployTrigger: "off"   # D70, R12.3
     preDeployCommand: pnpm db:migrate   # D71, R12.1: only the api migrates, under pg_advisory_lock(42)
     healthCheckPath: /api/health        # R12.5
-    maxShutdownDelaySeconds: 120        # D70, R12.4: SIGTERM waits long enough to drain a 90 s model call
+    maxShutdownDelaySeconds: 150        # D70, R12.4: SIGTERM waits long enough to drain a 120 s model call
     envVars:
       - key: DATABASE_URL_MIGRATE
         sync: false          # the app_migrate URL, set by hand, never the database owner's: migrations run as app_migrate (as-built item 9),
@@ -33,7 +33,7 @@ services:
     dockerfilePath: ./Dockerfile.worker
     dockerContext: .
     autoDeployTrigger: "off"
-    maxShutdownDelaySeconds: 120
+    maxShutdownDelaySeconds: 150   # drain a 120 s model call (D39)
     envVars:
       - key: DATABASE_URL_WORKER
         sync: false          # role app_worker
