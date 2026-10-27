@@ -24,7 +24,7 @@ load_env() {
     exit 2
   fi
   if [ ! -f "$ENV_FILE" ]; then
-    echo "check_wave_3_env_missing: write .env.wave3 with APP_ORIGIN and DATABASE_URL_WORKER (the Render external URL for app_worker)" >&2
+    echo "check_wave_3_env_missing: write .env.wave3 with APP_ORIGIN and DATABASE_URL_WORKER (the Render external URL for app_worker); pnpm db:render-roles writes it" >&2
     exit 2
   fi
   if grep -q '^LLM_MODE=' "$ENV_FILE"; then

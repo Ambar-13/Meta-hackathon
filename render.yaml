@@ -1,22 +1,24 @@
-# D70: two production services plus Postgres, auto-deploy off, deploys only through the hooks that scripts/release.sh calls with a tag.
+# D70: two production services plus Postgres, auto-deploy off, deploys only through the hooks that scripts/release.sh calls with the commit of a tag.
+# Plan IDs and prices are Render's on 2026-10-28 (render.com/docs/blueprint-spec, render.com/pricing); the sizes are the Wave 0 defaults.
 services:
   - type: web
     name: meet-first-api
     runtime: docker
-    plan: starter            # a paid instance (ARCHITECTURE.md 9); the plan name is a Wave 0 default [confirm]
+    plan: 0.5c-512mb         # 0.5 CPU, 512 MB, $7 a month, a paid instance (ARCHITECTURE.md 9) [confirm]
     region: singapore        # ARCHITECTURE.md 12: availability and latency to api.meta.ai are unverified [confirm]
     dockerfilePath: ./Dockerfile.api
     dockerContext: .
     autoDeployTrigger: "off"   # D70, R12.3
-    preDeployCommand: pnpm db:migrate   # D71, R12.1: only the api migrates, under pg_advisory_lock(42)
+    preDeployCommand: pnpm -w db:migrate   # D71, R12.1: only the api migrates, under pg_advisory_lock(42). -w runs the root script:
+                                           # the image's working directory is apps/api, where pnpm 9.12 finds no db:migrate
     healthCheckPath: /api/health        # R12.5
     maxShutdownDelaySeconds: 150        # D70, R12.4: SIGTERM waits long enough to drain a 120 s model call
     envVars:
       - key: DATABASE_URL_MIGRATE
-        sync: false          # the app_migrate URL, set by hand, never the database owner's: migrations run as app_migrate (as-built item 9),
+        sync: false          # the app_migrate URL from pnpm db:render-roles, never the database owner's: migrations run as app_migrate (as-built item 9),
                              # and Render gives the pre-deploy command the service's variables, so whatever is here is also in the api's environment
       - key: DATABASE_URL_API
-        sync: false          # same host and database, role app_api; the password is set by hand after migration 0001 creates the role
+        sync: false          # same host and database, role app_api; pnpm db:render-roles makes the role and writes this URL
       - key: APP_ORIGIN
         sync: false          # https://<service>.onrender.com until a domain exists (A7)
       - key: MAX_CONCURRENT_MEETINGS
@@ -28,7 +30,7 @@ services:
   - type: worker
     name: meet-first-worker
     runtime: docker
-    plan: starter            # always on (ARCHITECTURE.md 2) [confirm]
+    plan: 0.5c-512mb         # always on (ARCHITECTURE.md 2); 0.5 CPU, 512 MB, $7 a month [confirm]
     region: singapore
     dockerfilePath: ./Dockerfile.worker
     dockerContext: .
@@ -55,6 +57,6 @@ services:
         value: production
 databases:
   - name: meet-first-db
-    plan: basic-256mb        # the plan size is unverified (R12.5); the health route reports degraded at 80% [confirm]
+    plan: 0.1c-256mb         # 0.1 CPU, 256 MB, $6 a month, plus $0.30 per GB of disk (15 GB by default); the health route reports degraded at 80% [confirm]
     postgresMajorVersion: "16"
     region: singapore

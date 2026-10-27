@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "migrate": "tsx src/migrate.ts",
     "fresh": "tsx src/fresh.ts",
-    "count-person": "tsx src/count-person.ts"
+    "count-person": "tsx src/count-person.ts",
+    "render-roles": "tsx src/render-roles.ts"
   },
   "dependencies": {
     "@meet-first/contracts": "workspace:*",

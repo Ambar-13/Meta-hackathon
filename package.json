@@ -20,6 +20,7 @@
     "db:migrate": "pnpm --filter @meet-first/db migrate",
     "db:fresh": "pnpm --filter @meet-first/db fresh",
     "db:count-person": "pnpm --filter @meet-first/db count-person",
+    "db:render-roles": "pnpm --filter @meet-first/db render-roles",
     "eval": "pnpm --filter @meet-first/evals run eval",
     "golden-path": "tsx scripts/golden-path.ts",
     "share:takedown": "tsx scripts/share-takedown.ts",
