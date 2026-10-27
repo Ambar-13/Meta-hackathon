@@ -46,10 +46,14 @@ function judgedChecks(view: QuizView): Assertion[] {
   ];
 }
 
-// Step 5: A takes the quiz. Under --mock the whole step is not exercised, because a judged quiz cannot be replayed.
+// Step 5: A takes the quiz. Under --mock the whole step is not exercised, because a judged quiz cannot be replayed. Under --record it is
+// skipped too: the quiz's misses go into A's meeting prompt, so a recording made with them would not replay under --mock (wave 3 4.4).
 export async function step05Quiz(run: RunState): Promise<StepResult> {
   if (run.options.mode === "mock") {
     return finishStep(5, "quiz", { rows: ["R4.2", "R4.5", "D31"], detail: "not exercised under --mock: a judged quiz cannot be replayed", assertions: [], notExercised: true });
+  }
+  if (run.options.mode === "record") {
+    return finishStep(5, "quiz", { rows: ["R4.2", "R4.5", "D31"], detail: "not exercised under --record: the recording follows the --mock path, which has no quiz", assertions: [], notExercised: true });
   }
   const personA = need(run.ids.personA, "personA");
   const cardId = need(run.ids.cardA, "cardA");

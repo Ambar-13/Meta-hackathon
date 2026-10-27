@@ -181,7 +181,9 @@ s16_golden_path() {
   jq -e '.result == "pass"' "$report" >/dev/null
   jq -e '.ledger.modes == ["replay"]' "$report" >/dev/null
   jq -e '[.steps[] | select(.name == "stream") | .assertions[] | select(.name == "planned reconnect") | .pass] == [true]' "$report" >/dev/null
-  jq -e '[.steps[] | select(.name == "brief") | .assertions[] | select(.name == "exactly one line is unsupported" or .name == "the unsupported line is not in decide first") | .pass] == [true, true]' "$report" >/dev/null
+  # Since Wave 3 the replay is a recording of the real model, whose support judge leaves many lines unsupported, so the brief is
+  # checked by its replayed judgments being reliable, not by the scripted count of one unsupported line (wave 3 section 4.4).
+  jq -e '[.steps[] | select(.name == "brief") | .assertions[] | select(.name == "both support judgments are reliable") | .pass] == [true]' "$report" >/dev/null
   jq -e '[.steps[] | select(.name == "comic") | .assertions[] | select(.name == "the comic is written after the brief") | .pass] == [true]' "$report" >/dev/null
   jq -e '[.steps[] | select(.name == "delete") | .assertions[] | select(.name == "every table is empty for A") | .pass] == [true]' "$report" >/dev/null
   # The directory's privacy checks: B's side of the directory meeting and B's help answer quote only turns behind public items (P1).

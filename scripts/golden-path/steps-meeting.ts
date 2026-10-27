@@ -70,14 +70,15 @@ async function arrivalAfter(reader: EventStreamReader, search: { mark: number; p
   }
 }
 
-// The checks on the recall switch: A's persona calls recall (when the run is mock or it did), and B's lookups return nothing.
+// The checks on the recall switch: A's persona calls recall when it chooses to, and B's lookups return nothing.
+// The recorded model did not call recall, so --mock tolerates a missing call as a live run does (wave 3 section 4.4, R8.2).
 function recallChecks(a: EventStreamReader, isMock: boolean, notes: string[]): Assertion[] {
   const isRecallCalled = a.committed.some((event) => event.type === "tool.called" && event.tool === "recall" && event.side === "a");
   const results = a.committed.filter((event): event is ToolResult => event.type === "tool.result" && event.tool === "recall");
   const toB = results.filter((event) => event.side === "b");
   const toA = results.filter((event) => event.side === "a");
   const checks: Assertion[] = [check("B's recall results hold no turns", true, toB.every((event) => turnsIn(event.result) === 0))];
-  if (isMock || isRecallCalled) checks.push(check("A's persona calls recall", true, isRecallCalled));
+  if (isRecallCalled) checks.push(check("A's persona calls recall", true, isRecallCalled));
   else notes.push("A's persona did not call recall (not exercised: model choice)");
   if (isMock) checks.push(check("A's recall results hold one to five turns", true, toA.every((event) => turnsIn(event.result) >= 1 && turnsIn(event.result) <= RECALL_MAX_TURNS)));
   return checks;
@@ -169,16 +170,14 @@ export async function step11Background(run: RunState): Promise<StepResult> {
   return finishStep(11, "background", { rows: ["R8.3", "R8.1", "D49"], detail, assertions });
 }
 
-// The concede and hold checks of the decision: each side concedes or holds, and under mock there is exactly one scripted concede.
-function decisionChecks(a: EventStreamReader, isMock: boolean): Assertion[] {
-  const concedes = a.committed.filter((event) => event.type === "concede").length;
+// The concede and hold checks of the decision: a decide phase, and each side concedes or holds.
+// How many sides concede is the model's choice; the recorded meeting had none, so --mock does not count them (wave 3 section 4.4).
+function decisionChecks(a: EventStreamReader): Assertion[] {
   const isEachSide = (["a", "b"] as const).every((side) => a.committed.some((event) => (event.type === "concede" || event.type === "hold") && event.side === side));
-  const checks: Assertion[] = [
+  return [
     check("a decide phase was reached", true, a.committed.some((event) => event.type === "phase.changed" && event.phase === "decide")),
     check("each side concedes or holds", true, isEachSide),
   ];
-  if (isMock) checks.push(check("exactly one scripted concede", 1, concedes));
-  return checks;
 }
 
 // Step 12: the meeting decides within 13 minutes. Both readers agree on the turns, and the database has one meeting.ended.
@@ -193,7 +192,7 @@ export async function step12Decide(run: RunState): Promise<StepResult> {
   const assertions: Assertion[] = [
     check("the meeting ended because it decided", "decided", ended.reason),
     check("the meeting ended within 13 minutes", true, endedSeconds <= DECIDE_LIMIT_SECONDS),
-    ...decisionChecks(a, run.options.mode === "mock"),
+    ...decisionChecks(a),
   ];
   await sleep(STRAGGLER_MS);
   a.assertGapless();

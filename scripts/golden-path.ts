@@ -59,9 +59,10 @@ async function readLedgerNow(run: RunState): Promise<boolean> {
   return true;
 }
 
-// The modes a run expects from the ledger: replay under --mock, live under --live, and none otherwise.
+// The modes a run expects from the ledger: replay under --mock, live under --live, record under --record, and none otherwise.
 function expectedModesOf(mode: RunMode): string[] | undefined {
   if (mode === "mock") return ["replay"];
+  if (mode === "record") return ["record"];
   return mode === "live" ? ["live"] : undefined;
 }
 
