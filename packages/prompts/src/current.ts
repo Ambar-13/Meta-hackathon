@@ -9,7 +9,7 @@ export const CURRENT_PROMPTS = {
   "meeting-speech": "v2",
   "meeting-receipts": "v1",
   brief: "v5",
-  "brief-support-judge": "v1",
+  "brief-support-judge": "v2",
   "comic-panels": "v1",
   "comic-image": "v1",
   "untrusted-data-rules": "v1",
