@@ -111,6 +111,7 @@ const PhaseChips = (props: { phase: Phase | null }): ReactElement | null => {
 // The sky at the top: the way home, whether it is live, the two name tags, the question, and which part of the talk this is.
 const MeetingStage = (props: { fold: MeetingFoldState; view: MeetingView | null }): ReactElement => {
   const names = sideNames(props.fold, props.view);
+  const hasNames = props.fold.started !== null || props.view !== null;
   const isLive = props.fold.started !== null && props.fold.ended === null;
   return (
     <header className="meeting-stage sky">
@@ -118,11 +119,13 @@ const MeetingStage = (props: { fold: MeetingFoldState; view: MeetingView | null 
         <Link className="meeting-back" to={APP_PATHS.home}>Home</Link>
         {isLive ? <span className="pill"><span className="dot" />Live</span> : null}
       </div>
-      <div className="meeting-duel" aria-hidden="true">
-        <NameTag name={names.a} className="meeting-tag a" />
-        <span className="meeting-and">&amp;</span>
-        <NameTag name={names.b} colour="blue" className="meeting-tag b" />
-      </div>
+      {hasNames ? (
+        <div className="meeting-duel" aria-hidden="true">
+          <NameTag name={names.a} className="meeting-tag a" />
+          <span className="meeting-and">&amp;</span>
+          <NameTag name={names.b} colour="blue" className="meeting-tag b" />
+        </div>
+      ) : null}
       <h1>{props.fold.started?.question ?? props.view?.questionText ?? "Meeting"}</h1>
       <PhaseChips phase={props.fold.phase} />
       <div className="scallop" aria-hidden="true" />

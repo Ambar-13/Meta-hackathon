@@ -129,6 +129,8 @@ legend { padding: 0 8px; margin-left: -8px; font: 800 20px/1.1 var(--display); l
 .panel > h2:first-child, .panel > h3:first-child { margin-top: 0; }
 .colour-panel { position: relative; background: var(--k, var(--blue)); border-radius: var(--radius-l); padding: 20px 20px 18px; margin: 18px 0; transform: rotate(var(--r, 0deg)); }
 .colour-panel > h2:first-child, .colour-panel > h3:first-child { margin-top: 0; }
+/* Grey text fails contrast on the saturated colours (ink-2 is 3.6:1 on blue and coral), so inside them the greys turn to ink. */
+.colour-panel, .bubble { --ink-2: var(--ink); --ink-3: var(--ink); }
 .colour-panel .panel, .colour-panel fieldset { border-color: transparent; }
 .soft-panel { background: var(--k-soft, var(--blue-soft)); border-radius: var(--radius); padding: 16px 18px; margin: 14px 0; }
 .notice { display: grid; gap: 4px; background: var(--coral-soft); border: 2px solid var(--coral-deep); border-radius: var(--radius); padding: 14px 16px; margin: 14px 0; }

@@ -9,7 +9,7 @@
 .avatar-card { position: relative; display: grid; justify-items: center; align-content: start; gap: 8px; min-height: 124px; margin: 0; padding: 30px 10px 12px;
   border-radius: var(--radius); background: var(--k-soft); border: 2px solid transparent; text-align: center; cursor: pointer; transition: transform 0.2s var(--ease); }
 .avatar-card:hover { border-color: var(--line-strong); }
-.avatar-card:has(input:checked) { border-color: var(--ink); background: var(--k); transform: rotate(-1.5deg); }
+.avatar-card:has(input:checked) { --ink-2: var(--ink); border-color: var(--ink); background: var(--k); transform: rotate(-1.5deg); }
 .avatar-card:has(input:focus-visible) { outline: 3px solid var(--blue-deep); outline-offset: 3px; }
 .avatar-card input { position: absolute; top: 10px; left: 10px; }
 .avatar-art { display: inline-grid; place-items: center; min-width: 64px; height: 52px; padding: 0 14px; border-radius: 999px; background: var(--paper); box-shadow: inset 0 0 0 2px var(--ink);

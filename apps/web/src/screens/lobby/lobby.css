@@ -52,6 +52,7 @@
 .meeting-state.is-ended, .meeting-state.is-deleted { border-color: var(--line-strong); color: var(--ink-2); }
 
 @media (min-width: 900px) {
+  .q-submit { position: static; justify-content: flex-start; padding: 6px 0 0; }
   .lobby-tags { margin: 18px 0 14px; }
   .lobby-tags .tag { --s: 18px; }
   .lobby-slot { width: 151px; height: 125px; }

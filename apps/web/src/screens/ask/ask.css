@@ -15,7 +15,7 @@
 .ask-answer-head { display: flex; align-items: center; gap: 12px; }
 .ask-answer-head h3 { margin: 0; }
 .ask-answer-head p { margin: 2px 0 0; font-size: 15px; }
-.ask-answer-text { margin: 14px 0 4px; padding: 13px 17px 14px; border-radius: 24px 24px 24px 8px; background: var(--blue); font: 500 16.5px/1.45 var(--sans); }
+.ask-answer-text { --ink-2: var(--ink); --ink-3: var(--ink); margin: 14px 0 4px; padding: 13px 17px 14px; border-radius: 24px 24px 24px 8px; background: var(--blue); font: 500 16.5px/1.45 var(--sans); }
 .ask-meet { margin-top: 14px; }
 .ask-no-card { margin: 14px 0 0; font-size: 15px; }
 .ask-extra { width: 100%; }

@@ -73,6 +73,7 @@
 .wl-kinds { padding: 64px 16px 30px; }
 .wl-kind { position: sticky; top: 16px; max-width: 1100px; margin: 0 auto 24px; padding: 22px 20px 20px; border-radius: 30px; background: var(--k);
   box-shadow: 0 -2px 0 oklch(20% 0.05 266 / 0.05), 0 24px 40px -26px oklch(20% 0.05 266 / 0.5); }
+.wl-kind, .wl-step { --ink-2: var(--ink); --ink-3: var(--ink); }
 .wl-tilt-0 { transform: rotate(-1.6deg); } .wl-tilt-1 { transform: rotate(1.4deg); } .wl-tilt-2 { transform: rotate(-1.2deg); } .wl-tilt-3 { transform: rotate(1.5deg); }
 .wl-kind .pill .dot { background: var(--c); }
 .wl-kind h3 { max-width: 18ch; margin: 14px 0 0; font-size: 31px; line-height: 1; }
