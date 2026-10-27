@@ -10,7 +10,7 @@ import { RecoverForm } from "./welcome-forms.js";
 type Step = { colour: string; sticker: StickerName; title: string; text: string; time: string };
 // The three steps from the README, in order.
 const STEPS: readonly Step[] = [
-  { colour: "c-green", sticker: "phone", title: "Upload your chats", text: "From ChatGPT, Claude, your notes or a paste. Your browser keeps only your own messages and scrubs them before anything is sent.", time: "a couple of minutes" },
+  { colour: "c-green", sticker: "phone", title: "Upload your chats", text: "From ChatGPT, Claude, Codex, your notes or a paste. Your browser keeps only your own messages and scrubs them before anything is sent.", time: "a couple of minutes" },
   { colour: "c-yellow", sticker: "check", title: "Approve your card", text: "Your agent lists what it learned about you, each line with the quote it came from. You approve them one by one.", time: "you say yes to every line" },
   { colour: "c-coral", sticker: "tags", title: "Meet someone", text: "Share a code, pick a question, and the two agents talk it through. Nobody needs to be online. Watch it live or replay it later.", time: "a ten-minute talk" },
 ];

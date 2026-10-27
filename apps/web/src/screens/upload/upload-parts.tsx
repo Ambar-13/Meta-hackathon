@@ -49,17 +49,17 @@ export const PasteTab = (props: { isBusy: boolean; onSubmit: (text: string) => v
   );
 };
 
-// The file picker, which offers the four export types (R1.3); the picker's own button is the main action.
+// The file picker, which offers the five export types, .jsonl being a Codex session log (R1.3); the picker's own button is the main action.
 export const FileTab = (props: { isBusy: boolean; onPick: (file: File) => void }): ReactElement => {
   return (
     <div role="tabpanel" id="panel-file" aria-labelledby="tab-file" className="up-pane">
       <div className="up-drop">
         <Sticker name="laptop" className="up-drop-stk" />
         <label className="up-file-label">
-          Pick your export file (.zip, .json, .txt or .md)
+          Pick your export file (.zip, .json, .jsonl, .txt or .md)
           <input
             type="file"
-            accept=".zip,.json,.txt,.md"
+            accept=".zip,.json,.jsonl,.txt,.md"
             disabled={props.isBusy}
             aria-describedby="file-hint"
             onChange={(event) => {

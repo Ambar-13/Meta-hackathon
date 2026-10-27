@@ -137,6 +137,53 @@ describe("extractOwnTurns", () => {
     expect(error).toMatchObject({ code: "source_no_own_turns" });
   });
 
+  it("R1.1-T25: reads 6 own turns from the Codex session fixture, stored as kind chatgpt, with the repeat dropped", async () => {
+    const text = await fixture("codex-session.jsonl");
+    const result = extractOwnTurns([{ name: "sessions/2026/10/02/rollout-2026-10-02T08-00-00.jsonl", text }], null);
+    expect(result.kind).toBe("chatgpt");
+    expect(result.turns.map((turn) => turn.text)).toEqual([
+      "I want the watering reminders to feel gentle, because I forget my plants when I am stressed.",
+      "Can you match the colours on this page? I like how calm it looks.",
+      "This is my balcony, and I only get morning sun.",
+      "I wrote this plan at midnight, so please be kind to it.",
+      "I drew the layout on paper first, because that is how I think.",
+      "yes, go ahead",
+    ]);
+    expect(result.foundTurns).toBe(6);
+    expect(result.personaSignal).toBe(1);
+    expect(result.canonicalChars).toBe(334);
+  });
+
+  it("R1.1-T33: a message repeated in a later Codex session is kept once, in its first place", async () => {
+    const first = await fixture("codex-session.jsonl");
+    const session = JSON.stringify({ type: "session_meta", payload: { source: "vscode", thread_source: "user" } });
+    const repeat = JSON.stringify({ type: "response_item", payload: { type: "message", role: "user", content: [{ type: "input_text", text: "yes, go ahead" }] } });
+    const fresh = JSON.stringify({ type: "response_item", payload: { type: "message", role: "user", content: [{ type: "input_text", text: "I name every plant after a city." }] } });
+    const result = extractOwnTurns(
+      [
+        { name: "a/rollout-1.jsonl", text: first },
+        { name: "b/rollout-2.JSONL", text: [session, repeat, fresh].join("\n") },
+      ],
+      null,
+    );
+    expect(result.turns.map((turn) => turn.text).slice(4)).toEqual(["I drew the layout on paper first, because that is how I think.", "yes, go ahead", "I name every plant after a city."]);
+    expect(result.turns.map((turn) => turn.turnIndex)).toEqual([0, 1, 2, 3, 4, 5, 6]);
+    expect(result.foundTurns).toBe(7);
+  });
+
+  it("R1.1-T34: detectKind sends a .jsonl file that starts like JSON to the Codex reader, which stores it as chatgpt", () => {
+    expect(detectKind({ name: "rollout-2026-10-02.jsonl", text: "{\"type\":\"session_meta\"}" }, null)).toBe("chatgpt");
+    expect(detectKind({ name: "ROLLOUT.JSONL", text: "\n{}" }, null)).toBe("chatgpt");
+    expect(detectKind({ name: "notes.jsonl", text: "hello" }, null)).toBe("paste");
+  });
+
+  it("R1.1-T35: a .jsonl file that holds only a helper's session throws source_no_own_turns", () => {
+    const session = JSON.stringify({ type: "session_meta", payload: { source: { subagent: { other: "guardian" } }, thread_source: "guardian_review" } });
+    const prompt = JSON.stringify({ type: "response_item", payload: { type: "message", role: "user", content: [{ type: "input_text", text: "Check this command." }] } });
+    const error = thrownBy(() => extractOwnTurns([{ name: "rollout.jsonl", text: `${session}\n${prompt}` }], null));
+    expect(error).toMatchObject({ code: "source_no_own_turns" });
+  });
+
   it("INV1-T1: every turn is role user with no sensitive categories and indices from 0", async () => {
     const text = await fixture("chatgpt-2024-mapping.json");
     const result = extractOwnTurns([{ name: "conversations.json", text }], null);

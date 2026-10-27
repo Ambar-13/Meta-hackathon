@@ -34,6 +34,8 @@ An anonymous session cannot be recovered once device and recovery code are both 
 - The daily and total USD caps pause model calls for the rest of the day. Cards show "card generation paused for today" and meetings show "meetings are paused for today" (packages/llm/src/caps.ts).
 - Comics are purged after 30 days unless their share page is published.
 - A meeting may run for about 13 minutes, while the copy says ten (PLAN.md 10.6).
+- The upload reads Codex sessions saved as plain .jsonl files. Codex keeps older sessions compressed as .jsonl.zst, and the upload skips those, so a person who zips their sessions folder gets only the plain ones read (`apps/web/src/extract/zip-stream.ts`).
+- One Codex session log can run to tens of megabytes, so even a week of sessions can zip to more than the 150 MB file limit (D2), and a person may need to pick fewer sessions at a time.
 
 ## Plain sentences for the code
 

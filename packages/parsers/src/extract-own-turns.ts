@@ -2,6 +2,7 @@ import { ContractError, HTTP, type SourceKind, type Turn } from "@meet-first/con
 import { canonicalise, guessLang } from "./canonicalise.js";
 import { parseChatGptMapping, parseChatGptMessages, type RawTurn } from "./chatgpt-shapes.js";
 import { parseClaudeChatMessages } from "./claude-shapes.js";
+import { CODEX_FILE_NAME, parseCodexRollout } from "./codex-shapes.js";
 import { walkGeneric } from "./generic-walker.js";
 import { computePersonaSignal } from "./persona-signal.js";
 import { rankAndCut } from "./rank-and-cut.js";
@@ -27,13 +28,19 @@ const NOT_JSON_SENTENCE = "This file is not a JSON export. Pick conversations.js
 const JSON_BOM = /^﻿/;
 // The start of a structured file: an optional byte order mark, spaces or line breaks, then an opening bracket or brace (R1.1).
 const STRUCTURED_START = /^﻿?\s*[[{]/;
+// The name of a structured file: a .json export, or a Codex session log in .jsonl (R1.1).
+const STRUCTURED_NAME = /\.jsonl?$/i;
+// The kind a Codex session is stored as. The frozen SourceKind has no codex kind, and Codex is OpenAI's agent, signed in with a
+// ChatGPT account. The kind is stored with the source and shown nowhere on screen.
+const CODEX_KIND: SourceKind = "chatgpt";
 // Splits pasted text into blocks at one or more blank lines (D10).
 const BLANK_LINE = /\n\s*\n/;
 
-// Which parser to try for one file, from its name and first bytes. JSON goes to the structured parsers; .md to notes; .txt or the paste box to paste.
+// Which parser to try for one file, from its name and first bytes. JSON and Codex .jsonl go to the structured parsers; .md to notes;
+// .txt or the paste box to paste.
 export function detectKind(input: ExtractInput, kindHint: SourceKind | null): SourceKind {
   if (kindHint !== null) return kindHint;
-  if (/\.json$/i.test(input.name) && STRUCTURED_START.test(input.text)) return "chatgpt";
+  if (STRUCTURED_NAME.test(input.name) && STRUCTURED_START.test(input.text)) return "chatgpt";
   if (/\.md$/i.test(input.name)) return "notes";
   return "paste";
 }
@@ -75,11 +82,15 @@ function blockTurns(text: string): RawTurn[] {
     .map((block, index) => ({ text: block, exportOrder: index, createTime: null }));
 }
 
-// Reads one input into raw turns and the kind its path gives.
-function readInput(input: ExtractInput, kindHint: SourceKind | null): { kind: SourceKind; turns: RawTurn[] } {
+// What reading one input gives: the kind its path sets, its raw turns, and whether a repeat of an earlier input's turn is dropped.
+type InputRead = { kind: SourceKind; turns: RawTurn[]; dropsRepeats: boolean };
+
+// Reads one input into raw turns and the kind its path gives. Only Codex sessions drop repeats (see withoutRepeats).
+function readInput(input: ExtractInput, kindHint: SourceKind | null): InputRead {
   const path = detectKind(input, kindHint);
-  if (path === "notes" || path === "paste") return { kind: path, turns: blockTurns(input.text) };
-  return structuredTurns(input, kindHint);
+  if (path === "notes" || path === "paste") return { kind: path, turns: blockTurns(input.text), dropsRepeats: false };
+  if (CODEX_FILE_NAME.test(input.name)) return { kind: CODEX_KIND, turns: parseCodexRollout(input.text), dropsRepeats: true };
+  return { ...structuredTurns(input, kindHint), dropsRepeats: false };
 }
 
 // Canonicalises each turn and drops the ones with no character other than whitespace (step 3 of extractOwnTurns).
@@ -90,14 +101,27 @@ function canonicalTurns(turns: RawTurn[]): RawTurn[] {
   });
 }
 
+// The turns whose text no earlier input gave, with their texts added to the seen set. Codex copies a person's messages into forked
+// and resumed sessions, so without this the same words would count two or more times.
+function withoutRepeats(turns: RawTurn[], seen: Set<string>): RawTurn[] {
+  return turns.filter((turn) => {
+    if (seen.has(turn.text)) return false;
+    seen.add(turn.text);
+    return true;
+  });
+}
+
 // Pulls the uploader's own turns out of any supported export. Throws source_no_own_turns when nothing is found (D9).
 // Order of attempts: ChatGPT 2024 mapping, ChatGPT 2026 messages, Claude chat_messages, generic walker, then notes or paste for plain text.
+// A Codex .jsonl session log goes to the Codex reader, and a message repeated in a later session is kept once.
 export function extractOwnTurns(inputs: ExtractInput[], kindHint: SourceKind | null): ExtractResult {
   const collected: RawTurn[] = [];
+  const seenCodexTexts = new Set<string>();
   let kind: SourceKind | null = null;
   for (const input of inputs) {
     const read = readInput(input, kindHint);
-    const turns = canonicalTurns(read.turns);
+    const canonical = canonicalTurns(read.turns);
+    const turns = read.dropsRepeats ? withoutRepeats(canonical, seenCodexTexts) : canonical;
     if (turns.length === 0) continue;
     kind ??= read.kind;
     collected.push(...turns);

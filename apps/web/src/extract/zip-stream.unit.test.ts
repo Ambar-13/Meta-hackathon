@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeAll } from "vitest";
 import { strToU8, zipSync } from "fflate";
 import chatgpt2024Text from "../../../../packages/parsers/fixtures/chatgpt-2024-mapping.json?raw";
 import chatgpt2026Text from "../../../../packages/parsers/fixtures/chatgpt-2026-messages.json?raw";
+import codexText from "../../../../packages/parsers/fixtures/codex-session.jsonl?raw";
 import {
   INFLATE_SLICE_BYTES,
   INFLATED_MAX_BYTES,
@@ -55,6 +56,15 @@ describe("readPickedFile", () => {
       { name: "notes.md", text: "# Notes\n\nOne." },
     ]);
   });
+
+  it("R1.3-T3: a picked Codex .jsonl file is read keeping only the lines the Codex reader wants", async () => {
+    const picked = await readPickedFile(new File([codexText], "rollout-2026-10-02T08-00-00.jsonl"), options);
+    expect(picked.map((entry) => entry.name)).toEqual(["rollout-2026-10-02T08-00-00.jsonl"]);
+    const lines = itemAt(picked, 0).text.split("\n");
+    expect(lines).toHaveLength(16);
+    expect(lines.join("\n")).not.toContain("Here is a gentler reminder schedule");
+    expect(lines.join("\n")).not.toContain("item_completed");
+  });
 });
 
 describe("readZipEntries entry choice", () => {
@@ -75,6 +85,19 @@ describe("readZipEntries entry choice", () => {
     });
     const others = await readZipEntries(new Blob([withoutConversations]), options);
     expect(others.map((entry) => entry.name)).toEqual(["notes/today.md", "readme.txt"]);
+  });
+
+  it("R1.1-T39: a zip of Codex sessions reads every .jsonl entry with only its wanted lines, and skips compressed .jsonl.zst entries", async () => {
+    const zip = zipSync({
+      "sessions/2026/10/02/rollout-a.jsonl": strToU8(codexText),
+      "sessions/2026/10/01/rollout-b.jsonl": strToU8("{\"type\":\"turn_context\",\"payload\":{}}"),
+      "sessions/2026/09/01/rollout-c.jsonl.zst": new Uint8Array([0x28, 0xb5, 0x2f, 0xfd]),
+    });
+    const entries = await readZipEntries(new Blob([zip]), options);
+    expect(entries.map((entry) => entry.name)).toEqual(["sessions/2026/10/02/rollout-a.jsonl", "sessions/2026/10/01/rollout-b.jsonl"]);
+    expect(itemAt(entries, 0).text.split("\n")).toHaveLength(16);
+    expect(itemAt(entries, 0).text).not.toContain("Here is a gentler reminder schedule");
+    expect(itemAt(entries, 1).text).toBe("");
   });
 });
 

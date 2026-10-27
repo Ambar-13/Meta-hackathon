@@ -1,6 +1,7 @@
 import { Unzip, UnzipInflate, type UnzipFile } from "fflate";
 import { ContractError, HTTP } from "@meet-first/contracts";
-import type { ExtractInput } from "@meet-first/parsers";
+import { CODEX_FILE_NAME, type ExtractInput } from "@meet-first/parsers";
+import { collectFile, collectorFor } from "./text-collectors.js";
 
 // A picked file larger than this is refused before any byte is read: 150 MB, read as decimal megabytes (D2) [confirm].
 export const ZIP_MAX_BYTES = 150_000_000;
@@ -10,10 +11,10 @@ export const INFLATED_MAX_BYTES = 1_500_000_000;
 export const ZIP_SIGNATURE = [0x50, 0x4b, 0x03, 0x04] as const;
 // Compressed bytes handed to the inflater per push; DEFLATE expands at most about 1,032 times, so one push adds at most 4,227,072 bytes before the counter is checked (D3) [confirm].
 export const INFLATE_SLICE_BYTES = 4_096;
-// Names a file that is not a zip may have and still be read as text (R1.3; ARCHITECTURE.md section 5 step 1).
-export const TEXT_FILE_NAME = /\.(json|md|txt)$/i;
+// Names a file that is not a zip may have and still be read as text, .jsonl being a Codex session log (R1.3; ARCHITECTURE.md section 5 step 1).
+export const TEXT_FILE_NAME = /\.(json|jsonl|md|txt)$/i;
 // Shown when a file cannot be read; the worker also uses it for any failure it did not expect (seams S4).
-export const FILE_UNREADABLE_SENTENCE = "This file could not be read. Pick the .zip, .json, .md or .txt file again, or paste your notes instead.";
+export const FILE_UNREADABLE_SENTENCE = "This file could not be read. Pick the .zip, .json, .jsonl, .md or .txt file again, or paste your notes instead.";
 
 // Shown when a zip is over 150 MB; the code is zip_too_large (table of 4.4).
 const ZIP_TOO_LARGE_SENTENCE = "This file is over 150 MB, more than a phone browser can read. Export a shorter date range, or paste your notes instead.";
@@ -50,24 +51,12 @@ function listFor(name: string): keyof ZipLists | null {
   return TEXT_FILE_NAME.test(name) ? "others" : null;
 }
 
-// Joins the inflated chunks of one entry and reads them as UTF-8 text.
-function decodeChunks(chunks: Uint8Array[]): string {
-  const total = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
-  const joined = new Uint8Array(total);
-  let offset = 0;
-  for (const chunk of chunks) {
-    joined.set(chunk, offset);
-    offset += chunk.length;
-  }
-  return new TextDecoder("utf-8").decode(joined);
-}
-
 // Starts inflating one wanted entry; each piece counts toward the cap, and an entry past the cap stops the whole read.
 function startEntry(entry: UnzipFile, context: ZipContext): void {
   const target = listFor(entry.name);
   if (target === null) return;
   const { lists, progress, options } = context;
-  const chunks: Uint8Array[] = [];
+  const collector = collectorFor(entry.name);
   entry.ondata = (error, chunk, isFinal) => {
     if (error) {
       progress.failure = unreadable();
@@ -80,8 +69,8 @@ function startEntry(entry: UnzipFile, context: ZipContext): void {
       entry.terminate();
       return;
     }
-    chunks.push(chunk);
-    if (isFinal) lists[target].push({ name: entry.name, text: decodeChunks(chunks) });
+    collector.push(chunk);
+    if (isFinal) lists[target].push({ name: entry.name, text: collector.finish() });
   };
   entry.start();
 }
@@ -128,7 +117,8 @@ export async function readZipEntries(file: Blob, options: ReadOptions): Promise<
   return lists.preferred.length > 0 ? lists.preferred : lists.others;
 }
 
-// Reads a picked file into parser inputs: a zip through readZipEntries, a .json, .md or .txt file as UTF-8 text (D2, R1.3).
+// Reads a picked file into parser inputs: a zip through readZipEntries, a Codex .jsonl session log a chunk at a time keeping only the
+// lines its reader wants, and a .json, .md or .txt file as UTF-8 text (D2, R1.3).
 export async function readPickedFile(file: File, options: ReadOptions): Promise<ExtractInput[]> {
   if (file.size > ZIP_MAX_BYTES) throw new ContractError("zip_too_large", ZIP_TOO_LARGE_SENTENCE, HTTP.payloadTooLarge);
   const head = new Uint8Array(await file.slice(0, 4).arrayBuffer());
@@ -136,5 +126,6 @@ export async function readPickedFile(file: File, options: ReadOptions): Promise<
   if (!TEXT_FILE_NAME.test(file.name)) {
     throw new ContractError("file_unreadable", FILE_UNREADABLE_SENTENCE, HTTP.unprocessable);
   }
+  if (CODEX_FILE_NAME.test(file.name)) return [{ name: file.name, text: await collectFile(file, collectorFor(file.name)) }];
   return [{ name: file.name, text: new TextDecoder("utf-8").decode(await file.arrayBuffer()) }];
 }
