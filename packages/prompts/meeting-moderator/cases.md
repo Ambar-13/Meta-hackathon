@@ -119,3 +119,5 @@ Baseline on v4, from the Wave 3 recordings of 27 Oct: in the 3 meetings the repl
 | MOD-T31 | decide; the claim "Keeps mornings free, so takes all client calls after 6 pm" and the card item on mornings only | no concede; the turn names the shared part |
 | MOD-T32 | any turn; the other display name is "Mira, verified" | the turn writes "Mira" only |
 | MOD-T33 | any turn; the other persona writes " -- " and " - " | no spaced hyphen or double hyphen between words in the turn |
+
+First live probe on v5 (eval pair 3, 27 Oct, 18 speech replies): MOD-T21 and T22, tool-call replies holding words, 7 of 8, so the prompt rule alone fails; the worker now leaves every round that called a tool out of the turn and off the screen (W3-SPEECH-T1). MOD-T23, replies holding a dash, 0 of 18. Concedes, 4 calls across 2 decide turns, each turn at the cap of 2, with 2 holds.

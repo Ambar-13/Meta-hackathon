@@ -36,4 +36,4 @@ v5 cases:
 - A line that borrows a detail from the question, such as "10-day", or a persona's detail that no quote holds: rule 10 removes it.
 - Fewer than 3 topics pass the clash test: the remaining clash lines are differences in emphasis (rule 7).
 - Baseline on v4, from the Wave 3 recordings of 27 Oct: the support judge backed 6 of 18 lines of the golden path meeting's two briefs, 11 of 18 of the directory meeting's, and 17 of 18 of eval pair 3's.
-
+- First live probe on v5 (eval pair 3, 27 Oct): 11 of 18 lines backed. Rejected: 4 one-quote lines that predicted a reaction ("evening contact would probably meet a firm no", "would probably feel hard") and 3 decide_first lines with order words ("settle messages next", "after that"); accepted: "would probably want to talk about X first" and "would probably not clash on X". Rule 7 and the decide_first frame were rewritten from these.
