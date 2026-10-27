@@ -80,23 +80,39 @@
     }
   },
   "response": {
+    "id": "chatcmpl-01a17d59-e525-720c-894c-0547c5071273",
     "choices": [
       {
+        "finish_reason": "stop",
         "index": 0,
         "message": {
-          "role": "assistant",
-          "content": "{\"items\":[{\"kind\":\"habit\",\"claim\":\"Says: I plan my week on Sunday evening, and I keep the plan to one page so I actually\",\"lang\":\"en\",\"gloss\":\"Says: I plan my week on Sunday evening, and I keep the plan to one page so I actually\",\"turn_id\":\"0\",\"quote\":\"I plan my week on Sunday evening, and I keep the plan to one page so I actually\"},{\"kind\":\"preference\",\"claim\":\"Says: I work best when the first hour of the day has no calls and no chat messages at\",\"lang\":\"en\",\"gloss\":\"Says: I work best when the first hour of the day has no calls and no chat messages at\",\"turn_id\":\"1\",\"quote\":\"I work best when the first hour of the day has no calls and no chat messages at\"},{\"kind\":\"value\",\"claim\":\"Says: My manager [person:manager] prefers short written updates, so I send one each\",\"lang\":\"en\",\"gloss\":\"Says: My manager [person:manager] prefers short written updates, so I send one each\",\"turn_id\":\"2\",\"quote\":\"My manager [person:manager] prefers short written updates, so I send one each\"},{\"kind\":\"boundary\",\"claim\":\"Says: I like a clear owner for every task, and I write the owner's name next to each\",\"lang\":\"en\",\"gloss\":\"Says: I like a clear owner for every task, and I write the owner's name next to each\",\"turn_id\":\"3\",\"quote\":\"I like a clear owner for every task, and I write the owner's name next to each\"},{\"kind\":\"goal\",\"claim\":\"Says: I stop working at six most days, because the evening is when I cook and read\",\"lang\":\"en\",\"gloss\":\"Says: I stop working at six most days, because the evening is when I cook and read\",\"turn_id\":\"4\",\"quote\":\"I stop working at six most days, because the evening is when I cook and read\"},{\"kind\":\"habit\",\"claim\":\"Says: When I feel stuck, I write the problem in plain words and then sleep on it\",\"lang\":\"en\",\"gloss\":\"Says: When I feel stuck, I write the problem in plain words and then sleep on it\",\"turn_id\":\"5\",\"quote\":\"When I feel stuck, I write the problem in plain words and then sleep on it\"},{\"kind\":\"preference\",\"claim\":\"Says: I want feedback in private and in writing first, and then I want to talk it\",\"lang\":\"en\",\"gloss\":\"Says: I want feedback in private and in writing first, and then I want to talk it\",\"turn_id\":\"6\",\"quote\":\"I want feedback in private and in writing first, and then I want to talk it\"},{\"kind\":\"value\",\"claim\":\"Says: I keep a running list of questions for my manager and bring the list to every\",\"lang\":\"en\",\"gloss\":\"Says: I keep a running list of questions for my manager and bring the list to every\",\"turn_id\":\"7\",\"quote\":\"I keep a running list of questions for my manager and bring the list to every\"}]}"
+          "content": "{\"items\": [{\"claim\": \"Plans the week on Sunday evening and keeps the plan to one page.\", \"gloss\": \"Plans the week on Sunday evening and keeps the plan to one page.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I plan my week on Sunday evening, and I keep the plan to one page so I actually read it.\", \"turn_id\": \"0\"}, {\"claim\": \"Works best when the first hour of the day has no calls and no chat messages.\", \"gloss\": \"Works best when the first hour of the day has no calls and no chat messages.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I work best when the first hour of the day has no calls and no chat messages at all.\", \"turn_id\": \"1\"}, {\"claim\": \"Stops working at six most days to keep evenings for cooking and reading.\", \"gloss\": \"Stops working at six most days to keep evenings for cooking and reading.\", \"kind\": \"boundary\", \"lang\": \"en\", \"quote\": \"I stop working at six most days, because the evening is when I cook and read.\", \"turn_id\": \"4\"}, {\"claim\": \"Wants feedback in private and in writing first, then a conversation to talk it through.\", \"gloss\": \"Wants feedback in private and in writing first, then a conversation to talk it through.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I want feedback in private and in writing first, and then I want to talk it through once.\", \"turn_id\": \"6\"}, {\"claim\": \"Asks for a three-line agenda before any meeting longer than thirty minutes.\", \"gloss\": \"Asks for a three-line agenda before any meeting longer than thirty minutes.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I dislike long agendas, so I ask for a three line agenda before any meeting longer than thirty minutes.\", \"turn_id\": \"8\"}, {\"claim\": \"Finishes one task completely before starting the next.\", \"gloss\": \"Finishes one task completely before starting the next.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I try to finish one task completely before I start the next, even when a small thing is waiting.\", \"turn_id\": \"10\"}, {\"claim\": \"Only commits to doing something when there is a clear time for it.\", \"gloss\": \"Only commits to doing something when there is a clear time for it.\", \"kind\": \"value\", \"lang\": \"en\", \"quote\": \"I am careful with promises, so I only say I will do something when I have a clear time for it.\", \"turn_id\": \"11\"}, {\"claim\": \"Prefers to review drafts after a day away.\", \"gloss\": \"Prefers to review drafts after a day away.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I prefer to review drafts after a day away, because the wording looks different in the morning.\", \"turn_id\": \"12\"}, {\"claim\": \"Ends meetings by saying aloud who does what by when.\", \"gloss\": \"Ends meetings by saying aloud who does what by when.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I like to end a meeting by saying who does what by when, out loud, so nobody leaves unsure.\", \"turn_id\": \"25\"}, {\"claim\": \"Keeps phone face down during work blocks and uses a timer for breaks.\", \"gloss\": \"Keeps phone face down during work blocks and uses a timer for breaks.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I keep my phone face down during work blocks, and I use a timer for the breaks in between.\", \"turn_id\": \"30\"}, {\"claim\": \"Values calm and direct messages and writes without extra words.\", \"gloss\": \"Values calm and direct messages and writes without extra words.\", \"kind\": \"value\", \"lang\": \"en\", \"quote\": \"I value calm and direct messages, so I try to write mine without extra words or greetings.\", \"turn_id\": \"35\"}, {\"claim\": \"Keeps a short daily log of what was learned and reads it before planning next.\", \"gloss\": \"Keeps a short daily log of what was learned and reads it before planning next.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I keep a short log of what I learned each day, and I read it before I plan the next one.\", \"turn_id\": \"39\"}, {\"claim\": \"Does not answer work messages after nine at night.\", \"gloss\": \"Does not answer work messages after nine at night.\", \"kind\": \"boundary\", \"lang\": \"en\", \"quote\": \"I do not answer work messages after nine at night, and I tell people that at the start.\", \"turn_id\": \"42\"}, {\"claim\": \"Wants to get better at saying no early before a request becomes a plan.\", \"gloss\": \"Wants to get better at saying no early before a request becomes a plan.\", \"kind\": \"goal\", \"lang\": \"en\", \"quote\": \"I want to get better at saying no early, before a request has already become a plan.\", \"turn_id\": \"43\"}, {\"claim\": \"Holds a line against working weekends except for a self-chosen launch.\", \"gloss\": \"Holds a line against working weekends except for a self-chosen launch.\", \"kind\": \"boundary\", \"lang\": \"en\", \"quote\": \"Working on weekends is a line I hold, and I only cross it for a launch that I chose myself.\", \"turn_id\": \"44\"}, {\"claim\": \"Hopes to be known for making hard decisions clear and helping carry them out.\", \"gloss\": \"Hopes to be known for making hard decisions clear and helping carry them out.\", \"kind\": \"goal\", \"lang\": \"en\", \"quote\": \"I hope to be known as the person who makes a hard decision clear and then helps others carry it out.\", \"turn_id\": \"55\"}]}",
+          "refusal": null,
+          "role": "assistant"
         },
-        "finish_reason": "stop"
+        "logprobs": null
       }
-    ]
+    ],
+    "created": 1793104405,
+    "model": "muse-spark-1.3",
+    "object": "chat.completion",
+    "usage": {
+      "completion_tokens": 3641,
+      "prompt_tokens": 7660,
+      "total_tokens": 11301,
+      "completion_tokens_details": {
+        "reasoning_tokens": 2330
+      },
+      "prompt_tokens_details": {
+        "cached_tokens": 7537
+      }
+    }
   },
   "usage": {
-    "promptTokens": 7733,
-    "cachedTokens": 0,
-    "completionTokens": 1200,
-    "reasoningTokens": 0
+    "promptTokens": 7660,
+    "cachedTokens": 7537,
+    "completionTokens": 3641,
+    "reasoningTokens": 2330
   },
-  "recordedAt": null,
-  "handWritten": true
+  "recordedAt": "2026-10-27T12:33:25.970Z"
 }

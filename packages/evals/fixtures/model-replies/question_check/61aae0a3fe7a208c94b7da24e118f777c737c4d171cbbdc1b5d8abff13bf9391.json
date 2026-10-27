@@ -62,23 +62,39 @@
     }
   },
   "response": {
+    "id": "chatcmpl-01a17d5e-2259-70b2-8c3c-d881c60e312d",
     "choices": [
       {
+        "finish_reason": "stop",
         "index": 0,
         "message": {
-          "role": "assistant",
-          "content": "{\"allowed\":true,\"reason\":\"An ask about how a friend would probably react to a change of plan.\",\"kind\":\"situation\",\"romantic\":false}"
+          "content": "{\"allowed\": true, \"kind\": \"situation\", \"reason\": \"An ask about how one person would probably react to news.\", \"romantic\": false}",
+          "refusal": null,
+          "role": "assistant"
         },
-        "finish_reason": "stop"
+        "logprobs": null
       }
-    ]
+    ],
+    "created": 1793104683,
+    "model": "muse-spark-1.3",
+    "object": "chat.completion",
+    "usage": {
+      "completion_tokens": 131,
+      "prompt_tokens": 4357,
+      "total_tokens": 4488,
+      "completion_tokens_details": {
+        "reasoning_tokens": 88
+      },
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    }
   },
   "usage": {
-    "promptTokens": 0,
+    "promptTokens": 4357,
     "cachedTokens": 0,
-    "completionTokens": 0,
-    "reasoningTokens": 0
+    "completionTokens": 131,
+    "reasoningTokens": 88
   },
-  "recordedAt": null,
-  "handWritten": true
+  "recordedAt": "2026-10-27T12:38:04.183Z"
 }

@@ -46,23 +46,39 @@
     }
   },
   "response": {
+    "id": "chatcmpl-01a17c98-703e-724d-a901-20c57ea23948",
     "choices": [
       {
+        "finish_reason": "stop",
         "index": 0,
         "message": {
-          "role": "assistant",
-          "content": "{\"agree\":false,\"reason\":\"The two answers give different main points.\"}"
+          "content": "{\"agree\":false,\"reason\":\"Answer 1 says thanks and change the subject and answer 2 says enjoy it and ask more, which differ.\"}",
+          "refusal": null,
+          "role": "assistant"
         },
-        "finish_reason": "stop"
+        "logprobs": null
       }
-    ]
+    ],
+    "created": 1793091727,
+    "model": "muse-spark-1.3",
+    "object": "chat.completion",
+    "usage": {
+      "completion_tokens": 173,
+      "prompt_tokens": 3430,
+      "total_tokens": 3603,
+      "completion_tokens_details": {
+        "reasoning_tokens": 133
+      },
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    }
   },
   "usage": {
-    "promptTokens": 0,
+    "promptTokens": 3430,
     "cachedTokens": 0,
-    "completionTokens": 0,
-    "reasoningTokens": 0
+    "completionTokens": 173,
+    "reasoningTokens": 133
   },
-  "recordedAt": null,
-  "handWritten": true
+  "recordedAt": "2026-10-27T09:02:07.560Z"
 }

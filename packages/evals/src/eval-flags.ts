@@ -6,7 +6,8 @@ import { fileURLToPath } from "node:url";
 export const REPO_ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 // The default time one meeting may take before the run gives up on it: 15 minutes (ARCHITECTURE.md 4.1).
 export const MEETING_TIMEOUT_MS = 900_000;
-// The pair list of a replay run: the golden path's pair only, because replay answers only recorded requests.
+// The pair list of a replay run: one pair of pairs.json, recorded on its own, because replay answers only recorded requests. It shares no
+// person with the golden path, whose recordings would otherwise answer its first calls and lead it off its own recording (wave 3 4.4).
 const REPLAY_PAIRS = "packages/evals/fixtures/pairs.replay.json";
 // The pair list of a live run: the eight fresh pairs of the eval (A2).
 const LIVE_PAIRS = "packages/evals/fixtures/pairs.json";

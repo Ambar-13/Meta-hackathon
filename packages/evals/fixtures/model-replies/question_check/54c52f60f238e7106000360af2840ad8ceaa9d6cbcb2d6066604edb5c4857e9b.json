@@ -62,23 +62,39 @@
     }
   },
   "response": {
+    "id": "chatcmpl-01a17d5e-39af-74c1-b357-44d8df5ab4d8",
     "choices": [
       {
+        "finish_reason": "stop",
         "index": 0,
         "message": {
-          "role": "assistant",
-          "content": "{\"allowed\":true,\"reason\":\"An ask about who could probably help with a problem.\",\"kind\":\"help\",\"romantic\":false}"
+          "content": "{\"allowed\": true, \"kind\": \"help\", \"reason\": \"An ask about who could help think through a stuck problem.\", \"romantic\": false}",
+          "refusal": null,
+          "role": "assistant"
         },
-        "finish_reason": "stop"
+        "logprobs": null
       }
-    ]
+    ],
+    "created": 1793104689,
+    "model": "muse-spark-1.3",
+    "object": "chat.completion",
+    "usage": {
+      "completion_tokens": 73,
+      "prompt_tokens": 4359,
+      "total_tokens": 4432,
+      "completion_tokens_details": {
+        "reasoning_tokens": 31
+      },
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    }
   },
   "usage": {
-    "promptTokens": 0,
+    "promptTokens": 4359,
     "cachedTokens": 0,
-    "completionTokens": 0,
-    "reasoningTokens": 0
+    "completionTokens": 73,
+    "reasoningTokens": 31
   },
-  "recordedAt": null,
-  "handWritten": true
+  "recordedAt": "2026-10-27T12:38:09.697Z"
 }
