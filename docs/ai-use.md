@@ -12,7 +12,7 @@ The code was written by coding agents from specification files kept outside the 
 
 ## What we recorded
 
-Replay fixtures are model replies recorded from real calls, set with `LLM_MODE=record`. Wave 3 overwrites the hand-written fixtures from Wave 2 with recordings. Until then, each fixture says it is hand-written. Nothing in the demo runs on a fake model: `LLM_MODE=live` is set in production, and production refuses `replay`.
+Replay fixtures are model replies recorded from real calls with `LLM_MODE=record`. They live in `packages/evals/fixtures/model-replies`, and the golden path (`pnpm golden-path --mock`) and the eval (`pnpm eval --replay`) replay them. They were recorded from Muse Spark on 27 Oct 2026: the golden path with `--record`, which skips the quiz as `--mock` does, and eval pair 3 on its own. Tests that need a reply the real model would not give, such as a judge that fails, read hand-written replies from `packages/evals/fixtures/scripted-replies` instead. Nothing in the demo runs on a fake model: `LLM_MODE=live` is set in production, and production refuses `replay`.
 
 ## What the numbers mean
 
