@@ -8,7 +8,7 @@ import { z } from "zod";
 import { ContractError, workerEnv, type CallSite, type Effort, type RecordedCall, type ToolDefinition } from "@meet-first/contracts";
 import { withMeeting, withPerson, type Database, type DatabaseTransaction } from "@meet-first/db";
 import { assertUnderCaps } from "./caps.js";
-import { CALL_SITE_CONFIG, IMAGE_CALL_EST_TOKENS, LENGTH_RETRY } from "./call-sites.js";
+import { CALL_SITE_CONFIG, IMAGE_CALL_EST_TOKENS, lengthRetryFor } from "./call-sites.js";
 import { buildChatRequest, estimateTokens, requestChars, type ChatMessage, type ChatRequestArgs, type ToolCall } from "./chat-request.js";
 import { CHAT_MODEL, IMAGE_MODEL, IMAGE_SIZE, usdForImage, usdForUsage } from "./config.js";
 import { finishLedgerRow, startLedgerRow, type LedgerFinish, type LedgerStart } from "./ledger.js";
@@ -83,7 +83,8 @@ export function makeSdk(env: Pick<WorkerEnv, "META_API_KEY" | "META_API_BASE_URL
   return new openai({ apiKey: env.META_API_KEY, baseURL: env.META_API_BASE_URL, maxRetries: 0 });
 }
 
-// The usage recorded when a live reply carries none: the request estimate as prompt tokens and max_tokens as completion tokens, so the caps count the worst case.
+// The usage recorded when a live reply carries none, or a live attempt fails before it reports any: the request estimate as prompt tokens and max_tokens
+// as completion tokens, so the caps count the worst case.
 export function worstCaseUsage(body: Record<string, unknown>): RecordedCall["usage"] {
   return { promptTokens: estimateTokens(requestChars(body), null), cachedTokens: 0, completionTokens: typeof body.max_tokens === "number" ? body.max_tokens : 0, reasoningTokens: 0 };
 }
@@ -196,6 +197,16 @@ function isReplayMiss(error: unknown): boolean {
   return error instanceof ContractError && error.code === "replay_fixture_missing";
 }
 
+// The usage and dollars of an attempt that threw. Meta may have billed a live or recorded chat call that timed out, was aborted, broke mid-stream or
+// failed without an HTTP status, so its row counts the worst case, which the caps and the meeting token stop read (D60, D61). A vendor HTTP error,
+// a replay miss, replay mode and comic_image count nothing: replay calls nobody, and Meta bills an image only when it is returned.
+function failureCharge(state: ClientState, core: CallCore, error: unknown): Pick<LedgerFinish, "usage" | "usd"> {
+  const canBeBilled = state.env.LLM_MODE === "live" || state.env.LLM_MODE === "record";
+  if (!canBeBilled || core.callSite === "comic_image" || vendorStatus(error) !== undefined || isReplayMiss(error)) return {};
+  const usage = worstCaseUsage(core.body);
+  return { usage, usd: usdForUsage(usage) };
+}
+
 // Writes the request of a replay miss to the temp folder, so a fixture can be made from the exact body the code sent (D74).
 function writeMissFile(core: CallCore): void {
   const path = join(tmpdir(), "meet-first-replay-misses", core.callSite, `${requestHash(core.body)}.request.json`);
@@ -222,7 +233,7 @@ async function runAttempt(state: ClientState, core: CallCore): Promise<Attempt> 
     const reply = await runInMode({ mode: state.env.LLM_MODE, fixtureRoot: state.fixtureRoot, live: state.live, request, signal: deadline });
     return { reply, ledgerId };
   } catch (error) {
-    await finishRow(state, { ledger: core.ledger, ledgerId: ledgerId }, failureFinish(error, deadline.aborted));
+    await finishRow(state, { ledger: core.ledger, ledgerId: ledgerId }, { ...failureFinish(error, deadline.aborted), ...failureCharge(state, core, error) });
     throw attemptFailure(core, error, deadline.aborted);
   }
 }
@@ -282,7 +293,7 @@ function readCompletion(reply: LlmReply, structured: boolean): Reading {
 
 // One non-streamed round: the attempt with its transport retries, then the reading; a cut reply is retried once at minimal effort (D63).
 async function completeRound(state: ClientState, args: CompleteArgs, lengthRetry: boolean): Promise<CompleteResult> {
-  const core = coreOf(args, false, lengthRetry ? LENGTH_RETRY : undefined);
+  const core = coreOf(args, false, lengthRetry ? lengthRetryFor(args.callSite) : undefined);
   const attempt = await withTransportRetries(() => runAttempt(state, core), { sleep: state.sleep, random: state.random });
   const isSelfTest = args.callSite === "self_test";
   let reading: Reading;
@@ -382,7 +393,7 @@ async function streamAttempt(state: ClientState, args: StreamArgs, core: CallCor
     return { reply, outcome, ledgerId, hasDelivered: gate.flags.hasDelivered };
   } catch (error) {
     const isTimedOut = gate.deadline.aborted || gate.firstGate?.aborted === true;
-    await finishRow(state, { ledger: core.ledger, ledgerId: ledgerId }, failureFinish(error, isTimedOut));
+    await finishRow(state, { ledger: core.ledger, ledgerId: ledgerId }, { ...failureFinish(error, isTimedOut), ...failureCharge(state, core, error) });
     throw streamFailure(core, error, gate);
   } finally {
     gate.dispose();
@@ -391,7 +402,7 @@ async function streamAttempt(state: ClientState, args: StreamArgs, core: CallCor
 
 // One streamed round with its transport retries; a cut or length reply before any text is shown is retried once (D39, R10.7).
 async function streamRound(state: ClientState, args: StreamArgs, lengthRetry: boolean): Promise<CompleteResult> {
-  const core = coreOf(args, true, lengthRetry ? LENGTH_RETRY : undefined);
+  const core = coreOf(args, true, lengthRetry ? lengthRetryFor(args.callSite) : undefined);
   const pass = await withTransportRetries(() => streamAttempt(state, args, core), { sleep: state.sleep, random: state.random });
   const { reply, outcome, ledgerId } = pass;
   if (outcome.finishReason !== "length" && outcome.finishReason !== "cut") {

@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { CALL_SITE_CONFIG, LENGTH_RETRY } from "./call-sites.js";
+import { CALL_SITE_CONFIG, lengthRetryFor } from "./call-sites.js";
 import { buildChatRequest, estimateTokens, requestChars, type ChatMessage } from "./chat-request.js";
 import { requestHash } from "./modes.js";
 import { CALL_SITES, CardBuildOutput, ContractError, MODEL_OUTPUT_SCHEMAS, toolsForPhase, toStrictJsonSchema } from "@meet-first/contracts";
@@ -42,16 +42,19 @@ describe("buildChatRequest", () => {
     }
   });
 
-  it("D63-T1: the length retry body is effort minimal with max_tokens 8,000", () => {
-    const body = buildChatRequest({
+  it("D63-T1: the length retry body is effort minimal with the larger of 8,000 and the call site's own max_tokens: 16,000 for the card, 8,000 for the 200-token question check", () => {
+    const card = buildChatRequest({
       callSite: "card",
       messages,
       schema: toStrictJsonSchema(CardBuildOutput, "dossier"),
       stream: false,
-      override: LENGTH_RETRY,
+      override: lengthRetryFor("card"),
     });
-    expect(body.reasoning_effort).toBe("minimal");
-    expect(body.max_tokens).toBe(8000);
+    const check = buildChatRequest({ callSite: "question_check", messages, stream: false, override: lengthRetryFor("question_check") });
+    expect(card.reasoning_effort).toBe("minimal");
+    expect(card.max_tokens).toBe(16000);
+    expect(check.reasoning_effort).toBe("minimal");
+    expect(check.max_tokens).toBe(8000);
   });
 
   it("D37-T1: a request without tools carries no tools key, and a streamed one carries the stream options", () => {
