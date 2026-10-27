@@ -44,7 +44,7 @@ export async function startLedgerRow(trx: Kysely<Database>, start: LedgerStart):
   return row.id;
 }
 
-// The usage columns of a call that sent back no usage, such as a timeout.
+// The usage columns of a finish that carries no usage, such as a vendor HTTP error, a replay miss or a failed image call.
 const NO_USAGE = { promptTokens: null, cachedTokens: null, completionTokens: null, reasoningTokens: null };
 
 // Fills the row after the call: usage, dollars, status, request id. A row it cannot see is a fault, never a silent skip,

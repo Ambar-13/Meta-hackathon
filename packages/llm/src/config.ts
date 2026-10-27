@@ -18,15 +18,18 @@ export const IMAGE_PRICE: ImagePrice = { usdPerImage: 0.01, source: { url: "http
 export const VENDOR_LIMITS = { tokensPerMinute: 4_000_000, imageRequestsPerMinute: 150 } as const;
 // The limiter's own ceilings, under the vendor's (D58, R11.4).
 export const LIMITER = { windowSeconds: 60, maxEstTokens: 3_000_000, maxCalls: 2_000, maxImageCalls: 120 } as const;
-// Dollars for one finished call, from usage. Reasoning tokens are billed as output (D62).
+// Dollars for one finished call, from usage. Reasoning tokens are billed as output, inside the completion tokens (D62).
 export function usdForUsage(usage: { promptTokens: number; cachedTokens: number; completionTokens: number; reasoningTokens: number }): number {
   return usdForUsageAt(usage, CHAT_PRICE);
 }
-// Dollars for one call at a given price: uncached input, cached input, and output plus reasoning, per million tokens, rounded to 6 decimals (D62, R10.8).
+// Dollars for one call at a given price: uncached input, cached input, and completion, per million tokens, rounded to 6 decimals (D62, R10.8).
+// Reasoning is billed as output (D62), but Meta counts it inside completion_tokens, so it is not added again; it stays in the usage and the
+// ledger. Measured on the live API on 27 Oct 2026: a speech call reported prompt 11,048, completion 1,294 of which reasoning 1,172, and total
+// 12,342, which is prompt plus completion; Meta's schema calls completion_tokens_details "a breakdown of the completion tokens".
 export function usdForUsageAt(usage: { promptTokens: number; cachedTokens: number; completionTokens: number; reasoningTokens: number }, price: ModelPrice): number {
   const dollars = ((usage.promptTokens - usage.cachedTokens) * price.inputUsdPerMillion
     + usage.cachedTokens * price.cachedInputUsdPerMillion
-    + (usage.completionTokens + usage.reasoningTokens) * price.outputUsdPerMillion) / 1_000_000;
+    + usage.completionTokens * price.outputUsdPerMillion) / 1_000_000;
   return Math.round(dollars * 1_000_000) / 1_000_000;
 }
 // Dollars for one image call.

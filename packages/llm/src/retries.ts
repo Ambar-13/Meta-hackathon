@@ -83,7 +83,7 @@ export async function withTransportRetries<T>(
   throw new ContractError("retries_exhausted", "The model call failed after every retry. The job fails closed and the sweeper or the next attempt picks it up.", 503);
 }
 
-// True when a finished reply must be discarded and retried once at effort minimal and max_tokens 8,000 (D63).
+// True when a finished reply must be discarded and retried once at effort minimal and max_tokens of at least 8,000 (D63).
 export function needsLengthRetry(finishReason: string, alreadyRetried: boolean): boolean {
   return (finishReason === "length" || finishReason === "cut") && !alreadyRetried;
 }
