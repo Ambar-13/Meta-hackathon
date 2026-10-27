@@ -1,0 +1,49 @@
+/* The brief: three tilted colour panels, quote chips in each side's colour, one quote in large type, and the quote sheet. */
+
+.brief-lead { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: -6px 0 6px; }
+.brief-lead .pill .dot { background: var(--c); }
+.brief-support { flex-basis: 100%; margin: 4px 0 0; font: 600 15px/1.4 var(--sans); }
+
+.brief-part { position: relative; margin: 26px 0 0; padding: 20px 18px 8px; border-radius: var(--radius-l); background: var(--k, var(--paper)); }
+.brief-agree { transform: rotate(-0.8deg); }
+.brief-clash { transform: rotate(0.9deg); }
+.brief-first { transform: rotate(-0.6deg); }
+.brief-aside { background: var(--paper); outline: 2px dashed var(--line-strong); outline-offset: -2px; }
+.brief-part > .stk { position: absolute; right: 14px; top: -22px; font-size: 46px; transform: rotate(10deg); }
+.brief-part h2 { margin: 0; padding-right: 48px; font-size: 27px; }
+.brief-part ul { list-style: none; margin: 12px 0 0; padding: 0; }
+.brief-line { padding: 14px 0; border-top: 1.5px solid oklch(20% 0.05 266 / 0.2); }
+.brief-line > p { margin: 0; font: 600 17px/1.38 var(--sans); }
+.brief-line.weak > p { color: var(--ink-2); }
+.brief-line .mark { margin: 8px 0 0; }
+.brief-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.brief-chip { min-height: 44px; max-width: 100%; justify-content: flex-start; gap: 8px; padding: 6px 14px 6px 6px; border: 0; border-radius: 16px; background: var(--paper);
+  box-shadow: var(--lift-s), 0 0 0 1.5px var(--line); font: 600 14.5px/1.3 var(--sans); text-align: left; }
+.brief-chip q { quotes: "\201C" "\201D"; }
+.brief-chip-side { display: inline-grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 50%; color: var(--paper); font: 800 13px/1 var(--display); }
+.brief-chip.side-a .brief-chip-side { background: var(--coral-deep); }
+.brief-chip.side-b .brief-chip-side { background: var(--blue-deep); }
+.brief-chip-flag { flex: none; padding: 3px 8px; border-radius: 999px; background: var(--yellow); font: 700 12px/1.2 var(--sans); }
+
+.brief-pull { margin: 40px 4px 0; }
+.brief-pull blockquote { margin: 0; font: 800 30px/1.1 var(--display); letter-spacing: -0.025em; quotes: "\201C" "\201D"; }
+.brief-pull blockquote::before { content: open-quote; }
+.brief-pull blockquote::after { content: close-quote; }
+.brief-pull figcaption { display: flex; align-items: center; gap: 8px; margin-top: 12px; font: 600 14px/1.2 var(--sans); color: var(--ink-2); }
+.brief-next { margin-top: 30px; }
+
+.quote-scrim { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; background: oklch(20% 0.05 266 / 0.35); }
+.quote-sheet { position: relative; width: 100%; max-width: 560px; padding: 24px 20px calc(20px + env(safe-area-inset-bottom)); border-radius: 28px 28px 0 0; background: var(--paper);
+  box-shadow: 0 -10px 40px -10px oklch(20% 0.05 266 / 0.4); }
+.quote-sheet > .stk { position: absolute; right: 18px; top: -24px; font-size: 50px; transform: rotate(10deg); }
+.quote-sheet h2 { margin: 0; font-size: 24px; }
+.quote-sheet blockquote { margin: 12px 0; padding: 14px 16px; border-radius: 16px; background: var(--blue-soft); font: 600 18px/1.45 var(--sans); }
+.quote-sheet-who { display: flex; align-items: center; gap: 8px; color: var(--ink-2); font-size: 15px; }
+
+@media (min-width: 900px) {
+  .brief-part { padding: 26px 26px 12px; }
+  .brief-part h2 { font-size: 32px; }
+  .brief-pull blockquote { font-size: 44px; }
+  .quote-scrim { align-items: center; }
+  .quote-sheet { border-radius: 28px; }
+}

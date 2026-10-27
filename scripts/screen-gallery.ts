@@ -18,7 +18,7 @@ const SIZES = [
 // How long a view gets to load its fonts and stubbed data before the screenshot, in ms.
 const SETTLE_MS = 2_200;
 // The tallest full-page screenshot, in CSS pixels.
-const FULL_MAX_PX = 7_000;
+const FULL_MAX_PX = 12_000;
 
 type Options = { only: string[]; out: string; scale: number; shouldBuild: boolean };
 type CdpReply = { result?: Record<string, unknown>; error?: { message: string } };

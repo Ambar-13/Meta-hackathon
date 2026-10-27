@@ -28,7 +28,9 @@ const NotFoundScreen = (): ReactElement => {
   return (
     <ScreenFrame title="No page here">
       <p>This address does not match a page.</p>
-      <Link to={APP_PATHS.welcome}>Go to the start page</Link>
+      <div className="actions">
+        <Link className="btn" to={APP_PATHS.welcome}>Go to the start page</Link>
+      </div>
     </ScreenFrame>
   );
 };

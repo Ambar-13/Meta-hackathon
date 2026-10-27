@@ -61,7 +61,8 @@ describe("meeting screen", () => {
     });
     push(feed, fold(meetingStarted(1), turnCommitted({ seq: 2, stepSeq: 1, side: "a", text: "I prefer mornings", claims: [claimFixture(false)] })));
     const turn = await screen.findByRole("article");
-    expect(turn.textContent).toContain('Quote: "I work best before nine in the morning"');
+    // The design pass shows each quote as a quote card, so the turn holds the quote's words, not a "Quote:" prefix.
+    expect(turn.textContent).toContain("I work best before nine in the morning");
     expect(turn.textContent).toContain("no receipt");
   });
 

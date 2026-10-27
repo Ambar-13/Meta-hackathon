@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
-import { NO_RECEIPT_COPY, WEAK_RECEIPT_COPY } from "@meet-first/contracts";
+import { NO_RECEIPT_COPY, WEAK_RECEIPT_COPY, type QuestionKind } from "@meet-first/contracts";
 import { Sticker, type StickerName } from "./stickers.js";
 
 // The colours a name tag band can take: coral and blue are the two people in a meeting, green and lilac mark everyone else.
@@ -7,19 +7,31 @@ export type TagColour = "coral" | "blue" | "green" | "lilac";
 // A meeting side as the voices use it: side a speaks in coral, side b in blue (docs/DESIGN.md "Two voices").
 export type VoiceSide = "a" | "b";
 
-// The "Hello, my name is" sticker with one name written on it. Size and tilt come from a class the screen sets on it.
+// The "Hello, my name is" sticker with one name written on it. Size and tilt come from a class the screen sets on it. The band's
+// words come from the stylesheet, so the tag adds no text a test or a screen reader could trip on.
 export const NameTag = (props: { name: string; colour?: TagColour; className?: string }): ReactElement => {
   const colour = props.colour ?? "coral";
   const classes = ["tag", colour === "coral" ? "" : colour, props.className ?? ""].filter((part) => part !== "").join(" ");
   return (
     <span className={classes} aria-hidden="true">
       <span className="tag-band">
-        <b>Hello</b>
-        <i>my name is</i>
+        <b />
+        <i />
       </span>
       <span className="tag-name">{props.name}</span>
     </span>
   );
+};
+
+// How each kind of question looks wherever it is named: its words, its colour class and its sticker (docs/DESIGN.md "Colour").
+export const KIND_LOOK: Record<QuestionKind, { label: string; colour: string; sticker: StickerName }> = {
+  get_along: { label: "Getting along", colour: "c-green", sticker: "smile" },
+  help: { label: "Help", colour: "c-yellow", sticker: "buoy" },
+  situation: { label: "A situation", colour: "c-lilac", sticker: "spark" },
+  decision: { label: "A decision", colour: "c-coral", sticker: "ask" },
+  deal: { label: "A deal", colour: "c-coral", sticker: "coins" },
+  debate: { label: "A debate", colour: "c-lilac", sticker: "chat" },
+  romance: { label: "A first date", colour: "c-blue", sticker: "cup" },
 };
 
 // The colour of each meeting side, as a colour class the avatar and bubbles read.

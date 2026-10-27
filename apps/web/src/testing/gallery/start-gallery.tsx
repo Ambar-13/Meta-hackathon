@@ -7,7 +7,7 @@ import "@fontsource-variable/shantell-sans";
 import "../../app-shell/app.css";
 import { StickerSheet } from "../../look/index.js";
 import { installFetchStub } from "./fetch-stub.js";
-import { ALL_VIEWS, type GalleryView } from "./gallery-views.js";
+import { ALL_VIEWS, PLAY_AFTER_MS, type GalleryView } from "./gallery-views.js";
 
 // Shows where a screen navigated to, when an action leaves the view's route.
 const LeftTheScreen = (): ReactElement => {
@@ -56,4 +56,5 @@ if (root !== null) {
       {view === undefined ? <GalleryIndex /> : <ViewOnRoute view={view} />}
     </>,
   );
+  if (view?.play !== undefined) setTimeout(view.play, PLAY_AFTER_MS);
 }

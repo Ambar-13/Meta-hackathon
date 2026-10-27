@@ -43,8 +43,9 @@ const PagesNav = (props: { links: readonly PageLink[]; hasAppLinks: boolean; pat
 };
 
 // The frame of every screen: the top bar with the logo, one h1, the content, then the Pages nav: Home, Directory, Find help and
-// Friends on pages that need a session, and Settings unless the screen is Settings itself. isWide lets a screen use the laptop's width.
-export const ScreenFrame = (props: { title: string; children: ReactNode; hideSettingsLink?: boolean; isWide?: boolean }): ReactElement => {
+// Friends on pages that need a session, and Settings unless the screen is Settings itself. isWide lets a screen use the laptop's width;
+// titleAside sits beside the h1, for a name tag or a status.
+export const ScreenFrame = (props: { title: string; children: ReactNode; hideSettingsLink?: boolean; isWide?: boolean; titleAside?: ReactNode }): ReactElement => {
   const location = useLocation();
   const hasAppLinks = showsAppLinks(location.pathname);
   const links = [...(hasAppLinks ? APP_LINKS : []), ...(props.hideSettingsLink === true ? [] : [SETTINGS_LINK])];
@@ -58,7 +59,14 @@ export const ScreenFrame = (props: { title: string; children: ReactNode; hideSet
         </Link>
       </header>
       <main className={mainClass}>
-        <h1>{props.title}</h1>
+        {props.titleAside === undefined ? (
+          <h1>{props.title}</h1>
+        ) : (
+          <div className="screen-title">
+            <h1>{props.title}</h1>
+            {props.titleAside}
+          </div>
+        )}
         {props.children}
       </main>
       {links.length === 0 ? null : <PagesNav links={links} hasAppLinks={hasAppLinks} pathname={location.pathname} />}

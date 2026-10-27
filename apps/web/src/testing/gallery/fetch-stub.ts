@@ -29,7 +29,8 @@ function responseOf(reply: GalleryReply): Response {
   return new Response(JSON.stringify(reply.body), { status: reply.status, headers: { "Content-Type": "application/json" } });
 }
 
-// Replaces window.fetch with a table of stubbed routes; a route with no stub answers 404, so a screen shows its error state.
+// Replaces window.fetch with a table of stubbed routes; a route with no stub answers a plain 404, so a screen shows its error state
+// with the words a person would see in the app.
 export function installFetchStub(stubs: readonly GalleryStub[]): void {
   const table: StubEntry[] = stubs.map((stub) => ({
     method: stub.route.method,
@@ -42,7 +43,7 @@ export function installFetchStub(stubs: readonly GalleryStub[]): void {
     const entry = table.find((row) => row.method === call.method && row.pattern.test(call.pathname));
     const reply = entry?.replies[Math.min(entry.served, entry.replies.length - 1)];
     if (entry === undefined || reply === undefined) {
-      return responseOf({ status: 404, body: { code: "not_stubbed", message: `The gallery has no reply for ${call.method} ${call.pathname}.` } });
+      return responseOf({ status: 404, body: { code: "not_found", message: "We could not find this. It may have been deleted." } });
     }
     entry.served += 1;
     if (reply.delayMs !== undefined) await new Promise((resolve) => setTimeout(resolve, reply.delayMs));

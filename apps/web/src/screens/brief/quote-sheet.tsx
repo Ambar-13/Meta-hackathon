@@ -1,8 +1,10 @@
 import { useEffect, useRef, type KeyboardEvent, type ReactElement } from "react";
+import { Avatar, Sticker } from "../../look/index.js";
 import { sideLetter } from "./brief-sections.js";
 import type { OpenQuote } from "./brief-state.js";
 
-// The sheet that shows one tapped quote in full, with the sentence that says whether it matched its turn (R6.5).
+// The sheet that shows one tapped quote in full, with the sentence that says whether it matched its turn (R6.5). It rises from
+// the bottom of a phone and sits in the middle of a laptop, over a dimmed page.
 export const QuoteSheet = (props: { sheet: OpenQuote | null; onClose: () => void }): ReactElement | null => {
   const closeButton = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {
@@ -21,13 +23,19 @@ export const QuoteSheet = (props: { sheet: OpenQuote | null; onClose: () => void
     }
   };
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="quote-sheet-title" onKeyDown={keepFocus} style={{ border: "1px solid currentColor", padding: 16, marginTop: 24 }}>
-      <h2 id="quote-sheet-title">Quote</h2>
-      <blockquote>{quote.text}</blockquote>
-      <p>{sentence}</p>
-      <button ref={closeButton} type="button" onClick={props.onClose} style={{ minHeight: 44 }}>
-        Close
-      </button>
+    <div className="quote-scrim">
+      <div className="quote-sheet" role="dialog" aria-modal="true" aria-labelledby="quote-sheet-title" onKeyDown={keepFocus}>
+        <Sticker name="quote" />
+        <h2 id="quote-sheet-title">Quote</h2>
+        <blockquote>{quote.text}</blockquote>
+        <p className="quote-sheet-who">
+          <Avatar name={side} side={quote.side} isSmall />
+          {sentence}
+        </p>
+        <button ref={closeButton} type="button" className="quiet" onClick={props.onClose}>
+          Close
+        </button>
+      </div>
     </div>
   );
 };
