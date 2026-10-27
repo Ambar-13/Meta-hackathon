@@ -18,6 +18,7 @@ import { DirectoryScreen } from "../screens/directory/index.js";
 import { HelpScreen } from "../screens/help/index.js";
 import { FriendsScreen } from "../screens/friends/index.js";
 import { AskScreen } from "../screens/ask/index.js";
+import { HomeScreen } from "../screens/home/index.js";
 
 // Every client path the app links to, re-exported for the screens that read the route table.
 export { APP_PATHS } from "./app-paths.js";
@@ -53,6 +54,7 @@ export const APP_ROUTES: RouteObject[] = [
   { path: ROUTE_PATTERNS.help, element: <HelpScreen /> },
   { path: ROUTE_PATTERNS.friends, element: <FriendsScreen /> },
   { path: ROUTE_PATTERNS.ask, element: <AskScreen /> },
+  { path: ROUTE_PATTERNS.home, element: <HomeScreen /> },
   { path: "*", element: <NotFoundScreen /> },
 ];
 

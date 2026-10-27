@@ -3,7 +3,11 @@ import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 import { ContractError } from "@meet-first/contracts";
 import { createAppRouter } from "./routes.js";
+import "@fontsource-variable/bricolage-grotesque/opsz.css";
+import "@fontsource-variable/hanken-grotesk";
+import "@fontsource-variable/shantell-sans";
 import "./app.css";
+import { StickerSheet } from "../look/index.js";
 
 // Catches a screen that throws and shows a reload button instead of a blank page.
 class AppErrorBoundary extends Component<{ children: ReactNode }, { hasFailed: boolean }> {
@@ -33,6 +37,7 @@ export const AppRoot = (): ReactElement => {
   const router = useMemo(() => createAppRouter(), []);
   return (
     <AppErrorBoundary>
+      <StickerSheet />
       <div className="app-frame">
         <RouterProvider router={router} />
       </div>

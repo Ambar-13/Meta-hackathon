@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { APP_PATHS, lobbyPathWithCard, meetingPathWithSide, pairPathWithCard, readCardQuery, readFragmentToken, readSideQuery, ROUTE_PATTERNS } from "./app-paths.js";
 import { IDS } from "../testing/fixtures.js";
 
-const KEYS = ["welcome", "upload", "pair", "join", "claim", "settings", "namesReview", "card", "quiz", "lobby", "meeting", "brief", "comic", "consent", "sharePage", "directory", "help", "friends", "ask"];
+const KEYS = ["welcome", "upload", "pair", "join", "claim", "settings", "namesReview", "card", "quiz", "lobby", "meeting", "brief", "comic", "consent", "sharePage", "directory", "help", "friends", "ask", "home"];
 
 describe("client paths", () => {
   it("D32-T1: readFragmentToken returns the 32-hex token after the # and null for anything else", () => {
@@ -14,7 +14,7 @@ describe("client paths", () => {
     expect(readFragmentToken("")).toBeNull();
   });
 
-  it("R13.2-T1: APP_PATHS and ROUTE_PATTERNS share the 19 keys in order and every builder fills its pattern", () => {
+  it("R13.2-T1: APP_PATHS and ROUTE_PATTERNS share the 20 keys in order and every builder fills its pattern", () => {
     expect(Object.keys(APP_PATHS)).toEqual(KEYS);
     expect(Object.keys(ROUTE_PATTERNS)).toEqual(KEYS);
     const paths: Record<string, string | ((id: string) => string)> = APP_PATHS;

@@ -1,5 +1,5 @@
 {
   "extends": "../tsconfig.base.json",
-  "compilerOptions": { "noEmit": true },
-  "include": ["golden-path.ts", "golden-path/*.ts", "share-takedown.ts", "path-ownership.ts", "constants-name-rows.ts", "checks/*.ts"]
+  "compilerOptions": {"noEmit": true},
+  "include": ["golden-path.ts", "golden-path/*.ts", "share-takedown.ts", "path-ownership.ts", "constants-name-rows.ts", "checks/*.ts", "screen-gallery.ts"]
 }

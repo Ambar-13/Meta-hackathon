@@ -4,8 +4,19 @@
     "rootDir": ".",
     "outDir": "dist",
     "jsx": "react-jsx",
-    "types": ["vite/client"],
-    "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"]
+    "types": [
+      "vite/client"
+    ],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable",
+      "WebWorker"
+    ]
   },
-  "include": ["src", "vite.config.ts"]
+  "include": [
+    "src",
+    "vite.config.ts",
+    "vite.gallery.config.ts"
+  ]
 }

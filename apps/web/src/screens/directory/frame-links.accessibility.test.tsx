@@ -19,12 +19,13 @@ function renderFrame(options: { pattern: string; url: string; hideSettingsLink?:
 }
 
 describe("screen frame links", () => {
-  it("W6-DWEB-T37 (design section 7): a page that needs a session shows Directory, Find help and Friends, then Settings", () => {
+  it("W6-DWEB-T37 (design section 7, Home added by the design pass): a page that needs a session shows Home, Directory, Find help and Friends, then Settings", () => {
     renderFrame({ pattern: ROUTE_PATTERNS.card, url: APP_PATHS.card(IDS.card) });
 
     const links = within(screen.getByRole("navigation", { name: "Pages" })).getAllByRole("link");
 
     expect(links.map((link) => [link.textContent, link.getAttribute("href")])).toEqual([
+      ["Home", "/home"],
       ["Directory", "/directory"],
       ["Find help", "/help"],
       ["Friends", "/friends"],
