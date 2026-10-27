@@ -264,7 +264,7 @@ function chargesOf(rows: Array<Record<string, unknown>>): unknown[] {
   }));
 }
 
-describe("a failed attempt that Meta may have billed counts the worst case", () => {
+describe("a failed attempt that Meta may have billed is counted", () => {
   it("W3-LLM-T2: a live call whose deadline fires is a timeout row priced at its estimate and max_tokens (fake live caller, fake deadline)", async () => {
     const person = await createTestPerson(fresh.db, "Client Test");
     let made = 0;
@@ -368,5 +368,19 @@ describe("a failed attempt that Meta may have billed counts the worst case", () 
     const client = makeLlmClient({ db: workerDb, env: liveEnv, now: () => NOW, sleep: noSleep, random: half, live });
     expect(await codeOf(client.image({ callSite: "comic_image", prompt: "A panel.", ledger: { personId: person.personId, meetingId: null } }))).toBe("not a contract error");
     expect(chargesOf(await ledgerRows(person.personId))).toEqual([{ status: "error", http_status: null, ...NO_CHARGE }]);
+  });
+
+  it("W3-LLM-T9: a 200 reply with usage but no choices is an error row priced at the usage Meta billed (fake live caller)", async () => {
+    const person = await createTestPerson(fresh.db, "Client Test");
+    // The card measured on the live API on 27 Oct 2026: 6,646 x 1.25 + 2,716 x 4.25 per million, rounded to 0.019851; reasoning sits inside completion.
+    const usage = { promptTokens: 6646, cachedTokens: 0, completionTokens: 2716, reasoningTokens: 2417 };
+    const body = { id: "chatcmpl-no-choices", usage: { prompt_tokens: 6646, completion_tokens: 2716, completion_tokens_details: { reasoning_tokens: 2417 } } };
+    const { live, calls } = fakeLiveCaller([{ status: 200, body, usage }]);
+    const client = makeLlmClient({ db: workerDb, env: liveEnv, now: () => NOW, sleep: noSleep, random: half, live });
+    expect(await codeOf(client.complete(cardArgs(person.personId)))).toBe("model_reply_invalid");
+    expect(calls).toHaveLength(1);
+    const rows = await ledgerRows(person.personId);
+    expect(rows.map((row) => row.request_id)).toEqual(["fake-0"]);
+    expect(chargesOf(rows)).toEqual([{ status: "error", http_status: 200, prompt_tokens: 6646, cached_tokens: 0, completion_tokens: 2716, reasoning_tokens: 2417, usd: 0.019851 }]);
   });
 });

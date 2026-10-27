@@ -300,7 +300,8 @@ async function completeRound(state: ClientState, args: CompleteArgs, lengthRetry
   try {
     reading = readCompletion(attempt.reply, !isSelfTest && args.schema !== undefined);
   } catch (error) {
-    await finishRow(state, { ledger: args.ledger, ledgerId: attempt.ledgerId }, { status: "error" });
+    // A reply came back, so Meta billed it even though it is unusable: the row keeps its usage and dollars.
+    await finishRow(state, { ledger: args.ledger, ledgerId: attempt.ledgerId }, finishFromReply("error", attempt.reply));
     throw error;
   }
   if (isSelfTest) {
