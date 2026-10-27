@@ -8,6 +8,7 @@ import type { ApiEnv, RouteDeps, RoutePlugin } from "./app-types.js";
 import { makeApiEnqueue } from "./job-queue.js";
 import { handleNotFound, handleRouteError, replaceJsonParser } from "./route-errors.js";
 import { addOriginCheck, addSessionHook, registerAccountRateLimit, registerSessionsRoutes } from "./sessions/index.js";
+import { registerHomeRoutes } from "./home/index.js";
 import { registerCardsRoutes } from "./cards/index.js";
 import { registerMeetingsRoutes } from "./meetings/index.js";
 import { registerPairsRoutes } from "./pairs/index.js";
@@ -78,6 +79,7 @@ export async function buildApp(deps: RouteDeps, options: BuildAppOptions): Promi
 // Registers every feature's routes on the root instance in the fixed slot order; a missing feature keeps its slot comment until its builder's request lands (seams S2).
 export async function registerAllRoutes(app: FastifyInstance, deps: RouteDeps): Promise<void> {
   await registerSessionsRoutes(app, deps);
+  await registerHomeRoutes(app, deps);
   await registerSourcesRoutes(app, deps);
   await registerCardsRoutes(app, deps);
   await registerQuizRoutes(app, deps);
