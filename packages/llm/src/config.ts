@@ -9,11 +9,12 @@ export type PriceSource = { url: string; date: string };
 export type ModelPrice = { inputUsdPerMillion: number; cachedInputUsdPerMillion: number; outputUsdPerMillion: number; source: PriceSource };
 // The price of one image, in dollars.
 export type ImagePrice = { usdPerImage: number; source: PriceSource };
-// Prices per million tokens, from the planning research of 26 Oct 2026. Ambar checks them against the dashboard [confirm]. With zero prices the caps could never stop spending.
-export const CHAT_PRICE: ModelPrice = { inputUsdPerMillion: 1.25, cachedInputUsdPerMillion: 0.15, outputUsdPerMillion: 4.25, source: { url: "Meta Model API pricing as read by the planning research, 26 Oct 2026", date: "2026-10-26" } }; // [confirm]
-// The price of one image call. Images are not costed until a price is known, so this stays at zero [confirm].
-export const IMAGE_PRICE: ImagePrice = { usdPerImage: 0, source: { url: "https://dev.meta.ai", date: "2026-10-26" } }; // [confirm] images are not costed until a price is known
-// Vendor limits the limiter is sized under (D57, D58, R11.4). 4,000,000 tokens per minute and 150 images per minute are the vendor figures named in the design.
+// Prices per million tokens of muse-spark-1.3 in standard mode, read on Meta's pricing page on 27 Oct 2026. With zero prices the caps could never stop spending.
+export const CHAT_PRICE: ModelPrice = { inputUsdPerMillion: 1.25, cachedInputUsdPerMillion: 0.15, outputUsdPerMillion: 4.25, source: { url: "https://dev.meta.ai/docs/pricing-rate-limits", date: "2026-10-27" } };
+// The price of one generated image of muse-image-1.0, read on Meta's pricing page on 27 Oct 2026: a flat $0.01, billed only for images returned.
+export const IMAGE_PRICE: ImagePrice = { usdPerImage: 0.01, source: { url: "https://dev.meta.ai/docs/pricing-rate-limits", date: "2026-10-27" } };
+// Vendor limits the limiter is sized under (D57, D58, R11.4): muse-spark-1.3 allows 4,000,000 tokens and 3,000 requests a minute, muse-image-1.0 150 requests a
+// minute, per team (Meta's pricing page, 27 Oct 2026).
 export const VENDOR_LIMITS = { tokensPerMinute: 4_000_000, imageRequestsPerMinute: 150 } as const;
 // The limiter's own ceilings, under the vendor's (D58, R11.4).
 export const LIMITER = { windowSeconds: 60, maxEstTokens: 3_000_000, maxCalls: 2_000, maxImageCalls: 120 } as const;
