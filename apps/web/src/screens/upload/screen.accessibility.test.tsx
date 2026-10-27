@@ -82,12 +82,12 @@ describe("upload screen, using a fake prepareUpload (needs ingest on main, stage
     expect(wide[0]?.getAttribute("aria-selected")).toBe("true");
   });
 
-  it("R1.3-T2: the file picker offers .zip, .json, .txt and .md", () => {
+  it("R1.3-T2: the file picker offers .zip, .json, .jsonl, .txt and .md", () => {
     renderScreen(<UploadScreen prepare={vi.fn() as never} />, { pattern: ROUTE_PATTERNS.upload, url: APP_PATHS.upload });
     fireEvent.click(screen.getByRole("tab", { name: "Pick a file" }));
-    const input = screen.getByLabelText("Pick your export file (.zip, .json, .txt or .md)");
+    const input = screen.getByLabelText("Pick your export file (.zip, .json, .jsonl, .txt or .md)");
     expect(input.getAttribute("type")).toBe("file");
-    expect(input.getAttribute("accept")).toBe(".zip,.json,.txt,.md");
+    expect(input.getAttribute("accept")).toBe(".zip,.json,.jsonl,.txt,.md");
   });
 
   it("R3.8-T1: a low persona signal shows the note and the paste offer, using a fake prepareUpload", async () => {

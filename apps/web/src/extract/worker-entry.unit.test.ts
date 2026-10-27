@@ -4,6 +4,7 @@ import { ContractError } from "@meet-first/contracts";
 import chatgpt2024Text from "../../../../packages/parsers/fixtures/chatgpt-2024-mapping.json?raw";
 import pasteText from "../../../../packages/parsers/fixtures/paste.txt?raw";
 import codeOnlyText from "../../../../packages/parsers/fixtures/code-only.json?raw";
+import codexText from "../../../../packages/parsers/fixtures/codex-session.jsonl?raw";
 import type { UploadProgress, UploadReady, UploadRefused } from "./index.js";
 import { FILE_UNREADABLE_SENTENCE } from "./zip-stream.js";
 import { installWorkerHandler, prepareInWorker, toRefusal, type WorkerRequest } from "./worker-entry.js";
@@ -51,6 +52,25 @@ describe("prepareInWorker", () => {
     expect(body).toContain("I keep rewriting my CV");
     expect(body).not.toContain("Shall I shorten it?");
     expect(body).not.toContain("What do you want a reader to notice first?");
+  });
+
+  it("D1-T10: a zipped folder of Codex sessions becomes a body of the person's own turns, stored as chatgpt", async () => {
+    stages.length = 0;
+    const reviewer = [
+      JSON.stringify({ type: "session_meta", payload: { source: { subagent: { other: "guardian" } }, thread_source: "guardian_review" } }),
+      JSON.stringify({ type: "response_item", payload: { type: "message", role: "user", content: [{ type: "input_text", text: "Review this command: rm -rf build" }] } }),
+    ].join("\n");
+    const zip = zipSync({ "sessions/2026/10/02/rollout-a.jsonl": strToU8(codexText), "sessions/2026/10/02/rollout-b.jsonl": strToU8(reviewer) });
+    const ready = readyOf(await run({ kind: "file", file: new File([zip], "codex-sessions.zip") }));
+    expect(ready.header.kind).toBe("chatgpt");
+    expect(ready.foundTurns).toBe(6);
+    expect(ready.keptTurns).toBe(6);
+    const body = await gunzipped(ready.body);
+    expect(body.split("\n")).toHaveLength(7);
+    expect(body).toContain("I drew the layout on paper first, because that is how I think.");
+    for (const absent of ["environment_context", "AGENTS.md", "## My request", "Here is a gentler reminder schedule", "rm -rf build"]) {
+      expect(body).not.toContain(absent);
+    }
   });
 
   it("D9-T3: an export with no own turns is refused before any body exists", async () => {
