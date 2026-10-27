@@ -76,7 +76,7 @@ describe("prompt texts", () => {
       "untrusted-data-rules",
       "persona-answer",
     ]);
-    const changed: Record<string, string> = { "question-check": "v5", "meeting-moderator": "v4", "meeting-speech": "v2", brief: "v4" };
+    const changed: Record<string, string> = { "question-check": "v5", "meeting-moderator": "v5", "meeting-speech": "v2", brief: "v5" };
     for (const name of PROMPT_NAMES) expect(currentVersion(name)).toBe(changed[name] ?? "v1");
     for (const name of ["dossier", "scrub-names", "untrusted-data-rules", "question-check", "meeting-moderator", "meeting-speech"] as const) {
       const prompt = readPrompt(name);
