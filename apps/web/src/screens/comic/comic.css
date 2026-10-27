@@ -1,0 +1,41 @@
+/* The comic page: the avatar cards, the six panels as tilted photo frames, the empty frames while it draws, and a panel that did not load. */
+
+.comic-intro { font-size: 17px; color: var(--ink-2); max-width: 46ch; }
+
+/* the avatar picker */
+.avatar-picker { border: 0; padding: 0; margin: 18px 0 0; background: none; }
+.avatar-picker legend { font-size: 24px; margin: 0 0 8px; padding: 0; }
+.avatar-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.avatar-card { position: relative; display: grid; justify-items: center; align-content: start; gap: 8px; min-height: 124px; margin: 0; padding: 30px 10px 12px;
+  border-radius: var(--radius); background: var(--k-soft); border: 2px solid transparent; text-align: center; cursor: pointer; transition: transform 0.2s var(--ease); }
+.avatar-card:hover { border-color: var(--line-strong); }
+.avatar-card:has(input:checked) { border-color: var(--ink); background: var(--k); transform: rotate(-1.5deg); }
+.avatar-card:has(input:focus-visible) { outline: 3px solid var(--blue-deep); outline-offset: 3px; }
+.avatar-card input { position: absolute; top: 10px; left: 10px; }
+.avatar-art { display: inline-grid; place-items: center; min-width: 64px; height: 52px; padding: 0 14px; border-radius: 999px; background: var(--paper); box-shadow: inset 0 0 0 2px var(--ink);
+  font: 700 17px/1 var(--hand); color: var(--ink); }
+.avatar-words { font: 600 15px/1.25 var(--sans); }
+.avatar-picker + .actions .big { width: 100%; max-width: 420px; }
+
+/* the panels */
+.comic-grid { display: grid; gap: 22px 18px; list-style: none; margin: 18px 0 0; padding: 4px; }
+.comic-frame { background: var(--paper); border-radius: 14px; padding: 10px 10px 4px; box-shadow: var(--lift), 0 0 0 1.5px var(--line); transform: rotate(var(--r, -1.2deg)); }
+.comic-frame:nth-child(2n) { --r: 1.1deg; }
+.comic-frame:nth-child(3n) { --r: -0.6deg; }
+.comic-frame img { display: block; height: auto; aspect-ratio: 1; border-radius: 8px; background: var(--blue-soft); }
+.comic-frame p { margin: 8px 4px 8px; font: 600 15px/1.35 var(--sans); }
+.comic-missing { display: grid; place-items: center; align-content: center; gap: 8px; aspect-ratio: 1; border-radius: 8px; border: 2px dashed var(--line-strong);
+  background: var(--coral-soft); font-weight: 600; color: var(--ink-2); text-align: center; padding: 16px; }
+.comic-missing .stk { font-size: 48px; }
+
+/* while it draws */
+.comic-drawing { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.comic-blank { display: grid; place-items: center; aspect-ratio: 1; border-radius: 8px; border: 2px dashed var(--line-strong); background: var(--blue-soft); margin-bottom: 6px; }
+
+.comic-after { margin: 4px 0 18px; }
+.comic-grid + .comic-after, .empty + .comic-after { justify-content: center; margin-top: 8px; }
+
+@media (min-width: 900px) {
+  .avatar-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .comic-drawing { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

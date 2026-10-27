@@ -1,0 +1,31 @@
+/* The pair and join pages: the two name tags, the invite card with its QR code, and the join card. */
+
+.pair-tags { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 10px 0 18px; }
+.pair-tags .tag { --s: 15px; }
+.pair-tag-a { --r: -7deg; }
+.pair-tag-b { --r: 6deg; }
+.pair-tag-b .tag-name { color: var(--ink-3); }
+.pair-and { font: 800 26px/1 var(--display); color: var(--ink-3); }
+
+.pair-lead { font-size: 18px; max-width: 34ch; }
+
+.invite-card { display: grid; gap: 4px 28px; justify-items: center; padding: 22px 18px 18px; border-radius: var(--radius-l); box-shadow: var(--lift); }
+.invite-qr { width: 100%; max-width: 240px; }
+.invite-qr svg { max-width: 240px; margin: 0 auto; box-shadow: none; padding: 6px; }
+.qr-paper { fill: var(--paper); }
+.qr-ink { fill: var(--ink); }
+.invite-body { width: 100%; }
+.invite-body label { margin-top: 10px; }
+.invite-body input { font-size: 15px; }
+.invite-body .actions { margin: 16px 0 4px; }
+
+.join-card { display: grid; justify-items: start; }
+.join-sticker { font-size: 64px; margin: 4px 0 6px; transform: rotate(-8deg); }
+.join-foot { margin-top: 28px; font-size: 15px; }
+
+@media (min-width: 900px) {
+  .pair-tags { justify-content: flex-start; }
+  .pair-tags .tag { --s: 18px; }
+  .invite-card { grid-template-columns: 240px minmax(0, 1fr); align-items: center; justify-items: stretch; padding: 26px 28px; }
+}
+.invite-wait { font-weight: 600; }
