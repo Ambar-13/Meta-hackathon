@@ -1,49 +1,77 @@
+import "./upload.css";
 import { useState, type ReactElement } from "react";
 import { useNavigate } from "react-router-dom";
-import { prepareUpload } from "../../extract/index.js";
-import { APP_PATHS, ErrorNotice, ScreenFrame } from "../../app-shell/index.js";
+import { prepareUpload, type UploadInput } from "../../extract/index.js";
+import { APP_PATHS, ApiError, ErrorNotice, ScreenFrame } from "../../app-shell/index.js";
 import { useIsNarrowScreen, useUploadFlow, type UploadFlow } from "./upload-state.js";
 import { FileTab, PasteTab, PreparingLine, PreviewPanel, UploadTabs } from "./upload-parts.js";
 
-// The shown flow states other than idle: the progress line, the refusal, the file check crash, and the preview with its upload.
-type SubmittedProps = { flow: UploadFlow; onCancel: () => void; onReset: () => void; onPasteInstead: () => void; onAttest: (isAttested: boolean) => void; onUpload: () => void };
+// The sentence for a file check that crashed; it has no code of its own, so it is shown as a status 0 error.
+const CRASHED_SENTENCE = "The file check stopped. Reload the page and try again.";
+
+// What the page does when the person acts: pick a tab, start, stop, start over, paste instead, attest, upload.
+export type UploadActions = {
+  onTab: (tab: "paste" | "file") => void;
+  onStart: (input: UploadInput) => void;
+  onCancel: () => void;
+  onReset: () => void;
+  onPasteInstead: () => void;
+  onAttest: (isAttested: boolean) => void;
+  onUpload: () => void;
+};
+
+// A stop in the flow: the error, then the one way on, which is to start again.
+const StopBody = (props: { error: ApiError; onReset: () => void }): ReactElement => {
+  return (
+    <section className="up-stop">
+      <ErrorNotice error={props.error} />
+      <div className="actions">
+        <button type="button" onClick={props.onReset}>
+          Start again
+        </button>
+      </div>
+    </section>
+  );
+};
 
 // The screen body for the flow after the person picked or pasted something.
-const FlowBody = (props: SubmittedProps): ReactElement | null => {
-  const { flow } = props;
-  if (flow.kind === "preparing") return <PreparingLine progress={flow.progress} onCancel={props.onCancel} />;
+const FlowBody = (props: { flow: UploadFlow; actions: UploadActions }): ReactElement | null => {
+  const { flow, actions } = props;
+  if (flow.kind === "preparing") return <PreparingLine progress={flow.progress} onCancel={actions.onCancel} />;
   if (flow.kind === "refused") {
-    return (
-      <>
-        <div className="notice" role="alert">
-          <p>{flow.refusal.message}</p>
-        </div>
-        <button type="button" className="quiet" onClick={props.onReset}>
-          Start again
-        </button>
-      </>
-    );
+    return <StopBody error={new ApiError({ status: 0, code: flow.refusal.code, message: flow.refusal.message })} onReset={actions.onReset} />;
   }
   if (flow.kind === "crashed") {
-    return (
-      <>
-        <p>The file check stopped. Reload the page and try again.</p>
-        <button type="button" className="quiet" onClick={props.onReset}>
-          Start again
-        </button>
-      </>
-    );
+    return <StopBody error={new ApiError({ status: 0, code: "file_check_crashed", message: CRASHED_SENTENCE })} onReset={actions.onReset} />;
   }
   if (flow.kind === "ready" || flow.kind === "uploading" || flow.kind === "failed") {
     const isAttested = flow.kind === "ready" ? flow.isAttested : true;
     return (
       <>
-        <PreviewPanel ready={flow.ready} isAttested={isAttested} isUploading={flow.kind === "uploading"} onAttest={props.onAttest} onUpload={props.onUpload} onPasteInstead={props.onPasteInstead} />
+        <PreviewPanel ready={flow.ready} isAttested={isAttested} isUploading={flow.kind === "uploading"} onAttest={actions.onAttest} onUpload={actions.onUpload} onPasteInstead={actions.onPasteInstead} />
         {flow.kind === "failed" ? <ErrorNotice error={flow.error} /> : null}
       </>
     );
   }
   return null;
+};
+
+// The page for one flow state: the lede and the tabs while nothing is picked, then the flow body. The gallery renders it directly.
+export const UploadView = (props: { flow: UploadFlow; tab: "paste" | "file"; isNarrow: boolean; actions: UploadActions }): ReactElement => {
+  const { flow, actions } = props;
+  return (
+    <ScreenFrame title="Add what your AI knows about you">
+      {flow.kind === "idle" ? (
+        <>
+          <p className="up-lede">Pick a chat export or paste a few notes. You see what will be sent before anything leaves this device.</p>
+          <UploadTabs isNarrow={props.isNarrow} selected={props.tab} onSelect={actions.onTab} />
+          {props.tab === "paste" ? <PasteTab isBusy={false} onSubmit={(text) => { actions.onStart({ kind: "paste", text }); }} /> : <FileTab isBusy={false} onPick={(file) => { actions.onStart({ kind: "file", file }); }} />}
+        </>
+      ) : (
+        <FlowBody flow={flow} actions={actions} />
+      )}
+    </ScreenFrame>
+  );
 };
 
 // The upload page: paste or pick, see what will be sent, attest, upload (seams S4, A3, R1.3, R2.7).
@@ -54,21 +82,17 @@ export const UploadScreen = (props: { prepare?: typeof prepareUpload }): ReactEl
   const upload = useUploadFlow(props.prepare ?? prepareUpload, (sourceId) => {
     navigate(APP_PATHS.namesReview(sourceId));
   });
-  const { flow } = upload;
-  const pasteInstead = (): void => {
-    upload.reset();
-    setTab("paste");
+  const actions: UploadActions = {
+    onTab: setTab,
+    onStart: upload.start,
+    onCancel: upload.cancel,
+    onReset: upload.reset,
+    onPasteInstead: () => {
+      upload.reset();
+      setTab("paste");
+    },
+    onAttest: upload.setAttested,
+    onUpload: () => void upload.upload(),
   };
-  return (
-    <ScreenFrame title="Add what your AI knows about you">
-      {flow.kind === "idle" ? (
-        <>
-          <UploadTabs isNarrow={isNarrow} selected={tab} onSelect={setTab} />
-          {tab === "paste" ? <PasteTab isBusy={false} onSubmit={(text) => { upload.start({ kind: "paste", text }); }} /> : <FileTab isBusy={false} onPick={(file) => { upload.start({ kind: "file", file }); }} />}
-        </>
-      ) : (
-        <FlowBody flow={flow} onCancel={upload.cancel} onReset={upload.reset} onPasteInstead={pasteInstead} onAttest={upload.setAttested} onUpload={() => void upload.upload()} />
-      )}
-    </ScreenFrame>
-  );
+  return <UploadView flow={upload.flow} tab={tab} isNarrow={isNarrow} actions={actions} />;
 };

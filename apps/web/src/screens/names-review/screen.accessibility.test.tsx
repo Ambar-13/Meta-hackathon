@@ -88,4 +88,26 @@ describe("names review screen", () => {
     fireEvent.click(screen.getByRole("radio", { name: "Choose names to keep" }));
     expect(unlabelledControls(document.body)).toEqual([]);
   });
+
+  it("design fix 3: while the first read is out, the screen shows only the looking line, and every control has a name", async () => {
+    stubRoute(routes.sources.readSource, { status: 200, body: sourceView(1, 2), delayMs: 10_000 });
+    renderNames();
+    const status = await screen.findByRole("status");
+    expect(status.textContent).toBe("Looking for names in your notes.");
+    expect(screen.queryByRole("button", { name: "Save and build my card" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();
+    expect(unlabelledControls(document.body)).toEqual([]);
+  });
+
+  it("design fix 3: a failed first read shows one sentence and Try again, which reads the source again and shows the list", async () => {
+    stubRoute(routes.sources.readSource, [{ status: 404, body: null }, sourceView(1, 1)]);
+    renderNames();
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toBe("This no longer exists or is not yours.");
+    expect(screen.queryByRole("button", { name: "Save and build my card" })).toBeNull();
+    expect(unlabelledControls(document.body)).toEqual([]);
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(await screen.findByText("1 name found.")).toBeTruthy();
+    expect(requestsTo(routes.sources.readSource)).toHaveLength(2);
+  });
 });
