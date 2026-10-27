@@ -9,6 +9,10 @@ import { startIfReady } from "./commit-turn.js";
 import { buildFrozenPrefix, type LoadedPrompt, type MeetingPrompts, type PrefixItem } from "./prompt-builder.js";
 import { loadMeetingPrompts } from "./step-job.js";
 
+// The refusal stored when the question check's reply does not match its schema. The question fails closed here; a thrown parse
+// error would send the job back to Graphile, which runs the paid call again.
+export const QUESTION_CHECK_UNREADABLE_REASON = "The question check sent back an answer that could not be read, so this question is not accepted.";
+
 // The check_question job: the free-text check when the question is unchecked, then both frozen prefixes (R10.5, D41).
 export const runCheckQuestion: JobTask<"check_question"> = async (payload, context) => {
   const meetingId = payload.meetingId;
@@ -83,11 +87,15 @@ export async function storeFrozenPrefixes(trx: Transaction<Database>, meetingId:
   return written;
 }
 
-// The question check's model call: one minimal call, re-queued when the limiter is full. Returns the verdict or "limited".
-async function checkQuestion(context: JobContext, request: QuestionRequest): Promise<QuestionCheckOutput | "limited"> {
+// The question check's model call: one minimal call, re-queued when the limiter is full. Returns the verdict, "limited", or
+// "unreadable" when the reply does not match the schema; that reply is refused and never thrown, so Graphile does not pay again.
+async function checkQuestion(context: JobContext, request: QuestionRequest): Promise<QuestionCheckOutput | "limited" | "unreadable"> {
   try {
     const result = await context.llm.complete(questionCheckCallArgs({ meetingId: request.meetingId, promptVersion: request.checkPrompt.version, messages: questionCheckMessages(request.checkPrompt.text, request.questionText) }));
-    return QuestionCheckOutput.parse(result.parsed);
+    const verdict = QuestionCheckOutput.safeParse(result.parsed);
+    if (verdict.success) return verdict.data;
+    context.log.warn({ code: "question_check_reply_invalid", meetingId: request.meetingId }, "The question check reply did not match its schema, so the question is refused.");
+    return "unreadable";
   } catch (error) {
     if (!(error instanceof LimiterBusy)) throw error;
     await reenqueueAfterLimiter(context, "check_question", { meetingId: request.meetingId });
@@ -101,21 +109,17 @@ function toPrefixItem(item: { position: number; kind: string; claim: string; lan
 }
 
 // The writes after the verdict, in one transaction: the verdict, both prefixes, then the start if both go-aheads are in.
-async function applyVerdict(trx: Transaction<Database>, scope: VerdictScope, verdict: QuestionCheckOutput | undefined): Promise<"running" | "queued" | "not_ready" | "refused"> {
+// An unreadable reply fails closed: the question is refused.
+async function applyVerdict(trx: Transaction<Database>, scope: VerdictScope, verdict: QuestionCheckOutput | "unreadable" | undefined): Promise<"running" | "queued" | "not_ready" | "refused"> {
   const { context, meetingId } = scope;
   await trx.selectFrom("meetings").select("id").where("id", "=", meetingId).forUpdate().executeTakeFirst();
-  if (verdict !== undefined && !verdict.allowed) {
-    await trx.updateTable("meetings").set({ question_rejected_reason: verdict.reason }).where("id", "=", meetingId).execute();
-    return "refused";
-  }
+  if (verdict === "unreadable") return refuseQuestion(trx, meetingId, QUESTION_CHECK_UNREADABLE_REASON);
+  if (verdict !== undefined && !verdict.allowed) return refuseQuestion(trx, meetingId, verdict.reason);
   // A question with any romantic part, to a listed persona whose owner has not switched on dating questions, is refused, whatever kind
   // the check gave it (as-built items 54 and 55).
   if (verdict !== undefined && (verdict.romantic || verdict.kind === "romance")) {
     const meeting = await trx.selectFrom("meetings").select("romance_allowed").where("id", "=", meetingId).executeTakeFirstOrThrow();
-    if (!meeting.romance_allowed) {
-      await trx.updateTable("meetings").set({ question_rejected_reason: ROMANCE_NOT_OPEN_REASON }).where("id", "=", meetingId).execute();
-      return "refused";
-    }
+    if (!meeting.romance_allowed) return refuseQuestion(trx, meetingId, ROMANCE_NOT_OPEN_REASON);
   }
   if (verdict !== undefined) {
     // The kind is written before the prefixes below are built, so both personas read the kind the check gave.
@@ -123,4 +127,10 @@ async function applyVerdict(trx: Transaction<Database>, scope: VerdictScope, ver
   }
   await storeFrozenPrefixes(trx, meetingId, scope.prompts);
   return startIfReady(trx, { meetingId, now: context.now(), maxRunning: context.env.MAX_CONCURRENT_MEETINGS });
+}
+
+// Stores the reason a question is refused, so the meeting never starts and the job never checks it again (R10.5).
+async function refuseQuestion(trx: Transaction<Database>, meetingId: string, reason: string): Promise<"refused"> {
+  await trx.updateTable("meetings").set({ question_rejected_reason: reason }).where("id", "=", meetingId).execute();
+  return "refused";
 }

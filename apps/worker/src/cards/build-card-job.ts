@@ -61,7 +61,8 @@ async function readCardInput(db: Kysely<Database>, payload: JobPayload<"build_ca
   });
 }
 
-// Runs the card calls for one built sample and writes the card; a failed reply fails the card, a thrown error reaches the caller.
+// Runs the card calls for one built sample and writes the card; a first reply that fails its schema fails the card, an error of the
+// first call reaches the caller, and a regeneration that fails leaves the first reply's verified items.
 async function buildAndWrite(context: JobContext, payload: JobPayload<"build_card">, input: { source: SourceRow; eligible: TurnRow[] }): Promise<void> {
   const { source, eligible } = input;
   const sampled = sampleTurns(eligible.map(toSampledTurn), CARD_INPUT_MAX_CHARS);
@@ -81,12 +82,18 @@ async function buildAndWrite(context: JobContext, payload: JobPayload<"build_car
 }
 
 // The one regeneration: when a check failed and the card call allows a retry, the failed items go back once; a second failure is dropped (D22, D27).
+// A regeneration that throws is logged and gives nothing, so the card keeps the first reply's verified items instead of failing.
 async function regenerate(context: JobContext, payload: JobPayload<"build_card">, args: { plan: BuildPlan; replyText: string; failures: FailedItem[] }): Promise<ItemCheck[]> {
   if (args.failures.length === 0 || CALL_SITE_CONFIG.card.retries < 1) return [];
-  const regeneration = cardRegenerationCall(args.plan.first, args.replyText, args.failures);
-  const reply2 = await context.llm.complete({ ...regeneration, ledger: { personId: payload.personId, meetingId: null } });
-  const parsed2 = CardBuildOutput.safeParse(reply2.parsed);
-  return parsed2.success ? verifyItems(parsed2.data.items, args.plan.turnsByIndex, args.plan.forbidden) : [];
+  try {
+    const regeneration = cardRegenerationCall(args.plan.first, args.replyText, args.failures);
+    const reply2 = await context.llm.complete({ ...regeneration, ledger: { personId: payload.personId, meetingId: null } });
+    const parsed2 = CardBuildOutput.safeParse(reply2.parsed);
+    return parsed2.success ? verifyItems(parsed2.data.items, args.plan.turnsByIndex, args.plan.forbidden) : [];
+  } catch (error) {
+    context.log.warn({ cardId: payload.cardId, code: "card_regeneration_failed", reason: cardErrorCode(error) }, "build_card: the regeneration failed, so the card keeps the first reply's verified items");
+    return [];
+  }
 }
 
 // The chars per token of a source from its first card call: request characters over prompt tokens, 3 decimals, at most 999.999; null when the reply reported no prompt tokens (D20).

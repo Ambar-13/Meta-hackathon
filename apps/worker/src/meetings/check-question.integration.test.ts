@@ -5,6 +5,7 @@ import { QUIZ_BANK, RecordedCall, ROMANCE_NOT_OPEN_REASON, sampleQuiz, rowToEven
 import { readPrompt } from "@meet-first/prompts";
 import { makeDatabase, parseDatabaseError, POOL_SIZE, withMeeting, withPerson, type Database } from "@meet-first/db";
 import { createPairedMeeting, freshTestDatabase, type TestDatabase } from "@meet-first/db/testing";
+import { QUESTION_CHECK_UNREADABLE_REASON } from "./check-question-job.js";
 import { makeMeetingTestContext, runMeetingJob, startTestMeeting, type MeetingTestContext } from "./testing/meeting-test-context.js";
 import { type ReplyScript } from "./testing/scripted-replies.js";
 
@@ -146,6 +147,21 @@ it("W5-DIR-T11: a question the check marks romantic under another kind is refuse
   const meeting = await meetingOf(m.meetingId);
   expect(meeting.question_rejected_reason).toBe(ROMANCE_NOT_OPEN_REASON);
   expect(meeting.question_checked_at).toBeNull();
+});
+
+it("W3-WORK-T6: a question-check reply that does not match its schema makes one model call, throws nothing and refuses the question", async () => {
+  await freeText(m.meetingId);
+  const t = await openTest(questionCheck({ allowed: "yes", reason: "", kind: "chat", romantic: "no" }));
+  await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
+  // A second run, as a Graphile retry would be, finds the question refused and makes no call.
+  await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
+  const meeting = await meetingOf(m.meetingId);
+  expect(meeting.question_rejected_reason).toBe(QUESTION_CHECK_UNREADABLE_REASON);
+  expect(meeting.question_checked_at).toBeNull();
+  for (const side of await membersOf(m.meetingId)) expect(side.frozen_prefix).toBeNull();
+  const ledger = await withMeeting(workerDb, m.meetingId, (trx) => trx.selectFrom("ledger").select("call_site").where("meeting_id", "=", m.meetingId).execute());
+  expect(ledger.map((row) => row.call_site)).toEqual(["question_check"]);
+  expect(t.pending).toEqual([]);
 });
 
 it("D41-T4: a curated question needs no model call and gets both prefixes, which carry the curated question's kind", async () => {
