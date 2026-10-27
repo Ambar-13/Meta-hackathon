@@ -74,8 +74,9 @@ async function beginInside(trx: Transaction<Database>, scope: { context: JobCont
   const tokens = await readMeetingTokens(trx, payload.meetingId);
   if (isOverTokenStop(tokens)) {
     await releaseStep(trx, ref, "stalled");
-    await endMeeting(trx, { meetingId: payload.meetingId, reason: "budget", now });
-    return { kind: "budget" };
+    // A false end means another path ended the meeting first and queued its own briefs, so this runner queues none.
+    const isEnded = await endMeeting(trx, { meetingId: payload.meetingId, reason: "budget", now });
+    return isEnded ? { kind: "budget" } : { kind: "skip" };
   }
   const member = await trx.selectFrom("meeting_members").select(["person_id", "card_id", "frozen_prefix"]).where("meeting_id", "=", payload.meetingId).where("side", "=", claim.step.side).executeTakeFirst();
   if (member === undefined || member.frozen_prefix === null) {
@@ -234,13 +235,14 @@ async function handleStepFailure(context: JobContext, payload: JobPayload<"meeti
   context.log.warn({ code, meetingId: payload.meetingId, stepSeq: payload.stepSeq }, "The step failed and is left stalled for the sweeper.");
 }
 
-// A dollar cap ended the call: the step stalls and the meeting ends with reason budget, then the briefs are queued.
+// A dollar cap ended the call: the step stalls and the meeting ends with reason budget, then the briefs are queued, but only when
+// this end ended the meeting; when another path ended it first, that path queued the briefs.
 async function stopForCap(context: JobContext, meetingId: string, held: HeldStep | null): Promise<void> {
-  await withMeeting(context.db, meetingId, async (trx) => {
+  const isEnded = await withMeeting(context.db, meetingId, async (trx) => {
     if (held !== null) await releaseStep(trx, refOf(held), "stalled");
-    await endMeeting(trx, { meetingId, reason: "budget", now: context.now() });
+    return endMeeting(trx, { meetingId, reason: "budget", now: context.now() });
   });
-  await context.enqueue("write_briefs", { meetingId });
+  if (isEnded) await context.enqueue("write_briefs", { meetingId });
 }
 
 // Moves the step this runner holds to pending or stalled, in its own short transaction.

@@ -1,9 +1,11 @@
 import type { Kysely } from "kysely";
+import { pino } from "pino";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { ContractError } from "@meet-first/contracts";
 import { makeDatabase, numberFromPostgres, POOL_SIZE, type Database } from "@meet-first/db";
 import { asPerson, createFrozenSource, createTestPerson, freshTestDatabase, type TestDatabase } from "@meet-first/db/testing";
 import { normQuote } from "@meet-first/receipts";
-import { CHAT_MODEL, LimiterBusy, requestChars, requestHash, type LlmRequest } from "@meet-first/llm";
+import { CHAT_MODEL, LimiterBusy, requestChars, requestHash, type LlmClient, type LlmRequest } from "@meet-first/llm";
 import { assertRecordedUsage, cardCase, cardCaseCalls, fixtureRequest, makeTestJobContext, runJobOnce, type CardFixtureCase } from "../testing/index.js";
 import { charsPerTokenFrom } from "./build-card-job.js";
 
@@ -142,6 +144,30 @@ describe("the card build job", () => {
     const claims = (await readItems(seeded)).map((row) => row.claim);
     expect(claims).toEqual(firstReplyItems("card-regenerate").slice(0, 6).map((item) => item.claim));
     expect(claims).not.toContain("Learns new tools by rebuilding old projects.");
+  });
+
+  it("W3-WORK-T7: a regeneration call that fails is logged, and the card is built from the first reply's verified items", async () => {
+    const seeded = await seedCardCase(cardCase("card-regenerate"));
+    const { context } = makeTestJobContext({ db: workerDb, now: () => NOW });
+    // A fake client: the first card call is the replayed fixture, the second (the regeneration) times out.
+    let calls = 0;
+    const llm: LlmClient = {
+      ...context.llm,
+      complete: (args) => {
+        calls += 1;
+        if (calls === 2) return Promise.reject(new ContractError("model_call_timeout", "The model did not answer within the call's time limit. The call is retried.", 504));
+        return context.llm.complete(args);
+      },
+    };
+    const lines: string[] = [];
+    const log = pino({ level: "warn" }, { write: (line: string) => { lines.push(line); } });
+    await runJobOnce({ ...context, llm, log }, "build_card", { cardId: seeded.cardId, personId: seeded.personId });
+    expect(calls).toBe(2);
+    expect(await readCard(seeded)).toMatchObject({ state: "ready", items_total: 7, items_verified: 6, error: null });
+    expect((await readItems(seeded)).map((row) => row.claim)).toEqual(firstReplyItems("card-regenerate").slice(0, 6).map((item) => item.claim));
+    expect(await ledgerRows(seeded)).toEqual([{ call_site: "card", status: "ok", llm_mode: "replay" }]);
+    const logged = lines.map((line) => JSON.parse(line) as { code?: unknown; reason?: unknown; cardId?: unknown });
+    expect(logged.map((entry) => ({ code: entry.code, reason: entry.reason, cardId: entry.cardId }))).toEqual([{ code: "card_regeneration_failed", reason: "model_call_timeout", cardId: seeded.cardId }]);
   });
 
   it("D27-T2: the regeneration request is the one the fixture case builds", async () => {
