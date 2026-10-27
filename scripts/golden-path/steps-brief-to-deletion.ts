@@ -45,7 +45,6 @@ export async function step13Brief(run: RunState): Promise<StepResult> {
   const assertions: Assertion[] = [
     check("the brief is ready", true, ready.type === "brief.ready"),
     check("the support rates are keyed a and b", ["a", "b"], briefReady === undefined ? [] : Object.keys(briefReady.supportRate).sort()),
-    check("decide first holds only supported lines", true, [...briefA.body.decideFirst, ...briefB.body.decideFirst].every((point) => point.supported === true && point.quotes.every((quote) => quote.verified))),
     check("A's agree line differs from B's", true, briefA.body.agree[0]?.text !== briefB.body.agree[0]?.text),
     check("each brief row has its owner", 2, owners.length),
     check("A's stored first agree line matches A's brief", briefA.body.agree[0]?.text, owners.find((row) => row.personId === personA)?.firstAgree),
@@ -53,8 +52,11 @@ export async function step13Brief(run: RunState): Promise<StepResult> {
     check("the claims are counted", true, claims.total >= 1),
     check("every claim is verified or flagged", true, claims.verified + claims.flagged >= claims.total),
   ];
+  // The recorded replies script one unsupported line outside decide first. A live model may leave an unsupported line in decide first,
+  // which the contract allows (decideFirst is always three lines) and the brief screen sets aside (A1), so this holds under --mock only.
   if (run.options.mode === "mock") {
     assertions.push(
+      check("decide first holds only supported lines", true, [...briefA.body.decideFirst, ...briefB.body.decideFirst].every((point) => point.supported === true && point.quotes.every((quote) => quote.verified))),
       check("exactly one line is unsupported", 1, unsupported.length),
       check("the unsupported line is not in decide first", true, unsupported.every((point) => !briefA.body.decideFirst.includes(point) && !briefB.body.decideFirst.includes(point))),
       check("both support judgments are reliable", [true, true], [briefA.body.supportReliable, briefB.body.supportReliable]),
