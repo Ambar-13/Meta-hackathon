@@ -43,7 +43,9 @@ function sleep(ms: number): Promise<void> {
 // Starts headless Chrome on a debugging port and connects to it over the DevTools protocol.
 async function openChrome(port: number): Promise<Cdp> {
   const profile = join(tmpdir(), `meet-first-gallery-${String(port)}`);
-  const args = ["--headless=new", `--remote-debugging-port=${String(port)}`, "--hide-scrollbars", "--disable-gpu", "--allow-file-access-from-files", `--user-data-dir=${profile}`, "about:blank"];
+  // Tabs opened in the background are throttled by default (slow timers, no painting); these flags keep every tab at full speed.
+  const unthrottled = ["--disable-background-timer-throttling", "--disable-renderer-backgrounding", "--disable-backgrounding-occluded-windows"];
+  const args = ["--headless=new", `--remote-debugging-port=${String(port)}`, "--hide-scrollbars", "--disable-gpu", "--allow-file-access-from-files", ...unthrottled, `--user-data-dir=${profile}`, "about:blank"];
   const chrome = spawn(CHROME, args, { stdio: "ignore" });
   let socketUrl: string | undefined;
   for (let attempt = 0; attempt < 40 && socketUrl === undefined; attempt += 1) {
@@ -97,6 +99,8 @@ async function openPage(cdp: Cdp, page: PageRequest): Promise<Tab> {
   const attached = await cdp.send("Target.attachToTarget", { targetId, flatten: true });
   const sessionId = String(attached.result?.["sessionId"]);
   await cdp.send("Emulation.setDeviceMetricsOverride", { width: size.width, height: size.height, deviceScaleFactor: scale, mobile: size.isMobile }, sessionId);
+  await cdp.send("Emulation.setFocusEmulationEnabled", { enabled: true }, sessionId);
+  await cdp.send("Target.activateTarget", { targetId });
   await cdp.send("Page.enable", {}, sessionId);
   await cdp.send("Page.navigate", { url }, sessionId);
   await sleep(SETTLE_MS);
