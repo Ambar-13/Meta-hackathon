@@ -121,3 +121,5 @@ Baseline on v4, from the Wave 3 recordings of 27 Oct: in the 3 meetings the repl
 | MOD-T33 | any turn; the other persona writes " -- " and " - " | no spaced hyphen or double hyphen between words in the turn |
 
 First live probe on v5 (eval pair 3, 27 Oct, 18 speech replies): MOD-T21 and T22, tool-call replies holding words, 7 of 8, so the prompt rule alone fails; the worker now leaves every round that called a tool out of the turn and off the screen (W3-SPEECH-T1). MOD-T23, replies holding a dash, 0 of 18. Concedes, 4 calls across 2 decide turns, each turn at the cap of 2, with 2 holds.
+
+Final recording on v5 with the worker's tool-round drop (27 Oct; the golden path and eval pair 3, 48 speech replies): replies that called a tool and held words, 17 of 18, so the prompt rule alone still fails MOD-T21 and T22; committed turns seen in later transcripts that hold a tool-call line, 0 of 27; replies holding a dash, 0 of 48 (MOD-T23); concedes, 11 calls with 6 holds across 6 decide turns, at most 2 in any turn (MOD-T27).
