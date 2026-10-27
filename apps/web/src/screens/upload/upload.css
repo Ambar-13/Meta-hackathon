@@ -1,0 +1,56 @@
+/* The upload page: the lede, the two tabs, the file card and the paste box, the step list while the file is read,
+   and the preview with its consent and upload button. Shared parts come from app.css. */
+
+.up-lede { margin: 0 0 6px; max-width: 44ch; color: var(--ink-2); font-size: 16px; }
+
+/* app.css sets button fonts and then resets every button to font: inherit, so the weight is set again here */
+.up-tabs button { font-weight: 600; }
+.up-pane button, .up-working button, .up-preview button, .up-stop button { font-weight: 700; }
+
+.up-tabs { margin: 16px 0 6px; }
+.up-tabs button { min-height: 44px; }
+
+.up-pane { margin-top: 4px; }
+.up-paste-label { margin-top: 12px; }
+.up-paste-label textarea { height: 176px; min-height: 120px; }
+.up-pane .actions { margin-top: 14px; }
+
+/* the file card: one big outlined card whose picker button is the main action */
+.up-drop { display: grid; justify-items: center; gap: 4px; margin: 14px 0 0; padding: 26px 18px 22px; text-align: center;
+  border: 2px dashed var(--ink); border-radius: var(--radius-l); background: var(--blue-soft); }
+.up-drop-stk { font-size: 56px; margin-bottom: 4px; transform: rotate(6deg); }
+.up-file-label { display: grid; justify-items: center; gap: 12px; margin: 4px 0 0; font: 700 17px/1.3 var(--sans); }
+.up-file-label input[type="file"] { max-width: 100%; color: var(--ink-2); font: 500 14px/1.3 var(--sans); }
+.up-file-label input[type="file"]::file-selector-button { min-height: 52px; margin-right: 12px; padding: 0 26px; border: 2px solid var(--ink); border-radius: 999px;
+  background: var(--blue); color: var(--ink); font: 700 17px/1.1 var(--sans); cursor: pointer; transition: transform 0.2s var(--ease); }
+.up-file-label input[type="file"]:hover:not(:disabled)::file-selector-button { transform: translateY(-2px); }
+.up-file-label input[type="file"]:focus-visible { outline: 3px solid var(--blue-deep); outline-offset: 4px; border-radius: 999px; }
+.up-drop .hint { max-width: 34ch; }
+
+/* reading and packing: the loading line, then the four steps */
+.up-working .loading { margin: 0 0 6px; }
+.up-steps { list-style: none; margin: 8px 0 0; padding: 0; }
+.up-step { display: flex; align-items: center; gap: 10px; min-height: 40px; border-top: 1.5px solid var(--line); font: 600 15px/1.3 var(--sans); color: var(--ink-3); }
+.up-step-dot { width: 12px; height: 12px; border-radius: 50%; flex: none; border: 2px solid var(--line-strong); }
+.up-step.done { color: var(--ink-2); }
+.up-step.done .up-step-dot { background: var(--green-deep); border-color: var(--green-deep); }
+.up-step.now { color: var(--ink); }
+.up-step.now .up-step-dot { background: var(--blue); border-color: var(--ink); }
+.up-working .actions { margin: 14px 0 0; }
+
+/* the preview: the counts on the one tilted panel, the consent words, the box and the button */
+.up-counts { --r: -1deg; margin-top: 26px; padding-right: 74px; }
+.up-counts h2 { margin: 0 0 8px; }
+.up-counts p { margin: 4px 0 0; font-weight: 600; }
+.up-counts-stk { position: absolute; right: 14px; top: -22px; font-size: 54px; transform: rotate(10deg); }
+.up-consent { margin: 18px 0 0; font-size: 15.5px; color: var(--ink-2); }
+.up-low { margin-top: 16px; }
+.up-low p { margin: 0 0 10px; font-weight: 600; }
+label.up-attest { min-height: 44px; align-items: center; margin-top: 16px; font-weight: 600; }
+.up-preview .actions { margin-top: 10px; }
+
+@media (min-width: 900px) {
+  .up-lede { font-size: 18px; }
+  .up-drop { padding: 40px 24px 32px; }
+  .up-paste-label textarea { height: 260px; }
+}

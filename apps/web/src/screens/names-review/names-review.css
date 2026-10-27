@@ -1,0 +1,69 @@
+/* The names check: looking, failed, and found. On a phone it is one column with the save button docked above the tab bar;
+   on a laptop the names sit beside a sticky column with the choices and the save. Shared parts come from app.css. */
+
+.nr-looking .loading, .nr-failed .notice { margin-top: 8px; }
+.nr-failed .actions { margin-top: 14px; }
+
+/* phone: one column, the choices pulled into reading order around the list */
+.nr-body { display: flex; flex-direction: column; padding-bottom: 96px; }
+.nr-side { display: contents; }
+.nr-top { order: 1; }
+.nr-side-mode { order: 2; }
+.nr-main { order: 3; }
+.nr-side-optins { order: 4; }
+
+.nr-top .loading { margin: 4px 0 8px; }
+.nr-count { margin: 0; font: 800 22px/1.15 var(--display); letter-spacing: -0.02em; }
+
+/* app.css resets every button to font: inherit, so the weight is set again here */
+.nr-failed button, .nr-pager button, .nr-save button { font-weight: 700; }
+
+/* the two choices: plain groups with a heading, each option a rounded row */
+fieldset.nr-mode, fieldset.nr-optins { margin: 18px 0; padding: 0; border: 0; border-radius: 0; background: none; }
+.nr-mode legend, .nr-optins legend { margin: 0 0 8px; padding: 0; font-size: 20px; line-height: 1.15; }
+label.nr-option { display: flex; align-items: center; gap: 12px; min-height: 52px; margin: 8px 0 0; padding: 10px 16px; border: 2px solid var(--line-strong); border-radius: 18px;
+  background: var(--paper); font-weight: 600; cursor: pointer; }
+label.nr-option:has(input:checked) { border-color: var(--ink); background: var(--blue-soft); }
+.nr-optins > .muted { margin: 0; font-size: 15px; }
+
+.nr-group h2 { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 24px 0 4px; font-size: 22px; }
+.nr-role { display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; border-radius: 999px; background: var(--lilac-soft); border: 1.5px solid var(--lilac-deep);
+  font: 600 14px/1 var(--sans); letter-spacing: 0; color: var(--ink); }
+.nr-list { list-style: none; margin: 0; padding: 0; }
+.nr-row { display: grid; grid-template-columns: 36px minmax(0, 1fr); align-items: center; gap: 4px 12px; padding: 10px 0; border-top: 1.5px solid var(--line); }
+.nr-row:first-child { border-top: 0; }
+.nr-initial { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--lilac); color: var(--ink); font: 800 15px/1 var(--display); }
+.nr-words { min-width: 0; line-height: 1.35; }
+.nr-words strong { font-weight: 700; }
+.nr-words .muted { display: block; font-size: 14.5px; }
+.nr-keep { grid-column: 2; display: inline-flex; align-items: center; gap: 10px; justify-self: start; min-height: 44px; margin: 0; padding: 0 16px 0 12px;
+  border-radius: 999px; border: 2px solid var(--line-strong); background: var(--paper); font: 600 15px/1.2 var(--sans); cursor: pointer; }
+.nr-row.kept .nr-keep { border-color: var(--ink); background: var(--blue-soft); }
+
+.nr-pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 18px 0 0; padding-top: 14px; border-top: 1.5px solid var(--line); }
+.nr-pager span { font: 600 14.5px/1.2 var(--sans); color: var(--ink-2); }
+.nr-pager button { min-height: 44px; padding: 0 18px; }
+
+/* the save dock: fixed above the tab bar on a phone */
+.nr-save { position: fixed; z-index: 25; left: 10px; right: 10px; bottom: calc(var(--tab-bar) + 16px); display: grid; gap: 8px; padding: 10px 10px 10px 14px; border-radius: 24px;
+  background: var(--paper); box-shadow: 0 12px 28px -14px oklch(20% 0.05 266 / 0.55), 0 0 0 1.5px var(--line); }
+.nr-save .notice { margin: 0; }
+.nr-save-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px 12px; }
+.nr-save-note { flex: 1 1 12em; margin: 0; font-size: 14px; line-height: 1.3; }
+.nr-save .loading { flex: 1 1 auto; margin: 0; }
+.nr-save .loading .typing { padding: 8px 10px; }
+.nr-save button { flex: 1 1 auto; }
+
+@media (min-width: 900px) {
+  .nr-body { display: grid; grid-template-columns: minmax(0, 1fr) 360px; grid-template-areas: "top side" "main side"; align-items: start; gap: 0 56px; padding-bottom: 0; }
+  .nr-top { grid-area: top; }
+  .nr-main { grid-area: main; }
+  .nr-side { grid-area: side; display: block; position: sticky; top: calc(76px + 16px); }
+  fieldset.nr-mode { margin-top: 0; }
+  .nr-group:first-child h2 { margin-top: 14px; }
+  .nr-side .nr-option { min-height: 48px; }
+  .nr-save { position: static; padding: 0; border-radius: 0; background: none; box-shadow: none; }
+  .nr-save-row { flex-direction: column; align-items: stretch; }
+  .nr-save-note { flex: none; }
+  .nr-save button { width: 100%; }
+}
