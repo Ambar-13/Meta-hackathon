@@ -1,10 +1,12 @@
 import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { pathToFileURL } from "node:url";
 import { CallSite, RecordedCall } from "@meet-first/contracts";
-import { requestHash, FIXTURE_ROOT } from "../modes.js";
+import { requestHash } from "../modes.js";
+import { SCRIPTED_REPLIES_DIR } from "./replay-folder.js";
 
-// Writes one hand-written fixture: the request file names the call, the response file holds the reply and its usage (D74, R13.3).
+// Writes one hand-written fixture into the scripted replies tests replay: the request file names the call, the response file holds
+// the reply and its usage. Hand-written replies never go into model-replies, which holds only recordings (D74, R13.3).
 export function writeFixture(callSiteArgument: string, requestPath: string, responsePath: string): number {
   const callSite = CallSite.parse(callSiteArgument);
   const request = JSON.parse(readFileSync(requestPath, "utf8")) as { callSite: string; promptVersion: string; body: Record<string, unknown> };
@@ -15,8 +17,7 @@ export function writeFixture(callSiteArgument: string, requestPath: string, resp
   const response = JSON.parse(readFileSync(responsePath, "utf8")) as { response: Record<string, unknown>; usage: RecordedCall["usage"] };
   const hash = requestHash(request.body);
   const call = RecordedCall.parse({ callSite, promptVersion: request.promptVersion, requestHash: hash, request, response: response.response, usage: response.usage, recordedAt: null, handWritten: true });
-  const root = fileURLToPath(new URL(`../../../../${FIXTURE_ROOT}`, import.meta.url));
-  const target = join(root, callSite, `${hash}.json`);
+  const target = join(SCRIPTED_REPLIES_DIR, callSite, `${hash}.json`);
   mkdirSync(dirname(target), { recursive: true });
   writeFileSync(target, `${JSON.stringify(call, null, 2)}\n`);
   console.log(target);
