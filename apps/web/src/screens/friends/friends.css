@@ -1,0 +1,49 @@
+/* The friends page (docs/DESIGN.md). Only rules this screen needs live here. */
+
+/* ---------- the page: one column on a phone, friends beside the answers on a laptop ---------- */
+.friends-columns { display: grid; gap: 8px; }
+.friends-columns section > h2:first-child { margin-top: 22px; }
+
+/* ---------- the friends list: one name tag row per friend ---------- */
+.friends-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 14px; }
+.friends-row { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 12px 16px; padding: 16px; border: 2px solid var(--ink); border-radius: var(--radius); background: var(--paper); }
+.friends-tag { --s: 12px; --r: -4deg; max-width: 62vw; }
+.friends-row:nth-child(even) .friends-tag { --r: 3deg; }
+.friends-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.friends-action { display: contents; }
+.friends-action > .pill { justify-self: start; }
+.friends-action > button, .friends-action > form, .friends-action > p, .friends-action > .notice { grid-column: 1 / -1; }
+.friends-action > button { width: 100%; }
+.friends-off { margin: 0; font-weight: 600; }
+.friends-on { border-color: var(--green-deep); }
+.friends-ask-form { width: 100%; padding: 4px 16px 16px; border-radius: var(--radius); background: var(--blue-soft); }
+.friends-ask-form textarea { min-height: 110px; }
+.friends-ask-form button { margin-top: 12px; }
+.friends-form-line { margin: 0; font-weight: 600; color: var(--coral-ink); }
+.friends-action .notice { width: 100%; margin: 0; }
+
+/* ---------- the more-people links ---------- */
+.friends-more { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 6px; }
+.friends-more .chip { min-height: 44px; padding: 0 16px; font-size: 15px; }
+.friends-more .chip .stk { font-size: 22px; }
+
+/* ---------- the answers your persona gave, each a short talk ---------- */
+.friends-copies { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 30px; }
+.friends-copy + .friends-copy { padding-top: 26px; border-top: 1.5px solid var(--line); }
+.friends-copy .msg.b .bubble { background: var(--blue-soft); }
+
+/* ---------- the asks you sent ---------- */
+.friends-sent { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; }
+.friends-sent-link { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 12px; min-height: 44px; padding: 12px 16px; border-radius: var(--radius); background: var(--lilac-soft); text-decoration: none; color: var(--ink); }
+.friends-sent-kind { font: 700 13px/1.2 var(--sans); color: var(--ink-2); }
+.friends-sent-text { grid-column: 1; font-weight: 600; }
+.friends-sent-state { grid-column: 2; grid-row: 1 / span 2; white-space: nowrap; }
+.friends-sent-state.is-done { background: var(--green); }
+
+@media (min-width: 900px) {
+  .friends-columns { grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 56px; align-items: start; }
+  .friends-side { position: sticky; top: 96px; }
+}
+
+/* app.css sets "font: inherit" on buttons after the button rule, so buttons lose their bold; requests/design-friends-001.md. */
+.friends-row button { font-weight: 700; }

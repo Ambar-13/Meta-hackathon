@@ -9,13 +9,12 @@ export const DELETING_COPY = "Deleting. This takes a few seconds.";
 
 // The id of the dialog title, which names the dialog for screen readers.
 const TITLE_ID = "delete-account-dialog-title";
-// Full width and at least 44 px tall: a comfortable touch target at phone width.
-const BUTTON_STYLE = { width: "100%", minHeight: 44 } as const;
 
 // The props of the dialog: whether a delete is running, the failure sentence if any, and the two actions.
 type DeleteAccountDialogProps = { isBusy: boolean; errorText: string | null; onCancel: () => void; onConfirm: () => void };
 
-// The modal dialog that asks before a delete. Focus starts on Keep my account, Tab stays inside the dialog, and Escape keeps the account.
+// The modal dialog that asks before a delete, over a dimmed page. Focus starts on Keep my account, Tab stays inside the dialog, and
+// Escape keeps the account. Both buttons are full width; the delete one is the coral danger button.
 export const DeleteAccountDialog = (props: DeleteAccountDialogProps): ReactElement => {
   const keepRef = useRef<HTMLButtonElement | null>(null);
   const confirmRef = useRef<HTMLButtonElement | null>(null);
@@ -37,17 +36,21 @@ export const DeleteAccountDialog = (props: DeleteAccountDialogProps): ReactEleme
     }
   };
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby={TITLE_ID} className="panel" onKeyDown={onKeyDown}>
-      <h3 id={TITLE_ID}>{DIALOG_TITLE}</h3>
-      <p>{DIALOG_BODY}</p>
-      {props.isBusy ? <p role="status">{DELETING_COPY}</p> : null}
-      {props.errorText === null ? null : <p role="alert">{props.errorText}</p>}
-      <button ref={keepRef} type="button" disabled={props.isBusy} onClick={props.onCancel} style={BUTTON_STYLE}>
-        Keep my account
-      </button>
-      <button ref={confirmRef} type="button" disabled={props.isBusy} onClick={props.onConfirm} style={BUTTON_STYLE}>
-        Delete my account
-      </button>
+    <div className="settings-backdrop">
+      <div role="dialog" aria-modal="true" aria-labelledby={TITLE_ID} className="panel settings-dialog" onKeyDown={onKeyDown}>
+        <h3 id={TITLE_ID}>{DIALOG_TITLE}</h3>
+        <p>{DIALOG_BODY}</p>
+        {props.isBusy ? <p className="settings-dialog-line" role="status">{DELETING_COPY}</p> : null}
+        {props.errorText === null ? null : <p className="settings-dialog-line is-error" role="alert">{props.errorText}</p>}
+        <div className="settings-dialog-actions">
+          <button ref={keepRef} type="button" className="quiet" disabled={props.isBusy} onClick={props.onCancel}>
+            Keep my account
+          </button>
+          <button ref={confirmRef} type="button" className="danger" disabled={props.isBusy} onClick={props.onConfirm}>
+            Delete my account
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,0 +1,40 @@
+/* The answers page, and the claims list the friends page also shows (docs/DESIGN.md). Only rules this screen needs live here. */
+
+/* ---------- the question and the waiting bubble ---------- */
+.ask-asked { margin: 6px 0 22px; }
+.ask-waiting { margin: 0 0 10px; }
+.ask-face { background: var(--blue); }
+.ask-face .stk { font-size: 24px; }
+.ask-waiting-line { margin: 0 0 0 auto; max-width: 92%; padding-right: 52px; text-align: right; color: var(--ink-2); font-weight: 600; }
+
+/* ---------- sections and the answer cards ---------- */
+.ask-section { margin-top: 8px; }
+.ask-none { margin: 10px 0; font-weight: 600; }
+.ask-answers { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.ask-answer { margin: 14px 0; }
+.ask-answer-head { display: flex; align-items: center; gap: 12px; }
+.ask-answer-head h3 { margin: 0; }
+.ask-answer-head p { margin: 2px 0 0; font-size: 15px; }
+.ask-answer-text { margin: 14px 0 4px; padding: 13px 17px 14px; border-radius: 24px 24px 24px 8px; background: var(--blue); font: 500 16.5px/1.45 var(--sans); }
+.ask-meet { margin-top: 14px; }
+.ask-no-card { margin: 14px 0 0; font-size: 15px; }
+.ask-extra { width: 100%; }
+
+/* ---------- claims: the claim, its quote as a receipt card, and its flag ---------- */
+.ask-claims { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 14px; width: 100%; }
+.ask-claim { display: grid; justify-items: start; gap: 6px; }
+.msg.b .ask-claim { justify-items: end; }
+.ask-claim-text { margin: 0; font: 700 14px/1.3 var(--sans); color: var(--ink-2); }
+.receipt.ask-quote { position: relative; display: block; margin: 0; padding: 11px 14px 11px 44px; font: 600 15px/1.4 var(--sans); }
+.receipt.ask-quote::before { content: "\201C"; }
+.receipt.ask-quote::after { content: "\201D"; }
+.receipt.ask-quote .stk { position: absolute; left: 12px; top: 10px; margin: 0; }
+.ask-claim.is-flagged .receipt.ask-quote { box-shadow: none; outline: 2px dashed var(--line-strong); outline-offset: -2px; }
+.ask-no-claims { margin: 12px 0 0; font-size: 15px; }
+
+@media (min-width: 900px) {
+  .ask-answer-text { font-size: 17.5px; }
+}
+
+/* app.css sets "font: inherit" on buttons after the button rule, so buttons lose their bold; requests/design-friends-001.md. */
+.ask-meet { font-weight: 700; }
