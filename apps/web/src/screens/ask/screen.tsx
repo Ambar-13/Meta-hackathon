@@ -2,10 +2,12 @@
 // to see the answers as soon as the ask ends, with their receipts, and to meet a helper from the results. The step: this page reads
 // the ask until it ends, then shows a help search's results or a friend ask's one answer. What it does not do: show a position, a
 // count or a rank, or any number about a person (design section 10).
+import "./ask.css";
 import type { ReactElement } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { HELP_RESULTS_HEADING, type AskView } from "@meet-first/contracts";
-import { ErrorNotice, readApprovedCard, readCardQuery, ScreenFrame } from "../../app-shell/index.js";
+import { APP_PATHS, ErrorNotice, readApprovedCard, readCardQuery, ScreenFrame } from "../../app-shell/index.js";
+import { Avatar, LoadingLine, Sticker, TypingDots } from "../../look/index.js";
 import { AnswerClaims, HelpAnswerItem } from "./answer-parts.js";
 import { splitHelpAnswers, useAskScreen, type AskScreenModel } from "./ask-state.js";
 
@@ -19,9 +21,62 @@ const NO_MATCH_LINE = "No listed persona matches this yet.";
 const NONE_PLACED_LINE = "No persona showed a clear sign. Their answers are below."; // [confirm]
 const NO_SIGN_HEADING = "No clear sign in their notes";
 const FRIEND_FALLBACK_NAME = "your friend"; // [confirm]
+// The way on from a refused or failed ask: back to the box it came from, by its kind [confirm].
+const AGAIN_LINKS = { help: { label: "Ask a different question", to: APP_PATHS.help }, react: { label: "Back to your friends", to: APP_PATHS.friends } } as const; // [confirm]
+// The name on the asker's own bubble, so its initial reads Y [confirm].
+const ASKER_NAME = "You"; // [confirm]
 
 // One answer of the view.
 type Answer = AskView["answers"][number];
+
+// The question as the asker's own coral bubble at the top of the page.
+const AskedBubble = (props: { view: AskView }): ReactElement => {
+  return (
+    <div className="talk ask-asked">
+      <div className="msg a">
+        <Avatar name={ASKER_NAME} side="a" />
+        <div className="bubble">
+          <p>{`${ASKED_PREFIX}${props.view.text}`}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// The ask while it runs: a blue bubble with typing dots from the friend, or from the personas of a help search, and the step it is on.
+const WaitingBubble = (props: { view: AskView; line: string }): ReactElement => {
+  const { view } = props;
+  return (
+    <>
+      <div className="talk ask-waiting">
+        <div className="msg b">
+          {view.mode === "react" && view.aboutName !== null ? (
+            <Avatar name={view.aboutName} side="b" />
+          ) : (
+            <span className="avatar c-blue ask-face" aria-hidden="true">
+              <Sticker name="chat" />
+            </span>
+          )}
+          <div className="bubble writing">
+            <TypingDots label={props.line} />
+          </div>
+        </div>
+      </div>
+      <p className="ask-waiting-line">{props.line}</p>
+    </>
+  );
+};
+
+// A refused or failed ask: the sentence in the notice, then the way back to where the question was asked.
+const EndedNotice = (props: { view: AskView; line: string }): ReactElement => {
+  const again = AGAIN_LINKS[props.view.mode];
+  return (
+    <div className="notice" role="alert">
+      <p>{props.line}</p>
+      <Link to={again.to}>{again.label}</Link>
+    </div>
+  );
+};
 
 // The finished help search: the placed answers under the results heading, then the answers that showed no clear sign (design section 7).
 const HelpResults = (props: { view: AskView; cardId: string | null; model: AskScreenModel }): ReactElement => {
@@ -32,46 +87,56 @@ const HelpResults = (props: { view: AskView; cardId: string | null; model: AskSc
   const toItem = (answer: Answer): ReactElement => <HelpAnswerItem key={answer.answerId} answer={answer} cardId={props.cardId} isBusy={props.model.isMeeting} onMeet={onMeet} />;
   return (
     <>
-      <section>
+      <section className="ask-section">
         <h2>{HELP_RESULTS_HEADING}</h2>
-        {props.view.answers.length === 0 ? <p>{NO_MATCH_LINE}</p> : null}
-        {props.view.answers.length > 0 && placed.length === 0 ? <p>{NONE_PLACED_LINE}</p> : null}
-        {placed.length > 0 ? <ul>{placed.map((answer) => toItem(answer))}</ul> : null}
+        {props.view.answers.length === 0 ? <p className="soft-panel ask-none">{NO_MATCH_LINE}</p> : null}
+        {props.view.answers.length > 0 && placed.length === 0 ? <p className="soft-panel ask-none">{NONE_PLACED_LINE}</p> : null}
+        {placed.length > 0 ? <ul className="ask-answers">{placed.map((answer) => toItem(answer))}</ul> : null}
       </section>
       {unplaced.length > 0 ? (
-        <section>
+        <section className="ask-section">
           <h2>{NO_SIGN_HEADING}</h2>
-          <ul>{unplaced.map((answer) => toItem(answer))}</ul>
+          <ul className="ask-answers">{unplaced.map((answer) => toItem(answer))}</ul>
         </section>
       ) : null}
     </>
   );
 };
 
-// The finished friend ask: how the friend would probably react, the answer and its claims (design section 7).
+// The finished friend ask: how the friend would probably react, as their blue bubble with its quotes under it (design section 7).
 const ReactResult = (props: { view: AskView }): ReactElement => {
   const answer = props.view.answers[0];
+  const name = props.view.aboutName ?? FRIEND_FALLBACK_NAME;
   return (
-    <section>
-      <h2>{`How ${props.view.aboutName ?? FRIEND_FALLBACK_NAME} would probably react`}</h2>
+    <section className="ask-section">
+      <h2>{`How ${name} would probably react`}</h2>
       {answer === undefined ? (
-        <p>{FAILED_LINE}</p>
+        <div className="notice">
+          <p>{FAILED_LINE}</p>
+        </div>
       ) : (
-        <>
-          <p>{answer.answer}</p>
-          <AnswerClaims claims={answer.claims} />
-        </>
+        <div className="talk">
+          <div className="msg b">
+            <Avatar name={name} side="b" />
+            <div className="bubble">
+              <p>{answer.answer}</p>
+            </div>
+            <div className="extra ask-extra">
+              <AnswerClaims claims={answer.claims} />
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );
 };
 
-// The part under "You asked": the waiting line, the refusal, the failure, or the finished answers.
+// The part under the question: the waiting bubble, the refusal, the failure, or the finished answers.
 const AskBody = (props: { view: AskView; cardId: string | null; model: AskScreenModel }): ReactElement => {
   const { view } = props;
-  if (view.state === "checking" || view.state === "asking" || view.state === "ranking") return <p role="status">{WAITING_LINES[view.state]}</p>;
-  if (view.state === "refused") return <div className="notice" role="alert"><p>{view.refusedReason ?? REFUSED_FALLBACK_LINE}</p></div>;
-  if (view.state === "failed") return <div className="notice" role="alert"><p>{FAILED_LINE}</p></div>;
+  if (view.state === "checking" || view.state === "asking" || view.state === "ranking") return <WaitingBubble view={view} line={WAITING_LINES[view.state]} />;
+  if (view.state === "refused") return <EndedNotice view={view} line={view.refusedReason ?? REFUSED_FALLBACK_LINE} />;
+  if (view.state === "failed") return <EndedNotice view={view} line={FAILED_LINE} />;
   if (view.mode === "react") return <ReactResult view={view} />;
   return <HelpResults view={view} cardId={props.cardId} model={props.model} />;
 };
@@ -88,11 +153,11 @@ export const AskScreen = (): ReactElement => {
   });
   const view = model.ask.value;
   if (view === null) {
-    return <ScreenFrame title="Answers">{model.ask.error === null ? <p>{LOADING_LINE}</p> : <ErrorNotice error={model.ask.error} />}</ScreenFrame>;
+    return <ScreenFrame title="Answers">{model.ask.error === null ? <LoadingLine text={LOADING_LINE} /> : <ErrorNotice error={model.ask.error} />}</ScreenFrame>;
   }
   return (
     <ScreenFrame title="Answers">
-      <p>{`${ASKED_PREFIX}${view.text}`}</p>
+      <AskedBubble view={view} />
       <AskBody view={view} cardId={cardId} model={model} />
       {model.meetError === null ? null : <ErrorNotice error={model.meetError} />}
     </ScreenFrame>

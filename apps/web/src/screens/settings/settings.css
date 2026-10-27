@@ -1,0 +1,33 @@
+/* The settings page and its delete dialog (docs/DESIGN.md). Only rules this screen needs live here. */
+
+/* ---------- the two sections ---------- */
+.settings-section { margin: 18px 0 22px; padding: 20px; }
+.settings-section > p { color: var(--ink-2); }
+.settings-main, .settings-delete-trigger { margin-top: 8px; }
+.settings-link { margin: 18px 0 0; }
+.settings-link label { margin-top: 0; }
+.settings-link input { font-size: 15px; }
+.settings-link-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 12px; }
+.settings-link-row p { margin: 0; font-size: 14.5px; }
+.settings-delete-trigger { border-color: var(--coral-deep); }
+.settings-deleted { display: flex; align-items: flex-start; gap: 12px; margin: 14px 0 0; }
+.settings-deleted .stk { font-size: 30px; }
+.settings-deleted p { margin: 2px 0 0; font-weight: 600; color: var(--ink); }
+
+/* ---------- the delete dialog: a card over a dimmed page ---------- */
+.settings-backdrop { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; overflow-y: auto;
+  background: color-mix(in oklch, var(--ink) 45%, transparent); }
+.settings-dialog { width: 100%; max-width: 460px; margin: 0; padding: 22px 20px 20px; border-radius: var(--radius-l); box-shadow: var(--lift); }
+.settings-dialog h3 { margin: 0 0 10px; font-size: 24px; line-height: 1.1; }
+.settings-dialog > p { font-size: 15.5px; color: var(--ink-2); }
+.settings-dialog .settings-dialog-line { color: var(--ink); font-weight: 600; }
+.settings-dialog .settings-dialog-line.is-error { padding: 10px 14px; border-radius: 16px; border: 2px solid var(--coral-deep); background: var(--coral-soft); }
+.settings-dialog-actions { display: grid; gap: 10px; margin-top: 18px; }
+.settings-dialog-actions button { width: 100%; min-height: 48px; }
+
+@media (min-width: 900px) {
+  .settings-dialog-actions { grid-template-columns: 1fr 1fr; }
+}
+
+/* app.css sets "font: inherit" on buttons after the button rule, so buttons lose their bold; requests/design-friends-001.md. */
+.settings-section button, .settings-dialog button { font-weight: 700; }

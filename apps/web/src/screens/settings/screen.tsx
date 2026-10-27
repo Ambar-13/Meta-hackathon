@@ -1,7 +1,9 @@
 // The settings page: the one-time "open in Safari" link (R9.2) and the delete-account flow (R9.7, D69).
+import "./settings.css";
 import { useRef, useState, type ReactElement } from "react";
 import { type TransferResponse } from "@meet-first/contracts";
 import { apiFetch, asApiError, ApiError, CopyButton, ErrorNotice, ScreenFrame, routes } from "../../app-shell/index.js";
+import { LoadingLine, Sticker } from "../../look/index.js";
 import { DeleteAccountDialog } from "./delete-account-dialog.js";
 import { SESSION_ENDED_CODE, useDeleteAccount, type DeleteFlowState } from "./settings-state.js";
 
@@ -14,6 +16,8 @@ const DELETED_NOTICE = "Your account is being deleted. Everything is removed wit
 // The sentence for a session the server no longer accepts, and the app's general sentence for any other failure.
 const SESSION_ENDED = "Your session has ended. Open the app again to continue.";
 const GENERAL_FAILURE = "The server could not finish this. Try again in a minute.";
+// The line while the one-time link is being made [confirm].
+const MAKING_LINK_LINE = "Making your link."; // [confirm]
 
 // The sentence the dialog shows for a failed delete, or null when nothing failed.
 function failureText(flow: DeleteFlowState): string | null {
@@ -32,13 +36,16 @@ const DeleteAccountSection = (): ReactElement => {
     triggerRef.current?.focus();
   };
   return (
-    <section className="panel" aria-labelledby="delete-account-heading">
+    <section className="panel settings-section" aria-labelledby="delete-account-heading">
       <h2 id="delete-account-heading">Delete my account</h2>
       <p>{SECTION_BODY}</p>
       {flow.kind === "deleted" ? (
-        <p role="status">{DELETED_NOTICE}</p>
+        <div className="soft-panel c-green settings-deleted">
+          <Sticker name="check" />
+          <p role="status">{DELETED_NOTICE}</p>
+        </div>
       ) : (
-        <button ref={triggerRef} type="button" onClick={flow.open}>
+        <button ref={triggerRef} type="button" className="quiet settings-delete-trigger" onClick={flow.open}>
           Delete my account
         </button>
       )}
@@ -63,21 +70,24 @@ export const SettingsScreen = (): ReactElement => {
   };
   return (
     <ScreenFrame title="Settings" hideSettingsLink>
-      <section className="panel" aria-labelledby="transfer-title">
+      <section className="panel settings-section" aria-labelledby="transfer-title">
         <h2 id="transfer-title">Open this profile in Safari</h2>
         <p>Opened inside another app? Make a one-time link, then open it in Safari.</p>
-        <button type="button" disabled={state.kind === "sending"} onClick={() => void makeLink()}>
+        <button type="button" className="settings-main" disabled={state.kind === "sending"} onClick={() => void makeLink()}>
           Make a Safari link
         </button>
+        {state.kind === "sending" ? <LoadingLine text={MAKING_LINK_LINE} /> : null}
         {state.kind === "created" ? (
-          <>
+          <div className="soft-panel settings-link">
             <label>
               One-time link
               <input type="text" readOnly value={state.url} />
             </label>
-            <CopyButton text={state.url} label="Copy link" />
-            <p className="muted">The link works once, for 10 minutes.</p>
-          </>
+            <div className="settings-link-row">
+              <CopyButton text={state.url} label="Copy link" />
+              <p className="muted">The link works once, for 10 minutes.</p>
+            </div>
+          </div>
         ) : null}
         {state.kind === "failed" ? <ErrorNotice error={state.error} /> : null}
       </section>

@@ -4,6 +4,7 @@
 // show a position, a count or a rank (design section 10).
 import type { ReactElement } from "react";
 import { NO_RECEIPT_COPY, WEAK_RECEIPT_COPY, type AnswerClaim, type AskAnswer } from "@meet-first/contracts";
+import { Avatar, Sticker } from "../../look/index.js";
 
 // The line for an answer that carries no claim [confirm].
 const NO_CLAIMS_LINE = "No quotes from their notes.";
@@ -20,22 +21,33 @@ export function receiptMarkFor(claim: AnswerClaim): string | null {
   return null;
 }
 
-// One answer's claims: each claim's text, its quote, and its receipt mark as text with role note; or the line that it has none.
-export const AnswerClaims = (props: { claims: AnswerClaim[] }): ReactElement => {
-  if (props.claims.length === 0) return <p className="muted">{NO_CLAIMS_LINE}</p>;
+// The flag of a claim whose quote is missing or weak: the receipt flag's look, with the mark as its only text and role note.
+const ClaimFlag = (props: { mark: string }): ReactElement => {
+  const isWeak = props.mark === WEAK_RECEIPT_COPY;
   return (
-    <ul>
+    <span className={isWeak ? "flag weak" : "flag"} role="note">
+      {isWeak ? null : <Sticker name="nope" />}
+      {props.mark}
+    </span>
+  );
+};
+
+// One answer's claims: each claim's text, its quote as a receipt card, and its receipt mark as text with role note; or the line that
+// it has none. A flagged claim's quote card is dashed, so a claim without a backed quote looks different from one with it.
+export const AnswerClaims = (props: { claims: AnswerClaim[] }): ReactElement => {
+  if (props.claims.length === 0) return <p className="muted ask-no-claims">{NO_CLAIMS_LINE}</p>;
+  return (
+    <ul className="ask-claims">
       {props.claims.map((claim, index) => {
         const mark = receiptMarkFor(claim);
         return (
-          <li key={`${String(index)}-${claim.quote}`}>
-            <p>{claim.text}</p>
-            <blockquote>{claim.quote}</blockquote>
-            {mark === null ? null : (
-              <span className="mark" role="note">
-                {mark}
-              </span>
-            )}
+          <li key={`${String(index)}-${claim.quote}`} className={mark === null ? "ask-claim" : "ask-claim is-flagged"}>
+            <p className="ask-claim-text">{claim.text}</p>
+            <blockquote className="receipt ask-quote">
+              <Sticker name="quote" />
+              {claim.quote}
+            </blockquote>
+            {mark === null ? null : <ClaimFlag mark={mark} />}
           </li>
         );
       })}
@@ -46,22 +58,28 @@ export const AnswerClaims = (props: { claims: AnswerClaim[] }): ReactElement => 
 // The meeting control of a meetable answer: the button when this phone knows an approved card, else the line that says how to get one.
 const MeetControl = (props: { answerId: string; cardId: string | null; isBusy: boolean; onMeet: (answerId: string, cardId: string) => void }): ReactElement => {
   const { cardId } = props;
-  if (cardId === null) return <p className="muted">{NO_CARD_LINE}</p>;
+  if (cardId === null) return <p className="muted ask-no-card">{NO_CARD_LINE}</p>;
   return (
-    <button type="button" disabled={props.isBusy} onClick={() => { props.onMeet(props.answerId, cardId); }}>
+    <button type="button" className="ask-meet" disabled={props.isBusy} onClick={() => { props.onMeet(props.answerId, cardId); }}>
       {MEET_LABEL}
     </button>
   );
 };
 
-// One help answer: the persona's display name and line, its answer and claims, and the meeting control when canMeet is true.
+// One help answer: the persona's initial, display name and line, its answer in a blue bubble, its claims, and the meeting control when
+// canMeet is true.
 export const HelpAnswerItem = (props: { answer: AskAnswer; cardId: string | null; isBusy: boolean; onMeet: (answerId: string, cardId: string) => void }): ReactElement => {
   const { answer } = props;
   return (
-    <li className="panel">
-      <h3>{answer.displayName}</h3>
-      {answer.line === null ? null : <p className="muted">{answer.line}</p>}
-      <p>{answer.answer}</p>
+    <li className="panel ask-answer">
+      <div className="ask-answer-head">
+        <Avatar name={answer.displayName} side="b" />
+        <div>
+          <h3>{answer.displayName}</h3>
+          {answer.line === null ? null : <p className="muted">{answer.line}</p>}
+        </div>
+      </div>
+      <p className="ask-answer-text">{answer.answer}</p>
       <AnswerClaims claims={answer.claims} />
       {answer.canMeet ? <MeetControl answerId={answer.answerId} cardId={props.cardId} isBusy={props.isBusy} onMeet={props.onMeet} /> : null}
     </li>
