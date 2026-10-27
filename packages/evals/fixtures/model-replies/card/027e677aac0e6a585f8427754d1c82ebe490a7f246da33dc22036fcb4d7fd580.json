@@ -80,28 +80,28 @@
     }
   },
   "response": {
-    "id": "chatcmpl-01a17d59-af1d-734c-8e8f-619cec4c1478",
+    "id": "chatcmpl-01a17e07-a3e3-7680-8f09-47b510f37694",
     "choices": [
       {
         "finish_reason": "stop",
         "index": 0,
         "message": {
-          "content": "{\"items\": [{\"claim\": \"Starts most mornings by writing a short list of three things to finish before lunch.\", \"gloss\": \"Starts most mornings by writing a short list of three things to finish before lunch.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I start most mornings by writing a short list of three things I want to finish before lunch.\", \"turn_id\": \"1\"}, {\"claim\": \"Prefers deep work in the morning and meetings in the afternoon when possible.\", \"gloss\": \"Prefers deep work in the morning and meetings in the afternoon when possible.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I prefer deep work in the morning and keep meetings for the afternoon whenever I can.\", \"turn_id\": \"2\"}, {\"claim\": \"Answers messages in batches twice a day rather than as they arrive.\", \"gloss\": \"Answers messages in batches twice a day rather than as they arrive.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I like to answer messages in batches, twice a day, rather than whenever they arrive.\", \"turn_id\": \"3\"}, {\"claim\": \"Keeps a notebook for ideas and reviews it every Friday.\", \"gloss\": \"Keeps a notebook for ideas and reviews it every Friday.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I keep a notebook for ideas, and I review it every Friday to see which ones still hold up.\", \"turn_id\": \"6\"}, {\"claim\": \"Is happiest with one clear owner and a small group that can decide quickly.\", \"gloss\": \"Is happiest with one clear owner and a small group that can decide quickly.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I am happiest when a project has one clear owner and a small group of people who can decide quickly.\", \"turn_id\": \"8\"}, {\"claim\": \"Keeps Wednesday afternoons free for reading and small fixes.\", \"gloss\": \"Keeps Wednesday afternoons free for reading and small fixes.\", \"kind\": \"boundary\", \"lang\": \"en\", \"quote\": \"I keep my calendar free on Wednesday afternoons so I can catch up on reading and small fixes.\", \"turn_id\": \"13\"}, {\"claim\": \"Trusts teammates quickly when they show their work and admit gaps.\", \"gloss\": \"Trusts teammates quickly when they show their work and admit gaps.\", \"kind\": \"value\", \"lang\": \"en\", \"quote\": \"I trust a teammate quickly when they show their working and admit what they do not know yet.\", \"turn_id\": \"14\"}, {\"claim\": \"Admits mistakes at once, fixes them, and writes down what changed.\", \"gloss\": \"Admits mistakes at once, fixes them, and writes down what changed.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"If I make a mistake in front of others, I say so at once, fix it, and write down what changed.\", \"turn_id\": \"16\"}, {\"claim\": \"Names contributors in every update to credit good work.\", \"gloss\": \"Names contributors in every update to credit good work.\", \"kind\": \"value\", \"lang\": \"en\", \"quote\": \"Good work should be credited to the people who did it, so I name them in every update.\", \"turn_id\": \"24\"}, {\"claim\": \"Protects one long daily focus block from calls.\", \"gloss\": \"Protects one long daily focus block from calls.\", \"kind\": \"boundary\", \"lang\": \"en\", \"quote\": \"I keep one long focus block each day, and I protect it from calls.\", \"turn_id\": \"30\"}, {\"claim\": \"Keeps the inbox closed until after the first task of the day.\", \"gloss\": \"Keeps the inbox closed until after the first task of the day.\", \"kind\": \"boundary\", \"lang\": \"en\", \"quote\": \"I do not like to start the day with email, so I leave the inbox closed until after my first task.\", \"turn_id\": \"32\"}, {\"claim\": \"Aims to ship one usable thing each month this year.\", \"gloss\": \"Aims to ship one usable thing each month this year.\", \"kind\": \"goal\", \"lang\": \"en\", \"quote\": \"My goal for this year is to ship one thing each month that a stranger could use without me.\", \"turn_id\": \"39\"}]}",
+          "content": "{\"items\": [{\"claim\": \"Starts most mornings by writing a short list of three things to finish before lunch.\", \"gloss\": \"Starts most mornings by writing a short list of three things to finish before lunch.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I start most mornings by writing a short list of three things I want to finish before lunch.\", \"turn_id\": \"1\"}, {\"claim\": \"Prefers deep work in the morning and meetings in the afternoon when possible.\", \"gloss\": \"Prefers deep work in the morning and meetings in the afternoon when possible.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I prefer deep work in the morning and keep meetings for the afternoon whenever I can.\", \"turn_id\": \"2\"}, {\"claim\": \"Answers messages in batches twice a day rather than as they arrive.\", \"gloss\": \"Answers messages in batches twice a day rather than as they arrive.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I like to answer messages in batches, twice a day, rather than whenever they arrive.\", \"turn_id\": \"3\"}, {\"claim\": \"Takes a walk first when a valued plan falls apart before deciding next steps.\", \"gloss\": \"Takes a walk first when a valued plan falls apart before deciding next steps.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"When a plan I cared about falls apart, I take a walk first and decide what to do after that.\", \"turn_id\": \"4\"}, {\"claim\": \"Keeps a notebook for ideas and reviews it every Friday.\", \"gloss\": \"Keeps a notebook for ideas and reviews it every Friday.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I keep a notebook for ideas, and I review it every Friday to see which ones still hold up.\", \"turn_id\": \"6\"}, {\"claim\": \"Is happiest with one clear owner and a small group who can decide quickly.\", \"gloss\": \"Is happiest with one clear owner and a small group who can decide quickly.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I am happiest when a project has one clear owner and a small group of people who can decide quickly.\", \"turn_id\": \"8\"}, {\"claim\": \"Checks quarterly goals before saying yes to a new project.\", \"gloss\": \"Checks quarterly goals before saying yes to a new project.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"Before I say yes to a new project, I check whether it fits the goals I set for the quarter.\", \"turn_id\": \"12\"}, {\"claim\": \"Protects Wednesday afternoons for reading and small fixes.\", \"gloss\": \"Protects Wednesday afternoons for reading and small fixes.\", \"kind\": \"boundary\", \"lang\": \"en\", \"quote\": \"I keep my calendar free on Wednesday afternoons so I can catch up on reading and small fixes.\", \"turn_id\": \"13\"}, {\"claim\": \"Believes good work should be credited and names contributors in every update.\", \"gloss\": \"Believes good work should be credited and names contributors in every update.\", \"kind\": \"value\", \"lang\": \"en\", \"quote\": \"Good work should be credited to the people who did it, so I name them in every update.\", \"turn_id\": \"24\"}, {\"claim\": \"Protects one long daily focus block from calls.\", \"gloss\": \"Protects one long daily focus block from calls.\", \"kind\": \"boundary\", \"lang\": \"en\", \"quote\": \"I keep one long focus block each day, and I protect it from calls.\", \"turn_id\": \"30\"}, {\"claim\": \"Keeps the inbox closed until after the first task each day.\", \"gloss\": \"Keeps the inbox closed until after the first task each day.\", \"kind\": \"boundary\", \"lang\": \"en\", \"quote\": \"I do not like to start the day with email, so I leave the inbox closed until after my first task.\", \"turn_id\": \"32\"}, {\"claim\": \"Aims to ship one usable thing each month this year.\", \"gloss\": \"Aims to ship one usable thing each month this year.\", \"kind\": \"goal\", \"lang\": \"en\", \"quote\": \"My goal for this year is to ship one thing each month that a stranger could use without me.\", \"turn_id\": \"39\"}]}",
           "refusal": null,
           "role": "assistant"
         },
         "logprobs": null
       }
     ],
-    "created": 1793104391,
+    "created": 1793115792,
     "model": "muse-spark-1.3",
     "object": "chat.completion",
     "usage": {
-      "completion_tokens": 2941,
+      "completion_tokens": 3101,
       "prompt_tokens": 7207,
-      "total_tokens": 10148,
+      "total_tokens": 10308,
       "completion_tokens_details": {
-        "reasoning_tokens": 1979
+        "reasoning_tokens": 2136
       },
       "prompt_tokens_details": {
         "cached_tokens": 0
@@ -111,8 +111,8 @@
   "usage": {
     "promptTokens": 7207,
     "cachedTokens": 0,
-    "completionTokens": 2941,
-    "reasoningTokens": 1979
+    "completionTokens": 3101,
+    "reasoningTokens": 2136
   },
-  "recordedAt": "2026-10-27T12:33:12.165Z"
+  "recordedAt": "2026-10-27T15:43:12.477Z"
 }
