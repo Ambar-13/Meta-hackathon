@@ -1,0 +1,36 @@
+{
+  "name": "brief-support-judge",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "lines": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "index": {
+              "type": "integer"
+            },
+            "supported": {
+              "type": "boolean"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "index",
+            "supported",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": [
+      "lines"
+    ],
+    "additionalProperties": false
+  }
+}

@@ -80,39 +80,39 @@
     }
   },
   "response": {
-    "id": "chatcmpl-01a17d5e-cd0b-7486-b631-1a7af2f147f2",
+    "id": "chatcmpl-01a17e05-23d1-73f5-8067-6f135dcd3c70",
     "choices": [
       {
         "finish_reason": "stop",
         "index": 0,
         "message": {
-          "content": "{\"items\": [{\"claim\": \"Starts most mornings by writing a short list of three things to finish before lunch.\", \"gloss\": \"Starts most mornings by writing a short list of three things to finish before lunch.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I start most mornings by writing a short list of three things to finish before lunch\", \"turn_id\": \"0\"}, {\"claim\": \"Prefers deep work in the morning and keeps meetings for the afternoon.\", \"gloss\": \"Prefers deep work in the morning and keeps meetings for the afternoon.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I prefer deep work in the morning and keep meetings for the afternoon whenever I can\", \"turn_id\": \"1\"}, {\"claim\": \"Answers messages in batches twice a day.\", \"gloss\": \"Answers messages in batches twice a day.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I answer messages in batches twice a day, because constant pings break my focus\", \"turn_id\": \"2\"}, {\"claim\": \"Values clear written plans more than long talks.\", \"gloss\": \"Values clear written plans more than long talks.\", \"kind\": \"value\", \"lang\": \"en\", \"quote\": \"I value clear written plans more than long talks, and I say so early\", \"turn_id\": \"7\"}, {\"claim\": \"Reviews the week on Friday noting one thing to repeat and one to change.\", \"gloss\": \"Reviews the week on Friday noting one thing to repeat and one to change.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I review my week on Friday and write down one thing I would repeat and one I would change\", \"turn_id\": \"12\"}, {\"claim\": \"Keeps the phone out of the bedroom.\", \"gloss\": \"Keeps the phone out of the bedroom.\", \"kind\": \"boundary\", \"lang\": \"en\", \"quote\": \"I keep my phone out of the bedroom so that the last hour of the day belongs to me\", \"turn_id\": \"15\"}, {\"claim\": \"Believes a good decision needs a reason that fits in one sentence.\", \"gloss\": \"Believes a good decision needs a reason that fits in one sentence.\", \"kind\": \"value\", \"lang\": \"en\", \"quote\": \"I think a good decision needs a reason I can write down in one sentence\", \"turn_id\": \"18\"}, {\"claim\": \"Wants to learn a second language properly with an hour of practice every day.\", \"gloss\": \"Wants to learn a second language properly with an hour of practice every day.\", \"kind\": \"goal\", \"lang\": \"en\", \"quote\": \"I want to learn a second language properly, which means an hour of practice every day\", \"turn_id\": \"20\"}, {\"claim\": \"Prefers to hear bad news quickly even about own work.\", \"gloss\": \"Prefers to hear bad news quickly even about own work.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I prefer to hear bad news quickly, even when the news is about my own work\", \"turn_id\": \"22\"}, {\"claim\": \"Says no to invitations that do not fit the week.\", \"gloss\": \"Says no to invitations that do not fit the week.\", \"kind\": \"boundary\", \"lang\": \"en\", \"quote\": \"I have learned to say no to invitations that do not fit the week, and I feel better for it\", \"turn_id\": \"32\"}]}",
+          "content": "{\"items\": [{\"claim\": \"Starts most mornings by writing a short list of three things to finish before lunch.\", \"gloss\": \"Starts most mornings by writing a short list of three things to finish before lunch.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I start most mornings by writing a short list of three things to finish before lunch\", \"turn_id\": \"0\"}, {\"claim\": \"Prefers deep work in the morning and keeps meetings for the afternoon when possible.\", \"gloss\": \"Prefers deep work in the morning and keeps meetings for the afternoon when possible.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I prefer deep work in the morning and keep meetings for the afternoon whenever I can\", \"turn_id\": \"1\"}, {\"claim\": \"Answers messages in batches twice a day.\", \"gloss\": \"Answers messages in batches twice a day.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I answer messages in batches twice a day, because constant pings break my focus\", \"turn_id\": \"2\"}, {\"claim\": \"Keeps a paper notebook for ideas and types the good ones into a document every Sunday.\", \"gloss\": \"Keeps a paper notebook for ideas and types the good ones into a document every Sunday.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I keep a paper notebook for ideas and type the good ones into a document every Sunday\", \"turn_id\": \"3\"}, {\"claim\": \"Values clear written plans more than long talks.\", \"gloss\": \"Values clear written plans more than long talks.\", \"kind\": \"value\", \"lang\": \"en\", \"quote\": \"I value clear written plans more than long talks, and I say so early\", \"turn_id\": \"7\"}, {\"claim\": \"Keeps the phone out of the bedroom to keep the last hour of the day for self.\", \"gloss\": \"Keeps the phone out of the bedroom to keep the last hour of the day for self.\", \"kind\": \"boundary\", \"lang\": \"en\", \"quote\": \"I keep my phone out of the bedroom so that the last hour of the day belongs to me\", \"turn_id\": \"15\"}, {\"claim\": \"Wants to learn a second language properly with an hour of practice every day.\", \"gloss\": \"Wants to learn a second language properly with an hour of practice every day.\", \"kind\": \"goal\", \"lang\": \"en\", \"quote\": \"I want to learn a second language properly, which means an hour of practice every day\", \"turn_id\": \"20\"}, {\"claim\": \"Prefers to hear bad news quickly, even about own work.\", \"gloss\": \"Prefers to hear bad news quickly, even about own work.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I prefer to hear bad news quickly, even when the news is about my own work\", \"turn_id\": \"22\"}, {\"claim\": \"Likes to test an idea on paper before spending time building it.\", \"gloss\": \"Likes to test an idea on paper before spending time building it.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I like to test an idea on paper before I spend time building it\", \"turn_id\": \"29\"}, {\"claim\": \"Says no to invitations that do not fit the week.\", \"gloss\": \"Says no to invitations that do not fit the week.\", \"kind\": \"boundary\", \"lang\": \"en\", \"quote\": \"I have learned to say no to invitations that do not fit the week\", \"turn_id\": \"32\"}]}",
           "refusal": null,
           "role": "assistant"
         },
         "logprobs": null
       }
     ],
-    "created": 1793104727,
+    "created": 1793115628,
     "model": "muse-spark-1.3",
     "object": "chat.completion",
     "usage": {
-      "completion_tokens": 2752,
+      "completion_tokens": 3455,
       "prompt_tokens": 7174,
-      "total_tokens": 9926,
+      "total_tokens": 10629,
       "completion_tokens_details": {
-        "reasoning_tokens": 1983
+        "reasoning_tokens": 2665
       },
       "prompt_tokens_details": {
-        "cached_tokens": 7153
+        "cached_tokens": 0
       }
     }
   },
   "usage": {
     "promptTokens": 7174,
-    "cachedTokens": 7153,
-    "completionTokens": 2752,
-    "reasoningTokens": 1983
+    "cachedTokens": 0,
+    "completionTokens": 3455,
+    "reasoningTokens": 2665
   },
-  "recordedAt": "2026-10-27T12:38:47.450Z"
+  "recordedAt": "2026-10-27T15:40:28.714Z"
 }

@@ -24,7 +24,7 @@ Notice that the version comes from `current.ts` on every call, so one changed li
 
 ## The main pieces
 
-`src/current.ts` holds the version of each prompt and the list of prompt names. `src/read-prompt.ts` reads one prompt version from disk on every call. `src/index.ts` is the package's public surface. There is one folder per prompt, 13 in all; each holds its version folders, a README, a CHANGELOG and its test cases. question-check, meeting-moderator and brief send `v4`, meeting-speech `v2`, the rest `v1`.
+`src/current.ts` holds the version of each prompt and the list of prompt names. `src/read-prompt.ts` reads one prompt version from disk on every call. `src/index.ts` is the package's public surface. There is one folder per prompt, 13 in all; each holds its version folders, a README, a CHANGELOG and its test cases. question-check, meeting-moderator and brief send `v5`, meeting-speech and brief-support-judge `v2`, the rest `v1`.
 
 ## How to test it
 

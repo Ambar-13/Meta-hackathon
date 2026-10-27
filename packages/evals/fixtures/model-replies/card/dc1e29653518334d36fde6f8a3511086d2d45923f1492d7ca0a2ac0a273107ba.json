@@ -80,28 +80,28 @@
     }
   },
   "response": {
-    "id": "chatcmpl-01a17d5e-90bb-705c-8336-76e53cc6f687",
+    "id": "chatcmpl-01a17e04-ead6-72a1-ad69-dd6f0b33ffa1",
     "choices": [
       {
         "finish_reason": "stop",
         "index": 0,
         "message": {
-          "content": "{\"items\": [{\"claim\": \"Starts most mornings by writing a short list of three things to finish before lunch.\", \"gloss\": \"Starts most mornings by writing a short list of three things to finish before lunch.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I start most mornings by writing a short list of three things to finish before lunch\", \"turn_id\": \"0\"}, {\"claim\": \"Prefers deep work in the morning and keeps meetings for the afternoon when possible.\", \"gloss\": \"Prefers deep work in the morning and keeps meetings for the afternoon when possible.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I prefer deep work in the morning and keep meetings for the afternoon whenever I can\", \"turn_id\": \"1\"}, {\"claim\": \"Answers messages in batches twice a day.\", \"gloss\": \"Answers messages in batches twice a day.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I answer messages in batches twice a day, because constant pings break my focus\", \"turn_id\": \"2\"}, {\"claim\": \"Keeps a paper notebook for ideas and types the good ones into a document every Sunday.\", \"gloss\": \"Keeps a paper notebook for ideas and types the good ones into a document every Sunday.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I keep a paper notebook for ideas and type the good ones into a document every Sunday\", \"turn_id\": \"3\"}, {\"claim\": \"Walks for twenty minutes after dinner even when the weather is poor.\", \"gloss\": \"Walks for twenty minutes after dinner even when the weather is poor.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I like to walk for twenty minutes after dinner, even when the weather is poor\", \"turn_id\": \"4\"}, {\"claim\": \"Values clear written plans more than long talks.\", \"gloss\": \"Values clear written plans more than long talks.\", \"kind\": \"value\", \"lang\": \"en\", \"quote\": \"I value clear written plans more than long talks, and I say so early\", \"turn_id\": \"7\"}, {\"claim\": \"Reviews the week on Friday by writing down one thing to repeat and one to change.\", \"gloss\": \"Reviews the week on Friday by writing down one thing to repeat and one to change.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I review my week on Friday and write down one thing I would repeat and one I would change\", \"turn_id\": \"12\"}, {\"claim\": \"Keeps the phone out of the bedroom to protect the last hour of the day.\", \"gloss\": \"Keeps the phone out of the bedroom to protect the last hour of the day.\", \"kind\": \"boundary\", \"lang\": \"en\", \"quote\": \"I keep my phone out of the bedroom so that the last hour of the day belongs to me\", \"turn_id\": \"15\"}, {\"claim\": \"Wants to learn a second language properly with an hour of practice every day.\", \"gloss\": \"Wants to learn a second language properly with an hour of practice every day.\", \"kind\": \"goal\", \"lang\": \"en\", \"quote\": \"I want to learn a second language properly, which means an hour of practice every day\", \"turn_id\": \"20\"}, {\"claim\": \"Prefers to hear bad news quickly even when it concerns own work.\", \"gloss\": \"Prefers to hear bad news quickly even when it concerns own work.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I prefer to hear bad news quickly, even when the news is about my own work\", \"turn_id\": \"22\"}, {\"claim\": \"Says no to invitations that do not fit the week.\", \"gloss\": \"Says no to invitations that do not fit the week.\", \"kind\": \"boundary\", \"lang\": \"en\", \"quote\": \"I have learned to say no to invitations that do not fit the week, and I feel better for it\", \"turn_id\": \"32\"}, {\"claim\": \"Trusts feedback that is specific, kind and given within a day of the event.\", \"gloss\": \"Trusts feedback that is specific, kind and given within a day of the event.\", \"kind\": \"value\", \"lang\": \"en\", \"quote\": \"I trust feedback that is specific, kind and given within a day of the event\", \"turn_id\": \"39\"}]}",
+          "content": "{\"items\": [{\"claim\": \"Starts most mornings by writing three things to finish before lunch.\", \"gloss\": \"Starts most mornings by writing three things to finish before lunch.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I start most mornings by writing a short list of three things to finish before lunch\", \"turn_id\": \"0\"}, {\"claim\": \"Prefers deep work in the morning and meetings in the afternoon.\", \"gloss\": \"Prefers deep work in the morning and meetings in the afternoon.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I prefer deep work in the morning and keep meetings for the afternoon whenever I can\", \"turn_id\": \"1\"}, {\"claim\": \"Answers messages in batches twice a day.\", \"gloss\": \"Answers messages in batches twice a day.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I answer messages in batches twice a day, because constant pings break my focus\", \"turn_id\": \"2\"}, {\"claim\": \"Values clear written plans over long talks.\", \"gloss\": \"Values clear written plans over long talks.\", \"kind\": \"value\", \"lang\": \"en\", \"quote\": \"I value clear written plans more than long talks, and I say so early\", \"turn_id\": \"7\"}, {\"claim\": \"Keeps the phone out of the bedroom to keep the last hour for self.\", \"gloss\": \"Keeps the phone out of the bedroom to keep the last hour for self.\", \"kind\": \"boundary\", \"lang\": \"en\", \"quote\": \"I keep my phone out of the bedroom so that the last hour of the day belongs to me\", \"turn_id\": \"15\"}, {\"claim\": \"Wants to learn a second language with an hour of practice every day.\", \"gloss\": \"Wants to learn a second language with an hour of practice every day.\", \"kind\": \"goal\", \"lang\": \"en\", \"quote\": \"I want to learn a second language properly, which means an hour of practice every day\", \"turn_id\": \"20\"}, {\"claim\": \"Reviews the week on Friday, noting one thing to repeat and one to change.\", \"gloss\": \"Reviews the week on Friday, noting one thing to repeat and one to change.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I review my week on Friday and write down one thing I would repeat and one I would change\", \"turn_id\": \"12\"}, {\"claim\": \"Prefers to hear bad news quickly, even about own work.\", \"gloss\": \"Prefers to hear bad news quickly, even about own work.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I prefer to hear bad news quickly, even when the news is about my own work\", \"turn_id\": \"22\"}, {\"claim\": \"Prefers paying more for a tool that works immediately over setting up a cheap one.\", \"gloss\": \"Prefers paying more for a tool that works immediately over setting up a cheap one.\", \"kind\": \"preference\", \"lang\": \"en\", \"quote\": \"I would rather pay more for a tool that works on the first day than spend a weekend setting up a cheap one\", \"turn_id\": \"25\"}, {\"claim\": \"Says no to invitations that do not fit the week.\", \"gloss\": \"Says no to invitations that do not fit the week.\", \"kind\": \"boundary\", \"lang\": \"en\", \"quote\": \"I have learned to say no to invitations that do not fit the week, and I feel better for it\", \"turn_id\": \"32\"}, {\"claim\": \"Walks for twenty minutes after dinner even in poor weather.\", \"gloss\": \"Walks for twenty minutes after dinner even in poor weather.\", \"kind\": \"habit\", \"lang\": \"en\", \"quote\": \"I like to walk for twenty minutes after dinner, even when the weather is poor\", \"turn_id\": \"4\"}, {\"claim\": \"Trusts feedback that is specific, kind and given within a day.\", \"gloss\": \"Trusts feedback that is specific, kind and given within a day.\", \"kind\": \"value\", \"lang\": \"en\", \"quote\": \"I trust feedback that is specific, kind and given within a day of the event\", \"turn_id\": \"39\"}]}",
           "refusal": null,
           "role": "assistant"
         },
         "logprobs": null
       }
     ],
-    "created": 1793104711,
+    "created": 1793115613,
     "model": "muse-spark-1.3",
     "object": "chat.completion",
     "usage": {
-      "completion_tokens": 4123,
+      "completion_tokens": 3482,
       "prompt_tokens": 7174,
-      "total_tokens": 11297,
+      "total_tokens": 10656,
       "completion_tokens_details": {
-        "reasoning_tokens": 3154
+        "reasoning_tokens": 2543
       },
       "prompt_tokens_details": {
         "cached_tokens": 7153
@@ -111,8 +111,8 @@
   "usage": {
     "promptTokens": 7174,
     "cachedTokens": 7153,
-    "completionTokens": 4123,
-    "reasoningTokens": 3154
+    "completionTokens": 3482,
+    "reasoningTokens": 2543
   },
-  "recordedAt": "2026-10-27T12:38:31.983Z"
+  "recordedAt": "2026-10-27T15:40:14.073Z"
 }

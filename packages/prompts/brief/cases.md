@@ -29,3 +29,12 @@ v3 cases:
 
 v4 cases:
 - Kind romance: agree lines are likely clicks, clash lines likely rubs said plainly, decide-first lines what to talk about first; no line says "meant to be" or "soulmates".
+
+v5 cases:
+- Two items on different topics that read like a contrast, such as Wednesday afternoons and stopping at six: never a clash line; at most a difference in emphasis (clash_test, the fail case).
+- One topic where both wants can be met at once, such as feedback in writing and feedback within a day: a difference in emphasis, said so in the text (clash_test, the near-miss; rule 7).
+- A line that borrows a detail from the question, such as "10-day", or a persona's detail that no quote holds: rule 10 removes it.
+- Fewer than 3 topics pass the clash test: the remaining clash lines are differences in emphasis (rule 7).
+- Baseline on v4, from the Wave 3 recordings of 27 Oct: the support judge backed 6 of 18 lines of the golden path meeting's two briefs, 11 of 18 of the directory meeting's, and 17 of 18 of eval pair 3's.
+- First live probe on v5 (eval pair 3, 27 Oct): 11 of 18 lines backed. Rejected: 4 one-quote lines that predicted a reaction ("evening contact would probably meet a firm no", "would probably feel hard") and 3 decide_first lines with order words ("settle messages next", "after that"); accepted: "would probably want to talk about X first" and "would probably not clash on X". Rule 7 and the decide_first frame were rewritten from these.
+- Final recording on v5 with brief-support-judge v2 (27 Oct): 45 of 54 lines backed across the 3 replayed meetings' 6 briefs, against 34 of 54 on v4; eval pair 3, 18 of 18; the golden path meeting's first brief, 4 lines unsupported against 12 on v4.

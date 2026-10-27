@@ -57,7 +57,7 @@ Changed as built: item 28.
 Changed as built: item 28.
 | D46 | Stalled sweeper | cron every minute: meetings `running` with no event for 150 s get a new `meeting_step` job; a stale job resuming finds the step done | SIGKILL leaves a Graphile job locked (lock timeout unverified) | meeting frozen for hours | T2 | low | no |
 Changed as built: item 31.
-| D47 | Delta storage | `meeting_steps.partial_text` flushed every 250 ms, NOTIFY payload `meeting_id:step_seq:attempt:len` | no delta rows; reconnect mid-turn shows text | blank 20 s or 10M rows | T1, T3 | low | no |
+| D47 | Delta storage | `meeting_steps.partial_text` flushed every 250 ms, NOTIFY payload `meeting_id:step_seq:attempt:len`; since 27 Oct a round that called a tool leaves the partial text when it ends and is never part of the turn | no delta rows; reconnect mid-turn shows text; no words about a tool call on screen | blank 20 s or 10M rows | T1, T3, W3-SPEECH-T1 | low | no |
 | D48 | NOTIFY | one channel `meeting_events`, payload under 100 bytes (limit 8,000 bytes); one LISTEN connection per API process; subscribers re-read under their RLS | delivered on commit, ordered | lost events or cross-pair reads | T3 | low | no |
 | D49 | Poll fallback | SSE first byte within 5 s or client polls `?after=seq` every 2 s; the server also runs a 10 s safety poll per SSE subscriber | Render proxy buffering is undocumented; LISTEN connection drops lose notifications | frozen screen | T2 | low | no |
 | D50 | SSE headers | `text/event-stream`, `Cache-Control: no-cache, no-transform`, `X-Accel-Buffering: no`, compression plugin excluded, 2 KB comment padding, `reply.hijack()` | proxies and compressors buffer | buffering | T2 | low | no |
