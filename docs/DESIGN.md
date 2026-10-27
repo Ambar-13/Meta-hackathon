@@ -83,7 +83,8 @@ Classes are in `app.css`; React parts are in `apps/web/src/look/`.
 | Marks | `.chip` (outlined, colour from `--c`), `.pill` (a status), `.dot`, `.mark` (inline flags). |
 | Sky | `.sky` with a `.scallop` at the bottom (or `.scallop.top`) and `<Cloud className />`. |
 | States | `<EmptyState sticker title action />` and `<LoadingLine text />`. Errors use `ErrorNotice` (`.notice`). |
-| Frame | `ScreenFrame title isWide`: the top bar with the logo, the h1, and the Pages nav (a tab bar on phones, a pill at the top right on laptops). |
+| Frame | `ScreenFrame title isWide titleAside`: the top bar with the logo, the h1, and the Pages nav (a tab bar on phones, a pill at the top right on laptops). `titleAside` sits beside the h1, for example the name tag on Home. |
+| Question kinds | `KIND_LOOK[kind]` gives each kind's words, colour class and sticker: getting along green, help yellow, deal and decision coral, debate and situation lilac, a first date blue. |
 
 ## Every screen has
 
@@ -104,6 +105,9 @@ pnpm exec tsx scripts/screen-gallery.ts --only home,meeting --out /tmp/screens
 
 Each screen folder adds its states as `apps/web/src/testing/gallery/views/<screen>.tsx`, exporting `views`. The gallery collects every file in that folder.
 
+- A state that needs a click or typing gets a `play` step, which runs a moment after the screen appears. `typeInto(label, value)` and `press(buttonText)` come from `gallery-views.ts`.
+- A route with no stub answers 404, which shows the error state. A stub with `delayMs: FOREVER_MS` holds the loading state.
+
 ## Words
 
 - Plain words and short sentences. No em dashes.
@@ -119,3 +123,4 @@ Each screen folder adds its states as `apps/web/src/testing/gallery/views/<scree
 - Hearts, flames or percent badges anywhere near a person, including dating.
 - Photos of people. Ambar chose no photos on 27 Oct, so people show as initials and name tags.
 - Inline `style` attributes in markup. Set custom properties from a class instead.
+  - Two known exceptions remain. A test reads the comic panel grid's column count and the comic image width from inline style values. React sets these through the DOM, which the CSP allows. They can go once those tests read classes instead.

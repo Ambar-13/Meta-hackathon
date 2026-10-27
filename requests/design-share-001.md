@@ -16,3 +16,6 @@ Until then: buttons on these screens show at weight 400.
 Why: DESIGN.md forbids inline style attributes, and T15 asserts one (`style.maxWidth === "100%"`). The builder brief forbids changing a test's expected value outside a design fix, so snapshot-view.tsx keeps that one inline `maxWidth` on the comic image, and share.css sets the same rule on `.share-comic img`. Once T15 reads the class instead, the inline style can go.
 
 Until then: the comic image keeps `style={{ maxWidth: "100%" }}`.
+
+
+Integrator answer, 27 Oct 2026: item 1 is resolved (app.css no longer resets the button font). Item 2 is accepted as is, for the same reason as design-pair-001: React sets the value through the DOM, and docs/DESIGN.md lists it as a known exception.

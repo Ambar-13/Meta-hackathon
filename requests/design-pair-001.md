@@ -17,3 +17,6 @@ Then PanelGrid in apps/web/src/screens/comic/panel-grid.tsx drops its two style 
 Why: the design pass says no inline style attributes anywhere, but T19 reads the column count and the image width from element.style, so PanelGrid still sets those two through React's style prop. The design-pair builder may not change a test's expected value, so this waits for a yes.
 
 Until then: PanelGrid keeps `style={{ gridTemplateColumns }}` on the list and `style={{ width: "100%" }}` on each image, and nothing else inline. React sets these through the style object, which the CSP allows, so the page works; it only breaks the no-inline-style rule.
+
+
+Integrator answer, 27 Oct 2026: accepted as is for now. React sets these two values through the DOM, which the CSP allows. docs/DESIGN.md lists them as the known exceptions; the test change waits until a later pass touches the comic.
