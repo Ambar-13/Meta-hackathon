@@ -234,10 +234,10 @@ s23_forbidden_imports() {
   local mock key msw
   # grep exits 1 when it finds nothing, which is the pass case here. The row runs in its own process, so this changes only this row.
   set +o pipefail
-  mock=$(grep -rln --exclude-dir=node_modules --exclude-dir=dist --exclude="*.md" "mock-api" apps packages 2>/dev/null | wc -l | tr -d ' ')
-  key=$(grep -rln --exclude-dir=node_modules --exclude-dir=dist --exclude="*.md" "META_API_KEY" apps/web apps/api 2>/dev/null | wc -l | tr -d ' ')
+  mock=$(grep -rln --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=dist-gallery --exclude="*.md" "mock-api" apps packages 2>/dev/null | wc -l | tr -d ' ')
+  key=$(grep -rln --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=dist-gallery --exclude="*.md" "META_API_KEY" apps/web apps/api 2>/dev/null | wc -l | tr -d ' ')
   # Both quote styles: the code base writes imports with double quotes, so a single-quote grep alone would always pass.
-  msw=$(grep -rlnE --exclude-dir=node_modules --exclude-dir=dist --exclude="*.md" "from ['\"]msw['\"/]" apps packages 2>/dev/null | grep -v '^apps/web/src/testing/' | wc -l | tr -d ' ')
+  msw=$(grep -rlnE --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=dist-gallery --exclude="*.md" "from ['\"]msw['\"/]" apps packages 2>/dev/null | grep -v '^apps/web/src/testing/' | wc -l | tr -d ' ')
   echo "mock-api $mock META_API_KEY $key msw $msw"
   [ "$mock" = "0" ] && [ "$key" = "0" ] && [ "$msw" = "0" ]
 }

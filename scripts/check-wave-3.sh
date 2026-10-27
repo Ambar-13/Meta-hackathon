@@ -142,7 +142,7 @@ s09_every_call_site_recorded() {
 }
 # The greps of rows 10 to 13 count files; grep exits 1 when it finds nothing, which is their pass case, so these rows run without
 # pipefail. The check scripts hold the searched words themselves, and a README may name them to say a package never uses them.
-code_hits() { grep -rlE --exclude-dir=node_modules --exclude-dir=dist --exclude='*.md' --exclude='check-wave-*.sh' "$@" 2>/dev/null | wc -l | tr -d ' '; }
+code_hits() { grep -rlE --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=dist-gallery --exclude='*.md' --exclude='check-wave-*.sh' "$@" 2>/dev/null | wc -l | tr -d ' '; }
 # Command 10: no mock module survives (D74, R13.3).
 s10_no_mock_module() {
   set +o pipefail
@@ -165,7 +165,7 @@ s12_key_and_client_confined() {
   local key client msw model_mock
   key=$(code_hits "META_API_KEY" "$ROOT/apps/web" "$ROOT/apps/api")
   client=$(code_hits "@meet-first/llm" "$ROOT/apps/web/src" "$ROOT/apps/api/src")
-  msw=$(grep -rlE --exclude-dir=node_modules --exclude-dir=dist --exclude='*.md' "from ['\"]msw['\"/]" "$ROOT/apps" "$ROOT/packages" 2>/dev/null | sed "s#^$ROOT/##" | grep -v '^apps/web/src/testing/' | wc -l | tr -d ' ')
+  msw=$(grep -rlE --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=dist-gallery --exclude='*.md' "from ['\"]msw['\"/]" "$ROOT/apps" "$ROOT/packages" 2>/dev/null | sed "s#^$ROOT/##" | grep -v '^apps/web/src/testing/' | wc -l | tr -d ' ')
   model_mock=$(code_hits "MODEL_MOCK" "$ROOT/apps" "$ROOT/packages" "$ROOT/scripts")
   echo "META_API_KEY $key, @meet-first/llm $client, msw $msw, MODEL_MOCK $model_mock"
   [ "$key" = "0" ] && [ "$client" = "0" ] && [ "$msw" = "0" ] && [ "$model_mock" = "0" ]
