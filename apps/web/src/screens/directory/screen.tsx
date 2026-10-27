@@ -1,7 +1,9 @@
+import "./directory.css";
 import { useState, type FormEvent, type ReactElement } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ErrorNotice, readApprovedCard, ScreenFrame } from "../../app-shell/index.js";
 import { cardForMeeting, SEARCH_MAX_CHARS, useDirectoryBrowse, useListingMeeting, useYourListing, type BrowseHook, type MeetControls } from "./directory-state.js";
+import { EmptyState, LoadingLine, Sticker } from "../../look/index.js";
 import { ListingCard, YourListingSection } from "./listing-parts.js";
 
 // The words of the directory page that no input gives [confirm] (drafted copy).
@@ -12,6 +14,9 @@ const DIRECTORY_COPY = {
   noCard: "To meet someone here, open your approved card and tap Open the directory.",
   emptyDirectory: "Nobody is listed yet.",
   noMatch: "No listing matches these words.",
+  emptyDirectoryNext: "Turn on the directory switch on your approved card to be the first.",
+  noMatchNext: "Try fewer words, or search with an empty box to see everyone.",
+  loading: "Reading the directory.",
 } as const;
 
 // The search box: the words go to the directory from page 0, and an empty search lists everyone, newest first (design section 6).
@@ -22,39 +27,54 @@ const SearchForm = (props: { onSearch: (query: string) => void }): ReactElement 
     props.onSearch(text);
   };
   return (
-    <form role="search" onSubmit={onSubmit}>
+    <form role="search" className="directory-search" onSubmit={onSubmit}>
       <label>
         {DIRECTORY_COPY.searchLabel}
         <input type="text" maxLength={SEARCH_MAX_CHARS} value={text} onChange={(event) => { setText(event.target.value); }} />
       </label>
-      <button type="submit">{DIRECTORY_COPY.search}</button>
+      <button type="submit" className="quiet">
+        <Sticker name="lens" />
+        {DIRECTORY_COPY.search}
+      </button>
     </form>
   );
 };
 
-// The line for a finished load that found nobody: one for the whole directory, one for search words.
+// The empty state for a finished load that found nobody: one for the whole directory, one for search words.
 const EmptyLine = (props: { browse: BrowseHook }): ReactElement | null => {
   const { browse } = props;
   if (!browse.hasLoaded || browse.isLoading || browse.listings.length > 0) return null;
-  return <p>{browse.query === "" ? DIRECTORY_COPY.emptyDirectory : DIRECTORY_COPY.noMatch}</p>;
+  if (browse.query === "") {
+    return (
+      <EmptyState sticker="tags" title={DIRECTORY_COPY.emptyDirectory}>
+        {DIRECTORY_COPY.emptyDirectoryNext}
+      </EmptyState>
+    );
+  }
+  return (
+    <EmptyState sticker="lens" title={DIRECTORY_COPY.noMatch}>
+      {DIRECTORY_COPY.noMatchNext}
+    </EmptyState>
+  );
 };
 
 // The listings with the no-card notice, the error, the empty line, and More while more pages exist (design section 7).
 const ListingsSection = (props: { browse: BrowseHook; meet: MeetControls | null }): ReactElement => {
   const { browse, meet } = props;
   return (
-    <section aria-labelledby="listings-title">
+    <section className="directory-listings" aria-labelledby="listings-title">
       <h2 id="listings-title">{DIRECTORY_COPY.listingsHeading}</h2>
-      {meet === null ? <p className="notice">{DIRECTORY_COPY.noCard}</p> : null}
+      {meet === null ? <p className="soft-panel c-yellow directory-no-card">{DIRECTORY_COPY.noCard}</p> : null}
       {browse.error === null ? null : <ErrorNotice error={browse.error} />}
+      {browse.isLoading && !browse.hasLoaded ? <LoadingLine text={DIRECTORY_COPY.loading} /> : null}
       <EmptyLine browse={browse} />
-      <ul>
+      <ul className="listing-list">
         {browse.listings.map((listing) => (
           <ListingCard key={listing.listingId} listing={listing} meet={meet} />
         ))}
       </ul>
       {browse.hasMore ? (
-        <button type="button" disabled={browse.isLoading} onClick={browse.loadMore}>
+        <button type="button" className="quiet directory-more" disabled={browse.isLoading} onClick={browse.loadMore}>
           More
         </button>
       ) : null}
@@ -72,10 +92,14 @@ export const DirectoryScreen = (): ReactElement => {
   const cardId = cardForMeeting({ search: location.search, approvedCardId: readApprovedCard(), listedCardId });
   const meet = useListingMeeting({ cardId, go: (path) => { navigate(path); } });
   return (
-    <ScreenFrame title="Directory">
-      <SearchForm onSearch={browse.search} />
-      <ListingsSection browse={browse} meet={cardId === null ? null : meet} />
-      <YourListingSection yours={yours} />
+    <ScreenFrame title="Directory" isWide>
+      <div className="directory-layout">
+        <div className="directory-main">
+          <SearchForm onSearch={browse.search} />
+          <ListingsSection browse={browse} meet={cardId === null ? null : meet} />
+        </div>
+        <YourListingSection yours={yours} />
+      </div>
     </ScreenFrame>
   );
 };

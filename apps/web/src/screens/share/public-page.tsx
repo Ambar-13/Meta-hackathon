@@ -1,7 +1,9 @@
+import "./share.css";
 import type { ReactElement } from "react";
-import { useParams } from "react-router-dom";
-import { ScreenFrame } from "../../app-shell/index.js";
-import { SnapshotView } from "./snapshot-view.js";
+import { Link, useParams } from "react-router-dom";
+import { APP_PATHS, ScreenFrame } from "../../app-shell/index.js";
+import { Cloud, EmptyState, LoadingLine } from "../../look/index.js";
+import { SnapshotTags, SnapshotView } from "./snapshot-view.js";
 import { usePublicSnapshot } from "./share-state.js";
 
 // Where the "Report this page" link goes. The report destination is not chosen yet; Ambar fills it in before merge (request 006).
@@ -10,25 +12,42 @@ export const REPORT_LINK_HREF = "{GAP: the report destination Ambar chooses; the
 const NOT_FOUND_TEXT = "No page here. It may have been taken down.";
 // The heading of the public page while it has no question to show.
 const PAGE_TITLE = "Shared meeting";
+// The words of the page that no input gives [confirm] (drafted copy, design pass).
+const PUBLIC_COPY = {
+  loading: "Opening the shared meeting.",
+  notFoundTitle: "Nothing to read here",
+  whatIs: "What is Meet First?",
+} as const;
 
-// The public share page: the question as the heading, then the snapshot, then the report link. Visitors need no session.
+// The public share page: the two name tags over the sky, the question as the heading, then the snapshot, then the report link.
+// Visitors need no session.
 export const PublicSharePage = (): ReactElement => {
   const slug = useParams()["slug"] ?? "";
   const state = usePublicSnapshot(slug);
   if (state.kind === "ready") {
     return (
-      <ScreenFrame title={state.snapshot.question} hideSettingsLink>
-        <SnapshotView snapshot={state.snapshot} />
-        <p>
-          <a href={REPORT_LINK_HREF}>Report this page</a>
-        </p>
+      <ScreenFrame title={state.snapshot.question} hideSettingsLink isWide>
+        <div className="sky share-sky" aria-hidden="true">
+          <Cloud className="share-cloud-1" />
+          <Cloud className="share-cloud-2" />
+          <span className="scallop" />
+        </div>
+        <SnapshotTags snapshot={state.snapshot} />
+        <div className="share-page">
+          <SnapshotView snapshot={state.snapshot} />
+          <p className="share-report">
+            <a href={REPORT_LINK_HREF}>Report this page</a>
+          </p>
+        </div>
       </ScreenFrame>
     );
   }
   if (state.kind === "not_found") {
     return (
       <ScreenFrame title={PAGE_TITLE} hideSettingsLink>
-        <p>{NOT_FOUND_TEXT}</p>
+        <EmptyState sticker="poof" title={PUBLIC_COPY.notFoundTitle} action={<Link className="btn quiet" to={APP_PATHS.welcome}>{PUBLIC_COPY.whatIs}</Link>}>
+          {NOT_FOUND_TEXT}
+        </EmptyState>
       </ScreenFrame>
     );
   }
@@ -41,5 +60,9 @@ export const PublicSharePage = (): ReactElement => {
       </ScreenFrame>
     );
   }
-  return <ScreenFrame title={PAGE_TITLE} hideSettingsLink>{null}</ScreenFrame>;
+  return (
+    <ScreenFrame title={PAGE_TITLE} hideSettingsLink>
+      <LoadingLine text={PUBLIC_COPY.loading} />
+    </ScreenFrame>
+  );
 };

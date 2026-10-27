@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { fireEvent, screen } from "@testing-library/react";
-import { routes, ShareSnapshot } from "@meet-first/contracts";
+import { fireEvent, screen, within } from "@testing-library/react";
+import { Brief, routes, ShareSnapshot, type BriefPoint } from "@meet-first/contracts";
 import { APP_PATHS, ROUTE_PATTERNS } from "../../app-shell/index.js";
 import { IDS, meetingView } from "../../testing/fixtures.js";
 import { renderScreen, requestsTo, stubRoute } from "../../testing/index.js";
@@ -35,9 +35,91 @@ function snapshotFixture(overrides: Partial<ShareSnapshot> = {}): ShareSnapshot 
   });
 }
 
+// The two people of the preview fixture meeting.
+const PREVIEW_MEMBERS = [
+  { side: "a", displayName: "Mira", ready: true, connected: false },
+  { side: "b", displayName: "Jonah", ready: true, connected: false },
+] as const;
+// The brief line of the fixture that passed the support check, with its quote.
+const BACKED_LINE = "Both like clear deadlines";
+const BACKED_QUOTE = "Deadlines matter to me";
+// Lines the support check did not back, could not decide, or whose quote was not found; none of them may be previewed.
+const HELD_BACK_LINES = ["Plans differ on lead time", "Pick the deadline first", "Both like a quiet room"];
+
+// One brief line on side a's quote; supported and verified say how the support check and the quote check went.
+function briefPoint(text: string, quote: string, check: { supported: boolean | null; verified: boolean }): BriefPoint {
+  return { text, quotes: [{ text: quote, side: "a", turnId: IDS.turnA, verified: check.verified }], supported: check.supported };
+}
+
+// A brief with one backed line and three held back; isAllUnsupported turns the backed line into one the check refused too.
+function briefFixture(options: { isAllUnsupported: boolean }): Brief {
+  const filler = (index: number): BriefPoint => briefPoint(`Filler line ${String(index)}`, "Filler quote", { supported: false, verified: true });
+  return Brief.parse({
+    agree: [briefPoint(BACKED_LINE, BACKED_QUOTE, { supported: !options.isAllUnsupported, verified: true }), briefPoint(HELD_BACK_LINES[2] ?? "", "Mornings are quiet", { supported: true, verified: false }), filler(1)],
+    clash: [briefPoint(HELD_BACK_LINES[0] ?? "", "I need a day to adjust", { supported: false, verified: true }), filler(2), filler(3)],
+    decideFirst: [briefPoint(HELD_BACK_LINES[1] ?? "", "Deadlines are guides", { supported: null, verified: true }), filler(4), filler(5)],
+    supportRate: 0.5,
+    supportReliable: true,
+    questionKind: "decision",
+  });
+}
+
+// Renders the consent screen on an ended meeting between Mira and Jonah, with the brief reply given.
+function renderConsentWithBrief(brief: Parameters<typeof stubRoute>[1]): void {
+  stubRoute(routes.meetings.readMeeting, meetingView({ state: "ended", questionText: QUESTION, questionKind: "decision", members: [...PREVIEW_MEMBERS] }));
+  stubRoute(routes.briefs.readBrief, brief);
+  renderScreen(<ConsentScreen />, { pattern: ROUTE_PATTERNS.consent, url: APP_PATHS.consent(IDS.meeting) });
+}
+
+describe("consent screen preview (design fix 2: the consent screen shows the excerpts it promises)", () => {
+  it("DESIGN-SHARE-T1: above the consent button the preview shows both names, the question, and only the brief lines that passed the support check with their quotes", async () => {
+    renderConsentWithBrief(briefFixture({ isAllUnsupported: false }));
+    const preview = (await screen.findByRole("heading", { level: 2, name: "What the page will show" })).closest("section");
+    if (preview === null) throw new Error("the preview is not inside a section");
+    expect(await within(preview).findByText(BACKED_LINE)).toBeTruthy();
+    expect(within(preview).getByText("Mira and Jonah")).toBeTruthy();
+    expect(within(preview).getByText(QUESTION)).toBeTruthy();
+    expect(within(preview).getByText(BACKED_QUOTE)).toBeTruthy();
+    expect(within(preview).getByRole("heading", { level: 3, name: "Where you agree" })).toBeTruthy();
+    for (const line of [...HELD_BACK_LINES, "Filler line 1"]) {
+      expect(within(preview).queryByText(line)).toBeNull();
+    }
+    expect(within(preview).getByText(/will appear too\.$/)).toBeTruthy();
+    const button = screen.getByRole("button", { name: "I consent to publish" });
+    expect(preview.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
+    expect(screen.getByText(CONSENT_EXPLAINER)).toBeTruthy();
+    expect(requestsTo(routes.briefs.readBrief)).toHaveLength(1);
+    expect(unlabelledControls(document.body)).toEqual([]);
+  });
+
+  it("DESIGN-SHARE-T2: when no line passed the support check the preview says so and the consent button stays", async () => {
+    renderConsentWithBrief(briefFixture({ isAllUnsupported: true }));
+    expect(await screen.findByRole("heading", { level: 2, name: "No brief lines to publish" })).toBeTruthy();
+    expect(screen.queryByText(BACKED_LINE)).toBeNull();
+    expect(screen.getByRole("button", { name: "I consent to publish" })).toBeTruthy();
+    expect(unlabelledControls(document.body)).toEqual([]);
+  });
+
+  it("DESIGN-SHARE-T3: a brief that cannot be read shows the server's sentence in the preview and the consent button stays", async () => {
+    renderConsentWithBrief({ status: 500, body: { code: "server_error", message: "Something went wrong on our side." } });
+    expect((await screen.findByRole("alert")).textContent).toContain("Something went wrong on our side.");
+    expect(screen.getByText("Mira and Jonah")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "I consent to publish" })).toBeTruthy();
+  });
+
+  it("DESIGN-SHARE-T4: a meeting that is not ended reads no brief and shows no preview", async () => {
+    stubRoute(routes.meetings.readMeeting, meetingView({ state: "running" }));
+    renderScreen(<ConsentScreen />, { pattern: ROUTE_PATTERNS.consent, url: APP_PATHS.consent(IDS.meeting) });
+    expect(await screen.findByText("Consent opens when both briefs are written.")).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "What the page will show" })).toBeNull();
+    expect(requestsTo(routes.briefs.readBrief)).toHaveLength(0);
+  });
+});
+
 describe("consent screen", () => {
   it("W2-SHARE-T11: the consent screen shows the explainer verbatim and the consent button before consent, the waiting status after, and the link with Copy link when published", async () => {
     stubRoute(routes.meetings.readMeeting, meetingView({ state: "ended" }));
+    stubRoute(routes.briefs.readBrief, briefFixture({ isAllUnsupported: false }));
     stubRoute(routes.briefs.consent, { consentA: true, consentB: false, published: false });
     renderScreen(<ConsentScreen />, { pattern: ROUTE_PATTERNS.consent, url: APP_PATHS.consent(IDS.meeting) });
     expect(await screen.findByText(CONSENT_EXPLAINER)).toBeTruthy();
@@ -50,6 +132,7 @@ describe("consent screen", () => {
 
   it("W2-SHARE-T11b: the consent screen shows the published line, the share link and Copy link once the page is live", async () => {
     stubRoute(routes.meetings.readMeeting, meetingView({ state: "ended" }));
+    stubRoute(routes.briefs.readBrief, briefFixture({ isAllUnsupported: false }));
     stubRoute(routes.briefs.consent, { consentA: true, consentB: true, published: true, slug: SLUG });
     renderScreen(<ConsentScreen />, { pattern: ROUTE_PATTERNS.consent, url: APP_PATHS.consent(IDS.meeting) });
     fireEvent.click(await screen.findByRole("button", { name: "I consent to publish" }));

@@ -1,0 +1,14 @@
+/* The Find help page: one problem box, where it goes, and the send button (docs/DESIGN.md). Shared parts come from app.css. */
+
+.help-form { position: relative; margin: 8px 0 0; padding: 18px 18px 20px; border: 2px solid var(--ink); border-radius: var(--radius-l); background: var(--paper); }
+.help-form label { margin-top: 0; padding-right: 44px; font: 800 20px/1.15 var(--display); letter-spacing: -0.02em; }
+.help-form textarea { width: calc(100% + 44px); margin-top: 12px; min-height: 150px; }
+.help-sticker { position: absolute; right: 14px; top: -20px; font-size: 50px; transform: rotate(10deg); }
+.help-length { margin: 10px 0 0; padding: 10px 14px; border-radius: 14px; background: var(--coral-soft); border: 2px solid var(--coral-deep); font-weight: 600; }
+.help-where { margin: 14px 0 0; padding: 12px 14px; border-radius: 16px; background: var(--green-soft); font: 500 15px/1.45 var(--sans); }
+.help-form button { width: 100%; margin-top: 16px; }
+
+@media (min-width: 900px) {
+  .help-form { padding: 24px 26px 26px; }
+  .help-form button { width: auto; }
+}
