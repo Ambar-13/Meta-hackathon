@@ -183,7 +183,7 @@ it("R10.3-T1: a first-token timeout after the client's retry fails the turn, usi
   expect(discard.count()).toBe(0);
 });
 
-it("D47-T2: the turn text joins its rounds with a blank line, using a fake speak function", async () => {
+it("W3-SPEECH-T1 (D47): a round that called a tool is left out of the turn text, using a fake speak function", async () => {
   const messages: ChatMessage[] = [
     sys,
     usr,
@@ -194,7 +194,7 @@ it("D47-T2: the turn text joins its rounds with a blank line, using a fake speak
   const outcome = await runSpeechRounds({ phase: "explore", messages, requestsMade: 1, hasDecision: false }, {
     speak: speaker.speak, runRound: fakeRound().runRound, discardRound: fakeDiscard().discardRound,
   });
-  expect(outcome).toEqual({ text: "Let me look.\n\nGoing on.", requestsMade: 2, hasDecision: false });
+  expect(outcome).toEqual({ text: "Going on.", requestsMade: 2, hasDecision: false });
 });
 
 it("D47-T1: the partial text writer writes at most every 250 ms and on flush, using a fake clock", async () => {

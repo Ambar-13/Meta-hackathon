@@ -11,7 +11,7 @@ import { assertValidHistory } from "./history-validator.js";
 import { buildVariablePart, capTurns, forbiddenTexts, initialMessages, promptCacheKey, receiptsCallArgs, speechCallArgs, type LoadedPrompt, type MeetingPrompts, type PromptClaim, type PromptTurn, type VariableInput } from "./prompt-builder.js";
 import { buildReceiptsMessages, runReceipts, type CitableTurn, type ReceiptsInput, type StoredClaim } from "./receipts.js";
 import { runRoundTransaction, type HeldStep } from "./tool-calls.js";
-import { joinTurnText, PartialTextWriter, runSpeechRounds, type RoundResult, type SpeakResult } from "./tool-loop.js";
+import { isToolRound, joinTurnText, PartialTextWriter, runSpeechRounds, type RoundResult, type SpeakResult } from "./tool-loop.js";
 import type { AssistantMessage } from "./history-validator.js";
 import { isPublicOnlyCard } from "./public-items.js";
 
@@ -138,10 +138,13 @@ async function speakOnce(scope: SpeechScope, request: { messages: ChatMessage[];
     onDelta: (slice) => writer.append(slice),
     onFirstToken: () => recordFirstToken(context.db, refOf(held), context.now()),
   });
-  await writer.flush();
+  const spoken: SpeakResult = { text: result.text ?? "", toolCalls: result.toolCalls, finishReason: result.finishReason };
+  // A round that called a tool is not part of the turn, so the words it streamed leave the screen as it ends (W3-SPEECH-T1).
+  if (isToolRound(spoken, request.tools)) await writer.discardRound();
+  else await writer.flush();
   writer.endRound();
   if (request.round === 1 && held.stepSeq <= 2) await storeMeasuredTokens(context, held, result.usage.promptTokens);
-  return { text: result.text ?? "", toolCalls: result.toolCalls, finishReason: result.finishReason };
+  return spoken;
 }
 
 // Runs one round's tool calls and keeps the step's messages in memory, so the commit sees every round.

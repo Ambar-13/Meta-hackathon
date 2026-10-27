@@ -7,7 +7,7 @@ import type { AssistantMessage, ToolMessage } from "./history-validator.js";
 export const SPEECH_REQUESTS_MAX = TOOL_ROUNDS_MAX + 1;
 // The reason recorded when a decide turn made no concede or hold call (D42).
 export const NO_DECISION_REASON = "no explicit decision";
-// The text between two rounds of one turn, on screen and in the committed turn [confirm].
+// The text between two parts of one turn's partial text, such as a resumed attempt's saved text and the new round [confirm].
 export const ROUND_TEXT_SEPARATOR = "\n\n";
 
 // One speech request's result, as the step job's speak function returns it.
@@ -47,11 +47,13 @@ export async function runSpeechRounds(state: SpeechState, deps: SpeechDeps): Pro
   return finishTurn(messages, "", { requestsMade, hasDecision });
 }
 
-// The texts of a turn so far, joined: each stored assistant text, then the current round's text.
+// The texts of a turn so far, joined: each stored assistant text of a round that called no tool, then the current round's text.
+// A round that called a tool is never part of the turn: its words were about the call, and the screen dropped them when it ended.
 export function joinTurnText(messages: readonly ChatMessage[], currentText: string): string {
   const texts: string[] = [];
   for (const message of messages.slice(2)) {
-    if (message.role === "assistant" && typeof message.content === "string" && message.content.trim() !== "") texts.push(message.content.trim());
+    const isCall = message.role === "assistant" && (message.tool_calls?.length ?? 0) > 0;
+    if (message.role === "assistant" && !isCall && typeof message.content === "string" && message.content.trim() !== "") texts.push(message.content.trim());
   }
   if (currentText.trim() !== "") texts.push(currentText.trim());
   return texts.join(ROUND_TEXT_SEPARATOR);
@@ -136,7 +138,7 @@ async function speakRound(deps: SpeechDeps, request: SpeakRequest): Promise<Spea
 }
 
 // True when the reply holds tool calls and the request offered tools, so the calls must run (D37).
-function isToolRound(result: SpeakResult, tools: ToolDefinition[] | undefined): boolean {
+export function isToolRound(result: SpeakResult, tools: ToolDefinition[] | undefined): boolean {
   return result.finishReason === "tool_calls" && tools !== undefined && result.toolCalls.length > 0;
 }
 
