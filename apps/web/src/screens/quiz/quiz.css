@@ -1,0 +1,36 @@
+/* The quiz screen: ten questions with large answer fields, the send bar, and the result.
+   Shared parts come from app-shell/app.css; only what this screen draws lives here. */
+
+.quiz-lead { margin: 0 0 22px; max-width: 42ch; color: var(--ink-2); font-weight: 500; }
+
+/* ---------- the form ---------- */
+.quiz-form fieldset { margin: 6px 0 0; padding: 0; border: 0; border-radius: 0; background: none; }
+.quiz-form legend { margin: 0 0 4px; padding: 0; }
+.quiz-questions { list-style: none; margin: 8px 0 0; padding: 0; }
+.quiz-questions > li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 4px 6px; padding: 16px 0; border-top: 1.5px solid var(--line); }
+.quiz-questions > li > b, .quiz-pairs > li > b { font: 700 13px/1.9 var(--sans); color: var(--ink-3); }
+.quiz-questions label { margin: 0; font: 700 17px/1.35 var(--sans); }
+.quiz-questions input { grid-column: 2; min-height: 56px; margin-top: 6px; }
+.quiz-questions input:disabled { border-style: dashed; border-color: var(--line-strong); background: var(--blue-soft); color: var(--ink-3); }
+.quiz-send-bar { position: sticky; z-index: 10; bottom: calc(var(--tab-bar) + 10px); display: flex; margin: 10px 0 0; padding: 10px; border-radius: 999px; background: var(--paper); box-shadow: var(--lift), 0 0 0 2px var(--ink); }
+.quiz-send-bar button { flex: 1; }
+
+/* ---------- the result ---------- */
+.quiz-score { --r: -1.2deg; margin-top: 8px; padding: 24px 22px 20px; }
+.quiz-score > .stk { position: absolute; right: 16px; top: -22px; font-size: 50px; transform: rotate(12deg); }
+.quiz-score h2 { margin: 0 0 6px; padding-right: 44px; font-size: 34px; line-height: 1.02; white-space: nowrap; }
+.quiz-score.is-rough h2 { font-size: 26px; line-height: 1.1; white-space: normal; }
+.quiz-score p { margin: 0; font-weight: 600; }
+.quiz-pairs { list-style: none; margin: 22px 0 0; padding: 0; }
+.quiz-pairs > li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 6px; padding: 16px 0; border-top: 1.5px solid var(--line); }
+.quiz-pair-question { margin: 0 0 8px; font: 700 17px/1.35 var(--sans); }
+.quiz-answer { margin: 0 0 6px; padding: 8px 12px; border-radius: 14px; box-shadow: inset 0 0 0 1.5px var(--line-strong); font-size: 15.5px; }
+.quiz-answer.is-persona { background: var(--lilac-soft); box-shadow: none; }
+.verdict { display: inline-flex; align-items: center; margin: 4px 0 0; padding: 5px 12px; border-radius: 999px; border: 1.5px dashed var(--ink); font: 700 13.5px/1.2 var(--sans); }
+.verdict.is-match { border: 0; background: var(--green); }
+
+@media (min-width: 900px) {
+  .quiz-send-bar { bottom: 18px; }
+  .quiz-score h2 { font-size: 52px; }
+  .quiz-score.is-rough h2 { font-size: 30px; }
+}

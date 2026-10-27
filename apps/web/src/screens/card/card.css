@@ -1,0 +1,88 @@
+/* The card screen: the hello tag, the item rows, the pill switches, the approve bar, the quote sheet and the Sharing section.
+   Shared parts come from app-shell/app.css; only what this screen draws lives here. */
+
+/* ---------- the hello row: the person's own tag and one line ---------- */
+.card-hello { display: flex; align-items: center; gap: 18px; margin: 0 0 18px; }
+.card-hello-tag { --s: 10px; --r: -6deg; margin: 6px 0 6px 4px; }
+.card-hello p { margin: 0; max-width: 34ch; color: var(--ink-2); font-weight: 500; }
+
+/* ---------- the approved next step: the one tilted colour panel ---------- */
+.card-next { --r: -1deg; margin-top: 8px; }
+.card-next > .stk { position: absolute; right: 16px; top: -22px; font-size: 50px; transform: rotate(10deg); }
+.card-next h2 { margin: 0 0 4px; padding-right: 48px; }
+.card-next p { margin: 0; max-width: 40ch; }
+.card-next .actions { margin: 16px 0 0; }
+
+.thin-note { margin: 0 0 14px; font-weight: 600; }
+
+/* ---------- item rows ---------- */
+.card-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.card-item { display: grid; justify-items: start; gap: 10px; padding: 16px 16px 10px; border: 2px solid var(--ink); border-radius: var(--radius); background: var(--paper); }
+.card-item.is-flagged { border-style: dashed; }
+.kind-chip { display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 999px; background: var(--k); font: 700 13.5px/1 var(--sans); color: var(--ink); }
+.card-claim { margin: 0; font: 700 19px/1.3 var(--sans); }
+.card-gloss { margin: -4px 0 0; font-size: 15px; color: var(--ink-2); }
+button.receipt-open { display: block; max-width: 100%; min-height: 44px; margin: 2px 0 4px; padding: 0; border: 0; border-radius: 16px; background: none; text-align: left; }
+.receipt-open .receipt { width: fit-content; max-width: 100%; }
+.card-item-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; width: 100%; padding-top: 6px; border-top: 1.5px solid var(--line); }
+.card-item-foot .flag { gap: 0; }
+.card-item-foot .flag .stk { margin-right: 6px; }
+.quote-checked { display: inline-flex; align-items: center; gap: 6px; font: 600 13.5px/1.2 var(--sans); color: var(--ink-2); }
+.quote-checked .stk { font-size: 18px; }
+.use-box { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; margin: 0; font: 600 15px/1.2 var(--sans); cursor: pointer; }
+.use-box:has(input:disabled) { color: var(--ink-3); cursor: not-allowed; }
+.in-card { display: inline-flex; align-items: center; min-height: 44px; font: 600 14px/1.2 var(--sans); color: var(--ink-2); }
+
+/* ---------- the pill switch: a drawn pill over the native checkbox ---------- */
+.switch-row { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 56px; gap: 16px; align-items: start; margin: 0; padding: 14px 0; font: 500 15.5px/1.45 var(--sans); cursor: pointer; }
+.switch-row > input { position: absolute; z-index: 1; top: 9px; right: 0; width: 56px; height: 44px; margin: 0; opacity: 0; cursor: pointer; }
+.switch-text { grid-column: 1; grid-row: 1; }
+.pill-switch { grid-column: 2; grid-row: 1; position: relative; width: 56px; height: 34px; border: 2px solid var(--ink); border-radius: 999px; background: var(--paper); transition: background-color 0.2s var(--ease); }
+.pill-switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); transition: transform 0.2s var(--ease); }
+.switch-row > input:checked + .pill-switch { background: var(--blue); }
+.switch-row > input:checked + .pill-switch::after { transform: translateX(22px); background: var(--paper); box-shadow: 0 0 0 2px var(--ink); }
+.switch-row > input:focus-visible + .pill-switch { outline: 3px solid var(--blue-deep); outline-offset: 3px; }
+.switch-row:has(> input:disabled) { color: var(--ink-3); cursor: not-allowed; }
+.switch-row > input:disabled { cursor: not-allowed; }
+.switch-row > input:disabled + .pill-switch { opacity: 0.4; }
+.recall { margin: 18px 0 0; padding: 2px 16px; border-radius: var(--radius); background: var(--blue-soft); }
+
+/* ---------- the approve bar: stays in view above the tab bar until the card is approved ---------- */
+.approve-bar { position: sticky; z-index: 10; bottom: calc(var(--tab-bar) + 10px); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 14px;
+  margin: 18px 0 0; padding: 10px 10px 10px 18px; border-radius: 26px; background: var(--paper); box-shadow: var(--lift), 0 0 0 2px var(--ink); }
+.approve-hint { flex: 1 1 14ch; margin: 0; font: 600 14.5px/1.3 var(--sans); color: var(--ink-2); }
+.approve-bar button { flex: 1 0 auto; }
+
+/* ---------- the quote sheet: over the page, from the bottom on a phone ---------- */
+.quote-sheet-ground { position: fixed; z-index: 40; inset: 0; display: flex; align-items: flex-end; justify-content: center; padding: 16px; background: var(--line-strong); }
+.quote-sheet { width: 100%; max-width: 560px; max-height: 80vh; margin: 0; overflow: auto; border-radius: var(--radius-l); box-shadow: var(--lift); }
+.source-message { margin: 10px 0; padding: 12px 14px; border-radius: 16px; background: var(--blue-soft); font-size: 16px; }
+.source-message mark { padding: 1px 3px; border-radius: 5px; background: var(--yellow); color: var(--ink); font-weight: 600; }
+
+/* ---------- the Sharing section ---------- */
+.sharing { margin-top: 26px; }
+.sharing-head { display: flex; align-items: center; gap: 10px; }
+.sharing-head h2 { margin: 0; }
+.sharing-head .stk { font-size: 34px; transform: rotate(8deg); }
+.sharing-lead { margin: 4px 0 6px; }
+.sharing .switch-row { border-top: 1.5px solid var(--line); }
+.public-items { margin: 4px 0 10px; padding: 14px 0 0; border: 0; border-top: 1.5px solid var(--line); border-radius: 0; background: none; }
+.public-items legend { float: left; width: 100%; margin: 0 0 8px; padding: 0; font: 700 15.5px/1.3 var(--sans); letter-spacing: 0; }
+.public-item { display: flex; align-items: center; gap: 12px; min-height: 48px; margin: 0 0 8px; padding: 6px 14px; border-radius: 16px; background: var(--green-soft); font: 600 15px/1.3 var(--sans); cursor: pointer; }
+.public-item:has(input:checked) { box-shadow: inset 0 0 0 2px var(--ink); }
+.listing-line { margin: 0 0 4px; padding: 0 0 6px; font-weight: 600; }
+.listing-line:has(input:disabled) { color: var(--ink-3); }
+.listing-line input:disabled { border-style: dashed; border-color: var(--line-strong); color: var(--ink-3); }
+.dating-note { margin: -6px 0 6px; padding: 8px 12px; border-radius: 14px; background: var(--yellow-soft); font: 600 14px/1.35 var(--sans); }
+.other-card { font-weight: 600; }
+.sharing-actions { margin: 18px 0 6px; }
+.save-line { margin: 8px 0 0; font-weight: 700; }
+.save-line.is-refused { padding: 10px 14px; border-radius: 16px; background: var(--coral-soft); }
+
+/* ---------- laptop ---------- */
+@media (min-width: 900px) {
+  .card-hello-tag { --s: 12px; }
+  .approve-bar { bottom: 18px; }
+  .approve-bar button { flex: 0 0 auto; }
+  .quote-sheet-ground { align-items: center; }
+}
