@@ -33,11 +33,26 @@ function curatedText(questionId: number): string {
   return question.text;
 }
 
-// The items B makes public: the item the help search must find, and the first others in position order, three in all.
-function publicItemsOf(items: readonly CardItem[]): CardItem[] {
+// The words of a text, lower case, four letters or more, so short common words do not count as a match.
+function matchWordsOf(text: string): Set<string> {
+  return new Set(text.toLowerCase().split(/[^a-z0-9]+/).filter((word) => word.length >= 4));
+}
+
+// The shareable item a live model's card offers for the help search: the one sharing the most words with the help question, the
+// lowest position on a tie. The recorded replies quote HELP_ITEM_WORDS; a live card words B's notes its own way.
+function closestHelpItem(shareable: readonly CardItem[]): CardItem | undefined {
+  const asked = matchWordsOf(HELP_ASK_TEXT);
+  const scored = shareable.map((item) => ({ item, shared: [...matchWordsOf(`${item.claim} ${item.quote}`)].filter((word) => asked.has(word)).length }));
+  const best = scored.filter((entry) => entry.shared > 0).sort((first, second) => second.shared - first.shared || first.item.position - second.item.position)[0];
+  return best?.item;
+}
+
+// The items B makes public: the item the help search must find, and the first others in position order, three in all. Under --mock the
+// help item is the recorded one that quotes HELP_ITEM_WORDS; on a live run it is the item closest to the help question.
+function publicItemsOf(items: readonly CardItem[], mode: RunState["options"]["mode"]): CardItem[] {
   const shareable = items.filter((item) => item.approved && item.verified && !item.sensitive);
-  const helpItem = shareable.find((item) => item.quote.includes(HELP_ITEM_WORDS));
-  if (helpItem === undefined) throw new StepFailure(`help_item_missing: no shareable item of B quotes "${HELP_ITEM_WORDS}", and the help step needs it public.`);
+  const helpItem = shareable.find((item) => item.quote.includes(HELP_ITEM_WORDS)) ?? (mode === "mock" ? undefined : closestHelpItem(shareable));
+  if (helpItem === undefined) throw new StepFailure(`help_item_missing: no shareable item of B quotes "${HELP_ITEM_WORDS}" or shares a word with the help question, and the help step needs it public.`);
   const others = shareable.filter((item) => item !== helpItem).slice(0, PUBLIC_ITEM_COUNT - 1);
   return [...others, helpItem].sort((first, second) => first.position - second.position);
 }
@@ -46,7 +61,7 @@ function publicItemsOf(items: readonly CardItem[]): CardItem[] {
 export async function step16Sharing(run: RunState): Promise<StepResult> {
   const cardB = need(run.ids.cardB, "cardB");
   const view = await readCardView(run.b, cardB);
-  const shared = publicItemsOf(view.items);
+  const shared = publicItemsOf(view.items, run.options.mode);
   const positions = shared.map((item) => item.position);
   const sharingPath = routePath(routes.directory.updateSharing.path, { id: cardB });
   const before = await run.b.json({ method: "GET", path: sharingPath, expect: 200, schema: routes.directory.readSharing.response });
