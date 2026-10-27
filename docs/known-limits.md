@@ -42,5 +42,6 @@ An anonymous session cannot be recovered once device and recovery code are both 
 - trustProxy is 1, which assumes one proxy hop in front of the api on Render; the setting lives in `apps/api/src/server.ts`.
 - A URL password longer than 1,024 characters is caught only by the entropy rule; the limit lives in `packages/scrub/src/secret-patterns.ts`.
 - A secret value of 1 to 3 characters after a name such as PASSWORD= stays visible, because the scrubber hides values of 4 or more; the rule lives in `packages/scrub/src/secret-patterns.ts`.
-- Every recorded model reply is hand-written until Wave 3 records them; the fixtures live in `packages/evals/fixtures/model-replies`.
+- A recording in `packages/evals/fixtures/model-replies` answers only its exact request, so a change to a prompt, a card or the golden path's choices makes replay miss. Record again after one: `pnpm golden-path --record` on a fresh database, then the eval's replay pair on its own.
+- The golden path's quiz is never recorded for replay. A judged quiz cannot be replayed, and its misses would change A's meeting prompt.
 - The api's environment holds the app_migrate URL, because Render gives the pre-deploy migrate the service's own variables; a one-off migrate job of its own would take it out of the api (render.yaml).

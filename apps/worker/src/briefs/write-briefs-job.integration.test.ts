@@ -5,7 +5,7 @@ import { BriefPoint, JOB_MAX_ATTEMPTS, type BriefSupportJudgeOutput } from "@mee
 import { makeDatabase, POOL_SIZE, withMeeting, type Database } from "@meet-first/db";
 import { freshTestDatabase, SEED_TURNS_B, type SeededMeeting, type TestDatabase } from "@meet-first/db/testing";
 import { CHAT_MODEL, LimiterBusy, makeLlmClient, type LlmClient } from "@meet-first/llm";
-import { makeReplayFolder, testWorkerEnv } from "@meet-first/llm/testing";
+import { makeReplayFolder, SCRIPTED_REPLIES_DIR, testWorkerEnv } from "@meet-first/llm/testing";
 import { readPrompt } from "@meet-first/prompts";
 import { definePayloadTask } from "../job-context.js";
 import { makeTestJobContext } from "../testing/index.js";
@@ -63,9 +63,9 @@ function isSideBJudge(args: { callSite: string; messages: Array<{ content: strin
   return args.callSite === "brief_support_judge" && (args.messages[1]?.content ?? "").includes(`<quote>"${SIDE_B_FIRST_QUOTE}"</quote>`);
 }
 
-// A replay client over the repository fixtures, or over a given fixture folder.
-function replayClient(fixtureRoot?: string): LlmClient {
-  return makeLlmClient({ db: workerDb, env: testWorkerEnv("replay"), now: () => NOW, sleep: () => Promise.resolve(), random: () => 0.5, ...(fixtureRoot === undefined ? {} : { fixtureRoot }) });
+// A replay client over the scripted replies, or over a given fixture folder.
+function replayClient(fixtureRoot = SCRIPTED_REPLIES_DIR): LlmClient {
+  return makeLlmClient({ db: workerDb, env: testWorkerEnv("replay"), now: () => NOW, sleep: () => Promise.resolve(), random: () => 0.5, fixtureRoot });
 }
 
 // The judge verdicts of one brief with one line changed: index 6 unsupported, index 0 supported.

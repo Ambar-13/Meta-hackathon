@@ -179,6 +179,15 @@ describe("repo checks", () => {
     expect(run.output).toContain("docs/extra.md");
   }, TEST_TIMEOUT_MS);
 
+  it("W3-CHECKS-T1 (D74): pnpm checks reads no recorded model reply, so an em dash the model wrote does not fail it", () => {
+    const run = runChecks({
+      files: { "packages/evals/fixtures/model-replies/speech/0a1b.json": `{"response": "A reply as the model wrote it ${EM_DASH} kept as received."}\n` },
+    });
+
+    expect(run.output).not.toContain("em dash");
+    expect(run.status).toBe(0);
+  }, TEST_TIMEOUT_MS);
+
   it("W2-DEPLOY-T9: pnpm checks fails on a file named utils.ts and a folder named helpers", () => {
     const run = runChecks({
       files: {

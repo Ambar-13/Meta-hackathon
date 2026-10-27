@@ -3,7 +3,7 @@ import type { Kysely } from "kysely";
 import { ContractError, type Enqueue, JobPayloads, type JobName } from "@meet-first/contracts";
 import type { Database } from "@meet-first/db";
 import { makeLlmClient, type LiveCaller } from "@meet-first/llm";
-import { testWorkerEnv } from "@meet-first/llm/testing";
+import { SCRIPTED_REPLIES_DIR, testWorkerEnv } from "@meet-first/llm/testing";
 import type { JobContext, JobTask } from "../job-context.js";
 import { TASKS } from "../runner.js";
 
@@ -18,7 +18,7 @@ export async function runJobOnce(context: JobContext, name: JobName, payload: un
   await task(parsed, context);
 }
 
-// A job context for tests: the real client over the repository fixtures, a recording enqueue, a silent log. With live, the mode is live and the live caller is that fake.
+// A job context for tests: the real client over the scripted replies, a recording enqueue, a silent log. With live, the mode is live and the live caller is that fake.
 export function makeTestJobContext(options: { db: Kysely<Database>; now?: () => Date; live?: LiveCaller; timeoutSignal?: (ms: number) => AbortSignal }): { context: JobContext; enqueued: EnqueuedJob[] } {
   const env = testWorkerEnv(options.live === undefined ? "replay" : "live");
   const now = options.now ?? (() => new Date());
@@ -28,6 +28,7 @@ export function makeTestJobContext(options: { db: Kysely<Database>; now?: () => 
     now,
     sleep: () => Promise.resolve(),
     random: () => 0.5,
+    fixtureRoot: SCRIPTED_REPLIES_DIR,
     ...(options.live === undefined ? {} : { live: options.live }),
     ...(options.timeoutSignal === undefined ? {} : { timeoutSignal: options.timeoutSignal }),
   });

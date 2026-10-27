@@ -1,8 +1,8 @@
 // The command-line flags of the golden path, the run options they make, the usage text, and the step selection for --until.
 import { ExitError } from "./report.js";
 
-// Which worker mode the run expects: live, replay (mock), or neither (no ledger assertion).
-export type RunMode = "live" | "mock" | "none";
+// Which worker mode the run expects: live, replay (mock), record, or neither (no ledger assertion).
+export type RunMode = "live" | "mock" | "record" | "none";
 // The run options the flags make.
 export type RunOptions = { base: string; until: string | undefined; mode: RunMode; reportPath: string };
 // The step names in order, as --until takes them. Steps 9 and 10 stay in the list, because they are removed steps that keep their numbers.
@@ -18,11 +18,12 @@ export type StepSlot = { number: number; name: string };
 // The usage text that --help and a bad flag print.
 export function usageText(): string {
   return [
-    "usage: pnpm golden-path [--base <url>] [--until <step>] [--live | --mock] [--report <path>]",
+    "usage: pnpm golden-path [--base <url>] [--until <step>] [--live | --mock | --record] [--report <path>]",
     `  --base    the origin to drive (default ${DEFAULT_BASE})`,
     `  --until   run the steps before this one, not the named one (${STEP_NAMES.join(", ")})`,
     "  --live    the worker runs in live mode; the ledger must say live",
     "  --mock    the worker runs in replay mode over the recorded fixtures; the ledger must say replay",
+    "  --record  the worker runs in record mode; the ledger must say record; the quiz is skipped as under --mock, so the recording replays",
     "  --report  where the JSON report goes (default docs/evidence/golden-path/<time>.json)",
   ].join("\n");
 }
@@ -39,7 +40,7 @@ export function selectSteps(until: string | undefined): StepSlot[] {
 // The flags that take a value after them.
 const VALUE_FLAGS = new Set(["--base", "--until", "--report"]);
 // The flags that stand alone.
-const SWITCH_FLAGS = new Set(["--live", "--mock"]);
+const SWITCH_FLAGS = new Set(["--live", "--mock", "--record"]);
 
 // Reads the flags into a map. Values are strings and switches are "true". A flag it does not know, or a value flag with no value, exits 2.
 function readArguments(argv: readonly string[]): Map<string, string> {
@@ -60,13 +61,13 @@ function readArguments(argv: readonly string[]): Map<string, string> {
   return values;
 }
 
-// The mode the switches ask for. Both switches at once exit 2.
+// The mode the switches ask for. More than one switch at once exits 2.
 function modeOf(values: ReadonlyMap<string, string>): RunMode {
-  const isLive = values.has("--live");
-  const isMock = values.has("--mock");
-  if (isLive && isMock) throw new ExitError(2, "golden_path_flags_conflict: pass one of --live or --mock.");
-  if (isLive) return "live";
-  return isMock ? "mock" : "none";
+  const chosen = (["--live", "--mock", "--record"] as const).filter((flag) => values.has(flag));
+  if (chosen.length > 1) throw new ExitError(2, "golden_path_flags_conflict: pass one of --live, --mock or --record.");
+  if (chosen[0] === "--live") return "live";
+  if (chosen[0] === "--mock") return "mock";
+  return chosen[0] === "--record" ? "record" : "none";
 }
 
 // Turns the command line into the run options. A bad flag, an unknown step or both --live and --mock exits 2.

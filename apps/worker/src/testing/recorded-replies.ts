@@ -1,11 +1,11 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { ContractError, type CallSite, RecordedCall } from "@meet-first/contracts";
+import { SCRIPTED_REPLIES_DIR } from "@meet-first/llm/testing";
 
-// The repository path of one fixture file.
+// The path of one scripted reply a test replays. Tests read the scripted replies, never the recordings of the real model.
 export function recordedReplyPath(callSite: CallSite, requestHash: string): string {
-  return join(fileURLToPath(new URL("../../../../packages/evals/fixtures/model-replies", import.meta.url)), callSite, `${requestHash}.json`);
+  return join(SCRIPTED_REPLIES_DIR, callSite, `${requestHash}.json`);
 }
 
 // Reads one fixture and parses it with RecordedCall; a missing file throws replay_fixture_missing with the modes.ts sentence.

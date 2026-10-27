@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { makeDatabase } from "@meet-first/db";
 import { parseFlags, selectSteps } from "./flags.js";
 import { placeholderCountQuery } from "./database-reads.js";
+import type { RunState } from "./report.js";
+import { step05Quiz } from "./steps-quiz-approve-pair.js";
 
 // Runs a function and returns the error it threw, or undefined when it did not throw.
 function catchError(run: () => unknown): Error | undefined {
@@ -31,6 +33,18 @@ describe("golden path flags", () => {
     const caught = catchError(() => parseFlags(["--live", "--mock"]));
     expect(caught).toMatchObject({ exitCode: 2 });
     expect(caught?.message).toMatch(/^golden_path_flags_conflict/);
+  });
+
+  it("golden-path-T4 (wave 3 section 4.4): --record runs in record mode, and --record with --mock exits 2", () => {
+    expect(parseFlags(["--record"]).mode).toBe("record");
+    const caught = catchError(() => parseFlags(["--record", "--mock"]));
+    expect(caught).toMatchObject({ exitCode: 2 });
+    expect(caught?.message).toMatch(/^golden_path_flags_conflict/);
+  });
+
+  it("golden-path-T5 (wave 3 section 4.4): the quiz is not exercised under --record, so the recording follows the --mock path", async () => {
+    const result = await step05Quiz({ options: { mode: "record" } } as RunState);
+    expect(result).toMatchObject({ number: 5, result: "not-exercised" });
   });
 });
 
