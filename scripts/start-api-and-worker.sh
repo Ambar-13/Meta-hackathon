@@ -32,7 +32,7 @@ pnpm -w db:migrate
 
 (cd apps/api && as_user meet-api env -u META_API_KEY -u DATABASE_URL_MIGRATE -u DATABASE_URL_WORKER node --import tsx src/server.ts) &
 api=$!
-(cd apps/worker && as_user meet-worker env -u DATABASE_URL_MIGRATE -u DATABASE_URL_API node --import tsx src/runner.ts) &
+(cd apps/worker && as_user meet-worker env -u DATABASE_URL_MIGRATE -u DATABASE_URL_API -u ACCESS_CODE node --import tsx src/runner.ts) &
 worker=$!
 
 signalled=0

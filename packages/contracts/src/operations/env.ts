@@ -8,6 +8,9 @@ export const apiEnv = z.object({ ...base,
   APP_ORIGIN: z.string().url(),
   PORT: z.coerce.number().int().default(3000),
   MAX_CONCURRENT_MEETINGS: z.coerce.number().int().default(40),
+  // The code a person gives to sign up, or empty for open sign-up. The deployed site sets one, so a script cannot make accounts
+  // and spend the model budget through them (R9.5).
+  ACCESS_CODE: z.string().trim().default(""),
 });
 // The variables apps/worker reads at boot. Production refuses LLM_MODE=replay (D74).
 export const workerEnv = z.object({ ...base,

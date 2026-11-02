@@ -3,6 +3,7 @@ import type { ReactElement } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ErrorNotice, lobbyPathWithCard, readApprovedCard, readCardQuery, ScreenFrame, CopyButton } from "../../app-shell/index.js";
 import { LoadingLine, NameTag } from "../../look/index.js";
+import { readAccessCode, withAccessCode } from "../welcome/index.js";
 import { qrPathFor, useCreatePair } from "./pair-state.js";
 
 // Two name tags side by side: yours in coral and an empty one in blue for the person you invite.
@@ -50,9 +51,11 @@ export const PairScreen = (): ReactElement => {
   );
 };
 
-// The invite on a white card: the QR code, a read-only link with a copy action, and the way to the lobby.
+// The invite on a white card: the QR code, a read-only link with a copy action, and the way to the lobby. The link carries
+// this browser's access code, so the friend who opens it never types it (R9.5).
 const InviteView = (props: { inviteUrl: string; pairId: string; cardId: string | null }): ReactElement => {
-  const { path, size } = qrPathFor(props.inviteUrl);
+  const link = withAccessCode(props.inviteUrl, readAccessCode());
+  const { path, size } = qrPathFor(link);
   return (
     <section className="panel invite-card" aria-label="Your invite">
       <div className="qr invite-qr">
@@ -64,14 +67,14 @@ const InviteView = (props: { inviteUrl: string; pairId: string; cardId: string |
       <div className="invite-body">
         <label>
           Invite link
-          <input type="text" readOnly value={props.inviteUrl} />
+          <input type="text" readOnly value={link} />
         </label>
         <p className="muted">The invite works once, for 24 hours.</p>
         <div className="actions">
           <Link className="btn" to={lobbyPathWithCard(props.pairId, props.cardId)}>
             Go to the lobby
           </Link>
-          <CopyButton text={props.inviteUrl} label="Copy link" />
+          <CopyButton text={link} label="Copy link" />
         </div>
       </div>
     </section>

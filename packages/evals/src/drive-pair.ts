@@ -109,9 +109,15 @@ function parseReply<T>(schema: ZodType<T, ZodTypeDef, unknown>, text: string, pa
   return parsed.data;
 }
 
+// The sign-up body for one display name, with the access code when the site asks for one (ACCESS_CODE in the shell, R9.5).
+function signUpBody(displayName: string): { displayName: string; accessCode?: string } {
+  const accessCode = (process.env.ACCESS_CODE ?? "").trim();
+  return accessCode === "" ? { displayName } : { displayName, accessCode };
+}
+
 // Makes one person, uploads their source, freezes the names, builds and approves their card. Returns the ids.
 async function prepareSide(client: PersonHttp, fixture: PersonFixture, options: { displayName: string; recallAllowed: boolean }) {
-  const created = await client.call({ method: "POST", path: routes.people.createPerson.path, expect: 201, schema: PersonCreateResponse, body: { displayName: options.displayName } });
+  const created = await client.call({ method: "POST", path: routes.people.createPerson.path, expect: 201, schema: PersonCreateResponse, body: signUpBody(options.displayName) });
   const body = await buildSourceBody(fixture);
   const upload = await client.upload(body.gzip, fixture.name);
   const sourceId = upload.sourceId;

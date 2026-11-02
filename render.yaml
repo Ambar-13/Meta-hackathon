@@ -27,14 +27,16 @@ services:
         sync: false          # https://<service>.onrender.com until a domain exists (A7)
       - key: META_API_KEY
         sync: false          # the worker process only; the start script keeps it out of the api (ARCHITECTURE.md 8)
+      - key: ACCESS_CODE
+        sync: false          # sign-up needs this code, so scripts cannot make accounts and spend the model budget (R9.5); the api process only
       - key: META_API_BASE_URL
         value: https://api.meta.ai/v1   # ARCHITECTURE.md 2
       - key: LLM_MODE
         value: live          # D74: production refuses replay
       - key: DAILY_USD_CAP
-        value: "40"          # D60
+        value: "15"          # D60, lowered on 2 Nov 2026 so a leaked access code cannot spend a day's credit fast
       - key: TOTAL_USD_CAP
-        value: "130"         # D60
+        value: "60"          # D60, lowered on 2 Nov 2026: the site can spend at most $60 of the Meta credit in all
       - key: MAX_CONCURRENT_MEETINGS
         value: "5"           # D57, lowered: both processes share 512 MB, and one meeting took them to 368 MB together (28 Oct)
       - key: LOG_LEVEL

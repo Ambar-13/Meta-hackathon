@@ -24,9 +24,40 @@ describe("welcome screens", () => {
     expect(screen.queryByLabelText("Your display name")).toBeNull();
   });
 
-  it("W5-AGE-T1: the start page says Meet First is for adults", () => {
+  it("W5-AGE-T2: the start page and its footer no longer say Meet First is for adults or 18 and over (Ambar, 2 Nov 2026)", () => {
     renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/" });
-    expect(screen.getByText("Meet First is for adults, 18 and over.")).toBeTruthy();
+    expect(screen.queryByText(/for adults|18 and over/i)).toBeNull();
+  });
+
+  it("R9.5-T5: when the server asks for an access code, the form shows the field, and the next try sends the code", async () => {
+    stubRoute(routes.people.createPerson, [
+      { status: 403, body: { code: "access_code_needed", message: "Meet First is invite-only for now. Enter the access code you were given." } },
+      { status: 201, body: personCreated() },
+    ]);
+    renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/" });
+    expect(screen.queryByLabelText("Access code")).toBeNull();
+    fireEvent.change(screen.getByLabelText("Your display name"), { target: { value: "A" } });
+    fireEvent.click(screen.getByRole("button", { name: "Create my profile" }));
+
+    const field = await screen.findByLabelText("Access code");
+    expect(screen.getByText("Meet First is invite-only for now. Enter the access code you were given.")).toBeTruthy();
+    fireEvent.change(field, { target: { value: "judges" } });
+    fireEvent.click(screen.getByRole("button", { name: "Create my profile" }));
+
+    expect(await screen.findByText(RECOVERY_CODE)).toBeTruthy();
+    expect(requestsTo(routes.people.createPerson).map((request) => request.body)).toEqual([{ displayName: "A" }, { displayName: "A", accessCode: "judges" }]);
+  });
+
+  it("R9.5-T6: a link with ?access= fills the access code, and the sign-up sends it", async () => {
+    stubRoute(routes.people.createPerson, { status: 201, body: personCreated() });
+    renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/?access=judges" });
+    const field = screen.getByLabelText("Access code");
+    expect(field instanceof HTMLInputElement ? field.value : "").toBe("judges");
+    fireEvent.change(screen.getByLabelText("Your display name"), { target: { value: "A" } });
+    fireEvent.click(screen.getByRole("button", { name: "Create my profile" }));
+
+    expect(await screen.findByText(RECOVERY_CODE)).toBeTruthy();
+    expect(requestsTo(routes.people.createPerson).map((request) => request.body)).toEqual([{ displayName: "A", accessCode: "judges" }]);
   });
 
   it("A5-T2: continuing opens the upload page and the code is gone for good", async () => {

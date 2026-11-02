@@ -1,7 +1,12 @@
-import { useEffect, type FormEvent, type ReactElement } from "react";
+import { useEffect, useState, type FormEvent, type ReactElement } from "react";
+import { useLocation } from "react-router-dom";
 import { ErrorNotice, CopyButton } from "../../app-shell/index.js";
 import { Sticker } from "../../look/index.js";
+import { accessCodeIn } from "./access-code.js";
 import { useCreatePerson, useRecover } from "./welcome-state.js";
+
+// The server's two codes for a sign-up the site's access code stops (R9.5).
+const ACCESS_CODE_REFUSALS: readonly string[] = ["access_code_needed", "access_code_wrong"];
 
 // The recovery code, shown once, with a copy action and the save sentence (A5).
 export const RecoveryCodePanel = (props: { code: string; onContinue: () => void }): ReactElement => {
@@ -39,9 +44,16 @@ const GroupsField = (): ReactElement => {
 };
 
 // The create-profile form, drawn as a blank name tag you write your name on; after creating it shows the recovery code once,
-// and onDone runs when the person continues (A5).
+// and onDone runs when the person continues (A5). The access code field appears only when the link carried a code or the server
+// asked for one, so a site without a code shows no extra field (R9.5).
 export const WelcomeForm = (props: { onDone: () => void }): ReactElement => {
   const { state, create, forgetCode } = useCreatePerson();
+  const linkCode = accessCodeIn(useLocation().search);
+  const isAskedForCode = state.kind === "failed" && ACCESS_CODE_REFUSALS.includes(state.error.code);
+  const [isCodeShown, setIsCodeShown] = useState(linkCode !== "");
+  useEffect(() => {
+    if (isAskedForCode) setIsCodeShown(true);
+  }, [isAskedForCode]);
   if (state.kind === "created") {
     const recoveryCode = state.recoveryCode;
     return (
@@ -58,7 +70,7 @@ export const WelcomeForm = (props: { onDone: () => void }): ReactElement => {
   const onSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    void create(String(form.get("displayName") ?? ""), String(form.get("groups") ?? ""));
+    void create(String(form.get("displayName") ?? ""), String(form.get("groups") ?? ""), String(form.get("accessCode") ?? ""));
   };
   return (
     <form className="wl-signup" onSubmit={onSubmit}>
@@ -72,6 +84,12 @@ export const WelcomeForm = (props: { onDone: () => void }): ReactElement => {
         </label>
         <input id="display-name" className="wl-write" type="text" name="displayName" maxLength={80} required autoComplete="off" placeholder="write it here" />
       </div>
+      {isCodeShown ? (
+        <label className="wl-access">
+          Access code
+          <input type="text" name="accessCode" defaultValue={linkCode} maxLength={100} autoComplete="off" />
+        </label>
+      ) : null}
       <button type="submit" className="big" disabled={isSending}>
         Create my profile
       </button>
