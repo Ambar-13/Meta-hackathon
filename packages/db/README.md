@@ -56,4 +56,4 @@ The .env needs DATABASE_URL_MIGRATE, DATABASE_URL_API, DATABASE_URL_WORKER, DATA
 
 Migrations 0003 onward arrive only through requests/.
 
-For Render, put three lines in `.env.render` at the repository root: RENDER_DB_EXTERNAL_URL and RENDER_DB_INTERNAL_URL, the External and Internal Database URLs on the database's Info page, and APP_ORIGIN, the api service's address. Then run `pnpm db:render-roles`. It writes `.env.render-api` and `.env.render-worker` to paste into the two services, and `.env.wave3` for `scripts/check-wave-3.sh`. A second run gives the three login roles new passwords and writes the files again.
+For Render, put three lines in `.env.render` at the repository root: RENDER_DB_EXTERNAL_URL and RENDER_DB_INTERNAL_URL, the External and Internal Database URLs on the database's Info page, and APP_ORIGIN, the api service's address. Then run `pnpm db:render-roles`. It writes `.env.render-api` and `.env.render-worker`, both to paste into the one Render service, and `.env.wave3` for `scripts/check-wave-3.sh`. A second run gives the three login roles new passwords and writes the files again.

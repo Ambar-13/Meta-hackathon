@@ -11,6 +11,7 @@ import { afterEach, describe, expect, it } from "vitest";
 const RELEASE_SCRIPT = join(import.meta.dirname, "..", "..", "scripts", "release.sh");
 const HOOK_API = "https://hooks.test/api?key=api-key";
 const HOOK_WORKER = "https://hooks.test/worker?key=worker-key";
+const HOOK_ONE = "https://hooks.test/one?key=one-key";
 const ORIGIN = "https://app.test";
 // Everything a full run needs; the waits between health reads are 0 s here.
 const FULL_ENV = { RENDER_DEPLOY_HOOK_API: HOOK_API, RENDER_DEPLOY_HOOK_WORKER: HOOK_WORKER, APP_ORIGIN: ORIGIN, RELEASE_WAIT_SECONDS: "0" };
@@ -221,5 +222,21 @@ describe("release script", () => {
     expect(noMigrations.status).toBe(2);
     expect(noMigrations.stderr).toContain("release_schema_unknown");
     expect(curlLog(fixture)).toBe("");
+  });
+
+  it("W3-DEPLOY-T9 (D70): with RENDER_DEPLOY_HOOK set for the one service, release.sh calls that hook once with the tag's commit and nothing else", () => {
+    const fixture = makeFixture();
+    commitFile(fixture.repo, FIRST_MIGRATION);
+    git(fixture.repo, ["push", "-q", "origin", "main:release"]);
+    git(fixture.repo, ["tag", "-a", "v1.0.0", "-m", "Release v1.0.0"]);
+
+    const result = runRelease(fixture, ["v1.0.0"], { RENDER_DEPLOY_HOOK: HOOK_ONE });
+
+    expect(result.status).toBe(0);
+    const commit = gitOutput(fixture.repo, ["rev-parse", "v1.0.0^{commit}"]);
+    // The one service's start script migrates before either process starts, so no health read sits between hooks.
+    const lines = curlLog(fixture).trim().split("\n");
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toContain(`${HOOK_ONE}&ref=${commit}`);
   });
 });

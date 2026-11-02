@@ -1,46 +1,31 @@
-# D70: two production services plus Postgres, auto-deploy off, deploys only through the hooks that scripts/release.sh calls with the commit of a tag.
-# Plan IDs and prices are Render's on 2026-10-28 (render.com/docs/blueprint-spec, render.com/pricing); the sizes are the Wave 0 defaults.
+# D70 as amended on 2 Nov 2026: one web service runs the api and the worker (scripts/start-api-and-worker.sh) beside Postgres,
+# on Render's free plans, because Render has no free background worker. Auto-deploy is off; scripts/release.sh deploys the commit
+# of a tag on the release branch through the service's one deploy hook. Limits are Render's on 2026-10-28 (render.com/docs/free,
+# render.com/docs/blueprint-spec): a free web service sleeps after 15 minutes with no visits and has no pre-deploy command, so the
+# start script migrates; the free database holds 1 GB and expires 30 days after it is made. Two paid services: see git history.
 services:
   - type: web
-    name: meet-first-api
+    name: meet-first
     runtime: docker
-    plan: 0.5c-512mb         # 0.5 CPU, 512 MB, $7 a month, a paid instance (ARCHITECTURE.md 9) [confirm]
+    plan: free               # 0.1 CPU, 512 MB; 0.5c-512mb ($7 a month) never sleeps and has 0.5 CPU [confirm]
     region: singapore        # ARCHITECTURE.md 12: availability and latency to api.meta.ai are unverified [confirm]
-    dockerfilePath: ./Dockerfile.api
+    dockerfilePath: ./Dockerfile.api   # the api image holds the whole workspace, the worker's code included
     dockerContext: .
+    dockerCommand: bash /app/scripts/start-api-and-worker.sh   # migrations, then the api and the worker (D71)
     autoDeployTrigger: "off"   # D70, R12.3
-    preDeployCommand: pnpm -w db:migrate   # D71, R12.1: only the api migrates, under pg_advisory_lock(42). -w runs the root script:
-                                           # the image's working directory is apps/api, where pnpm 9.12 finds no db:migrate
     healthCheckPath: /api/health        # R12.5
     maxShutdownDelaySeconds: 150        # D70, R12.4: SIGTERM waits long enough to drain a 120 s model call
     envVars:
       - key: DATABASE_URL_MIGRATE
-        sync: false          # the app_migrate URL from pnpm db:render-roles, never the database owner's: migrations run as app_migrate (as-built item 9),
-                             # and Render gives the pre-deploy command the service's variables, so whatever is here is also in the api's environment
+        sync: false          # from pnpm db:render-roles; the start script gives it to the migrate step only (as-built item 9)
       - key: DATABASE_URL_API
-        sync: false          # same host and database, role app_api; pnpm db:render-roles makes the role and writes this URL
+        sync: false          # role app_api; the api process only
+      - key: DATABASE_URL_WORKER
+        sync: false          # role app_worker; the worker process only
       - key: APP_ORIGIN
         sync: false          # https://<service>.onrender.com until a domain exists (A7)
-      - key: MAX_CONCURRENT_MEETINGS
-        value: "40"          # D57
-      - key: LOG_LEVEL
-        value: info
-      - key: NODE_ENV
-        value: production
-  - type: worker
-    name: meet-first-worker
-    runtime: docker
-    plan: 0.5c-512mb         # always on (ARCHITECTURE.md 2); 0.5 CPU, 512 MB, $7 a month [confirm]
-    region: singapore
-    dockerfilePath: ./Dockerfile.worker
-    dockerContext: .
-    autoDeployTrigger: "off"
-    maxShutdownDelaySeconds: 150   # drain a 120 s model call (D39)
-    envVars:
-      - key: DATABASE_URL_WORKER
-        sync: false          # role app_worker
       - key: META_API_KEY
-        sync: false
+        sync: false          # the worker process only; the start script keeps it out of the api (ARCHITECTURE.md 8)
       - key: META_API_BASE_URL
         value: https://api.meta.ai/v1   # ARCHITECTURE.md 2
       - key: LLM_MODE
@@ -50,13 +35,13 @@ services:
       - key: TOTAL_USD_CAP
         value: "130"         # D60
       - key: MAX_CONCURRENT_MEETINGS
-        value: "40"
+        value: "5"           # D57, lowered: both processes share 512 MB, and one meeting took them to 368 MB together (28 Oct)
       - key: LOG_LEVEL
         value: info
       - key: NODE_ENV
         value: production
 databases:
   - name: meet-first-db
-    plan: 0.1c-256mb         # 0.1 CPU, 256 MB, $6 a month, plus $0.30 per GB of disk (15 GB by default); the health route reports degraded at 80% [confirm]
+    plan: free               # 1 GB, expires 30 days after it is made; 0.1c-256mb ($6 a month) keeps it [confirm]
     postgresMajorVersion: "16"
     region: singapore
