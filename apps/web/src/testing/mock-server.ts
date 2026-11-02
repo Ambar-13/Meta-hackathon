@@ -15,8 +15,14 @@ function asStubReply(input: StubInput): StubReply {
   return { status: 200, body: input };
 }
 
+// The answers every screen gets for the signed-in rail's two reads unless a test stubs them: no friends and no friend requests.
+// server.resetHandlers keeps these, and a test's own stubRoute goes in front of them (wave 7).
+const RAIL_DEFAULTS = [
+  http.get(new URL("/api/friends", window.location.origin).href, () => HttpResponse.json({ friends: [] })),
+  http.get(new URL("/api/friend-requests", window.location.origin).href, () => HttpResponse.json({ incoming: [], outgoing: [] })),
+];
 // One MSW server for every accessibility test, shared by all its files.
-const server = setupServer();
+const server = setupServer(...RAIL_DEFAULTS);
 // The requests recorded per "METHOD path", in order.
 const recorded = new Map<string, Array<{ url: string; body: unknown }>>();
 

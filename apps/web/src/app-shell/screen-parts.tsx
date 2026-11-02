@@ -2,7 +2,8 @@ import { useEffect, useState, type ReactElement, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ApiError } from "./api-fetch.js";
 import { APP_PATHS } from "./app-paths.js";
-import { Sticker, type StickerName } from "../look/index.js";
+import { SocialRail } from "./social-rail.js";
+import { Sticker } from "../look/index.js";
 
 // How long the copy button says Copied, 2 s [confirm] (no input gives this duration).
 export const COPIED_MS = 2_000;
@@ -15,63 +16,85 @@ function showsAppLinks(pathname: string): boolean {
   return !NO_SESSION_PATHS.includes(pathname) && !pathname.startsWith(APP_PATHS.sharePage(""));
 }
 
-// One link of the Pages nav: its words, where it goes, and the sticker drawn beside it.
-type PageLink = { label: string; to: string; sticker: StickerName };
-// The links into the app, in this order: Home, then the directory, the help finder and the friends list (design section 7).
-const APP_LINKS: readonly PageLink[] = [
-  { label: "Home", to: APP_PATHS.home, sticker: "house" },
-  { label: "Directory", to: APP_PATHS.directory, sticker: "tags" },
-  { label: "Find help", to: APP_PATHS.help, sticker: "buoy" },
-  { label: "Friends", to: APP_PATHS.friends, sticker: "smile" },
-];
-// The Settings link, last in the nav on every screen except Settings itself.
-const SETTINGS_LINK: PageLink = { label: "Settings", to: APP_PATHS.settings, sticker: "gear" };
+// The Settings link, the one link in the Pages nav of a page without a session.
+const SETTINGS_LINK = { label: "Settings", to: APP_PATHS.settings } as const;
 
-// The Pages nav: a tab bar at the bottom of a phone and a pill at the top right of a laptop; on pages without a session it holds
-// only Settings, as one chip at the top.
-const PagesNav = (props: { links: readonly PageLink[]; hasAppLinks: boolean; pathname: string }): ReactElement => {
-  return (
-    <nav className={props.hasAppLinks ? "tab-bar" : "top-links"} aria-label="Pages">
-      {props.links.map((link) => (
-        <Link key={link.to} to={link.to} aria-current={props.pathname === link.to ? "page" : undefined}>
-          <Sticker name={link.sticker} />
-          {link.label}
-        </Link>
-      ))}
-    </nav>
-  );
-};
-
-// The frame of every screen: the top bar with the logo, one h1, the content, then the Pages nav: Home, Directory, Find help and
-// Friends on pages that need a session, and Settings unless the screen is Settings itself. isWide lets a screen use the laptop's width;
-// titleAside sits beside the h1, for a name tag or a status.
-export const ScreenFrame = (props: { title: string; children: ReactNode; hideSettingsLink?: boolean; isWide?: boolean; titleAside?: ReactNode }): ReactElement => {
-  const location = useLocation();
-  const hasAppLinks = showsAppLinks(location.pathname);
-  const links = [...(hasAppLinks ? APP_LINKS : []), ...(props.hideSettingsLink === true ? [] : [SETTINGS_LINK])];
-  const mainClass = ["screen", props.isWide === true ? "wide" : "", hasAppLinks ? "has-tabs" : ""].filter((part) => part !== "").join(" ");
+// The frame of a page without a session, as it was before wave 7: the top bar with the logo, the content, and Settings as one chip.
+const OpenFrame = (props: { main: ReactElement; hasSettingsLink: boolean; pathname: string }): ReactElement => {
   return (
     <>
       <header className="top-bar">
-        <Link className="logo" to={hasAppLinks ? APP_PATHS.home : APP_PATHS.welcome}>
+        <Link className="logo" to={APP_PATHS.welcome}>
           <Sticker name="tags" />
           Meet First
         </Link>
       </header>
-      <main className={mainClass}>
-        {props.titleAside === undefined ? (
-          <h1>{props.title}</h1>
-        ) : (
-          <div className="screen-title">
-            <h1>{props.title}</h1>
-            {props.titleAside}
-          </div>
-        )}
-        {props.children}
-      </main>
-      {links.length === 0 ? null : <PagesNav links={links} hasAppLinks={hasAppLinks} pathname={location.pathname} />}
+      {props.main}
+      {props.hasSettingsLink ? (
+        <nav className="top-links" aria-label="Pages">
+          <Link to={SETTINGS_LINK.to} aria-current={props.pathname === SETTINGS_LINK.to ? "page" : undefined}>
+            <Sticker name="gear" />
+            {SETTINGS_LINK.label}
+          </Link>
+        </nav>
+      ) : null}
     </>
   );
+};
+
+// The frame of a signed-in page: the phone's top bar with Settings at its right end, the rail or tab bar, then the content column.
+const SignedInFrame = (props: { main: ReactElement; hasSettingsLink: boolean; pathname: string }): ReactElement => {
+  return (
+    <div className="social-frame">
+      <header className="top-bar social-top">
+        <Link className="logo" to={APP_PATHS.home}>
+          <Sticker name="tags" />
+          Meet First
+        </Link>
+        {props.hasSettingsLink ? (
+          <Link className="chip top-settings" to={SETTINGS_LINK.to}>
+            <Sticker name="gear" />
+            {SETTINGS_LINK.label}
+          </Link>
+        ) : null}
+      </header>
+      <SocialRail pathname={props.pathname} hasSettingsLink={props.hasSettingsLink} />
+      <div className="social-body">{props.main}</div>
+    </div>
+  );
+};
+
+// What a screen passes to the frame: one h1 title (or hasOwnHeading when the screen draws its own h1), the content, and its options.
+// isWide lets a screen use the laptop's width; titleAside sits beside the h1, for a name tag or a status.
+type FrameProps = { title: string; children: ReactNode; hideSettingsLink?: boolean; isWide?: boolean; titleAside?: ReactNode; hasOwnHeading?: boolean };
+
+// The h1 of a screen, with the aside beside it when there is one.
+const FrameTitle = (props: FrameProps): ReactElement | null => {
+  if (props.hasOwnHeading === true) return null;
+  if (props.titleAside === undefined) return <h1>{props.title}</h1>;
+  return (
+    <div className="screen-title">
+      <h1>{props.title}</h1>
+      {props.titleAside}
+    </div>
+  );
+};
+
+// The frame of every screen. A signed-in page gets the rail on a laptop and the tab bar on a phone (Chat, Explore, Friends, Me, and
+// Settings unless the screen is Settings itself). The start, claim and join pages and the public share pages keep the plain frame.
+export const ScreenFrame = (props: FrameProps): ReactElement => {
+  const location = useLocation();
+  const hasAppLinks = showsAppLinks(location.pathname);
+  const hasSettingsLink = props.hideSettingsLink !== true;
+  const mainClass = ["screen", props.isWide === true ? "wide" : "", hasAppLinks ? "has-tabs" : ""].filter((part) => part !== "").join(" ");
+  const main = (
+    <main className={mainClass}>
+      <FrameTitle {...props} />
+      {props.children}
+    </main>
+  );
+  if (!hasAppLinks) return <OpenFrame main={main} hasSettingsLink={hasSettingsLink} pathname={location.pathname} />;
+  return <SignedInFrame main={main} hasSettingsLink={hasSettingsLink} pathname={location.pathname} />;
 };
 
 // Shows one ApiError: its sentence, plus a link to the start page when the session is missing (status 401).

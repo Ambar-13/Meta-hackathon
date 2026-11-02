@@ -7,7 +7,7 @@ import { ITEM_KIND_COLOUR, meetingLink, meetingStateWords, nextStepOf, shortDay,
 import "./home.css";
 
 // The one next step, on a tilted blue panel with its sticker: the main link, and a second one when there is a real choice.
-const NextStepPanel = (props: { home: HomeView }): ReactElement => {
+export const NextStepPanel = (props: { home: HomeView }): ReactElement => {
   const step = nextStepOf(props.home);
   return (
     <section className="colour-panel c-blue home-next" aria-labelledby="home-next-title">
@@ -43,7 +43,7 @@ const CardTag = (props: { card: HomeCard; name: string }): ReactElement => {
 };
 
 // The card section: the tag when there is a card, a short line when there is not.
-const CardSection = (props: { home: HomeView }): ReactElement => {
+export const CardSection = (props: { home: HomeView }): ReactElement => {
   const { card } = props.home;
   return (
     <section aria-labelledby="home-card-title">
@@ -57,7 +57,7 @@ const CardSection = (props: { home: HomeView }): ReactElement => {
 };
 
 // Every meeting, newest first, each with the other person, the question, where it is and when.
-const MeetingsSection = (props: { home: HomeView }): ReactElement => {
+export const MeetingsSection = (props: { home: HomeView }): ReactElement => {
   const { meetings, serverNow } = props.home;
   return (
     <section aria-labelledby="home-meetings-title">
@@ -84,7 +84,7 @@ const MeetingsSection = (props: { home: HomeView }): ReactElement => {
 };
 
 // The pairs still open, each a way back to its lobby; nothing shows when there are none.
-const PairsSection = (props: { home: HomeView }): ReactElement | null => {
+export const PairsSection = (props: { home: HomeView }): ReactElement | null => {
   if (props.home.pairs.length === 0) return null;
   return (
     <section aria-labelledby="home-pairs-title">

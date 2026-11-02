@@ -1,5 +1,5 @@
 import { useEffect, type ReactElement } from "react";
-import { AsksView, FriendsView, type AboutMeAnswer, type AnswerClaim, type AskSummary, type Friend } from "@meet-first/contracts";
+import { AsksView, FriendRequestsView, FriendsView, type AboutMeAnswer, type AnswerClaim, type AskSummary, type Friend } from "@meet-first/contracts";
 import { ROUTE_PATTERNS, routes } from "../../../app-shell/index.js";
 import { FriendsScreen } from "../../../screens/friends/index.js";
 import { SERVER_NOW } from "../../fixtures.js";
@@ -56,7 +56,7 @@ export const ScriptedSteps = (props: { steps: readonly GalleryStep[]; children: 
 const ID = (n: number): string => `00000000-0000-4000-8000-${String(900 + n).padStart(12, "0")}`;
 // Friends: two with friend asks on, one with them off, and one with a long name.
 const FRIENDS: Friend[] = [
-  { pairId: ID(1), displayName: "Bea", canAsk: true, listingId: null },
+  { pairId: ID(1), displayName: "Bea", canAsk: true, listingId: ID(41) },
   { pairId: ID(2), displayName: "Cal", canAsk: false, listingId: null },
   { pairId: ID(3), displayName: "Jonah", canAsk: true, listingId: null },
   { pairId: ID(4), displayName: "Maximiliana", canAsk: false, listingId: null },
@@ -77,11 +77,23 @@ const SENT: AskSummary[] = [
   { askId: ID(23), mode: "help", text: "Who would rate my startup idea?", state: "refused", createdAt: SERVER_NOW },
 ];
 
-// The two reads of the page with these friends and these asks.
-function readStubs(friends: Friend[], asks: { asked: AskSummary[]; aboutMe: AboutMeAnswer[] }): GalleryStub[] {
+// Two requests to answer and one sent, as GET /api/friend-requests returns them.
+const REQUESTS = FriendRequestsView.parse({
+  incoming: [
+    { requestId: ID(31), direction: "incoming", otherName: "Ines", otherListingId: ID(42), createdAt: SERVER_NOW },
+    { requestId: ID(32), direction: "incoming", otherName: "Kofi", otherListingId: null, createdAt: SERVER_NOW },
+  ],
+  outgoing: [{ requestId: ID(33), direction: "outgoing", otherName: "Lena", otherListingId: null, createdAt: SERVER_NOW }],
+});
+// No pending requests either way.
+const NO_REQUESTS = FriendRequestsView.parse({ incoming: [], outgoing: [] });
+
+// The three reads of the page with these friends, these asks and these requests.
+function readStubs(friends: Friend[], asks: { asked: AskSummary[]; aboutMe: AboutMeAnswer[] }, requests: FriendRequestsView = NO_REQUESTS): GalleryStub[] {
   return [
     { route: routes.directory.friends, replies: { status: 200, body: FriendsView.parse({ friends }) } },
     { route: routes.asks.listAsks, replies: { status: 200, body: AsksView.parse(asks) } },
+    { route: routes.social.listFriendRequests, replies: { status: 200, body: requests } },
   ];
 }
 
@@ -95,18 +107,20 @@ function friendsView(head: { name: string; title: string }, stubs: GalleryStub[]
   return { ...head, pattern: ROUTE_PATTERNS.friends, url: "/friends", element: <ScriptedSteps steps={steps}><FriendsScreen /></ScriptedSteps>, stubs };
 }
 
-// The friends page: the list with each friend's switch, the open ask box and its errors, the answers your persona gave, the asks
-// you sent, and the loading, empty and error states.
+// The friends page: requests to answer, the list with each friend's switch, the open ask box and its errors, the answers your persona
+// gave, the asks you sent, and the loading, empty and error states.
 export const views: readonly GalleryView[] = [
-  friendsView({ name: "friends-ready", title: "Friends, the list with answers and sent asks" }, FULL),
-  friendsView({ name: "friends-ask-open", title: "Friends, the ask box open with a question" }, FULL, [{ click: "Ask how they would react" }, { type: ASK_TEXT }]),
-  friendsView({ name: "friends-ask-too-short", title: "Friends, a question that is too short" }, FULL, [{ click: "Ask how they would react" }, { type: "Hm" }, { click: "Send the ask" }]),
-  friendsView({ name: "friends-ask-sending", title: "Friends, the ask being sent" }, [...FULL, { route: routes.asks.createAsk, replies: { status: 201, body: { askId: ID(30) }, delayMs: FOREVER_MS } }], [{ click: "Ask how they would react" }, { type: ASK_TEXT }, { click: "Send the ask" }]),
-  friendsView({ name: "friends-ask-refused", title: "Friends, the ask refused because asks are off" }, [...FULL, { route: routes.asks.createAsk, replies: { status: 409, body: { code: "friend_asks_off", message: "Jonah has not turned on friend asks." } } }], [{ click: "Ask how they would react" }, { type: ASK_TEXT }, { click: "Send the ask" }]),
+  friendsView({ name: "friends-requests", title: "Friends, requests to answer, friends and requests sent" }, readStubs(FRIENDS, { asked: SENT, aboutMe: COPIES }, REQUESTS)),
+  friendsView({ name: "friends-list", title: "Friends, the list with answers and sent asks" }, FULL),
+  friendsView({ name: "friends-ask-open", title: "Friends, the ask box open with a question" }, FULL, [{ click: "Ask their agent" }, { type: ASK_TEXT }]),
+  friendsView({ name: "friends-ask-too-short", title: "Friends, a question that is too short" }, FULL, [{ click: "Ask their agent" }, { type: "Hm" }, { click: "Send the ask" }]),
+  friendsView({ name: "friends-ask-sending", title: "Friends, the ask being sent" }, [...FULL, { route: routes.asks.createAsk, replies: { status: 201, body: { askId: ID(30) }, delayMs: FOREVER_MS } }], [{ click: "Ask their agent" }, { type: ASK_TEXT }, { click: "Send the ask" }]),
+  friendsView({ name: "friends-ask-refused", title: "Friends, the ask refused because asks are off" }, [...FULL, { route: routes.asks.createAsk, replies: { status: 409, body: { code: "friend_asks_off", message: "Jonah has not turned on friend asks." } } }], [{ click: "Ask their agent" }, { type: ASK_TEXT }, { click: "Send the ask" }]),
   friendsView({ name: "friends-empty", title: "Friends, nobody yet and nothing asked" }, readStubs([], { asked: [], aboutMe: [] })),
   friendsView({ name: "friends-loading", title: "Friends, both lists loading" }, [
     { route: routes.directory.friends, replies: { status: 200, body: { friends: [] }, delayMs: FOREVER_MS } },
     { route: routes.asks.listAsks, replies: { status: 200, body: { asked: [], aboutMe: [] }, delayMs: FOREVER_MS } },
+    { route: routes.social.listFriendRequests, replies: { status: 200, body: NO_REQUESTS, delayMs: FOREVER_MS } },
   ]),
   friendsView({ name: "friends-error", title: "Friends, both lists failed to load" }, []),
 ];
