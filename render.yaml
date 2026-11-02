@@ -14,7 +14,8 @@ services:
     dockerCommand: bash /app/scripts/start-api-and-worker.sh   # migrations, then the api and the worker (D71)
     autoDeployTrigger: "off"   # D70, R12.3
     healthCheckPath: /api/health        # R12.5
-    maxShutdownDelaySeconds: 150        # D70, R12.4: SIGTERM waits long enough to drain a 120 s model call
+    # No maxShutdownDelaySeconds: Render refuses it on free services, so a deploy stops the service after Render's default
+    # wait, and a model call longer than that can be cut (docs/known-limits.md). On a paid plan, set it to 150 (D70, R12.4).
     envVars:
       - key: DATABASE_URL_MIGRATE
         sync: false          # from pnpm db:render-roles; the start script gives it to the migrate step only (as-built item 9)

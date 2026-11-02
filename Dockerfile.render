@@ -10,9 +10,15 @@ WORKDIR /app
 COPY . .
 RUN corepack install && pnpm install --frozen-lockfile
 RUN pnpm --filter @meet-first/web build
-# The two users, with no home and no login shell; setpriv, which the start script uses to become them, ships in this image.
-RUN useradd --system --no-create-home --shell /usr/sbin/nologin meet-api \
- && useradd --system --no-create-home --shell /usr/sbin/nologin meet-worker \
- && command -v setpriv
+# The two users, with no login shell, and each with a home and a temporary folder only it can write, so neither can plant a
+# module or a compiled file the other would load. setpriv, which the start script uses to become them, ships in this image.
+RUN set -e; \
+    for user in meet-api meet-worker; do \
+      useradd --system --create-home --home-dir "/home/$user" --shell /usr/sbin/nologin "$user"; \
+      install -d -o "$user" -g "$user" -m 700 "/home/$user/tmp"; \
+      chown "$user:$user" "/home/$user"; \
+      chmod 700 "/home/$user"; \
+    done; \
+    command -v setpriv
 ENV NODE_ENV=production
 CMD ["bash", "/app/scripts/start-api-and-worker.sh"]

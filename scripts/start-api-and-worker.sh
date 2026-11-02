@@ -16,19 +16,23 @@ if [ "$is_root" = 1 ] && ! command -v setpriv >/dev/null; then
   exit 1
 fi
 
-# Runs a command as the given user when this script is root (the container), or as it is otherwise (a laptop's own user).
+# Runs a command as the given user when this script is root (the container), with that user's own home and temporary folder
+# (Dockerfile.render) and no NODE_PATH, so Node finds no module and tsx no compiled file the other user could have written.
+# Run as any other user, as on a laptop, the command runs as it is.
 as_user() {
   local user="$1"
   shift
-  if [ "$is_root" = 1 ]; then exec setpriv --reuid="$user" --regid="$user" --clear-groups --no-new-privs -- "$@"; fi
+  if [ "$is_root" = 1 ]; then
+    exec setpriv --reuid="$user" --regid="$user" --clear-groups --no-new-privs -- env HOME="/home/$user" TMPDIR="/home/$user/tmp" NODE_PATH= "$@"
+  fi
   exec "$@"
 }
 
 pnpm -w db:migrate
 
-(cd apps/api && as_user meet-api env -u META_API_KEY -u DATABASE_URL_MIGRATE -u DATABASE_URL_WORKER HOME=/tmp node --import tsx src/server.ts) &
+(cd apps/api && as_user meet-api env -u META_API_KEY -u DATABASE_URL_MIGRATE -u DATABASE_URL_WORKER node --import tsx src/server.ts) &
 api=$!
-(cd apps/worker && as_user meet-worker env -u DATABASE_URL_MIGRATE -u DATABASE_URL_API HOME=/tmp node --import tsx src/runner.ts) &
+(cd apps/worker && as_user meet-worker env -u DATABASE_URL_MIGRATE -u DATABASE_URL_API node --import tsx src/runner.ts) &
 worker=$!
 
 signalled=0
