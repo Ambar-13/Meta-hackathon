@@ -55,13 +55,13 @@ describe("meeting events", () => {
     expect(COMMITTED_EVENT_TYPES).toHaveLength(11);
   });
 
-  it("R13.2-T2: CALL_SITES equals the ledger call_site CHECK list as 0006 last sets it", () => {
-    const sql = readFileSync(new URL("../../../db/migrations/0006_directory_and_asks.sql", import.meta.url), "utf8");
+  it("R13.2-T2: CALL_SITES equals the ledger call_site CHECK list as 0008 last sets it", () => {
+    const sql = readFileSync(new URL("../../../db/migrations/0008_social.sql", import.meta.url), "utf8");
 
     const names = checkNames(sql, /ADD CONSTRAINT ledger_call_site_check CHECK \(call_site IN \(([^)]*)\)\)/);
 
     expect([...names].sort()).toEqual([...CALL_SITES].sort());
-    expect(CALL_SITES).toHaveLength(14);
+    expect(CALL_SITES).toHaveLength(15);
   });
 
   it("R13.2-T3: CATEGORIES equals the redactions category CHECK list in 0001", () => {

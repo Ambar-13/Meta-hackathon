@@ -23,8 +23,8 @@ const COPY_IDS = { react: "00000000-0000-4000-8000-000000000521", help: "0000000
 const BACKED: AnswerClaim = { text: "Says yes, then plans", quote: "I say yes first and plan the details after.", verified: true, supported: true };
 const UNVERIFIED: AnswerClaim = { text: "Reads the logs first", quote: "I read the logs first.", verified: false, supported: null };
 // Bea turned friend asks on; Cal did not.
-const BEA: Friend = { pairId: PAIRS.bea, displayName: "Bea", canAsk: true };
-const CAL: Friend = { pairId: PAIRS.cal, displayName: "Cal", canAsk: false };
+const BEA: Friend = { pairId: PAIRS.bea, displayName: "Bea", canAsk: true, listingId: null };
+const CAL: Friend = { pairId: PAIRS.cal, displayName: "Cal", canAsk: false, listingId: null };
 // The two copies of the caller's persona's answers, newest first as the server sends them.
 const REACT_COPY: AboutMeAnswer = { answerId: COPY_IDS.react, mode: "react", text: "Being asked to lead the demo at the last minute.", askerName: "Ola", answer: "My person would probably say yes, then ask for notes.", claims: [BACKED], createdAt: SERVER_NOW };
 const HELP_COPY: AboutMeAnswer = { answerId: COPY_IDS.help, mode: "help", text: "Our deploys fail at night and nobody knows why.", askerName: "Pim", answer: "My person would probably read the logs first.", claims: [UNVERIFIED], createdAt: SERVER_NOW };

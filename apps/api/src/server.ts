@@ -20,6 +20,7 @@ import { registerComicsRoutes } from "./comics/index.js";
 import { registerShareRoutes } from "./share/index.js";
 import { registerDirectoryRoutes } from "./directory/index.js";
 import { registerAsksRoutes } from "./asks/index.js";
+import { registerSocialRoutes } from "./social/index.js";
 import { addContentSecurityPolicy, registerWebPagesRoutes } from "./web-pages/index.js";
 
 // Connections in the api's Kysely pool (D56: api 10). The LISTEN connection is one more client, owned by meeting-stream.
@@ -91,6 +92,7 @@ export async function registerAllRoutes(app: FastifyInstance, deps: RouteDeps): 
   await registerShareRoutes(app, deps);
   await registerDirectoryRoutes(app, deps);
   await registerAsksRoutes(app, deps);
+  await registerSocialRoutes(app, deps);
   await registerWebPagesRoutes(app, deps);
 }
 

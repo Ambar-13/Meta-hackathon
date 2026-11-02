@@ -6,6 +6,7 @@ export type PersonTable =
   | { table: string; reach: "person_id" } // a person_id column (people counts by id)
   | { table: string; reach: "pair_person"; columns: ["creator_person_id", "joiner_person_id"] } // a pair the person created or joined
   | { table: string; reach: "answer_person"; columns: ["asker_person_id", "subject_person_id"] } // a persona answer the person asked for or gave
+  | { table: string; reach: "request_person"; columns: ["from_person_id", "to_person_id"] } // a friend request the person sent or received
   | { table: string; reach: "meeting_id" } // joint rows that go when the meeting goes (meetings counts by id)
   | { table: string; reach: "comic_id" } // comic_panels, through comics.meeting_id
   | { table: string; reach: "ledger_nulled" } // ledger: person_id goes null and the rows stay (D69)
@@ -40,6 +41,8 @@ export const PERSON_TABLES: readonly PersonTable[] = [
   { table: "directory_listings", reach: "person_id" },
   { table: "persona_asks", reach: "person_id" },
   { table: "persona_answers", reach: "answer_person", columns: ["asker_person_id", "subject_person_id"] },
+  { table: "friend_requests", reach: "request_person", columns: ["from_person_id", "to_person_id"] },
+  { table: "orchestrator_messages", reach: "person_id" },
   { table: "ledger", reach: "ledger_nulled" },
   { table: "deletions", reach: "record" },
   { table: "people", reach: "person_id" },
@@ -79,6 +82,8 @@ function conditionFor(scope: CountScope, entry: CountableTable): RawBuilder<unkn
       return sql`creator_person_id = ${scope.personId}::uuid OR joiner_person_id = ${scope.personId}::uuid`;
     case "answer_person":
       return sql`asker_person_id = ${scope.personId}::uuid OR subject_person_id = ${scope.personId}::uuid`;
+    case "request_person":
+      return sql`from_person_id = ${scope.personId}::uuid OR to_person_id = ${scope.personId}::uuid`;
     case "meeting_id":
       return meetingCondition(scope.meetingIds, entry.table);
     case "comic_id":

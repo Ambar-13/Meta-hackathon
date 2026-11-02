@@ -54,8 +54,9 @@ export type ListedMeetingsView = z.infer<typeof ListedMeetingsView>;
 export const CardSharing = z.object({ friendsCanAsk: z.boolean(), publicPositions: z.array(z.number().int().min(1)).max(CARD_ITEMS_MAX) });
 // The type of CardSharing, read from the schema above.
 export type CardSharing = z.infer<typeof CardSharing>;
-// One friend: a person the caller joined a pair with by invite, named by that pair. canAsk is the friend's own switch.
-export const Friend = z.object({ pairId: Uuid, displayName: z.string(), canAsk: z.boolean() });
+// One friend: a person the caller joined a pair with by invite or by an accepted friend request, named by that pair. canAsk is the friend's own switch;
+// listingId is their listing when Explore shows it, so the friend links to their profile.
+export const Friend = z.object({ pairId: Uuid, displayName: z.string(), canAsk: z.boolean(), listingId: Uuid.nullable() });
 // The type of Friend, read from the schema above.
 export type Friend = z.infer<typeof Friend>;
 // What GET /api/friends returns, most recently joined first.

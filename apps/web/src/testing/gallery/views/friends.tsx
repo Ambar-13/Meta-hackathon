@@ -56,10 +56,10 @@ export const ScriptedSteps = (props: { steps: readonly GalleryStep[]; children: 
 const ID = (n: number): string => `00000000-0000-4000-8000-${String(900 + n).padStart(12, "0")}`;
 // Friends: two with friend asks on, one with them off, and one with a long name.
 const FRIENDS: Friend[] = [
-  { pairId: ID(1), displayName: "Bea", canAsk: true },
-  { pairId: ID(2), displayName: "Cal", canAsk: false },
-  { pairId: ID(3), displayName: "Jonah", canAsk: true },
-  { pairId: ID(4), displayName: "Maximiliana", canAsk: false },
+  { pairId: ID(1), displayName: "Bea", canAsk: true, listingId: null },
+  { pairId: ID(2), displayName: "Cal", canAsk: false, listingId: null },
+  { pairId: ID(3), displayName: "Jonah", canAsk: true, listingId: null },
+  { pairId: ID(4), displayName: "Maximiliana", canAsk: false, listingId: null },
 ];
 // One claim of each kind: backed, weak, and with no receipt.
 const BACKED: AnswerClaim = { text: "Says yes, then plans", quote: "I say yes first and plan the details after.", verified: true, supported: true };

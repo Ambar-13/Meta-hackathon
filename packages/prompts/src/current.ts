@@ -1,4 +1,4 @@
-// The version folder each prompt sends today. Only the wave's prompts owner edits this file: dossier in Wave 1, briefs in Wave 2 (IMPLEMENTATION.md section 8).
+// The version folder each prompt sends today. Only the wave's prompts owner edits this file: dossier in Wave 1, briefs in Wave 2, the orchestrator in wave 7 (IMPLEMENTATION.md section 8).
 export const CURRENT_PROMPTS = {
   dossier: "v1",
   "scrub-names": "v1",
@@ -14,6 +14,7 @@ export const CURRENT_PROMPTS = {
   "comic-image": "v1",
   "untrusted-data-rules": "v1",
   "persona-answer": "v1",
+  orchestrator: "v1",
 } as const;
 // The name of one prompt folder under packages/prompts.
 export type PromptName = keyof typeof CURRENT_PROMPTS;
