@@ -70,7 +70,7 @@ function readyCardChecks(card: CardView, prefix: string): Assertion[] {
 }
 
 // The sign-up body for one display name, with the access code when the site asks for one (ACCESS_CODE in the shell, R9.5).
-function signUpBody(displayName: string): { displayName: string; accessCode?: string } {
+export function signUpBody(displayName: string): { displayName: string; accessCode?: string } {
   const accessCode = (process.env.ACCESS_CODE ?? "").trim();
   return accessCode === "" ? { displayName } : { displayName, accessCode };
 }

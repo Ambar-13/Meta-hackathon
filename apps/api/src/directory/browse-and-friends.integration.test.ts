@@ -162,9 +162,9 @@ describe("directory and friends routes", () => {
     expect(sharing.statusCode).toBe(200);
     expect(meeting.statusCode).toBe(201);
     expect(aView.statusCode).toBe(200);
-    expect(FriendsView.parse(aView.json())).toEqual({ friends: [{ pairId: m.pairId, displayName: "Test B", canAsk: true }] });
+    expect(FriendsView.parse(aView.json())).toEqual({ friends: [{ pairId: m.pairId, displayName: "Test B", canAsk: true, listingId: null }] });
     expect(bView.statusCode).toBe(200);
-    expect(FriendsView.parse(bView.json())).toEqual({ friends: [{ pairId: m.pairId, displayName: "Test A", canAsk: false }] });
+    expect(FriendsView.parse(bView.json())).toEqual({ friends: [{ pairId: m.pairId, displayName: "Test A", canAsk: false, listingId: null }] });
     expect(listerView.statusCode).toBe(200);
     expect(FriendsView.parse(listerView.json())).toEqual({ friends: [] });
   });

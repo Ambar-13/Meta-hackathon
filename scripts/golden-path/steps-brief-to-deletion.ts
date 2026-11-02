@@ -172,14 +172,14 @@ async function directoryChecksAfterDeletion(run: RunState, personB: string): Pro
   return [
     check("B no longer sees the directory meeting", 0, await countMeetingAsMember(run.db, personB, directoryMeetingId)),
     check("B's copies of A's asks are gone", [], asks.body.aboutMe),
-    check("B no longer has A as a friend", [], friends.body.friends),
+    check("B no longer has A as a friend (C, from step 22, stays)", false, friends.body.friends.some((friend) => friend.displayName === "A")),
     check("B's listing stays", need(run.ids.listingB, "listingB"), listing.body.listingId),
   ];
 }
 
 // Step 22: A deletes the account. Every table clears for A, B keeps their source, card and listing, and A's meetings and asks are
 // gone for B.
-export async function step22Delete(run: RunState): Promise<StepResult> {
+export async function step24Delete(run: RunState): Promise<StepResult> {
   const personA = need(run.ids.personA, "personA");
   const personB = need(run.ids.personB, "personB");
   const meetingId = need(run.ids.meetingId, "meetingId");
@@ -204,5 +204,5 @@ export async function step22Delete(run: RunState): Promise<StepResult> {
     ...(await directoryChecksAfterDeletion(run, personB)),
   );
   run.manual.push("the deletion dialog says the other person keeps their source and card (R9.7)");
-  return finishStep(22, "delete", { rows: ["R9.6", "R9.7", "D69", "invariant 16", "P2"], detail: "A's rows cleared; B keeps the card and the listing", assertions });
+  return finishStep(24, "delete", { rows: ["R9.6", "R9.7", "D69", "invariant 16", "P2"], detail: "A's rows cleared; B keeps the card and the listing", assertions });
 }

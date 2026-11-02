@@ -45,7 +45,7 @@ describe("friends from GET /api/friends", () => {
     const listed = await send({ method: "GET", url: routes.directory.friends.path, token: m.a.sessionToken });
 
     expect(listed.statusCode).toBe(200);
-    expect(FriendsView.parse(listed.body)).toEqual({ friends: [{ pairId: m.pairId, displayName: "Test B", canAsk: true }] });
+    expect(FriendsView.parse(listed.body)).toEqual({ friends: [{ pairId: m.pairId, displayName: "Test B", canAsk: true, listingId: null }] });
     const friend = FriendsView.parse(listed.body).friends[0];
     const asked = await send({ method: "POST", url: routes.asks.createAsk.path, token: m.a.sessionToken, payload: { mode: "react", pairId: friend?.pairId, text: "Our demo breaks an hour before judging." } });
     expect(asked.statusCode).toBe(201);

@@ -8,7 +8,7 @@ export type RunOptions = { base: string; until: string | undefined; mode: RunMod
 // The step names in order, as --until takes them. Steps 9 and 10 stay in the list, because they are removed steps that keep their numbers.
 export const STEP_NAMES = [
   "person", "paste", "card-a", "upload-b", "quiz", "approve", "pair", "stream", "ask", "ask-timeout", "background", "decide", "brief", "comic", "share",
-  "sharing", "directory", "dir-decide", "dir-brief", "friend-ask", "help", "delete",
+  "sharing", "directory", "dir-decide", "dir-brief", "friend-ask", "help", "friend-request", "orchestrator", "delete",
 ] as const;
 // The origin the script drives when --base is not given.
 export const DEFAULT_BASE = "http://localhost:3000";

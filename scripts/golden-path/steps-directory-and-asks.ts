@@ -180,7 +180,7 @@ export async function step20FriendAsk(run: RunState): Promise<StepResult> {
   const answer = view.answers[0];
   const notes: string[] = [];
   const assertions: Assertion[] = [
-    check("A's friends are B alone, by the invite pair", [{ pairId, displayName: "B", canAsk: true }], friends.body.friends),
+    check("A's friends are B alone, by the invite pair, with B's listing", [{ pairId, displayName: "B", canAsk: true, listingId: run.ids.listingB ?? null }], friends.body.friends),
     check("the friend ask is done", "done", view.state),
     check("the ask is about B", "B", view.aboutName),
     check("one answer, from B's persona", ["B"], view.answers.map((item) => item.displayName)),

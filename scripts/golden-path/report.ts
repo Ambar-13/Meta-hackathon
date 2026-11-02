@@ -49,6 +49,9 @@ export type RunIds = {
   directoryMeetingId?: string;
   reactAskId?: string;
   helpAskId?: string;
+  personC?: string;
+  orchestratorReplyId?: string;
+  orchestratorAskId?: string;
 };
 // Values one step leaves for a later step. None of them is a secret, and none is printed.
 export type RunFacts = {

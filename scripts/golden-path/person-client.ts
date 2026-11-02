@@ -36,7 +36,7 @@ export class PersonClient {
   private isDeleted = false;
 
   constructor(
-    readonly label: "A" | "B",
+    readonly label: "A" | "B" | "C",
     readonly base: string,
     private readonly fetchImpl: FetchLike = (url, init) => fetch(url, init),
   ) {}

@@ -92,7 +92,8 @@ export function checkPlan(plan: OrchestratorPlanOutput, friends: OrchestratorFri
   const question = askableQuestion(plan.question);
   if (plan.action === "help") return question === null ? wordsOnly(NO_QUESTION_SENTENCE) : { state: "planned", action: "help", text: reply, question, friendName: null, pairId: null };
   const key = nameKey(plan.friend);
-  const matches = key === "" ? [] : friends.filter((friend) => nameKey(friend.displayName) === key);
+  // The model saw each name through promptLine, so a name is matched in that form and in its stored form.
+  const matches = key === "" ? [] : friends.filter((friend) => nameKey(promptLine(friend.displayName)) === key || nameKey(friend.displayName) === key);
   const friend = matches[0];
   if (friend === undefined) return wordsOnly(unknownFriendSentence(friends));
   if (matches.length > 1) return wordsOnly(`You have more than one friend called ${promptLine(friend.displayName)}, so I cannot tell which one you mean. Ask them from your Friends page instead.`);

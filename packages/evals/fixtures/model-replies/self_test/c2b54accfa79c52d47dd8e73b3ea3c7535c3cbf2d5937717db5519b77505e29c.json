@@ -1,0 +1,91 @@
+{
+  "callSite": "self_test",
+  "promptVersion": "v1",
+  "requestHash": "c2b54accfa79c52d47dd8e73b3ea3c7535c3cbf2d5937717db5519b77505e29c",
+  "request": {
+    "callSite": "self_test",
+    "promptVersion": "v1",
+    "body": {
+      "model": "muse-spark-1.3",
+      "messages": [
+        {
+          "role": "user",
+          "content": "ok"
+        }
+      ],
+      "max_tokens": 1,
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "orchestrator",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "string",
+                "enum": [
+                  "help",
+                  "react",
+                  "reply"
+                ]
+              },
+              "friend": {
+                "type": "string"
+              },
+              "question": {
+                "type": "string"
+              },
+              "reply": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "action",
+              "friend",
+              "question",
+              "reply"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "response": {
+    "id": "chatcmpl-01a19ced-a72d-73a6-bd0b-d2a5d6073182",
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": null,
+          "refusal": null,
+          "role": "assistant"
+        },
+        "logprobs": null
+      }
+    ],
+    "created": 1793634182,
+    "model": "muse-spark-1.3",
+    "object": "chat.completion",
+    "usage": {
+      "completion_tokens": 1,
+      "prompt_tokens": 9,
+      "total_tokens": 10,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    }
+  },
+  "usage": {
+    "promptTokens": 9,
+    "cachedTokens": 0,
+    "completionTokens": 1,
+    "reasoningTokens": 0
+  },
+  "recordedAt": "2026-11-02T15:43:03.070Z"
+}

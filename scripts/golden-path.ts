@@ -7,16 +7,19 @@ import { check, commitOf, ExitError, failedStep, finishRun, finishStep, formatSt
 import { step01Person, step02Paste, step03CardA, step04UploadB } from "./golden-path/steps-people-and-sources.js";
 import { step05Quiz, step06Approve, step07Pair } from "./golden-path/steps-quiz-approve-pair.js";
 import { removedStep, step08Stream, step11Background, step12Decide } from "./golden-path/steps-meeting.js";
-import { step13Brief, step14Comic, step15Share, step22Delete } from "./golden-path/steps-brief-to-deletion.js";
+import { step13Brief, step14Comic, step15Share, step24Delete } from "./golden-path/steps-brief-to-deletion.js";
 import { step16Sharing, step17Directory, step18DirectoryDecide, step19DirectoryBrief, step20FriendAsk, step21Help } from "./golden-path/steps-directory-and-asks.js";
+import { step22FriendRequest, step23Orchestrator } from "./golden-path/steps-social.js";
 
 // The steps by number, each a function from the run to its result. Steps 9 and 10 are removed, so they print "removed" (as-built item 28).
-// Steps 16 to 21 are the directory, the friend ask and the help search; the deletion moved to the end (design section 9).
+// Steps 16 to 21 are the directory, the friend ask and the help search; 22 and 23 are a friend request and the orchestrator chat (wave 7);
+// the deletion is last (design section 9).
 const RUNNERS = new Map<number, (run: RunState) => Promise<StepResult>>([
   [1, step01Person], [2, step02Paste], [3, step03CardA], [4, step04UploadB], [5, step05Quiz], [6, step06Approve], [7, step07Pair],
   [8, step08Stream], [9, () => Promise.resolve(removedStep(9, "ask"))], [10, () => Promise.resolve(removedStep(10, "ask-timeout"))],
   [11, step11Background], [12, step12Decide], [13, step13Brief], [14, step14Comic], [15, step15Share], [16, step16Sharing],
-  [17, step17Directory], [18, step18DirectoryDecide], [19, step19DirectoryBrief], [20, step20FriendAsk], [21, step21Help], [22, step22Delete],
+  [17, step17Directory], [18, step18DirectoryDecide], [19, step19DirectoryBrief], [20, step20FriendAsk], [21, step21Help],
+  [22, step22FriendRequest], [23, step23Orchestrator], [24, step24Delete],
 ]);
 // A step that fails here stops the run, because the steps after it need what it makes. The removed steps never stop.
 const PREREQUISITES = new Set([1, 2, 3, 4, 6, 7, 12, 13, 16, 17, 18]), REMOVED = new Set([9, 10]);
