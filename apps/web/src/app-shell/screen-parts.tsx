@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { ApiError } from "./api-fetch.js";
 import { APP_PATHS } from "./app-paths.js";
 import { SocialRail } from "./social-rail.js";
-import { Sticker } from "../look/index.js";
+import { Icon, Sticker } from "../look/index.js";
 
 // How long the copy button says Copied, 2 s [confirm] (no input gives this duration).
 export const COPIED_MS = 2_000;
@@ -52,9 +52,8 @@ const SignedInFrame = (props: { main: ReactElement; hasSettingsLink: boolean; pa
           Meet First
         </Link>
         {props.hasSettingsLink ? (
-          <Link className="chip top-settings" to={SETTINGS_LINK.to}>
-            <Sticker name="gear" />
-            {SETTINGS_LINK.label}
+          <Link className="top-settings" to={SETTINGS_LINK.to} aria-label={SETTINGS_LINK.label}>
+            <Icon name="settings" size={24} />
           </Link>
         ) : null}
       </header>

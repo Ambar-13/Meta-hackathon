@@ -79,6 +79,10 @@ export function askBodyOf(row: MessageRow): { body: AskCreate } | { refusal: str
   return parsed.success ? { body: parsed.data } : { refusal: "That question does not fit an ask. Say it in a sentence of 5 to 300 characters." };
 }
 
+// The codes of createAsk that refuse the ask for good: a daily cap, the friend's switch, a friendship that ended, a question that does not
+// fit. Any other error (the queue refusing the job, a dropped connection) puts the plan back, so the person can press again.
+const REFUSAL_CODES: ReadonlySet<string> = new Set(["help_daily_cap", "react_daily_cap", "friend_asks_off", "not_found", "payload_invalid"]);
+
 // The sentence a refused ask adds to the reply: createAsk's own sentence, except not_found, which here means the friendship is gone.
 export function refusalSentence(error: ContractError, row: MessageRow): string {
   if (error.code === "not_found") return `You are no longer friends with ${row.action_friend_name ?? "this friend"}, so I could not ask their agent.`;
@@ -120,16 +124,17 @@ export async function runPlan(deps: AskDeps, input: { personId: string; messageI
   if (!claim.isClaimed) return toOrchestratorMessage(claim.row);
   const ask = askBodyOf(claim.row);
   if ("refusal" in ask) return toOrchestratorMessage(await settleRun(deps, { personId: input.personId, row: claim.row, outcome: ask }));
+  let askId: string;
   try {
-    const askId = await createAsk(deps, input.personId, ask.body);
-    return toOrchestratorMessage(await settleRun(deps, { personId: input.personId, row: claim.row, outcome: { askId } }));
+    askId = await createAsk(deps, input.personId, ask.body);
   } catch (error) {
-    if (error instanceof ContractError && error.httpStatus >= 400 && error.httpStatus < 500) {
+    if (error instanceof ContractError && REFUSAL_CODES.has(error.code)) {
       return toOrchestratorMessage(await settleRun(deps, { personId: input.personId, row: claim.row, outcome: { refusal: refusalSentence(error, claim.row) } }));
     }
     await releaseClaim(deps, input);
     throw error;
   }
+  return toOrchestratorMessage(await settleRun(deps, { personId: input.personId, row: claim.row, outcome: { askId } }));
 }
 
 // Registers GET /api/orchestrator: 200 OrchestratorThread, the caller's latest messages oldest first. Never cached, because a reply changes while the job plans it.

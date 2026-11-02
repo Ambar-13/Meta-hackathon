@@ -5,6 +5,7 @@ import "@fontsource-variable/bricolage-grotesque/opsz.css";
 import "@fontsource-variable/hanken-grotesk";
 import "@fontsource-variable/shantell-sans";
 import "../../app-shell/app.css";
+import "../../app-shell/app-look.css";
 import { StickerSheet } from "../../look/index.js";
 import { installFetchStub } from "./fetch-stub.js";
 import { ALL_VIEWS, PLAY_AFTER_MS, type GalleryView } from "./gallery-views.js";

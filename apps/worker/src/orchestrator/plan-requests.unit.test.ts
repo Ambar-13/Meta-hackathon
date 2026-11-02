@@ -80,3 +80,12 @@ describe("planUserText", () => {
     expect(planUserText({ text: "hi", friends: [], recent: [] })).toBe("<recent>\n(none)\n</recent>\n<friends>\n(none)\n</friends>\n<message>hi</message>");
   });
 });
+
+describe("the friend sentences", () => {
+  it("W7-CHECK-T5: an unknown friend names at most 5 friends, so a long friend list keeps the reply short", () => {
+    const many: OrchestratorFriends = Array.from({ length: 30 }, (unused, index) => ({ pairId: `00000000-0000-4000-8000-${String(100 + index).padStart(12, "0")}`, displayName: `Friend number ${String(index + 1)} with a long name`, canAsk: true }));
+    const plan = checkPlan({ ...REACT_PLAN, friend: "Nobody" }, many);
+
+    expect(plan.text).toBe("I could not tell which friend you mean. Your friends include: Friend number 1 with a long name, Friend number 2 with a long name, Friend number 3 with a long name, Friend number 4 with a long name, Friend number 5 with a long name.");
+  });
+});

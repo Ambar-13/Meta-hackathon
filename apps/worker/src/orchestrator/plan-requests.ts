@@ -77,10 +77,19 @@ function wordsOnly(text: string): CheckedPlan {
   return { state: "done", action: "reply", text, question: null, friendName: null, pairId: null };
 }
 
-// The sentence when the plan's friend matches nobody: the person's friends by name, or how to get one.
+// The most friends the unknown-friend sentence names, so the reply stays short however many friends a person has.
+export const NAMED_FRIENDS_MAX = 5;
+
+// The sentence when the plan's friend matches nobody: up to NAMED_FRIENDS_MAX of the person's friends by name, or how to get one.
 export function unknownFriendSentence(friends: OrchestratorFriends): string {
   if (friends.length === 0) return NO_FRIENDS_SENTENCE;
-  return `I could not tell which friend you mean. Your friends are: ${friends.map((friend) => promptLine(friend.displayName)).join(", ")}.`;
+  const names = friends.slice(0, NAMED_FRIENDS_MAX).map((friend) => promptLine(friend.displayName)).join(", ");
+  return friends.length > NAMED_FRIENDS_MAX ? `I could not tell which friend you mean. Your friends include: ${names}.` : `I could not tell which friend you mean. Your friends are: ${names}.`;
+}
+
+// The sentence when the friend a plan matched stopped being a friend before the plan was written.
+export function goneFriendSentence(name: string): string {
+  return `You are no longer friends with ${promptLine(name)}, so I cannot ask their agent.`;
 }
 
 // Decides what one plan becomes, never trusting the model: a react needs the friend to match exactly one friend of the snapshot by

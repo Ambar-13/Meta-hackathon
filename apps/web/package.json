@@ -14,6 +14,7 @@
     "@meet-first/parsers": "workspace:*",
     "@meet-first/scrub": "workspace:*",
     "fflate": "0.8.2",
+    "lucide-react": "0.454.0",
     "qrcode-generator": "1.4.4",
     "react": "19.0.0",
     "react-dom": "19.0.0",

@@ -5,7 +5,7 @@ import { withPerson, type DatabaseTransaction } from "@meet-first/db";
 import { CapReached, LimiterBusy } from "@meet-first/llm";
 import { readPrompt } from "@meet-first/prompts";
 import type { JobContext, JobTask } from "../job-context.js";
-import { checkPlan, PLAN_FAILED_SENTENCE, planCallArgs, planMessages, RECENT_MESSAGES_MAX, type CheckedPlan, type PlanInput, type RecentMessage } from "./plan-requests.js";
+import { checkPlan, goneFriendSentence, PLAN_FAILED_SENTENCE, planCallArgs, planMessages, RECENT_MESSAGES_MAX, type CheckedPlan, type PlanInput, type RecentMessage } from "./plan-requests.js";
 
 // The sentence of a reply when a dollar cap stopped the call, by the cap's code (D60).
 const CAP_SENTENCES: Readonly<Record<string, string>> = {
@@ -14,7 +14,7 @@ const CAP_SENTENCES: Readonly<Record<string, string>> = {
 };
 
 // What a failed call writes: the sentence, and no action.
-type FailedPlan = { state: "failed"; text: string };
+export type FailedPlan = { state: "failed"; text: string };
 
 // Reads a thinking reply with the person's message, the friends snapshot and the earlier messages, oldest first; null when the reply
 // is gone or no longer thinking, which is also what row security shows for another person's reply.
@@ -58,10 +58,29 @@ async function writePlan(trx: DatabaseTransaction, messageId: string, plan: Chec
   await trx.updateTable("orchestrator_messages").set(values).where("id", "=", messageId).where("state", "=", "thinking").execute();
 }
 
+// True when Postgres refused a write because a row it points to is gone (SQLSTATE 23503), as the pair of a friend who deleted their account.
+function isForeignKeyViolation(error: unknown): boolean {
+  return typeof error === "object" && error !== null && Reflect.get(error, "code") === "23503";
+}
+
+// What a reply becomes when its plan could not be written: words saying the friend is gone, when the plan's pair was deleted while the
+// model worked, else the failed sentence. Either way the job ends here, so a retry never calls the model a second time.
+export function fallbackPlan(plan: CheckedPlan | FailedPlan, error: unknown): CheckedPlan | FailedPlan {
+  if (isForeignKeyViolation(error) && plan.state === "planned" && plan.friendName !== null) {
+    return { state: "done", action: "reply", text: goneFriendSentence(plan.friendName), question: null, friendName: null, pairId: null };
+  }
+  return { state: "failed", text: PLAN_FAILED_SENTENCE };
+}
+
 // Plans one reply from thinking to planned, done or failed. A missing reply, and one already planned, is left as it is.
 export const orchestrate: JobTask<"orchestrate"> = async (payload, context) => {
   const input = await withPerson(context.db, payload.personId, (trx) => readPlanInput(trx, payload.messageId));
   if (input === null) return;
   const plan = await planReply(context, { personId: payload.personId, messageId: payload.messageId, plan: input });
-  await withPerson(context.db, payload.personId, (trx) => writePlan(trx, payload.messageId, plan));
+  try {
+    await withPerson(context.db, payload.personId, (trx) => writePlan(trx, payload.messageId, plan));
+  } catch (error) {
+    context.log.warn({ code: "orchestrator_write_failed", messageId: payload.messageId }, "The plan could not be written, so the reply gets the fallback words.");
+    await withPerson(context.db, payload.personId, (trx) => writePlan(trx, payload.messageId, fallbackPlan(plan, error)));
+  }
 };

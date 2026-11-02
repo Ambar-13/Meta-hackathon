@@ -1,15 +1,18 @@
 // The messages of the thread: the person's soft bubbles on the right, and the orchestrator's plain replies on the left with what each
 // reply does by its state: thinking dots, a plan card with its one button, the ask card, or a way to try again.
 import type { ReactElement } from "react";
-import type { OrchestratorMessage } from "@meet-first/contracts";
-import { Sticker } from "../../look/index.js";
+import { HELP_SEND_COPY, type OrchestratorMessage } from "@meet-first/contracts";
+import { MeetyMark } from "../../look/index.js";
 import { AskCard, KindHead, WaitLine } from "./ask-card.js";
 import type { RunStatus } from "./chat-state.js";
 
 // The words of a reply that is still being planned.
 export const THINKING_LINE = "Working out what to do";
-// The line on a help search's card.
-const HELP_LINE = "Your question goes to the agents of people in Explore. Each answers only from what its person chose to share.";
+// The line on a help search's card: the /help page's consent words, because pressing the button sends the question to up to 20 people,
+// each of whom gets a copy with the person's display name.
+const HELP_LINE = HELP_SEND_COPY;
+// The line under a reply whose ask is gone, for example because the friend deleted their account after it ran.
+export const ASK_GONE_LINE = "This ask is no longer here. Send your message again to ask again.";
 // The name a friend ask uses when the reply did not name the friend.
 const FRIEND_FALLBACK = "your friend";
 
@@ -59,32 +62,41 @@ const PlanCard = (props: { message: OrchestratorMessage; status: RunStatus; onRu
   );
 };
 
-// What follows a reply's words, by its state: the plan card, the ask card, or "Try again".
+// Which part follows a reply's words: its plan card, its ask card, the line for an ask that is gone, Ask again, or nothing.
+type ReplyStage = "plan" | "ask" | "gone" | "failed" | "none";
+
+// The part that follows one reply, by its state and whether it still has its ask.
+function replyStage(message: OrchestratorMessage): ReplyStage {
+  const isAsk = message.action === "help" || message.action === "react";
+  if (message.state === "planned" && isAsk) return "plan";
+  if (message.askId !== null && (message.state === "running" || message.state === "done")) return "ask";
+  if (message.state === "running" && isAsk) return "gone";
+  return message.state === "failed" ? "failed" : "none";
+}
+
+// What follows a reply's words, by its stage: the plan card, the ask card, the line for an ask that is gone, or "Ask again".
 const ReplyExtra = (props: { message: OrchestratorMessage; actions: ReplyActions }): ReactElement | null => {
   const { message, actions } = props;
-  const isAsk = message.action === "help" || message.action === "react";
-  if (message.state === "planned" && isAsk) {
-    return <PlanCard message={message} status={actions.runStatus(message.id)} onRun={() => { actions.runPlan(message.id); }} />;
-  }
-  if (message.askId !== null && (message.state === "running" || message.state === "done")) {
-    return <AskCard askId={message.askId} mode={message.action === "react" ? "react" : "help"} question={message.actionQuestion ?? ""} />;
-  }
-  if (message.state === "failed") {
+  const stage = replyStage(message);
+  if (stage === "plan") return <PlanCard message={message} status={actions.runStatus(message.id)} onRun={() => { actions.runPlan(message.id); }} />;
+  if (stage === "ask") return <AskCard askId={message.askId ?? ""} mode={message.action === "react" ? "react" : "help"} question={message.actionQuestion ?? ""} />;
+  if (stage === "gone") return <p className="chat-ask-line">{ASK_GONE_LINE}</p>;
+  if (stage === "failed") {
     return (
       <button type="button" className="quiet chat-again" onClick={() => { actions.tryAgain(message.id); }}>
-        Try again
+        Ask again
       </button>
     );
   }
   return null;
 };
 
-// The orchestrator's reply: the spark and its label, then the words as plain text (or the thinking dots), then what the reply does.
+// Meety's reply: its mark and name, then the words as plain text (or the thinking dots), then what the reply does.
 const AgentReply = (props: { message: OrchestratorMessage; actions: ReplyActions }): ReactElement => {
   const { message } = props;
   return (
     <article className="chat-agent" aria-label="Meety replied">
-      <Sticker name="spark" />
+      <MeetyMark />
       <span className="chat-who">Meety</span>
       <div className="chat-body">
         {message.state === "thinking" ? <WaitLine text={THINKING_LINE} /> : <p className="chat-text">{message.text}</p>}

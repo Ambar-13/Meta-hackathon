@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, screen, within } from "@testing-library/react";
-import { FriendRequestsView, FriendsView, type Friend } from "@meet-first/contracts";
+import { FriendRequestsView } from "@meet-first/contracts";
 import { APP_PATHS, ROUTE_PATTERNS, routes, ScreenFrame } from "./index.js";
 import { renderScreen, stubRoute } from "../testing/index.js";
 import { IDS, SERVER_NOW } from "../testing/fixtures.js";
@@ -11,9 +11,6 @@ afterEach(() => {
 
 // The fixed ids of this file.
 const ID = (n: number): string => `00000000-0000-4000-8000-${String(700 + n).padStart(12, "0")}`;
-// Two friends: Bea is in Explore, Cal is not.
-const BEA: Friend = { pairId: ID(1), displayName: "Bea", canAsk: true, listingId: ID(11) };
-const CAL: Friend = { pairId: ID(2), displayName: "Cal", canAsk: false, listingId: null };
 
 // Renders a bare screen frame at one page of the app.
 function renderFrame(options: { pattern: string; url: string; hideSettingsLink?: boolean; width?: 375 | 1024 }): void {
@@ -77,8 +74,7 @@ describe("screen frame links", () => {
     expect(screen.queryByRole("link", { name: "Settings" })).toBeNull();
   });
 
-  it("W7-WEB-A-T1: the Pages nav lists Chat, Explore, Friends, Me and Settings in order with aria-current on the current page, and the Friends nav lists each friend, linking to their profile when listed", async () => {
-    stubRoute(routes.directory.friends, FriendsView.parse({ friends: [BEA, CAL] }));
+  it("W7-WEB-A-T1, updated for the Instagram rail of 3 Nov: the Pages nav lists Meety, Explore, Friends, Me and Settings in order with aria-current on the current page, and the frame lists no friends, which the home page's right-hand column does", () => {
     renderFrame({ pattern: ROUTE_PATTERNS.explore, url: APP_PATHS.explore, width: 1024 });
 
     expect(pageLinks()).toEqual([
@@ -88,30 +84,7 @@ describe("screen frame links", () => {
       ["Me", "/me", null],
       ["Settings", "/settings", null],
     ]);
-    const friendsNav = await screen.findByRole("navigation", { name: "Friends" });
-    const friendLinks = within(friendsNav).getAllByRole("link");
-    expect(friendLinks.map((link) => [link.textContent, link.getAttribute("href")])).toEqual([
-      ["BBea", `/people/${ID(11)}`],
-      ["CCal", "/friends"],
-    ]);
-    expect(screen.getByRole("link", { name: "Bea" }).getAttribute("href")).toBe(`/people/${ID(11)}`);
-  });
-
-  it("W7-WEB-A-T1b: the Friends nav says so when there are no friends and offers Explore, and offers See all friends past 12", async () => {
-    renderFrame({ pattern: ROUTE_PATTERNS.friends, url: APP_PATHS.friends, width: 1024 });
-    const empty = await screen.findByRole("navigation", { name: "Friends" });
-    expect(within(empty).getByText("No friends yet.")).toBeTruthy();
-    expect(within(empty).getByRole("link", { name: "Find people in Explore" }).getAttribute("href")).toBe("/explore");
-    expect(within(screen.getByRole("navigation", { name: "Pages" })).getByRole("link", { name: "Friends" }).getAttribute("aria-current")).toBe("page");
-    cleanup();
-
-    const many = Array.from({ length: 14 }, (unused, index): Friend => ({ pairId: ID(30 + index), displayName: `Friend ${String(index + 1)}`, canAsk: true, listingId: null }));
-    stubRoute(routes.directory.friends, FriendsView.parse({ friends: many }));
-    renderFrame({ pattern: ROUTE_PATTERNS.card, url: APP_PATHS.card(IDS.card), width: 1024 });
-    const nav = await screen.findByRole("navigation", { name: "Friends" });
-    await within(nav).findByText("Friend 1");
-    expect(within(nav).getAllByRole("listitem")).toHaveLength(12);
-    expect(within(nav).getByRole("link", { name: "See all friends" }).getAttribute("href")).toBe("/friends");
+    expect(screen.queryByRole("navigation", { name: "Friends" })).toBeNull();
   });
 
   it("W7-WEB-A-T2: with 2 incoming requests the Friends link's accessible name is Friends, 2 requests", async () => {
@@ -120,7 +93,7 @@ describe("screen frame links", () => {
 
     const link = await screen.findByRole("link", { name: "Friends, 2 requests" });
     expect(link.getAttribute("href")).toBe("/friends");
-    expect(link.textContent).toBe("Friends2");
+    expect(link.textContent).toBe("2Friends");
   });
 
   it("W7-WEB-A-T2b: a failed rail read shows the pages and no friend list or error", async () => {

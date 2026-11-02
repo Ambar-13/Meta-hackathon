@@ -1,49 +1,57 @@
-/* The friends page (docs/DESIGN.md). Only rules this screen needs live here. */
+/* The friends page, after Instagram's request and following lists (3 Nov 2026): one row per person with their picture and name and
+   the buttons on the right, hairlines between sections, no boxes. */
 
 /* ---------- the page: one column on a phone, friends beside the answers on a laptop ---------- */
 .friends-columns { display: grid; gap: 8px; }
-.friends-columns section > h2:first-child { margin-top: 22px; }
+.friends-columns section > h2:first-child { margin-top: 20px; }
 
-/* ---------- requests and friends: one row per person, the avatar, the name, then the buttons ---------- */
-.friends-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 12px; }
-.friends-row { display: grid; grid-template-columns: 42px minmax(0, 1fr); align-items: center; gap: 12px 14px; padding: 14px 16px; border: 2px solid var(--ink); border-radius: var(--radius); background: var(--paper); }
-.friends-row.is-request { background: var(--coral-soft); border-color: var(--coral-deep); }
-.friends-name { font: 700 18px/1.25 var(--sans); overflow-wrap: anywhere; }
-.friends-name-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); }
+/* ---------- requests and friends: the picture, the name, then the buttons ---------- */
+.friends-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; }
+.friends-row { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; gap: 10px 12px; padding: 10px 0; }
+.friends-name { font: 600 15px/1.25 var(--ui-font); overflow-wrap: anywhere; color: var(--ui-ink); }
+.friends-name-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--ui-ink); }
 .friends-action { display: contents; }
-.friends-buttons { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-.friends-buttons > button, .friends-buttons > .btn { flex: 1 1 auto; min-height: 44px; padding: 0 18px; font-size: 15px; }
+.friends-buttons { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.friends-buttons > button, .friends-buttons > .btn { flex: 1 1 auto; min-height: 40px; padding: 0 16px; font-size: 14px; }
 .friends-action > form, .friends-action > p, .friends-action > .notice { grid-column: 1 / -1; }
-.friends-off { flex: 1 1 100%; margin: 0; font-weight: 600; }
-.friends-ask-form { width: 100%; padding: 4px 16px 16px; border-radius: var(--radius); background: var(--blue-soft); }
-.friends-ask-form textarea { min-height: 110px; }
+.friends-off { flex: 1 1 100%; margin: 0; font-size: 14px; color: var(--ui-ink-2); }
+.friends-ask-form { width: 100%; padding: 4px 14px 14px; border: 1px solid var(--ui-line); border-radius: 14px; }
+.friends-ask-form textarea { min-height: 100px; }
 .friends-ask-form button { margin-top: 12px; }
-.friends-form-line { margin: 0; font-weight: 600; color: var(--coral-ink); }
+.friends-form-line { margin: 0; font-weight: 600; color: var(--ui-red); }
 .friends-action .notice { width: 100%; margin: 0; }
 .friends-requests .notice { margin-top: 12px; }
 
 /* ---------- the requests you sent ---------- */
-.friends-waiting { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
-.friends-waiting > li { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 52px; padding: 6px 16px; border-radius: var(--radius); background: var(--yellow-soft); }
-.friends-waiting .friends-name { font-size: 16px; }
-.friends-waiting .muted { font: 600 13.5px/1.3 var(--sans); }
+.friends-waiting { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 2px; }
+.friends-waiting > li { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 52px; padding: 4px 0; }
+.friends-waiting .friends-name { font-size: 15px; }
+.friends-waiting .muted { font-size: 13px; }
 
 /* ---------- the answers your persona gave, each a short talk ---------- */
-.friends-copies { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 30px; }
-.friends-copy + .friends-copy { padding-top: 26px; border-top: 1.5px solid var(--line); }
-.friends-copy .msg.b .bubble { background: var(--blue-soft); }
+.friends-copies { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 26px; }
+.friends-copy + .friends-copy { padding-top: 24px; border-top: 1px solid var(--ui-line); }
+.friends-copy .bubble { background: var(--ui-soft); font-size: 15px; }
+.friends-copy .msg.b .bubble { background: oklch(95.5% 0.025 268); }
 
 /* ---------- the asks you sent ---------- */
-.friends-sent { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; }
-.friends-sent-link { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 12px; min-height: 44px; padding: 12px 16px; border-radius: var(--radius); background: var(--lilac-soft); text-decoration: none; color: var(--ink); }
-.friends-sent-kind { font: 700 13px/1.2 var(--sans); color: var(--ink-2); }
-.friends-sent-text { grid-column: 1; font-weight: 600; }
-.friends-sent-state { grid-column: 2; grid-row: 1 / span 2; white-space: nowrap; }
-.friends-sent-state.is-done { background: var(--green); }
+.friends-sent { list-style: none; margin: 8px 0 0; padding: 0; display: grid; }
+.friends-sent > li + li { border-top: 1px solid var(--ui-line); }
+.friends-sent-link { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 12px; min-height: 44px; padding: 12px 0; text-decoration: none; color: var(--ui-ink); }
+.friends-sent-link:hover { text-decoration: none; }
+.friends-sent-kind { font: 600 13px/1.2 var(--ui-font); color: var(--ui-ink-2); }
+.friends-sent-text { grid-column: 1; font-weight: 500; }
+.friends-sent-state { grid-column: 2; grid-row: 1 / span 2; white-space: nowrap; border: 0; background: var(--ui-soft); }
+.friends-sent-state.is-done { background: oklch(95% 0.03 268); }
 
-@media (min-width: 900px) {
-  .friends-columns { grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 56px; align-items: start; }
+@media (min-width: 720px) {
+  .friends-row { grid-template-columns: 44px minmax(120px, 1fr) auto; }
+  .friends-buttons { grid-column: 3; flex-wrap: nowrap; justify-content: flex-end; }
+  .friends-off { flex: 0 1 200px; text-align: right; }
+  .friends-buttons > button, .friends-buttons > .btn { flex: none; }
+  .friends-action > form, .friends-action > p, .friends-action > .notice { grid-column: 2 / -1; }
 }
 
-/* app.css sets "font: inherit" on buttons after the button rule, so buttons lose their bold; requests/design-friends-001.md. */
-.friends-row button, .friends-row .btn { font-weight: 700; }
+@media (min-width: 1100px) {
+  .friends-columns { grid-template-columns: minmax(0, 460px) minmax(0, 1fr); gap: 56px; align-items: start; }
+}

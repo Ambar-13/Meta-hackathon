@@ -116,3 +116,20 @@ describe("the orchestrator chat in the database", () => {
     expect(workerRead.map((row) => row.text)).toEqual(["hello"]);
   });
 });
+
+describe("the request lists", () => {
+  it("W7-CHECK-T6: friend_requests_mine returns at most 100 requests each way, newest first", async () => {
+    const listed = await createPairedMeetingWithTurns(t.db);
+    const listing = await list(listed.b.personId, listed.b.cardId, "Popular person.");
+    for (let index = 0; index < 101; index += 1) {
+      const sender = await createTestPerson(t.db, `Sender ${String(index)}`);
+      await sendRequest(sender.personId, listing);
+    }
+
+    const rows = await asPerson(t.db, listed.b.personId, async (trx) => (await sql<{ direction: string; other_display_name: string }>`SELECT direction, other_display_name FROM friend_requests_mine()`.execute(trx)).rows);
+
+    expect(rows).toHaveLength(100);
+    expect(rows.every((row) => row.direction === "incoming")).toBe(true);
+    expect(rows[0]?.other_display_name).toBe("Sender 100");
+  });
+});

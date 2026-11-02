@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import type { ProfileView } from "@meet-first/contracts";
 import { APP_PATHS, chatPathWithDraft, ErrorNotice, ScreenFrame } from "../../app-shell/index.js";
-import { EmptyState, LoadingLine, Sticker } from "../../look/index.js";
+import { EmptyState, Icon, LoadingLine } from "../../look/index.js";
 import { QuestionPicker } from "../lobby/index.js";
 import { leaveOutKindsFor, useListingMeeting, type MeetControls } from "../directory/index.js";
 import { useMeetingCard, useProfile, type ProfileModel } from "./people-state.js";
@@ -56,8 +56,8 @@ const FriendButtons = (props: { profile: ProfileView; meet: MeetControls | null 
   const { profile } = props;
   return (
     <>
-      <span className="chip c-green profile-friends">
-        <Sticker name="check" />
+      <span className="chip profile-friends">
+        <Icon name="check" size={16} isBold />
         {PROFILE_COPY.friends}
       </span>
       {profile.canAsk ? (
@@ -75,7 +75,7 @@ const FriendshipButtons = (props: { model: ProfileModel; profile: ProfileView; m
   const { model, profile } = props;
   const isSending = model.action.kind === "sending";
   const requestId = profile.requestId;
-  if (profile.friendship === "self") return <Link className="btn" to={APP_PATHS.me}>{PROFILE_COPY.editListing}</Link>;
+  if (profile.friendship === "self") return <Link className="btn quiet" to={APP_PATHS.me}>{PROFILE_COPY.editListing}</Link>;
   if (profile.friendship === "friends") return <FriendButtons profile={profile} meet={props.meet} />;
   if (profile.friendship === "requested") {
     return (

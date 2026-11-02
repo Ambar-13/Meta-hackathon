@@ -38,7 +38,7 @@ const ListedMe = (props: { listing: MyListing; home: HomeView | null; yours: You
   return (
     <>
       <ProfileHeader name={profile?.displayName ?? props.home?.displayName ?? ME_SCREEN_COPY.title} line={profile?.line ?? listing.line} itemCount={items.length}>
-        <button type="button" aria-expanded={isEditing} onClick={() => { setIsEditing(!isEditing); }}>{ME_SCREEN_COPY.editListing}</button>
+        <button type="button" className="quiet" aria-expanded={isEditing} onClick={() => { setIsEditing(!isEditing); }}>{ME_SCREEN_COPY.editListing}</button>
       </ProfileHeader>
       {isEditing ? <EditListing listing={listing} yours={props.yours} onSaved={onSaved} /> : null}
       <ProfileTabs items={items} source={ME_SCREEN_COPY.source} postsName={null} />
@@ -78,9 +78,9 @@ const MeLinks = (props: { home: HomeView | null }): ReactElement => {
   const card = props.home?.card ?? null;
   return (
     <nav className="me-links" aria-label={ME_SCREEN_COPY.linksLabel}>
-      {card === null ? null : <Link className="chip c-coral" to={APP_PATHS.card(card.id)}>{ME_SCREEN_COPY.yourCard}</Link>}
-      <Link className="chip c-blue" to={APP_PATHS.upload}>{ME_SCREEN_COPY.addChats}</Link>
-      <Link className="chip c-lilac" to={APP_PATHS.settings}>{ME_SCREEN_COPY.settings}</Link>
+      {card === null ? null : <Link className="btn quiet" to={APP_PATHS.card(card.id)}>{ME_SCREEN_COPY.yourCard}</Link>}
+      <Link className="btn quiet" to={APP_PATHS.upload}>{ME_SCREEN_COPY.addChats}</Link>
+      <Link className="btn quiet" to={APP_PATHS.settings}>{ME_SCREEN_COPY.settings}</Link>
     </nav>
   );
 };

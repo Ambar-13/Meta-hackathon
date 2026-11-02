@@ -1,32 +1,37 @@
-/* Explore: the search box, then everyone in Explore as a grid of name-tag tiles, Instagram's Explore in Meet First's kit (docs/DESIGN.md). */
+/* Explore, after Instagram's (3 Nov 2026): a grey search field with a glass in it, then everyone in Explore as a grid of tiles. With
+   no photos, each tile is a person's own line on their colour, like a text post, with their picture and name under it. */
 
 /* ---------- search ---------- */
-.explore-search { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 10px; max-width: 720px; }
-.explore-search label { margin: 0; }
-.explore-search button { min-height: 50px; padding: 0 18px; }
-.explore-stuck { margin: 12px 0 0; font: 500 15px/1.4 var(--sans); color: var(--ink-2); }
-.explore-stuck a { font-weight: 700; color: var(--ink); }
+.explore-search { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; max-width: 640px; }
+.explore-field { position: relative; display: block; margin: 0; }
+.explore-label { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.explore-glass { position: absolute; left: 14px; top: 50%; translate: 0 -50%; color: var(--ui-ink-2); pointer-events: none; }
+.explore-search .explore-field input, .explore-search .explore-field input:focus { margin: 0; padding-left: 42px; border-color: transparent; background: var(--ui-soft); }
+.explore-search .explore-field input:focus { border-color: var(--ui-line); background: var(--ui-bg); }
+.explore-search button { min-height: 44px; }
+.explore-stuck { margin: 10px 0 0; font-size: 14px; color: var(--ui-ink-2); }
 .explore-error { margin-top: 14px; }
 .explore-error > button { margin-top: 4px; }
 
 /* ---------- the grid of people ---------- */
-.explore-grid { list-style: none; margin: 22px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.explore-tile { display: flex; flex-direction: column; align-items: flex-start; height: 100%; padding: 16px 14px 14px; border: 2px solid var(--ink); border-radius: var(--radius);
-  background: var(--paper); color: var(--ink); text-decoration: none; transition: transform 0.2s var(--ease), background-color 0.2s var(--ease); }
-.explore-tile:hover { transform: translateY(-2px); background: var(--blue-soft); }
-.explore-tile:focus-visible { outline-offset: 3px; border-radius: var(--radius); }
-.tile-tag { --s: 10px; --r: -3deg; width: auto; min-width: 8.4em; max-width: calc(100% - 6px); margin: 4px 0 12px 2px; }
-.tile-tag.tilt-b { --r: 2deg; }
-.tile-name { margin: 0; font-size: 20px; line-height: 1.1; overflow-wrap: anywhere; }
-.tile-line { margin: 6px 0 0; font: 500 14.5px/1.35 var(--sans); color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.tile-claim { max-width: 100%; margin: 10px 0 0; padding: 6px 11px; border-radius: 999px; background: var(--yellow-soft); font: 600 13.5px/1.3 var(--sans);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.explore-tile .listing-open { display: inline-flex; margin: 8px 0 0; padding: 4px 11px; border-radius: 999px; background: var(--lilac-soft); font: 600 13.5px/1.3 var(--sans); color: var(--ink); }
+main.screen.wide:has(.explore-grid) { max-width: 975px; }
+.explore-grid { list-style: none; margin: 20px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.explore-grid > li { min-width: 0; }
+.explore-tile { display: flex; flex-direction: column; justify-content: space-between; gap: 16px; height: 100%; min-height: 210px; min-width: 0; overflow: hidden; padding: 14px;
+  border-radius: 14px; background: var(--k-soft); color: var(--ui-ink); text-decoration: none; transition: filter 0.15s var(--ease); }
+.explore-tile:hover { filter: brightness(0.97); text-decoration: none; }
+.explore-tile:focus-visible { outline-offset: 2px; border-radius: 14px; }
+.tile-line { margin: 0; font: 600 16px/1.35 var(--ui-font); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.tile-foot { display: grid; gap: 8px; min-width: 0; }
+.tile-who { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.tile-who .person-avatar { background: var(--ui-bg); }
+.tile-name { margin: 0; font: 600 14px/1.2 var(--ui-font); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tile-claim { display: block; font-size: 13px; color: oklch(40% 0.006 265); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.explore-tile .listing-open { justify-self: start; padding: 4px 10px; border-radius: 999px; background: var(--ui-bg); font: 600 13px/1.3 var(--ui-font); color: var(--ui-ink); }
 .explore-more { display: flex; margin: 22px auto 0; }
 
 @media (min-width: 720px) {
   .explore-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .explore-tile { padding: 20px 18px 18px; }
-  .tile-tag { --s: 12px; }
-  .tile-name { font-size: 22px; }
+  .explore-tile { aspect-ratio: 1; min-height: 0; padding: 18px; }
+  .tile-line { font-size: 18px; -webkit-line-clamp: 5; }
 }

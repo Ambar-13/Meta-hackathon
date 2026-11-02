@@ -1,0 +1,117 @@
+/* The signed-in app's look since 3 Nov 2026: Instagram's frame and screens, ChatGPT's chat (Ambar: "instagram + chatgpt chat combined").
+   White ground, near-black text, one grey for secondary text, hairline lines, the system font, round people, blue buttons, curved
+   corners everywhere. Every rule sits under :where(.social-frame), so it weighs no more than app.css's own rules: the landing and the
+   public pages keep the name-tag look, and a screen's own stylesheet still wins where it sets something. */
+
+.social-frame {
+  --ui-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --ui-bg: oklch(99.7% 0.001 265);
+  --ui-ink: oklch(18% 0.008 265);
+  --ui-ink-2: oklch(50% 0.006 265);
+  --ui-line: oklch(89.5% 0.003 265);
+  --ui-soft: oklch(96.2% 0.002 265);
+  --ui-hover: oklch(93.5% 0.002 265);
+  --ui-blue: oklch(54% 0.22 268);
+  --ui-blue-hover: oklch(47% 0.21 268);
+  --ui-red: oklch(56% 0.2 22);
+  --ui-radius: 10px;
+  /* The kit's tokens, pointed at the new ones, so every older screen that reads them takes the look too. */
+  --paper: var(--ui-bg);
+  --ink: var(--ui-ink);
+  --ink-2: var(--ui-ink-2);
+  --ink-3: var(--ui-ink-2);
+  --line: var(--ui-line);
+  --line-strong: oklch(80% 0.004 265);
+  --sans: var(--ui-font);
+  --display: var(--ui-font);
+  --lift: 0 10px 28px -14px oklch(18% 0.01 265 / 0.28);
+  --lift-s: 0 2px 8px oklch(18% 0.01 265 / 0.06);
+  min-height: 100dvh;
+  background: var(--ui-bg);
+  color: var(--ui-ink);
+  font: 400 15px/1.45 var(--ui-font);
+}
+
+/* ---------- text ---------- */
+:where(.social-frame) h1, :where(.social-frame) h2, :where(.social-frame) h3 { font-family: var(--ui-font); font-weight: 700; letter-spacing: -0.01em; color: var(--ui-ink); }
+:where(.social-frame) h1 { font-size: 24px; line-height: 1.2; margin: 8px 0 16px; }
+:where(.social-frame) h2 { font-size: 18px; line-height: 1.25; margin: 24px 0 8px; }
+:where(.social-frame) h3 { font-size: 16px; line-height: 1.3; margin: 16px 0 4px; letter-spacing: 0; }
+:where(.social-frame) p { margin: 6px 0; }
+:where(.social-frame) a { color: var(--ui-blue); font-weight: 600; text-decoration: none; }
+:where(.social-frame) a:hover { text-decoration: underline; text-underline-offset: 0.18em; }
+:where(.social-frame) :focus-visible { outline: 2px solid var(--ui-blue); outline-offset: 2px; border-radius: 8px; }
+:where(.social-frame) ::selection { background: oklch(90% 0.06 268); }
+:where(.social-frame) .muted, :where(.social-frame) .hint { color: var(--ui-ink-2); }
+
+/* ---------- buttons: Instagram's blue, grey for the quieter ones ---------- */
+:where(.social-frame) button, :where(.social-frame) .btn {
+  min-height: 44px; padding: 0 18px; border: 0; border-radius: var(--ui-radius); background: var(--ui-blue); color: oklch(99.5% 0 0);
+  font: 600 15px/1.2 var(--ui-font); transition: background-color 0.15s var(--ease);
+}
+:where(.social-frame) button:hover:not(:disabled), :where(.social-frame) .btn:hover { transform: none; background: var(--ui-blue-hover); text-decoration: none; }
+:where(.social-frame) button:active:not(:disabled), :where(.social-frame) .btn:active { transform: none; }
+:where(.social-frame) button.quiet, :where(.social-frame) .btn.quiet { background: var(--ui-soft); color: var(--ui-ink); }
+:where(.social-frame) button.quiet:hover:not(:disabled), :where(.social-frame) .btn.quiet:hover { background: var(--ui-hover); }
+:where(.social-frame) button.coral, :where(.social-frame) .btn.coral { background: var(--ui-soft); color: var(--ui-ink); }
+:where(.social-frame) button.danger, :where(.social-frame) .btn.danger { background: var(--ui-red); color: oklch(99.5% 0 0); }
+:where(.social-frame) button.text-button { min-height: 44px; padding: 0 4px; background: none; color: var(--ui-blue); text-decoration: none; }
+:where(.social-frame) button.text-button:hover:not(:disabled) { background: none; text-decoration: underline; }
+:where(.social-frame) button:disabled { background: var(--ui-soft); color: oklch(66% 0.004 265); }
+:where(.social-frame) .btn.big, :where(.social-frame) button.big { min-height: 50px; padding: 0 24px; font-size: 16px; }
+
+/* ---------- fields ---------- */
+:where(.social-frame) label { font: 600 14px/1.3 var(--ui-font); }
+:where(.social-frame) input[type="text"], :where(.social-frame) input[type="search"], :where(.social-frame) input[type="url"], :where(.social-frame) input:not([type]),
+:where(.social-frame) textarea, :where(.social-frame) select {
+  min-height: 44px; padding: 10px 14px; border: 1px solid var(--ui-line); border-radius: var(--ui-radius); background: var(--ui-bg); font: 400 16px/1.4 var(--ui-font);
+}
+:where(.social-frame) input[type="text"]:focus, :where(.social-frame) input[type="search"]:focus, :where(.social-frame) input:not([type]):focus,
+:where(.social-frame) textarea:focus, :where(.social-frame) select:focus { border-width: 1px; padding: 10px 14px; border-color: var(--ui-ink-2); background: var(--ui-bg); }
+:where(.social-frame) input[type="checkbox"], :where(.social-frame) input[type="radio"] { accent-color: var(--ui-blue); }
+:where(.social-frame) fieldset { border: 1px solid var(--ui-line); border-radius: 16px; }
+:where(.social-frame) legend { font: 700 16px/1.2 var(--ui-font); letter-spacing: 0; }
+
+/* ---------- surfaces: flat, hairline, curved ---------- */
+:where(.social-frame) .panel { border: 1px solid var(--ui-line); border-radius: 16px; }
+:where(.social-frame) .colour-panel { transform: none; background: var(--ui-soft); border-radius: 16px; }
+:where(.social-frame) .soft-panel { background: var(--ui-soft); border-radius: 16px; }
+:where(.social-frame) .sticky-note { transform: none; box-shadow: none; background: oklch(97% 0.035 100); border-radius: 16px; }
+:where(.social-frame) .sticky-note h2, :where(.social-frame) .sticky-note h3 { font: 700 16px/1.3 var(--ui-font); }
+:where(.social-frame) .notice { border: 1px solid oklch(86% 0.07 22); border-radius: 14px; background: oklch(97% 0.02 22); }
+:where(.social-frame) .rows > li { border-top: 1px solid var(--ui-line); }
+:where(.social-frame) .turn { border: 1px solid var(--ui-line); border-radius: 14px; }
+:where(.social-frame) .empty { border: 0; padding: 40px 16px; }
+:where(.social-frame) .empty p { color: var(--ui-ink-2); }
+:where(.social-frame) .loading .typing { background: var(--ui-soft); }
+
+/* ---------- small marks ---------- */
+:where(.social-frame) .chip { min-height: 36px; border: 1px solid var(--ui-line); background: var(--ui-bg); font: 600 14px/1 var(--ui-font); }
+:where(.social-frame) .pill { border: 1px solid var(--ui-line); font: 600 13px/1.2 var(--ui-font); }
+:where(.social-frame) .mark, :where(.social-frame) .flag { font: 600 13px/1.2 var(--ui-font); }
+:where(.social-frame) .receipt { transform: none; box-shadow: none; border: 1px solid var(--ui-line); border-radius: 14px; }
+:where(.social-frame) .receipt q { font: 500 15px/1.4 var(--ui-font); }
+:where(.social-frame) .receipt small { font: 400 13px/1.3 var(--ui-font); color: var(--ui-ink-2); }
+:where(.social-frame) .tabs { background: var(--ui-soft); }
+:where(.social-frame) .tabs button { background: transparent; color: var(--ui-ink); }
+:where(.social-frame) .tabs button[aria-selected="true"] { background: var(--ui-bg); color: var(--ui-ink); box-shadow: 0 1px 3px oklch(18% 0.01 265 / 0.12); }
+
+/* ---------- stickers and name tags: the landing's, so the app shows names plainly ---------- */
+:where(.social-frame) .stk { display: none; }
+:where(.social-frame) .logo .stk { display: inline-block; }
+:where(.social-frame) .tag { flex-direction: row; width: auto; transform: none; border-radius: 999px; background: var(--ui-soft); box-shadow: none; }
+:where(.social-frame) .tag-band, :where(.social-frame) .tag::after { display: none; }
+:where(.social-frame) .tag-name { padding: 8px 14px; font: 600 15px/1.2 var(--ui-font); }
+:where(.social-frame) .avatar { box-shadow: none; font: 600 16px/1 var(--ui-font); }
+:where(.social-frame) .avatar.small { font-size: 13px; }
+
+/* ---------- people and Meety ---------- */
+.person-avatar { display: inline-grid; place-items: center; flex: none; width: var(--a-size, 44px); height: var(--a-size, 44px); border-radius: 50%;
+  background: var(--k-soft, oklch(95% 0.02 265)); color: var(--c, oklch(40% 0.1 265)); font: 600 var(--a-font, 18px)/1 var(--ui-font, system-ui); }
+.person-avatar.size-s { --a-size: 32px; --a-font: 14px; }
+.person-avatar.size-m { --a-size: 44px; --a-font: 18px; }
+.person-avatar.size-l { --a-size: 86px; --a-font: 34px; }
+.person-avatar.size-xl { --a-size: 150px; --a-font: 56px; }
+.meety-mark { display: inline-grid; place-items: center; flex: none; width: var(--a-size, 28px); height: var(--a-size, 28px); border-radius: 50%; background: var(--ui-ink, oklch(18% 0.008 265)); color: var(--ui-bg, oklch(99.7% 0.001 265)); }
+.meety-mark.size-m { --a-size: 36px; }
+.icon { flex: none; }

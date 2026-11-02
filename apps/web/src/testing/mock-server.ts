@@ -20,6 +20,8 @@ function asStubReply(input: StubInput): StubReply {
 const RAIL_DEFAULTS = [
   http.get(new URL("/api/friends", window.location.origin).href, () => HttpResponse.json({ friends: [] })),
   http.get(new URL("/api/friend-requests", window.location.origin).href, () => HttpResponse.json({ incoming: [], outgoing: [] })),
+  // The home page's suggestions read the first page of Explore (3 Nov 2026); a test that needs listings stubs its own.
+  http.get(new URL("/api/directory", window.location.origin).href, () => HttpResponse.json({ listings: [], page: 0, hasMore: false })),
 ];
 // One MSW server for every accessibility test, shared by all its files.
 const server = setupServer(...RAIL_DEFAULTS);

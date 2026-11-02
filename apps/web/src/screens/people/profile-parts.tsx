@@ -1,6 +1,6 @@
 import { useId, useRef, useState, type KeyboardEvent, type ReactElement, type ReactNode } from "react";
 import type { PublicItem } from "@meet-first/contracts";
-import { EmptyState, NameTag, Receipt, Sticker } from "../../look/index.js";
+import { EmptyState, Icon, PersonAvatar, Receipt } from "../../look/index.js";
 import { postsSoonCopy, thingsSharedWords } from "./people-state.js";
 
 // The two tabs under a profile header, in order.
@@ -11,14 +11,12 @@ const TABS = [
 // One tab's key.
 type TabKey = (typeof TABS)[number]["key"];
 
-// The Instagram-style header of a profile: the name tag drawn large in a cobalt ring, then the name as the h1, the count of things
-// shared, the line, and the buttons. On a phone it stacks, centred.
+// The Instagram-style header of a profile: the person's round picture, then the name as the h1, the count of things shared, the line,
+// and the buttons. On a phone the picture sits left of the name and the buttons go full width under them.
 export const ProfileHeader = (props: { name: string; line: string | null; itemCount: number | null; children: ReactNode }): ReactElement => {
   return (
     <header className="profile-head">
-      <span className="profile-ring">
-        <NameTag name={props.name} colour="blue" className="profile-tag" />
-      </span>
+      <PersonAvatar name={props.name} size="xl" className="profile-avatar" />
       <div className="profile-words">
         <h1>{props.name}</h1>
         {props.itemCount === null ? null : <p className="profile-count">{thingsSharedWords(props.itemCount)}</p>}
@@ -33,8 +31,10 @@ export const ProfileHeader = (props: { name: string; line: string | null; itemCo
 export const PostsSoonCard = (props: { name: string | null }): ReactElement => {
   const copy = postsSoonCopy(props.name);
   return (
-    <section className="colour-panel c-yellow posts-soon">
-      <Sticker name="spark" />
+    <section className="posts-soon">
+      <span className="posts-soon-icon">
+        <Icon name="posts" size={30} />
+      </span>
       <h2>{copy.heading}</h2>
       <p>{copy.body}</p>
     </section>
@@ -89,6 +89,7 @@ export const ProfileTabs = (props: { items: PublicItem[]; source: string; postsN
             tabIndex={selected === tab.key ? 0 : -1}
             onClick={() => { select(tab.key, false); }}
           >
+            <Icon name={tab.key === "about" ? "about" : "posts"} size={16} />
             {tab.label}
           </button>
         ))}

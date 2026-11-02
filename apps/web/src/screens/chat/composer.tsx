@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, type KeyboardEvent, type ReactElement } from "react";
 import { ORCHESTRATOR_MESSAGE_MAX_CHARS } from "@meet-first/contracts";
 import { ErrorNotice } from "../../app-shell/index.js";
+import { Icon } from "../../look/index.js";
 import type { ComposerModel } from "./chat-state.js";
 import { COUNTER_FROM_CHARS } from "./chat-words.js";
 
@@ -67,7 +68,10 @@ export const Composer = (props: { model: ComposerModel }): ReactElement => {
         />
         <div className="chat-box-row">
           {used > COUNTER_FROM_CHARS ? <span className="chat-left">{`${String(ORCHESTRATOR_MESSAGE_MAX_CHARS - used)} left`}</span> : null}
-          <button type="submit" disabled={!canSend}>{model.isSending ? "Sending" : "Send"}</button>
+          <button type="submit" className="chat-send" disabled={!canSend}>
+            {model.isSending ? "Sending" : "Send"}
+            <Icon name="send" size={18} isBold />
+          </button>
         </div>
       </form>
       <p className="chat-safety">{SAFETY_LINE}</p>

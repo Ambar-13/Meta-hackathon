@@ -127,4 +127,19 @@ describe("the orchestrate job", () => {
     const body = JSON.stringify(model.seen[0]?.body);
     expect(body).toContain("you: How would Test B react if I moved our trip to March?\\nmeety: I can ask Test B's agent about March.\\n</recent>");
   });
+
+  it("W7-CHECK-T3: when the planned friend's pair is gone before the plan is written, the reply says so and the job ends, with no second model call", async () => {
+    const replyId = await withPerson(fresh.db, m.a.personId, async (trx) => {
+      const message = await trx.insertInto("orchestrator_messages").values({ person_id: m.a.personId, role: "you", text: "How would Gone react to a later demo?", state: "done" }).returning("id").executeTakeFirstOrThrow();
+      const snapshot = JSON.stringify([{ pairId: "00000000-0000-4000-8000-0000000009ff", displayName: "Gone", canAsk: true }]);
+      return (await trx.insertInto("orchestrator_messages").values({ person_id: m.a.personId, role: "agent", text: "", state: "thinking", reply_to: message.id, friends_snapshot: snapshot }).returning("id").executeTakeFirstOrThrow()).id;
+    });
+    const model = fakeModel(JSON.stringify({ action: "react", friend: "Gone", question: "How would you probably react to a later demo?", reply: "I can ask Gone's agent." }));
+
+    await runFor(replyId, model.live);
+    await runFor(replyId, model.live);
+
+    expect(await readReply(replyId)).toMatchObject({ state: "done", action: "reply", text: "You are no longer friends with Gone, so I cannot ask their agent.", action_pair_id: null });
+    expect(model.seen).toHaveLength(1);
+  });
 });

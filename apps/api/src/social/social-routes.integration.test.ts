@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { ErrorBody, FriendRequestAcceptResponse, FriendRequestCreateResponse, FriendRequestsView, FriendsView, OrchestratorMessage, OrchestratorSendResponse, OrchestratorThread, ProfileView, routes, SESSION_COOKIE } from "@meet-first/contracts";
+import { ContractError, ErrorBody, FriendRequestAcceptResponse, FriendRequestCreateResponse, FriendRequestsView, FriendsView, OrchestratorMessage, OrchestratorSendResponse, OrchestratorThread, ProfileView, routes, SESSION_COOKIE } from "@meet-first/contracts";
 import { withPerson } from "@meet-first/db";
 import { createPairedMeetingWithTurns, createTestPerson, type SeededMeeting } from "@meet-first/db/testing";
 import { registerAsksRoutes } from "../asks/index.js";
@@ -7,6 +7,7 @@ import { registerDirectoryRoutes } from "../directory/index.js";
 import { buildTestApp } from "../testing/index.js";
 import { enqueuedJobs } from "../testing/app-factory.js";
 import { registerSocialRoutes } from "./index.js";
+import { runPlan } from "./orchestrator.js";
 
 // The origin every request of this file sends: the test app's own address.
 const ORIGIN = "http://localhost:3000";
@@ -193,5 +194,19 @@ describe("the orchestrator chat", () => {
     expect(ErrorBody.parse(capped.body)).toEqual({ code: "orchestrator_daily_cap", message: "You have sent today's messages to Meety. Try again tomorrow." });
     const empty = await send({ method: "POST", url: routes.social.sendToOrchestrator.path, token: busy.sessionToken, payload: { text: "   " } });
     expect(empty.statusCode).toBe(400);
+  });
+
+  it("W7-CHECK-T4: when the queue refuses the ask's job, the plan goes back to planned with no ask, so the person can press again", async () => {
+    const ids = OrchestratorSendResponse.parse((await send({ method: "POST", url: routes.social.sendToOrchestrator.path, token: y.a.sessionToken, payload: { text: "Who could help me with sales?" } })).body);
+    await withPerson(t.db, y.a.personId, (trx) => trx.updateTable("orchestrator_messages")
+      .set({ state: "planned", text: "I can run a help search.", action: "help", action_question: "Who could help me get better at sales?" })
+      .where("id", "=", ids.replyId).execute());
+    const refusingQueue = (): Promise<void> => Promise.reject(new ContractError("enqueue_failed", "The job queue did not accept the job. Retry the request."));
+
+    const outcome = await runPlan({ db: t.db, now: () => new Date(), enqueue: refusingQueue }, { personId: y.a.personId, messageId: ids.replyId }).then(() => "settled", (error: unknown) => (error instanceof ContractError ? error.code : "other"));
+
+    expect(outcome).toBe("enqueue_failed");
+    const row = await withPerson(t.db, y.a.personId, (trx) => trx.selectFrom("orchestrator_messages").select(["state", "ask_id", "text"]).where("id", "=", ids.replyId).executeTakeFirstOrThrow());
+    expect(row).toEqual({ state: "planned", ask_id: null, text: "I can run a help search." });
   });
 });

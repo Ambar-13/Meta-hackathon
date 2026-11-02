@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
-import type { Friend, OrchestratorMessage } from "@meet-first/contracts";
+import { HELP_SEND_COPY, type Friend, type OrchestratorMessage } from "@meet-first/contracts";
 import { APP_PATHS, clearClientState, ROUTE_PATTERNS, routes } from "../../app-shell/index.js";
 import { renderScreen, requestsTo, stubRoute } from "../../testing/index.js";
 import { unlabelledControls } from "../../testing/render-screen.js";
@@ -170,17 +170,35 @@ describe("chat screen", () => {
     expect(within(reply).queryAllByRole("button")).toHaveLength(0);
   });
 
-  it("W7-WEB-B-T8: a failed reply shows its sentence, and Try again fills the composer with the message before it", async () => {
+  it("W7-WEB-B-T8, changed on 3 Nov after the wave 7 check: a failed reply shows its sentence, and Ask again sends the message before it again in one press", async () => {
     const sentence = "I could not work that out just now. Try again in a minute.";
-    stubReads({ thread: [[youSaid(chatId(1), "Older message"), replied(chatId(2), { text: "Done." }), youSaid(CHAT_IDS.sent, "How would Jonah react to a later demo?"), replied(CHAT_IDS.reply, { state: "failed", text: sentence })]] });
+    const earlier = "How would Jonah react to a later demo?";
+    stubReads({ thread: [[youSaid(chatId(1), "Older message"), replied(chatId(2), { text: "Done." }), youSaid(chatId(3), earlier), replied(chatId(4), { state: "failed", text: sentence })]] });
+    stubRoute(routes.social.sendToOrchestrator, { status: 202, body: { messageId: CHAT_IDS.sent, replyId: CHAT_IDS.reply } });
     renderChat();
 
     expect(await screen.findByText(sentence)).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
-    expect(composer().value).toBe("How would Jonah react to a later demo?");
+    fireEvent.click(screen.getByRole("button", { name: "Ask again" }));
     await waitFor(() => {
-      expect(document.activeElement).toBe(composer());
+      expect(requestsTo(routes.social.sendToOrchestrator).map((request) => request.body)).toEqual([{ text: earlier }]);
     });
+    expect(composer().value).toBe("");
+  });
+
+  it("W7-CHECK-T1: a planned help search's card says who gets a copy of the question, as the help page does", async () => {
+    stubReads({ thread: [[youSaid(chatId(1), "Who could help me with sales?"), replied(chatId(2), { state: "planned", action: "help", actionQuestion: "Who could help me with sales?", text: "I can run a help search." })]] });
+    renderChat();
+
+    const card = await screen.findByRole("region", { name: "The plan" });
+    expect(within(card).getByText(HELP_SEND_COPY)).toBeTruthy();
+    expect(within(card).getByRole("button", { name: "Start the help search" })).toBeTruthy();
+  });
+
+  it("W7-CHECK-T2: a running reply whose ask is gone says so, instead of showing nothing under its words", async () => {
+    stubReads({ thread: [[youSaid(chatId(1), "How would Jonah react to a later demo?"), replied(chatId(2), { state: "running", action: "react", actionQuestion: "How would you react?", actionFriendName: "Jonah", askId: null, text: "I can ask Jonah's agent." })]] });
+    renderChat();
+
+    expect(await screen.findByText("This ask is no longer here. Send your message again to ask again.")).toBeTruthy();
   });
 
   it("W7-WEB-B-T9: a 429 on send shows the api's sentence and keeps the text in the composer", async () => {

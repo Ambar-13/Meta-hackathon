@@ -1,46 +1,51 @@
-/* A profile: Instagram's header (the name tag as the big round picture, then the name, the count, the line and the buttons) over
-   the About and Posts tabs, in Meet First's kit (docs/DESIGN.md). /me reuses these rules. */
+/* A profile, after Instagram's (3 Nov 2026): the round picture beside the name, the count, the line and the buttons, then a hairline
+   tab strip with About and Posts. /me reuses these rules. */
 
-.profile-page { max-width: 935px; }
+.profile-page { max-width: 935px; margin: 0 auto; }
 
-/* ---------- the header: stacked and centred on a phone ---------- */
-.profile-head { display: flex; flex-direction: column; align-items: center; gap: 18px; margin: 14px 0 8px; text-align: center; }
-.profile-ring { display: inline-grid; place-items: center; padding: 22px 18px; border-radius: var(--radius-l); box-shadow: inset 0 0 0 4px var(--blue-deep); background: var(--blue-soft); }
-.profile-tag { --s: 22px; --r: -3deg; max-width: 72vw; }
-.profile-words { display: flex; flex-direction: column; align-items: center; width: 100%; min-width: 0; }
-.profile-words h1 { margin: 0; overflow-wrap: anywhere; }
-.profile-count { margin: 8px 0 0; font: 700 15px/1.3 var(--sans); }
-.profile-line { margin: 8px 0 0; font: 500 17px/1.45 var(--sans); max-width: 46ch; }
-.profile-buttons { display: flex; flex-direction: column; align-items: stretch; gap: 10px; width: 100%; margin-top: 18px; }
-.profile-buttons > .chip { align-self: center; min-height: 44px; }
-.profile-buttons > .chip .stk { font-size: 20px; }
-.profile-note { margin: 0; font: 600 15px/1.4 var(--sans); color: var(--ink-2); }
-.profile-meet { width: 100%; text-align: left; }
+/* ---------- the header: on a phone the picture sits left of the name and the count, the line and the buttons go full width under them ---------- */
+.profile-head { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "pic name" "pic count" "line line" "buttons buttons"; align-items: center;
+  column-gap: 20px; row-gap: 4px; margin: 12px 0 8px; }
+.profile-avatar { grid-area: pic; }
+.profile-avatar.size-xl { --a-size: 86px; --a-font: 34px; }
+.profile-words { display: contents; }
+.profile-words h1 { grid-area: name; align-self: end; margin: 0; font: 600 20px/1.25 var(--ui-font); overflow-wrap: anywhere; }
+.profile-count { grid-area: count; align-self: start; margin: 0; font-size: 15px; }
+.profile-line { grid-area: line; margin: 12px 0 0; font-size: 15px; line-height: 1.45; max-width: 52ch; }
+.profile-buttons { grid-area: buttons; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.profile-buttons > button, .profile-buttons > .btn { flex: 1 1 140px; min-height: 40px; font-size: 14px; }
+.profile-friends { min-height: 40px; gap: 6px; border: 0; background: var(--ui-soft); color: var(--ui-ink); }
+.profile-note { flex-basis: 100%; margin: 0; font-size: 14px; color: var(--ui-ink-2); }
+.profile-meet { flex-basis: 100%; text-align: left; }
 .profile-meet fieldset { margin: 6px 0 0; }
-.profile-meet [role="alert"] { margin: 12px 0 0; padding: 12px 14px; border-radius: 16px; background: var(--coral-soft); border: 2px solid var(--coral-deep); font-weight: 600; }
+.profile-meet [role="alert"] { margin: 12px 0 0; padding: 12px 14px; border-radius: 12px; background: oklch(97% 0.02 22); }
 
-/* ---------- the tabs and their panels ---------- */
-.profile-tabs { margin-top: 22px; padding-top: 6px; box-shadow: 0 -1.5px 0 var(--line); }
-.profile-tabs .tabs { margin: 16px 0 6px; }
-.profile-tabs .tabs button { min-height: 44px; padding: 0 22px; font-weight: 700; }
-.profile-tabs .tabs button:focus-visible { border-radius: 999px; }
-.about-items { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 14px; }
-.about-item { padding: 16px; border: 2px solid var(--ink); border-radius: var(--radius); background: var(--paper); }
-.about-claim { margin: 0 0 10px; font: 700 17px/1.35 var(--sans); }
-.posts-soon { --r: 1deg; max-width: 560px; margin-top: 26px; padding-top: 26px; }
-.posts-soon > .stk { position: absolute; right: 16px; top: -22px; font-size: 48px; transform: rotate(12deg); }
-.posts-soon h2 { margin: 0 0 8px; font-size: 26px; }
-.posts-soon p { margin: 0; }
+/* ---------- the tabs: a hairline strip with the chosen tab marked above it ---------- */
+.profile-tabs { margin-top: 26px; box-shadow: 0 -1px 0 var(--ui-line); }
+.profile-tabs .tabs { display: flex; justify-content: center; gap: 48px; margin: 0; padding: 0; border-radius: 0; background: none; }
+.profile-tabs .tabs button { gap: 6px; min-height: 48px; padding: 0 4px; border-radius: 0; background: none; color: var(--ui-ink-2); font: 600 14px/1 var(--ui-font); box-shadow: none; }
+.profile-tabs .tabs button:hover:not(:disabled) { background: none; color: var(--ui-ink); }
+.profile-tabs .tabs button[aria-selected="true"] { color: var(--ui-ink); background: none; box-shadow: inset 0 1px 0 var(--ui-ink); }
+.profile-tabs .tabs button:focus-visible { border-radius: 8px; }
+.about-items { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 10px; }
+.about-item { padding: 16px; border: 1px solid var(--ui-line); border-radius: 14px; background: var(--ui-bg); }
+.about-claim { margin: 0 0 8px; font: 600 15px/1.4 var(--ui-font); }
+.about-item .receipt { padding: 0; border: 0; border-radius: 0; background: none; }
+.about-item .receipt q { font-size: 15px; color: var(--ui-ink); }
+.posts-soon { display: grid; justify-items: center; gap: 10px; max-width: 420px; margin: 40px auto 20px; text-align: center; }
+.posts-soon-icon { display: inline-grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--ui-ink); }
+.posts-soon h2 { margin: 6px 0 0; font: 700 20px/1.25 var(--ui-font); }
+.posts-soon p { margin: 0; font-size: 14px; color: var(--ui-ink-2); }
 
-/* ---------- laptop: the picture on the left, the words and buttons on the right ---------- */
+/* ---------- laptop: the big picture in its own column ---------- */
 @media (min-width: 720px) {
-  .profile-head { flex-direction: row; align-items: center; gap: 40px; text-align: left; }
-  .profile-ring { padding: 28px 24px; }
-  .profile-tag { --s: 25.6px; max-width: none; }
-  .profile-words { align-items: flex-start; }
-  .profile-buttons { flex-direction: row; flex-wrap: wrap; align-items: center; width: auto; }
-  .profile-buttons > .chip { align-self: auto; }
-  .profile-buttons > .profile-note { flex-basis: 100%; }
-  .profile-meet { flex-basis: 100%; }
+  .profile-head { grid-template-columns: 150px minmax(0, 1fr); grid-template-areas: "pic words"; column-gap: 56px; margin: 26px 0 8px; padding-left: 40px; }
+  .profile-avatar.size-xl { --a-size: 150px; --a-font: 56px; }
+  .profile-words { grid-area: words; display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+  .profile-words h1 { align-self: auto; font-size: 22px; }
+  .profile-count { align-self: auto; margin-top: 10px; }
+  .profile-line { margin-top: 8px; }
+  .profile-buttons { margin-top: 16px; }
+  .profile-buttons > button, .profile-buttons > .btn { flex: none; min-width: 120px; }
   .about-items { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

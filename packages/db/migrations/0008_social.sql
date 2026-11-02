@@ -186,20 +186,25 @@ COMMENT ON FUNCTION friend_request_decline(uuid) IS 'Declines a pending request 
 CREATE FUNCTION friend_requests_mine()
 RETURNS TABLE (request_id uuid, direction text, other_display_name text, other_listing_id uuid, created_at timestamptz)
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, pg_temp AS $$
-  SELECT r.id,
-    CASE WHEN r.to_person_id = app_person() THEN 'incoming' ELSE 'outgoing' END,
-    p.display_name, shown.id, r.created_at
-  FROM friend_requests r
-  JOIN people p ON p.id = CASE WHEN r.to_person_id = app_person() THEN r.from_person_id ELSE r.to_person_id END AND p.state = 'active'
-  LEFT JOIN LATERAL (
-    SELECT l.id FROM directory_listings l
-    JOIN cards c ON c.id = l.card_id AND c.person_id = l.person_id AND c.state = 'approved'
-    WHERE l.person_id = p.id
-  ) shown ON true
-  WHERE r.state = 'pending' AND app_person() IN (r.from_person_id, r.to_person_id)
-  ORDER BY r.created_at DESC, r.id
+  SELECT ranked.request_id, ranked.direction, ranked.other_display_name, ranked.other_listing_id, ranked.created_at
+  FROM (
+    SELECT r.id AS request_id,
+      CASE WHEN r.to_person_id = app_person() THEN 'incoming' ELSE 'outgoing' END AS direction,
+      p.display_name AS other_display_name, shown.id AS other_listing_id, r.created_at,
+      row_number() OVER (PARTITION BY r.to_person_id = app_person() ORDER BY r.created_at DESC, r.id) AS place
+    FROM friend_requests r
+    JOIN people p ON p.id = CASE WHEN r.to_person_id = app_person() THEN r.from_person_id ELSE r.to_person_id END AND p.state = 'active'
+    LEFT JOIN LATERAL (
+      SELECT l.id FROM directory_listings l
+      JOIN cards c ON c.id = l.card_id AND c.person_id = l.person_id AND c.state = 'approved'
+      WHERE l.person_id = p.id
+    ) shown ON true
+    WHERE r.state = 'pending' AND app_person() IN (r.from_person_id, r.to_person_id)
+  ) ranked
+  WHERE ranked.place <= 100
+  ORDER BY ranked.created_at DESC, ranked.request_id
 $$;
-COMMENT ON FUNCTION friend_requests_mine() IS 'The pending requests of the person in app.person_id, received and sent, newest first: the other person''s display name and their listing when Explore shows it, never their person id.';
+COMMENT ON FUNCTION friend_requests_mine() IS 'The pending requests of the person in app.person_id, received and sent, newest first and at most 100 each way: the other person''s display name and their listing when Explore shows it, never their person id.';
 
 CREATE FUNCTION directory_profile(p_listing uuid)
 RETURNS TABLE (listing_id uuid, display_name text, line text, open_to_romance boolean, items jsonb, friendship text, request_id uuid, pair_id uuid, can_ask boolean)

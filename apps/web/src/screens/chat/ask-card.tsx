@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { ASK_POLL_MS, type AskMode, type AskView } from "@meet-first/contracts";
 import { apiFetch, APP_PATHS, routes, usePolledView, type PolledView } from "../../app-shell/index.js";
-import { Avatar, TypingDots } from "../../look/index.js";
+import { PersonAvatar, TypingDots } from "../../look/index.js";
 import { isAskRunning } from "../ask/ask-state.js";
 import { ASK_CARD_ANSWERS_MAX, firstSentence } from "./chat-words.js";
 
@@ -57,7 +57,7 @@ const AskAnswers = (props: { view: AskView }): ReactElement => {
         <ul className="chat-answers">
           {shown.map((answer) => (
             <li key={answer.answerId}>
-              <Avatar name={answer.displayName} side="b" isSmall />
+              <PersonAvatar name={answer.displayName} size="s" />
               <span>
                 <strong>{answer.displayName}</strong>
                 <span className="chat-answer-line">{firstSentence(answer.answer)}</span>

@@ -14,6 +14,7 @@ import { readDraftQuery, useChatScreen, type ChatModel } from "./chat-state.js";
 import { chipTexts, greetingOf, messageBefore } from "./chat-words.js";
 import { Composer } from "./composer.js";
 import { Thread, type ReplyActions } from "./thread-parts.js";
+import { FriendsRow, HomeSide } from "./home-parts.js";
 
 // The lines of this page that the design gives word for word, and the loading line it does not.
 const UNDER_GREETING = "Ask who could help you with something, or how a friend would probably react to something.";
@@ -97,7 +98,7 @@ function replyActions(model: ChatModel): ReplyActions {
   return {
     runStatus: model.runStatus,
     runPlan: (replyId) => { void model.runPlan(replyId); },
-    tryAgain: (replyId) => { model.composer.fill(messageBefore(model.messages, replyId) ?? ""); },
+    tryAgain: (replyId) => { void model.composer.resend(messageBefore(model.messages, replyId) ?? ""); },
   };
 }
 
@@ -126,23 +127,41 @@ function newestKey(messages: ChatModel["messages"]): string {
   return last === undefined ? "" : `${String(messages.length)}:${last.id}:${last.state}`;
 }
 
+// The chat itself: the next step while there is no approved card, the greeting or the thread, the box, and the chips.
+const ChatColumn = (props: { model: ChatModel; isEmpty: boolean; end: RefObject<HTMLDivElement | null> }): ReactElement => {
+  const { model, isEmpty } = props;
+  const home = model.home.value;
+  return (
+    <div className={rootClass(model.thread.value !== null, isEmpty)}>
+      {home === null ? null : <NextStep home={home} />}
+      {isEmpty ? <Greeting displayName={home?.displayName ?? null} /> : null}
+      {model.messages.length > 0 ? <Thread messages={model.messages} actions={replyActions(model)} /> : null}
+      <ThreadState model={model} />
+      <Composer model={model.composer} />
+      {isEmpty ? <Chips model={model} /> : null}
+      <div className="chat-end" ref={props.end} />
+    </div>
+  );
+};
+
 // The chat page: the next step while there is no approved card, the greeting or the thread, the composer, and the chips.
 export const ChatScreen = (): ReactElement => {
   const location = useLocation();
   const model = useChatScreen(readDraftQuery(location.search));
   const isEmpty = model.thread.value !== null && model.messages.length === 0;
   const end = useScrollToNewest(newestKey(model.messages));
-  const home = model.home.value;
+  const friends = model.friends.value?.friends ?? null;
+  const onAsk = (name: string): void => {
+    model.composer.fill(`How would ${name} react to `);
+  };
   return (
-    <ScreenFrame title="Meety">
-      <div className={rootClass(model.thread.value !== null, isEmpty)}>
-        {home === null ? null : <NextStep home={home} />}
-        {isEmpty ? <Greeting displayName={home?.displayName ?? null} /> : null}
-        {model.messages.length > 0 ? <Thread messages={model.messages} actions={replyActions(model)} /> : null}
-        <ThreadState model={model} />
-        <Composer model={model.composer} />
-        {isEmpty ? <Chips model={model} /> : null}
-        <div className="chat-end" ref={end} />
+    <ScreenFrame title="Meety" isWide>
+      <div className="home">
+        <div className="home-main">
+          <FriendsRow friends={friends ?? []} />
+          <ChatColumn model={model} isEmpty={isEmpty} end={end} />
+        </div>
+        <HomeSide home={model.home.value} friends={friends} suggestions={model.suggestions.value?.listings ?? null} adds={model.adds} onAsk={onAsk} />
       </div>
     </ScreenFrame>
   );

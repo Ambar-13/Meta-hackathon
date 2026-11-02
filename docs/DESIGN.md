@@ -2,6 +2,16 @@
 
 The look of the Meet First web app. Who it is for and why it looks this way are in [PRODUCT.md](PRODUCT.md). Ambar picked this direction on 27 Oct 2026, from probe 5 ("name tags, Lofty-led, on white").
 
+## The signed-in app: Instagram and ChatGPT (since 3 Nov 2026)
+
+Ambar on 3 Nov: "i wanted it to look like instagram + chatgpt chat combined.... the current ui doesnt look good", with a screenshot of Instagram's 2026 web app. Everything below this section is the landing's look; it stays for the welcome, claim, join and public share pages. Every signed-in page takes the look in `apps/web/src/app-shell/app-look.css`, scoped to `.social-frame`.
+
+- **Frame (Instagram):** on a laptop a 72px white rail of line icons (lucide, 1.8 stroke), the logo at its top, Meety, Explore, Friends and Me in the middle, Settings at its foot; the current page's icon is filled or bold, and each icon's words show beside it on hover and focus. On a phone a top bar with the logo and Settings, and a bottom bar of the four icons with a hairline above it. A red count sits on the Friends icon.
+- **Home (Instagram and ChatGPT):** your friends as story circles across the top, a ring in the two voice colours (coral to cobalt) when their agent can be asked; Meety's chat in the middle, after ChatGPT (your messages in grey bubbles on the right, Meety's replies as plain text with its mark, a 28px-radius box with a soft shadow); on screens 1160px and wider a right-hand column with you, your friends with Ask, and people Explore suggests with Add friend.
+- **Explore, profiles, Friends, Me (Instagram):** a grey search field; a grid of tiles, each a person's line on their own colour; profiles with a round picture (150px laptop, 86px phone), the name, the count, the line, blue and grey buttons, and a hairline tab strip; requests and friends as plain rows.
+- **Tokens:** the system font, near-white ground, near-black ink, one grey (`--ui-ink-2`), hairlines (`--ui-line`), grey fills (`--ui-soft`), Instagram's blue for main buttons (`--ui-blue`), red only for counts and deleting. People are round initials on one of four soft colours their name picks (`PersonAvatar`). Stickers and name tags are hidden in the app except the logo.
+- **Kept rules:** curved corners everywhere (buttons 10px, cards 14 to 16px, the box and chips pills), text 13px and up, no all caps, no em dashes, one main action per screen.
+
 ## The idea
 
 The look comes from one thing in Meet First's own world: the "Hello, my name is" sticker everyone wears on day one of a hackathon.

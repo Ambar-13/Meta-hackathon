@@ -2,7 +2,7 @@ import { useState, type FormEvent, type ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { DIRECTORY_SWITCH_COPY, LISTING_LINE_MAX_CHARS, ROMANCE_SWITCH_COPY, type HomeView, type ListedMeeting, type MyListing } from "@meet-first/contracts";
 import { APP_PATHS, ErrorNotice } from "../../app-shell/index.js";
-import { Avatar } from "../../look/index.js";
+import { PersonAvatar } from "../../look/index.js";
 import { MEETING_STATE_LABELS } from "../lobby/index.js";
 import type { YourListingHook } from "../directory/index.js";
 import { useListingSave, type ListingSaveState } from "./me-state.js";
@@ -29,7 +29,7 @@ const SaveLine = (props: { state: ListingSaveState }): ReactElement | null => {
   const { state } = props;
   if (state.kind === "refused") return <p className="me-refusal" role="alert">{state.sentence}</p>;
   if (state.kind === "failed") return <ErrorNotice error={state.error} />;
-  if (state.kind === "saved") return <p className="soft-panel c-green" role="status">{ME_COPY.saved}</p>;
+  if (state.kind === "saved") return <p className="soft-panel" role="status">{ME_COPY.saved}</p>;
   return null;
 };
 
@@ -78,10 +78,10 @@ export const EditListing = (props: { listing: MyListing; yours: YourListingHook;
 export const JoinExplore = (props: { home: HomeView | null; yours: YourListingHook }): ReactElement | null => {
   const card = props.home?.card ?? null;
   const hasLeft = props.yours.leaveState.kind === "left";
-  if (props.home === null) return hasLeft ? <p className="soft-panel c-green" role="status">{ME_COPY.left}</p> : null;
+  if (props.home === null) return hasLeft ? <p className="soft-panel" role="status">{ME_COPY.left}</p> : null;
   return (
     <section className="panel me-edit" aria-label="Join Explore">
-      {hasLeft ? <p className="soft-panel c-green" role="status">{ME_COPY.left}</p> : null}
+      {hasLeft ? <p className="soft-panel" role="status">{ME_COPY.left}</p> : null}
       {card?.state === "approved" ? (
         <>
           <ListingForm cardId={card.id} listing={null} submitLabel={ME_COPY.join} onSaved={props.yours.replaceListing} />
@@ -118,7 +118,7 @@ export const ListedMeetingList = (props: { meetings: ListedMeeting[] }): ReactEl
       <ul className="listed-meetings">
         {props.meetings.map((meeting) => (
           <li key={meeting.meetingId}>
-            <Avatar name={meeting.otherDisplayName} side="b" />
+            <PersonAvatar name={meeting.otherDisplayName} />
             <div className="listed-body">
               <p className="listed-question">{`${meeting.otherDisplayName}: ${meeting.questionText}`}</p>
               <span className="pill">{MEETING_STATE_LABELS[meeting.state]}</span>

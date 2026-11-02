@@ -7,6 +7,7 @@ import "@fontsource-variable/bricolage-grotesque/opsz.css";
 import "@fontsource-variable/hanken-grotesk";
 import "@fontsource-variable/shantell-sans";
 import "./app.css";
+import "./app-look.css";
 import { StickerSheet } from "../look/index.js";
 
 // Catches a screen that throws and shows a reload button instead of a blank page.

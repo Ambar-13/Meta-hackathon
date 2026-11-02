@@ -8,7 +8,7 @@ import { useState, type FormEvent, type ReactElement } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { AboutMeAnswer, AskSummary, Friend, FriendRequestView } from "@meet-first/contracts";
 import { APP_PATHS, ErrorNotice, ScreenFrame } from "../../app-shell/index.js";
-import { Avatar, EmptyState, LoadingLine } from "../../look/index.js";
+import { Avatar, EmptyState, LoadingLine, PersonAvatar } from "../../look/index.js";
 import { AnswerClaims } from "../ask/index.js";
 import { useFriendsScreen, type FriendsScreenModel } from "./friends-state.js";
 
@@ -122,9 +122,9 @@ const FriendsBody = (props: { model: FriendsScreenModel }): ReactElement => {
   }
   return (
     <ul className="friends-list">
-      {friends.value.friends.map((friend, index) => (
+      {friends.value.friends.map((friend) => (
         <li className="friends-row" key={friend.pairId}>
-          <Avatar name={friend.displayName} side={index % 2 === 0 ? "b" : "a"} />
+          <PersonAvatar name={friend.displayName} />
           <PersonName name={friend.displayName} listingId={friend.listingId} />
           <FriendAction friend={friend} model={props.model} />
         </li>
@@ -143,7 +143,7 @@ const RequestsSection = (props: { model: FriendsScreenModel; incoming: FriendReq
       <ul className="friends-list">
         {props.incoming.map((request) => (
           <li className="friends-row is-request" key={request.requestId}>
-            <Avatar name={request.otherName} side="a" />
+            <PersonAvatar name={request.otherName} />
             <PersonName name={request.otherName} listingId={request.otherListingId} />
             <div className="friends-buttons">
               <button type="button" disabled={model.answer.busyId === request.requestId} onClick={() => void model.accept(request.requestId)}>Accept</button>
@@ -166,7 +166,7 @@ const SentRequestsSection = (props: { outgoing: FriendRequestView[] }): ReactEle
       <ul className="friends-waiting">
         {props.outgoing.map((request) => (
           <li key={request.requestId}>
-            <Avatar name={request.otherName} side="b" isSmall />
+            <PersonAvatar name={request.otherName} size="s" />
             <PersonName name={request.otherName} listingId={request.otherListingId} />
             <span className="muted">{WAITING_LINE}</span>
           </li>

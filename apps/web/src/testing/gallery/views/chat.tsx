@@ -42,12 +42,24 @@ const FAILED = replied(chatId(22), { state: "failed", text: "I could not work th
 // A plain answer in words, with a line break.
 const WORDS = replied(chatId(23), { state: "done", action: "reply", text: "Meet First lets your agent answer for you from what you chose to share.\nAsk me who could help with something, or how a friend would probably react." });
 
+// The first page of Explore the right-hand column suggests people from: three people who are not friends yet.
+const SUGGESTED = {
+  listings: [
+    { listingId: chatId(60), displayName: "Priyanka", line: "Design and front end, happy to pair on anything with a screen.", openToRomance: false, items: [] },
+    { listingId: chatId(61), displayName: "Ravi", line: "Backend and data. Says no to scope creep.", openToRomance: false, items: [] },
+    { listingId: chatId(62), displayName: "Sung-min", line: "First hackathon, here to meet people.", openToRomance: false, items: [] },
+  ],
+  page: 0,
+  hasMore: false,
+};
+
 // The three reads of the page: the thread, the home view and the friends list, plus any other stubs.
 function reads(thread: OrchestratorMessage[], extra: GalleryStub[] = [], hasCard = true): GalleryStub[] {
   return [
     { route: routes.social.readThread, replies: { status: 200, body: threadOf(thread) } },
     { route: routes.people.readHome, replies: { status: 200, body: homeOf(hasCard) } },
     { route: routes.directory.friends, replies: { status: 200, body: friendsOf([MIRA, JONAH]) } },
+    { route: routes.directory.browse, replies: { status: 200, body: SUGGESTED } },
     ...extra,
   ];
 }
