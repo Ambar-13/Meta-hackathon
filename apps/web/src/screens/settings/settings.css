@@ -1,7 +1,9 @@
 /* The settings page and its delete dialog (docs/DESIGN.md). Only rules this screen needs live here. */
 
 /* ---------- the two sections ---------- */
-.settings-section { margin: 18px 0 22px; padding: 20px; }
+.settings-section { margin: 0; padding: 22px 0; border-top: 1px solid var(--ui-line); }
+.settings-section:first-of-type { padding-top: 6px; border-top: 0; }
+.settings-section > h2 { margin-top: 0; }
 .settings-section > p { color: var(--ink-2); }
 .settings-main, .settings-delete-trigger { margin-top: 8px; }
 .settings-link { margin: 18px 0 0; }
@@ -10,7 +12,7 @@
 .settings-link-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 12px; }
 .settings-link-row p { margin: 0; font-size: 14.5px; }
 .settings-delete-trigger { border-color: var(--coral-deep); }
-.settings-deleted { display: flex; align-items: flex-start; gap: 12px; margin: 14px 0 0; }
+.settings-deleted { display: flex; align-items: flex-start; gap: 12px; margin: 14px 0 0; padding: 0; background: none; }
 .settings-deleted .stk { font-size: 30px; }
 .settings-deleted p { margin: 2px 0 0; font-weight: 600; color: var(--ink); }
 

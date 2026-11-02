@@ -1,6 +1,7 @@
 /* The pair and join pages: the two name tags, the invite card with its QR code, and the join card. */
 
 .pair-tags { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 10px 0 18px; }
+.social-frame .pair-tags { display: none; }
 .pair-tags .tag { --s: 15px; }
 .pair-tag-a { --r: -7deg; }
 .pair-tag-b { --r: 6deg; }

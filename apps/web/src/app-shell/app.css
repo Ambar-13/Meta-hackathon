@@ -183,7 +183,7 @@ legend { padding: 0 8px; margin-left: -8px; font: 800 20px/1.1 var(--display); l
 .msg.b .bubble { border-radius: 24px 24px 8px 24px; }
 .bubble .who { display: block; font: 700 13px/1.2 var(--sans); margin-bottom: 4px; }
 .bubble p { margin: 0 0 6px; } .bubble p:last-child { margin-bottom: 0; }
-.bubble.writing { background: var(--paper); outline: 2px dashed var(--v); outline-offset: -2px; }
+.bubble.writing { background: var(--paper); outline: 2px dashed var(--line-strong); outline-offset: -2px; }
 .bubble.guess { background: var(--paper); outline: 2px dashed var(--ink); outline-offset: -2px; }
 .receipt { display: flex; gap: 10px; align-items: flex-start; max-width: 100%; background: var(--paper); border-radius: 16px; padding: 10px 12px; text-align: left; color: var(--ink); text-decoration: none;
   box-shadow: var(--lift-s), 0 0 0 1.5px var(--line); transform: rotate(var(--t, -0.5deg)); }

@@ -14,12 +14,6 @@ export type ProfileModel = {
   decline: (requestId: string) => Promise<void>;
 };
 
-// The count line under a name: "3 things shared", "1 thing shared", or "Nothing shared yet" (the one number shown about a person).
-export function thingsSharedWords(count: number): string {
-  if (count === 0) return "Nothing shared yet";
-  return count === 1 ? "1 thing shared" : `${String(count)} things shared`;
-}
-
 // The coming-soon card's words: the own-profile copy when name is null, else the copy about that person's agent.
 export function postsSoonCopy(name: string | null): { heading: string; body: string } {
   if (name === null) {

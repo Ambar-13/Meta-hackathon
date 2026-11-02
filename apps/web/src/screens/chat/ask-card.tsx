@@ -8,10 +8,10 @@ import { PersonAvatar, TypingDots } from "../../look/index.js";
 import { isAskRunning } from "../ask/ask-state.js";
 import { ASK_CARD_ANSWERS_MAX, firstSentence } from "./chat-words.js";
 
-// The chip of each kind of ask: its words and colour class.
-export const ASK_KIND_CHIP: Record<AskMode, { label: string; colour: string }> = {
-  help: { label: "Help search", colour: "c-yellow" },
-  react: { label: "Friend ask", colour: "c-blue" },
+// The small grey words over each kind of ask.
+export const ASK_KIND_CHIP: Record<AskMode, { label: string }> = {
+  help: { label: "Help search" },
+  react: { label: "Friend ask" },
 };
 
 // The waiting line of each running state of an ask.
@@ -35,12 +35,12 @@ export const WaitLine = (props: { text: string }): ReactElement => {
   );
 };
 
-// The chip and the question at the top of a card.
+// The kind's words and the question at the top of a plan or an ask.
 export const KindHead = (props: { mode: AskMode; question: string }): ReactElement => {
   const chip = ASK_KIND_CHIP[props.mode];
   return (
     <>
-      <span className={`chip chat-kind ${chip.colour}`}>{chip.label}</span>
+      <span className="chat-kind">{chip.label}</span>
       <p className="chat-question">{`“${props.question}”`}</p>
     </>
   );

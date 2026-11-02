@@ -2,7 +2,7 @@ import { useId, useRef, useState, type KeyboardEvent, type ReactElement, type Re
 import type { PostsView, PublicItem } from "@meet-first/contracts";
 import { ErrorNotice, type PolledView } from "../../app-shell/index.js";
 import { EmptyState, Icon, LoadingLine, PersonAvatar, Receipt, SampleChip } from "../../look/index.js";
-import { postAgeWords, postsSoonCopy, thingsSharedWords } from "./people-state.js";
+import { postAgeWords, postsSoonCopy } from "./people-state.js";
 
 // The two tabs under a profile header, in order.
 const TABS = [
@@ -14,16 +14,15 @@ export type TabKey = (typeof TABS)[number]["key"];
 // The line under a sample person's name, so nobody takes them for a real person.
 const SAMPLE_NOTE = "A sample person, not a real one. Friend requests to them are accepted at once.";
 
-// The Instagram-style header of a profile: the person's round picture, then the name as the h1, the count of things shared, the line,
-// the sample note for a sample person, and the buttons. On a phone the picture sits left of the name and the buttons go full width
-// under them.
-export const ProfileHeader = (props: { name: string; line: string | null; itemCount: number | null; isSample?: boolean; children: ReactNode }): ReactElement => {
+// The Instagram-style header of a profile: the person's round picture, then the name as the h1, the line, the sample note for a sample
+// person, and the buttons. No count of anything about the person shows here (PRODUCT.md principle 5). On a phone the picture sits left
+// of the name and the buttons go full width under them.
+export const ProfileHeader = (props: { name: string; line: string | null; isSample?: boolean; children: ReactNode }): ReactElement => {
   return (
     <header className="profile-head">
       <PersonAvatar name={props.name} size="xl" className="profile-avatar" />
       <div className="profile-words">
         <h1>{props.name}</h1>
-        {props.itemCount === null ? null : <p className="profile-count">{thingsSharedWords(props.itemCount)}</p>}
         {props.line === null ? null : <p className="profile-line">{props.line}</p>}
         {props.isSample === true ? (
           <p className="profile-sample">

@@ -1,6 +1,6 @@
 /* Explore, after Instagram's (3 Nov 2026): a grey search field with a glass in it, then everyone in Explore and their posts as one grid
    of tiles. With no photos, a person's tile is their own line on their colour with their picture and name under it, and a post's tile
-   is white with a hairline, its writer on top and its age at the foot. */
+   is the warm soft fill, its writer on top and its age at the foot. */
 
 /* ---------- search ---------- */
 .explore-search { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; max-width: 640px; }
@@ -27,17 +27,15 @@ main.screen.wide:has(.explore-grid) { max-width: 975px; }
 .tile-who { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0; }
 .tile-who .person-avatar { background: var(--ui-bg); }
 .tile-name { margin: 0; font: 600 14px/1.2 var(--ui-font); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tile-claim { display: block; font-size: 13px; color: oklch(40% 0.006 265); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.explore-tile .listing-open { justify-self: start; padding: 4px 10px; border-radius: 999px; background: var(--ui-bg); font: 600 13px/1.3 var(--ui-font); color: var(--ui-ink); }
-.explore-tile .sample-chip { background: var(--ui-bg); }
+.tile-claim { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 13px; color: oklch(40% 0.012 70); }
+.explore-tile .listing-open { justify-self: start; font: 600 13px/1.3 var(--ui-font); color: var(--ui-ink); }
 .explore-more { display: flex; margin: 22px auto 0; }
 
 /* ---------- posts in the grid: on a phone a post takes the full width under two people, and so does a last person with no one
    beside them, so no hole is left ---------- */
 .explore-grid > li.is-post, .explore-grid > li.is-alone { grid-column: 1 / -1; }
-.post-tile { justify-content: flex-start; gap: 10px; min-height: 0; border: 1px solid var(--ui-line); background: var(--ui-bg); }
+.post-tile { justify-content: flex-start; gap: 10px; min-height: 0; background: var(--ui-soft); }
 .post-tile .tile-who .person-avatar { background: var(--k-soft); }
-.post-tile .sample-chip { background: var(--ui-soft); }
 .post-text { flex: 1; margin: 0; font: 400 16px/1.45 var(--ui-font); overflow-wrap: anywhere; }
 .post-time { font-size: 13px; color: var(--ui-ink-2); }
 .explore-posts-failed { margin: 14px 0 0; font-size: 14px; color: var(--ui-ink-2); }

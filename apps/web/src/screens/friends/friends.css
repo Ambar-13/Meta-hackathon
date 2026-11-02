@@ -15,7 +15,7 @@
 .friends-buttons > button, .friends-buttons > .btn { flex: 1 1 auto; min-height: 40px; padding: 0 16px; font-size: 14px; }
 .friends-action > form, .friends-action > p, .friends-action > .notice { grid-column: 1 / -1; }
 .friends-off { flex: 1 1 100%; margin: 0; font-size: 14px; color: var(--ui-ink-2); }
-.friends-ask-form { width: 100%; padding: 4px 14px 14px; border: 1px solid var(--ui-line); border-radius: 14px; }
+.friends-ask-form { width: 100%; padding: 4px 0 14px; }
 .friends-ask-form textarea { min-height: 100px; }
 .friends-ask-form button { margin-top: 12px; }
 .friends-form-line { margin: 0; font-weight: 600; color: var(--ui-red); }
@@ -41,8 +41,8 @@
 .friends-sent-link:hover { text-decoration: none; }
 .friends-sent-kind { font: 600 13px/1.2 var(--ui-font); color: var(--ui-ink-2); }
 .friends-sent-text { grid-column: 1; font-weight: 500; }
-.friends-sent-state { grid-column: 2; grid-row: 1 / span 2; white-space: nowrap; border: 0; background: var(--ui-soft); }
-.friends-sent-state.is-done { background: oklch(95% 0.03 268); }
+.friends-sent-state { grid-column: 2; grid-row: 1 / span 2; padding: 0; white-space: nowrap; border: 0; background: none; color: var(--ui-ink-2); }
+.friends-sent-state.is-done { color: var(--ui-blue); }
 
 @media (min-width: 720px) {
   .friends-row { grid-template-columns: 44px minmax(120px, 1fr) auto; }

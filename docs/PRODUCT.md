@@ -24,7 +24,7 @@ References, in Ambar's words: a merge of Lofty Lab (loftylab.framer.website: pho
 
 ## Anti-references
 
-- Generic AI product UI: a grey or off-white page, rounded cards stacked in a column, lots of empty space, a sentence of filler under every heading. Ambar's words on the first attempt: "super ai slop and emptish, just curved cards and bad design, not intuitive at all and a lot of bs". <!-- plain-words: allow (his words, quoted) -->
+- Generic AI product UI: a grey page, rounded cards stacked in a column, cards inside cards, pill labels on top of boxes, lots of empty space, a sentence of filler under every heading. (The signed-in app's ground is off-white #fffcf5 by Ambar's choice on 3 Nov 2026; what makes this look generic is the boxes, not the warmth of the ground.) Ambar's words on the first attempt: "super ai slop and emptish, just curved cards and bad design, not intuitive at all and a lot of bs". <!-- plain-words: allow (his words, quoted) -->
 - The techy look: monospace, terminal styling, codes, hazard or hi-vis colours, condensed docket type, anything taken from tickets or back-office paperwork.
 - The quiet editorial-magazine lane: cream ground, italic serif headlines, ruled columns, no pictures.
 - Dating and matching apps: swipe stacks, percent matches, scores, flames, hearts on everything. Meet First never scores a person.

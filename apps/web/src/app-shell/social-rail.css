@@ -5,19 +5,19 @@
 .social-pages .page-word { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 .social-pages .page-icon { position: relative; display: inline-grid; place-items: center; }
 .count-pill { position: absolute; top: -7px; right: -11px; display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px;
-  background: var(--ui-red); color: oklch(99.5% 0 0); box-shadow: 0 0 0 2px var(--ui-bg); font: 700 13px/1 var(--ui-font); }
+  background: var(--ui-red); color: var(--ui-bg); box-shadow: 0 0 0 2px var(--ui-bg); font: 700 13px/1 var(--ui-font); }
 .social-frame .logo { font-family: "Bricolage Grotesque Variable", system-ui, sans-serif; font-weight: 800; letter-spacing: -0.04em; color: var(--ui-ink); }
 
 /* ---------- phone and tablet: the top bar with Settings, and the icon bar at the bottom ---------- */
 @media (max-width: 767.98px) {
   .social-frame { --tab-bar: 58px; }
   .social-rail .rail-logo, .social-pages .rail-only { display: none; }
-  .social-frame .social-top { height: 56px; padding: 0 6px 0 16px; background: oklch(99.7% 0.001 265 / 0.94); box-shadow: 0 1px 0 var(--ui-line); }
+  .social-frame .social-top { height: 56px; padding: 0 6px 0 16px; background: color-mix(in oklch, var(--ui-bg) 94%, transparent); box-shadow: 0 1px 0 var(--ui-line); }
   .social-top .logo { font-size: 21px; }
   .top-settings { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; color: var(--ui-ink); }
   .top-settings:hover { background: var(--ui-soft); text-decoration: none; }
   .social-pages.tab-bar { left: 0; right: 0; bottom: 0; justify-content: space-around; gap: 0; margin: 0; padding: 2px 8px calc(2px + env(safe-area-inset-bottom, 0px));
-    border-radius: 0; background: oklch(99.7% 0.001 265 / 0.97); box-shadow: 0 -1px 0 var(--ui-line); }
+    border-radius: 0; background: color-mix(in oklch, var(--ui-bg) 97%, transparent); box-shadow: 0 -1px 0 var(--ui-line); }
   .social-pages.tab-bar a { flex: 1; max-width: 96px; min-height: 52px; padding: 0; border-radius: 12px; color: var(--ui-ink); }
   .social-pages.tab-bar a:hover { background: var(--ui-soft); }
   .social-pages.tab-bar a[aria-current="page"] { background: none; box-shadow: none; }

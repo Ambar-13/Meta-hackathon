@@ -93,7 +93,7 @@ const FriendAction = (props: { friend: Friend; model: FriendsScreenModel }): Rea
     <div className="friends-action">
       <div className="friends-buttons">
         {friend.canAsk ? (
-          <button type="button" className={isChosen ? "quiet" : undefined} aria-expanded={isChosen} onClick={() => { model.choose(friend.pairId); }}>
+          <button type="button" className="quiet" aria-expanded={isChosen} onClick={() => { model.choose(friend.pairId); }}>
             {ASK_BUTTON_LABEL}
           </button>
         ) : (

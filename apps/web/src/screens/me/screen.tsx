@@ -37,7 +37,7 @@ const ListedMe = (props: { listing: MyListing; home: HomeView | null; yours: You
   const items = profile?.items ?? listing.items;
   return (
     <>
-      <ProfileHeader name={profile?.displayName ?? props.home?.displayName ?? ME_SCREEN_COPY.title} line={profile?.line ?? listing.line} itemCount={items.length}>
+      <ProfileHeader name={profile?.displayName ?? props.home?.displayName ?? ME_SCREEN_COPY.title} line={profile?.line ?? listing.line}>
         <button type="button" className="quiet" aria-expanded={isEditing} onClick={() => { setIsEditing(!isEditing); }}>{ME_SCREEN_COPY.editListing}</button>
       </ProfileHeader>
       {isEditing ? <EditListing listing={listing} yours={props.yours} onSaved={onSaved} /> : null}
@@ -50,7 +50,7 @@ const ListedMe = (props: { listing: MyListing; home: HomeView | null; yours: You
 const UnlistedMe = (props: { home: HomeView | null; yours: YourListingHook }): ReactElement => {
   return (
     <>
-      <ProfileHeader name={props.home?.displayName ?? ME_SCREEN_COPY.title} line={null} itemCount={null}>
+      <ProfileHeader name={props.home?.displayName ?? ME_SCREEN_COPY.title} line={null}>
         <p className="profile-note">{ME_SCREEN_COPY.notListed}</p>
       </ProfileHeader>
       <JoinExplore home={props.home} yours={props.yours} />

@@ -71,8 +71,11 @@ describe("/me, against the MSW route stubs (a fake server)", () => {
     renderMe();
     const head = await header();
 
-    await within(head).findByText("1 thing shared");
+    await waitFor(() => {
+      expect(requestsTo(routes.social.readProfile)).toHaveLength(1);
+    });
     expect(within(head).getByText("Builds hackathon tools")).toBeTruthy();
+    expect(within(head).queryByText(/things? shared/)).toBeNull();
     expect(within(head).getByRole("button", { name: "Edit my listing" }).getAttribute("aria-expanded")).toBe("false");
     expect(requestsTo(routes.social.readProfile)[0]?.url).toContain(`/api/directory/${LISTING_IDS.mine}`);
     fireEvent.click(screen.getByRole("tab", { name: "Posts" }));

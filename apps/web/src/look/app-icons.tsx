@@ -4,6 +4,7 @@
 import type { ReactElement } from "react";
 import { ArrowUp, Check, Compass, LayoutGrid, MessageCircle, Quote, Search, Settings, Sparkles, UserPlus, UserRound, Users } from "lucide-react";
 import { initialOf } from "./look-parts.js";
+import { Sticker } from "./stickers.js";
 
 // Every icon the app draws, by what it means here.
 const ICONS = {
@@ -65,7 +66,7 @@ export const SampleChip = (): ReactElement => {
 export const MeetyMark = (props: { size?: AvatarSize }): ReactElement => {
   return (
     <span className={`meety-mark size-${props.size ?? "s"}`} aria-hidden="true">
-      <Icon name="spark" size={props.size === "m" ? 22 : 16} />
+      <Sticker name="tags" />
     </span>
   );
 };

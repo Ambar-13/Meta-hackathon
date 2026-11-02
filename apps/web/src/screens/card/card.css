@@ -1,5 +1,6 @@
 /* The card screen: the hello tag, the item rows, the pill switches, the approve bar, the quote sheet and the Sharing section.
-   Shared parts come from app-shell/app.css; only what this screen draws lives here. */
+   Shared parts come from app-shell/app.css; only what this screen draws lives here. Since 3 Nov 2026 the items are a hairline list
+   with no box round each, the kind is grey words, and no part is green. */
 
 /* ---------- the hello row: the person's own tag and one line ---------- */
 .card-hello { display: flex; align-items: center; gap: 18px; margin: 0 0 18px; }
@@ -7,24 +8,25 @@
 .card-hello p { margin: 0; max-width: 34ch; color: var(--ink-2); font-weight: 500; }
 
 /* ---------- the approved next step: the one tilted colour panel ---------- */
-.card-next { --r: -1deg; margin-top: 8px; }
+.card-next { --r: -1deg; margin: 8px 0 18px; padding-bottom: 20px; border-bottom: 1px solid var(--ui-line); }
 .card-next > .stk { position: absolute; right: 16px; top: -22px; font-size: 50px; transform: rotate(10deg); }
 .card-next h2 { margin: 0 0 4px; padding-right: 48px; }
 .card-next p { margin: 0; max-width: 40ch; }
 .card-next .actions { margin: 16px 0 0; }
 
-.thin-note { margin: 0 0 14px; font-weight: 600; }
+.thin-note { margin: 0 0 14px; font-weight: 600; color: var(--ui-ink-2); }
 
 /* ---------- item rows ---------- */
-.card-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
-.card-item { display: grid; justify-items: start; gap: 10px; padding: 16px 16px 10px; border: 2px solid var(--ink); border-radius: var(--radius); background: var(--paper); }
-.card-item.is-flagged { border-style: dashed; }
-.kind-chip { display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 999px; background: var(--k); font: 700 13.5px/1 var(--sans); color: var(--ink); }
-.card-claim { margin: 0; font: 700 19px/1.3 var(--sans); }
+.card-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.card-item { display: grid; justify-items: start; gap: 8px; padding: 18px 0 10px; border-top: 1px solid var(--ui-line); }
+.card-item:first-child { border-top: 0; padding-top: 4px; }
+.card-item.is-flagged .card-claim { color: var(--ui-ink-2); }
+.kind-chip { display: inline-flex; align-items: center; font: 600 13px/1.2 var(--ui-font); color: var(--ui-ink-2); }
+.card-claim { margin: 0; font: 600 17px/1.35 var(--ui-font); }
 .card-gloss { margin: -4px 0 0; font-size: 15px; color: var(--ink-2); }
 button.receipt-open { display: block; max-width: 100%; min-height: 44px; margin: 2px 0 4px; padding: 0; border: 0; border-radius: 16px; background: none; text-align: left; }
 .receipt-open .receipt { width: fit-content; max-width: 100%; }
-.card-item-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; width: 100%; padding-top: 6px; border-top: 1.5px solid var(--line); }
+.card-item-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; width: 100%; }
 .card-item-foot .flag { gap: 0; }
 .card-item-foot .flag .stk { margin-right: 6px; }
 .quote-checked { display: inline-flex; align-items: center; gap: 6px; font: 600 13.5px/1.2 var(--sans); color: var(--ink-2); }
@@ -37,19 +39,20 @@ button.receipt-open { display: block; max-width: 100%; min-height: 44px; margin:
 .switch-row { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 56px; gap: 16px; align-items: start; margin: 0; padding: 14px 0; font: 500 15.5px/1.45 var(--sans); cursor: pointer; }
 .switch-row > input { position: absolute; z-index: 1; top: 9px; right: 0; width: 56px; height: 44px; margin: 0; opacity: 0; cursor: pointer; }
 .switch-text { grid-column: 1; grid-row: 1; }
-.pill-switch { grid-column: 2; grid-row: 1; position: relative; width: 56px; height: 34px; border: 2px solid var(--ink); border-radius: 999px; background: var(--paper); transition: background-color 0.2s var(--ease); }
-.pill-switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); transition: transform 0.2s var(--ease); }
-.switch-row > input:checked + .pill-switch { background: var(--blue); }
-.switch-row > input:checked + .pill-switch::after { transform: translateX(22px); background: var(--paper); box-shadow: 0 0 0 2px var(--ink); }
-.switch-row > input:focus-visible + .pill-switch { outline: 3px solid var(--blue-deep); outline-offset: 3px; }
+.pill-switch { grid-column: 2; grid-row: 1; position: relative; width: 52px; height: 32px; border-radius: 999px; background: var(--ui-line); transition: background-color 0.2s var(--ease); }
+.pill-switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: var(--ui-bg); box-shadow: 0 1px 3px oklch(20% 0.01 70 / 0.3);
+  transition: transform 0.2s var(--ease); }
+.switch-row > input:checked + .pill-switch { background: var(--ui-blue); }
+.switch-row > input:checked + .pill-switch::after { transform: translateX(20px); }
+.switch-row > input:focus-visible + .pill-switch { outline: 2px solid var(--ui-blue); outline-offset: 3px; }
 .switch-row:has(> input:disabled) { color: var(--ink-3); cursor: not-allowed; }
 .switch-row > input:disabled { cursor: not-allowed; }
 .switch-row > input:disabled + .pill-switch { opacity: 0.4; }
-.recall { margin: 18px 0 0; padding: 2px 16px; border-radius: var(--radius); background: var(--blue-soft); }
+.recall { margin: 18px 0 0; border-top: 1px solid var(--ui-line); }
 
 /* ---------- the approve bar: stays in view above the tab bar until the card is approved ---------- */
 .approve-bar { position: sticky; z-index: 10; bottom: calc(var(--tab-bar) + 10px); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 14px;
-  margin: 18px 0 0; padding: 10px 10px 10px 18px; border-radius: 26px; background: var(--paper); box-shadow: var(--lift), 0 0 0 2px var(--ink); }
+  margin: 18px 0 0; padding: 10px 10px 10px 18px; border-radius: 26px; background: var(--ui-bg); box-shadow: var(--lift), 0 0 0 1px var(--ui-line); }
 .approve-hint { flex: 1 1 14ch; margin: 0; font: 600 14.5px/1.3 var(--sans); color: var(--ink-2); }
 .approve-bar button { flex: 1 0 auto; }
 
@@ -60,24 +63,23 @@ button.receipt-open { display: block; max-width: 100%; min-height: 44px; margin:
 .source-message mark { padding: 1px 3px; border-radius: 5px; background: var(--yellow); color: var(--ink); font-weight: 600; }
 
 /* ---------- the Sharing section ---------- */
-.sharing { margin-top: 26px; }
+.sharing { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--ui-line); }
 .sharing-head { display: flex; align-items: center; gap: 10px; }
 .sharing-head h2 { margin: 0; }
 .sharing-head .stk { font-size: 34px; transform: rotate(8deg); }
 .sharing-lead { margin: 4px 0 6px; }
-.sharing .switch-row { border-top: 1.5px solid var(--line); }
-.public-items { margin: 4px 0 10px; padding: 14px 0 0; border: 0; border-top: 1.5px solid var(--line); border-radius: 0; background: none; }
+.sharing .switch-row { border-top: 1px solid var(--ui-line); }
+.public-items { margin: 4px 0 10px; padding: 14px 0 0; border: 0; border-top: 1px solid var(--ui-line); border-radius: 0; background: none; }
 .public-items legend { float: left; width: 100%; margin: 0 0 8px; padding: 0; font: 700 15.5px/1.3 var(--sans); letter-spacing: 0; }
-.public-item { display: flex; align-items: center; gap: 12px; min-height: 48px; margin: 0 0 8px; padding: 6px 14px; border-radius: 16px; background: var(--green-soft); font: 600 15px/1.3 var(--sans); cursor: pointer; }
-.public-item:has(input:checked) { box-shadow: inset 0 0 0 2px var(--ink); }
+.public-item { clear: left; display: flex; align-items: center; gap: 12px; min-height: 48px; margin: 0; padding: 6px 0; font: 500 15px/1.3 var(--ui-font); cursor: pointer; }
 .listing-line { margin: 0 0 4px; padding: 0 0 6px; font-weight: 600; }
 .listing-line:has(input:disabled) { color: var(--ink-3); }
 .listing-line input:disabled { border-style: dashed; border-color: var(--line-strong); color: var(--ink-3); }
-.dating-note { margin: -6px 0 6px; padding: 8px 12px; border-radius: 14px; background: var(--yellow-soft); font: 600 14px/1.35 var(--sans); }
+.dating-note { margin: -6px 0 6px; font: 400 14px/1.45 var(--ui-font); color: var(--ui-ink-2); }
 .other-card { font-weight: 600; }
 .sharing-actions { margin: 18px 0 6px; }
 .save-line { margin: 8px 0 0; font-weight: 700; }
-.save-line.is-refused { padding: 10px 14px; border-radius: 16px; background: var(--coral-soft); }
+.save-line.is-refused { color: var(--ui-red); }
 
 /* ---------- laptop ---------- */
 @media (min-width: 900px) {

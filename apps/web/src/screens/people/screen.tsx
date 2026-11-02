@@ -106,7 +106,7 @@ const ProfileBody = (props: { model: ProfileModel; profile: ProfileView }): Reac
   const posts = useListingPosts(profile.listingId);
   return (
     <>
-      <ProfileHeader name={profile.displayName} line={profile.line} itemCount={profile.items.length} isSample={profile.isSample}>
+      <ProfileHeader name={profile.displayName} line={profile.line} isSample={profile.isSample}>
         <FriendshipButtons model={model} profile={profile} meet={cardId === null ? null : meet} />
       </ProfileHeader>
       {model.action.kind === "failed" ? <ErrorNotice error={model.action.error} /> : null}

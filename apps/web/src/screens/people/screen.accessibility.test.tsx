@@ -49,7 +49,7 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
     stubRoute(routes.social.sendFriendRequest, { status: 201, body: { requestId: LISTING_IDS.request } });
 
     const head = await header();
-    expect(within(head).getByText("3 things shared")).toBeTruthy();
+    expect(within(head).queryByText(/things? shared/)).toBeNull();
     expect(within(head).getByText("Mira builds small tools")).toBeTruthy();
     fireEvent.click(within(head).getByRole("button", { name: "Add friend" }));
 
