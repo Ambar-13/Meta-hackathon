@@ -2,16 +2,33 @@
 # Starts the api and the worker in one container, for the one Render service (render.yaml, D70 as amended on 2 Nov 2026).
 # It applies the migrations first, the job of Render's pre-deploy command, which a free service lacks (D71), then starts both.
 # Each process gets only its own variables: the api never sees META_API_KEY, so the key stays in the worker as it did on two
-# services (ARCHITECTURE.md 8), and neither keeps the app_migrate URL. When one process stops, the other is stopped too and the
-# container exits, so Render restarts it. SIGTERM reaches both, and each drains its work before it exits (D39).
+# services (ARCHITECTURE.md 8), and neither keeps the app_migrate URL. In the container this script runs as root
+# (Dockerfile.render) and starts each process as its own user, so neither can read the other's environment or this script's
+# through /proc. When one process stops, the other is stopped too and the container exits, so Render restarts it. SIGTERM
+# reaches both, and each drains its work before it exits (D39).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+is_root=0
+if [ "$(id -u)" = 0 ]; then is_root=1; fi
+if [ "$is_root" = 1 ] && ! command -v setpriv >/dev/null; then
+  echo "start_setpriv_missing: this script runs as root but cannot drop to the api and worker users; build from Dockerfile.render." >&2
+  exit 1
+fi
+
+# Runs a command as the given user when this script is root (the container), or as it is otherwise (a laptop's own user).
+as_user() {
+  local user="$1"
+  shift
+  if [ "$is_root" = 1 ]; then exec setpriv --reuid="$user" --regid="$user" --clear-groups --no-new-privs -- "$@"; fi
+  exec "$@"
+}
+
 pnpm -w db:migrate
 
-(cd apps/api && exec env -u META_API_KEY -u DATABASE_URL_MIGRATE -u DATABASE_URL_WORKER node --import tsx src/server.ts) &
+(cd apps/api && as_user meet-api env -u META_API_KEY -u DATABASE_URL_MIGRATE -u DATABASE_URL_WORKER HOME=/tmp node --import tsx src/server.ts) &
 api=$!
-(cd apps/worker && exec env -u DATABASE_URL_MIGRATE -u DATABASE_URL_API node --import tsx src/runner.ts) &
+(cd apps/worker && as_user meet-worker env -u DATABASE_URL_MIGRATE -u DATABASE_URL_API HOME=/tmp node --import tsx src/runner.ts) &
 worker=$!
 
 signalled=0
