@@ -15,3 +15,4 @@ packages/evals/fixtures/people
 .env
 .env.*
 !.env.example
+deploy
