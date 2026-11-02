@@ -301,7 +301,7 @@ async function main(): Promise<void> {
   const report = await setUpRenderRoles(readRenderInputs(process.env), REPO_ROOT);
   const applied = report.migration.applied.length > 0 ? `applied ${report.migration.applied.join(", ")}` : "nothing to apply";
   console.log(`render-roles: the four roles and app_migrate's rights are set; migrate: ${applied}; schema version ${String(report.migration.schemaVersion)}`);
-  console.log(`render-roles: wrote ${report.files.join(", ")} at the repository root (git-ignored). Paste .env.render-api into meet-first-api and .env.render-worker into meet-first-worker on Render.`);
+  console.log(`render-roles: wrote ${report.files.join(", ")} at the repository root (git-ignored). Paste both .env.render-api and .env.render-worker into the meet-first service on Render.`);
 }
 
 if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
