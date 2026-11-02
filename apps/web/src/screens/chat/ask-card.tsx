@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { ASK_POLL_MS, type AskMode, type AskView } from "@meet-first/contracts";
 import { apiFetch, APP_PATHS, routes, usePolledView, type PolledView } from "../../app-shell/index.js";
-import { PersonAvatar, TypingDots } from "../../look/index.js";
+import { PersonAvatar, TypingDots, tintOf } from "../../look/index.js";
 import { isAskRunning } from "../ask/ask-state.js";
 import { ASK_CARD_ANSWERS_MAX, firstSentence } from "./chat-words.js";
 
@@ -41,7 +41,7 @@ export const KindHead = (props: { mode: AskMode; question: string }): ReactEleme
   return (
     <>
       <span className="chat-kind">{chip.label}</span>
-      <p className="chat-question">{`“${props.question}”`}</p>
+      <p className={`chat-question ${props.mode === "help" ? "c-yellow" : "c-coral"}`}>{`“${props.question}”`}</p>
     </>
   );
 };
@@ -56,7 +56,7 @@ const AskAnswers = (props: { view: AskView }): ReactElement => {
       ) : (
         <ul className="chat-answers">
           {shown.map((answer) => (
-            <li key={answer.answerId}>
+            <li key={answer.answerId} className={tintOf(answer.displayName)}>
               <PersonAvatar name={answer.displayName} size="s" />
               <span>
                 <strong>{answer.displayName}</strong>

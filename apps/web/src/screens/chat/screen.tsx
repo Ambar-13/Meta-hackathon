@@ -8,7 +8,7 @@ import { useEffect, useRef, type ReactElement, type RefObject } from "react";
 import { Link, useLocation } from "react-router-dom";
 import type { HomeView } from "@meet-first/contracts";
 import { ErrorNotice, ScreenFrame } from "../../app-shell/index.js";
-import { LoadingLine, Sticker } from "../../look/index.js";
+import { LoadingLine, MeetyMark, Sticker } from "../../look/index.js";
 import { nextStepOf } from "../home/home-state.js";
 import { readDraftQuery, useChatScreen, type ChatModel } from "./chat-state.js";
 import { chipTexts, greetingOf, messageBefore } from "./chat-words.js";
@@ -35,23 +35,38 @@ const NextStep = (props: { home: HomeView }): ReactElement | null => {
   );
 };
 
-// The empty thread: the greeting as the page's visual title and the line under it.
+// The empty thread: Meety's mark, the greeting as the page's visual title with the person's name in coral, and the line under it.
 const Greeting = (props: { displayName: string | null }): ReactElement => {
+  const name = props.displayName?.trim() ?? "";
+  const text = greetingOf(name);
+  const at = name === "" ? -1 : text.indexOf(name);
   return (
     <div className="chat-hello">
-      <h2 className="chat-greeting">{greetingOf(props.displayName)}</h2>
+      <MeetyMark size="l" />
+      <h2 className="chat-greeting" aria-label={text}>
+        {at < 0 ? text : (
+          <>
+            {text.slice(0, at)}
+            <span className="chat-greeting-name">{name}</span>
+            {text.slice(at + name.length)}
+          </>
+        )}
+      </h2>
       <p>{UNDER_GREETING}</p>
     </div>
   );
 };
+
+// The colour of each example chip, in order: a help search is yellow everywhere, and the two friend asks take the two voices.
+const CHIP_TINTS = ["c-yellow", "c-coral", "c-blue"] as const;
 
 // The three example chips under the composer; pressing one fills the box and never sends.
 const Chips = (props: { model: ChatModel }): ReactElement => {
   const texts = chipTexts(props.model.friends.value?.friends ?? null);
   return (
     <div className="chat-chips" role="group" aria-label="Examples to start from">
-      {texts.map((text) => (
-        <button key={text} type="button" className="quiet chat-chip" onClick={() => { props.model.composer.fill(text); }}>
+      {texts.map((text, index) => (
+        <button key={text} type="button" className={`chat-chip ${CHIP_TINTS[index] ?? "c-blue"}`} onClick={() => { props.model.composer.fill(text); }}>
           {text}
         </button>
       ))}

@@ -127,4 +127,5 @@
 .meety-mark { display: inline-grid; place-items: center; flex: none; width: var(--a-size, 28px); height: var(--a-size, 28px); font-size: calc(var(--a-size, 28px) * 0.86); }
 :where(.social-frame) .meety-mark .stk { display: inline-block; }
 .meety-mark.size-m { --a-size: 36px; }
+.meety-mark.size-l { --a-size: 56px; }
 .icon { flex: none; }
