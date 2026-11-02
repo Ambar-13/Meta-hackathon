@@ -11,14 +11,14 @@ import { asMeeting, asPerson, countVisibleRows, createPairedMeetingWithTurns, fr
 import { withMeeting, withPerson, type DatabaseTransaction } from "./transaction.js";
 import type { Database } from "./types.js";
 
-// The user-data tables (ARCHITECTURE.md section 2, Wave 0 section 7); names_passes and source_names come from migration 0002, the directory's three from 0006, and friend_requests and orchestrator_messages from 0008.
-const USER_DATA_TABLES = ["people", "sessions", "transfer_links", "sources", "turns", "redactions", "cards", "card_items", "quizzes", "quiz_items", "pairs", "meetings", "meeting_members", "meeting_steps", "meeting_events", "claims", "briefs", "comics", "comic_panels", "share_pages", "ledger", "deletions", "names_passes", "source_names", "directory_listings", "persona_asks", "persona_answers", "friend_requests", "orchestrator_messages"] as const;
+// The user-data tables (ARCHITECTURE.md section 2, Wave 0 section 7); names_passes and source_names come from migration 0002, the directory's three from 0006, friend_requests and orchestrator_messages from 0008, and posts from 0009.
+const USER_DATA_TABLES = ["people", "sessions", "transfer_links", "sources", "turns", "redactions", "cards", "card_items", "quizzes", "quiz_items", "pairs", "meetings", "meeting_members", "meeting_steps", "meeting_events", "claims", "briefs", "comics", "comic_panels", "share_pages", "ledger", "deletions", "names_passes", "source_names", "directory_listings", "persona_asks", "persona_answers", "friend_requests", "orchestrator_messages", "posts"] as const;
 // The three reference tables with no person or meeting column (Wave 0 section 4.5.2).
 const REFERENCE_TABLES = ["quiz_bank", "service_heartbeats", "schema_migrations"] as const;
 // The tables keyed by meeting_id that a member of another meeting must not read (R8.7-T1, R8.7-T2).
 const MEETING_TABLES = ["meeting_members", "meeting_steps", "meeting_events", "claims", "briefs", "comics", "comic_panels", "share_pages", "ledger"] as const;
-// The functions of migrations 0001 to 0008 that run as app_definer, in byte order.
-const DEFINER_FUNCTIONS = ["app_shares_meeting", "auth_claim_transfer", "auth_create_person", "auth_person_for_session", "auth_redeem_recovery", "claim_meeting_slot", "directory_browse", "directory_meeting_create", "directory_profile", "directory_shortlist", "friend_list", "friend_request_accept", "friend_request_decline", "friend_request_send", "friend_requests_mine", "ledger_meeting_tokens", "ledger_usd_since", "ledger_window", "meeting_create", "pair_display_names", "pairs_join", "purge_expired_rows", "share_read", "share_revoke", "sweep_candidates"];
+// The functions of migrations 0001 to 0009 that run as app_definer, in byte order.
+const DEFINER_FUNCTIONS = ["app_shares_meeting", "auth_claim_transfer", "auth_create_person", "auth_person_for_session", "auth_redeem_recovery", "claim_meeting_slot", "directory_browse", "directory_meeting_create", "directory_profile", "directory_shortlist", "explore_posts", "friend_list", "friend_request_accept", "friend_request_decline", "friend_request_send", "friend_requests_mine", "ledger_meeting_tokens", "ledger_usd_since", "ledger_window", "listing_posts", "meeting_create", "pair_display_names", "pairs_join", "purge_expired_rows", "sample_people_listed", "share_read", "share_revoke", "sweep_candidates"];
 
 // Returns the item at index, and throws when the list is shorter.
 function at<T>(items: readonly T[], index: number): T {
@@ -96,7 +96,7 @@ describe("schema security", () => {
   it("R9.1-T1: every table in public has row security enabled and forced", async () => {
     const rows = await catalog<{ name: string; enabled: boolean; forced: boolean }>(`SELECT c.relname AS name, c.relrowsecurity AS enabled, c.relforcerowsecurity AS forced FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relkind = 'r' ORDER BY c.relname COLLATE "C"`);
 
-    expect(rows.map((row) => row.name)).toEqual(["briefs", "card_items", "cards", "claims", "comic_panels", "comics", "deletions", "directory_listings", "friend_requests", "ledger", "meeting_events", "meeting_members", "meeting_steps", "meetings", "names_passes", "orchestrator_messages", "pairs", "people", "persona_answers", "persona_asks", "quiz_bank", "quiz_items", "quizzes", "redactions", "schema_migrations", "service_heartbeats", "sessions", "share_pages", "source_names", "sources", "transfer_links", "turns"]);
+    expect(rows.map((row) => row.name)).toEqual(["briefs", "card_items", "cards", "claims", "comic_panels", "comics", "deletions", "directory_listings", "friend_requests", "ledger", "meeting_events", "meeting_members", "meeting_steps", "meetings", "names_passes", "orchestrator_messages", "pairs", "people", "persona_answers", "persona_asks", "posts", "quiz_bank", "quiz_items", "quizzes", "redactions", "schema_migrations", "service_heartbeats", "sessions", "share_pages", "source_names", "sources", "transfer_links", "turns"]);
     expect(rows.every((row) => row.enabled && row.forced)).toBe(true);
   });
 
@@ -113,10 +113,10 @@ describe("schema security", () => {
     expect(roles.map((role) => role.rolname)).toEqual(["app_api", "app_definer", "app_migrate", "app_worker"]);
     expect(roles.every((role) => !role.rolsuper && !role.rolbypassrls)).toBe(true);
     expect(roles.map((role) => role.rolcanlogin)).toEqual([true, false, true, true]);
-    expect(Object.fromEntries(owned.map((row) => [row.owner, numberFromPostgres(row.n)]))).toEqual({ app_migrate: 33 });
+    expect(Object.fromEntries(owned.map((row) => [row.owner, numberFromPostgres(row.n)]))).toEqual({ app_migrate: 34 });
   });
 
-  it("R9.1-T4: the security definer functions are exactly the twenty-five of migrations 0001 to 0008", async () => {
+  it("R9.1-T4: the security definer functions are exactly the twenty-eight of migrations 0001 to 0009", async () => {
     const rows = await catalog<{ name: string }>(`SELECT p.proname AS name FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname = 'public' AND p.prosecdef ORDER BY p.proname COLLATE "C"`);
 
     expect(rows.map((row) => row.name)).toEqual(DEFINER_FUNCTIONS);
@@ -126,7 +126,7 @@ describe("schema security", () => {
     const rows = await catalog<{ name: string; owner: string; api: boolean; worker: boolean }>(`SELECT p.proname AS name, pg_get_userbyid(p.proowner) AS owner, has_function_privilege('app_api', p.oid, 'EXECUTE') AS api, has_function_privilege('app_worker', p.oid, 'EXECUTE') AS worker FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname = 'public' AND p.prosecdef ORDER BY p.proname COLLATE "C"`);
 
     expect(rows.every((row) => row.owner === "app_definer")).toBe(true);
-    expect(rows.filter((row) => row.api).map((row) => row.name)).toEqual(["app_shares_meeting", "auth_claim_transfer", "auth_create_person", "auth_person_for_session", "auth_redeem_recovery", "claim_meeting_slot", "directory_browse", "directory_meeting_create", "directory_profile", "friend_list", "friend_request_accept", "friend_request_decline", "friend_request_send", "friend_requests_mine", "meeting_create", "pair_display_names", "pairs_join", "share_read"]);
+    expect(rows.filter((row) => row.api).map((row) => row.name)).toEqual(["app_shares_meeting", "auth_claim_transfer", "auth_create_person", "auth_person_for_session", "auth_redeem_recovery", "claim_meeting_slot", "directory_browse", "directory_meeting_create", "directory_profile", "explore_posts", "friend_list", "friend_request_accept", "friend_request_decline", "friend_request_send", "friend_requests_mine", "listing_posts", "meeting_create", "pair_display_names", "pairs_join", "sample_people_listed", "share_read"]);
     expect(rows.filter((row) => row.worker).map((row) => row.name)).toEqual(["app_shares_meeting", "claim_meeting_slot", "directory_shortlist", "ledger_meeting_tokens", "ledger_usd_since", "ledger_window", "purge_expired_rows", "share_revoke", "sweep_candidates"]);
   });
 

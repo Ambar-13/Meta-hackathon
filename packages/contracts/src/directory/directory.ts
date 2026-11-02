@@ -20,8 +20,9 @@ export const FRIENDS_ASK_SWITCH_COPY = "Let friends I've met here ask my persona
 export const PublicItem = z.object({ kind: ItemKind, claim: z.string(), quote: z.string() });
 // The type of PublicItem, read from the schema above.
 export type PublicItem = z.infer<typeof PublicItem>;
-// One listing as anyone in the directory sees it: only listing fields, never a person id, a turn or an item that is not public.
-export const DirectoryListing = z.object({ listingId: Uuid, displayName: z.string(), line: z.string(), openToRomance: z.boolean(), items: z.array(PublicItem) });
+// One listing as anyone in the directory sees it: only listing fields and the sample mark, never a person id, a turn or an item that
+// is not public.
+export const DirectoryListing = z.object({ listingId: Uuid, displayName: z.string(), line: z.string(), openToRomance: z.boolean(), isSample: z.boolean(), items: z.array(PublicItem) });
 // The type of DirectoryListing, read from the schema above.
 export type DirectoryListing = z.infer<typeof DirectoryListing>;
 // What GET /api/directory returns: one page of listings, newest first or best match first when there is a query. The caller's own listing is left out.

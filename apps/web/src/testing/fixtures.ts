@@ -267,6 +267,7 @@ export function profileView(overrides: Partial<ProfileView>): ProfileView {
     displayName: "Mira",
     line: "Mira builds small tools",
     openToRomance: true,
+    isSample: false,
     items: [
       { kind: "habit", claim: "Mira starts work early", quote: "I am at my desk by seven, says Mira" },
       { kind: "value", claim: "Small demos that work", quote: "Show one thing that works, not ten that almost do." },

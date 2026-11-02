@@ -42,12 +42,13 @@ const FAILED = replied(chatId(22), { state: "failed", text: "I could not work th
 // A plain answer in words, with a line break.
 const WORDS = replied(chatId(23), { state: "done", action: "reply", text: "Meet First lets your agent answer for you from what you chose to share.\nAsk me who could help with something, or how a friend would probably react." });
 
-// The first page of Explore the right-hand column suggests people from: three people who are not friends yet.
+// The first page of Explore the right-hand column suggests people from: three people who are not friends yet, two of them sample
+// people as on the live site.
 const SUGGESTED = {
   listings: [
-    { listingId: chatId(60), displayName: "Priyanka", line: "Design and front end, happy to pair on anything with a screen.", openToRomance: false, items: [] },
-    { listingId: chatId(61), displayName: "Ravi", line: "Backend and data. Says no to scope creep.", openToRomance: false, items: [] },
-    { listingId: chatId(62), displayName: "Sung-min", line: "First hackathon, here to meet people.", openToRomance: false, items: [] },
+    { listingId: chatId(60), displayName: "Priyanka", line: "Design and front end, happy to pair on anything with a screen.", openToRomance: false, isSample: false, items: [] },
+    { listingId: chatId(61), displayName: "Maya", line: "Angel investor. I back small teams early and answer every founder within a week.", openToRomance: false, isSample: true, items: [] },
+    { listingId: chatId(62), displayName: "Jun", line: "First hackathon. I build small robots and I am here to meet people.", openToRomance: false, isSample: true, items: [] },
   ],
   page: 0,
   hasMore: false,

@@ -9,7 +9,7 @@ const LISTED_CARD = "00000000-0000-4000-8000-000000000113";
 
 // One listing whose id ends in the given digit; isOpen says whether it takes dating questions.
 function listing(digit: number, isOpen: boolean): DirectoryListing {
-  return DirectoryListing.parse({ listingId: `00000000-0000-4000-8000-00000000051${String(digit)}`, displayName: `Person ${String(digit)}`, line: "A line", openToRomance: isOpen, items: [] });
+  return DirectoryListing.parse({ listingId: `00000000-0000-4000-8000-00000000051${String(digit)}`, displayName: `Person ${String(digit)}`, line: "A line", openToRomance: isOpen, isSample: false, items: [] });
 }
 
 // The browse state after one page that held the given listings, with a request out.

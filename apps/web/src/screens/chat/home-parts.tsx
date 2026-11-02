@@ -5,7 +5,7 @@ import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import type { DirectoryListing, Friend, HomeView } from "@meet-first/contracts";
 import { APP_PATHS } from "../../app-shell/index.js";
-import { Icon, PersonAvatar } from "../../look/index.js";
+import { Icon, PersonAvatar, SampleChip } from "../../look/index.js";
 import type { AddsModel, AddState } from "./chat-state.js";
 
 // The most friends and suggestions the right-hand column lists; See all leads to the rest.
@@ -104,7 +104,7 @@ const SideFriends = (props: { friends: readonly Friend[]; onAsk: (name: string) 
   );
 };
 
-// People Explore suggests, each with Add friend, which sends a friend request at once.
+// People Explore suggests, each with Add friend, which sends a friend request at once, and the Sample mark on a sample person.
 const SideSuggestions = (props: { people: readonly DirectoryListing[]; adds: AddsModel }): ReactElement | null => {
   if (props.people.length === 0) return null;
   return (
@@ -117,10 +117,13 @@ const SideSuggestions = (props: { people: readonly DirectoryListing[]; adds: Add
             <li key={listing.listingId} className="side-row">
               <PersonAvatar name={listing.displayName} />
               <span className="side-who">
-                <Link className="side-name" to={APP_PATHS.person(listing.listingId)}>{listing.displayName}</Link>
+                <span className="side-name-row">
+                  <Link className="side-name" to={APP_PATHS.person(listing.listingId)}>{listing.displayName}</Link>
+                  {listing.isSample ? <SampleChip /> : null}
+                </span>
                 <small>{state.kind === "refused" ? state.sentence : listing.line}</small>
               </span>
-              <AddControl listing={listing} state={state} onAdd={() => void props.adds.add(listing.listingId)} />
+              <AddControl listing={listing} state={state} onAdd={() => void props.adds.add(listing)} />
             </li>
           );
         })}

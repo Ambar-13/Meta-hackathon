@@ -21,6 +21,7 @@
     "db:fresh": "pnpm --filter @meet-first/db fresh",
     "db:count-person": "pnpm --filter @meet-first/db count-person",
     "db:render-roles": "pnpm --filter @meet-first/db render-roles",
+    "db:seed-samples": "pnpm --filter @meet-first/db seed-samples",
     "eval": "pnpm --filter @meet-first/evals run eval",
     "golden-path": "tsx scripts/golden-path.ts",
     "share:takedown": "tsx scripts/share-takedown.ts",

@@ -39,6 +39,8 @@ services:
         value: "60"          # D60, lowered on 2 Nov 2026: the site can spend at most $60 of the Meta credit in all
       - key: MAX_CONCURRENT_MEETINGS
         value: "5"           # D57, lowered: both processes share 512 MB, and one meeting took them to 368 MB together (28 Oct)
+      - key: SEED_SAMPLES
+        value: "1"           # the six sample people of Explore, added once by the start script; "0" stops adding them
       - key: LOG_LEVEL
         value: info
       - key: NODE_ENV

@@ -10,6 +10,7 @@ type Bytes = ColumnType<Buffer, Buffer, Buffer>;
 export interface PeopleTable {
   id: Generated<string>; display_name: string; affiliations: Generated<string[]>; state: Generated<"active" | "deleted">;
   recovery_code_hash: Bytes | null; recovery_code_used_at: NullableTimestamp; deleted_at: NullableTimestamp; created_at: GeneratedTimestamp;
+  is_sample: Generated<boolean>;
 }
 // One row of the sessions table, as migration 0001 defines it.
 export interface SessionsTable {
@@ -156,10 +157,12 @@ export interface OrchestratorMessagesTable {
   action: "help" | "react" | "reply" | null; action_question: string | null; action_friend_name: string | null; action_pair_id: string | null; ask_id: string | null;
   friends_snapshot: JSONColumnType<unknown[], string | undefined>; reply_to: string | null; created_at: GeneratedTimestamp;
 }
+// One row of the posts table, as migration 0009 defines it.
+export interface PostsTable { id: Generated<string>; person_id: string; text: string; created_at: GeneratedTimestamp; }
 // One row of the recall_corpus view, as migration 0001 defines it.
 export interface RecallCorpusView { turn_id: string; person_id: string; source_id: string; text: string; norm_text: string; card_id: string; }
 
-// Every table and view of migrations 0001 to 0008, by its SQL name. Add a row here in the same change that adds a migration.
+// Every table and view of migrations 0001 to 0009, by its SQL name. Add a row here in the same change that adds a migration.
 export interface Database {
   people: PeopleTable; sessions: SessionsTable; transfer_links: TransferLinksTable; sources: SourcesTable; turns: TurnsTable; redactions: RedactionsTable;
   cards: CardsTable; card_items: CardItemsTable; quiz_bank: QuizBankTable; quizzes: QuizzesTable; quiz_items: QuizItemsTable; pairs: PairsTable;
@@ -167,5 +170,5 @@ export interface Database {
   briefs: BriefsTable; comics: ComicsTable; comic_panels: ComicPanelsTable; share_pages: SharePagesTable; ledger: LedgerTable; deletions: DeletionsTable;
   service_heartbeats: ServiceHeartbeatsTable; schema_migrations: SchemaMigrationsTable; names_passes: NamesPassesTable; source_names: SourceNamesTable; recall_corpus: RecallCorpusView;
   directory_listings: DirectoryListingsTable; persona_asks: PersonaAsksTable; persona_answers: PersonaAnswersTable;
-  friend_requests: FriendRequestsTable; orchestrator_messages: OrchestratorMessagesTable;
+  friend_requests: FriendRequestsTable; orchestrator_messages: OrchestratorMessagesTable; posts: PostsTable;
 }

@@ -229,4 +229,37 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
     expect(window.innerWidth).toBe(375);
     expect(unlabelledControls(document.body)).toEqual([]);
   });
+
+  it("W7-SAMPLE-WEB-T3: a sample person's profile says so, ?tab=posts opens Posts with their posts newest first, and Add friend makes you friends at once", async () => {
+    const posts = [
+      { postId: "00000000-0000-4000-8000-000000000701", listingId: LISTING_IDS.mira, displayName: "Mira", isSample: true, text: "The newer post.", createdAt: new Date(Date.now() - 2 * 3_600_000).toISOString() },
+      { postId: "00000000-0000-4000-8000-000000000702", listingId: LISTING_IDS.mira, displayName: "Mira", isSample: true, text: "The older post.", createdAt: new Date(Date.now() - 50 * 3_600_000).toISOString() },
+    ];
+    stubRoute(routes.social.listListingPosts, [{ posts }]);
+    stubRoute(routes.social.sendFriendRequest, { status: 201, body: { requestId: LISTING_IDS.request } });
+    renderProfile([profileView({ isSample: true }), profileView({ isSample: true, friendship: "friends", pairId: PAIR, canAsk: true })], { search: "?tab=posts" });
+    const head = await header();
+
+    expect(within(head).getByText("A sample person, not a real one. Friend requests to them are accepted at once.")).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "Posts" }).getAttribute("aria-selected")).toBe("true");
+    const shown = await screen.findAllByRole("listitem");
+    expect(shown.map((item) => item.querySelector("p")?.textContent)).toEqual(["The newer post.", "The older post."]);
+    expect(within(shown[0] as HTMLElement).getByText("2 hours ago")).toBeTruthy();
+    expect(within(shown[1] as HTMLElement).getByText("2 days ago")).toBeTruthy();
+
+    fireEvent.click(within(head).getByRole("button", { name: "Add friend" }));
+
+    expect(await within(head).findByRole("link", { name: "Ask their agent" })).toBeTruthy();
+    expect(within(head).getByText("Friends")).toBeTruthy();
+  });
+
+  it("W7-SAMPLE-WEB-T4: a profile with no posts shows the coming-soon card on Posts, and a real person carries no sample note", async () => {
+    stubRoute(routes.social.listListingPosts, [{ posts: [] }]);
+    renderProfile(profileView({}), { search: "?tab=posts" });
+    const head = await header();
+
+    expect(await screen.findByRole("heading", { name: "Coming soon: posts by Mira's agent." })).toBeTruthy();
+    expect(within(head).queryByText("Sample")).toBeNull();
+    expect(requestsTo(routes.social.listListingPosts)).toHaveLength(1);
+  });
 });

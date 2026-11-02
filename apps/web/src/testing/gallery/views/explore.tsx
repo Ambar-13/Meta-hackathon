@@ -1,4 +1,4 @@
-import { DirectoryListing, DirectoryPage, FriendRequestsView, FriendsView, type Friend, type FriendRequestView } from "@meet-first/contracts";
+import { DirectoryListing, DirectoryPage, FriendRequestsView, FriendsView, PostsView, type Friend, type FriendRequestView, type Post } from "@meet-first/contracts";
 import { ROUTE_PATTERNS, routes } from "../../../app-shell/index.js";
 import { ExploreScreen } from "../../../screens/explore/index.js";
 import { FOREVER_MS, type GalleryReply, type GalleryStub } from "../fetch-stub.js";
@@ -34,22 +34,54 @@ export function railStubs(friends: Friend[], incoming: FriendRequestView[] = [])
 const LISTING = (n: number): string => `00000000-0000-4000-8000-${String(510 + n).padStart(12, "0")}`;
 // Six people in Explore: long and short names and lines, open and closed to dating questions, one with nothing public.
 export const EXPLORE_LISTINGS: DirectoryListing[] = [
-  { listingId: LISTING(1), displayName: "Mira", line: "Plans first, builds second, demos something small.", openToRomance: true, items: [{ kind: "habit", claim: "Writes the plan before the first commit", quote: "I can't start until I know what done looks like." }] },
-  { listingId: LISTING(2), displayName: "Jonah", line: "Night owl who builds to find out.", openToRomance: false, items: [{ kind: "preference", claim: "Builds to find out", quote: "Easier to show you than to explain it." }] },
-  { listingId: LISTING(3), displayName: "Priyanka", line: "Design and front end, happy to pair on anything with a screen, and keen to learn some hardware this year.", openToRomance: false, items: [] },
-  { listingId: LISTING(4), displayName: "Maximiliana", line: "Robotics, coffee, long walks between talks.", openToRomance: true, items: [{ kind: "goal", claim: "Wants to ship a hardware hack that people can hold in their hands", quote: "This year I want something you can hold." }] },
-  { listingId: LISTING(5), displayName: "Ravi", line: "Backend and data. Says no to scope creep.", openToRomance: false, items: [{ kind: "value", claim: "Says no to scope creep", quote: "Someone has to say no to features." }] },
-  { listingId: LISTING(6), displayName: "Sung-min", line: "First hackathon, here to meet people.", openToRomance: false, items: [{ kind: "boundary", claim: "Done by 9 pm", quote: "After nine I am no use to anyone." }] },
+  { listingId: LISTING(1), displayName: "Mira", line: "Plans first, builds second, demos something small.", openToRomance: true, isSample: false, items: [{ kind: "habit", claim: "Writes the plan before the first commit", quote: "I can't start until I know what done looks like." }] },
+  { listingId: LISTING(2), displayName: "Jonah", line: "Night owl who builds to find out.", openToRomance: false, isSample: false, items: [{ kind: "preference", claim: "Builds to find out", quote: "Easier to show you than to explain it." }] },
+  { listingId: LISTING(3), displayName: "Priyanka", line: "Design and front end, happy to pair on anything with a screen, and keen to learn some hardware this year.", openToRomance: false, isSample: false, items: [] },
+  { listingId: LISTING(4), displayName: "Maximiliana", line: "Robotics, coffee, long walks between talks.", openToRomance: true, isSample: false, items: [{ kind: "goal", claim: "Wants to ship a hardware hack that people can hold in their hands", quote: "This year I want something you can hold." }] },
+  { listingId: LISTING(5), displayName: "Ravi", line: "Backend and data. Says no to scope creep.", openToRomance: false, isSample: false, items: [{ kind: "value", claim: "Says no to scope creep", quote: "Someone has to say no to features." }] },
+  { listingId: LISTING(6), displayName: "Sung-min", line: "First hackathon, here to meet people.", openToRomance: false, isSample: false, items: [{ kind: "boundary", claim: "Done by 9 pm", quote: "After nine I am no use to anyone." }] },
 ].map((listing) => DirectoryListing.parse(listing));
+
+// Explore as the live site shows it after the seed (3 Nov 2026): one real person first, then the six sample people with their lines,
+// first public items and posts, as packages/db/src/samples/sample-people.ts writes them.
+const SAMPLE = (n: number, listing: { displayName: string; line: string; claim: string; quote: string }): DirectoryListing =>
+  DirectoryListing.parse({ listingId: LISTING(10 + n), displayName: listing.displayName, line: listing.line, openToRomance: false, isSample: true, items: [{ kind: "habit", claim: listing.claim, quote: listing.quote }] });
+// The six sample people as Explore lists them.
+export const SAMPLE_LISTINGS: DirectoryListing[] = [
+  SAMPLE(1, { displayName: "Maya", line: "Angel investor. I back small teams early and answer every founder within a week.", claim: "Prefers a seed extension to a bridge when the numbers are moving", quote: "A seed extension makes sense to me when the numbers are moving" }),
+  SAMPLE(2, { displayName: "Priya", line: "Product designer who also writes the front end. I sketch three versions before I pick one.", claim: "Sketches three versions of a screen before choosing one", quote: "I always sketch three versions of a screen before I pick one" }),
+  SAMPLE(3, { displayName: "Ravi", line: "Backend and data. I write the rollback before the feature.", claim: "Keeps a not-now list and builds only what still matters", quote: "I keep a not-now list. Every idea goes on it" }),
+  SAMPLE(4, { displayName: "Jun", line: "First hackathon. I build small robots and I am here to meet people.", claim: "Came to the hackathon to meet people more than to win", quote: "I came to meet people more than to win" }),
+  SAMPLE(5, { displayName: "Leila", line: "Growth. I message every new user myself and keep a waitlist instead of a launch day.", claim: "Finds the first users through trust, not ads", quote: "The first ten users come from trust, not ads" }),
+  SAMPLE(6, { displayName: "Tomas", line: "Machine learning researcher. I never trust a result I have only run once.", claim: "Distrusts any result that was run only once", quote: "I never trust a result I have only run once" }),
+];
+// The posts of Explore, newest first, dated back from the moment the gallery renders, since a post shows its age against the clock.
+const POST = (n: number, listing: DirectoryListing, post: { text: string; hoursAgo: number }): Post => ({
+  postId: LISTING(40 + n), listingId: listing.listingId, displayName: listing.displayName, isSample: listing.isSample, text: post.text, createdAt: new Date(Date.now() - post.hoursAgo * 3_600_000).toISOString(),
+});
+const [MAYA, PRIYA, RAVI, JUN, LEILA, TOMAS] = SAMPLE_LISTINGS as [DirectoryListing, DirectoryListing, DirectoryListing, DirectoryListing, DirectoryListing, DirectoryListing];
+export const SAMPLE_POSTS: Post[] = [
+  POST(1, JUN, { text: "Looking for a team that needs someone to own the hardware. I bring an Arduino, a box of motors and a soldering iron.", hoursAgo: 2 }),
+  POST(2, MAYA, { text: "Founders: send me the one number you check every morning. Not the deck, just the number and why it matters to you.", hoursAgo: 3 }),
+  POST(3, PRIYA, { text: "Hackathon tip: draw the three screens the judges will see before you write any code. Everything else can wait until Sunday.", hoursAgo: 6 }),
+  POST(4, RAVI, { text: "Before every demo I ask one question: if this breaks on stage, what is the undo? If nobody knows, we fix that first.", hoursAgo: 9 }),
+  POST(5, LEILA, { text: "Our best week of sign-ups came from twelve personal messages, not from the launch post. Write to people one at a time.", hoursAgo: 12 }),
+  POST(6, TOMAS, { text: "Ran our new model with five seeds instead of one. Two of the five lost to the baseline. Glad we checked before the demo.", hoursAgo: 20 }),
+];
 
 // One page of Explore.
 function page(listings: DirectoryListing[], hasMore: boolean): GalleryReply {
   return { status: 200, body: DirectoryPage.parse({ listings, page: 0, hasMore }) };
 }
 
-// The page's reads: these Explore replies and a rail with five friends.
-function reads(pages: GalleryReply | GalleryReply[]): GalleryStub[] {
-  return [...railStubs(railFriends(5)), { route: routes.directory.browse, replies: pages }];
+// The posts reply of Explore.
+function postsReply(posts: Post[]): GalleryReply {
+  return { status: 200, body: PostsView.parse({ posts }) };
+}
+
+// The page's reads: these Explore replies, these posts and a rail with five friends.
+function reads(pages: GalleryReply | GalleryReply[], posts: GalleryReply = postsReply([])): GalleryStub[] {
+  return [...railStubs(railFriends(5)), { route: routes.directory.browse, replies: pages }, { route: routes.social.listPosts, replies: posts }];
 }
 
 // One view of Explore on its route.
@@ -57,8 +89,10 @@ function exploreView(head: { name: string; title: string }, stubs: GalleryStub[]
   return { ...head, pattern: ROUTE_PATTERNS.explore, url: "/explore", element, stubs };
 }
 
-// Explore: the grid of people with more to show, a search that finds nobody, loading, and a failed load.
+// Explore: people and posts as the live site shows them, the grid of people with more to show, a search that finds nobody, loading,
+// and a failed load.
 export const views: readonly GalleryView[] = [
+  exploreView({ name: "explore-feed", title: "Explore, people and posts" }, reads(page([...EXPLORE_LISTINGS.slice(0, 1), ...SAMPLE_LISTINGS], false), postsReply(SAMPLE_POSTS))),
   exploreView({ name: "explore-grid", title: "Explore, the grid of people" }, reads(page(EXPLORE_LISTINGS, true))),
   exploreView(
     { name: "explore-empty", title: "Explore, a search that finds nobody" },

@@ -11,15 +11,15 @@ import { requirePerson } from "../sessions/index.js";
 // The last page the directory reads, the same bound GET /api/sources/:id puts on its pages. A later page answers empty without a database call, so the offset always fits a Postgres int (design section 6) [confirm].
 const BROWSE_PAGE_MAX = 100_000;
 
-// One row of directory_browse by its SQL names (migration 0007): listing fields, the dating switch and the public items, never an id of a person, card, item or turn.
-export type BrowseRow = { listing_id: string; display_name: string; line: string; open_to_romance: boolean; items: unknown };
+// One row of directory_browse by its SQL names (migration 0009): listing fields, the dating switch, the sample mark and the public items, never an id of a person, card, item or turn.
+export type BrowseRow = { listing_id: string; display_name: string; line: string; open_to_romance: boolean; is_sample: boolean; items: unknown };
 // One row of friend_list by its SQL names (migration 0008).
 export type FriendRow = { pair_id: string; display_name: string; can_ask: boolean; listing_id: string | null };
 
 // One directory page from one read. The read asks for one row more than a page holds: when that extra row comes back a next page exists, and the row is dropped (design section 6).
 export function toDirectoryPage(rows: readonly BrowseRow[], page: number): DirectoryPage {
   return DirectoryPage.parse({
-    listings: rows.slice(0, DIRECTORY_PAGE_SIZE).map((row) => ({ listingId: row.listing_id, displayName: row.display_name, line: row.line, openToRomance: row.open_to_romance, items: row.items })),
+    listings: rows.slice(0, DIRECTORY_PAGE_SIZE).map((row) => ({ listingId: row.listing_id, displayName: row.display_name, line: row.line, openToRomance: row.open_to_romance, isSample: row.is_sample, items: row.items })),
     page,
     hasMore: rows.length > DIRECTORY_PAGE_SIZE,
   });
@@ -29,7 +29,7 @@ export function toDirectoryPage(rows: readonly BrowseRow[], page: number): Direc
 async function readDirectoryPage(deps: RouteDeps, input: { personId: string; query: string; page: number }): Promise<DirectoryPage> {
   if (input.page > BROWSE_PAGE_MAX) return toDirectoryPage([], input.page);
   const rows = await withPerson(deps.db, input.personId, async (trx) => {
-    const result = await sql<BrowseRow>`SELECT listing_id, display_name, line, open_to_romance, items FROM directory_browse(${input.query}::text, ${DIRECTORY_PAGE_SIZE + 1}::int, ${input.page * DIRECTORY_PAGE_SIZE}::int)`.execute(trx);
+    const result = await sql<BrowseRow>`SELECT listing_id, display_name, line, open_to_romance, is_sample, items FROM directory_browse(${input.query}::text, ${DIRECTORY_PAGE_SIZE + 1}::int, ${input.page * DIRECTORY_PAGE_SIZE}::int)`.execute(trx);
     return result.rows;
   });
   return toDirectoryPage(rows, input.page);

@@ -15,13 +15,17 @@ function asStubReply(input: StubInput): StubReply {
   return { status: 200, body: input };
 }
 
-// The answers every screen gets for the signed-in rail's two reads unless a test stubs them: no friends and no friend requests.
+// The answers every screen gets for the signed-in rail's two reads unless a test stubs them: no friends and no friend requests; and
+// for the reads of the home page, Explore and profiles: no listings and no posts.
 // server.resetHandlers keeps these, and a test's own stubRoute goes in front of them (wave 7).
 const RAIL_DEFAULTS = [
   http.get(new URL("/api/friends", window.location.origin).href, () => HttpResponse.json({ friends: [] })),
   http.get(new URL("/api/friend-requests", window.location.origin).href, () => HttpResponse.json({ incoming: [], outgoing: [] })),
   // The home page's suggestions read the first page of Explore (3 Nov 2026); a test that needs listings stubs its own.
   http.get(new URL("/api/directory", window.location.origin).href, () => HttpResponse.json({ listings: [], page: 0, hasMore: false })),
+  // Explore and profiles read posts (3 Nov 2026); a test that needs posts stubs its own.
+  http.get(new URL("/api/posts", window.location.origin).href, () => HttpResponse.json({ posts: [] })),
+  http.get(new URL("/api/directory/:id/posts", window.location.origin).href, () => HttpResponse.json({ posts: [] })),
 ];
 // One MSW server for every accessibility test, shared by all its files.
 const server = setupServer(...RAIL_DEFAULTS);

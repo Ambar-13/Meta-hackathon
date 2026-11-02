@@ -1,10 +1,12 @@
 import "./explore.css";
 import { useState, type FormEvent, type ReactElement } from "react";
 import { Link } from "react-router-dom";
-import type { DirectoryListing } from "@meet-first/contracts";
-import { APP_PATHS, ErrorNotice, ScreenFrame } from "../../app-shell/index.js";
-import { EmptyState, Icon, LoadingLine, PersonAvatar, tintOf } from "../../look/index.js";
+import type { DirectoryListing, Post, PostsView } from "@meet-first/contracts";
+import { APP_PATHS, ErrorNotice, personPostsPath, ScreenFrame, type PolledView } from "../../app-shell/index.js";
+import { EmptyState, Icon, LoadingLine, PersonAvatar, SampleChip, tintOf } from "../../look/index.js";
 import { SEARCH_MAX_CHARS, useDirectoryBrowse, type BrowseHook } from "../directory/index.js";
+import { postAgeWords } from "../people/index.js";
+import { mixTiles, useExplorePosts } from "./explore-state.js";
 
 // The words of the Explore page (wave 7).
 const EXPLORE_COPY = {
@@ -18,7 +20,8 @@ const EXPLORE_COPY = {
   emptyLine: "Try other words, or clear the search.",
   more: "Show more",
   retry: "Try again",
-  peopleLabel: "People in Explore",
+  gridLabel: "People and posts in Explore",
+  postsFailed: "Posts did not load.",
 } as const;
 // The words a listing open to dating questions shows, as the directory showed them (design section 11).
 const OPEN_TO_ROMANCE_COPY = "Open to dating questions";
@@ -42,19 +45,21 @@ const SearchForm = (props: { onSearch: (query: string) => void }): ReactElement 
   );
 };
 
-// One person as a tile, like a post in Instagram's Explore: their line on their own colour, then their picture and name, their first
-// public item's claim, and the dating words when open. The whole tile is one link to their profile.
-const PersonTile = (props: { listing: DirectoryListing }): ReactElement => {
+// One person as a tile, like a post in Instagram's Explore: their line on their own colour, then their picture and name with the
+// Sample mark when they are one, their first public item's claim, and the dating words when open. The whole tile is one link to their
+// profile.
+const PersonTile = (props: { listing: DirectoryListing; isAlone: boolean }): ReactElement => {
   const { listing } = props;
   const first = listing.items[0];
   return (
-    <li>
+    <li className={props.isAlone ? "is-alone" : undefined}>
       <Link className={`explore-tile ${tintOf(listing.displayName)}`} to={APP_PATHS.person(listing.listingId)}>
         <p className="tile-line">{listing.line}</p>
         <span className="tile-foot">
           <span className="tile-who">
             <PersonAvatar name={listing.displayName} size="s" />
             <h2 className="tile-name">{listing.displayName}</h2>
+            {listing.isSample ? <SampleChip /> : null}
           </span>
           {first === undefined ? null : <span className="tile-claim">{first.claim}</span>}
           {listing.openToRomance ? <span className="listing-open">{OPEN_TO_ROMANCE_COPY}</span> : null}
@@ -64,12 +69,35 @@ const PersonTile = (props: { listing: DirectoryListing }): ReactElement => {
   );
 };
 
-// The grid with its states: loading, an error with a retry, nobody found, and Show more while more pages exist.
-const PeopleGrid = (props: { browse: BrowseHook }): ReactElement => {
-  const { browse } = props;
-  const isEmpty = browse.hasLoaded && !browse.isLoading && browse.error === null && browse.listings.length === 0;
+// One post as a tile, on white beside the coloured people: who wrote it, the post, and how long ago. The whole tile is one link to
+// its person's profile, open on their Posts tab.
+const PostTile = (props: { post: Post; now: Date }): ReactElement => {
+  const { post } = props;
   return (
-    <section className="explore-people" aria-label={EXPLORE_COPY.peopleLabel}>
+    <li className="is-post">
+      <Link className="explore-tile post-tile" to={personPostsPath(post.listingId)}>
+        <span className="tile-who">
+          <PersonAvatar name={post.displayName} size="s" />
+          <span className="tile-name">{post.displayName}</span>
+          {post.isSample ? <SampleChip /> : null}
+        </span>
+        <p className="post-text">{post.text}</p>
+        <time className="post-time" dateTime={post.createdAt}>{postAgeWords(post.createdAt, props.now)}</time>
+      </Link>
+    </li>
+  );
+};
+
+// The posts the grid mixes in: none during a search, which finds people only, and none until they load.
+function postsToMix(browse: BrowseHook, posts: PolledView<PostsView>): Post[] {
+  return browse.query === "" ? posts.value?.posts ?? [] : [];
+}
+
+// The grid's states above the tiles: an error with a retry, loading, and nobody found.
+const GridStatus = (props: { browse: BrowseHook; isEmpty: boolean }): ReactElement => {
+  const { browse } = props;
+  return (
+    <>
       {browse.error === null ? null : (
         <div className="explore-error">
           <ErrorNotice error={browse.error} />
@@ -77,12 +105,35 @@ const PeopleGrid = (props: { browse: BrowseHook }): ReactElement => {
         </div>
       )}
       {browse.isLoading && !browse.hasLoaded ? <LoadingLine text={EXPLORE_COPY.loading} /> : null}
-      {isEmpty ? <EmptyState sticker="lens" title={EXPLORE_COPY.emptyTitle}>{EXPLORE_COPY.emptyLine}</EmptyState> : null}
+      {props.isEmpty ? <EmptyState sticker="lens" title={EXPLORE_COPY.emptyTitle}>{EXPLORE_COPY.emptyLine}</EmptyState> : null}
+    </>
+  );
+};
+
+// The line under the tiles when the posts did not load, with Try again; nothing during a search, which shows no posts.
+const PostsFailed = (props: { browse: BrowseHook; posts: PolledView<PostsView> }): ReactElement | null => {
+  if (props.posts.error === null || props.browse.query !== "") return null;
+  return (
+    <p className="explore-posts-failed">
+      {`${EXPLORE_COPY.postsFailed} `}
+      <button type="button" className="text-button" onClick={props.posts.reload}>{EXPLORE_COPY.retry}</button>
+    </p>
+  );
+};
+
+// The grid with its states, people and posts mixed, the posts line, and Show more while more pages of people exist.
+const ExploreGrid = (props: { browse: BrowseHook; posts: PolledView<PostsView> }): ReactElement => {
+  const { browse, posts } = props;
+  const shownPosts = postsToMix(browse, posts);
+  const isEmpty = browse.hasLoaded && !browse.isLoading && browse.error === null && browse.listings.length === 0 && shownPosts.length === 0;
+  const now = new Date();
+  return (
+    <section className="explore-people" aria-label={EXPLORE_COPY.gridLabel}>
+      <GridStatus browse={browse} isEmpty={isEmpty} />
       <ul className="explore-grid">
-        {browse.listings.map((listing) => (
-          <PersonTile key={listing.listingId} listing={listing} />
-        ))}
+        {mixTiles(browse.listings, shownPosts).map((tile) => (tile.kind === "person" ? <PersonTile key={tile.listing.listingId} listing={tile.listing} isAlone={tile.isAlone} /> : <PostTile key={tile.post.postId} post={tile.post} now={now} />))}
       </ul>
+      <PostsFailed browse={browse} posts={posts} />
       {browse.hasMore ? (
         <button type="button" className="quiet explore-more" disabled={browse.isLoading} onClick={browse.loadMore}>
           {EXPLORE_COPY.more}
@@ -92,9 +143,11 @@ const PeopleGrid = (props: { browse: BrowseHook }): ReactElement => {
   );
 };
 
-// The /explore page: the search box, a way to ask the orchestrator for help, and everyone in Explore as a grid of tiles (wave 7).
+// The /explore page: the search box, a way to ask Meety for help, and everyone in Explore with their posts as one grid of tiles
+// (wave 7; posts since 3 Nov 2026).
 export const ExploreScreen = (): ReactElement => {
   const browse = useDirectoryBrowse();
+  const posts = useExplorePosts();
   return (
     <ScreenFrame title={EXPLORE_COPY.title} isWide>
       <SearchForm onSearch={browse.search} />
@@ -102,7 +155,7 @@ export const ExploreScreen = (): ReactElement => {
         {`${EXPLORE_COPY.stuck} `}
         <Link to={APP_PATHS.home}>{EXPLORE_COPY.askOrchestrator}</Link>
       </p>
-      <PeopleGrid browse={browse} />
+      <ExploreGrid browse={browse} posts={posts} />
     </ScreenFrame>
   );
 };

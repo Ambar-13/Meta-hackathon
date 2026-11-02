@@ -12,16 +12,16 @@ import { requirePerson } from "../sessions/index.js";
 // The :id of GET /api/directory/:id: a listing id. One that is not a uuid is not_found, so a bad id tells nothing.
 const ListingParams = z.object({ id: Uuid });
 
-// One row of directory_profile by its SQL names (migration 0008).
+// One row of directory_profile by its SQL names (migration 0009).
 export type ProfileRow = {
-  listing_id: string; display_name: string; line: string; open_to_romance: boolean; items: unknown;
+  listing_id: string; display_name: string; line: string; open_to_romance: boolean; is_sample: boolean; items: unknown;
   friendship: string; request_id: string | null; pair_id: string | null; can_ask: boolean;
 };
 
 // The profile view of one directory_profile row.
 export function toProfileView(row: ProfileRow): ProfileView {
   return ProfileView.parse({
-    listingId: row.listing_id, displayName: row.display_name, line: row.line, openToRomance: row.open_to_romance, items: row.items,
+    listingId: row.listing_id, displayName: row.display_name, line: row.line, openToRomance: row.open_to_romance, isSample: row.is_sample, items: row.items,
     friendship: row.friendship, requestId: row.request_id, pairId: row.pair_id, canAsk: row.can_ask,
   });
 }
@@ -33,7 +33,7 @@ export function registerReadProfile(app: FastifyInstance, deps: RouteDeps): void
     const params = ListingParams.safeParse(request.params);
     if (!params.success) throw makeNotFoundError();
     const row = await withPerson(deps.db, personId, async (trx) => {
-      const result = await sql<ProfileRow>`SELECT listing_id, display_name, line, open_to_romance, items, friendship, request_id, pair_id, can_ask FROM directory_profile(${params.data.id}::uuid)`.execute(trx);
+      const result = await sql<ProfileRow>`SELECT listing_id, display_name, line, open_to_romance, is_sample, items, friendship, request_id, pair_id, can_ask FROM directory_profile(${params.data.id}::uuid)`.execute(trx);
       return result.rows[0];
     });
     if (row === undefined) throw new ContractError("listing_not_found", "This person is no longer in Explore.", HTTP.notFound);

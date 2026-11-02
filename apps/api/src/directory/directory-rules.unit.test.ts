@@ -17,7 +17,7 @@ function refusalOf(run: () => void): { code: string; status: number; message: st
 
 // Browse row number n, whose listing id ends in n written with two digits.
 function browseRow(n: number): BrowseRow {
-  return { listing_id: "00000000-0000-4000-8000-0000000000" + String(n).padStart(2, "0"), display_name: "Row " + String(n), line: "Line " + String(n), open_to_romance: n === 1, items: [{ kind: "goal", claim: "c", quote: "q" }] };
+  return { listing_id: "00000000-0000-4000-8000-0000000000" + String(n).padStart(2, "0"), display_name: "Row " + String(n), line: "Line " + String(n), open_to_romance: n === 1, is_sample: n === 2, items: [{ kind: "goal", claim: "c", quote: "q" }] };
 }
 
 describe("directory rules", () => {
@@ -31,8 +31,9 @@ describe("directory rules", () => {
     expect(full.page).toBe(3);
     expect(full.hasMore).toBe(true);
     expect(full.listings).toHaveLength(20);
-    expect(full.listings[0]).toEqual({ listingId: "00000000-0000-4000-8000-000000000001", displayName: "Row 1", line: "Line 1", openToRomance: true, items: [{ kind: "goal", claim: "c", quote: "q" }] });
+    expect(full.listings[0]).toEqual({ listingId: "00000000-0000-4000-8000-000000000001", displayName: "Row 1", line: "Line 1", openToRomance: true, isSample: false, items: [{ kind: "goal", claim: "c", quote: "q" }] });
     expect(full.listings[1]?.openToRomance).toBe(false);
+    expect(full.listings[1]?.isSample).toBe(true);
     expect(full.listings[19]?.displayName).toBe("Row 20");
     expect(exact.hasMore).toBe(false);
     expect(exact.listings).toHaveLength(20);

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { ContractError, ErrorBody, FriendRequestAcceptResponse, FriendRequestCreateResponse, FriendRequestsView, FriendsView, OrchestratorMessage, OrchestratorSendResponse, OrchestratorThread, ProfileView, routes, SESSION_COOKIE } from "@meet-first/contracts";
+import { ContractError, DirectoryPage, ErrorBody, FriendRequestAcceptResponse, FriendRequestCreateResponse, FriendRequestsView, FriendsView, OrchestratorMessage, OrchestratorSendResponse, OrchestratorThread, PostsView, ProfileView, routes, SESSION_COOKIE } from "@meet-first/contracts";
 import { withPerson } from "@meet-first/db";
 import { createPairedMeetingWithTurns, createTestPerson, type SeededMeeting } from "@meet-first/db/testing";
 import { registerAsksRoutes } from "../asks/index.js";
@@ -208,5 +208,37 @@ describe("the orchestrator chat", () => {
     expect(outcome).toBe("enqueue_failed");
     const row = await withPerson(t.db, y.a.personId, (trx) => trx.selectFrom("orchestrator_messages").select(["state", "ask_id", "text"]).where("id", "=", ids.replyId).executeTakeFirstOrThrow());
     expect(row).toEqual({ state: "planned", ask_id: null, text: "I can run a help search." });
+  });
+});
+
+describe("posts and the sample mark", () => {
+  it("W7-SAMPLE-API-T1: GET /api/posts lists the newest posts of listed people but not your own, and a profile's posts route lists one person's", async () => {
+    const hour = 3_600_000;
+    const now = Date.now();
+    await withPerson(t.db, y.b.personId, (trx) => trx.insertInto("posts").values([
+      { person_id: y.b.personId, text: "Older post by B.", created_at: new Date(now - 2 * hour) },
+      { person_id: y.b.personId, text: "Newer post by B.", created_at: new Date(now - hour) },
+    ]).execute());
+    await withPerson(t.db, x.a.personId, (trx) => trx.insertInto("posts").values({ person_id: x.a.personId, text: "A post by A.", created_at: new Date(now) }).execute());
+
+    const feed = await send({ method: "GET", url: routes.social.listPosts.path, token: x.a.sessionToken });
+    const ofB = await send({ method: "GET", url: pathOf(routes.social.listListingPosts, listingYb), token: x.a.sessionToken });
+    const badId = await send({ method: "GET", url: pathOf(routes.social.listListingPosts, "not-a-uuid"), token: x.a.sessionToken });
+
+    expect(feed.statusCode).toBe(200);
+    expect(PostsView.parse(feed.body).posts.map((post) => [post.text, post.displayName, post.listingId, post.isSample])).toEqual([["Newer post by B.", "Test B", listingYb, false], ["Older post by B.", "Test B", listingYb, false]]);
+    expect(PostsView.parse(ofB.body).posts.map((post) => post.text)).toEqual(["Newer post by B.", "Older post by B."]);
+    expect(badId.statusCode).toBe(404);
+  });
+
+  it("W7-SAMPLE-API-T2: Explore and a profile carry the sample mark", async () => {
+    await withPerson(t.db, y.b.personId, (trx) => trx.updateTable("people").set({ is_sample: true }).where("id", "=", y.b.personId).execute());
+
+    const page = DirectoryPage.parse((await send({ method: "GET", url: routes.directory.browse.path, token: x.a.sessionToken })).body);
+    const shown = await profile(x.a.sessionToken, listingYb);
+
+    expect(page.listings.find((listing) => listing.listingId === listingYb)?.isSample).toBe(true);
+    expect(shown.isSample).toBe(true);
+    expect((await profile(y.b.sessionToken, listingXa)).isSample).toBe(false);
   });
 });

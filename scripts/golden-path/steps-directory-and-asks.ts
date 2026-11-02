@@ -23,7 +23,7 @@ const ASK_POLL_MS = 3_000;
 // The states an ask stops in.
 const ASK_FINAL_STATES = new Set(["done", "refused", "failed"]);
 // The keys a listing and a public item may carry in the directory, and nothing else (P6).
-const LISTING_KEYS = ["displayName", "items", "line", "listingId", "openToRomance"];
+const LISTING_KEYS = ["displayName", "isSample", "items", "line", "listingId", "openToRomance"];
 const PUBLIC_ITEM_KEYS = ["claim", "kind", "quote"];
 
 // The text of a curated question, or a failed step when the bank has no such id.

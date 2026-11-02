@@ -11,7 +11,8 @@
     "migrate": "tsx src/migrate.ts",
     "fresh": "tsx src/fresh.ts",
     "count-person": "tsx src/count-person.ts",
-    "render-roles": "tsx src/render-roles.ts"
+    "render-roles": "tsx src/render-roles.ts",
+    "seed-samples": "tsx src/samples/seed-samples.ts"
   },
   "dependencies": {
     "@meet-first/contracts": "workspace:*",

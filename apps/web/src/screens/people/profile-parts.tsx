@@ -1,7 +1,8 @@
 import { useId, useRef, useState, type KeyboardEvent, type ReactElement, type ReactNode } from "react";
-import type { PublicItem } from "@meet-first/contracts";
-import { EmptyState, Icon, PersonAvatar, Receipt } from "../../look/index.js";
-import { postsSoonCopy, thingsSharedWords } from "./people-state.js";
+import type { PostsView, PublicItem } from "@meet-first/contracts";
+import { ErrorNotice, type PolledView } from "../../app-shell/index.js";
+import { EmptyState, Icon, LoadingLine, PersonAvatar, Receipt, SampleChip } from "../../look/index.js";
+import { postAgeWords, postsSoonCopy, thingsSharedWords } from "./people-state.js";
 
 // The two tabs under a profile header, in order.
 const TABS = [
@@ -9,11 +10,14 @@ const TABS = [
   { key: "posts", label: "Posts" },
 ] as const;
 // One tab's key.
-type TabKey = (typeof TABS)[number]["key"];
+export type TabKey = (typeof TABS)[number]["key"];
+// The line under a sample person's name, so nobody takes them for a real person.
+const SAMPLE_NOTE = "A sample person, not a real one. Friend requests to them are accepted at once.";
 
 // The Instagram-style header of a profile: the person's round picture, then the name as the h1, the count of things shared, the line,
-// and the buttons. On a phone the picture sits left of the name and the buttons go full width under them.
-export const ProfileHeader = (props: { name: string; line: string | null; itemCount: number | null; children: ReactNode }): ReactElement => {
+// the sample note for a sample person, and the buttons. On a phone the picture sits left of the name and the buttons go full width
+// under them.
+export const ProfileHeader = (props: { name: string; line: string | null; itemCount: number | null; isSample?: boolean; children: ReactNode }): ReactElement => {
   return (
     <header className="profile-head">
       <PersonAvatar name={props.name} size="xl" className="profile-avatar" />
@@ -21,6 +25,12 @@ export const ProfileHeader = (props: { name: string; line: string | null; itemCo
         <h1>{props.name}</h1>
         {props.itemCount === null ? null : <p className="profile-count">{thingsSharedWords(props.itemCount)}</p>}
         {props.line === null ? null : <p className="profile-line">{props.line}</p>}
+        {props.isSample === true ? (
+          <p className="profile-sample">
+            <SampleChip />
+            {SAMPLE_NOTE}
+          </p>
+        ) : null}
         <div className="profile-buttons">{props.children}</div>
       </div>
     </header>
@@ -56,10 +66,37 @@ const AboutPanel = (props: { items: PublicItem[]; source: string }): ReactElemen
   );
 };
 
+// The Posts tab: the person's posts, newest first, each with how long ago it went up; the coming-soon card when there are none.
+const PostsPanel = (props: { posts: PolledView<PostsView> | null; name: string | null }): ReactElement => {
+  const { posts } = props;
+  if (posts === null) return <PostsSoonCard name={props.name} />;
+  if (posts.value === null) {
+    if (posts.error === null) return <LoadingLine text="Loading posts." />;
+    return (
+      <div className="profile-posts-error">
+        <ErrorNotice error={posts.error} />
+        <button type="button" className="quiet" onClick={posts.reload}>Try again</button>
+      </div>
+    );
+  }
+  if (posts.value.posts.length === 0) return <PostsSoonCard name={props.name} />;
+  const now = new Date();
+  return (
+    <ul className="profile-posts">
+      {posts.value.posts.map((post) => (
+        <li key={post.postId} className="profile-post">
+          <p className="post-text">{post.text}</p>
+          <time className="post-time" dateTime={post.createdAt}>{postAgeWords(post.createdAt, now)}</time>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
 // The About and Posts tabs under a profile: a real tab list, where the arrow keys move between the tabs and each panel is labelled
-// by its tab. postsName is null on your own profile.
-export const ProfileTabs = (props: { items: PublicItem[]; source: string; postsName: string | null }): ReactElement => {
-  const [selected, setSelected] = useState<TabKey>("about");
+// by its tab. postsName is null on your own profile; posts is null where the page reads no posts; firstTab is the tab it opens on.
+export const ProfileTabs = (props: { items: PublicItem[]; source: string; postsName: string | null; posts?: PolledView<PostsView> | null; firstTab?: TabKey }): ReactElement => {
+  const [selected, setSelected] = useState<TabKey>(props.firstTab ?? "about");
   const baseId = useId();
   const tabRefs = useRef<Partial<Record<TabKey, HTMLButtonElement | null>>>({});
   const select = (key: TabKey, shouldFocus: boolean): void => {
@@ -96,7 +133,7 @@ export const ProfileTabs = (props: { items: PublicItem[]; source: string; postsN
       </div>
       {TABS.map((tab) => (
         <div key={tab.key} role="tabpanel" id={`${baseId}-${tab.key}-panel`} aria-labelledby={`${baseId}-${tab.key}-tab`} hidden={selected !== tab.key}>
-          {tab.key === "about" ? <AboutPanel items={props.items} source={props.source} /> : <PostsSoonCard name={props.postsName} />}
+          {tab.key === "about" ? <AboutPanel items={props.items} source={props.source} /> : <PostsPanel posts={props.posts ?? null} name={props.postsName} />}
         </div>
       ))}
     </div>

@@ -43,6 +43,7 @@ export const PERSON_TABLES: readonly PersonTable[] = [
   { table: "persona_answers", reach: "answer_person", columns: ["asker_person_id", "subject_person_id"] },
   { table: "friend_requests", reach: "request_person", columns: ["from_person_id", "to_person_id"] },
   { table: "orchestrator_messages", reach: "person_id" },
+  { table: "posts", reach: "person_id" },
   { table: "ledger", reach: "ledger_nulled" },
   { table: "deletions", reach: "record" },
   { table: "people", reach: "person_id" },

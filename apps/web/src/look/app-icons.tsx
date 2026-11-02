@@ -56,6 +56,11 @@ export const PersonAvatar = (props: { name: string; size?: AvatarSize; className
   );
 };
 
+// The mark on every sample person (migration 0009): a made-up person seeded so Explore has people to try, never shown as a real one.
+export const SampleChip = (): ReactElement => {
+  return <span className="sample-chip">Sample</span>;
+};
+
 // Meety's own small picture: a sparkle on a dark circle, next to each of its replies.
 export const MeetyMark = (props: { size?: AvatarSize }): ReactElement => {
   return (

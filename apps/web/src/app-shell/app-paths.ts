@@ -41,6 +41,19 @@ export const SIDE_QUERY = "side";
 // The query name that carries words for the chat composer, so a link can open the chat with a message started (wave 7).
 export const DRAFT_QUERY = "draft";
 
+// The query name that opens a profile on one of its tabs, so a post in Explore can open its person's Posts tab.
+export const PROFILE_TAB_QUERY = "tab";
+
+// A profile opened on its Posts tab.
+export function personPostsPath(listingId: string): string {
+  return `${APP_PATHS.person(listingId)}?${PROFILE_TAB_QUERY}=posts`;
+}
+
+// The tab a profile's address asks for: posts when it says so, else about.
+export function readProfileTab(search: string): "about" | "posts" {
+  return new URLSearchParams(search).get(PROFILE_TAB_QUERY) === "posts" ? "posts" : "about";
+}
+
 // The chat at /home with these words waiting in its composer.
 export function chatPathWithDraft(text: string): string {
   return `${APP_PATHS.home}?${DRAFT_QUERY}=${encodeURIComponent(text)}`;

@@ -3,7 +3,7 @@
 // The step: these hooks read the thread (again every THREAD_POLL_MS while a reply thinks), the home view and the friends list, and
 // hold the composer's text, the send and the plan runs. What it does not do: show anything; screen.tsx and its parts do.
 import { useState } from "react";
-import { ORCHESTRATOR_MESSAGE_MAX_CHARS, type DirectoryPage, type FriendsView, type HomeView, type OrchestratorMessage, type OrchestratorThread } from "@meet-first/contracts";
+import { ORCHESTRATOR_MESSAGE_MAX_CHARS, type DirectoryListing, type DirectoryPage, type FriendsView, type HomeView, type OrchestratorMessage, type OrchestratorThread } from "@meet-first/contracts";
 import { apiFetch, asApiError, DRAFT_QUERY, routes, usePolledView, type ApiError, type PolledView } from "../../app-shell/index.js";
 import { directoryQueryFor } from "../directory/index.js";
 import { shouldPollThread, shownMessages, THREAD_POLL_MS } from "./chat-words.js";
@@ -32,7 +32,7 @@ export type ComposerModel = {
 // api's sentence.
 export type AddState = { kind: "idle" } | { kind: "sending" } | { kind: "requested" } | { kind: "friends" } | { kind: "refused"; sentence: string };
 // The friend requests the home page's suggestions send: each listing's state, and the action of its Add friend button.
-export type AddsModel = { stateOf: (listingId: string) => AddState; add: (listingId: string) => Promise<void> };
+export type AddsModel = { stateOf: (listingId: string) => AddState; add: (listing: DirectoryListing) => Promise<void> };
 
 // One plan run as the page follows it: whether its request is out, and the error it came back with.
 export type RunStatus = { isRunning: boolean; error: ApiError | null };
@@ -97,19 +97,22 @@ function useComposer(draft: string | null, onSent: (messages: OrchestratorMessag
 }
 
 // The suggestions' Add friend buttons: POST /api/friend-requests with the listing. A request already waiting reads as sent, and an
-// existing friendship as friends, so the button never offers what the api would refuse.
-function useAdds(): AddsModel {
+// existing friendship as friends, so the button never offers what the api would refuse. A sample person accepts at once (migration
+// 0009), so adding one reads as friends and onFriends reads the friends list again.
+function useAdds(onFriends: () => void): AddsModel {
   const [states, setStates] = useState<Readonly<Record<string, AddState>>>({});
   const set = (listingId: string, state: AddState): void => {
     setStates((previous) => ({ ...previous, [listingId]: state }));
   };
-  const add = async (listingId: string): Promise<void> => {
+  const add = async (listing: DirectoryListing): Promise<void> => {
+    const { listingId } = listing;
     const now = states[listingId]?.kind ?? "idle";
     if (now !== "idle" && now !== "refused") return;
     set(listingId, { kind: "sending" });
     try {
       await apiFetch(routes.social.sendFriendRequest, { body: { listingId } });
-      set(listingId, { kind: "requested" });
+      set(listingId, { kind: listing.isSample ? "friends" : "requested" });
+      if (listing.isSample) onFriends();
     } catch (thrown: unknown) {
       const error = asApiError(thrown);
       if (error.code === "friend_request_pending") set(listingId, { kind: "requested" });
@@ -147,7 +150,7 @@ export function useChatScreen(draft: string | null): ChatModel {
   const home = usePolledView(() => apiFetch(routes.people.readHome, {}), { key: "chat-home", ...READ_ONCE });
   const friends = usePolledView(() => apiFetch(routes.directory.friends, {}), { key: "chat-friends", ...READ_ONCE });
   const suggestions = usePolledView(() => apiFetch(routes.directory.browse, { query: directoryQueryFor("", 0) }), { key: "chat-suggestions", ...READ_ONCE });
-  const adds = useAdds();
+  const adds = useAdds(friends.reload);
   const [sent, setSent] = useState<readonly OrchestratorMessage[]>([]);
   const composer = useComposer(draft, (messages) => {
     setSent((previous) => [...previous, ...messages]);

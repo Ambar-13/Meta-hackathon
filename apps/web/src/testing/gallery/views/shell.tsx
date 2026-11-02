@@ -12,6 +12,10 @@ export const views: readonly GalleryView[] = [
     pattern: ROUTE_PATTERNS.explore,
     url: "/explore",
     element: <ExploreScreen />,
-    stubs: [...railStubs(railFriends(14), railRequests(2)), { route: routes.directory.browse, replies: { status: 200, body: DirectoryPage.parse({ listings: EXPLORE_LISTINGS, page: 0, hasMore: false }) } }],
+    stubs: [
+      ...railStubs(railFriends(14), railRequests(2)),
+      { route: routes.directory.browse, replies: { status: 200, body: DirectoryPage.parse({ listings: EXPLORE_LISTINGS, page: 0, hasMore: false }) } },
+      { route: routes.social.listPosts, replies: { status: 200, body: { posts: [] } } },
+    ],
   },
 ];

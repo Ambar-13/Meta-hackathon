@@ -8,12 +8,13 @@ export const Friendship = z.enum(["self", "friends", "requested", "incoming", "n
 export type Friendship = z.infer<typeof Friendship>;
 
 // What GET /api/directory/:id returns: one person in Explore as the caller sees them. requestId is set for requested and incoming,
-// pairId for friends; canAsk says whether that friend lets friends ask their agent.
+// pairId for friends; canAsk says whether that friend lets friends ask their agent; isSample marks a sample person (migration 0009).
 export const ProfileView = z.object({
   listingId: Uuid,
   displayName: z.string(),
   line: z.string(),
   openToRomance: z.boolean(),
+  isSample: z.boolean(),
   items: z.array(PublicItem),
   friendship: Friendship,
   requestId: Uuid.nullable(),

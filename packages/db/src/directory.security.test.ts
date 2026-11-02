@@ -71,7 +71,7 @@ describe("directory and asks", () => {
     await list(pair.b.personId, pair.b.cardId, "Happy to talk about planning.");
     const seenByA = await asPerson(t.db, pair.a.personId, (trx) => sql<Record<string, unknown>>`SELECT * FROM directory_browse(${""}, 20, 0)`.execute(trx));
     const listingB = seenByA.rows.find((row) => row.display_name === "Test B");
-    expect(Object.keys(listingB ?? {}).sort()).toEqual(["display_name", "items", "line", "listing_id", "open_to_romance"]);
+    expect(Object.keys(listingB ?? {}).sort()).toEqual(["display_name", "is_sample", "items", "line", "listing_id", "open_to_romance"]);
     expect(listingB?.open_to_romance).toBe(false);
     const items = listingB?.items as Array<Record<string, unknown>>;
     expect(items).toHaveLength(1);

@@ -1,5 +1,6 @@
-/* Explore, after Instagram's (3 Nov 2026): a grey search field with a glass in it, then everyone in Explore as a grid of tiles. With
-   no photos, each tile is a person's own line on their colour, like a text post, with their picture and name under it. */
+/* Explore, after Instagram's (3 Nov 2026): a grey search field with a glass in it, then everyone in Explore and their posts as one grid
+   of tiles. With no photos, a person's tile is their own line on their colour with their picture and name under it, and a post's tile
+   is white with a hairline, its writer on top and its age at the foot. */
 
 /* ---------- search ---------- */
 .explore-search { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; max-width: 640px; }
@@ -23,15 +24,28 @@ main.screen.wide:has(.explore-grid) { max-width: 975px; }
 .explore-tile:focus-visible { outline-offset: 2px; border-radius: 14px; }
 .tile-line { margin: 0; font: 600 16px/1.35 var(--ui-font); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .tile-foot { display: grid; gap: 8px; min-width: 0; }
-.tile-who { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.tile-who { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0; }
 .tile-who .person-avatar { background: var(--ui-bg); }
 .tile-name { margin: 0; font: 600 14px/1.2 var(--ui-font); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tile-claim { display: block; font-size: 13px; color: oklch(40% 0.006 265); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .explore-tile .listing-open { justify-self: start; padding: 4px 10px; border-radius: 999px; background: var(--ui-bg); font: 600 13px/1.3 var(--ui-font); color: var(--ui-ink); }
+.explore-tile .sample-chip { background: var(--ui-bg); }
 .explore-more { display: flex; margin: 22px auto 0; }
+
+/* ---------- posts in the grid: on a phone a post takes the full width under two people, and so does a last person with no one
+   beside them, so no hole is left ---------- */
+.explore-grid > li.is-post, .explore-grid > li.is-alone { grid-column: 1 / -1; }
+.post-tile { justify-content: flex-start; gap: 10px; min-height: 0; border: 1px solid var(--ui-line); background: var(--ui-bg); }
+.post-tile .tile-who .person-avatar { background: var(--k-soft); }
+.post-tile .sample-chip { background: var(--ui-soft); }
+.post-text { flex: 1; margin: 0; font: 400 16px/1.45 var(--ui-font); overflow-wrap: anywhere; }
+.post-time { font-size: 13px; color: var(--ui-ink-2); }
+.explore-posts-failed { margin: 14px 0 0; font-size: 14px; color: var(--ui-ink-2); }
 
 @media (min-width: 720px) {
   .explore-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .explore-grid > li.is-post, .explore-grid > li.is-alone { grid-column: auto; }
   .explore-tile { aspect-ratio: 1; min-height: 0; padding: 18px; }
   .tile-line { font-size: 18px; -webkit-line-clamp: 5; }
+  .post-text { display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden; }
 }

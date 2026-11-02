@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
-import { DirectoryListing, DirectoryPage } from "@meet-first/contracts";
+import { DirectoryListing, DirectoryPage, PostsView } from "@meet-first/contracts";
 import { APP_PATHS, clearClientState, ROUTE_PATTERNS, routes } from "../../app-shell/index.js";
 import { renderScreen, requestsTo, stubRoute, type StubInput } from "../../testing/index.js";
 import { unlabelledControls } from "../../testing/render-screen.js";
@@ -22,6 +22,7 @@ function listing(listingId: string, displayName: string, isOpen: boolean): Direc
     displayName,
     line: `${displayName} builds small tools`,
     openToRomance: isOpen,
+    isSample: false,
     items: [{ kind: "habit", claim: `${displayName} starts work early`, quote: `I am at my desk by seven, says ${displayName}` }],
   });
 }
@@ -31,8 +32,15 @@ function page(pageNumber: number, listings: DirectoryListing[], hasMore: boolean
   return DirectoryPage.parse({ listings, page: pageNumber, hasMore });
 }
 
-// Renders Explore with these replies for GET /api/directory.
-function renderExplore(pages: StubInput[]): void {
+// Post number n by Mira or Ravi (Ravi is a sample person here), hoursAgo hours old.
+function post(n: number, writer: "Mira" | "Ravi", hoursAgo: number): PostsView["posts"][number] {
+  const listingId = writer === "Mira" ? LISTING_IDS.mira : LISTING_IDS.ravi;
+  return { postId: `00000000-0000-4000-8000-00000000070${String(n)}`, listingId, displayName: writer, isSample: writer === "Ravi", text: `Post number ${String(n)} by ${writer}.`, createdAt: new Date(Date.now() - hoursAgo * 3_600_000).toISOString() };
+}
+
+// Renders Explore with these replies for GET /api/directory, and these posts for GET /api/posts when given.
+function renderExplore(pages: StubInput[], posts?: PostsView): void {
+  if (posts !== undefined) stubRoute(routes.social.listPosts, [posts]);
   stubRoute(routes.directory.browse, pages);
   renderScreen(<ExploreScreen />, { pattern: ROUTE_PATTERNS.explore, url: APP_PATHS.explore });
 }
@@ -140,5 +148,42 @@ describe("Explore page, against the MSW route stubs (a fake server)", () => {
 
     expect(window.innerWidth).toBe(375);
     expect(unlabelledControls(document.body)).toEqual([]);
+  });
+
+  it("W7-SAMPLE-WEB-T1: posts sit in the grid after every two people, each one link to its person's Posts tab with the writer, the Sample mark and its age; a search shows people only", async () => {
+    const third = listing("00000000-0000-4000-8000-000000000513", "Lena", false);
+    const sampleRavi = { ...RAVI, isSample: true };
+    renderExplore([page(0, [MIRA, sampleRavi, third], false), page(0, [sampleRavi], false)], { posts: [post(1, "Ravi", 3), post(2, "Mira", 30)] });
+    const grid = await screen.findByRole("region", { name: "People and posts in Explore" });
+    const first = await screen.findByRole("link", { name: /Post number 1 by Ravi\./ });
+
+    await screen.findByRole("link", { name: /Post number 2 by Mira\./ });
+    const tiles = within(grid).getAllByRole("link").map((link) => link.textContent ?? "");
+    expect(tiles.map((text) => (text.includes("Post number") ? "post" : "person"))).toEqual(["person", "person", "post", "person", "post"]);
+    expect(first.getAttribute("href")).toBe(`/people/${LISTING_IDS.ravi}?tab=posts`);
+    expect(within(first).getByText("Sample")).toBeTruthy();
+    expect(within(first).getByText("3 hours ago")).toBeTruthy();
+    expect(within(await tileOf("Ravi")).getByText("Sample")).toBeTruthy();
+    expect(within(await tileOf("Mira")).queryByText("Sample")).toBeNull();
+
+    fireEvent.change(screen.getByRole("textbox", { name: "Search Explore" }), { target: { value: "ravi" } });
+    fireEvent.click(screen.getByRole("button", { name: "Search" }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole("heading", { name: "Mira" })).toBeNull();
+    });
+    expect(screen.queryByRole("link", { name: /Post number/ })).toBeNull();
+  });
+
+  it("W7-SAMPLE-WEB-T2: when the posts do not load, the people still show, with a line and Try again for the posts", async () => {
+    stubRoute(routes.social.listPosts, [{ status: 500, body: { code: "server_error", message: "Something went wrong on our side." } }, { posts: [post(1, "Ravi", 1)] }]);
+    renderExplore([page(0, [MIRA, RAVI], false)]);
+
+    expect(await screen.findByText("Posts did not load.")).toBeTruthy();
+    expect(await tileOf("Mira")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+
+    expect(await screen.findByRole("link", { name: /Post number 1 by Ravi\./ })).toBeTruthy();
+    expect(screen.queryByText("Posts did not load.")).toBeNull();
   });
 });

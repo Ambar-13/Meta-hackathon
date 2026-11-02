@@ -27,7 +27,8 @@
 @media (min-width: 768px) {
   :root { --tab-bar: 0px; }
   .social-frame { --tab-bar: 0px; }
-  .social-top { display: none; }
+  /* Two classes, so app.css's .top-bar { display: flex }, which can come later in the built stylesheet, never shows the phone bar here. */
+  .social-frame .social-top { display: none; }
   .social-rail { position: fixed; z-index: 30; top: 0; bottom: 0; left: 0; width: 72px; display: flex; flex-direction: column; align-items: center;
     padding: 22px 0 18px; background: var(--ui-bg); box-shadow: 1px 0 0 var(--ui-line); }
   .rail-logo { display: inline-grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; font-size: 28px; }

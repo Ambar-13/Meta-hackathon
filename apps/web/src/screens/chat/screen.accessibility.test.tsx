@@ -242,4 +242,29 @@ describe("chat screen", () => {
     await screen.findByRole("heading", { name: "Hi Ana, what do you want to find out?" });
     expect(screen.queryByRole("region", { name: "Your next step" })).toBeNull();
   });
+
+  it("W7-SAMPLE-WEB-T5: Add friend on a suggested sample person reads as friends at once and reads the friends list again, and a real person reads as requested", async () => {
+    const mayaListing = chatId(80);
+    const leoListing = chatId(81);
+    const maya = { listingId: mayaListing, displayName: "Maya", line: "Angel investor.", openToRomance: false, isSample: true, items: [] };
+    const leo = { listingId: leoListing, displayName: "Leo", line: "Writes the backend.", openToRomance: false, isSample: false, items: [] };
+    stubRoute(routes.social.readThread, [{ status: 200, body: threadOf([]) }]);
+    stubRoute(routes.people.readHome, homeOf(true));
+    stubRoute(routes.directory.friends, [friendsOf([MIRA]), friendsOf([MIRA, { pairId: chatId(82), displayName: "Maya", canAsk: true, listingId: mayaListing }])]);
+    stubRoute(routes.directory.browse, [{ listings: [maya, leo], page: 0, hasMore: false }]);
+    stubRoute(routes.social.sendFriendRequest, [{ status: 201, body: { requestId: chatId(83) } }, { status: 201, body: { requestId: chatId(84) } }]);
+    renderChat();
+    const suggested = await screen.findByRole("region", { name: "Suggested for you" });
+
+    expect(within(suggested).getByText("Sample")).toBeTruthy();
+    fireEvent.click(within(suggested).getByRole("button", { name: "Add Maya as a friend" }));
+    const stories = screen.getByRole("navigation", { name: "Friends" });
+    expect(await within(stories).findByRole("link", { name: "Maya" })).toBeTruthy();
+    expect(requestsTo(routes.social.sendFriendRequest)[0]?.body).toEqual({ listingId: mayaListing });
+    expect(within(suggested).queryByRole("button", { name: "Add Maya as a friend" })).toBeNull();
+
+    fireEvent.click(within(suggested).getByRole("button", { name: "Add Leo as a friend" }));
+    expect(await within(suggested).findByText("Requested")).toBeTruthy();
+    expect(requestsTo(routes.directory.friends)).toHaveLength(2);
+  });
 });

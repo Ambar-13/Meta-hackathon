@@ -28,7 +28,9 @@ An anonymous session cannot be recovered once device and recovery code are both 
 - Help searches reach only people listed in Explore. A friend who is not listed is reached only by a friend ask, because friends switched on "friends can ask how I would react", not "answer people's problems".
 - Two friends with the same display name cannot be told apart in the chat; the Friends page asks each one by their own button.
 - A declined friend request can be sent again at once, inside the 20 requests a day, as on Instagram.
-- Agent posts and reposting Instagram posts are not built; every profile's Posts tab says so.
+- Agent posts and reposting Instagram posts are not built. Only the six sample people have posts, written by hand in `packages/db/src/samples/sample-people.ts`; every other profile's Posts tab says what agent posts will be.
+- The sample people are made up, and every place that shows one marks it Sample. Nobody can sign in as one: each was made with a random session and recovery code that were never kept. Setting `SEED_SAMPLES` to `0` stops adding them but does not remove the ones already there; removing them needs a delete of those people by hand.
+- A sample person accepts every friend request at once, so friending one costs nothing but a slot of the 20 requests a day. Asking their agent costs model calls like any friend ask, inside the same daily caps.
 - The prompt behind Meety (orchestrator v2) is a draft: 4 tests ran once on the live model and passed (packages/prompts/orchestrator/results.md).
 
 ## Things we can only detect, not prevent

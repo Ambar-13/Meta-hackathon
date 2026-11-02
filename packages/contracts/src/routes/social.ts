@@ -8,10 +8,11 @@ import {
   OrchestratorSend,
   OrchestratorSendResponse,
   OrchestratorThread,
+  PostsView,
   ProfileView,
 } from "../social/index.js";
 
-// Routes for friend requests, a person's profile in Explore, and the orchestrator chat (wave 7).
+// Routes for friend requests, a person's profile in Explore, the orchestrator chat (wave 7), and posts (migration 0009).
 export const socialRoutes = {
   listFriendRequests: { method: "GET", path: "/api/friend-requests", request: z.undefined(), response: FriendRequestsView },
   sendFriendRequest: { method: "POST", path: "/api/friend-requests", request: FriendRequestCreate, response: FriendRequestCreateResponse },
@@ -21,4 +22,6 @@ export const socialRoutes = {
   readThread: { method: "GET", path: "/api/orchestrator", request: z.undefined(), response: OrchestratorThread },
   sendToOrchestrator: { method: "POST", path: "/api/orchestrator", request: OrchestratorSend, response: OrchestratorSendResponse },
   runPlan: { method: "POST", path: "/api/orchestrator/:id/run", request: z.undefined(), response: OrchestratorMessage },
+  listPosts: { method: "GET", path: "/api/posts", request: z.undefined(), response: PostsView },
+  listListingPosts: { method: "GET", path: "/api/directory/:id/posts", request: z.undefined(), response: PostsView },
 } as const;

@@ -2,11 +2,11 @@ import "./people.css";
 import type { ReactElement } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import type { ProfileView } from "@meet-first/contracts";
-import { APP_PATHS, chatPathWithDraft, ErrorNotice, ScreenFrame } from "../../app-shell/index.js";
+import { APP_PATHS, chatPathWithDraft, ErrorNotice, readProfileTab, ScreenFrame } from "../../app-shell/index.js";
 import { EmptyState, Icon, LoadingLine } from "../../look/index.js";
 import { QuestionPicker } from "../lobby/index.js";
 import { leaveOutKindsFor, useListingMeeting, type MeetControls } from "../directory/index.js";
-import { useMeetingCard, useProfile, type ProfileModel } from "./people-state.js";
+import { useListingPosts, useMeetingCard, useProfile, type ProfileModel } from "./people-state.js";
 import { ProfileHeader, ProfileTabs } from "./profile-parts.js";
 
 // The words of the profile page (wave 7).
@@ -96,20 +96,28 @@ const FriendshipButtons = (props: { model: ProfileModel; profile: ProfileView; m
   return <button type="button" disabled={isSending} onClick={() => void model.addFriend()}>{PROFILE_COPY.addFriend}</button>;
 };
 
-// A loaded profile: the header with its buttons and any refusal, then the About and Posts tabs.
+// A loaded profile: the header with its buttons and any refusal, then the About and Posts tabs, open on Posts when the address says so.
 const ProfileBody = (props: { model: ProfileModel; profile: ProfileView }): ReactElement => {
   const { model, profile } = props;
   const navigate = useNavigate();
   const location = useLocation();
   const cardId = useMeetingCard(location.search, profile.friendship === "friends");
   const meet = useListingMeeting({ cardId, go: (path) => { navigate(path); } });
+  const posts = useListingPosts(profile.listingId);
   return (
     <>
-      <ProfileHeader name={profile.displayName} line={profile.line} itemCount={profile.items.length}>
+      <ProfileHeader name={profile.displayName} line={profile.line} itemCount={profile.items.length} isSample={profile.isSample}>
         <FriendshipButtons model={model} profile={profile} meet={cardId === null ? null : meet} />
       </ProfileHeader>
       {model.action.kind === "failed" ? <ErrorNotice error={model.action.error} /> : null}
-      <ProfileTabs items={profile.items} source={sourceFor(profile.displayName)} postsName={profile.friendship === "self" ? null : profile.displayName} />
+      <ProfileTabs
+        key={profile.listingId}
+        items={profile.items}
+        source={sourceFor(profile.displayName)}
+        postsName={profile.friendship === "self" ? null : profile.displayName}
+        posts={posts}
+        firstTab={readProfileTab(location.search)}
+      />
     </>
   );
 };

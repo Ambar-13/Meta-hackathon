@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { ProfileView } from "@meet-first/contracts";
+import type { PostsView, ProfileView } from "@meet-first/contracts";
 import { apiFetch, asApiError, readApprovedCard, readCardQuery, routes, usePolledView, type ApiError, type PolledView } from "../../app-shell/index.js";
 import { readListingOrNull } from "../card/index.js";
 
@@ -32,6 +32,30 @@ export function postsSoonCopy(name: string | null): { heading: string; body: str
     heading: `Coming soon: posts by ${name}'s agent.`,
     body: `${name}'s agent will draft posts from ${name}'s chats or on a topic ${name} gives, and nothing goes up until ${name} says yes.`,
   };
+}
+
+const MINUTE_MS = 60_000;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_MS = 24 * HOUR_MS;
+
+// How long ago a post went up, in words: "A moment ago", "5 minutes ago", "3 hours ago", "2 days ago", then the day, as "Oct 28".
+// A time ahead of this clock reads as a moment ago.
+export function postAgeWords(createdAt: string, now: Date): string {
+  const age = now.getTime() - new Date(createdAt).getTime();
+  const count = (unit: number, word: string): string => {
+    const n = Math.floor(age / unit);
+    return `${String(n)} ${word}${n === 1 ? "" : "s"} ago`;
+  };
+  if (age < MINUTE_MS) return "A moment ago";
+  if (age < HOUR_MS) return count(MINUTE_MS, "minute");
+  if (age < DAY_MS) return count(HOUR_MS, "hour");
+  if (age < 7 * DAY_MS) return count(DAY_MS, "day");
+  return new Date(createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+// One profile's posts (GET /api/directory/:id/posts), read once when the profile opens; a failed read is tried again after 30 s.
+export function useListingPosts(listingId: string): PolledView<PostsView> {
+  return usePolledView(() => apiFetch(routes.social.listListingPosts, { params: { id: listingId } }), { key: `profile-posts-${listingId}`, intervalMs: 30_000, keepPolling: () => false });
 }
 
 // Reads one profile (GET /api/directory/:id) and sends, accepts or declines the friend request on it.
