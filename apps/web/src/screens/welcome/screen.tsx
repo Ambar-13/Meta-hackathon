@@ -35,7 +35,6 @@ const WelcomeHero = (props: { onDone: () => void }): ReactElement => {
       </h1>
       <p className="wl-lede">They play out how the two of you would probably get on. Then you get a short brief, and every line shows the words it came from.</p>
       <WelcomeForm onDone={props.onDone} />
-      <p className="wl-fine">Meet First is for adults, 18 and over.</p>
       <div className="scallop" aria-hidden="true" />
     </section>
   );

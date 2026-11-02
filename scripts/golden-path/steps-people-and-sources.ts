@@ -69,10 +69,16 @@ function readyCardChecks(card: CardView, prefix: string): Assertion[] {
   ];
 }
 
+// The sign-up body for one display name, with the access code when the site asks for one (ACCESS_CODE in the shell, R9.5).
+function signUpBody(displayName: string): { displayName: string; accessCode?: string } {
+  const accessCode = (process.env.ACCESS_CODE ?? "").trim();
+  return accessCode === "" ? { displayName } : { displayName, accessCode };
+}
+
 // Step 1: two people with cookies and recovery codes; the Origin refusal; the single-use recovery code.
 export async function step01Person(run: RunState): Promise<StepResult> {
   const created = routes.people.createPerson;
-  const reply = await run.a.json({ method: created.method, path: created.path, body: { displayName: "A" }, expect: 201, schema: created.response });
+  const reply = await run.a.json({ method: created.method, path: created.path, body: signUpBody("A"), expect: 201, schema: created.response });
   const cookie = run.a.lastSetCookie() ?? "";
   const token = run.a.currentToken() ?? "";
   run.ids.personA = reply.body.personId;
@@ -88,9 +94,9 @@ export async function step01Person(run: RunState): Promise<StepResult> {
     check("the session token is not in the reply body", false, token !== "" && JSON.stringify(reply.body).includes(token)),
     check("the reply body has no token key", [], Object.keys(reply.body).filter((key) => ["token", "sessionToken", "session"].includes(key))),
   ];
-  await run.a.json({ method: created.method, path: created.path, body: { displayName: "C" }, expect: 403, schema: ErrorBody, omitOrigin: true });
+  await run.a.json({ method: created.method, path: created.path, body: signUpBody("C"), expect: 403, schema: ErrorBody, omitOrigin: true });
   assertions.push(check("the refused call stored no cookie", undefined, run.a.lastSetCookie()));
-  const second = await run.b.json({ method: created.method, path: created.path, body: { displayName: "B" }, expect: 201, schema: created.response });
+  const second = await run.b.json({ method: created.method, path: created.path, body: signUpBody("B"), expect: 201, schema: created.response });
   run.ids.personB = second.body.personId;
   assertions.push(check("B's cookie is HttpOnly and Secure", true, (run.b.lastSetCookie() ?? "").includes("HttpOnly") && (run.b.lastSetCookie() ?? "").includes("Secure")));
   const personA = need(run.ids.personA, "personA");

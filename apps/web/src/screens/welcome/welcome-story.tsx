@@ -106,7 +106,7 @@ const KIND_PANELS: readonly KindPanel[] = [
   { kind: "help", label: "Help", colour: "c-yellow", sticker: "buoy", question: "Where could each of us help the other most?", lines: ["Mira could probably untangle his database by Thursday.", "Jonah could probably make her demo look like a product."] },
   { kind: "deal", label: "A deal", colour: "c-coral", sticker: "coins", question: "If I build and you sell, would we close that deal tomorrow?", lines: ["Mira would probably ask for the bigger share for building it.", "Jonah would probably push for an even split, then meet her halfway."] },
   { kind: "debate", label: "A debate", colour: "c-lilac", sticker: "chat", question: "Will AI replace most junior engineers? Where do our views split?", lines: ["Mira would probably say it changes the job, not the hiring.", "Jonah would probably say fewer juniors get hired at first."] },
-  { kind: "romance", label: "A first date", colour: "c-blue", sticker: "cup", question: "Would we enjoy a first date, and what would we talk about?", lines: ["Mira would probably pick the place with the good playlist.", "Jonah would probably bring up the trip he never took."], note: "Only when both of you switch it on, and only for adults." },
+  { kind: "romance", label: "A first date", colour: "c-blue", sticker: "cup", question: "Would we enjoy a first date, and what would we talk about?", lines: ["Mira would probably pick the place with the good playlist.", "Jonah would probably bring up the trip he never took."], note: "Only when both of you switch it on." },
 ];
 
 // One tilted colour panel: the kind, the question, the brief's three parts for that kind, and a two-line sample.

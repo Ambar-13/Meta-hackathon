@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { PersonCreate, Recover, type PersonCreateResponse } from "@meet-first/contracts";
 import { apiFetch, asApiError, ApiError, readFragmentToken, rememberAllowlist, routes } from "../../app-shell/index.js";
+import { rememberAccessCode } from "./access-code.js";
 
 // The message for a display name the contracts refuse (A5).
 const NAME_MESSAGE = "Use 1 to 80 characters for your display name.";
@@ -9,6 +10,8 @@ const NAME_MESSAGE = "Use 1 to 80 characters for your display name.";
 const GROUPS_MESSAGE = "Use at most 10 groups, each 1 to 80 characters.";
 // The message for a recovery code of the wrong length [confirm] (drafted copy, no input gives it).
 const CODE_MESSAGE = "A recovery code has 32 characters.";
+// The message for an access code longer than the contracts allow (R9.5).
+const ACCESS_MESSAGE = "An access code has at most 100 characters.";
 
 // Splits the groups field on commas, trims each part and drops empty parts (D17).
 export function parseAffiliations(text: string): string[] {
@@ -25,17 +28,21 @@ export type RecoverState = { kind: "idle" } | { kind: "sending" } | { kind: "don
 // The claim flow of /claim: no token, a token ready, sending, done, or failed (R9.2).
 export type ClaimState = { kind: "missing" } | { kind: "ready"; token: string } | { kind: "sending"; token: string } | { kind: "done" } | { kind: "failed"; error: ApiError };
 
-// The invalid message for a rejected create body: the name sentence when the name is the cause, else the groups sentence.
+// The invalid message for a rejected create body: the name sentence when the name is the cause, the access code sentence when the
+// code is, else the groups sentence.
 function createMessage(issuePaths: Array<string | number | undefined>): string {
-  return issuePaths.includes("displayName") ? NAME_MESSAGE : GROUPS_MESSAGE;
+  if (issuePaths.includes("displayName")) return NAME_MESSAGE;
+  return issuePaths.includes("accessCode") ? ACCESS_MESSAGE : GROUPS_MESSAGE;
 }
 
-// Creates a person and keeps the allowlist in memory; the recovery code lives only in this state (A5, D17).
-export function useCreatePerson(): { state: CreateState; create: (displayName: string, groups: string) => Promise<void>; forgetCode: () => void } {
+// Creates a person and keeps the allowlist in memory; the recovery code lives only in this state (A5, D17). An access code, when
+// one was typed or came in the link, goes with the request and is kept for the invite links this person shares (R9.5).
+export function useCreatePerson(): { state: CreateState; create: (displayName: string, groups: string, accessCode: string) => Promise<void>; forgetCode: () => void } {
   const [state, setState] = useState<CreateState>({ kind: "idle" });
-  const create = async (displayName: string, groups: string): Promise<void> => {
+  const create = async (displayName: string, groups: string, accessCode: string): Promise<void> => {
     const affiliations = parseAffiliations(groups);
-    const body = affiliations.length > 0 ? { displayName, affiliations } : { displayName };
+    const code = accessCode.trim();
+    const body = { displayName, ...(affiliations.length > 0 ? { affiliations } : {}), ...(code !== "" ? { accessCode: code } : {}) };
     const checked = PersonCreate.safeParse(body);
     if (!checked.success) {
       setState({ kind: "invalid", message: createMessage(checked.error.issues.map((issue) => issue.path[0])) });
@@ -45,6 +52,7 @@ export function useCreatePerson(): { state: CreateState; create: (displayName: s
     try {
       const reply: PersonCreateResponse = await apiFetch(routes.people.createPerson, { body: checked.data });
       rememberAllowlist(checked.data.displayName, checked.data.affiliations ?? []);
+      rememberAccessCode(checked.data.accessCode ?? "");
       setState({ kind: "created", recoveryCode: reply.recoveryCode });
     } catch (thrown: unknown) {
       setState({ kind: "failed", error: asApiError(thrown) });

@@ -6,6 +6,8 @@ export const PersonCreate = z.object({
   displayName: z.string().trim().min(1).max(80),
   // Affiliations the scrubber must leave alone. The 80 and 10 caps are builder defaults marked [confirm].
   affiliations: z.array(z.string().trim().min(1).max(80)).max(10).optional(),
+  // The access code, which the server checks only when the site sets ACCESS_CODE (R9.5).
+  accessCode: z.string().trim().min(1).max(100).optional(),
 });
 // The type of PersonCreate, read from the schema above.
 export type PersonCreate = z.infer<typeof PersonCreate>;

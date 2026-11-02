@@ -40,7 +40,8 @@
 .wl-groups summary::-webkit-details-marker { display: none; }
 .wl-groups[open] { background: oklch(99.6% 0.003 95 / 0.85); border-radius: var(--radius); padding: 4px 16px 14px; }
 .wl-signup .notice { width: 100%; text-align: left; }
-.wl-fine { position: relative; z-index: 2; margin: 14px auto 0; font: 500 14px/1.45 var(--sans); color: var(--ink-2); }
+.wl-access { position: relative; z-index: 2; display: block; max-width: 460px; margin: 14px auto 0; text-align: left; }
+.wl-access input[type="text"] { background: var(--paper); }
 
 .wl-recovery { position: relative; z-index: 2; max-width: 460px; margin: 26px auto 0; padding: 22px 20px 6px; text-align: left; border-radius: 6px 6px 24px 6px;
   background: var(--yellow); box-shadow: var(--lift); transform: rotate(-1deg); }
