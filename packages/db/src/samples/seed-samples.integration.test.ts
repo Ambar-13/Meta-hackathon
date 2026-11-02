@@ -53,13 +53,26 @@ describe("the sample people seed", () => {
     const names = SAMPLE_PEOPLE.map((person) => person.displayName);
     const page = await browse(viewer);
 
-    expect(first).toEqual({ added: names, present: [] });
-    expect(second).toEqual({ added: [], present: names });
+    expect(first).toEqual({ added: names, present: [], wasBusy: false });
+    expect(second).toEqual({ added: [], present: names, wasBusy: false });
     expect(page[0]).toMatchObject({ display_name: "Real Person", is_sample: false });
     expect(page.slice(1).map((row) => row.display_name)).toEqual(names);
     expect(page.slice(1).every((row) => row.is_sample && row.items.length === 4)).toBe(true);
     const samplePeople = await withNoContext(t.db, async (trx) => (await sql<{ display_name: string }>`SELECT display_name FROM sample_people_listed()`.execute(trx)).rows.map((row) => row.display_name));
     expect(samplePeople).toEqual([...names].sort());
+  });
+
+  it("W7-SAMPLE-T11: a seed that finds the lock taken adds nothing and does not wait", async () => {
+    const report = await t.db.connection().execute(async (holder) => {
+      await sql`SELECT pg_advisory_lock(9003011::bigint)`.execute(holder);
+      try {
+        return await seedSamplePeople({ api: t.db, worker }, { now: NOW });
+      } finally {
+        await sql`SELECT pg_advisory_unlock(9003011::bigint)`.execute(holder);
+      }
+    });
+
+    expect(report).toEqual({ added: [], present: [], wasBusy: true });
   });
 
   it("W7-SAMPLE-T5: search finds a sample person by the words of a public item", async () => {

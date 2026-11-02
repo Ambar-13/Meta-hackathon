@@ -30,11 +30,12 @@ as_user() {
 
 pnpm -w db:migrate
 
-# The sample people of Explore (packages/db/src/samples/seed-samples.ts), unless SEED_SAMPLES is 0. It runs beside the api and the
-# worker, so waking from sleep is no slower, and once all six are listed it adds nothing. It gets only the api and worker URLs. A
-# failure is logged and stops nothing, because Explore works without them.
+# The sample people of Explore (packages/db/src/samples/seed-samples.ts), unless SEED_SAMPLES is 0. Like the migrations it runs
+# before the api and the worker start, so tsx runs as root only while no other process could have written to the shared /tmp. Once
+# all six are listed it adds nothing. It gets only the api and worker URLs. A failure is logged and stops nothing, because Explore
+# works without them.
 if [ "${SEED_SAMPLES:-1}" != "0" ]; then
-  (cd packages/db && env -u META_API_KEY -u DATABASE_URL_MIGRATE -u ACCESS_CODE node --import tsx src/samples/seed-samples.ts || echo "seed_samples_failed: the app runs without the sample people." >&2) &
+  (cd packages/db && env -u META_API_KEY -u DATABASE_URL_MIGRATE -u ACCESS_CODE node --import tsx src/samples/seed-samples.ts) || echo "seed_samples_failed: the app runs without the sample people." >&2
 fi
 
 (cd apps/api && as_user meet-api env -u META_API_KEY -u DATABASE_URL_MIGRATE -u DATABASE_URL_WORKER node --import tsx src/server.ts) &

@@ -13,15 +13,17 @@ import { withPerson } from "../transaction.js";
 import type { Database } from "../types.js";
 import { SAMPLE_PEOPLE, type SamplePerson } from "./sample-people.js";
 
-// The advisory lock two seeds at once take turns on, so a sample person is never written twice. Any fixed number works.
+// The advisory lock a seed holds while it writes, so a sample person is never written twice. A seed that finds it taken adds nothing
+// rather than waiting, so a stuck lock can never hold up the start script. Any fixed number works.
 const SEED_LOCK = 9_003_011;
 // One connection holds the lock while the other writes.
 const SEED_POOL_SIZE = 2;
 const HOUR_MS = 3_600_000;
 const MINUTE_MS = 60_000;
 
-// What one run did: the sample people it added and the ones Explore already listed.
-export type SeedReport = { added: string[]; present: string[] };
+// What one run did: the sample people it added, the ones Explore already listed, and whether another seed held the lock, in which case
+// this one added nothing.
+export type SeedReport = { added: string[]; present: string[]; wasBusy: boolean };
 // The two clients the seed writes through: app_api, with a pool of at least two connections so one can hold the lock, and app_worker.
 export type SeedClients = { api: Kysely<Database>; worker: Kysely<Database> };
 
@@ -83,11 +85,12 @@ export async function seedSamplePeople(clients: SeedClients, options: { people?:
   const people = options.people ?? SAMPLE_PEOPLE;
   const now = options.now ?? new Date();
   return api.connection().execute(async (lock) => {
-    await sql`SELECT pg_advisory_lock(${SEED_LOCK}::bigint)`.execute(lock);
+    const taken = await sql<{ ok: boolean }>`SELECT pg_try_advisory_lock(${SEED_LOCK}::bigint) AS ok`.execute(lock);
+    if (taken.rows[0]?.ok !== true) return { added: [], present: [], wasBusy: true };
     try {
       const listed = await sql<{ display_name: string }>`SELECT display_name FROM sample_people_listed()`.execute(api);
       const present = new Set(listed.rows.map((row) => row.display_name));
-      const report: SeedReport = { added: [], present: [] };
+      const report: SeedReport = { added: [], present: [], wasBusy: false };
       for (const [index, person] of people.entries()) {
         if (present.has(person.displayName)) {
           report.present.push(person.displayName);
@@ -116,7 +119,8 @@ async function main(): Promise<void> {
   const worker = makeDatabase(env.data.DATABASE_URL_WORKER, 1);
   try {
     const report = await seedSamplePeople({ api, worker });
-    console.log(`seed-samples: added ${String(report.added.length)} (${report.added.join(", ") || "none"}), already listed ${String(report.present.length)}`);
+    if (report.wasBusy) console.log("seed-samples: another seed is running, so this one added nothing");
+    else console.log(`seed-samples: added ${String(report.added.length)} (${report.added.join(", ") || "none"}), already listed ${String(report.present.length)}`);
   } finally {
     await api.destroy();
     await worker.destroy();
