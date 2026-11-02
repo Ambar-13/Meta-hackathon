@@ -9,7 +9,7 @@ services:
     runtime: docker
     plan: free               # 0.1 CPU, 512 MB; 0.5c-512mb ($7 a month) never sleeps and has 0.5 CPU [confirm]
     region: singapore        # ARCHITECTURE.md 12: availability and latency to api.meta.ai are unverified [confirm]
-    dockerfilePath: ./Dockerfile.api   # the api image holds the whole workspace, the worker's code included
+    dockerfilePath: ./Dockerfile.render   # the whole workspace; starts as root so the api and the worker run as two users
     dockerContext: .
     dockerCommand: bash /app/scripts/start-api-and-worker.sh   # migrations, then the api and the worker (D71)
     autoDeployTrigger: "off"   # D70, R12.3
