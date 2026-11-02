@@ -30,7 +30,7 @@ export type CheckedPlan = {
 function recentLine(message: RecentMessage): string {
   const flat = message.text.replace(/\s+/g, " ").trim();
   const cut = Array.from(flat).slice(0, RECENT_MESSAGE_MAX_CHARS).join("");
-  return (message.role === "you" ? "you: " : "orchestrator: ") + escapeBlockText(cut);
+  return (message.role === "you" ? "you: " : "meety: ") + escapeBlockText(cut);
 }
 
 // The user message of one plan call: the earlier messages, the friend list and the new message, each in its own block. Names go on one

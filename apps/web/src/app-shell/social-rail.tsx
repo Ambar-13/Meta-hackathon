@@ -8,9 +8,9 @@ import { Avatar, Sticker, type StickerName } from "../look/index.js";
 
 // One page of the signed-in nav: its words, where it goes, its sticker, and whether only the laptop rail shows it.
 type RailPage = { label: string; to: string; sticker: StickerName; isRailOnly?: boolean };
-// The pages, in this order: Chat, Explore, Friends, Me, then Settings, which the phone keeps in the top bar instead (wave 7).
+// The pages, in this order: Meety (the chat), Explore, Friends, Me, then Settings, which the phone keeps in the top bar instead (wave 7).
 const RAIL_PAGES: readonly RailPage[] = [
-  { label: "Chat", to: APP_PATHS.home, sticker: "chat" },
+  { label: "Meety", to: APP_PATHS.home, sticker: "chat" },
   { label: "Explore", to: APP_PATHS.explore, sticker: "lens" },
   { label: "Friends", to: APP_PATHS.friends, sticker: "smile" },
   { label: "Me", to: APP_PATHS.me, sticker: "tags" },

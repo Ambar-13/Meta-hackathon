@@ -83,9 +83,9 @@ const ReplyExtra = (props: { message: OrchestratorMessage; actions: ReplyActions
 const AgentReply = (props: { message: OrchestratorMessage; actions: ReplyActions }): ReactElement => {
   const { message } = props;
   return (
-    <article className="chat-agent" aria-label="The orchestrator replied">
+    <article className="chat-agent" aria-label="Meety replied">
       <Sticker name="spark" />
-      <span className="chat-who">Orchestrator</span>
+      <span className="chat-who">Meety</span>
       <div className="chat-body">
         {message.state === "thinking" ? <WaitLine text={THINKING_LINE} /> : <p className="chat-text">{message.text}</p>}
         <ReplyExtra message={message} actions={props.actions} />
@@ -97,7 +97,7 @@ const AgentReply = (props: { message: OrchestratorMessage; actions: ReplyActions
 // The thread: every message in order, in a log that screen readers follow politely.
 export const Thread = (props: { messages: readonly OrchestratorMessage[]; actions: ReplyActions }): ReactElement => {
   return (
-    <div className="chat-log" role="log" aria-live="polite" aria-label="Your chat with the orchestrator">
+    <div className="chat-log" role="log" aria-live="polite" aria-label="Your chat with Meety">
       {props.messages.map((message) =>
         message.role === "you" ? <YouBubble key={message.id} message={message} /> : <AgentReply key={message.id} message={message} actions={props.actions} />,
       )}

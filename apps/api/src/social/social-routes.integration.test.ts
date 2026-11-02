@@ -190,7 +190,7 @@ describe("the orchestrator chat", () => {
     await withPerson(t.db, busy.personId, (trx) => trx.insertInto("orchestrator_messages").values(Array.from({ length: 40 }, () => ({ person_id: busy.personId, role: "you" as const, text: "hello there", state: "done" as const }))).execute());
     const capped = await send({ method: "POST", url: routes.social.sendToOrchestrator.path, token: busy.sessionToken, payload: { text: "one more" } });
     expect(capped.statusCode).toBe(429);
-    expect(ErrorBody.parse(capped.body)).toEqual({ code: "orchestrator_daily_cap", message: "You have sent today's messages to the orchestrator. Try again tomorrow." });
+    expect(ErrorBody.parse(capped.body)).toEqual({ code: "orchestrator_daily_cap", message: "You have sent today's messages to Meety. Try again tomorrow." });
     const empty = await send({ method: "POST", url: routes.social.sendToOrchestrator.path, token: busy.sessionToken, payload: { text: "   " } });
     expect(empty.statusCode).toBe(400);
   });

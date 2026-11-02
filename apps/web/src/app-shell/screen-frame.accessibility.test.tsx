@@ -41,7 +41,7 @@ describe("screen frame links", () => {
     renderFrame({ pattern: ROUTE_PATTERNS.card, url: APP_PATHS.card(IDS.card) });
 
     expect(pageLinks().map(([words, href]) => [words, href])).toEqual([
-      ["Chat", "/home"],
+      ["Meety", "/home"],
       ["Explore", "/explore"],
       ["Friends", "/friends"],
       ["Me", "/me"],
@@ -61,7 +61,7 @@ describe("screen frame links", () => {
 
     for (const page of pages) {
       renderFrame(page);
-      for (const name of ["Chat", "Explore", "Friends", "Me", "Directory", "Find help"]) {
+      for (const name of ["Meety", "Explore", "Friends", "Me", "Directory", "Find help"]) {
         expect(screen.queryByRole("link", { name })).toBeNull();
       }
       cleanup();
@@ -82,7 +82,7 @@ describe("screen frame links", () => {
     renderFrame({ pattern: ROUTE_PATTERNS.explore, url: APP_PATHS.explore, width: 1024 });
 
     expect(pageLinks()).toEqual([
-      ["Chat", "/home", null],
+      ["Meety", "/home", null],
       ["Explore", "/explore", "page"],
       ["Friends", "/friends", null],
       ["Me", "/me", null],

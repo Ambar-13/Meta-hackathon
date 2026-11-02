@@ -17,7 +17,7 @@ import { SettingsScreen } from "../screens/settings/index.js";
 import { HelpScreen } from "../screens/help/index.js";
 import { FriendsScreen } from "../screens/friends/index.js";
 import { AskScreen } from "../screens/ask/index.js";
-import { HomeScreen } from "../screens/home/index.js";
+import { ChatScreen } from "../screens/chat/index.js";
 import { ExploreScreen } from "../screens/explore/index.js";
 import { MeScreen } from "../screens/me/index.js";
 import { PersonScreen } from "../screens/people/index.js";
@@ -58,7 +58,7 @@ export const APP_ROUTES: RouteObject[] = [
   { path: ROUTE_PATTERNS.help, element: <HelpScreen /> },
   { path: ROUTE_PATTERNS.friends, element: <FriendsScreen /> },
   { path: ROUTE_PATTERNS.ask, element: <AskScreen /> },
-  { path: ROUTE_PATTERNS.home, element: <HomeScreen /> },
+  { path: ROUTE_PATTERNS.home, element: <ChatScreen /> },
   { path: ROUTE_PATTERNS.explore, element: <ExploreScreen /> },
   { path: ROUTE_PATTERNS.me, element: <MeScreen /> },
   { path: ROUTE_PATTERNS.person, element: <PersonScreen /> },

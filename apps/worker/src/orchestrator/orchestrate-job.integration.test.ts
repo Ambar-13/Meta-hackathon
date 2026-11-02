@@ -125,6 +125,6 @@ describe("the orchestrate job", () => {
     await runFor(nextId, model.live);
 
     const body = JSON.stringify(model.seen[0]?.body);
-    expect(body).toContain("you: How would Test B react if I moved our trip to March?\\norchestrator: I can ask Test B's agent about March.\\n</recent>");
+    expect(body).toContain("you: How would Test B react if I moved our trip to March?\\nmeety: I can ask Test B's agent about March.\\n</recent>");
   });
 });

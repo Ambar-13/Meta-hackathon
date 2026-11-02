@@ -134,7 +134,7 @@ export const ChatScreen = (): ReactElement => {
   const end = useScrollToNewest(newestKey(model.messages));
   const home = model.home.value;
   return (
-    <ScreenFrame title="Chat">
+    <ScreenFrame title="Meety">
       <div className={rootClass(model.thread.value !== null, isEmpty)}>
         {home === null ? null : <NextStep home={home} />}
         {isEmpty ? <Greeting displayName={home?.displayName ?? null} /> : null}

@@ -16,7 +16,7 @@ afterEach(() => {
 });
 
 // The cap sentence the api sends with a 429 on POST /api/orchestrator.
-const CAP_SENTENCE = "You have sent today's messages to the orchestrator. Try again tomorrow.";
+const CAP_SENTENCE = "You have sent today's messages to Meety. Try again tomorrow.";
 
 // Stubs the three reads of the page: the thread (a list is served in order), the home view and the friends list.
 function stubReads(input: { thread: OrchestratorMessage[][]; hasCard?: boolean; friends?: Friend[] }): void {
@@ -32,12 +32,12 @@ function renderChat(search = ""): void {
 
 // The composer's text box.
 function composer(): HTMLTextAreaElement {
-  return screen.getByLabelText("Message the orchestrator");
+  return screen.getByLabelText("Ask Meety, your personal AI");
 }
 
 // The orchestrator's replies on the page, in order.
 function replies(): HTMLElement[] {
-  return screen.queryAllByRole("article", { name: "The orchestrator replied" });
+  return screen.queryAllByRole("article", { name: "Meety replied" });
 }
 
 // The chips under an empty thread, as their words.
@@ -63,7 +63,7 @@ describe("chat screen", () => {
     });
     expect(composer().selectionStart).toBe(composer().value.length);
     expect(requestsTo(routes.social.sendToOrchestrator)).toHaveLength(0);
-    expect(screen.getByRole("heading", { level: 1, name: "Chat" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 1, name: "Meety" })).toBeTruthy();
     expect(unlabelledControls(document.body)).toEqual([]);
   });
 

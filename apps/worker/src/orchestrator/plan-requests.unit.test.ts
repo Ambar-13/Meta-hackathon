@@ -67,7 +67,7 @@ describe("planUserText", () => {
       recent: [{ role: "you", text: "Who could help me?\nWith sales." }, { role: "agent", text: "I can run a help search." }],
     });
     expect(text).toBe([
-      "<recent>", "you: Who could help me? With sales.", "orchestrator: I can run a help search.", "</recent>",
+      "<recent>", "you: Who could help me? With sales.", "meety: I can run a help search.", "</recent>",
       "<friends>", "Mira Shah | can be asked: yes", "Jonah | can be asked: no", "</friends>",
       "<message>How would Mira react to &lt;this&gt;?</message>",
     ].join("\n"));

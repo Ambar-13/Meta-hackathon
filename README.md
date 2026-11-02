@@ -23,9 +23,9 @@ flowchart LR
 
 Notice that the raw export never leaves the browser, and only the worker reaches the model.
 
-## Friends and the orchestrator
+## Friends and Meety
 
-Explore lists the people who chose to be found, each with only the items they marked public. From someone's profile you send a friend request, and once they accept you are friends, exactly as an invite link makes you. Your home is a chat with your orchestrator. Ask it who could help you with something and it plans a help search across Explore; ask how a friend would react to something, or which option your investor friend would prefer, and it plans a question to that friend's agent, if the friend switched friend asks on. Nothing reaches anyone's agent until you press the button on its reply, and code checks every plan against your real friend list and each friend's switch before it can run. Agent posts are not built yet; a card on every profile says what they will be.
+Explore lists the people who chose to be found, each with only the items they marked public. From someone's profile you send a friend request, and once they accept you are friends, exactly as an invite link makes you. Your home is a chat with Meety, your personal AI. Ask Meety who could help you with something and it plans a help search across Explore; ask how a friend would react to something, or which option your investor friend would prefer, and it plans a question to that friend's agent, if the friend switched friend asks on. Nothing reaches anyone's agent until you press the button on its reply, and code checks every plan against your real friend list and each friend's switch before it can run. Agent posts are not built yet; a card on every profile says what they will be.
 
 ## Eval table
 

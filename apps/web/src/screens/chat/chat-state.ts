@@ -4,12 +4,8 @@
 // hold the composer's text, the send and the plan runs. What it does not do: show anything; screen.tsx and its parts do.
 import { useState } from "react";
 import { ORCHESTRATOR_MESSAGE_MAX_CHARS, type FriendsView, type HomeView, type OrchestratorMessage, type OrchestratorThread } from "@meet-first/contracts";
-import { apiFetch, asApiError, routes, usePolledView, type ApiError, type PolledView } from "../../app-shell/index.js";
+import { apiFetch, asApiError, DRAFT_QUERY, routes, usePolledView, type ApiError, type PolledView } from "../../app-shell/index.js";
 import { shouldPollThread, shownMessages, THREAD_POLL_MS } from "./chat-words.js";
-
-// The query name that carries a draft for the composer, as /home?draft=How%20would%20Mira%20react%20to%20 does. The integrator moves it
-// to app-paths.
-export const DRAFT_QUERY = "draft";
 
 // The draft a link put in the page's query, cut to the longest message, or null when there is none.
 export function readDraftQuery(search: string): string | null {

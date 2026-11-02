@@ -12,7 +12,7 @@ const EXPLORE_COPY = {
   searchLabel: "Search Explore",
   search: "Search",
   stuck: "Stuck on something?",
-  askOrchestrator: "Ask the orchestrator who could help.",
+  askOrchestrator: "Ask Meety who could help.",
   loading: "Loading people.",
   emptyTitle: "Nobody matches yet",
   emptyLine: "Try other words, or clear the search.",

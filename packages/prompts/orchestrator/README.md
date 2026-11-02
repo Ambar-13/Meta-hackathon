@@ -1,6 +1,6 @@
 # orchestrator prompt
 
-The orchestrator reads one chat message from a person and plans exactly one action: a help search across Explore, a friend ask to one friend's agent, or a reply in words only (wave 7).
+Meety, the person's personal AI (called the orchestrator in the code), reads one chat message from a person and plans exactly one action: a help search across Explore, a friend ask to one friend's agent, or a reply in words only (wave 7).
 
 ## What this does
 
@@ -26,8 +26,8 @@ Notice that the model only proposes: checkPlan decides the action, and nothing r
 
 ## The main pieces
 
-`v1/prompt.md` is the system message. `v1/schema.json` is OrchestratorPlanOutput from packages/contracts, converted to a strict schema. `cases.md` holds the inventory and the test set. The request builder and the checks are in apps/worker/src/orchestrator/plan-requests.ts.
+`v2/prompt.md` is the system message (v1 is the same rules without the name Meety). `v2/schema.json` is OrchestratorPlanOutput from packages/contracts, converted to a strict schema. `cases.md` holds the inventory and the test set. The request builder and the checks are in apps/worker/src/orchestrator/plan-requests.ts.
 
 ## How to test it
 
-`pnpm exec vitest run --project unit apps/worker/src/orchestrator` for the checks in code. The prompt's own test set is in cases.md; 3 of its 22 tests have one recorded run each, in results.md, so it is a draft.
+`pnpm exec vitest run --project unit apps/worker/src/orchestrator` for the checks in code. The prompt's own test set is in cases.md; v2 has 4 recorded runs, one each, in results.md, so it is a draft.

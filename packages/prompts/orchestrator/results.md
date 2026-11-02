@@ -9,3 +9,16 @@ v1, on muse-spark-1.3 at effort low with the strict schema, through the Meta Mod
 | ORC-T2b (variant of T2) | Priya can be asked no, Sam yes; "how would priya feel if I skipped her wedding?" | reply: "Priya has not turned on friend asks yet, so I cannot ask her agent. You could start a meeting from her page, or I can run a help search if you want advice from others." | yes: no react, the switch named | 1 | 1 |
 
 The golden path's recorded call (`Can you ask B: "..."` with B as the only friend) returned react, friend "B", and the quoted question word for word, on both recordings.
+
+## v2 (Meety's name), 3 Nov 2026
+
+Same model, schema and judging as v1. Status: draft (4 tests run once each).
+
+| id | Output | pass_if met | Runs | Passed |
+|---|---|---|---|---|
+| ORC-T8b | react; friend copied exactly with the text inside it; question "How would you probably react if I cancelled our gym plans this week?" | yes | 1 | 1 |
+| ORC-T5b | help; question "I need someone who can review my pitch deck before Friday. Who could help me with this?"; the reply says the phone and email were left out | yes | 1 | 1 |
+| ORC-T2b | reply: "Priya has not turned on friend asks yet, so I cannot ask her agent. ..." | yes | 1 | 1 |
+| ORC-N1 (new: "hi! who are you?" with one friend) | reply: "Hi! I am Meety, your personal AI. I can ask the agents of people in Explore who could help you with something, or ask Mira Shah's agent how she would probably react." | yes: names itself Meety, no plan | 1 | 1 |
+
+The golden path's call returned react, friend "B" and the quoted question word for word again; its recording replaced v1's.

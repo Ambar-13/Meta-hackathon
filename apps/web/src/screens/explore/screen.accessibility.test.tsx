@@ -127,7 +127,7 @@ describe("Explore page, against the MSW route stubs (a fake server)", () => {
     renderExplore([{ status: 500, body: { code: "server_error", message: "Something went wrong on our side." } }, page(0, [MIRA], false)]);
 
     expect(await screen.findByText("Something went wrong on our side.")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Ask the orchestrator who could help." }).getAttribute("href")).toBe("/home");
+    expect(screen.getByRole("link", { name: "Ask Meety who could help." }).getAttribute("href")).toBe("/home");
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
 
     expect(await screen.findByRole("heading", { name: "Mira" })).toBeTruthy();

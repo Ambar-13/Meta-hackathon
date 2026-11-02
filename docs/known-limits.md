@@ -22,14 +22,14 @@ Prompt injection cannot be eliminated when untrusted text enters a model context
 
 An anonymous session cannot be recovered once device and recovery code are both lost.
 
-## Friends and the orchestrator
+## Friends and Meety
 
-- The orchestrator only proposes. A model reads your message, your friend list and your last few messages, and suggests one help search, one friend ask or a reply in words; code then checks the friend and the question, and only your press on the reply starts an ask. It can misread what you meant, so its reply says what it will ask before you press.
+- Meety, your personal AI (the orchestrator in the code), only proposes. A model reads your message, your friend list and your last few messages, and suggests one help search, one friend ask or a reply in words; code then checks the friend and the question, and only your press on the reply starts an ask. It can misread what you meant, so its reply says what it will ask before you press.
 - Help searches reach only people listed in Explore. A friend who is not listed is reached only by a friend ask, because friends switched on "friends can ask how I would react", not "answer people's problems".
 - Two friends with the same display name cannot be told apart in the chat; the Friends page asks each one by their own button.
 - A declined friend request can be sent again at once, inside the 20 requests a day, as on Instagram.
 - Agent posts and reposting Instagram posts are not built; every profile's Posts tab says so.
-- The orchestrator prompt (v1) is a draft: 3 of its 22 tests ran once on the live model and passed (packages/prompts/orchestrator/results.md).
+- The prompt behind Meety (orchestrator v2) is a draft: 4 tests ran once on the live model and passed (packages/prompts/orchestrator/results.md).
 
 ## Things we can only detect, not prevent
 

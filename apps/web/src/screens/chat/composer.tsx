@@ -6,6 +6,9 @@ import { ErrorNotice } from "../../app-shell/index.js";
 import type { ComposerModel } from "./chat-state.js";
 import { COUNTER_FROM_CHARS } from "./chat-words.js";
 
+// The words in the empty box, and its name for screen readers (Ambar, 3 Nov: "have like the text ask meety our personal ai").
+export const COMPOSER_LABEL = "Ask Meety, your personal AI";
+
 // The most lines the box grows to before it scrolls.
 const MAX_ROWS = 6;
 // The line under the box.
@@ -51,12 +54,13 @@ export const Composer = (props: { model: ComposerModel }): ReactElement => {
           send();
         }}
       >
-        <label className="chat-hidden" htmlFor={fieldId}>Message the orchestrator</label>
+        <label className="chat-hidden" htmlFor={fieldId}>{COMPOSER_LABEL}</label>
         <textarea
           id={fieldId}
           ref={field}
           rows={rowsOf(model.text)}
           maxLength={ORCHESTRATOR_MESSAGE_MAX_CHARS}
+          placeholder={COMPOSER_LABEL}
           value={model.text}
           onChange={(event) => { model.setText(event.target.value); }}
           onKeyDown={(event) => { onEnter(event, send); }}

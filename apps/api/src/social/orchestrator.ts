@@ -18,7 +18,7 @@ import { requirePerson } from "../sessions/index.js";
 // The :id of the run route: a reply's id. One that is not a uuid is not_found, so a bad id tells nothing.
 const MessageParams = z.object({ id: Uuid });
 // The sentence when the person has sent ORCHESTRATOR_MESSAGES_PER_DAY messages this UTC day.
-const DAILY_CAP_SENTENCE = "You have sent today's messages to the orchestrator. Try again tomorrow.";
+const DAILY_CAP_SENTENCE = "You have sent today's messages to Meety. Try again tomorrow.";
 
 // One row of orchestrator_messages as the thread reads it.
 type MessageRow = {
