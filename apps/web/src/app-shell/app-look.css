@@ -49,14 +49,14 @@
   min-height: 44px; padding: 0 18px; border: 0; border-radius: var(--ui-radius); background: var(--ui-blue); color: oklch(99.5% 0 0);
   font: 600 15px/1.2 var(--ui-font); transition: background-color 0.15s var(--ease);
 }
-:where(.social-frame) button:hover:not(:disabled), :where(.social-frame) .btn:hover { transform: none; background: var(--ui-blue-hover); text-decoration: none; }
+/* Hover darkens whatever colour a button has, so buttons that a screen colours itself (quote cards, tabs) never turn blue. */
+:where(.social-frame) button:hover:not(:disabled), :where(.social-frame) .btn:hover { transform: none; filter: brightness(0.94); text-decoration: none; }
 :where(.social-frame) button:active:not(:disabled), :where(.social-frame) .btn:active { transform: none; }
 :where(.social-frame) button.quiet, :where(.social-frame) .btn.quiet { background: var(--ui-soft); color: var(--ui-ink); }
-:where(.social-frame) button.quiet:hover:not(:disabled), :where(.social-frame) .btn.quiet:hover { background: var(--ui-hover); }
 :where(.social-frame) button.coral, :where(.social-frame) .btn.coral { background: var(--ui-soft); color: var(--ui-ink); }
 :where(.social-frame) button.danger, :where(.social-frame) .btn.danger { background: var(--ui-red); color: oklch(99.5% 0 0); }
 :where(.social-frame) button.text-button { min-height: 44px; padding: 0 4px; background: none; color: var(--ui-blue); text-decoration: none; }
-:where(.social-frame) button.text-button:hover:not(:disabled) { background: none; text-decoration: underline; }
+:where(.social-frame) button.text-button:hover:not(:disabled) { filter: none; text-decoration: underline; }
 :where(.social-frame) button:disabled { background: var(--ui-soft); color: oklch(66% 0.004 265); }
 :where(.social-frame) .btn.big, :where(.social-frame) button.big { min-height: 50px; padding: 0 24px; font-size: 16px; }
 
@@ -90,6 +90,7 @@
 :where(.social-frame) .pill { border: 1px solid var(--ui-line); font: 600 13px/1.2 var(--ui-font); }
 :where(.social-frame) .mark, :where(.social-frame) .flag { font: 600 13px/1.2 var(--ui-font); }
 :where(.social-frame) .receipt { transform: none; box-shadow: none; border: 1px solid var(--ui-line); border-radius: 14px; }
+:where(.social-frame) button.receipt { justify-content: flex-start; text-align: left; }
 :where(.social-frame) .receipt q { font: 500 15px/1.4 var(--ui-font); }
 :where(.social-frame) .receipt small { font: 400 13px/1.3 var(--ui-font); color: var(--ui-ink-2); }
 :where(.social-frame) .tabs { background: var(--ui-soft); }
