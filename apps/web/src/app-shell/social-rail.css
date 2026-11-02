@@ -1,0 +1,41 @@
+/* The signed-in frame of wave 7: a bottom tab bar and a top bar on phones and tablets, a left rail with the pages and your
+   friends on a laptop (docs/DESIGN.md). Pages without a session keep the plain frame in app.css. */
+
+/* ---------- phone and tablet: the top bar with Settings, and the tab bar ---------- */
+.top-settings { min-height: 44px; padding: 0 14px 0 10px; font-size: 14px; }
+.top-settings .stk { font-size: 20px; }
+.social-pages .page-word { display: inline-flex; align-items: center; gap: 6px; }
+.count-pill { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: var(--coral-deep); color: var(--paper);
+  font: 700 13px/1 var(--sans); }
+
+@media (max-width: 1023.98px) {
+  .social-rail .rail-logo, .social-rail .rail-friends, .social-pages .rail-only { display: none; }
+  .social-pages.tab-bar { max-width: 560px; margin: 0 auto; }
+}
+
+/* ---------- laptop: the rail on the left, the content column to its right ---------- */
+@media (min-width: 1024px) {
+  :root { --tab-bar: 0px; }
+  .social-top { display: none; }
+  .social-rail { position: fixed; z-index: 30; top: 0; bottom: 0; left: 0; width: 280px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto;
+    padding: 22px 16px 28px; background: var(--paper); box-shadow: 1.5px 0 0 var(--line); }
+  .rail-logo { min-height: 52px; padding: 0 14px; margin-bottom: 14px; border-radius: 999px; }
+  .social-body { padding-left: 280px; }
+
+  .social-pages.tab-bar { position: static; flex-direction: column; justify-content: flex-start; gap: 2px; padding: 0; border-radius: 0; background: none; box-shadow: none; }
+  .social-pages.tab-bar a { flex: none; flex-direction: row; justify-content: flex-start; gap: 14px; min-height: 52px; padding: 0 16px; border-radius: 999px;
+    font: 600 17px/1 var(--sans); transition: background-color 0.2s var(--ease); }
+  .social-pages.tab-bar a .stk { font-size: 26px; }
+  .social-pages.tab-bar a:hover, .social-pages.tab-bar a:focus-visible { background: var(--blue-soft); }
+  .social-pages.tab-bar a[aria-current="page"] { font-weight: 700; background: var(--blue-soft); box-shadow: inset 0 0 0 2px var(--ink); }
+
+  .rail-friends { margin-top: 18px; padding-top: 16px; box-shadow: 0 -1.5px 0 var(--line); }
+  .rail-heading { margin: 0 16px 6px; font: 700 15px/1.2 var(--sans); color: var(--ink); }
+  .rail-friends ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .rail-friends li a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 4px 14px; border-radius: 999px; font: 600 15px/1.2 var(--sans); color: var(--ink);
+    text-decoration: none; transition: background-color 0.2s var(--ease); }
+  .rail-friends li a span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rail-friends li a:hover, .rail-friends li a:focus-visible { background: var(--blue-soft); }
+  .rail-none { margin: 4px 16px; font-size: 15px; color: var(--ink-2); }
+  .rail-find { display: inline-flex; align-items: center; min-height: 44px; margin: 2px 16px 0; font: 700 15px/1.2 var(--sans); }
+}

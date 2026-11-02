@@ -19,6 +19,8 @@ export const APP_PATHS = {
   directory: "/directory", help: "/help", friends: "/friends",
   ask: (askId: string) => `/asks/${askId}`,
   home: "/home",
+  explore: "/explore", me: "/me",
+  person: (listingId: string) => `/people/${listingId}`,
 } as const;
 
 // The route patterns, with the keys and parameter names of APP_PATHS, in the same order (seams S11).
@@ -28,12 +30,21 @@ export const ROUTE_PATTERNS = {
   meeting: "/meetings/:meetingId", brief: "/meetings/:meetingId/brief", comic: "/meetings/:meetingId/comic",
   consent: "/meetings/:meetingId/share", sharePage: "/share/:slug",
   directory: "/directory", help: "/help", friends: "/friends", ask: "/asks/:askId", home: "/home",
+  explore: "/explore", me: "/me", person: "/people/:listingId",
 } as const;
 
 // The query name that carries the approved card a meeting is created with, so a reload keeps it [confirm] (no contract field carries it).
 export const CARD_QUERY = "card";
 // The query name that carries this browser's side in a meeting, so a reload keeps it [confirm] (MeetingView has no viewer side).
 export const SIDE_QUERY = "side";
+
+// The query name that carries words for the chat composer, so a link can open the chat with a message started (wave 7).
+export const DRAFT_QUERY = "draft";
+
+// The chat at /home with these words waiting in its composer.
+export function chatPathWithDraft(text: string): string {
+  return `${APP_PATHS.home}?${DRAFT_QUERY}=${encodeURIComponent(text)}`;
+}
 
 // The pair screen for an approved card.
 export function pairPathWithCard(cardId: string): string {

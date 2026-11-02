@@ -25,8 +25,8 @@ export type YourListingLoad =
   | { kind: "ready"; listing: MyListing | null; listedCardId: string | null; meetings: ListedMeeting[] };
 // Where the Leave button stands.
 export type LeaveState = { kind: "idle" } | { kind: "sending" } | { kind: "left" } | { kind: "failed"; error: ApiError };
-// The Your listing part's data with the Leave action.
-export type YourListingHook = { load: YourListingLoad; leaveState: LeaveState; leave: () => Promise<void> };
+// The Your listing part's data with the Leave action, and replaceListing for a listing the person has joined with or saved.
+export type YourListingHook = { load: YourListingLoad; leaveState: LeaveState; leave: () => Promise<void>; replaceListing: (listing: MyListing) => void };
 
 // The listings before the first page arrives.
 const FIRST_BROWSE: BrowseState = { query: "", listings: [], nextPage: 0, hasMore: false, hasLoaded: false, isLoading: true, error: null };
@@ -138,5 +138,9 @@ export function useYourListing(): YourListingHook {
       setLeaveState({ kind: "failed", error: asApiError(thrown) });
     }
   };
-  return { load, leaveState, leave };
+  const replaceListing = (listing: MyListing): void => {
+    setLoad((previous) => (previous.kind === "ready" ? { ...previous, listing } : previous));
+    setLeaveState({ kind: "idle" });
+  };
+  return { load, leaveState, leave, replaceListing };
 }

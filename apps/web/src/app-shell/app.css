@@ -102,7 +102,7 @@ legend { padding: 0 8px; margin-left: -8px; font: 800 20px/1.1 var(--display); l
 .tab-bar { position: fixed; z-index: 30; left: 10px; right: 10px; bottom: max(10px, env(safe-area-inset-bottom)); display: flex; justify-content: space-between; gap: 2px;
   padding: 6px; border-radius: 26px; background: var(--paper); box-shadow: 0 14px 30px -14px oklch(20% 0.05 266 / 0.6), 0 0 0 1.5px var(--line); }
 .tab-bar a { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 58px; padding: 4px 2px; border-radius: 20px;
-  font: 700 12px/1.1 var(--sans); text-decoration: none; color: var(--ink); white-space: nowrap; }
+  font: 700 13px/1.1 var(--sans); text-decoration: none; color: var(--ink); white-space: nowrap; }
 .tab-bar a .stk { font-size: 24px; }
 .tab-bar a[aria-current="page"] { background: var(--blue-soft); box-shadow: inset 0 0 0 2px var(--ink); }
 .top-links { position: fixed; z-index: 30; top: 12px; right: 12px; display: flex; gap: 6px; }
@@ -238,12 +238,9 @@ button.receipt { min-height: 0; border: 0; font: inherit; cursor: pointer; }
 @media (min-width: 900px) {
   .top-bar { height: 76px; padding: 0 32px; }
   .screen { padding: 20px 32px 70px; }
-  .screen.has-tabs { padding-bottom: 70px; }
+  .screen.has-tabs { padding-bottom: calc(var(--tab-bar) + 70px); }
   h1 { font-size: clamp(48px, 5vw, 72px); }
   h2 { font-size: 30px; }
-  .tab-bar { left: auto; right: 28px; top: 12px; bottom: auto; gap: 6px; padding: 6px; border-radius: 999px; box-shadow: 0 10px 24px -16px oklch(20% 0.05 266 / 0.5), 0 0 0 1.5px var(--line); }
-  .tab-bar a { flex-direction: row; gap: 7px; min-height: 42px; padding: 0 16px; border-radius: 999px; font-size: 14.5px; }
-  .tab-bar a .stk { font-size: 20px; }
   .msg { max-width: 82%; }
   .bubble { font-size: 17.5px; }
 }

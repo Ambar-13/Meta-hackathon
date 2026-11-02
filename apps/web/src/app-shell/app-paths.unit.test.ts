@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { APP_PATHS, lobbyPathWithCard, meetingPathWithSide, pairPathWithCard, readCardQuery, readFragmentToken, readSideQuery, ROUTE_PATTERNS } from "./app-paths.js";
+import { APP_PATHS, chatPathWithDraft, lobbyPathWithCard, meetingPathWithSide, pairPathWithCard, readCardQuery, readFragmentToken, readSideQuery, ROUTE_PATTERNS } from "./app-paths.js";
 import { IDS } from "../testing/fixtures.js";
 
-const KEYS = ["welcome", "upload", "pair", "join", "claim", "settings", "namesReview", "card", "quiz", "lobby", "meeting", "brief", "comic", "consent", "sharePage", "directory", "help", "friends", "ask", "home"];
+const KEYS = ["welcome", "upload", "pair", "join", "claim", "settings", "namesReview", "card", "quiz", "lobby", "meeting", "brief", "comic", "consent", "sharePage", "directory", "help", "friends", "ask", "home", "explore", "me", "person"];
 
 describe("client paths", () => {
   it("D32-T1: readFragmentToken returns the 32-hex token after the # and null for anything else", () => {
@@ -14,7 +14,7 @@ describe("client paths", () => {
     expect(readFragmentToken("")).toBeNull();
   });
 
-  it("R13.2-T1: APP_PATHS and ROUTE_PATTERNS share the 20 keys in order and every builder fills its pattern", () => {
+  it("R13.2-T1: APP_PATHS and ROUTE_PATTERNS share the 23 keys in order and every builder fills its pattern", () => {
     expect(Object.keys(APP_PATHS)).toEqual(KEYS);
     expect(Object.keys(ROUTE_PATTERNS)).toEqual(KEYS);
     const paths: Record<string, string | ((id: string) => string)> = APP_PATHS;
@@ -48,5 +48,12 @@ describe("client paths", () => {
     expect(readSideQuery("")).toBeNull();
     expect(meetingPathWithSide(IDS.meeting, "b")).toBe(`/meetings/${IDS.meeting}?side=b`);
     expect(meetingPathWithSide(IDS.meeting, null)).toBe(`/meetings/${IDS.meeting}`);
+  });
+
+  it("W7-WEB-A-U1: chatPathWithDraft opens the chat with the words encoded in the draft query", () => {
+    expect(chatPathWithDraft("How would Mira react to ")).toBe("/home?draft=How%20would%20Mira%20react%20to%20");
+    expect(chatPathWithDraft("a&b=c?")).toBe("/home?draft=a%26b%3Dc%3F");
+    expect(new URLSearchParams(chatPathWithDraft("How would Mira react to ").split("?")[1]).get("draft")).toBe("How would Mira react to ");
+    expect(APP_PATHS.person(IDS.card)).toBe(`/people/${IDS.card}`);
   });
 });

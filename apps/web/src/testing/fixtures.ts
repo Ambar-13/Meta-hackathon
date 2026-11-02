@@ -10,6 +10,7 @@ import {
   quizCopy,
   QuizView,
   ReplayExport,
+  ProfileView,
   SourceView,
   TurnDelta,
   MeetingView,
@@ -249,4 +250,32 @@ export function briefReady(seq: number): CommittedEvent {
 // A ReplayExport of IDS.meeting holding the given events.
 export function replayExport(events: CommittedEvent[]): ReplayExport {
   return ReplayExport.parse({ meetingId: IDS.meeting, exportedAt: SERVER_NOW, events });
+}
+
+// The listing ids of Mira (open to dating questions) and Ravi (not), shared by the Explore, profile and Me tests (wave 7).
+export const LISTING_IDS = {
+  mira: `${UUID_PREFIX}000000000511`,
+  ravi: `${UUID_PREFIX}000000000512`,
+  mine: `${UUID_PREFIX}000000000501`,
+  request: `${UUID_PREFIX}000000000531`,
+} as const;
+
+// A ProfileView of Mira, as a person with no friendship to her sees it; tests replace the fields they need (wave 7).
+export function profileView(overrides: Partial<ProfileView>): ProfileView {
+  return ProfileView.parse({
+    listingId: LISTING_IDS.mira,
+    displayName: "Mira",
+    line: "Mira builds small tools",
+    openToRomance: true,
+    items: [
+      { kind: "habit", claim: "Mira starts work early", quote: "I am at my desk by seven, says Mira" },
+      { kind: "value", claim: "Small demos that work", quote: "Show one thing that works, not ten that almost do." },
+      { kind: "goal", claim: "Wants to ship a hardware hack", quote: "This year I want something you can hold." },
+    ],
+    friendship: "none",
+    requestId: null,
+    pairId: null,
+    canAsk: false,
+    ...overrides,
+  });
 }
