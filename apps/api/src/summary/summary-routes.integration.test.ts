@@ -1,10 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { ErrorBody, routes, SESSION_COOKIE, SUMMARY_MAX_CHARS, SUMMARY_SAVES_PER_DAY, SummaryView } from "@meet-first/contracts";
+import { ContractError, ErrorBody, routes, SESSION_COOKIE, SUMMARY_MAX_CHARS, SUMMARY_SAVES_PER_DAY, SummaryView, type Enqueue } from "@meet-first/contracts";
 import { withPerson } from "@meet-first/db";
 import { createTestPerson } from "@meet-first/db/testing";
 import { buildTestApp } from "../testing/index.js";
 import { enqueuedJobs } from "../testing/app-factory.js";
 import { registerSummaryRoutes } from "./index.js";
+import { saveSummary } from "./summary-routes.js";
 
 // The site's own address in these tests; changing requests must come from it.
 const ORIGIN = "http://localhost:3000";
@@ -114,6 +115,16 @@ describe("the summary routes", () => {
     const row = await withPerson(t.db, person.personId, (trx) => trx.selectFrom("person_summaries").select("text").where("person_id", "=", person.personId).executeTakeFirstOrThrow());
 
     expect(row.text).not.toMatch(/\[(?:person|code|redacted)\s*:/iu);
+  });
+
+  it("W7-SUMMARY-API-T9: when the queue refuses the check, the summary is marked failed and the queue's error goes on", async () => {
+    const person = await createTestPerson(t.db, "Summary Queue");
+    const failingEnqueue: Enqueue = () => Promise.reject(new ContractError("enqueue_failed", "The job queue did not accept the job. Retry the request."));
+
+    await expect(saveSummary({ db: t.db, enqueue: failingEnqueue }, person.personId, { text: SUMMARY, friendsCanAsk: false })).rejects.toMatchObject({ code: "enqueue_failed" });
+    const row = await withPerson(t.db, person.personId, (trx) => trx.selectFrom("person_summaries").select("state").where("person_id", "=", person.personId).executeTakeFirstOrThrow());
+
+    expect(row.state).toBe("failed");
   });
 
   it("W7-SUMMARY-API-T5: DELETE removes the summary, and reading it then answers 404", async () => {

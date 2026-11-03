@@ -59,6 +59,27 @@ async function upsertSummary(trx: DatabaseTransaction, input: SummaryInput): Pro
   return row;
 }
 
+// Saves the person's summary, then queues its check after the commit; undefined past the day's saves. When the queue refuses, the
+// summary is marked failed, so it never waits for a check that will not come, and the queue's error goes on, as job-queue.ts says
+// every route does.
+export async function saveSummary(deps: Pick<RouteDeps, "db" | "enqueue">, personId: string, body: SummarySave): Promise<Awaited<ReturnType<typeof upsertSummary>> | undefined> {
+  const row = await withPerson(deps.db, personId, async (trx) => {
+    const person = await trx.selectFrom("people").select(["display_name", "affiliations"]).where("id", "=", personId).executeTakeFirstOrThrow();
+    const text = scrubbedText(body.text, [person.display_name, ...person.affiliations]);
+    if (text.length > SUMMARY_MAX_CHARS) throw makePayloadInvalidError();
+    if (!(await countSave(trx, personId))) return undefined;
+    return upsertSummary(trx, { personId, text, friendsCanAsk: body.friendsCanAsk });
+  });
+  if (row === undefined) return undefined;
+  try {
+    await deps.enqueue("check_summary", { personId });
+  } catch (error) {
+    await withPerson(deps.db, personId, (trx) => trx.updateTable("person_summaries").set({ state: "failed" }).where("person_id", "=", personId).where("state", "=", "checking").execute());
+    throw error;
+  }
+  return row;
+}
+
 // Registers PUT /api/people/me/summary: 202 SummaryView, checking, and a check_summary job queued after the save commits; 400 for an
 // empty or too long text; 429 summary_daily_cap past the day's saves.
 function registerSaveSummary(app: FastifyInstance, deps: RouteDeps): void {
@@ -66,15 +87,8 @@ function registerSaveSummary(app: FastifyInstance, deps: RouteDeps): void {
     const personId = requirePerson(request);
     const body = SummarySave.safeParse(request.body);
     if (!body.success) throw makePayloadInvalidError();
-    const row = await withPerson(deps.db, personId, async (trx) => {
-      const person = await trx.selectFrom("people").select(["display_name", "affiliations"]).where("id", "=", personId).executeTakeFirstOrThrow();
-      const text = scrubbedText(body.data.text, [person.display_name, ...person.affiliations]);
-      if (text.length > SUMMARY_MAX_CHARS) throw makePayloadInvalidError();
-      if (!(await countSave(trx, personId))) return undefined;
-      return upsertSummary(trx, { personId, text, friendsCanAsk: body.data.friendsCanAsk });
-    });
+    const row = await saveSummary(deps, personId, body.data);
     if (row === undefined) throw new ContractError("summary_daily_cap", DAILY_CAP_SENTENCE, HTTP.tooMany);
-    await deps.enqueue("check_summary", { personId });
     return reply.code(202).send(viewOf(row));
   });
 }
