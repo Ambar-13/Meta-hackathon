@@ -471,5 +471,21 @@ describe("sharing posts and stories, and likes", () => {
     expect(refused.statusCode).toBe(429);
     expect(ErrorBody.parse(refused.body).code).toBe("post_daily_cap");
   });
-});
 
+  it("W7-SHARE-API-T7: a share waits until the sharer's other shares are done before it counts the day's, so shares sent at once cannot pass the cap together", async () => {
+    const rush = await createTestPerson(t.db, "Rush");
+    let isDone = false;
+    let shared: Promise<{ statusCode: number; body: unknown }> | undefined;
+    await withPerson(t.db, rush.personId, async (trx) => {
+      await trx.selectFrom("people").select("id").where("id", "=", rush.personId).forNoKeyUpdate().execute();
+      shared = share(rush.sessionToken, { kind: "post", text: "Waits its turn.", photo: null }).then((response) => {
+        isDone = true;
+        return response;
+      });
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      expect(isDone).toBe(false);
+    });
+
+    expect((await shared)?.statusCode).toBe(201);
+  });
+});

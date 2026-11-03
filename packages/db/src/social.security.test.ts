@@ -247,6 +247,21 @@ describe("posts, stories and likes in the database", () => {
     }
   });
 
+  it("W7-POST-DB-T4: a post's photo reads for its writer, and for others only while the writer is listed in Explore", async () => {
+    const postId = (await asPerson(t.db, x.a.personId, (trx) => trx.insertInto("posts").values({ person_id: x.a.personId, text: "", photo: jpeg }).returning("id").executeTakeFirstOrThrow())).id;
+    const photoAs = async (personId: string) => (await asPerson(t.db, personId, async (trx) => (await sql<{ photo: Buffer | null }>`SELECT post_photo_read(${postId}::uuid) AS photo`.execute(trx)).rows[0]?.photo)) ?? null;
+    try {
+      expect((await photoAs(x.a.personId))?.equals(jpeg)).toBe(true);
+      expect(await photoAs(y.b.personId)).toBeNull();
+      const listingXa = await list(x.a.personId, x.a.cardId, "Lists for a moment.");
+      expect((await photoAs(y.b.personId))?.equals(jpeg)).toBe(true);
+      await asPerson(t.db, x.a.personId, (trx) => trx.deleteFrom("directory_listings").where("id", "=", listingXa).execute());
+      expect(await photoAs(y.b.personId)).toBeNull();
+    } finally {
+      await asPerson(t.db, x.a.personId, (trx) => trx.deleteFrom("posts").where("id", "=", postId).execute());
+    }
+  });
+
   it("W7-POST-DB-T3: a story needs an end and a post none, and every share needs words or a photo", async () => {
     const insertAsB = (values: { kind?: "post" | "story"; text: string; photo?: Buffer; expires_at?: Date }): Promise<unknown> => caught(() => asPerson(t.db, y.b.personId, (trx) => trx.insertInto("posts").values({ person_id: y.b.personId, ...values }).execute()));
     const codes = await Promise.all([

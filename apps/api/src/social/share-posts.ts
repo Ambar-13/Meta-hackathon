@@ -29,7 +29,7 @@ function photoBytes(photo: string | null): Buffer | null {
 
 // Registers POST /api/posts: 201 PostCreated with the new post's id, its kind and when a story stops showing; 400 payload_invalid for a
 // body with neither words nor a photo, or a photo that is not a JPEG of at most POST_PHOTO_MAX_BYTES; 429 post_daily_cap once the caller
-// has shared SHARES_PER_DAY times this UTC day.
+// has shared SHARES_PER_DAY times this UTC day, counted after their other shares in progress are done.
 export function registerCreatePost(app: FastifyInstance, deps: RouteDeps): void {
   app.post(routes.social.createPost.path, { bodyLimit: CREATE_BODY_LIMIT_BYTES }, async (request, reply) => {
     const personId = requirePerson(request);
@@ -37,6 +37,9 @@ export function registerCreatePost(app: FastifyInstance, deps: RouteDeps): void 
     if (!body.success) throw makePayloadInvalidError();
     const photo = photoBytes(body.data.photo);
     const row = await withPerson(deps.db, personId, async (trx) => {
+      // The sharer's row lock makes shares sent at the same moment take turns, so none can pass the day's count, as friend_request_send
+      // does for friend requests. NO KEY UPDATE leaves alone the key locks that rows pointing at the person take.
+      await trx.selectFrom("people").select("id").where("id", "=", personId).forNoKeyUpdate().execute();
       const today = await trx.selectFrom("posts").select(sql<string>`count(*)`.as("n"))
         .where("person_id", "=", personId).where("created_at", ">=", sql<Date>`date_trunc('day', now(), 'UTC')`).executeTakeFirstOrThrow();
       if (numberFromPostgres(today.n) >= SHARES_PER_DAY) throw new ContractError("post_daily_cap", "You have shared a lot today. Try again tomorrow.", HTTP.tooMany);

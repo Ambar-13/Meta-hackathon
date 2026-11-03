@@ -81,7 +81,8 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, pg_temp AS $$
 $$;
 COMMENT ON FUNCTION story_feed(int) IS 'The stories that have not expired: the caller''s own first, whether or not they are listed, then those of people listed in Explore, newest first, with the listing (null for an unlisted caller''s own), display name, sample mark and whether it has a photo, never a person id.';
 
--- One post's or story's photo by its id, for anyone signed in who was shown the id, while its writer is active and a story has not expired.
+-- One post's or story's photo by its id, where the post or story shows: to its writer, and to anyone signed in while its writer is listed
+-- in Explore, as explore_posts and story_feed show them. A story's photo ends with the story.
 CREATE FUNCTION post_photo_read(p_id uuid)
 RETURNS bytea
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, pg_temp AS $$
@@ -89,8 +90,14 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, pg_temp AS $$
   FROM posts po
   JOIN people p ON p.id = po.person_id AND p.state = 'active'
   WHERE po.id = p_id AND app_person() IS NOT NULL AND (po.kind = 'post' OR po.expires_at > now())
+    AND (po.person_id = app_person() OR EXISTS (
+      SELECT 1
+      FROM directory_listings l
+      JOIN cards c ON c.id = l.card_id AND c.person_id = l.person_id AND c.state = 'approved'
+      WHERE l.person_id = po.person_id
+    ))
 $$;
-COMMENT ON FUNCTION post_photo_read(uuid) IS 'The photo of one post or unexpired story by its id, for a signed-in caller, while its writer is active; null for one with no photo, one that is gone and a caller with no person set.';
+COMMENT ON FUNCTION post_photo_read(uuid) IS 'The photo of one post or unexpired story by its id, for its writer, and for anyone signed in while the writer is listed in Explore with an approved card; null for one with no photo, one that is gone or no longer shows, and a caller with no person set.';
 
 -- Whether the caller may like a post: one that explore_posts or listing_posts could show them.
 CREATE FUNCTION post_is_visible(p_id uuid)
