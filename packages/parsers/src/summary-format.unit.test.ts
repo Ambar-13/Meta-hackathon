@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SUMMARY_MAX_POINTS, SUMMARY_QUOTES_MAX } from "@meet-first/contracts";
-import { parseSummary, summaryPriority } from "./summary-format.js";
+import { formatSummary, parseSummary, summaryPriority } from "./summary-format.js";
 
 // A summary in the fixed format, as the copy prompt asks a person's AI to write it.
 const PLAIN = [
@@ -83,5 +83,15 @@ describe("the summary format", () => {
       quotes: ["rentably was never a bad idea, the timing was just early", "i'd build it again tomorrow", "i write for an hour before i open slack", "rentably again and again"],
       topics: ["Rentably", "Mornings"],
     });
+  });
+
+  it("W7-SUMMARY-T10: formatSummary writes points back in the fixed format, so parseSummary reads the same points again", () => {
+    const points = parseSummary(PLAIN);
+    const text = formatSummary(points);
+
+    expect(parseSummary(text)).toEqual(points);
+    expect(text.split("\n\n")).toHaveLength(points.length);
+    expect(text.startsWith("Kind: view\nTopic: Rentably\nPoint: Rentably was never a bad idea.\nStrength: strong\nQuote: ")).toBe(true);
+    expect(formatSummary([{ kind: "habit", topic: "", point: "Writes first.", strength: "mild", quotes: [] }])).toBe("Kind: habit\nPoint: Writes first.\nStrength: mild");
   });
 });

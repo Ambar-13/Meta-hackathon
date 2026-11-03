@@ -98,3 +98,11 @@ export function summaryPriority(points: readonly SummaryPoint[]): SummaryPriorit
   }
   return { quotes: points.flatMap((point) => point.quotes), topics };
 }
+
+// The points written back in the copy prompt's format: one block per point with its fields in order, a blank line between blocks, and
+// no Topic or Quote line where the point has none. parseSummary reads the same points from it.
+export function formatSummary(points: readonly SummaryPoint[]): string {
+  return points
+    .map((point) => [`Kind: ${point.kind}`, ...(point.topic === "" ? [] : [`Topic: ${point.topic}`]), `Point: ${point.point}`, `Strength: ${point.strength}`, ...point.quotes.map((quote) => `Quote: ${quote}`)].join("\n"))
+    .join("\n\n");
+}

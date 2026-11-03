@@ -3,6 +3,7 @@ import { ApiError, APP_PATHS, ROUTE_PATTERNS } from "../../../app-shell/index.js
 import type { UploadReady } from "../../../extract/index.js";
 import { UploadView, type UploadActions } from "../../../screens/upload/screen.js";
 import { useIsNarrowScreen, type UploadFlow } from "../../../screens/upload/upload-state.js";
+import { useSummary } from "../../../screens/summary/index.js";
 import type { GalleryView } from "../gallery-views.js";
 
 // Actions that do nothing: the gallery shows one state and stays there.
@@ -40,7 +41,8 @@ const NONE_OF_YOURS = "No messages written by you were found in this file. Pick 
 const UploadAt = (props: { flow: UploadFlow; tab?: "paste" | "file" }): ReactElement => {
   const isNarrow = useIsNarrowScreen();
   const tab = props.tab ?? (isNarrow ? "paste" : "file");
-  return <UploadView flow={props.flow} tab={tab} isNarrow={isNarrow} actions={NO_ACTIONS} />;
+  const summary = useSummary();
+  return <UploadView flow={props.flow} tab={tab} isNarrow={isNarrow} actions={NO_ACTIONS} summary={summary} />;
 };
 
 // One upload view on the upload route.

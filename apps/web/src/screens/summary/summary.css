@@ -1,0 +1,20 @@
+/* Your AI's summary of you: the copy button, the paste box, the points to save, and the saved summary's check. */
+.summary-section { display: grid; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--ui-line); }
+.summary-section h2 { margin: 0; font: 600 17px/1.3 var(--ui-font); color: var(--ui-ink); }
+.summary-lede, .summary-note, .summary-nudge { max-width: 65ch; margin: 0; font: 400 15px/1.5 var(--ui-font); color: var(--ui-ink-2); }
+.summary-nudge a { font-weight: 600; }
+.summary-copy { display: grid; gap: 8px; justify-items: start; }
+.summary-status, .summary-check { margin: 0; font: 500 15px/1.45 var(--ui-font); color: var(--ui-ink); }
+
+/* ---------- the paste box and the prompt shown when the browser would not copy it ---------- */
+.summary-field { display: grid; gap: 6px; font: 500 14px/1.4 var(--ui-font); color: var(--ui-ink); }
+.summary-field textarea { box-sizing: border-box; width: 100%; min-height: 132px; padding: 12px 14px; border: 1px solid var(--ui-line); border-radius: 14px;
+  background: var(--ui-bg); color: var(--ui-ink); font: 400 15px/1.5 var(--ui-font); resize: vertical; }
+
+/* ---------- the points to save, one row each with Remove ---------- */
+.summary-count { margin: 4px 0 0; font: 600 14px/1.4 var(--ui-font); color: var(--ui-ink); }
+.summary-points { list-style: none; margin: 0; padding: 0; border: 1px solid var(--ui-line); border-radius: 14px; }
+.summary-points > li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 12px 14px; }
+.summary-points > li + li { border-top: 1px solid var(--ui-line); }
+.summary-point { margin: 0; font: 400 15px/1.45 var(--ui-font); color: var(--ui-ink); overflow-wrap: anywhere; }
+.summary-quote { margin: 4px 0 0; font: 400 14px/1.45 var(--ui-font); color: var(--ui-ink-2); overflow-wrap: anywhere; }

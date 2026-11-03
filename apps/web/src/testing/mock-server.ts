@@ -26,6 +26,8 @@ const RAIL_DEFAULTS = [
   // Explore and profiles read posts; a test that needs posts stubs its own.
   http.get(new URL("/api/posts", window.location.origin).href, () => HttpResponse.json({ posts: [] })),
   http.get(new URL("/api/directory/:id/posts", window.location.origin).href, () => HttpResponse.json({ posts: [] })),
+  // Me and the upload page read the summary; a test that needs one stubs its own.
+  http.get(new URL("/api/people/me/summary", window.location.origin).href, () => HttpResponse.json({ code: "not_found", message: "This no longer exists or is not yours." }, { status: 404 })),
 ];
 // One MSW server for every accessibility test, shared by all its files.
 const server = setupServer(...RAIL_DEFAULTS);

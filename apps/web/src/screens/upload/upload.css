@@ -61,3 +61,7 @@ label.up-attest { min-height: 44px; align-items: center; margin-top: 16px; font-
   font: 600 15px/1.2 var(--ui-font); box-shadow: none; }
 .social-frame .up-file-label input[type="file"]:hover:not(:disabled)::file-selector-button { transform: none; filter: brightness(0.94); }
 .social-frame .up-file-label input[type="file"]:focus-visible { outline: 2px solid var(--ui-blue); border-radius: var(--ui-radius); }
+
+/* ---------- your chats, after your AI's summary ---------- */
+.up-chats { display: grid; gap: 8px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--ui-line); }
+.up-chats h2 { margin: 0; font: 600 17px/1.3 var(--ui-font); color: var(--ui-ink); }

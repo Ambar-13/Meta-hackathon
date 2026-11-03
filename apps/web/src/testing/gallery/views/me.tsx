@@ -1,4 +1,4 @@
-import { ListedMeetingsView, MyListing, type HomeView } from "@meet-first/contracts";
+import { ListedMeetingsView, MyListing, type HomeView, type SummaryPointView, type SummaryView } from "@meet-first/contracts";
 import { ROUTE_PATTERNS, routes } from "../../../app-shell/index.js";
 import { MeScreen } from "../../../screens/me/index.js";
 import { IDS, profileView, SERVER_NOW } from "../../fixtures.js";
@@ -39,17 +39,60 @@ function ok(body: unknown): GalleryReply {
 }
 
 // The reads of /me. /api/directory/me is listed before /api/directory/:id, so it answers its own path.
-function reads(listing: GalleryReply, meetings: unknown): GalleryStub[] {
+function reads(listing: GalleryReply, meetings: unknown, home: HomeView = HOME): GalleryStub[] {
   return [
     ...railStubs(railFriends(3)),
     { route: routes.directory.readMyListing, replies: listing },
     { route: routes.directory.listedMeetings, replies: ok(meetings) },
     { route: routes.social.readProfile, replies: ok(PROFILE) },
-    { route: routes.people.readHome, replies: ok(HOME) },
+    { route: routes.people.readHome, replies: ok(home) },
   ];
 }
 
-// /me listed, its Meetings tab, and not listed.
+// A summary in the copy prompt's format, as a person's AI writes it.
+const PASTED_SUMMARY = [
+  "Kind: view",
+  "Topic: Rentably",
+  "Point: Believes Rentably was never a bad idea; thinks the timing was early.",
+  "Strength: strong",
+  "Quote: rentably was never a bad idea, the timing was just early",
+  "",
+  "Kind: habit",
+  "Topic: Mornings",
+  "Point: Writes for an hour before checking messages.",
+  "Strength: mild",
+  "",
+  "Kind: avoid",
+  "Topic: Phone calls",
+  "Point: Avoids phone calls and asks for a message instead.",
+  "Strength: moderate",
+  "Quote: can we just text, i hate calls",
+].join("\n");
+
+// One checked point, its quote found in the person's chats or not.
+function checkedPoint(point: string, isFound: boolean): SummaryPointView {
+  const found = { quote: "rentably was never a bad idea", turnIndex: 3, turnId: "00000000-0000-4000-8000-000000000701" };
+  return { kind: "view", topic: "Rentably", point, strength: "strong", quotes: ["rentably was never a bad idea"], found: isFound ? found : null };
+}
+
+// A checked summary: 2 of its 3 points found in the chats.
+const READY_SUMMARY: SummaryView = {
+  state: "ready",
+  points: [checkedPoint("Believes Rentably was never a bad idea.", true), checkedPoint("Writes for an hour before checking messages.", false), checkedPoint("Avoids phone calls.", true)],
+  friendsCanAsk: true,
+  updatedAt: SERVER_NOW,
+};
+
+// Pastes the summary into the paste box the way React sees typing, for a play step.
+function pasteSummary(): void {
+  const label = Array.from(document.querySelectorAll("label")).find((element) => (element.textContent ?? "").trim().startsWith("Your AI's answer"));
+  const field = label?.control ?? null;
+  if (!(field instanceof HTMLTextAreaElement)) return;
+  Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set?.call(field, PASTED_SUMMARY);
+  field.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+// /me listed, its Meetings tab, and not listed; then your AI's summary with no chats, pasted, and checked.
 export const views: readonly GalleryView[] = [
   { name: "me-listed", title: "Me, in Explore", pattern: ROUTE_PATTERNS.me, url: "/me", element: <MeScreen />, stubs: reads(ok(LISTING), MEETINGS) },
   {
@@ -69,4 +112,22 @@ export const views: readonly GalleryView[] = [
     stubs: reads(ok(LISTING), MEETINGS),
   },
   { name: "me-unlisted", title: "Me, not in Explore yet", pattern: ROUTE_PATTERNS.me, url: "/me", element: <MeScreen />, stubs: reads({ status: 404, body: { code: "not_listed", message: "You are not in Explore yet." } }, { meetings: [] }) },
+  {
+    name: "me-summary-no-chats",
+    title: "Me, no chats yet: the summary and the line that asks for chats",
+    pattern: ROUTE_PATTERNS.me,
+    url: "/me",
+    element: <MeScreen />,
+    stubs: reads({ status: 404, body: { code: "not_listed", message: "You are not in Explore yet." } }, { meetings: [] }, { ...HOME, source: null, card: null }),
+  },
+  {
+    name: "me-summary-pasted",
+    title: "Me, a summary pasted: its points to save",
+    pattern: ROUTE_PATTERNS.me,
+    url: "/me",
+    element: <MeScreen />,
+    stubs: reads(ok(LISTING), MEETINGS),
+    play: pasteSummary,
+  },
+  { name: "me-summary-ready", title: "Me, a checked summary", pattern: ROUTE_PATTERNS.me, url: "/me", element: <MeScreen />, stubs: [...reads(ok(LISTING), MEETINGS), { route: routes.people.readSummary, replies: ok(READY_SUMMARY) }] },
 ];

@@ -1,4 +1,5 @@
 import type { SourceHeader } from "@meet-first/contracts";
+import type { SummaryPriority } from "@meet-first/parsers";
 import { FILE_UNREADABLE_SENTENCE } from "./zip-stream.js";
 import type { WorkerMessage, WorkerRequest } from "./worker-entry.js";
 
@@ -29,10 +30,11 @@ export type UploadRefusalCode = "source_no_own_turns" | "source_file_not_json" |
 // The sentence for an upload the person stopped before it finished (the upload_cancelled row of the table in 4.4).
 const UPLOAD_CANCELLED_SENTENCE = "The upload was stopped before it finished. Pick the file again to start over.";
 
-// Runs extraction, ranking, the scrub preview and compression inside the Web Worker; resolves once, never rejects.
+// Runs extraction, ranking (the summary's quotes and topics first, when there is one), the scrub preview and compression inside the Web
+// Worker; resolves once, never rejects.
 export function prepareUpload(
   input: UploadInput,
-  options: { allowlist: string[]; onProgress: (progress: UploadProgress) => void; signal: AbortSignal },
+  options: { allowlist: string[]; onProgress: (progress: UploadProgress) => void; signal: AbortSignal; priority?: SummaryPriority },
 ): Promise<UploadReady | UploadRefused> {
   return new Promise((resolve) => {
     const cancelled: UploadRefused = { ok: false, code: "upload_cancelled", message: UPLOAD_CANCELLED_SENTENCE };
@@ -60,6 +62,7 @@ export function prepareUpload(
     worker.onerror = () => {
       finish({ ok: false, code: "file_unreadable", message: FILE_UNREADABLE_SENTENCE });
     };
-    worker.postMessage({ input, allowlist: options.allowlist } satisfies WorkerRequest);
+    const priority = options.priority === undefined ? {} : { priority: options.priority };
+    worker.postMessage({ input, allowlist: options.allowlist, ...priority } satisfies WorkerRequest);
   });
 }

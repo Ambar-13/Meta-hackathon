@@ -7,6 +7,7 @@ import { LoadingLine } from "../../look/index.js";
 import { useYourListing, type YourListingHook } from "../directory/index.js";
 import { useHomeView } from "../home/index.js";
 import { ProfileHeader, ProfileTabs, useProfile } from "../people/index.js";
+import { SummarySection, useSummary, type SummaryHook } from "../summary/index.js";
 import { AddChats, EditListing, EditProfile, JoinExplore, MeMeetings, MeNext } from "./me-parts.js";
 import { useMyPosts, useProfileEdit } from "./me-state.js";
 
@@ -91,15 +92,22 @@ const UnlistedMe = (props: { home: HomeView | null; yours: YourListingHook; belo
 };
 
 // The next step, the end of About and the Meetings panel from the home view; while it loads, or when it fails, its loading line or
-// error. Add more chats shows only once there is a card: before that the next step is the way to add your notes.
-function belowFrom(home: PolledView<HomeView>, fromExplore: ReadonlySet<string>, tabs: Pick<MeBelow, "posts" | "firstTab">): MeBelow {
+// error. The end of About is your AI's summary, with the line that asks for your chats when you have none; Add more chats shows only
+// once there is a card: before that the next step is the way to add your notes.
+function belowFrom(home: PolledView<HomeView>, fromExplore: ReadonlySet<string>, parts: Pick<MeBelow, "posts" | "firstTab"> & { summary: SummaryHook }): MeBelow {
+  const { summary, ...tabs } = parts;
   if (home.value === null) {
     const state = home.error === null ? <LoadingLine text={ME_SCREEN_COPY.loadingHome} /> : <ErrorNotice error={home.error} />;
     return { next: state, aboutEnd: null, meetings: state, ...tabs };
   }
   return {
     next: <MeNext home={home.value} />,
-    aboutEnd: home.value.card === null ? null : <AddChats />,
+    aboutEnd: (
+      <>
+        <SummarySection hasChats={home.value.source !== null} summary={summary} />
+        {home.value.card === null ? null : <AddChats />}
+      </>
+    ),
     meetings: <MeMeetings home={home.value} fromExplore={fromExplore} />,
     ...tabs,
   };
@@ -112,10 +120,11 @@ export const MeScreen = (): ReactElement => {
   const yours = useYourListing();
   const home = useHomeView();
   const posts = useMyPosts();
+  const summary = useSummary();
   const location = useLocation();
   const { load } = yours;
   const isReady = load.kind === "ready";
-  const below = belowFrom(home, new Set(isReady ? load.meetings.map((meeting) => meeting.meetingId) : []), { posts, firstTab: readProfileTab(location.search) });
+  const below = belowFrom(home, new Set(isReady ? load.meetings.map((meeting) => meeting.meetingId) : []), { posts, firstTab: readProfileTab(location.search), summary });
   return (
     <ScreenFrame title={ME_SCREEN_COPY.title} hasOwnHeading={isReady} isWide>
       <div className="profile-page">

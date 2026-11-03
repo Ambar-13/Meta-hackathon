@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { prepareUpload, type UploadInput, type UploadProgress, type UploadReady, type UploadRefused } from "../../extract/index.js";
+import type { SummaryPriority } from "@meet-first/parsers";
 import { apiUpload, asApiError, ApiError, readAllowlist } from "../../app-shell/index.js";
 
 // The consent copy, shown unchanged with the preview count before the upload button.
@@ -40,13 +41,14 @@ export function useIsNarrowScreen(): boolean {
   return isNarrowNow;
 }
 
-// Drives the flow: prepareUpload, the attestation, the upload, then onUploaded with the new source id.
+// Drives the flow: prepareUpload with the summary's quotes and topics to keep first when there is a summary, the attestation, the
+// upload, then onUploaded with the new source id.
 export function useUploadFlow(
   prepare: typeof prepareUpload,
   onUploaded: (sourceId: string) => void,
 ): {
   flow: UploadFlow;
-  start: (input: UploadInput) => void;
+  start: (input: UploadInput, priority?: SummaryPriority) => void;
   cancel: () => void;
   setAttested: (isAttested: boolean) => void;
   upload: () => Promise<void>;
@@ -57,7 +59,7 @@ export function useUploadFlow(
   flowRef.current = flow;
   const controller = useRef<AbortController | null>(null);
 
-  const start = (input: UploadInput): void => {
+  const start = (input: UploadInput, priority?: SummaryPriority): void => {
     controller.current?.abort();
     const next = new AbortController();
     controller.current = next;
@@ -65,7 +67,8 @@ export function useUploadFlow(
     const onProgress = (progress: UploadProgress): void => {
       setFlow((current) => (current.kind === "preparing" ? { kind: "preparing", progress } : current));
     };
-    prepare(input, { allowlist: readAllowlist(), onProgress, signal: next.signal }).then(
+    const first = priority === undefined ? {} : { priority };
+    prepare(input, { allowlist: readAllowlist(), onProgress, signal: next.signal, ...first }).then(
       (result) => {
         if (controller.current !== next) return;
         setFlow(result.ok ? { kind: "ready", ready: result, isAttested: false } : { kind: "refused", refusal: result });

@@ -120,3 +120,21 @@ describe("upload screen, using a fake prepareUpload (needs ingest on main, stage
     expect(unlabelledControls(document.body)).toEqual([]);
   });
 });
+
+describe("upload screen with a saved summary, using a fake prepareUpload", () => {
+  it("W7-SUMMARY-UI-T6: the summary comes first on the page, and the file check keeps the saved summary's quotes and topics first", async () => {
+    const point = { kind: "view", topic: "Rentably", point: "Believes Rentably was never a bad idea.", strength: "strong", quotes: ["rentably was never a bad idea, the timing was just early"], found: null };
+    stubRoute(routes.people.readSummary, { state: "ready", points: [point], friendsCanAsk: false, updatedAt: "2026-10-27T10:00:00.000Z" });
+    const prepare = vi.fn<(...calls: unknown[]) => Promise<Record<string, unknown>>>(() => readyResult());
+    renderScreen(<UploadScreen prepare={prepare as never} />, { pattern: ROUTE_PATTERNS.upload, url: APP_PATHS.upload });
+
+    const summaryHeading = await screen.findByRole("heading", { level: 2, name: "Your AI's summary of you" });
+    const chatsHeading = screen.getByRole("heading", { level: 2, name: "Your chats" });
+    expect(summaryHeading.compareDocumentPosition(chatsHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(await screen.findByText("0 of 1 point found in your chats.")).toBeTruthy();
+    checkPaste();
+
+    expect(await screen.findByText(CONSENT_COPY)).toBeTruthy();
+    expect((prepare.mock.calls[0]?.[1] as { priority?: unknown }).priority).toEqual({ quotes: ["rentably was never a bad idea, the timing was just early"], topics: ["Rentably"] });
+  });
+});

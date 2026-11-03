@@ -1,8 +1,9 @@
 import "./upload.css";
-import { useState, type ReactElement } from "react";
+import { useId, useState, type ReactElement } from "react";
 import { useNavigate } from "react-router-dom";
 import { prepareUpload, type UploadInput } from "../../extract/index.js";
 import { APP_PATHS, ApiError, ErrorNotice, ScreenFrame } from "../../app-shell/index.js";
+import { SummarySection, useSummary, type SummaryHook } from "../summary/index.js";
 import { useIsNarrowScreen, useUploadFlow, type UploadFlow } from "./upload-state.js";
 import { FileTab, PasteTab, PreparingLine, PreviewPanel, UploadTabs } from "./upload-parts.js";
 
@@ -56,16 +57,22 @@ const FlowBody = (props: { flow: UploadFlow; actions: UploadActions }): ReactEle
   return null;
 };
 
-// The page for one flow state: the lede and the tabs while nothing is picked, then the flow body. The gallery renders it directly.
-export const UploadView = (props: { flow: UploadFlow; tab: "paste" | "file"; isNarrow: boolean; actions: UploadActions }): ReactElement => {
+// The page for one flow state: while nothing is picked, your AI's summary first, then your chats with their lede and tabs; after that
+// the flow body. The gallery renders it directly.
+export const UploadView = (props: { flow: UploadFlow; tab: "paste" | "file"; isNarrow: boolean; actions: UploadActions; summary: SummaryHook }): ReactElement => {
   const { flow, actions } = props;
+  const chatsId = useId();
   return (
     <ScreenFrame title="Add what your AI knows about you">
       {flow.kind === "idle" ? (
         <>
-          <p className="up-lede">Pick a chat export or paste a few notes. You see what will be sent before anything leaves this device.</p>
-          <UploadTabs isNarrow={props.isNarrow} selected={props.tab} onSelect={actions.onTab} />
-          {props.tab === "paste" ? <PasteTab isBusy={false} onSubmit={(text) => { actions.onStart({ kind: "paste", text }); }} /> : <FileTab isBusy={false} onPick={(file) => { actions.onStart({ kind: "file", file }); }} />}
+          <SummarySection hasChats={null} summary={props.summary} />
+          <section className="up-chats" aria-labelledby={chatsId}>
+            <h2 id={chatsId}>Your chats</h2>
+            <p className="up-lede">Pick a chat export or paste a few notes. You see what will be sent before anything leaves this device.</p>
+            <UploadTabs isNarrow={props.isNarrow} selected={props.tab} onSelect={actions.onTab} />
+            {props.tab === "paste" ? <PasteTab isBusy={false} onSubmit={(text) => { actions.onStart({ kind: "paste", text }); }} /> : <FileTab isBusy={false} onPick={(file) => { actions.onStart({ kind: "file", file }); }} />}
+          </section>
         </>
       ) : (
         <FlowBody flow={flow} actions={actions} />
@@ -74,17 +81,21 @@ export const UploadView = (props: { flow: UploadFlow; tab: "paste" | "file"; isN
   );
 };
 
-// The upload page: paste or pick, see what will be sent, attest, upload.
+// The upload page: your AI's summary, then paste or pick, see what will be sent, attest, upload. The summary's quotes and topics go to
+// the file check, so what you said first is kept first.
 export const UploadScreen = (props: { prepare?: typeof prepareUpload }): ReactElement => {
   const navigate = useNavigate();
   const isNarrow = useIsNarrowScreen();
+  const summary = useSummary();
   const [tab, setTab] = useState<"paste" | "file">(isNarrow ? "paste" : "file");
   const upload = useUploadFlow(props.prepare ?? prepareUpload, (sourceId) => {
     navigate(APP_PATHS.namesReview(sourceId));
   });
   const actions: UploadActions = {
     onTab: setTab,
-    onStart: upload.start,
+    onStart: (input) => {
+      upload.start(input, summary.priority);
+    },
     onCancel: upload.cancel,
     onReset: upload.reset,
     onPasteInstead: () => {
@@ -94,5 +105,5 @@ export const UploadScreen = (props: { prepare?: typeof prepareUpload }): ReactEl
     onAttest: upload.setAttested,
     onUpload: () => void upload.upload(),
   };
-  return <UploadView flow={upload.flow} tab={tab} isNarrow={isNarrow} actions={actions} />;
+  return <UploadView flow={upload.flow} tab={tab} isNarrow={isNarrow} actions={actions} summary={summary} />;
 };

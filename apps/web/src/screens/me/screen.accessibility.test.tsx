@@ -291,3 +291,13 @@ describe("/me, against the MSW route stubs (a fake server)", () => {
   });
 });
 
+
+describe("/me with no chats, against the MSW route stubs (a fake server)", () => {
+  it("W7-SUMMARY-UI-T4: with no chats uploaded, the page says to add them", async () => {
+    stubMeReads({ home: home({ source: null, card: null }) });
+    renderMe();
+
+    expect(await screen.findByText("Add your chats too. With them, your Meety can quote you and help your friends better.")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Add your chats" }).getAttribute("href")).toBe(APP_PATHS.upload);
+  });
+});

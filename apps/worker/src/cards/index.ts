@@ -14,5 +14,5 @@ export { verifyItems, hasEnoughOwnText, type ItemCheck, type FailedItem } from "
 export { eligibleTurns } from "./build-card-job.js";
 // The role tokens that replace names: one per distinct name, the check that leaves a person's own names alone, and the rewrite.
 export { applyRoleTokens, assignTokens, isAllowlisted, PROTECTED_TOKEN } from "./apply-role-tokens.js";
-// When a names pass stopped by the daily cap runs again: just after midnight UTC.
+// When a names pass stopped by the daily cap runs again: a little after midnight UTC.
 export { namesPassRetryAt } from "./scrub-names-job.js";
