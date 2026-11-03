@@ -9,7 +9,8 @@
 .profile-head { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "pic name" "line line" "sample sample" "buttons buttons"; align-items: center;
   column-gap: 20px; row-gap: 4px; margin: 12px 0 8px; }
 .profile-avatar { grid-area: pic; }
-.profile-avatar.size-xl { --a-size: 86px; --a-font: 34px; }
+/* Under .profile-head, so the shared picture sizes in app-look.css, which load after this file in the built app, never win. */
+.profile-head .profile-avatar.size-xl { --a-size: 86px; --a-font: 34px; }
 .profile-words { display: contents; }
 .profile-words h1 { grid-area: name; margin: 0; font: 600 20px/1.25 var(--ui-font); overflow-wrap: anywhere; }
 .profile-line { grid-area: line; margin: 12px 0 0; font-size: 15px; line-height: 1.45; max-width: 52ch; }
@@ -78,7 +79,7 @@
 /* ---------- laptop: the big picture in its own column ---------- */
 @media (min-width: 720px) {
   .profile-head { grid-template-columns: 150px minmax(0, 1fr); grid-template-areas: "pic words"; column-gap: 56px; margin: 26px 0 8px; padding-left: 40px; }
-  .profile-avatar.size-xl { --a-size: 150px; --a-font: 56px; }
+  .profile-head .profile-avatar.size-xl { --a-size: 150px; --a-font: 56px; }
   .profile-words { grid-area: words; display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
   .profile-words h1 { font-size: 22px; }
   .profile-line { margin-top: 10px; }
