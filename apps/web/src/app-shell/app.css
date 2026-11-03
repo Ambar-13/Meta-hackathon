@@ -5,7 +5,7 @@
 /* ---------- tokens ---------- */
 :root {
   color-scheme: light;
-  --paper: oklch(99.47% 0.0045 78.3); /* #fffdfa, the same off-white as the signed-in app */
+  --paper: oklch(99.75% 0.002 78.3); /* #fffefd, the same off-white as the signed-in app */
   --ink: oklch(20% 0.05 266);
   --ink-2: oklch(39% 0.04 266);
   --ink-3: oklch(52% 0.03 266);
