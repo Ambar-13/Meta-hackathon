@@ -40,7 +40,7 @@ services:
       - key: DAILY_USD_CAP
         value: "15"          # D60, lowered on 2 Nov 2026 so a leaked access code cannot spend a day's credit fast
       - key: TOTAL_USD_CAP
-        value: "60"          # D60, lowered on 2 Nov 2026: the site can spend at most $60 of the Meta credit in all
+        value: "111"         # D60: at most $111 of the Meta credit in all, raised from 60 by Ambar on 3 Nov 2026 for Google sign-in
       - key: MAX_CONCURRENT_MEETINGS
         value: "5"           # D57, lowered: both processes share 512 MB, and one meeting took them to 368 MB together (28 Oct)
       - key: SEED_SAMPLES
