@@ -115,7 +115,7 @@ export async function allowFriendAsks(db: Kysely<Database>, person: AskPerson): 
 }
 
 // Joins two people by an invite pair, as the invite link does: the creator makes the pair, the joiner joins it with pairs_join. Returns the pair id.
-export async function joinInvitePair(db: Kysely<Database>, creator: AskPerson, joiner: AskPerson): Promise<string> {
+export async function joinInvitePair(db: Kysely<Database>, creator: Pick<AskPerson, "personId">, joiner: Pick<AskPerson, "personId">): Promise<string> {
   const token = randomBytes(PAIR_TOKEN_BYTES).toString("hex");
   const pair = await withPerson(db, creator.personId, (trx) => trx.insertInto("pairs")
     .values({ creator_person_id: creator.personId, token_hash: sha256Text(token), expires_at: new Date(Date.now() + PAIR_LIFETIME_HOURS * 3_600_000) }).returning("id").executeTakeFirstOrThrow());

@@ -3,7 +3,7 @@ import { sql } from "kysely";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { AskCreateResponse, ErrorBody, PAIR_LIFETIME_HOURS, PAIR_TOKEN_BYTES, routes, SESSION_COOKIE } from "@meet-first/contracts";
 import { withPerson } from "@meet-first/db";
-import { createPairedMeetingWithTurns, sha256Text, type SeededMeeting } from "@meet-first/db/testing";
+import { createPairedMeetingWithTurns, createTestPerson, sha256Text, type SeededMeeting } from "@meet-first/db/testing";
 import { enqueuedJobs } from "../testing/app-factory.js";
 import { buildTestApp } from "../testing/index.js";
 import { registerAsksRoutes } from "./index.js";
@@ -172,5 +172,35 @@ describe("POST /api/asks, friend asks", () => {
     expect(noOrigin.statusCode).toBe(403);
     expect(ErrorBody.parse(noOrigin.body)).toEqual({ code: "origin_mismatch", message: "Open the app from its own address and try again." });
     expect(await countAsks({ personId: m.a.personId, mode: "react" })).toBe(0);
+  });
+});
+
+describe("POST /api/asks, a friend with a summary and no card", () => {
+  // A friend with no card and a ready summary whose friends switch is on or off, joined with a new asker; returns both and the pair.
+  async function summaryOnlyFriend(isOn: boolean): Promise<{ askerToken: string; pairId: string; friendName: string }> {
+    const asker = await createTestPerson(t.db, "Summary Asker");
+    const friendName = isOn ? "Summary Friend On" : "Summary Friend Off";
+    const friend = await createTestPerson(t.db, friendName);
+    await withPerson(t.db, friend.personId, (trx) => trx.insertInto("person_summaries")
+      .values({ person_id: friend.personId, text: "Kind: avoid\nPoint: Avoids phone calls.", points: JSON.stringify([]), state: "ready", friends_can_ask: isOn }).execute());
+    const pairId = await joinNewPair({ creatorId: asker.personId, joinerId: friend.personId });
+    return { askerToken: asker.sessionToken, pairId, friendName };
+  }
+
+  it("W7-ASK-T27b: a friend with only a ready summary and the switch on can be asked", async () => {
+    const setup = await summaryOnlyFriend(true);
+
+    const response = await sendReact({ token: setup.askerToken, pairId: setup.pairId });
+
+    expect(response.statusCode).toBe(201);
+  });
+
+  it("W7-ASK-T28: with the summary's switch off, the ask is refused as today", async () => {
+    const setup = await summaryOnlyFriend(false);
+
+    const response = await sendReact({ token: setup.askerToken, pairId: setup.pairId });
+
+    expect(response.statusCode).toBe(409);
+    expect(ErrorBody.parse(response.body)).toEqual({ code: "friend_asks_off", message: `${setup.friendName} has not turned on friend asks.` });
   });
 });

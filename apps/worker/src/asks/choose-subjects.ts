@@ -93,11 +93,17 @@ async function friendSubject(db: Kysely<Database>, ask: AskRow): Promise<NewAnsw
   return [{ subjectPersonId: friendId, subjectCardId: friend.cardId, listingId: null, subjectDisplayName: friend.displayName, subjectLine: null, shortlistRank: 1 }];
 }
 
-// The friend's display name and most recently approved card with friends_can_ask on, in the friend's own context; null when either is missing.
-async function readFriendCard(trx: DatabaseTransaction, friendId: string): Promise<{ cardId: string; displayName: string } | null> {
+// The friend's display name and most recently approved card with friends_can_ask on, in the friend's own context. A friend with no
+// approved card at all is answered from their summary when it is ready with its friends switch on, so the card is null. Null when the
+// name is missing, when every approved card has the switch off, or when there is no card and no such summary.
+async function readFriendCard(trx: DatabaseTransaction, friendId: string): Promise<{ cardId: string | null; displayName: string } | null> {
   const displayName = await readDisplayName(trx, friendId);
+  if (displayName === null) return null;
   const card = await trx.selectFrom("cards").select("id").where("person_id", "=", friendId).where("state", "=", "approved").where("friends_can_ask", "=", true)
     .where("approved_at", "is not", null).orderBy("approved_at", "desc").orderBy("id").limit(1).executeTakeFirst();
-  if (displayName === null || card === undefined) return null;
-  return { cardId: card.id, displayName };
+  if (card !== undefined) return { cardId: card.id, displayName };
+  const anyCard = await trx.selectFrom("cards").select("id").where("person_id", "=", friendId).where("state", "=", "approved").executeTakeFirst();
+  if (anyCard !== undefined) return null;
+  const summary = await trx.selectFrom("person_summaries").select("friends_can_ask").where("person_id", "=", friendId).where("state", "=", "ready").executeTakeFirst();
+  return summary?.friends_can_ask === true ? { cardId: null, displayName } : null;
 }

@@ -2,7 +2,7 @@ import type { Kysely } from "kysely";
 import { afterAll, afterEach, beforeAll, expect, it } from "vitest";
 import type { SummaryPointView } from "@meet-first/contracts";
 import { makeDatabase, POOL_SIZE, withPerson, type Database } from "@meet-first/db";
-import { freshTestDatabase, type TestDatabase } from "@meet-first/db/testing";
+import { createTestPerson, freshTestDatabase, type TestDatabase } from "@meet-first/db/testing";
 import { runAsk } from "./run-ask-job.js";
 import {
   ALLOWED_REACT, ASK_TURNS, KAI_REACT, LENA_REACT, ROMANTIC_REACT, allSupported, allowFriendAsks, countCalls, createAskPerson, insertReactAsk, joinInvitePair,
@@ -214,4 +214,23 @@ it("W7-ASK-T22: the persona request shows found summary points as quotable and s
   await runAsk({ askId: againId, personId: ana.personId }, second.context);
 
   expect(userTexts(second, "persona_answer")[0] ?? "").not.toMatch(/<summary_(points|only)>/);
+});
+
+it("W7-ASK-T27: a friend with only a ready summary and the switch on can be asked, and is answered from the summary", async () => {
+  const zed = await createTestPerson(fresh.db, "Zed");
+  const point = { kind: "avoid" as const, topic: "Calls", point: "Avoids phone calls and asks for a message instead.", strength: "moderate" as const, quotes: [], found: null };
+  await seedReadySummary(fresh.db, zed, { points: [point], isFriendsOn: true });
+  const pairId = await joinInvitePair(fresh.db, ana, zed);
+  const askId = await insertReactAsk(fresh.db, ana, { pairId, text: "Would Zed mind a quick call about the move?", aboutName: "Zed" });
+  const reply = { answer: "Zed likely prefers a message to a call, though this never came up in his chats.", has_sign: false, claims: [] };
+  const test = await openTest({ questionCheck: [ALLOWED_REACT], personaAnswers: { Zed: reply }, judge: [] });
+
+  await runAsk({ askId, personId: ana.personId }, test.context);
+
+  const rows = await readAnswerRows(fresh.db, ana, askId);
+  expect(rows).toHaveLength(1);
+  expect(rows[0]).toMatchObject({ mode: "react", subject_person_id: zed.personId, subject_card_id: null, state: "answered", answer: reply.answer });
+  const request = userTexts(test, "persona_answer")[0] ?? "";
+  expect(request).toContain("<your_card>\n(no items)\n</your_card>");
+  expect(request).toContain("<summary_only>\n- " + point.point + "\n</summary_only>");
 });

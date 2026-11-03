@@ -98,8 +98,8 @@ async function recallQueryFor(context: JobContext, ask: AskRow, row: AnswerRow):
 // Reads one subject's material in the subject's own context, and only reads. Null when a help answer's listing is gone, names another
 // card or, for a romance ask, has its dating switch off; when the subject's account deletion has started; when the card
 // is gone or no longer approved; and, for a friend ask, when the friend has turned friend asks off since the answer row was written.
-// A help answer never reads recall or the summary; a friend or self ask searches recall with the query. A self ask by someone with
-// no approved card has no card to read, and its material is their summary alone.
+// A help answer never reads recall or the summary; a friend or self ask searches recall with the query. A subject with no approved
+// card has no card to read, and the material is their summary alone.
 async function readSubjectMaterial(db: Kysely<Database>, subject: { ask: AskRow; row: AnswerRow; query: string }): Promise<SubjectMaterial | null> {
   const { ask, row } = subject;
   return withPerson(db, row.subjectPersonId, async (trx) => {
@@ -107,7 +107,7 @@ async function readSubjectMaterial(db: Kysely<Database>, subject: { ask: AskRow;
     if (ask.mode === "help" && !(await isListingCurrent(trx, ask, row))) return null;
     const summary = await readSummaryMaterial(trx, await readUsablePoints(trx, row.subjectPersonId, ask.mode));
     const cardId = row.subjectCardId;
-    if (cardId === null) return ask.mode === "self" ? materialOf({ items: [], recall: [], misses: [], summary }) : null;
+    if (cardId === null) return summaryOnlyMaterial(ask, summary);
     const card = await readUsableCard(trx, ask, cardId);
     if (card === null) return null;
     const items = await readItems(trx, cardId, ask.mode === "help");
@@ -115,6 +115,15 @@ async function readSubjectMaterial(db: Kysely<Database>, subject: { ask: AskRow;
     const recall = ask.mode !== "help" && card.recall_allowed ? await readRecall(trx, cardId, subject.query) : [];
     return materialOf({ items, recall, misses, summary });
   });
+}
+
+// The material of an answer whose subject has no approved card: their summary alone, for their own ask, or for a friend's ask while
+// the summary's friends switch is on (readUsablePoints gives nothing when it is off, and the answer then fails as a gone subject). A
+// help answer always has a card, so it gets null.
+function summaryOnlyMaterial(ask: AskRow, summary: SummaryMaterial): SubjectMaterial | null {
+  const isEmpty = summary.found.length === 0 && summary.only.length === 0;
+  if (ask.mode === "help" || (ask.mode === "react" && isEmpty)) return null;
+  return materialOf({ items: [], recall: [], misses: [], summary });
 }
 
 // The subject's card as this ask may use it, or null when it is gone, no longer approved, or, for a friend ask, has friend asks off.

@@ -42,3 +42,43 @@ ALTER TABLE persona_answers ALTER COLUMN subject_card_id DROP NOT NULL;
 -- The search-words call, which turns an ask into the words its search uses.
 ALTER TABLE ledger DROP CONSTRAINT ledger_call_site_check;
 ALTER TABLE ledger ADD CONSTRAINT ledger_call_site_check CHECK (call_site IN ('scrub_names','question_check','card','quiz_answer','quiz_judge','speech','receipts','brief','brief_support_judge','comic_panels','comic_image','self_test','persona_answer','ask_support_judge','orchestrator','search_words'));
+
+-- A friend with no approved card can be asked when their summary is ready and its friends switch is on. friend_list() reads that
+-- switch as app_definer, so that role reads summaries as it reads cards; the function returns only whether the friend can be asked.
+GRANT SELECT ON person_summaries TO app_definer;
+CREATE POLICY person_summaries_definer ON person_summaries FOR SELECT TO app_definer USING (true);
+
+DROP FUNCTION friend_list();
+CREATE FUNCTION friend_list()
+RETURNS TABLE (pair_id uuid, display_name text, can_ask boolean, listing_id uuid, is_sample boolean)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, pg_temp AS $$
+  SELECT f.pair_id, f.display_name, f.can_ask, shown.id, f.is_sample
+  FROM (
+    SELECT DISTINCT ON (o.other) o.id AS pair_id, o.other, p.display_name, p.is_sample, o.joined_at,
+      EXISTS (SELECT 1 FROM cards c WHERE c.person_id = o.other AND c.state = 'approved' AND c.friends_can_ask)
+        OR (NOT EXISTS (SELECT 1 FROM cards c WHERE c.person_id = o.other AND c.state = 'approved')
+          AND EXISTS (SELECT 1 FROM person_summaries s WHERE s.person_id = o.other AND s.state = 'ready' AND s.friends_can_ask)) AS can_ask
+    FROM (
+      SELECT pr.id, pr.joined_at, CASE WHEN pr.creator_person_id = app_person() THEN pr.joiner_person_id ELSE pr.creator_person_id END AS other
+      FROM pairs pr
+      WHERE pr.joined_at IS NOT NULL AND NOT pr.via_directory AND app_person() IN (pr.creator_person_id, pr.joiner_person_id)
+    ) o
+    JOIN people p ON p.id = o.other AND p.state = 'active'
+    ORDER BY o.other, o.joined_at DESC
+  ) f
+  LEFT JOIN LATERAL (
+    SELECT l.id FROM directory_listings l
+    JOIN cards c ON c.id = l.card_id AND c.person_id = l.person_id AND c.state = 'approved'
+    WHERE l.person_id = f.other
+  ) shown ON true
+  ORDER BY f.joined_at DESC
+$$;
+COMMENT ON FUNCTION friend_list() IS 'The friends of the person in app.person_id: everyone they joined an invite pair with or accepted a friend request from, once each by their latest pair, with whether that friend lets friends ask their Meety (an approved card with its switch on, or, with no approved card, a ready summary with its switch on), their listing when Explore shows it, and their sample mark. Directory pairs never count.';
+
+-- The grants run while app_migrate still owns the function: after the handover PostgreSQL ignores them with a warning (0001 does the same).
+REVOKE ALL ON FUNCTION friend_list() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION friend_list() TO app_api;
+-- A new owner needs CREATE on the function's schema, so app_definer holds it only for the handover, as in 0008, 0009 and 0010.
+GRANT CREATE ON SCHEMA public TO app_definer;
+ALTER FUNCTION friend_list() OWNER TO app_definer;
+REVOKE CREATE ON SCHEMA public FROM app_definer;
