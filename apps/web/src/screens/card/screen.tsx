@@ -82,7 +82,7 @@ const ApprovedNext = (props: { card: CardView; isSending: boolean; onQuiz: () =>
 // The notice on a thin card: fewer than 6 items had a quote that checked out (D23).
 const ThinNote = (props: { isThin: boolean }): ReactElement | null => {
   if (!props.isThin) return null;
-  return <p className="thin-note">Thin card: fewer than 6 items had a quote that checked out. Meetings still work; the quiz is skipped.</p>;
+  return <p className="thin-note">Your card is short: fewer than 6 items had a quote that checked out. Meetings still work; the quiz is skipped.</p>;
 };
 
 // A built card: the next step or the hello line, the items, the recall switch, then Sharing once approved or the approve bar before.

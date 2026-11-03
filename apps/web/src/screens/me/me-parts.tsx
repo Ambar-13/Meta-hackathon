@@ -1,27 +1,28 @@
 import { useState, type FormEvent, type ReactElement } from "react";
 import { Link } from "react-router-dom";
-import { DIRECTORY_SWITCH_COPY, LISTING_LINE_MAX_CHARS, ROMANCE_SWITCH_COPY, type HomeView, type ListedMeeting, type MyListing } from "@meet-first/contracts";
+import { DIRECTORY_SWITCH_COPY, LISTING_LINE_MAX_CHARS, ROMANCE_SWITCH_COPY, type HomeView, type MyListing } from "@meet-first/contracts";
 import { APP_PATHS, ErrorNotice } from "../../app-shell/index.js";
-import { PersonAvatar } from "../../look/index.js";
-import { MEETING_STATE_LABELS } from "../lobby/index.js";
+import { EmptyState, Icon, PersonAvatar } from "../../look/index.js";
 import type { YourListingHook } from "../directory/index.js";
+import { meetingLink, meetingStateWords, nextStepOf, shortDay } from "../home/index.js";
 import { useListingSave, type ListingSaveState } from "./me-state.js";
 
-// The words of your listing's controls on /me (wave 7).
+// The words of your listing's controls, your next step and your meetings on /me (wave 7).
 const ME_COPY = {
-  lineLabel: "Your line in Explore (up to 140 characters)",
+  lineLabel: "Your line in Explore",
   save: "Save my listing",
   join: "Join Explore",
   saved: "Saved. People in Explore see this now.",
   leave: "Leave Explore",
-  left: "You left Explore. Meetings already made stay below.",
+  left: "You left Explore. Your meetings stay in the Meetings tab.",
   pickPublic: "Choose which items are public on your card",
-  needCard: "Approve your card first, then come back here to join.",
-  openCard: "Open my card",
-  addChats: "Add your chats",
-  meetingsHeading: "Meetings your persona was in",
-  openMeeting: "Open the meeting",
-  readBrief: "Read the brief",
+  nextLabel: "Your next step",
+  noMeetings: "No meetings yet",
+  noMeetingsLine: "Your first one starts from an invite or Explore.",
+  fromExplore: "From Explore",
+  invitesHeading: "Open invites",
+  waiting: "Waiting for someone to join",
+  addChats: "Add more chats",
 } as const;
 
 // The line under a join or a save: the refusal, the api's sentence, or that it saved.
@@ -74,59 +75,98 @@ export const EditListing = (props: { listing: MyListing; yours: YourListingHook;
   );
 };
 
-// The join controls for a person who is not in Explore: the line, the dating switch and Join, from their approved card.
+// The join controls for a person who is not in Explore, from their approved card: the line, the dating switch and Join. Before the
+// card is approved nothing shows here, since the next step under it already says what to do first.
 export const JoinExplore = (props: { home: HomeView | null; yours: YourListingHook }): ReactElement | null => {
   const card = props.home?.card ?? null;
   const hasLeft = props.yours.leaveState.kind === "left";
-  if (props.home === null) return hasLeft ? <p role="status">{ME_COPY.left}</p> : null;
+  const joinable = card !== null && card.state === "approved" ? card : null;
+  if (!hasLeft && joinable === null) return null;
   return (
     <section className="me-edit" aria-label="Join Explore">
       {hasLeft ? <p role="status">{ME_COPY.left}</p> : null}
-      {card?.state === "approved" ? (
+      {joinable === null ? null : (
         <>
-          <ListingForm cardId={card.id} listing={null} submitLabel={ME_COPY.join} onSaved={props.yours.replaceListing} />
-          <Link to={APP_PATHS.card(card.id)}>{ME_COPY.pickPublic}</Link>
-        </>
-      ) : (
-        <>
-          <p className="me-need-card">{ME_COPY.needCard}</p>
-          <Link className="btn quiet" to={card === null ? APP_PATHS.upload : APP_PATHS.card(card.id)}>{card === null ? ME_COPY.addChats : ME_COPY.openCard}</Link>
+          <ListingForm cardId={joinable.id} listing={null} submitLabel={ME_COPY.join} onSaved={props.yours.replaceListing} />
+          <Link to={APP_PATHS.card(joinable.id)}>{ME_COPY.pickPublic}</Link>
         </>
       )}
     </section>
   );
 };
 
-// The links of one listed meeting: its meeting page unless it is gone, and its brief page once it has ended.
-const ListedMeetingLinks = (props: { meeting: ListedMeeting }): ReactElement | null => {
-  const { meeting } = props;
-  if (meeting.state === "deleted") return null;
+// The one next step, flat between your profile and the tabs: what it is, why, its button (the page's one blue), and a second link
+// when there is a real choice.
+export const MeNext = (props: { home: HomeView }): ReactElement => {
+  const step = nextStepOf(props.home);
   return (
-    <div className="listed-links">
-      <Link className="btn quiet" to={APP_PATHS.meeting(meeting.meetingId)}>{ME_COPY.openMeeting}</Link>
-      {meeting.state === "ended" ? <Link className="btn quiet" to={APP_PATHS.brief(meeting.meetingId)}>{ME_COPY.readBrief}</Link> : null}
-    </div>
+    <section className="me-next" aria-labelledby="me-next-title">
+      <p className="me-next-label">{ME_COPY.nextLabel}</p>
+      <h2 id="me-next-title">{step.title}</h2>
+      {step.text === "" ? null : <p className="me-next-text">{step.text}</p>}
+      <div className="me-next-actions">
+        <Link className="btn" to={step.action.to}>{step.action.label}</Link>
+        {step.second === undefined ? null : <Link to={step.second.to}>{step.second.label}</Link>}
+      </div>
+    </section>
   );
 };
 
-// The meetings your persona was in through Explore, newest first as the server sends them (P4); nothing shows when there are none.
-export const ListedMeetingList = (props: { meetings: ListedMeeting[] }): ReactElement | null => {
-  if (props.meetings.length === 0) return null;
+// The invites still open, each a row back to its lobby; nothing shows when there are none.
+const OpenInvites = (props: { home: HomeView }): ReactElement | null => {
+  const { pairs, serverNow } = props.home;
+  if (pairs.length === 0) return null;
   return (
-    <section aria-labelledby="me-listed-title">
-      <h2 id="me-listed-title">{ME_COPY.meetingsHeading}</h2>
-      <ul className="listed-meetings">
-        {props.meetings.map((meeting) => (
-          <li key={meeting.meetingId}>
-            <PersonAvatar name={meeting.otherDisplayName} />
-            <div className="listed-body">
-              <p className="listed-question">{`${meeting.otherDisplayName}: ${meeting.questionText}`}</p>
-              <span className="pill">{MEETING_STATE_LABELS[meeting.state]}</span>
-              <ListedMeetingLinks meeting={meeting} />
-            </div>
+    <section className="me-invites" aria-labelledby="me-invites-title">
+      <h3 id="me-invites-title">{ME_COPY.invitesHeading}</h3>
+      <ul className="me-rows">
+        {pairs.map((pair) => (
+          <li key={pair.id}>
+            <Link className="me-row" to={APP_PATHS.lobby(pair.id)}>
+              {pair.otherDisplayName === null ? <span className="me-row-icon"><Icon name="add" size={20} /></span> : <PersonAvatar name={pair.otherDisplayName} />}
+              <span>
+                <b>{pair.otherDisplayName === null ? ME_COPY.waiting : `With ${pair.otherDisplayName}`}</b>
+                <small>{`Open until ${shortDay(pair.expiresAt, serverNow)}`}</small>
+              </span>
+            </Link>
           </li>
         ))}
       </ul>
     </section>
   );
+};
+
+// The Meetings tab: every meeting you are in, newest first, one list, each a row to its brief once ready or else to the meeting, with
+// where it stands, its day, and From Explore when someone met you there; then the invites still open.
+export const MeMeetings = (props: { home: HomeView; fromExplore: ReadonlySet<string> }): ReactElement => {
+  const { meetings, serverNow } = props.home;
+  return (
+    <div className="me-meetings">
+      {meetings.length === 0 ? <EmptyState sticker="chat" title={ME_COPY.noMeetings}>{ME_COPY.noMeetingsLine}</EmptyState> : (
+        <ul className="me-rows">
+          {meetings.map((meeting) => (
+            <li key={meeting.id}>
+              <Link className="me-row" to={meetingLink(meeting)}>
+                <PersonAvatar name={meeting.otherDisplayName} />
+                <span>
+                  <b>{`With ${meeting.otherDisplayName}: ${meeting.questionText}`}</b>
+                  <small>
+                    {[meetingStateWords(meeting), shortDay(meeting.createdAt, serverNow), props.fromExplore.has(meeting.id) ? ME_COPY.fromExplore : ""]
+                      .filter((part) => part !== "")
+                      .join(" · ")}
+                  </small>
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+      <OpenInvites home={props.home} />
+    </div>
+  );
+};
+
+// The end of your About tab: your card grows from your chats, so adding more starts here.
+export const AddChats = (): ReactElement => {
+  return <Link className="me-add-chats" to={APP_PATHS.upload}>{ME_COPY.addChats}</Link>;
 };

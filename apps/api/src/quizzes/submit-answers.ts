@@ -32,7 +32,7 @@ async function writeOneAnswer(trx: Transaction<Database>, args: { quizId: string
     return Number(result.numUpdatedRows);
   } catch (error) {
     if (parseDatabaseError(error)?.code === "persona_answer_missing") {
-      throw new ContractError("persona_answer_missing", "The persona has not answered this question yet. Wait a moment and reload.", 409);
+      throw new ContractError("persona_answer_missing", "Your agent has not answered this question yet. Wait a moment and reload.", 409);
     }
     throw error;
   }

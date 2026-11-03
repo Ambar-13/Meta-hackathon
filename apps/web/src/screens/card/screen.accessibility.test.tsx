@@ -11,7 +11,7 @@ import { CardScreen } from "./screen.js";
 // keep the card tests below as they were: nothing shared, not listed.
 beforeEach(() => {
   stubRoute(routes.directory.readSharing, { friendsCanAsk: false, publicPositions: [] });
-  stubRoute(routes.directory.readMyListing, { status: 404, body: { code: "not_listed", message: "You are not in the directory." } });
+  stubRoute(routes.directory.readMyListing, { status: 404, body: { code: "not_listed", message: "You are not in Explore yet." } });
 });
 
 afterEach(() => {
@@ -75,7 +75,7 @@ describe("card screen", () => {
     fireEvent.click(first);
     fireEvent.click(screen.getByRole("button", { name: "Approve my card" }));
     expect(await screen.findByText("Card approved.")).toBeTruthy();
-    expect(screen.getByText("Thin card: fewer than 6 items had a quote that checked out. Meetings still work; the quiz is skipped.")).toBeTruthy();
+    expect(screen.getByText("Your card is short: fewer than 6 items had a quote that checked out. Meetings still work; the quiz is skipped.")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Take the knows-me quiz" })).toBeNull();
     expect(screen.getByRole("link", { name: "Pair with someone" }).getAttribute("href")).toBe(`/pair?card=${IDS.card}`);
   });
@@ -105,7 +105,7 @@ describe("card screen", () => {
     const rows = await screen.findAllByRole("listitem");
     const row = rows[1];
     if (row === undefined) throw new Error("no second row");
-    expect(row.textContent).toContain("no receipt");
+    expect(row.textContent).toContain("no quote");
     expect(within(row).getByRole("checkbox", { name: "Use this in meetings" })).toHaveProperty("disabled", true);
   });
 

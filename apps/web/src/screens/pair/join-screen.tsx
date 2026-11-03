@@ -23,7 +23,7 @@ export const JoinScreen = (): ReactElement => {
       {state.kind === "ready" || state.kind === "sending" ? (
         <section className="join-card">
           <Sticker name="tags" className="join-sticker" />
-          <p className="pair-lead">You were invited to let your personas meet first.</p>
+          <p className="pair-lead">You were invited to let your agents meet first.</p>
           <div className="actions">
             <button type="button" className="big" disabled={state.kind === "sending"} onClick={() => void join()}>
               Accept the invite

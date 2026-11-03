@@ -90,7 +90,7 @@ describe("ask screen", () => {
     expect(screen.getByText("Checking your question.")).toBeTruthy();
     await advance(3000);
     expect(requestsTo(routes.asks.readAsk)).toHaveLength(2);
-    expect(screen.getByText("Asking the personas. This takes about a minute.")).toBeTruthy();
+    expect(screen.getByText("Asking the agents. This takes about a minute.")).toBeTruthy();
     await advance(3000);
     expect(requestsTo(routes.asks.readAsk)).toHaveLength(3);
     expect(screen.getByText("Checking the quotes in each answer.")).toBeTruthy();
@@ -130,8 +130,8 @@ describe("ask screen", () => {
     await screen.findByRole("heading", { name: HELP_RESULTS_HEADING });
 
     expect(within(itemOf("Mira")).queryAllByRole("note")).toHaveLength(0);
-    expect(within(itemOf("Dev")).getAllByRole("note").map((note) => note.textContent)).toEqual(["weak receipt", "weak receipt"]);
-    expect(within(itemOf("Sol")).getAllByRole("note").map((note) => note.textContent)).toEqual(["no receipt"]);
+    expect(within(itemOf("Dev")).getAllByRole("note").map((note) => note.textContent)).toEqual(["weak quote", "weak quote"]);
+    expect(within(itemOf("Sol")).getAllByRole("note").map((note) => note.textContent)).toEqual(["no quote"]);
     expect(within(itemOf("Ana")).getByText("No quotes from their notes.")).toBeTruthy();
     expect(within(itemOf("Ana")).queryAllByRole("note")).toHaveLength(0);
   });
@@ -150,14 +150,14 @@ describe("ask screen", () => {
     stubRoute(routes.asks.readAsk, askView({ answers: [] }));
     renderAsk();
 
-    expect(await screen.findByText("No listed persona matches this yet.")).toBeTruthy();
+    expect(await screen.findByText("Nobody in Explore matches this yet.")).toBeTruthy();
     expect(screen.queryByRole("heading", { name: "No clear sign in their notes" })).toBeNull();
     cleanup();
 
     stubRoute(routes.asks.readAsk, askView({ answers: fourAnswers().slice(2) }));
     renderAsk();
 
-    expect(await screen.findByText("No persona showed a clear sign. Their answers are below.")).toBeTruthy();
+    expect(await screen.findByText("No agent showed a clear sign. Their answers are below.")).toBeTruthy();
     const unplaced = within(sectionOf("No clear sign in their notes")).getAllByRole("heading", { level: 3 }).map((heading) => heading.textContent);
     expect(unplaced).toEqual(["Sol", "Ana"]);
   });

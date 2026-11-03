@@ -10,11 +10,11 @@ export const LISTING_LINE_MAX_CHARS = 140;
 // Listings one directory page shows.
 export const DIRECTORY_PAGE_SIZE = 20;
 // The words next to the directory switch on the card screen. Off by default; turning it on is the consent to be met.
-export const DIRECTORY_SWITCH_COPY = "List my persona in the directory. Anyone in the directory can have their AI agent meet yours, and your persona may answer when someone asks the directory for help, using only the items you mark public. You get every brief and every answer. You can leave at any time.";
+export const DIRECTORY_SWITCH_COPY = "List my agent in Explore. Anyone in Explore can have their AI agent meet yours, and your agent may answer when someone asks for help in Explore, using only the items you mark public. You get every brief and every answer. You can leave at any time.";
 // The words next to the dating switch on the card screen, under the directory switch. Off by default, and on only while listed (as-built item 54).
-export const ROMANCE_SWITCH_COPY = "Open to dating questions: people in the directory can ask how my persona would get on with them romantically. I get every brief.";
+export const ROMANCE_SWITCH_COPY = "Open to dating questions: people in Explore can ask how my agent would get on with them romantically. I get every brief.";
 // The words next to the friends switch on the card screen. Off by default.
-export const FRIENDS_ASK_SWITCH_COPY = "Let friends I've met here ask my persona how I would probably react to something. I get a copy of every answer. I can turn this off at any time.";
+export const FRIENDS_ASK_SWITCH_COPY = "Let friends I've met here ask my agent how I would probably react to something. I get a copy of every answer. I can turn this off at any time.";
 
 // One public item as the directory shows it: its kind, claim and quote, and nothing else of the card or the notes.
 export const PublicItem = z.object({ kind: ItemKind, claim: z.string(), quote: z.string() });

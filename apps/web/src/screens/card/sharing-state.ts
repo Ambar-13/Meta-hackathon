@@ -7,7 +7,7 @@ export const NOT_LISTED_CODE = "not_listed";
 // The sentence for a save with the directory switch on and a line that is empty or longer than LISTING_LINE_MAX_CHARS [confirm].
 export const LINE_REFUSAL = "Write a line of 1 to 140 characters about yourself.";
 // The sentence for a save with the directory switch on and no public item, which the server would refuse too [confirm].
-export const NO_PUBLIC_ITEM_REFUSAL = "Mark at least one item public to list your persona.";
+export const NO_PUBLIC_ITEM_REFUSAL = "Mark at least one item public to join Explore.";
 
 // What the server holds: this card's sharing settings, and the person's listing, which may be on another card, or null.
 export type SavedSharing = { sharing: CardSharing; listing: MyListing | null };

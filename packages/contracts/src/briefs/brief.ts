@@ -53,9 +53,9 @@ export const BriefSupportJudgeOutput = z.object({
 // The type of BriefSupportJudgeOutput, read from the schema above.
 export type BriefSupportJudgeOutput = z.infer<typeof BriefSupportJudgeOutput>;
 // The label shown when a line has a quote the judge did not support (A1).
-export const WEAK_RECEIPT_COPY = "weak receipt";
+export const WEAK_RECEIPT_COPY = "weak quote";
 // The label shown when a line has no quote at all (R6.5).
-export const NO_RECEIPT_COPY = "no receipt";
+export const NO_RECEIPT_COPY = "no quote";
 // The three section headings of a brief for each kind of question. The data stays agree, clash and decideFirst; only the words
 // change, so a get-along brief reads "where you'd click" and a deal reads "where you agree". The brief screen and the share page read it.
 export const BRIEF_SECTION_LABELS: Record<QuestionKind, { agree: string; clash: string; decideFirst: string }> = {

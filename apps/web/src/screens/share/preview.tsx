@@ -10,7 +10,7 @@ export const PREVIEW_COPY = {
   loading: "Reading what the page would hold.",
   noLinesTitle: "No brief lines to publish",
   noLines: "None of your brief lines passed the support check, so the page shows none of them.",
-  alsoShown: "The card items you both approved, what the two personas said, and the other person's checked brief lines will appear too.",
+  alsoShown: "The card items you both approved, what the two agents said, and the other person's checked brief lines will appear too.",
 } as const;
 
 // The display name of one side of the meeting, or an empty string when the view does not hold it.

@@ -43,7 +43,7 @@ export const BriefLine = (props: { point: BriefPoint; onQuote: ShowQuote }): Rea
   return (
     <li className={isWeak ? "brief-line weak" : "brief-line"}>
       <p>{props.point.text}</p>
-      {isWeak ? <span role="note" className="mark weak">weak receipt</span> : null}
+      {isWeak ? <span role="note" className="mark weak">weak quote</span> : null}
       <div className="brief-chips">
         {props.point.quotes.map((quote, index) => (
           <QuoteChip

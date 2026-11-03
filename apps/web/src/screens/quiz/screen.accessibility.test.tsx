@@ -19,13 +19,13 @@ describe("quiz screen", () => {
   it("R4.2-T1: the form stays locked while the persona answers and no persona answer shows before submitting", async () => {
     stubRoute(routes.cards.readQuiz, quizView("answering"));
     renderQuiz();
-    expect(await screen.findByText("Your persona answers first. The form opens when it is done.")).toBeTruthy();
+    expect(await screen.findByText("Your agent answers first. The form opens when it is done.")).toBeTruthy();
     const boxes = screen.getAllByRole("textbox");
     expect(boxes).toHaveLength(10);
     for (const box of boxes) {
       expect(box.hasAttribute("disabled")).toBe(true);
     }
-    expect(screen.queryByText(/^Your persona:/)).toBeNull();
+    expect(screen.queryByText(/^Your agent:/)).toBeNull();
   });
 
   it("R4.3-T1: each answer allows 200 characters and Send waits for all 10", async () => {
@@ -59,7 +59,7 @@ describe("quiz screen", () => {
     renderQuiz();
     expect((await screen.findByRole("heading", { level: 2 })).textContent).toBe("matched 7 of 10");
     expect(document.body.textContent).not.toContain("%");
-    expect(screen.getByText("Your persona: Persona answer 1")).toBeTruthy();
+    expect(screen.getByText("Your agent: Persona answer 1")).toBeTruthy();
     expect(screen.getAllByText("Matched")).toHaveLength(7);
     expect(screen.getAllByText("Did not match")).toHaveLength(3);
   });

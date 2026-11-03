@@ -10,7 +10,7 @@ import "./brief.css";
 
 // The one line under the title: the rate as a rate, or the note that the check did not run (A1).
 export function supportLine(brief: Brief): string {
-  if (brief.supportReliable !== true || brief.supportRate === null) return "The support check did not run. Every line is marked weak receipt.";
+  if (brief.supportReliable !== true || brief.supportRate === null) return "The support check did not run. Every line is marked weak quote.";
   const lines = [...brief.agree, ...brief.clash, ...brief.decideFirst];
   const withQuote = lines.filter((point) => point.quotes.length > 0);
   const supported = withQuote.filter((point) => point.supported === true).length;

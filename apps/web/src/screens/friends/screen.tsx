@@ -17,7 +17,7 @@ const FRIENDS_HEADING = "Your friends"; // [confirm]
 const REQUESTS_HEADING = "Requests";
 const SENT_REQUESTS_HEADING = "Requests you sent";
 const WAITING_LINE = "Waiting for an answer";
-const COPIES_HEADING = "Answers your persona gave";
+const COPIES_HEADING = "Answers your agent gave";
 const SENT_HEADING = "Asks you sent"; // [confirm]
 const ASK_BUTTON_LABEL = "Ask their agent";
 const MEET_LABEL = "Meet";
@@ -26,12 +26,12 @@ const NO_FRIENDS_TITLE = "No friends yet";
 const NO_FRIENDS_LINE = "Find people in Explore and add them, or share your invite link.";
 const NO_FRIENDS_ACTION = "Find people in Explore";
 const NO_COPIES_TITLE = "No answers yet"; // [confirm]
-const NO_COPIES_LINE = "Your persona has not answered anyone yet."; // [confirm]
+const NO_COPIES_LINE = "Your agent has not answered anyone yet."; // [confirm]
 const NO_SENT_TITLE = "Nothing sent yet"; // [confirm]
 const NO_SENT_LINE = "Ask a friend how they would react, or ask Meety who could help."; // [confirm]
 const LOADING_FRIENDS_LINE = "Loading your friends."; // [confirm]
-const LOADING_COPIES_LINE = "Loading the answers your persona gave."; // [confirm]
-const COPY_ANSWER_LABEL = "Your persona's answer"; // [confirm]
+const LOADING_COPIES_LINE = "Loading the answers your agent gave."; // [confirm]
+const COPY_ANSWER_LABEL = "Your agent's answer"; // [confirm]
 // The name on the caller's own persona bubble, so its initial reads Y [confirm].
 const SELF_NAME = "You"; // [confirm]
 // The words for where each sent ask is, and its kind [confirm].
@@ -47,13 +47,13 @@ function asksOffLine(friend: Friend): string {
 
 // The label of one friend's ask box; 5 to 300 characters is what AskCreate accepts after trimming [confirm].
 function askBoxLabel(friend: Friend): string {
-  return `What should ${friend.displayName} react to? (5 to 300 characters)`;
+  return `What should ${friend.displayName} react to?`;
 }
 
 // The line that opens one copy: who asked and what, by the kind of ask [confirm].
 function askedLine(copy: AboutMeAnswer): string {
   if (copy.mode === "react") return `${copy.askerName} asked how you would probably react to: ${copy.text}`;
-  return `${copy.askerName} asked the directory for help: ${copy.text}`;
+  return `${copy.askerName} asked people in Explore for help: ${copy.text}`;
 }
 
 // A person's name in a row: a link to their profile when they are in Explore, else plain.

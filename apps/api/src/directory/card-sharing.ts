@@ -26,7 +26,7 @@ export function makeCardNotApprovedError(): ContractError {
 
 // listing_needs_public_item, 409: a listed card keeps at least one public item, because strangers see only public items (design section 6, P2).
 export function makeListingNeedsPublicItemError(): ContractError {
-  return new ContractError("listing_needs_public_item", "A listed persona needs at least one public item. Mark one, or leave the directory first.", HTTP.conflict);
+  return new ContractError("listing_needs_public_item", "To stay in Explore you need at least one public item. Mark one, or leave Explore first.", HTTP.conflict);
 }
 
 // Locks the caller's people row before any check, so one person's sharing changes and listing changes take turns, and two requests sent at once cannot leave a listed card with no public item [confirm].

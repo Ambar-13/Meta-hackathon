@@ -10,12 +10,12 @@ import { directoryPathWithCard, isListedWith, useSharing, type SavedSharing, typ
 // The words of the Sharing section that no input gives [confirm] (drafted copy).
 const SHARING_COPY = {
   loading: "Loading your sharing settings.",
-  publicLegend: "Items people in the directory can see",
-  lineLabel: "A line about you for the directory (1 to 140 characters)",
-  otherCard: "Your persona is listed from another card. Turning the directory switch on here lists this card instead.",
+  publicLegend: "Items people in Explore can see",
+  lineLabel: "A line about you for Explore",
+  otherCard: "Explore lists you from another card. Turning the Explore switch on here lists this card instead.",
   save: "Save sharing",
   saved: "Sharing saved.",
-  openDirectory: "Open the directory",
+  openDirectory: "Open Explore",
   datingNote: "Dating is your call. Leave this off if you only want teammates and friends.",
   noPublicItems: "No item can be public yet. Only items in your card with a checked quote can.",
 } as const;

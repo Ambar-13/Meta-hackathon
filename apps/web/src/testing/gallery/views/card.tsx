@@ -66,7 +66,7 @@ const CardAsMira = (): ReactElement => {
 // The two reads of the Sharing section for a person who shares nothing and is not listed.
 const NOTHING_SHARED: readonly GalleryStub[] = [
   { route: routes.directory.readSharing, replies: { status: 200, body: { friendsCanAsk: false, publicPositions: [] } } },
-  { route: routes.directory.readMyListing, replies: { status: 404, body: { code: "not_listed", message: "You are not in the directory." } } },
+  { route: routes.directory.readMyListing, replies: { status: 404, body: { code: "not_listed", message: "You are not in Explore yet." } } },
 ];
 
 // One card view on the card route, as Mira, reading the given card.

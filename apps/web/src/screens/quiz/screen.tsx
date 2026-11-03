@@ -8,7 +8,7 @@ import { QuizForm, QuizResult } from "./quiz-parts.js";
 import { useQuizScreen, type SubmitState } from "./quiz-state.js";
 
 // The words for a quiz that is not answered yet: the persona first, then the form.
-const AnsweringLine = (): ReactElement => <LoadingLine text="Your persona answers first. The form opens when it is done." />;
+const AnsweringLine = (): ReactElement => <LoadingLine text="Your agent answers first. The form opens when it is done." />;
 
 // The status of sending the answers: the word while sending, the error when it failed.
 const SubmitStatus = (props: { submit: SubmitState }): ReactElement | null => {
@@ -44,7 +44,7 @@ export const QuizScreen = (): ReactElement => {
   const isOpen = quiz.state === "answering" || quiz.state === "waiting_human";
   return (
     <ScreenFrame title="Knows-me quiz">
-      {isOpen ? <p className="quiz-lead">Ten questions about you. Your persona answers them too, then a judge compares.</p> : null}
+      {isOpen ? <p className="quiz-lead">Ten questions about you. Your agent answers them too, then a judge compares.</p> : null}
       {isLocked ? <AnsweringLine /> : null}
       {isOpen ? (
         <QuizForm items={quiz.items} answers={answers} isLocked={isLocked} isSending={submit.kind === "sending"} onChange={setAnswer} onSend={() => void send()} />

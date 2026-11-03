@@ -2,7 +2,7 @@
 // chatgpt chat combined"). Icons come from lucide at one size and stroke; a person is the first letter of their name on a soft circle in
 // one of four colours that their name picks, so the same person always looks the same. The landing keeps the name tags and stickers.
 import type { ReactElement } from "react";
-import { ArrowUp, Check, Compass, LayoutGrid, MessageCircle, Quote, Search, Settings, Sparkles, UserPlus, UserRound, Users } from "lucide-react";
+import { ArrowUp, Check, Compass, Handshake, LayoutGrid, MessageCircle, Quote, Search, Settings, Sparkles, UserPlus, UserRound, Users } from "lucide-react";
 import { initialOf } from "./look-parts.js";
 import { Sticker } from "./stickers.js";
 
@@ -20,6 +20,7 @@ const ICONS = {
   spark: Sparkles,
   posts: LayoutGrid,
   about: Quote,
+  meetings: Handshake,
 } as const;
 // The name of one icon.
 export type IconName = keyof typeof ICONS;

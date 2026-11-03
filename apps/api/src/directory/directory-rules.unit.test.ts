@@ -54,7 +54,7 @@ describe("directory rules", () => {
       { code: "not_found", status: 404, message: "This no longer exists or is not yours." },
       { code: "card_not_approved", status: 409, message: "approve your card before creating a meeting." },
       { code: "payload_invalid", status: 400, message: "Only approved items with a found quote can be public." },
-      { code: "listing_needs_public_item", status: 409, message: "A listed persona needs at least one public item. Mark one, or leave the directory first." },
+      { code: "listing_needs_public_item", status: 409, message: "To stay in Explore you need at least one public item. Mark one, or leave Explore first." },
       null,
       null,
     ]);

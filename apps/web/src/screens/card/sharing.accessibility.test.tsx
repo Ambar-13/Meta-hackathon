@@ -11,12 +11,12 @@ import { CardScreen } from "./screen.js";
 const LISTING_ID = "00000000-0000-4000-8000-000000000501";
 const OTHER_CARD_ID = "00000000-0000-4000-8000-000000000112";
 // The labels of the line field and the public items group, as sharing-section.tsx writes them.
-const LINE_LABEL = "A line about you for the directory (1 to 140 characters)";
-const PUBLIC_LEGEND = "Items people in the directory can see";
+const LINE_LABEL = "A line about you for Explore";
+const PUBLIC_LEGEND = "Items people in Explore can see";
 // The four public checkboxes of sharingCard(), in card order.
 const PUBLIC_NAMES = ["Value: Claim number 1", "Boundary: Claim number 4", "Goal: Claim number 5", "Value: Claim number 6"];
 // GET /api/directory/me for a person with no listing.
-const NOT_LISTED: StubInput = { status: 404, body: { code: "not_listed", message: "You are not in the directory." } };
+const NOT_LISTED: StubInput = { status: 404, body: { code: "not_listed", message: "You are not in Explore yet." } };
 
 beforeEach(() => {
   clearClientState();
@@ -207,7 +207,7 @@ describe("card Sharing section, against the MSW route stubs (a fake server)", ()
   it("W6-DWEB-T16 (P2): a listing on another card shows the note, starts with the directory switch off, and a save with it off sends no DELETE", async () => {
     stubSharing({ sharing: { friendsCanAsk: false, publicPositions: [] }, listing: listingOn(OTHER_CARD_ID, false), update: { friendsCanAsk: true, publicPositions: [] } });
     await renderSharing();
-    expect(screen.getByText("Your persona is listed from another card. Turning the directory switch on here lists this card instead.")).toBeTruthy();
+    expect(screen.getByText("Explore lists you from another card. Turning the Explore switch on here lists this card instead.")).toBeTruthy();
     expect(isTicked(screen.getByRole("switch", { name: DIRECTORY_SWITCH_COPY }))).toBe(false);
 
     fireEvent.click(screen.getByRole("switch", { name: FRIENDS_ASK_SWITCH_COPY }));
@@ -227,7 +227,7 @@ describe("card Sharing section, against the MSW route stubs (a fake server)", ()
     fireEvent.change(screen.getByRole("textbox", { name: LINE_LABEL }), { target: { value: "Builds hackathon tools" } });
     fireEvent.click(screen.getByRole("button", { name: "Save sharing" }));
 
-    expect(await screen.findByText("Mark at least one item public to list your persona.")).toBeTruthy();
+    expect(await screen.findByText("Mark at least one item public to join Explore.")).toBeTruthy();
     expect(requestsTo(routes.directory.updateSharing)).toHaveLength(0);
     expect(requestsTo(routes.directory.upsertMyListing)).toHaveLength(0);
     expect(requestsTo(routes.directory.leave)).toHaveLength(0);
@@ -238,7 +238,7 @@ describe("card Sharing section, against the MSW route stubs (a fake server)", ()
 
     await renderSharing();
 
-    expect(screen.getByRole("link", { name: "Open the directory" }).getAttribute("href")).toBe(`/directory?card=${IDS.card}`);
+    expect(screen.getByRole("link", { name: "Open Explore" }).getAttribute("href")).toBe(`/directory?card=${IDS.card}`);
   });
 
   it("W6-DWEB-T19 (design section 7): every control of the approved card page with its Sharing section has an accessible name at 375 px", async () => {

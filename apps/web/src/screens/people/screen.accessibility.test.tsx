@@ -203,7 +203,7 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
 
     fireEvent.click(within(await header()).getByRole("button", { name: "Meet their agent" }));
     fireEvent.click(screen.getByRole("radio", { name: "Write your own question" }));
-    fireEvent.change(screen.getByLabelText("Your question (5 to 300 characters)"), { target: { value: "Hm?" } });
+    fireEvent.change(screen.getByLabelText("Your question"), { target: { value: "Hm?" } });
     fireEvent.click(screen.getByRole("button", { name: "Create the meeting" }));
 
     expect(await screen.findByText("Write a question of 5 to 300 characters.")).toBeTruthy();
@@ -212,7 +212,7 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
 
   it("W6-DWEB-T32, moved to the profile: with no card known a friend's profile shows no Meet button and says how to get one", async () => {
     renderProfile(friendMira(true));
-    stubRoute(routes.directory.readMyListing, { status: 404, body: { code: "not_listed", message: "You are not in the directory." } });
+    stubRoute(routes.directory.readMyListing, { status: 404, body: { code: "not_listed", message: "You are not in Explore yet." } });
     const head = await header();
 
     await waitFor(() => {

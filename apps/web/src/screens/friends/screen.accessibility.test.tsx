@@ -92,14 +92,14 @@ describe("friends screen", () => {
     renderFriends();
 
     fireEvent.click(within(await friendRow("Bea")).getByRole("button", { name: "Ask their agent" }));
-    expect(screen.getByLabelText("What should Bea react to? (5 to 300 characters)").tagName).toBe("TEXTAREA");
+    expect(screen.getByLabelText("What should Bea react to?").tagName).toBe("TEXTAREA");
 
-    fireEvent.change(screen.getByLabelText("What should Bea react to? (5 to 300 characters)"), { target: { value: "Hm" } });
+    fireEvent.change(screen.getByLabelText("What should Bea react to?"), { target: { value: "Hm" } });
     fireEvent.click(screen.getByRole("button", { name: "Send the ask" }));
     expect(screen.getByText("Write a question of 5 to 300 characters.")).toBeTruthy();
     expect(requestsTo(routes.asks.createAsk)).toHaveLength(0);
 
-    fireEvent.change(screen.getByLabelText("What should Bea react to? (5 to 300 characters)"), { target: { value: "  " + REACT_TEXT + "  " } });
+    fireEvent.change(screen.getByLabelText("What should Bea react to?"), { target: { value: "  " + REACT_TEXT + "  " } });
     fireEvent.click(screen.getByRole("button", { name: "Send the ask" }));
 
     await waitFor(() => {
@@ -115,7 +115,7 @@ describe("friends screen", () => {
     renderFriends();
 
     fireEvent.click(within(await friendRow("Bea")).getByRole("button", { name: "Ask their agent" }));
-    fireEvent.change(screen.getByLabelText("What should Bea react to? (5 to 300 characters)"), { target: { value: REACT_TEXT } });
+    fireEvent.change(screen.getByLabelText("What should Bea react to?"), { target: { value: REACT_TEXT } });
     fireEvent.click(screen.getByRole("button", { name: "Send the ask" }));
 
     expect(await within(await friendRow("Bea")).findByText("Bea has not turned on friend asks.")).toBeTruthy();
@@ -128,22 +128,22 @@ describe("friends screen", () => {
     renderFriends();
 
     expect(await screen.findByText("Ola asked how you would probably react to: Being asked to lead the demo at the last minute.")).toBeTruthy();
-    const copies = Array.from(sectionOf("Answers your persona gave").querySelector("ul")?.children ?? []);
+    const copies = Array.from(sectionOf("Answers your agent gave").querySelector("ul")?.children ?? []);
     expect(copies).toHaveLength(2);
     const first = within(copies[0] as HTMLElement);
     expect(first.getByText("Ola asked how you would probably react to: Being asked to lead the demo at the last minute.")).toBeTruthy();
-    expect(first.getByText("Your persona's answer")).toBeTruthy();
+    expect(first.getByText("Your agent's answer")).toBeTruthy();
     expect(first.getByText("My person would probably say yes, then ask for notes.")).toBeTruthy();
     expect(first.getAllByText(BACKED.quote, { selector: "blockquote" })).toHaveLength(1);
     expect(first.queryAllByRole("note")).toHaveLength(0);
     const second = within(copies[1] as HTMLElement);
-    expect(second.getByText("Pim asked the directory for help: Our deploys fail at night and nobody knows why.")).toBeTruthy();
-    expect(second.getAllByRole("note").map((note) => note.textContent)).toEqual(["no receipt"]);
+    expect(second.getByText("Pim asked people in Explore for help: Our deploys fail at night and nobody knows why.")).toBeTruthy();
+    expect(second.getAllByRole("note").map((note) => note.textContent)).toEqual(["no quote"]);
     cleanup();
 
     stubReads({ friends: [BEA], aboutMe: [] });
     renderFriends();
-    expect(await screen.findByText("Your persona has not answered anyone yet.")).toBeTruthy();
+    expect(await screen.findByText("Your agent has not answered anyone yet.")).toBeTruthy();
   });
 
   it("W6-ASKA-T44, updated for wave 7: the page links to no Directory or Find help, every control is labelled, and there is no overflow at 375 px, with fake api replies", async () => {

@@ -11,7 +11,7 @@ import "./meeting.css";
 
 // The line under "The meeting has ended." for each end reason [confirm] (drafted copy, no input gives it).
 export const ENDED_LINES: Record<"decided" | "budget" | "deleted", string> = {
-  decided: "Both personas reached the decide step.",
+  decided: "Both agents reached the decide step.",
   budget: "The meeting stopped at its token budget.",
   deleted: "This meeting was deleted.",
 };
@@ -139,9 +139,9 @@ const ReadingNote = (props: { names: { a: string; b: string } }): ReactElement =
     <aside className="sticky-note meeting-legend" aria-label="How to read it">
       <h2>How to read it</h2>
       <ul>
-        <li>{`Coral is ${props.names.a}'s persona. Blue is ${props.names.b}'s.`}</li>
+        <li>{`Coral is ${props.names.a}'s agent. Blue is ${props.names.b}'s.`}</li>
         <li>Each quote under a line is from that person&apos;s own words.</li>
-        <li><Sticker name="nope" /> No receipt means the persona is guessing.</li>
+        <li><Sticker name="nope" /> No quote means the agent is guessing.</li>
       </ul>
     </aside>
   );

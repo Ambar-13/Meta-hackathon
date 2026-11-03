@@ -135,7 +135,7 @@ describe("constraints", () => {
     const error = await caughtFrom(() => asPerson(t.db, m.a.personId, (trx) => trx.updateTable("quiz_items").set({ human_answer: "My own answer." }).where("quiz_id", "=", quizId).where("position", "=", 1).execute()));
 
     expect(codeOf(error)).toBe("23514");
-    expect(parseDatabaseError(error)).toEqual({ code: "persona_answer_missing", message: "The persona has not answered this question yet. Wait a moment and reload." });
+    expect(parseDatabaseError(error)).toEqual({ code: "persona_answer_missing", message: "Your agent has not answered this question yet. Wait a moment and reload." });
   });
 
   it("INV7-T2: allows a human answer once the persona answered", async () => {

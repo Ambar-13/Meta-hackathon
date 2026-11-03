@@ -86,11 +86,11 @@ describe("lobby screen", () => {
     const picker = await screen.findByRole("group", { name: "Pick a question for the meeting" });
     expect(picker.querySelectorAll('input[type="radio"]')).toHaveLength(CURATED_QUESTIONS.length + 1);
     fireEvent.click(screen.getByRole("radio", { name: "Write your own question" }));
-    fireEvent.change(screen.getByLabelText("Your question (5 to 300 characters)"), { target: { value: "Hm?" } });
+    fireEvent.change(screen.getByLabelText("Your question"), { target: { value: "Hm?" } });
     fireEvent.click(screen.getByRole("button", { name: "Create the meeting" }));
     expect(screen.getByText("Write a question of 5 to 300 characters.")).toBeTruthy();
     expect(requestsTo(routes.meetings.createMeeting)).toHaveLength(0);
-    fireEvent.change(screen.getByLabelText("Your question (5 to 300 characters)"), { target: { value: "Should we split work by strengths?" } });
+    fireEvent.change(screen.getByLabelText("Your question"), { target: { value: "Should we split work by strengths?" } });
     fireEvent.click(screen.getByRole("button", { name: "Create the meeting" }));
     await waitFor(() => {
       expect(requestsTo(routes.meetings.createMeeting)).toHaveLength(1);

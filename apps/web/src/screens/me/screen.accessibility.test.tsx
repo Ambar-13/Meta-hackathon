@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
-import { CURATED_QUESTIONS, ListedMeetingsView, MyListing, type HomeView } from "@meet-first/contracts";
+import { CURATED_QUESTIONS, ListedMeetingsView, MyListing, type HomeMeetingRow, type HomeView } from "@meet-first/contracts";
 import { APP_PATHS, clearClientState, ROUTE_PATTERNS, routes } from "../../app-shell/index.js";
 import { renderScreen, requestsTo, stubRoute, type StubInput } from "../../testing/index.js";
 import { unlabelledControls } from "../../testing/render-screen.js";
@@ -15,11 +15,11 @@ afterEach(() => {
   cleanup();
 });
 
-// Two meetings the person's persona was in through Explore.
+// Two meetings of the person's, the first one someone started with them in Explore.
 const ENDED_MEETING = "00000000-0000-4000-8000-000000000521";
 const READY_MEETING = "00000000-0000-4000-8000-000000000522";
 // GET /api/directory/me for a person with no listing.
-const NOT_LISTED: StubInput = { status: 404, body: { code: "not_listed", message: "You are not in the directory." } };
+const NOT_LISTED: StubInput = { status: 404, body: { code: "not_listed", message: "You are not in Explore yet." } };
 // The line shown to a person who is not in Explore.
 const NOT_LISTED_LINE = "You are not in Explore yet. Join so friends can find you.";
 // The person's approved card on home.
@@ -66,7 +66,7 @@ async function header(): Promise<HTMLElement> {
 }
 
 describe("/me, against the MSW route stubs (a fake server)", () => {
-  it("W7-WEB-A-T8a: listed, /me shows your profile as others see it with Edit my listing, your own Posts words, the home sections and the links", async () => {
+  it("W7-WEB-A-T8a: listed, /me shows your profile as others see it with Edit my listing and Your card, the next step above the tabs, your own Posts words, and Add more chats under About", async () => {
     stubMeReads({ listing: myListing(true) });
     renderMe();
     const head = await header();
@@ -78,16 +78,25 @@ describe("/me, against the MSW route stubs (a fake server)", () => {
     expect(within(head).queryByText(/things? shared/)).toBeNull();
     expect(within(head).getByRole("button", { name: "Edit my listing" }).getAttribute("aria-expanded")).toBe("false");
     expect(requestsTo(routes.social.readProfile)[0]?.url).toContain(`/api/directory/${LISTING_IDS.mine}`);
+    expect(within(head).getByRole("link", { name: "Your card" }).getAttribute("href")).toBe(`/cards/${IDS.card}`);
+    const next = await screen.findByRole("heading", { level: 2, name: "Meet someone." });
+    expect(next.compareDocumentPosition(screen.getByRole("tablist", { name: "Profile" })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Open Explore" }).getAttribute("href")).toBe(APP_PATHS.explore);
+    expect(within(screen.getByRole("tabpanel", { name: "About" })).getByRole("link", { name: "Add more chats" }).getAttribute("href")).toBe("/upload");
     fireEvent.click(screen.getByRole("tab", { name: "Posts" }));
     expect(screen.getByRole("heading", { name: "Coming soon: your agent posts." })).toBeTruthy();
-    expect(await screen.findByRole("heading", { name: "Your card" })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "Meetings" })).toBeTruthy();
-    const links = within(screen.getByRole("navigation", { name: "More about you" })).getAllByRole("link");
-    expect(links.map((link) => [link.textContent, link.getAttribute("href")])).toEqual([
-      ["Your card", `/cards/${IDS.card}`],
-      ["Add more chats", "/upload"],
-      ["Settings", "/settings"],
-    ]);
+  });
+
+  it("W7-ME-T1: nothing on /me shows twice: one link to your card, no box of your card, no list of links at the foot, and no persona", async () => {
+    stubMeReads({ listing: myListing(true) });
+    renderMe();
+    await screen.findByText("Your next step");
+
+    expect(screen.getAllByRole("link", { name: "Your card" })).toHaveLength(1);
+    expect(screen.queryByRole("heading", { name: "Your card" })).toBeNull();
+    expect(screen.queryByRole("navigation", { name: "More about you" })).toBeNull();
+    expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual(["About", "Posts", "Meetings"]);
+    expect(document.body.textContent).not.toMatch(/persona|directory/i);
   });
 
   it("W7-WEB-A-T8b: not listed, /me shows your name, the line that you are not in Explore, and Join, which sends your card, line and dating switch", async () => {
@@ -98,14 +107,14 @@ describe("/me, against the MSW route stubs (a fake server)", () => {
     expect(within(head).getByText(NOT_LISTED_LINE)).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Leave Explore" })).toBeNull();
 
-    fireEvent.change(await screen.findByRole("textbox", { name: "Your line in Explore (up to 140 characters)" }), { target: { value: "  Builds hackathon tools  " } });
+    fireEvent.change(await screen.findByRole("textbox", { name: "Your line in Explore" }), { target: { value: "  Builds hackathon tools  " } });
     fireEvent.click(screen.getByRole("button", { name: "Join Explore" }));
 
     expect(await screen.findByRole("button", { name: "Edit my listing" })).toBeTruthy();
     expect(requestsTo(routes.directory.upsertMyListing)[0]?.body).toEqual({ cardId: IDS.card, line: "Builds hackathon tools", openToRomance: false });
   });
 
-  it("W7-WEB-A-T8c: an empty line is refused before any request, and with no approved card Join is not offered", async () => {
+  it("W7-WEB-A-T8c: an empty line is refused before any request, and with no approved card Join is not offered and the next step says to approve it", async () => {
     stubMeReads({});
     stubRoute(routes.directory.upsertMyListing, myListing(false));
     renderMe();
@@ -116,7 +125,8 @@ describe("/me, against the MSW route stubs (a fake server)", () => {
 
     stubMeReads({ home: home({ card: { ...APPROVED_CARD, state: "ready" } }) });
     renderMe();
-    expect(await screen.findByText("Approve your card first, then come back here to join.")).toBeTruthy();
+    expect(await screen.findByRole("heading", { level: 2, name: "Approve your card." })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Review my card" }).getAttribute("href")).toBe(`/cards/${IDS.card}`);
     expect(screen.queryByRole("button", { name: "Join Explore" })).toBeNull();
   });
 
@@ -128,7 +138,7 @@ describe("/me, against the MSW route stubs (a fake server)", () => {
     fireEvent.click(within(await header()).getByRole("button", { name: "Edit my listing" }));
     const section = screen.getByRole("region", { name: "Your listing" });
 
-    expect(within(section).getByRole<HTMLInputElement>("textbox", { name: "Your line in Explore (up to 140 characters)" }).value).toBe("Builds hackathon tools");
+    expect(within(section).getByRole<HTMLInputElement>("textbox", { name: "Your line in Explore" }).value).toBe("Builds hackathon tools");
     const dating = within(section).getByRole<HTMLInputElement>("checkbox");
     expect(dating.checked).toBe(true);
     fireEvent.click(dating);
@@ -138,37 +148,43 @@ describe("/me, against the MSW route stubs (a fake server)", () => {
 
     fireEvent.click(within(section).getByRole("button", { name: "Leave Explore" }));
 
-    expect(await screen.findByText("You left Explore. Meetings already made stay below.")).toBeTruthy();
+    expect(await screen.findByText("You left Explore. Your meetings stay in the Meetings tab.")).toBeTruthy();
     expect(requestsTo(routes.directory.leave)).toHaveLength(1);
     expect(screen.queryByRole("button", { name: "Leave Explore" })).toBeNull();
     expect(screen.getByText(NOT_LISTED_LINE)).toBeTruthy();
   });
 
-  it("W6-DWEB-T35, moved to /me: the meetings your persona was in link to their meeting, and to their brief once ended", async () => {
+  it("W6-DWEB-T35, moved to /me: the Meetings tab lists each meeting once, to its brief once ready or else to the meeting, marks the one someone started in Explore, then the open invites", async () => {
     const debate = CURATED_QUESTIONS.find((question) => question.id === 13)?.text ?? "";
-    const meetings = ListedMeetingsView.parse({
-      meetings: [
-        { meetingId: ENDED_MEETING, otherDisplayName: "Ravi", questionText: debate, state: "ended", createdAt: SERVER_NOW },
-        { meetingId: READY_MEETING, otherDisplayName: "Mira", questionText: "Should we split work by strengths?", state: "ready", createdAt: SERVER_NOW },
-      ],
-    });
-    stubMeReads({ listing: myListing(false), meetings });
-
+    const rows: HomeMeetingRow[] = [
+      { id: ENDED_MEETING, otherDisplayName: "Ravi", questionText: debate, questionKind: "debate", state: "ended", isBriefReady: true, createdAt: SERVER_NOW },
+      { id: READY_MEETING, otherDisplayName: "Mira", questionText: "Should we split work by strengths?", questionKind: "decision", state: "ready", isBriefReady: false, createdAt: SERVER_NOW },
+    ];
+    const listed = ListedMeetingsView.parse({ meetings: [{ meetingId: ENDED_MEETING, otherDisplayName: "Ravi", questionText: debate, state: "ended", createdAt: SERVER_NOW }] });
+    const pairs = [{ id: IDS.pair, otherDisplayName: null, createdAt: SERVER_NOW, expiresAt: SERVER_NOW }];
+    stubMeReads({ listing: myListing(false), meetings: listed, home: home({ meetings: rows, pairs }) });
     renderMe();
 
-    expect(await screen.findByText(`Ravi: ${debate}`)).toBeTruthy();
-    expect(screen.getByText("Mira: Should we split work by strengths?")).toBeTruthy();
-    expect(screen.getAllByRole("link", { name: "Open the meeting" }).map((link) => link.getAttribute("href"))).toEqual([`/meetings/${ENDED_MEETING}`, `/meetings/${READY_MEETING}`]);
-    expect(screen.getAllByRole("link", { name: "Read the brief" }).map((link) => link.getAttribute("href"))).toEqual([`/meetings/${ENDED_MEETING}/brief`]);
-    expect(screen.getByText("Ended")).toBeTruthy();
-    expect(screen.getByText("Not started")).toBeTruthy();
+    fireEvent.click(await screen.findByRole("tab", { name: "Meetings" }));
+    const panel = screen.getByRole("tabpanel", { name: "Meetings" });
+    await within(panel).findByText(`With Ravi: ${debate}`);
+
+    const links = within(panel).getAllByRole("link");
+    expect(links.map((link) => link.getAttribute("href"))).toEqual([`/meetings/${ENDED_MEETING}/brief`, `/meetings/${READY_MEETING}`, APP_PATHS.lobby(IDS.pair)]);
+    const [ravi, mira, invite] = links as [HTMLElement, HTMLElement, HTMLElement];
+    expect(within(ravi).getByText("Brief ready · Today · From Explore")).toBeTruthy();
+    expect(within(mira).getByText("With Mira: Should we split work by strengths?")).toBeTruthy();
+    expect(within(mira).getByText("Waiting to start · Today")).toBeTruthy();
+    expect(within(invite).getByText("Waiting for someone to join")).toBeTruthy();
+    expect(within(invite).getByText("Open until Today")).toBeTruthy();
+    expect(within(panel).getByRole("heading", { name: "Open invites" })).toBeTruthy();
   });
 
   it("W6-DWEB-T36, moved to /me: every control on /me has an accessible name at 375 px, with the listing controls open", async () => {
     stubMeReads({ listing: myListing(true) });
     renderMe();
     fireEvent.click(within(await header()).getByRole("button", { name: "Edit my listing" }));
-    await screen.findByRole("heading", { name: "Your card" });
+    await screen.findByText("Your next step");
 
     await waitFor(() => {
       expect(unlabelledControls(document.body)).toEqual([]);

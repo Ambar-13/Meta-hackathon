@@ -63,7 +63,7 @@ export const MeetingsSection = (props: { home: HomeView }): ReactElement => {
     <section aria-labelledby="home-meetings-title">
       <h2 id="home-meetings-title">Meetings</h2>
       {meetings.length === 0 ? (
-        <EmptyState sticker="chat" title="No meetings yet">Your first one starts from an invite or the directory.</EmptyState>
+        <EmptyState sticker="chat" title="No meetings yet">Your first one starts from an invite or Explore.</EmptyState>
       ) : (
         <ul className="home-rows">
           {meetings.map((meeting) => (

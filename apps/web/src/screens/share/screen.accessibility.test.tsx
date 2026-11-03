@@ -9,7 +9,7 @@ import { ConsentScreen } from "./consent-screen.js";
 import { PublicSharePage } from "./public-page.js";
 
 // The explainer, word for word from the copy table (4.7).
-const CONSENT_EXPLAINER = "Publishing makes a page anyone with the link can read. It shows your display names, the question, the card items you approved, what the two personas said, and the brief lines that passed the support check with their quotes. It never shows your archive, redacted text, quiz answers or anything you did not approve. Either of you can take it down at any time; the page disappears on the next visit.";
+const CONSENT_EXPLAINER = "Publishing makes a page anyone with the link can read. It shows your display names, the question, the card items you approved, what the two agents said, and the brief lines that passed the support check with their quotes. It never shows your archive, redacted text, quiz answers or anything you did not approve. Either of you can take it down at any time; the page disappears on the next visit.";
 // The slug of the fixture page: 22 URL-safe characters.
 const SLUG = "AAAAAAAAAAAAAAAAAAAAAA";
 // The question of the fixture page.
@@ -157,7 +157,7 @@ describe("public share page", () => {
     expect((await screen.findByRole("heading", { level: 1 })).textContent).toBe(QUESTION);
     expect(screen.getAllByText("A: Test A").length).toBeGreaterThan(0);
     expect(screen.getAllByText("B: Test B").length).toBeGreaterThan(0);
-    for (const heading of ["Who met", "What the personas said", "The brief, lines the support check backed"]) {
+    for (const heading of ["Who met", "What the agents said", "The brief, lines the support check backed"]) {
       expect(screen.getByRole("heading", { level: 2, name: heading })).toBeTruthy();
     }
     for (const section of ["Where you agree", "Where you clash", "Decide this first"]) {

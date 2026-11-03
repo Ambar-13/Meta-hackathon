@@ -28,12 +28,12 @@ describe("help screen", () => {
   it("W6-ASKA-T28 (design section 7, P5): the help page shows the problem box, HELP_SEND_COPY after it and the send button, with every control labelled and no overflow at 375 px, with fake api replies", () => {
     renderHelp();
 
-    const box = screen.getByLabelText("Your problem (5 to 300 characters)");
+    const box = screen.getByLabelText("Your problem");
     expect(box.tagName).toBe("TEXTAREA");
     expect(box.getAttribute("maxlength")).toBe("300");
     const words = screen.getByText(HELP_SEND_COPY);
     expect(box.compareDocumentPosition(words) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
-    expect(screen.getByRole("button", { name: "Ask the directory" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Find who could help" })).toBeTruthy();
     expect(unlabelledControls(document.body)).toEqual([]);
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(375);
   });
@@ -41,16 +41,16 @@ describe("help screen", () => {
   it("W6-ASKA-T29 (design section 7): a problem under 5 characters shows the length line and sends nothing, and a problem of 5 to 300 characters is sent trimmed and opens the answers page, with fake api replies", async () => {
     stubRoute(routes.asks.createAsk, { status: 201, body: { askId: ASK } });
     renderHelp();
-    const box = screen.getByLabelText("Your problem (5 to 300 characters)");
+    const box = screen.getByLabelText("Your problem");
 
     fireEvent.change(box, { target: { value: "Hm?" } });
-    fireEvent.click(screen.getByRole("button", { name: "Ask the directory" }));
+    fireEvent.click(screen.getByRole("button", { name: "Find who could help" }));
 
     expect(screen.getByText("Write a problem of 5 to 300 characters.")).toBeTruthy();
     expect(requestsTo(routes.asks.createAsk)).toHaveLength(0);
 
     fireEvent.change(box, { target: { value: "  " + PROBLEM + "  " } });
-    fireEvent.click(screen.getByRole("button", { name: "Ask the directory" }));
+    fireEvent.click(screen.getByRole("button", { name: "Find who could help" }));
 
     await waitFor(() => {
       expect(requestsTo(routes.asks.createAsk)).toHaveLength(1);
@@ -63,11 +63,11 @@ describe("help screen", () => {
     stubRoute(routes.asks.createAsk, { status: 429, body: { code: "help_daily_cap", message: "You have used today's help searches. Try again tomorrow." } });
     renderHelp();
 
-    fireEvent.change(screen.getByLabelText("Your problem (5 to 300 characters)"), { target: { value: PROBLEM } });
-    fireEvent.click(screen.getByRole("button", { name: "Ask the directory" }));
+    fireEvent.change(screen.getByLabelText("Your problem"), { target: { value: PROBLEM } });
+    fireEvent.click(screen.getByRole("button", { name: "Find who could help" }));
 
     expect(await screen.findByText("You have used today's help searches. Try again tomorrow.")).toBeTruthy();
     expect(screen.queryByTestId("location")).toBeNull();
-    expect(screen.getByRole("button", { name: "Ask the directory" }).hasAttribute("disabled")).toBe(false);
+    expect(screen.getByRole("button", { name: "Find who could help" }).hasAttribute("disabled")).toBe(false);
   });
 });

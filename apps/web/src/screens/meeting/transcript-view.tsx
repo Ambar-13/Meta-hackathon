@@ -18,10 +18,10 @@ function renderLine(fold: MeetingFoldState, item: Exclude<TimelineItem, { kind: 
   const name = item.kind === "phase" ? "" : speakerName(fold, item.side);
   let text = "";
   if (item.kind === "phase") text = `Phase: ${PHASE_LABELS[item.phase]}`;
-  if (item.kind === "recall") text = `${name}'s persona looked in its notes for: ${item.query}`;
-  if (item.kind === "recall_result") text = item.found === 1 ? `${name}'s persona found 1 note.` : `${name}'s persona found ${String(item.found)} notes.`;
-  if (item.kind === "concede") text = `${name}'s persona accepted a point: ${item.reason}`;
-  if (item.kind === "hold") text = `${name}'s persona kept its position: ${item.reason}`;
+  if (item.kind === "recall") text = `${name}'s agent looked in its notes for: ${item.query}`;
+  if (item.kind === "recall_result") text = item.found === 1 ? `${name}'s agent found 1 note.` : `${name}'s agent found ${String(item.found)} notes.`;
+  if (item.kind === "concede") text = `${name}'s agent accepted a point: ${item.reason}`;
+  if (item.kind === "hold") text = `${name}'s agent kept its position: ${item.reason}`;
   return <p className="timeline-line" key={item.seq}>{text}</p>;
 }
 
@@ -39,10 +39,10 @@ const ClaimReceipt = (props: { claim: Claim; name: string }): ReactElement => {
 function renderTurn(fold: MeetingFoldState, item: Extract<TimelineItem, { kind: "turn" }>): ReactElement {
   const name = speakerName(fold, item.side);
   return (
-    <article className={`msg ${item.side}`} key={item.seq} aria-label={`${name}'s persona`}>
+    <article className={`msg ${item.side}`} key={item.seq} aria-label={`${name}'s agent`}>
       <Avatar name={name} side={item.side} />
       <div className="bubble">
-        <h3 className="who">{`${name}'s persona`}</h3>
+        <h3 className="who">{`${name}'s agent`}</h3>
         <SafeMarkdown text={item.text} />
       </div>
       {item.claims.length === 0 ? null : (
@@ -62,10 +62,10 @@ const PartialTurn = (props: { fold: MeetingFoldState }): ReactElement | null => 
   if (partial === null) return null;
   const name = speakerName(props.fold, partial.side);
   return (
-    <article className={`msg ${partial.side}`} aria-live="polite" aria-label={`${name}'s persona is speaking`}>
+    <article className={`msg ${partial.side}`} aria-live="polite" aria-label={`${name}'s agent is speaking`}>
       <Avatar name={name} side={partial.side} />
       <div className="bubble writing">
-        <h3 className="who">{`${name}'s persona is speaking`}</h3>
+        <h3 className="who">{`${name}'s agent is speaking`}</h3>
         <SafeMarkdown text={partial.text} />
       </div>
     </article>
@@ -102,7 +102,7 @@ export const TranscriptView = (props: { fold: MeetingFoldState; isThinkingNow: b
         <PartialTurn fold={fold} />
         {props.isThinkingNow ? (
           <p className="timeline-line">
-            <TypingDots label="The personas are thinking" />
+            <TypingDots label="The agents are thinking" />
             Still thinking.
           </p>
         ) : null}

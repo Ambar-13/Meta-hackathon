@@ -30,7 +30,7 @@ export type Phase = z.infer<typeof Phase>;
 export const CURATED_QUESTION_COUNT = 20;
 // The reason a directory meeting's question is refused when it is a romance question and the listed person has not switched on dating
 // questions (as-built item 54).
-export const ROMANCE_NOT_OPEN_REASON = "This person has not opened their persona to dating questions.";
+export const ROMANCE_NOT_OPEN_REASON = "This person has not opened their agent to dating questions.";
 // The body of POST /api/pairs/:id/meetings: a curated question or free text, plus the card to speak from.
 // This is a route schema, not a model output, so the union is allowed here.
 export const MeetingCreate = z.intersection(

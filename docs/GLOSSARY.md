@@ -21,7 +21,7 @@ One line per word, in alphabetical order. Each line names the table, schema or f
 - **display name**: The name a person chose, which the other person of their pair sees. Lives in the `people` table as `display_name`.
 - **evidence valid**: The measure that a claim's quote is found inside the turn it names. It is one of the seven eval metrics (A2). Lives in the `claims` table as `evidence_valid`.
 - **explore phase**: The middle phase of a meeting, up to six turns, skipped once eight minutes have passed (D34). Lives in `meeting_steps` as `phase`.
-- **flagged**: Marked as having no receipt, after the claim's one regeneration failed to give a quote that is found in its turn (D27). Lives in the `claims` and `card_items` tables as `flagged`.
+- **flagged**: Marked as having no quote, after the claim's one regeneration failed to give a quote that is found in its turn (D27). Lives in the `claims` and `card_items` tables as `flagged`.
 - **friend ask**: A question one person sends to a friend's persona about how that friend would probably react; the friend switches it on and gets a copy of every answer. Lives in the `persona_asks` and `persona_answers` tables.
 - **frozen (source)**: A source whose names review is done, so its turn text can no longer change (D16). Lives in the `sources` table as `frozen_at`.
 - **gloss**: The short plain sentence that explains one card item or claim, written by the model next to its quote (D21). Lives in the `card_items` and `claims` tables as `gloss`.
@@ -38,7 +38,7 @@ One line per word, in alphabetical order. Each line names the table, schema or f
 - **meeting step**: One turn of a meeting, with its own row, its state and its claim. Lives in the `meeting_steps` table.
 - **member**: One of the two people seated in a meeting. Lives in the `meeting_members` table.
 - **names pass**: The worker check that finds third-party names in a source and replaces them with role tokens. Lives in `apps/worker/src/cards/scrub-names-job.ts`, and its result in the `names_passes` table.
-- **no receipt**: The mark a claim shows when no quote for it could be found in its turn, even after one regeneration. Lives in the `claims` table as `flagged`.
+- **no quote** (in code, no receipt: `NO_RECEIPT_COPY`): The mark a claim shows when no quote for it could be found in its turn, even after one regeneration. Lives in the `claims` table as `flagged`.
 - **norm text**: The form of a quote used for matching: NFC, case folded, curly quotes and dashes made ASCII, and runs of spaces made one space (D24). Lives in `packages/receipts/src/norm-quote.ts`.
 - **open phase**: The first phase of a meeting, two turns, one for each side. Lives in `meeting_steps` as `phase`.
 - **pair**: Two people joined by an invite token, with one meeting for each question they pick. Lives in the `pairs` table.
@@ -78,7 +78,7 @@ One line per word, in alphabetical order. Each line names the table, schema or f
 - **turn**: One message from a person's chat history, or one speech by a persona in a meeting. Lives in the `turns` table for sources, and in `meeting_events` for meetings.
 - **turn id**: The id of one turn. Claims and card items point at their source turn with it. Lives in the `turns` table as `id`.
 - **verified**: Found, by string match, inside the turn that a claim or card item names (D26). Lives in the `claims` and `card_items` tables as `verified`.
-- **weak receipt**: The mark on a brief point whose quote does not back the point. The point is kept out of decide-first and the share page. Lives in the `briefs` table as `support_reliable` and the support lists.
+- **weak quote** (in code, weak receipt: `WEAK_RECEIPT_COPY`): The mark on a brief point whose quote does not back the point. The point is kept out of decide-first and the share page. Lives in the `briefs` table as `support_reliable` and the support lists.
 - **withMeeting**: The database wrapper that runs one transaction for one meeting, setting `app.meeting_id`. Lives in `packages/db/src/transaction.ts`.
 - **withPerson**: The database wrapper that runs one transaction for one person, setting `app.person_id`. Lives in `packages/db/src/transaction.ts`.
 - **worker**: The background process that runs the jobs: model calls, card builds, meetings, briefs, comics and deletion. Lives in `apps/worker`.

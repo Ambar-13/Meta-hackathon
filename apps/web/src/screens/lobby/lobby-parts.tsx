@@ -6,7 +6,7 @@ import { Avatar, LoadingLine, Sticker } from "../../look/index.js";
 import { MEETING_STATE_LABELS, type QuestionPick } from "./lobby-state.js";
 
 // The label of the free-text box in the picker.
-const FREE_TEXT_LABEL = "Your question (5 to 300 characters)";
+const FREE_TEXT_LABEL = "Your question";
 // The longest free-text question the picker accepts (R10.5).
 const FREE_TEXT_MAX_CHARS = 300;
 

@@ -219,7 +219,7 @@ describe("card sharing routes", () => {
     const kept = await send(ivy, { method: "PUT", url: pathOf(routes.directory.updateSharing, ivy.cardId), payload: { friendsCanAsk: false, publicPositions: [2] } });
 
     expect(emptied.statusCode).toBe(409);
-    expect(emptied.json()).toEqual({ code: "listing_needs_public_item", message: "A listed persona needs at least one public item. Mark one, or leave the directory first." });
+    expect(emptied.json()).toEqual({ code: "listing_needs_public_item", message: "To stay in Explore you need at least one public item. Mark one, or leave Explore first." });
     expect(flagsAfterRefusal).toEqual([true, true, false, false, false, false]);
     expect(kept.statusCode).toBe(200);
     expect(kept.json()).toEqual({ friendsCanAsk: false, publicPositions: [2] });

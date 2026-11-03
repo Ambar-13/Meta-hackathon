@@ -56,7 +56,7 @@ export async function step13Brief(run: RunState): Promise<StepResult> {
   // lines unsupported, some in decide first, which the contract allows (decideFirst is always three lines) and the brief screen sets
   // aside (A1). So no run counts them (wave 3 section 4.4). Under --mock the replayed judgments must still both be reliable.
   if (run.options.mode === "mock") assertions.push(check("both support judgments are reliable", [true, true], [briefA.body.supportReliable, briefB.body.supportReliable]));
-  run.manual.push(`3 lines each with tappable quotes; ${String(claims.flagged)} flagged claim(s) read "no receipt" on both screens; any unsupported line reads "weak receipt" and is not in decide first; the support rate is shown as a rate, never as proof (A1)`);
+  run.manual.push(`3 lines each with tappable quotes; ${String(claims.flagged)} flagged claim(s) read "no quote" on both screens; any unsupported line reads "weak receipt" and is not in decide first; the support rate is shown as a rate, never as proof (A1)`);
   return finishStep(13, "brief", { rows: ["R6.5", "R7.6", "A1", "invariant 19"], detail: `briefs ready; ${String(unsupported.length)} unsupported line(s); ${String(claims.flagged)} flagged claim(s)`, assertions });
 }
 

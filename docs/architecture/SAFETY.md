@@ -74,7 +74,7 @@ A share page is served only while both consent flags are true and revoked_at is 
 
 The recall switch on a card shows this text, word for word (R7.1):
 
-> allow lookups into my scrubbed notes during meetings; quotes may be shown to the other person
+> Let my agent search my notes during meetings, with names hidden and secrets removed. The other person may see quotes from them.
 
 ## Deletion
 
@@ -104,7 +104,7 @@ flowchart LR
   B --> V[verifyBriefQuotes again, same turn, same side]
   V --> J[support judge: does the quote back the line]
   J -->|supported and verified| D[decide-first and the share snapshot]
-  J -->|not supported or not verified| K[weak receipt, kept out of both]
+  J -->|not supported or not verified| K[weak quote, kept out of both]
 ```
 
 Notice that a quote shows where words came from; the judge is a second, separate check that they support the line, and it is reported as a rate, never as a guarantee.

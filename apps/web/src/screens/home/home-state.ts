@@ -59,7 +59,7 @@ function stepAfterApproval(home: HomeView, cardId: string): NextStep {
     const text = pair.otherDisplayName === null ? "Your invite is open. Send the link to the person you want to meet." : `${pair.otherDisplayName} joined. Pick a question and say you are ready.`;
     return { title: pair.otherDisplayName === null ? "Waiting for them to join." : "Pick a question.", text, action: { label: "Open the lobby", to: APP_PATHS.lobby(pair.id) }, sticker: "tags" };
   }
-  return { title: "Meet someone.", text: "Your card is approved. Share an invite with a friend, or find someone in the directory.", action: { label: "Pair with someone", to: pairPathWithCard(cardId) }, second: { label: "Open the directory", to: APP_PATHS.directory }, sticker: "tags" };
+  return { title: "Meet someone.", text: "Your card is approved. Share an invite with a friend, or find someone in Explore.", action: { label: "Pair with someone", to: pairPathWithCard(cardId) }, second: { label: "Open Explore", to: APP_PATHS.explore }, sticker: "tags" };
 }
 
 // The one next step for this person, from where they are: notes, names, card, then meetings (design pass fix 4).

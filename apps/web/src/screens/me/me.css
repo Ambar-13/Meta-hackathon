@@ -1,41 +1,36 @@
-/* /me, after Instagram's own profile (3 Nov 2026): the profile header from people.css with grey buttons, your listing controls, your
-   card, meetings and invites as plain hairline rows, and the links at the foot. */
+/* /me, after Instagram's own profile (3 Nov 2026): the profile header from people.css with Edit my listing and Your card, your
+   listing controls under it while open, the one next step, then the About, Posts and Meetings tabs. Ambar asked for the repeats to go:
+   the card shows once (the About tab and the header's button), meetings are one list, and Settings is the frame's gear. Spacing is on
+   a 4px grid. */
 
-.me-edit { margin: 18px 0 8px; }
+/* ---------- your listing's controls ---------- */
+.me-edit { margin: 16px 0 8px; }
 .me-listing-form label:first-child { margin-top: 0; }
 .me-listing-form button[type="submit"] { margin-top: 12px; }
 .me-listing-form [role="status"], .me-listing-form .notice { margin-bottom: 0; }
 .me-refusal { margin: 12px 0 0; font-weight: 600; color: var(--ui-red); }
-.me-need-card { margin: 0 0 12px; font-weight: 600; }
 .me-edit > a:not(.btn) { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
 .me-edit .actions { margin: 8px 0 0; }
-.me-home { margin-top: 40px; padding-top: 8px; box-shadow: 0 -1px 0 var(--ui-line); }
 
-.listed-meetings { list-style: none; margin: 8px 0 0; padding: 0; }
-.listed-meetings > li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; padding: 14px 0; border-top: 1px solid var(--ui-line); }
-.listed-question { margin: 0 0 8px; font: 600 15px/1.4 var(--ui-font); }
-.listed-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-.listed-links .btn { min-height: 40px; padding: 0 14px; font-size: 14px; }
+/* ---------- the next step: flat between the header and the tabs, its button the page's one blue ---------- */
+.me-next { margin: 16px 0 0; padding: 16px 0 20px; border-top: 1px solid var(--ui-line); }
+.profile-page .me-next-label { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--ui-ink-2); font: 500 13px/20px var(--ui-font); }
+.me-next-label::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--ui-blue); }
+.profile-page .me-next h2 { margin: 4px 0 0; font: 600 18px/24px var(--ui-font); letter-spacing: 0; }
+.profile-page .me-next-text { max-width: 60ch; margin: 4px 0 0; color: var(--ui-ink); font-size: 15px; line-height: 22px; }
+.me-next-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 12px; }
+.profile-page .me-next-actions .btn { min-height: 40px; padding: 0 16px; font-size: 14px; }
 
-.me-links { display: flex; flex-wrap: wrap; gap: 8px; margin: 30px 0 6px; }
-.me-links .btn { min-height: 40px; padding: 0 16px; font-size: 14px; }
+/* ---------- the end of About: adding more chats ---------- */
+.profile-page .me-add-chats { display: inline-flex; align-items: center; min-height: 44px; margin-top: 8px; font-size: 15px; }
 
-/* Your card, the next step, meetings and invites come from the home screen; here they drop the name-tag look for plain rows. */
-.me-home .home-next { transform: none; padding: 0 0 22px; border-radius: 0; background: none; border-bottom: 1px solid var(--ui-line); }
-.me-home .home-next .pill, .me-home .home-row .pill, .listed-meetings .pill { padding: 0; border: 0; background: none; color: var(--ui-ink-2); font: 600 13px/1.3 var(--ui-font); }
-.me-home .pill .dot { background: var(--ui-blue); }
-.me-home .home-next h2 { margin: 10px 0 0; font: 700 18px/1.3 var(--ui-font); }
-.me-home .home-next p { font-size: 15px; }
-.me-home .home-card { border: 0; border-radius: 16px; background: var(--ui-soft); }
-.me-home .home-card:hover { transform: none; }
-.me-home .home-card-band { padding: 12px 16px 0; background: none; color: var(--ui-ink-2); }
-.me-home .home-card-band b, .me-home .home-card-band i { display: none; }
-.me-home .home-card-name { padding: 4px 16px 2px; font: 700 20px/1.2 var(--ui-font); }
-.me-home .home-card-items { flex-direction: column; align-items: flex-start; gap: 4px; }
-.me-home .home-item { padding: 0; border-radius: 0; background: none; font: 600 15px/1.35 var(--ui-font); color: var(--ui-ink); }
-.me-home .home-card-quote { font: 400 14px/1.45 var(--ui-font); }
-.me-home .home-rows { gap: 0; }
-.me-home .home-row { grid-template-columns: 44px minmax(0, 1fr); padding: 12px 0; border-radius: 0; background: none; border-top: 1px solid var(--ui-line); }
-.me-home .home-row:hover { transform: none; }
-.me-home .home-row b { font: 600 15px/1.3 var(--ui-font); }
-.me-home .home-row small { font: 400 13px/1.2 var(--ui-font); }
+/* ---------- the Meetings tab: your meetings, then open invites, as plain rows ---------- */
+.me-rows { list-style: none; margin: 0; padding: 0; }
+.me-rows > li + li { border-top: 1px solid var(--ui-line); }
+.profile-page .me-row { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; gap: 12px; padding: 12px 0; color: var(--ui-ink); font-weight: 400; }
+.profile-page .me-row:hover { text-decoration: none; }
+.me-row:hover b { text-decoration: underline; text-underline-offset: 0.18em; }
+.me-row b { display: block; font: 600 15px/20px var(--ui-font); overflow-wrap: anywhere; }
+.me-row small { display: block; margin-top: 2px; color: var(--ui-ink-2); font: 400 13px/20px var(--ui-font); }
+.me-row-icon { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--ui-soft); color: var(--ui-ink-2); }
+.profile-page .me-invites h3 { margin: 24px 0 4px; font: 600 15px/20px var(--ui-font); letter-spacing: 0; }

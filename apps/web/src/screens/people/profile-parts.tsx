@@ -4,10 +4,11 @@ import { ErrorNotice, type PolledView } from "../../app-shell/index.js";
 import { EmptyState, Icon, LoadingLine, PersonAvatar, Receipt, SampleChip } from "../../look/index.js";
 import { postAgeWords, postsSoonCopy } from "./people-state.js";
 
-// The two tabs under a profile header, in order.
+// The tabs under a profile header, in order, with their icons; Meetings shows only on your own profile.
 const TABS = [
-  { key: "about", label: "About" },
-  { key: "posts", label: "Posts" },
+  { key: "about", label: "About", icon: "about" },
+  { key: "posts", label: "Posts", icon: "posts" },
+  { key: "meetings", label: "Meetings", icon: "meetings" },
 ] as const;
 // One tab's key.
 export type TabKey = (typeof TABS)[number]["key"];
@@ -92,9 +93,30 @@ const PostsPanel = (props: { posts: PolledView<PostsView> | null; name: string |
   );
 };
 
-// The About and Posts tabs under a profile: a real tab list, where the arrow keys move between the tabs and each panel is labelled
-// by its tab. postsName is null on your own profile; posts is null where the page reads no posts; firstTab is the tab it opens on.
-export const ProfileTabs = (props: { items: PublicItem[]; source: string; postsName: string | null; posts?: PolledView<PostsView> | null; firstTab?: TabKey }): ReactElement => {
+// What the tabs under a profile show: the public items with the words for their source, the Posts tab's name (null on your own
+// profile) and posts (null where the page reads none), the tab it opens on, what follows the items on About, and the Meetings panel,
+// which only your own profile passes.
+type ProfileTabsProps = {
+  items: PublicItem[];
+  source: string;
+  postsName: string | null;
+  posts?: PolledView<PostsView> | null;
+  firstTab?: TabKey;
+  aboutEnd?: ReactNode;
+  meetings?: ReactNode;
+};
+
+// The panel of one tab.
+function panelOf(key: TabKey, props: ProfileTabsProps): ReactNode {
+  if (key === "about") return <><AboutPanel items={props.items} source={props.source} />{props.aboutEnd}</>;
+  if (key === "posts") return <PostsPanel posts={props.posts ?? null} name={props.postsName} />;
+  return props.meetings;
+}
+
+// The About and Posts tabs under a profile, and Meetings on your own: a real tab list, where the arrow keys move between the tabs and
+// each panel is labelled by its tab.
+export const ProfileTabs = (props: ProfileTabsProps): ReactElement => {
+  const tabs = TABS.filter((tab) => tab.key !== "meetings" || props.meetings !== undefined);
   const [selected, setSelected] = useState<TabKey>(props.firstTab ?? "about");
   const baseId = useId();
   const tabRefs = useRef<Partial<Record<TabKey, HTMLButtonElement | null>>>({});
@@ -103,17 +125,17 @@ export const ProfileTabs = (props: { items: PublicItem[]; source: string; postsN
     if (shouldFocus) tabRefs.current[key]?.focus();
   };
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
-    const index = TABS.findIndex((tab) => tab.key === selected);
-    const step = { ArrowRight: 1, ArrowLeft: -1, Home: -index, End: TABS.length - 1 - index }[event.key];
+    const index = tabs.findIndex((tab) => tab.key === selected);
+    const step = { ArrowRight: 1, ArrowLeft: -1, Home: -index, End: tabs.length - 1 - index }[event.key];
     if (step === undefined) return;
     event.preventDefault();
-    const next = TABS[(index + step + TABS.length) % TABS.length];
+    const next = tabs[(index + step + tabs.length) % tabs.length];
     if (next !== undefined) select(next.key, true);
   };
   return (
     <div className="profile-tabs">
       <div className="tabs" role="tablist" aria-label="Profile" onKeyDown={onKeyDown}>
-        {TABS.map((tab) => (
+        {tabs.map((tab) => (
           <button
             key={tab.key}
             ref={(element) => { tabRefs.current[tab.key] = element; }}
@@ -125,14 +147,14 @@ export const ProfileTabs = (props: { items: PublicItem[]; source: string; postsN
             tabIndex={selected === tab.key ? 0 : -1}
             onClick={() => { select(tab.key, false); }}
           >
-            <Icon name={tab.key === "about" ? "about" : "posts"} size={16} />
+            <Icon name={tab.icon} size={16} />
             {tab.label}
           </button>
         ))}
       </div>
-      {TABS.map((tab) => (
+      {tabs.map((tab) => (
         <div key={tab.key} role="tabpanel" id={`${baseId}-${tab.key}-panel`} aria-labelledby={`${baseId}-${tab.key}-tab`} hidden={selected !== tab.key}>
-          {tab.key === "about" ? <AboutPanel items={props.items} source={props.source} /> : <PostsPanel posts={props.posts ?? null} name={props.postsName} />}
+          {panelOf(tab.key, props)}
         </div>
       ))}
     </div>

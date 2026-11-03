@@ -27,7 +27,7 @@ export function toMyListing(row: ListingRow, items: readonly PublicItem[]): MyLi
 
 // not_listed, 404: the caller has no listing (design section 6).
 function makeNotListedError(): ContractError {
-  return new ContractError("not_listed", "You are not in the directory.", HTTP.notFound);
+  return new ContractError("not_listed", "You are not in Explore yet.", HTTP.notFound);
 }
 
 // Registers GET /api/directory/me: 200 MyListing; 404 not_listed (design section 6).

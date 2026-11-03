@@ -55,7 +55,7 @@ describe("brief screen", () => {
     const secondClashLine = within(sectionTitled("Where you clash")).getAllByRole("listitem")[1];
     expect(secondClashLine).toBeTruthy();
     const mark = within(secondClashLine as HTMLElement).getByRole("note");
-    expect(mark.textContent).toBe("weak receipt");
+    expect(mark.textContent).toBe("weak quote");
   });
 
   it("W2-BRIEF-T18 (invariant 19): an unsupported decide-first line is absent from Decide this first and present under Set aside with the weak receipt mark", async () => {
@@ -65,7 +65,7 @@ describe("brief screen", () => {
     expect(within(sectionTitled("Decide this first")).getAllByRole("listitem")).toHaveLength(2);
     const setAside = within(sectionTitled("Set aside")).getAllByRole("listitem");
     expect(setAside).toHaveLength(1);
-    expect(within(setAside[0] as HTMLElement).getByRole("note").textContent).toBe("weak receipt");
+    expect(within(setAside[0] as HTMLElement).getByRole("note").textContent).toBe("weak quote");
   });
 
   it("W2-BRIEF-T19 (R6.5): an unverified quote shows no receipt and still opens the quote sheet", async () => {
@@ -74,7 +74,7 @@ describe("brief screen", () => {
     if (first === undefined) throw new Error("the fixture has no agree line");
     stubRoute(routes.briefs.readBrief, { ...brief, agree: [{ ...first, quotes: first.quotes.map((quote) => ({ ...quote, verified: false })) }, brief.agree[1], brief.agree[2]] });
     await renderBrief();
-    const chip = screen.getAllByRole("button").find((button) => button.textContent?.includes("no receipt"));
+    const chip = screen.getAllByRole("button").find((button) => button.textContent?.includes("no quote"));
     expect(chip).toBeTruthy();
     fireEvent.click(chip as HTMLElement);
     const sheet = screen.getByRole("dialog");

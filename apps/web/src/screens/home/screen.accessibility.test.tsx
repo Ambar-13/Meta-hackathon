@@ -52,7 +52,7 @@ describe("home screen", () => {
   it("HOME-WEB-T4: an approved card with nothing else offers to meet someone", async () => {
     renderHome(home({ source: { id: IDS.source, namesPassDone: true, namesReviewed: true }, card: APPROVED_CARD }));
     expect(await nextStepLink("Pair with someone")).toBe(`${APP_PATHS.pair}?card=${IDS.card}`);
-    expect(screen.getByRole("link", { name: "Open the directory" }).getAttribute("href")).toBe(APP_PATHS.directory);
+    expect(screen.getByRole("link", { name: "Open Explore" }).getAttribute("href")).toBe(APP_PATHS.explore);
   });
 
   it("HOME-WEB-T5: a running meeting comes first, and its row says it is talking now", async () => {

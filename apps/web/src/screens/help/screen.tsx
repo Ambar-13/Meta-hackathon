@@ -10,16 +10,16 @@ import { apiFetch, APP_PATHS, asApiError, ErrorNotice, routes, ScreenFrame, type
 import { LoadingLine, Sticker } from "../../look/index.js";
 
 // The label of the problem box; 5 to 300 characters is what AskCreate accepts after trimming [confirm].
-const PROBLEM_LABEL = "Your problem (5 to 300 characters)";
+const PROBLEM_LABEL = "Your problem";
 // The fewest and the most characters of a problem, the bounds of AskCreate in contracts.
 const PROBLEM_MIN_CHARACTERS = 5;
 const PROBLEM_MAX_CHARACTERS = 300;
 // The line shown when the problem is shorter or longer than that [confirm].
 const PROBLEM_LENGTH_LINE = "Write a problem of 5 to 300 characters.";
 // The words of the send button [confirm].
-const SEND_LABEL = "Ask the directory";
+const SEND_LABEL = "Find who could help";
 // The line shown while the problem is on its way [confirm] (drafted copy, design pass).
-const SENDING_LINE = "Sending your problem to the directory.";
+const SENDING_LINE = "Asking the people in Explore.";
 
 // The help page's send action: the length check, the POST, then the answers page; go navigates (design section 7).
 function useHelpSend(go: (path: string) => void): { isSending: boolean; lengthLine: string | null; sendError: ApiError | null; send: (text: string) => Promise<void> } {

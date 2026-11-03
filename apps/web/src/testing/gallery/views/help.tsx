@@ -55,7 +55,7 @@ export const AfterSteps = (props: { steps: readonly PressStep[]; children: React
 // The problem the help views type in.
 const PROBLEM = "Our deploys fail at night and nobody knows why.";
 // The steps that type a problem and send it.
-const SEND_STEPS: readonly PressStep[] = [{ type: PROBLEM, into: "Your problem (5 to 300 characters)" }, { press: "Ask the directory" }];
+const SEND_STEPS: readonly PressStep[] = [{ type: PROBLEM, into: "Your problem" }, { press: "Find who could help" }];
 
 // The Find help page: the empty problem box, a problem that is too short, the search being sent, and the daily limit reached.
 export const views: readonly GalleryView[] = [
@@ -66,7 +66,7 @@ export const views: readonly GalleryView[] = [
     pattern: ROUTE_PATTERNS.help,
     url: "/help",
     element: (
-      <AfterSteps steps={[{ type: "Hm?", into: "Your problem (5 to 300 characters)" }, { press: "Ask the directory" }]}>
+      <AfterSteps steps={[{ type: "Hm?", into: "Your problem" }, { press: "Find who could help" }]}>
         <HelpScreen />
       </AfterSteps>
     ),

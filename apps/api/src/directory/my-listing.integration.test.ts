@@ -103,7 +103,7 @@ describe("your listing routes", () => {
     const response = await send(lea, { method: "GET", url: routes.directory.readMyListing.path });
 
     expect(response.statusCode).toBe(404);
-    expect(response.json()).toEqual({ code: "not_listed", message: "You are not in the directory." });
+    expect(response.json()).toEqual({ code: "not_listed", message: "You are not in Explore yet." });
   });
 
   it("W6-DAPI-T15 (design section 6, P2, P8): listing answers MyListing with the card's public items in position order and the dating switch, and GET reads the same", async () => {
@@ -170,7 +170,7 @@ describe("your listing routes", () => {
     expect(missing.statusCode).toBe(409);
     expect(missing.json()).toEqual(notApprovedBody);
     expect(noPublic.statusCode).toBe(409);
-    expect(noPublic.json()).toEqual({ code: "listing_needs_public_item", message: "A listed persona needs at least one public item. Mark one, or leave the directory first." });
+    expect(noPublic.json()).toEqual({ code: "listing_needs_public_item", message: "To stay in Explore you need at least one public item. Mark one, or leave Explore first." });
     expect(notApproved.statusCode).toBe(409);
     expect(notApproved.json()).toEqual(notApprovedBody);
     expect(rows).toEqual([]);
@@ -209,7 +209,7 @@ describe("your listing routes", () => {
     expect(left.statusCode).toBe(204);
     expect(left.body).toBe("");
     expect(after.statusCode).toBe(404);
-    expect(after.json()).toEqual({ code: "not_listed", message: "You are not in the directory." });
+    expect(after.json()).toEqual({ code: "not_listed", message: "You are not in Explore yet." });
     expect(leftAgain.statusCode).toBe(204);
     expect(leftAgain.body).toBe("");
     expect(rows).toEqual([]);
