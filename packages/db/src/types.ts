@@ -157,14 +157,19 @@ export interface OrchestratorMessagesTable {
   action: "help" | "react" | "reply" | null; action_question: string | null; action_friend_name: string | null; action_pair_id: string | null; ask_id: string | null;
   friends_snapshot: JSONColumnType<unknown[], string | undefined>; reply_to: string | null; created_at: GeneratedTimestamp;
 }
-// One row of the posts table, as migration 0009 defines it.
-export interface PostsTable { id: Generated<string>; person_id: string; text: string; created_at: GeneratedTimestamp; }
+// One row of the posts table, as migrations 0009 and 0013 define it: a post or a story, with its photo as JPEG bytes.
+export interface PostsTable {
+  id: Generated<string>; person_id: string; text: string; created_at: GeneratedTimestamp; kind: Generated<"post" | "story">;
+  photo: ColumnType<Buffer | null, Buffer | null | undefined, Buffer | null>; expires_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+}
+// One row of the post_likes table, as migration 0013 defines it: a post a person liked.
+export interface PostLikesTable { post_id: string; person_id: string; created_at: GeneratedTimestamp; }
 // One row of the profile_photos table, as migration 0012 defines it: a person's own photo as JPEG bytes.
 export interface ProfilePhotosTable { id: Generated<string>; person_id: string; image: Buffer; created_at: GeneratedTimestamp; }
 // One row of the recall_corpus view, as migration 0001 defines it.
 export interface RecallCorpusView { turn_id: string; person_id: string; source_id: string; text: string; norm_text: string; card_id: string; }
 
-// Every table and view of migrations 0001 to 0009, by its SQL name. Add a row here in the same change that adds a migration.
+// Every table and view of migrations 0001 to 0013, by its SQL name. Add a row here in the same change that adds a migration.
 export interface Database {
   people: PeopleTable; sessions: SessionsTable; transfer_links: TransferLinksTable; sources: SourcesTable; turns: TurnsTable; redactions: RedactionsTable;
   cards: CardsTable; card_items: CardItemsTable; quiz_bank: QuizBankTable; quizzes: QuizzesTable; quiz_items: QuizItemsTable; pairs: PairsTable;
@@ -172,5 +177,5 @@ export interface Database {
   briefs: BriefsTable; comics: ComicsTable; comic_panels: ComicPanelsTable; share_pages: SharePagesTable; ledger: LedgerTable; deletions: DeletionsTable;
   service_heartbeats: ServiceHeartbeatsTable; schema_migrations: SchemaMigrationsTable; names_passes: NamesPassesTable; source_names: SourceNamesTable; recall_corpus: RecallCorpusView;
   directory_listings: DirectoryListingsTable; persona_asks: PersonaAsksTable; persona_answers: PersonaAnswersTable;
-  friend_requests: FriendRequestsTable; orchestrator_messages: OrchestratorMessagesTable; posts: PostsTable; profile_photos: ProfilePhotosTable;
+  friend_requests: FriendRequestsTable; orchestrator_messages: OrchestratorMessagesTable; posts: PostsTable; post_likes: PostLikesTable; profile_photos: ProfilePhotosTable;
 }

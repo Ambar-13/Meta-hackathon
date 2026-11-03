@@ -1,14 +1,14 @@
 import "./me.css";
 import { useState, type ReactElement, type ReactNode } from "react";
-import { Link } from "react-router-dom";
-import type { HomeView, MyListing, ProfileView } from "@meet-first/contracts";
-import { APP_PATHS, ErrorNotice, ScreenFrame, type PolledView } from "../../app-shell/index.js";
+import { Link, useLocation } from "react-router-dom";
+import type { HomeView, MyListing, MyPostsView, ProfileView } from "@meet-first/contracts";
+import { APP_PATHS, ErrorNotice, readProfileTab, ScreenFrame, type PolledView } from "../../app-shell/index.js";
 import { LoadingLine } from "../../look/index.js";
 import { useYourListing, type YourListingHook } from "../directory/index.js";
 import { useHomeView } from "../home/index.js";
 import { ProfileHeader, ProfileTabs, useProfile } from "../people/index.js";
 import { AddChats, EditListing, EditProfile, JoinExplore, MeMeetings, MeNext } from "./me-parts.js";
-import { useProfileEdit } from "./me-state.js";
+import { useMyPosts, useProfileEdit } from "./me-state.js";
 
 // The words of /me (wave 7).
 const ME_SCREEN_COPY = {
@@ -21,8 +21,9 @@ const ME_SCREEN_COPY = {
   source: "In your own words",
 } as const;
 
-// What /me shows under your profile from GET /api/home: the next step, the end of the About tab, and the Meetings tab's panel.
-type MeBelow = { next: ReactNode; aboutEnd: ReactNode; meetings: ReactNode };
+// What /me shows under your profile from GET /api/home: the next step, the end of the About tab, and the Meetings tab's panel; your own
+// posts for the Posts tab; and the tab the address asks for.
+type MeBelow = { next: ReactNode; aboutEnd: ReactNode; meetings: ReactNode; posts: PolledView<MyPostsView>; firstTab: "about" | "posts" };
 
 // What your header shows when you are in Explore: your name and line as Explore shows them once read, else from your home view and your
 // listing, and your photo.
@@ -59,7 +60,8 @@ const ListedMe = (props: { listing: MyListing; home: HomeView | null; yours: You
         </>
       ) : null}
       {props.below.next}
-      <ProfileTabs items={profile?.items ?? listing.items} source={ME_SCREEN_COPY.source} postsName={null} aboutEnd={props.below.aboutEnd} meetings={props.below.meetings} />
+      <ProfileTabs items={profile?.items ?? listing.items} source={ME_SCREEN_COPY.source} postsName={null} posts={props.below.posts} onPostDeleted={props.below.posts.reload}
+        firstTab={props.below.firstTab} aboutEnd={props.below.aboutEnd} meetings={props.below.meetings} />
     </>
   );
 };
@@ -82,34 +84,38 @@ const UnlistedMe = (props: { home: HomeView | null; yours: YourListingHook; belo
       {isEditing && props.home !== null ? <EditProfile name={name} photo={photo} edit={edit} /> : null}
       <JoinExplore home={props.home} yours={props.yours} />
       {props.below.next}
-      <ProfileTabs items={[]} source={ME_SCREEN_COPY.source} postsName={null} aboutEnd={props.below.aboutEnd} meetings={props.below.meetings} />
+      <ProfileTabs items={[]} source={ME_SCREEN_COPY.source} postsName={null} posts={props.below.posts} onPostDeleted={props.below.posts.reload}
+        firstTab={props.below.firstTab} aboutEnd={props.below.aboutEnd} meetings={props.below.meetings} />
     </>
   );
 };
 
 // The next step, the end of About and the Meetings panel from the home view; while it loads, or when it fails, its loading line or
 // error. Add more chats shows only once there is a card: before that the next step is the way to add your notes.
-function belowFrom(home: PolledView<HomeView>, fromExplore: ReadonlySet<string>): MeBelow {
+function belowFrom(home: PolledView<HomeView>, fromExplore: ReadonlySet<string>, tabs: Pick<MeBelow, "posts" | "firstTab">): MeBelow {
   if (home.value === null) {
     const state = home.error === null ? <LoadingLine text={ME_SCREEN_COPY.loadingHome} /> : <ErrorNotice error={home.error} />;
-    return { next: state, aboutEnd: null, meetings: state };
+    return { next: state, aboutEnd: null, meetings: state, ...tabs };
   }
   return {
     next: <MeNext home={home.value} />,
     aboutEnd: home.value.card === null ? null : <AddChats />,
     meetings: <MeMeetings home={home.value} fromExplore={fromExplore} />,
+    ...tabs,
   };
 }
 
 // /me, after Instagram's own profile: your profile as others see it with Edit my listing and Your card, the one next step, then the
-// About, Posts and Meetings tabs. Nothing shows twice: your card is the About tab and the header's button, your meetings are one list
+// About, Posts (your own posts, with New post and Delete) and Meetings tabs, open on Posts when the address says so. Nothing shows twice: your card is the About tab and the header's button, your meetings are one list
 // that marks the ones someone started with you in Explore, and Settings is the gear in the frame.
 export const MeScreen = (): ReactElement => {
   const yours = useYourListing();
   const home = useHomeView();
+  const posts = useMyPosts();
+  const location = useLocation();
   const { load } = yours;
   const isReady = load.kind === "ready";
-  const below = belowFrom(home, new Set(isReady ? load.meetings.map((meeting) => meeting.meetingId) : []));
+  const below = belowFrom(home, new Set(isReady ? load.meetings.map((meeting) => meeting.meetingId) : []), { posts, firstTab: readProfileTab(location.search) });
   return (
     <ScreenFrame title={ME_SCREEN_COPY.title} hasOwnHeading={isReady} isWide>
       <div className="profile-page">

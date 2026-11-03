@@ -60,7 +60,8 @@ main.screen.wide:has(.explore), main.screen.wide:has(.search-page) { max-width: 
 :is(.explore, .search-page) .friend-add { flex: none; white-space: nowrap; }
 :is(.explore, .search-page) .listing-open { color: var(--ui-ink-2); font: 400 13px/16px var(--ui-font); }
 
-/* ---------- the row of faces: Your Meety, then the people, each a round picture in a thin ring with the name under it ---------- */
+/* ---------- the row of stories: Your story, then each person with a story, a round picture in a ring with the name under it: a dark
+   ring while a story is new to you, a hairline once you have watched them all ---------- */
 .stories { margin-top: 24px; }
 .stories ul { list-style: none; display: flex; gap: 16px; margin: 0; padding: 2px 0 8px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; }
 .stories ul::-webkit-scrollbar { display: none; }
@@ -72,6 +73,9 @@ main.screen.wide:has(.explore), main.screen.wide:has(.search-page) { max-width: 
 .stories .story:hover .story-ring { transform: translateY(-2px); }
 .stories .story-ring .person-avatar.size-l { --a-size: 64px; --a-font: 26px; }
 .stories .story.is-you .story-ring { border-style: dashed; }
+:is(.explore, .search-page) .stories button.story { padding: 0; border: 0; background: none; font: inherit; cursor: pointer; }
+.stories .story-ring.is-new { padding: 3px; border: 2px solid var(--ui-ink); }
+.stories .story-ring.is-seen { border: 1px solid var(--line-strong); }
 .stories .story.is-you .meety-mark { width: 64px; height: 64px; border-radius: 50%; background: var(--ui-soft); font-size: 40px; }
 .stories .story-plus { position: absolute; right: -2px; bottom: -2px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%;
   background: var(--ui-blue); color: var(--ui-bg); box-shadow: 0 0 0 3px var(--ui-bg); }
@@ -125,12 +129,18 @@ main.screen.wide:has(.explore), main.screen.wide:has(.search-page) { max-width: 
 .feed-note-words q { display: block; color: var(--ui-ink-2); font: 400 14px/20px var(--ui-font); quotes: "\201C" "\201D"; }
 .feed-note-go { flex: none; color: var(--ui-ink); }
 
-/* Ask NAME's Meety and Posts, as icon and word buttons in a row under the post; Ask in ink, as the post's one action. */
+/* Like, Ask NAME's Meety and Posts, as icon and word buttons in a row under the post; Ask in ink, as the post's one action, and a liked
+   heart filled red, as Instagram's. Delete on your own post asks once more before it deletes. */
 .feed-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0 4px; margin: 10px 0 -8px -12px; }
 :is(.explore, .search-page) .feed-action { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; border: 0; border-radius: 22px; background: none;
   color: var(--ui-ink-2); font: 500 14px/20px var(--ui-font); transition: background-color 0.15s var(--ease), color 0.15s var(--ease); }
 :is(.explore, .search-page) .feed-action:hover, :is(.explore, .search-page) .feed-action:hover:not(:disabled) { filter: none; background: var(--ui-soft); color: var(--ui-ink); text-decoration: none; }
 :is(.explore, .search-page) .feed-action.is-ask { color: var(--ui-ink); font-weight: 600; }
+:is(.explore, .search-page) .feed-action[aria-pressed="true"] { color: var(--ui-ink); }
+:is(.explore, .search-page) .feed-action[aria-pressed="true"] .icon { color: var(--ui-red); fill: currentColor; }
+.feed-delete { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.feed-delete > span { padding-left: 12px; color: var(--ui-ink); font: 500 14px/20px var(--ui-font); }
+:is(.explore, .search-page) .feed-action.is-danger { color: var(--ui-red); font-weight: 600; }
 :is(.explore, .search-page) .feed-why { flex-basis: 100%; margin: 0 0 8px 12px; color: var(--ui-ink-2); font-size: 14px; line-height: 20px; }
 
 /* ---------- Photos: Instagram's Explore grid, three tall tiles to a row with square corners and 3px between them ---------- */
@@ -221,3 +231,41 @@ main.screen.wide:has(.explore), main.screen.wide:has(.search-page) { max-width: 
 }
 .search-photos { margin-top: 32px; }
 .search-page .search-photos h2 { margin: 0 0 12px; font: 600 16px/24px var(--ui-font); letter-spacing: 0; }
+
+/* ---------- the story viewer: over the whole page on a phone, a tall card on a dark ground on a laptop; bars for the person's stories,
+   their face, name and age, Pause and Close; the picture, Previous on its left third and Next on the rest; then the foot ---------- */
+.story-viewer { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; background: var(--ui-ink); color: var(--ui-bg); }
+.story-card { position: relative; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; width: 100%; height: 100%; }
+.story-bars { display: flex; gap: 4px; padding: 10px 12px 0; }
+.story-bar { flex: 1; height: 3px; overflow: hidden; border-radius: 2px; background: color-mix(in oklab, var(--ui-bg) 35%, transparent); }
+.story-bar.is-done { background: var(--ui-bg); }
+.story-bar-fill { display: block; width: 100%; height: 100%; background: var(--ui-bg); transform: scaleX(0); transform-origin: left; animation: story-fill 5s linear forwards; }
+.story-bar-fill.is-paused { animation-play-state: paused; }
+@keyframes story-fill { to { transform: scaleX(1); } }
+.story-head { display: flex; align-items: center; gap: 10px; padding: 8px 6px 8px 14px; }
+.story-who { font: 600 15px/20px var(--ui-font); }
+.story-age { margin-right: auto; color: color-mix(in oklab, var(--ui-bg) 72%, transparent); font: 400 14px/20px var(--ui-font); }
+.story-icon { display: inline-grid; place-items: center; min-width: 44px; min-height: 44px; padding: 0 10px; border: 0; border-radius: 22px; background: none; color: var(--ui-bg);
+  font: 600 14px/20px var(--ui-font); cursor: pointer; }
+.story-icon:hover { background: color-mix(in oklab, var(--ui-bg) 14%, transparent); filter: none; }
+.story-stage { position: relative; display: grid; min-height: 0; }
+.story-stage .story-picture { width: 100%; height: 100%; aspect-ratio: auto; }
+.story-tap { position: absolute; top: 0; bottom: 0; padding: 0; border: 0; border-radius: 0; background: transparent; cursor: pointer; }
+.story-tap:hover { background: transparent; filter: none; }
+.story-tap.is-previous { left: 0; width: 30%; }
+.story-tap.is-next { right: 0; width: 70%; }
+.story-tap:focus-visible { outline: 2px solid var(--ui-bg); outline-offset: -6px; }
+.story-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 14px calc(14px + env(safe-area-inset-bottom, 0px)); }
+.story-delete { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.story-delete > span { font: 500 14px/20px var(--ui-font); }
+.story-chip { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border: 1px solid color-mix(in oklab, var(--ui-bg) 45%, transparent); border-radius: 22px;
+  background: none; color: var(--ui-bg); font: 600 14px/20px var(--ui-font); cursor: pointer; }
+.story-chip:hover { background: color-mix(in oklab, var(--ui-bg) 14%, transparent); color: var(--ui-bg); text-decoration: none; filter: none; }
+.story-chip.is-danger { border-color: var(--ui-red); background: var(--ui-red); }
+@media (min-width: 768px) {
+  .story-card { width: min(420px, calc((100vh - 176px) * 9 / 16)); height: auto; }
+  .story-stage .story-picture { aspect-ratio: 9 / 16; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .story-bar-fill { animation: none; transform: none; }
+}

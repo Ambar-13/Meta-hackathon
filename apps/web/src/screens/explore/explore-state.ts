@@ -45,12 +45,6 @@ export function noteItemFor(post: Post, listing: DirectoryListing | undefined): 
   return best;
 }
 
-// The people of the row of faces: everyone on the loaded pages of Explore, friends first, each group in its order on the page.
-// Example: Ravi, Mira and Jun, with Jun a friend, give Jun, Ravi, Mira.
-export function storyPeople(listings: readonly DirectoryListing[], isFriend: (listingId: string) => boolean): DirectoryListing[] {
-  return [...listings.filter((listing) => isFriend(listing.listingId)), ...listings.filter((listing) => !isFriend(listing.listingId))];
-}
-
 // The person's home view (GET /api/home), read once when the feed opens, for the next step while they have no approved card; a failed
 // read shows no next step and never blocks the feed.
 export function useFeedHome(): PolledView<HomeView> {

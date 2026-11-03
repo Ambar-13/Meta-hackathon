@@ -110,7 +110,7 @@ export const SearchScreen = (): ReactElement => {
     browse.search(query);
   };
   const title = peopleTitle(isSearching, isEveryone);
-  const hasPhotos = (posts.value?.posts ?? []).some((post) => photoOf(post.photo) !== null);
+  const hasPhotos = (posts.value?.posts ?? []).some((post) => post.isMine !== true && photoOf(post.photo) !== null);
   return (
     <ScreenFrame title={SEARCH_COPY.title} hasOwnHeading isWide>
       <div className="search-page">

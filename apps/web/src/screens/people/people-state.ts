@@ -14,18 +14,16 @@ export type ProfileModel = {
   decline: (requestId: string) => Promise<void>;
 };
 
-// The coming-soon card's words: the own-profile copy when name is null, else the copy about that person's agent.
-export function postsSoonCopy(name: string | null): { heading: string; body: string } {
+// The words of a Posts tab with no posts (3 Nov 2026, once anyone could share): on your own profile, where your posts show and that your
+// Meety reads them; on someone else's, that they have not shared one yet.
+export function postsEmptyCopy(name: string | null): { heading: string; body: string } {
   if (name === null) {
     return {
-      heading: "Coming soon: your Meety posts.",
-      body: "Your Meety will draft posts from your chats or on a topic you give, and nothing goes up until you say yes. You will also be able to repost your Instagram posts here.",
+      heading: "Share your first post",
+      body: "Your posts show here and, once you are in Explore, in everyone's feed. Your Meety reads them to learn what you are into.",
     };
   }
-  return {
-    heading: `Coming soon: posts by ${name}'s Meety.`,
-    body: `${name}'s Meety will draft posts from ${name}'s chats or on a topic ${name} gives, and nothing goes up until ${name} says yes.`,
-  };
+  return { heading: "No posts yet", body: `${name} has not shared a post yet.` };
 }
 
 const MINUTE_MS = 60_000;

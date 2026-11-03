@@ -57,16 +57,17 @@ function myListing(isOpen: boolean): MyListing {
 const MY_PROFILE = profileView({ listingId: LISTING_IDS.mine, displayName: "Ana", line: "Builds hackathon tools", items: [{ kind: "value", claim: "Claim number 1", quote: "I said this in my own words, number 1" }], friendship: "self" });
 
 // Stubs the reads of /me. The profile route is stubbed first, so the more exact /api/directory/me stub answers its own path.
-function stubMeReads(replies: { listing?: StubInput; meetings?: StubInput; home?: StubInput; profile?: StubInput }): void {
+function stubMeReads(replies: { listing?: StubInput; meetings?: StubInput; home?: StubInput; profile?: StubInput; posts?: StubInput | StubInput[] }): void {
   stubRoute(routes.social.readProfile, replies.profile ?? MY_PROFILE);
   stubRoute(routes.directory.readMyListing, replies.listing ?? NOT_LISTED);
   stubRoute(routes.directory.listedMeetings, replies.meetings ?? { meetings: [] });
   stubRoute(routes.people.readHome, replies.home ?? home());
+  stubRoute(routes.social.listMyPosts, replies.posts ?? { posts: [] });
 }
 
-// Renders /me.
-function renderMe(): void {
-  renderScreen(<MeScreen />, { pattern: ROUTE_PATTERNS.me, url: APP_PATHS.me });
+// Renders /me, with this query on the address.
+function renderMe(search = ""): void {
+  renderScreen(<MeScreen />, { pattern: ROUTE_PATTERNS.me, url: `${APP_PATHS.me}${search}` });
 }
 
 // The profile header, where the name and the buttons sit.
@@ -95,7 +96,33 @@ describe("/me, against the MSW route stubs (a fake server)", () => {
     expect(screen.getByRole("link", { name: "Find people" }).getAttribute("href")).toBe(APP_PATHS.search);
     expect(within(screen.getByRole("tabpanel", { name: "About" })).getByRole("link", { name: "Add more chats" }).getAttribute("href")).toBe("/upload");
     fireEvent.click(screen.getByRole("tab", { name: "Posts" }));
-    expect(screen.getByRole("heading", { name: "Coming soon: your Meety posts." })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "Share your first post" })).toBeTruthy();
+    expect(within(screen.getByRole("tabpanel", { name: "Posts" })).getByRole("link", { name: "New post" }).getAttribute("href")).toBe("/create");
+  });
+
+  it("W7-SHARE-WEB-T4: ?tab=posts opens your own posts, newest first, with New post; Delete asks once more, then deletes and reads your posts again", async () => {
+    const first = { postId: "00000000-0000-4000-8000-000000000731", text: "Shipping the stories row tonight.", createdAt: SERVER_NOW, photo: null, photoAlt: null };
+    const second = { postId: "00000000-0000-4000-8000-000000000732", text: "An older post.", createdAt: SERVER_NOW, photo: null, photoAlt: null };
+    stubMeReads({ posts: [{ posts: [first, second] }, { posts: [second] }] });
+    stubRoute(routes.social.deletePost, { status: 204, body: null });
+    renderMe("?tab=posts");
+
+    const panel = await screen.findByRole("tabpanel", { name: "Posts" });
+    expect(screen.getByRole("tab", { name: "Posts" }).getAttribute("aria-selected")).toBe("true");
+    expect(await within(panel).findByText(first.text)).toBeTruthy();
+    expect(within(panel).getByRole("link", { name: "New post" }).getAttribute("href")).toBe("/create");
+    fireEvent.click(within(panel).getAllByRole("button", { name: "Delete" })[0] as HTMLElement);
+    expect(within(panel).getByText("Delete this post for good?")).toBeTruthy();
+    expect(requestsTo(routes.social.deletePost)).toHaveLength(0);
+    fireEvent.click(within(panel).getAllByRole("button", { name: "Delete" })[0] as HTMLElement);
+
+    await waitFor(() => {
+      expect(requestsTo(routes.social.deletePost)[0]?.url).toContain(`/api/posts/${first.postId}`);
+    });
+    await waitFor(() => {
+      expect(within(panel).queryByText(first.text)).toBeNull();
+    });
+    expect(within(panel).getByText(second.text)).toBeTruthy();
   });
 
   it("W7-ME-T1: nothing on /me shows twice: one link to your card, no box of your card, no list of links at the foot, and no persona", async () => {

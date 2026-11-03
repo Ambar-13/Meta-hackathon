@@ -1,8 +1,9 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactElement, type ReactNode } from "react";
-import type { Post, PostsView, PublicItem } from "@meet-first/contracts";
-import { ErrorNotice, type PolledView } from "../../app-shell/index.js";
+import { Link } from "react-router-dom";
+import type { Post, PublicItem } from "@meet-first/contracts";
+import { APP_PATHS, asApiError, ErrorNotice, routes, apiFetch, type ApiError, type PolledView } from "../../app-shell/index.js";
 import { EmptyState, Icon, LoadingLine, PersonAvatar, photoOf, PostPhoto, Receipt, SampleChip } from "../../look/index.js";
-import { postAgeWords, postsSoonCopy } from "./people-state.js";
+import { postAgeWords, postsEmptyCopy } from "./people-state.js";
 
 // The tabs under a profile header, in order, with their icons; Meetings shows only on your own profile.
 const TABS = [
@@ -37,9 +38,15 @@ export const ProfileHeader = (props: { name: string; line: string | null; isSamp
   );
 };
 
-// The coming-soon card of the Posts tab: the own-profile words when name is null, else the words about that person's agent.
-export const PostsSoonCard = (props: { name: string | null }): ReactElement => {
-  const copy = postsSoonCopy(props.name);
+// One post as a Posts tab shows it: someone's post from the profile's read, or one of your own.
+type ShownPost = Pick<Post, "postId" | "text" | "createdAt" | "photo" | "photoAlt">;
+// What a Posts tab reads: its posts, newest first.
+type ShownPosts = { posts: readonly ShownPost[] };
+
+// The card of a Posts tab with no posts: on your own profile, where your posts show, that your Meety reads them, and New post; on
+// someone else's, that they have not shared one yet.
+export const PostsEmptyCard = (props: { name: string | null }): ReactElement => {
+  const copy = postsEmptyCopy(props.name);
   return (
     <section className="posts-soon">
       <span className="posts-soon-icon">
@@ -47,7 +54,29 @@ export const PostsSoonCard = (props: { name: string | null }): ReactElement => {
       </span>
       <h2>{copy.heading}</h2>
       <p>{copy.body}</p>
+      {props.name === null ? <Link className="btn" to={APP_PATHS.create}>New post</Link> : null}
     </section>
+  );
+};
+
+// Delete on one of your own posts: the first press asks once more, the second deletes it (DELETE /api/posts/:id), then onDeleted runs
+// so the page reads again. buttonClass is the look of its buttons where it sits.
+export const DeletePost = (props: { postId: string; onDeleted: () => void; buttonClass: string }): ReactElement => {
+  const [isAsking, setIsAsking] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+  const remove = (): void => {
+    apiFetch(routes.social.deletePost, { params: { id: props.postId } }).then(props.onDeleted, (thrown: unknown) => {
+      setError(asApiError(thrown));
+    });
+  };
+  if (!isAsking) return <button type="button" className={props.buttonClass} onClick={() => { setIsAsking(true); }}>Delete</button>;
+  return (
+    <span className="post-delete">
+      <span>Delete this post for good?</span>
+      <button type="button" className={`${props.buttonClass} is-danger`} onClick={remove}>Delete</button>
+      <button type="button" className={props.buttonClass} onClick={() => { setIsAsking(false); }}>Keep it</button>
+      {error === null ? null : <ErrorNotice error={error} />}
+    </span>
   );
 };
 
@@ -90,7 +119,7 @@ const LookSwitch = (props: { look: PostsLook; onChange: (look: PostsLook) => voi
 
 // The grid: three square tiles to a row with square corners, a photo post as its photo and a post of words as its words on a soft
 // ground. A tile opens its post in the list.
-const PostGrid = (props: { posts: readonly Post[]; onOpen: (postId: string) => void }): ReactElement => {
+const PostGrid = (props: { posts: readonly ShownPost[]; onOpen: (postId: string) => void }): ReactElement => {
   return (
     <ul className="post-grid">
       {props.posts.map((post) => {
@@ -98,7 +127,7 @@ const PostGrid = (props: { posts: readonly Post[]; onOpen: (postId: string) => v
         return (
           <li key={post.postId}>
             <button type="button" className={found === null ? "post-tile is-words" : "post-tile"} onClick={() => { props.onOpen(post.postId); }}>
-              {found === null ? <span className="post-tile-words">{post.text}</span> : <img src={found.src} alt={post.photoAlt ?? post.text} loading="lazy" decoding="async" />}
+              {found === null ? <span className="post-tile-words">{post.text}</span> : <img src={found.src} alt={post.photoAlt ?? (post.text === "" ? "Photo" : post.text)} loading="lazy" decoding="async" />}
             </button>
           </li>
         );
@@ -107,9 +136,9 @@ const PostGrid = (props: { posts: readonly Post[]; onOpen: (postId: string) => v
   );
 };
 
-// The list: each post with its photo when it has one and how long ago it went up. The post opened from the grid scrolls into view and
-// takes the focus, so the reader lands on it.
-const PostList = (props: { posts: readonly Post[]; openId: string | null }): ReactElement => {
+// The list: each post with its photo when it has one and how long ago it went up, and Delete on your own. The post opened from the grid
+// scrolls into view and takes the focus, so the reader lands on it.
+const PostList = (props: { posts: readonly ShownPost[]; openId: string | null; onDeleted: (() => void) | undefined }): ReactElement => {
   const now = new Date();
   const openRef = useRef<HTMLLIElement | null>(null);
   useEffect(() => {
@@ -122,9 +151,12 @@ const PostList = (props: { posts: readonly Post[]; openId: string | null }): Rea
     <ul className="profile-posts">
       {props.posts.map((post) => (
         <li key={post.postId} className="profile-post" ref={post.postId === props.openId ? openRef : undefined} tabIndex={post.postId === props.openId ? -1 : undefined}>
-          <p className="post-text">{post.text}</p>
-          <PostPhoto photo={post.photo} alt={post.photoAlt} />
-          <time className="post-time" dateTime={post.createdAt}>{postAgeWords(post.createdAt, now)}</time>
+          {post.text === "" ? null : <p className="post-text">{post.text}</p>}
+          <PostPhoto photo={post.photo} alt={post.photoAlt ?? "Photo"} />
+          <div className="post-foot">
+            <time className="post-time" dateTime={post.createdAt}>{postAgeWords(post.createdAt, now)}</time>
+            {props.onDeleted === undefined ? null : <DeletePost postId={post.postId} onDeleted={props.onDeleted} buttonClass="text-button" />}
+          </div>
         </li>
       ))}
     </ul>
@@ -132,12 +164,13 @@ const PostList = (props: { posts: readonly Post[]; openId: string | null }): Rea
 };
 
 // The Posts tab: the person's posts, newest first. With a photo among them they open as the grid, with the switch to the list; posts
-// of words alone show as the list with no switch. The coming-soon card shows when there are none.
-const PostsPanel = (props: { posts: PolledView<PostsView> | null; name: string | null }): ReactElement => {
+// of words alone show as the list with no switch. The empty card shows when there are none. On your own, New post sits above them and
+// each post in the list has Delete.
+const PostsPanel = (props: { posts: PolledView<ShownPosts> | null; name: string | null; onDeleted: (() => void) | undefined }): ReactElement => {
   const { posts } = props;
   const [chosenLook, setChosenLook] = useState<PostsLook | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
-  if (posts === null) return <PostsSoonCard name={props.name} />;
+  if (posts === null) return <PostsEmptyCard name={props.name} />;
   if (posts.value === null) {
     if (posts.error === null) return <LoadingLine text="Loading posts." />;
     return (
@@ -148,7 +181,7 @@ const PostsPanel = (props: { posts: PolledView<PostsView> | null; name: string |
     );
   }
   const list = posts.value.posts;
-  if (list.length === 0) return <PostsSoonCard name={props.name} />;
+  if (list.length === 0) return <PostsEmptyCard name={props.name} />;
   const hasPhotos = list.some((post) => photoOf(post.photo) !== null);
   const look = hasPhotos ? (chosenLook ?? "grid") : "list";
   const choose = (next: PostsLook): void => {
@@ -161,20 +194,22 @@ const PostsPanel = (props: { posts: PolledView<PostsView> | null; name: string |
   };
   return (
     <div className="profile-posts-panel">
+      {props.name === null ? <Link className="btn quiet posts-new" to={APP_PATHS.create}>New post</Link> : null}
       {hasPhotos ? <LookSwitch look={look} onChange={choose} /> : null}
-      {look === "grid" ? <PostGrid posts={list} onOpen={open} /> : <PostList posts={list} openId={openId} />}
+      {look === "grid" ? <PostGrid posts={list} onOpen={open} /> : <PostList posts={list} openId={openId} onDeleted={props.onDeleted} />}
     </div>
   );
 };
 
 // What the tabs under a profile show: the public items with the words for their source, the Posts tab's name (null on your own
-// profile) and posts (null where the page reads none), the tab it opens on, what follows the items on About, and the Meetings panel,
-// which only your own profile passes.
+// profile), posts (null where the page reads none) and what runs once one of your own is deleted, the tab it opens on, what follows the
+// items on About, and the Meetings panel, which only your own profile passes.
 type ProfileTabsProps = {
   items: PublicItem[];
   source: string;
   postsName: string | null;
-  posts?: PolledView<PostsView> | null;
+  posts?: PolledView<ShownPosts> | null;
+  onPostDeleted?: () => void;
   firstTab?: TabKey;
   aboutEnd?: ReactNode;
   meetings?: ReactNode;
@@ -183,7 +218,7 @@ type ProfileTabsProps = {
 // The panel of one tab.
 function panelOf(key: TabKey, props: ProfileTabsProps): ReactNode {
   if (key === "about") return <><AboutPanel items={props.items} source={props.source} />{props.aboutEnd}</>;
-  if (key === "posts") return <PostsPanel posts={props.posts ?? null} name={props.postsName} />;
+  if (key === "posts") return <PostsPanel posts={props.posts ?? null} name={props.postsName} onDeleted={props.onPostDeleted} />;
   return props.meetings;
 }
 

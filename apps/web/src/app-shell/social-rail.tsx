@@ -6,20 +6,28 @@ import { friendsLinkName, useRailData } from "./social-rail-state.js";
 import { Icon, MeetyMark, Sticker, type IconName } from "../look/index.js";
 
 // One page of the signed-in nav: its words, where it goes, its line icon, and whether only the laptop rail shows it.
-type RailPage = { label: string; to: string; icon: IconName; isRailOnly?: boolean };
-// The pages, in this order, as Instagram's: Home (the feed), Search, Meety (the chat, where Instagram has messages), Friends, Me, then
-// Settings, which the laptop keeps at the sidebar's foot and the phone keeps in the top bar instead (3 Nov 2026).
+type RailPage = { label: string; to: string; icon: IconName; isRailOnly?: boolean; isPhoneHidden?: boolean };
+// The pages, in this order, as Instagram's: Home (the feed), Search, Meety (the chat, where Instagram has messages), Friends, Create,
+// which the phone keeps as the + of its top bar instead, Me, then Settings, which the laptop keeps at the sidebar's foot and the phone
+// keeps in the top bar instead (3 Nov 2026).
 const RAIL_PAGES: readonly RailPage[] = [
   { label: "Home", to: APP_PATHS.home, icon: "home" },
   { label: "Search", to: APP_PATHS.search, icon: "search" },
   { label: "Meety", to: APP_PATHS.meety, icon: "meety" },
   { label: "Friends", to: APP_PATHS.friends, icon: "friends" },
+  { label: "Create", to: APP_PATHS.create, icon: "create", isPhoneHidden: true },
   { label: "Me", to: APP_PATHS.me, icon: "me" },
   { label: "Settings", to: APP_PATHS.settings, icon: "settings", isRailOnly: true },
 ];
 
 // The sidebar's own words on a laptop.
 const RAIL_COPY = { home: "Meet First home", tagline: "Your Meety meets theirs first.", invite: "Invite a friend", meety: "Your Meety", meetyLine: "Shares only what you choose" } as const;
+
+// The class of one page link: rail-only for the one the laptop keeps at the sidebar's foot, phone-hidden for one the phone keeps elsewhere.
+function pageClass(page: RailPage): string | undefined {
+  if (page.isRailOnly === true) return "rail-only";
+  return page.isPhoneHidden === true ? "phone-hidden" : undefined;
+}
 
 // One page link: its icon, with the request count on the Friends link, and its words, shown beside the icon in the laptop sidebar,
 // under it on a phone, and on hover in the narrow rail between the two.
@@ -30,7 +38,7 @@ const PageLink = (props: { page: RailPage; pathname: string; incomingCount: numb
   return (
     <Link
       to={page.to}
-      className={page.isRailOnly === true ? "rail-only" : undefined}
+      className={pageClass(page)}
       aria-current={isCurrent ? "page" : undefined}
       aria-label={hasCount ? friendsLinkName(props.incomingCount) : undefined}
       data-label={page.label}

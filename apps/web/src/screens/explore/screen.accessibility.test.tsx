@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
-import { DirectoryListing, DirectoryPage, type FriendsView, type PostsView } from "@meet-first/contracts";
+import { DirectoryListing, DirectoryPage, type FriendsView, type PostsView, type Story } from "@meet-first/contracts";
 import { APP_PATHS, chatPathWithDraft, clearClientState, ROUTE_PATTERNS, routes } from "../../app-shell/index.js";
 import { renderScreen, requestsTo, stubRoute, type StubInput } from "../../testing/index.js";
 import { unlabelledControls } from "../../testing/render-screen.js";
@@ -10,6 +10,7 @@ import { FeedScreen } from "./screen.js";
 
 beforeEach(() => {
   clearClientState();
+  window.localStorage.removeItem("meet-first-stories-seen");
 });
 
 afterEach(() => {
@@ -39,12 +40,24 @@ function post(n: number, writer: "Mira" | "Ravi", hoursAgo: number): PostsView["
   return { postId: `00000000-0000-4000-8000-00000000070${String(n)}`, listingId, displayName: writer, isSample: writer === "Ravi", text: `Post number ${String(n)} by ${writer}.`, createdAt: new Date(Date.now() - hoursAgo * 3_600_000).toISOString() };
 }
 
-// What the feed's other reads answer in a test: the replies for GET /api/posts, the friends list, and whether the card is approved.
-type OtherReads = { posts?: StubInput[]; friends?: FriendsView; hasCard?: boolean };
+// One story by a person, hoursAgo hours old: Ravi and Mira by their listings, yours with no listing.
+function story(n: number, writer: "Mira" | "Ravi" | "You", hoursAgo: number): Story {
+  const listingId = { Mira: LISTING_IDS.mira, Ravi: LISTING_IDS.ravi, You: null }[writer];
+  return {
+    storyId: `00000000-0000-4000-8000-00000000075${String(n)}`, listingId, displayName: writer === "You" ? "Ana" : writer, isSample: false, isMine: writer === "You",
+    authorPhoto: null, text: `Story number ${String(n)} by ${writer}.`, photo: null, photoAlt: null,
+    createdAt: new Date(Date.now() - hoursAgo * 3_600_000).toISOString(), expiresAt: new Date(Date.now() + 3_600_000).toISOString(),
+  };
+}
 
-// Renders Home, the feed, with these replies for GET /api/directory; no posts, no friends and an approved card unless given.
+// What the feed's other reads answer in a test: the replies for GET /api/posts and GET /api/stories, the friends list, and whether the
+// card is approved.
+type OtherReads = { posts?: StubInput[]; stories?: StubInput[]; friends?: FriendsView; hasCard?: boolean };
+
+// Renders Home, the feed, with these replies for GET /api/directory; no posts, no stories, no friends and an approved card unless given.
 function renderFeed(pages: StubInput[], others: OtherReads = {}): void {
   stubRoute(routes.social.listPosts, others.posts ?? [{ posts: [] }]);
+  stubRoute(routes.social.listStories, others.stories ?? [{ stories: [] }]);
   stubRoute(routes.directory.friends, others.friends ?? { friends: [] });
   stubRoute(routes.people.readHome, homeOf(others.hasCard ?? true));
   stubRoute(routes.directory.browse, pages);
@@ -231,18 +244,90 @@ describe("Home, the feed, against the MSW route stubs (a fake server)", () => {
     expect(mirasPicture?.textContent).toBe("M");
   });
 
-  it("W7-FACES-T1: the row of faces starts with Your Meety, a link to Me, then the people of Explore, friends first, each a link to their profile", async () => {
-    const friends: FriendsView = { friends: [{ pairId: LISTING_IDS.request, displayName: "Ravi", canAsk: true, listingId: LISTING_IDS.ravi }] };
-    renderFeed([page(0, [MIRA, RAVI], false)], { friends });
-    const faces = await screen.findByRole("region", { name: "People to meet" });
-    await waitFor(() => {
-      expect(within(faces).getAllByRole("link").map((link) => link.querySelector(".story-name")?.textContent)).toEqual(["Your Meety", "Ravi", "Mira"]);
-    });
-    const [you, ravi, mira] = within(faces).getAllByRole("link");
+  it("W7-STORY-WEB-T1: the row starts with Your story, ready for a story in Create, then people with a story; a face opens the viewer, which plays each person's stories oldest first and moves on to the next person, and Escape closes it with the face shown as watched", async () => {
+    const stories = [story(1, "Ravi", 1), story(2, "Mira", 2), story(3, "Ravi", 3)];
+    renderFeed([page(0, [MIRA, RAVI], false)], { stories: [{ stories }] });
+    const row = await screen.findByRole("region", { name: "Stories" });
+    const ravi = await within(row).findByRole("button", { name: "Ravi, new story" });
 
-    expect(you?.getAttribute("href")).toBe(APP_PATHS.me);
-    expect(ravi?.getAttribute("href")).toBe(`/people/${LISTING_IDS.ravi}`);
-    expect(mira?.getAttribute("href")).toBe(`/people/${LISTING_IDS.mira}`);
+    expect(within(row).getByRole("link", { name: "Add to your story" }).getAttribute("href")).toBe("/create?kind=story");
+    expect(within(row).getAllByRole("button").map((button) => button.getAttribute("aria-label"))).toEqual(["Ravi, new story", "Mira, new story"]);
+    fireEvent.click(ravi);
+    const viewer = screen.getByRole("dialog", { name: "Ravi: story 1 of 2" });
+    expect(within(viewer).getByText("Story number 3 by Ravi.")).toBeTruthy();
+    expect(document.activeElement).toBe(within(viewer).getByRole("button", { name: "Close" }));
+    fireEvent.click(within(viewer).getByRole("button", { name: "Next story" }));
+    expect(screen.getByRole("dialog", { name: "Ravi: story 2 of 2" })).toBeTruthy();
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Next story" }));
+    expect(screen.getByRole("dialog", { name: "Mira: story 1 of 1" })).toBeTruthy();
+    fireEvent.keyDown(screen.getByRole("dialog"), { key: "ArrowLeft" });
+    expect(screen.getByRole("dialog", { name: "Ravi: story 1 of 2" })).toBeTruthy();
+    fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(within(row).getByRole("button", { name: "Ravi, story" })).toBeTruthy();
+    expect(unlabelledControls(row)).toEqual([]);
   });
 
+  it("W7-STORY-WEB-T2: your own story leads the row in place of Your story's add link, Pause stops it, and Delete story asks once more, deletes it and reads the stories again", async () => {
+    const mine = story(4, "You", 1);
+    stubRoute(routes.social.deletePost, { status: 204, body: null });
+    renderFeed([page(0, [MIRA], false)], { stories: [{ stories: [mine, story(5, "Mira", 2)] }, { stories: [story(5, "Mira", 2)] }] });
+    const row = await screen.findByRole("region", { name: "Stories" });
+    const yours = await within(row).findByRole("button", { name: "Your story, new story" });
+    expect(within(row).queryByRole("link", { name: "Add to your story" })).toBeNull();
+    fireEvent.click(yours);
+    const viewer = screen.getByRole("dialog", { name: "Your story: story 1 of 1" });
+
+    const pause = within(viewer).getByRole("button", { name: "Pause" });
+    fireEvent.click(pause);
+    expect(within(viewer).getByRole("button", { name: "Play" }).getAttribute("aria-pressed")).toBe("true");
+    expect(within(viewer).getByRole("link", { name: "Add to your story" }).getAttribute("href")).toBe("/create?kind=story");
+    fireEvent.click(within(viewer).getByRole("button", { name: "Delete story" }));
+    fireEvent.click(within(viewer).getByRole("button", { name: "Delete" }));
+
+    await waitFor(() => {
+      expect(requestsTo(routes.social.deletePost)[0]?.url).toContain(`/api/posts/${mine.storyId}`);
+    });
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+    expect(await within(row).findByRole("link", { name: "Add to your story" })).toBeTruthy();
+  });
+
+  it("W7-LIKE-WEB-T1: Like fills the heart at once and sends PUT, a second tap sends DELETE, and a refused like goes back and says why", async () => {
+    const mira = { ...post(1, "Mira", 1), isLiked: false, isMine: false };
+    stubRoute(routes.social.likePost, [{ postId: mira.postId, isLiked: true }, { status: 500, body: { code: "server_error", message: "Something went wrong on our side." } }]);
+    stubRoute(routes.social.unlikePost, { postId: mira.postId, isLiked: false });
+    renderFeed([page(0, [MIRA], false)], { posts: [{ posts: [mira] }] });
+    const like = await screen.findByRole("button", { name: "Like Mira's post" });
+
+    expect(like.getAttribute("aria-pressed")).toBe("false");
+    fireEvent.click(like);
+    expect(like.getAttribute("aria-pressed")).toBe("true");
+    await waitFor(() => {
+      expect(requestsTo(routes.social.likePost)[0]?.url).toContain(`/api/posts/${mira.postId}/like`);
+    });
+    fireEvent.click(like);
+    expect(like.getAttribute("aria-pressed")).toBe("false");
+    await waitFor(() => {
+      expect(requestsTo(routes.social.unlikePost)).toHaveLength(1);
+    });
+    fireEvent.click(like);
+    expect(await screen.findByText("Something went wrong on our side.")).toBeTruthy();
+    expect(like.getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("W7-SHARE-WEB-T5: your own post shows with Like, Posts leading to your own Posts tab and Delete, and no Add friend or Ask", async () => {
+    const own = { ...post(2, "Mira", 1), displayName: "Ana", listingId: LISTING_IDS.mine, isMine: true, isLiked: false };
+    renderFeed([page(0, [MIRA], false)], { posts: [{ posts: [own] }] });
+    const article = await screen.findByRole("article", { name: "Your post" });
+
+    expect(within(article).getByRole("link", { name: "Ana" }).getAttribute("href")).toBe(APP_PATHS.me);
+    expect(within(article).getByRole("button", { name: "Like your post" })).toBeTruthy();
+    expect(within(article).getByRole("link", { name: "Your posts" }).getAttribute("href")).toBe("/me?tab=posts");
+    expect(within(article).getByRole("button", { name: "Delete" })).toBeTruthy();
+    expect(within(article).queryByRole("button", { name: /Add .* as a friend/ })).toBeNull();
+    expect(within(article).queryByText(/Ask .*'s Meety/)).toBeNull();
+  });
 });

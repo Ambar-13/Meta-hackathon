@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { ContractError, DirectoryPage, ErrorBody, FriendRequestAcceptResponse, FriendRequestCreateResponse, FriendRequestsView, FriendsView, HomeView, MyPhoto, OrchestratorMessage, OrchestratorSendResponse, OrchestratorThread, PostsView, PROFILE_PHOTO_MAX_BYTES, ProfileView, routes, SESSION_COOKIE } from "@meet-first/contracts";
+import { ContractError, DirectoryPage, ErrorBody, FriendRequestAcceptResponse, FriendRequestCreateResponse, FriendRequestsView, FriendsView, HomeView, MyPhoto, MyPostsView, OrchestratorMessage, OrchestratorSendResponse, OrchestratorThread, PostCreated, PostLiked, PostsView, PROFILE_PHOTO_MAX_BYTES, ProfileView, routes, SESSION_COOKIE, SHARES_PER_DAY, StoriesView } from "@meet-first/contracts";
 import { withPerson } from "@meet-first/db";
 import { createPairedMeetingWithTurns, createTestPerson, type SeededMeeting } from "@meet-first/db/testing";
 import { registerAsksRoutes } from "../asks/index.js";
@@ -213,7 +213,7 @@ describe("the orchestrator chat", () => {
 });
 
 describe("posts and the sample mark", () => {
-  it("W7-SAMPLE-API-T1: GET /api/posts lists the newest posts of listed people but not your own, and a profile's posts route lists one person's", async () => {
+  it("W7-SAMPLE-API-T1: GET /api/posts lists the newest posts of listed people, your own among them marked as yours, and a profile's posts route lists one person's", async () => {
     const hour = 3_600_000;
     const now = Date.now();
     await withPerson(t.db, y.b.personId, (trx) => trx.insertInto("posts").values([
@@ -227,7 +227,9 @@ describe("posts and the sample mark", () => {
     const badId = await send({ method: "GET", url: pathOf(routes.social.listListingPosts, "not-a-uuid"), token: x.a.sessionToken });
 
     expect(feed.statusCode).toBe(200);
-    expect(PostsView.parse(feed.body).posts.map((post) => [post.text, post.displayName, post.listingId, post.isSample])).toEqual([["Newer post by B.", "Test B", listingYb, false], ["Older post by B.", "Test B", listingYb, false]]);
+    expect(PostsView.parse(feed.body).posts.map((post) => [post.text, post.displayName, post.listingId, post.isSample, post.isMine])).toEqual([
+      ["A post by A.", "Test A", listingXa, false, true], ["Newer post by B.", "Test B", listingYb, false, false], ["Older post by B.", "Test B", listingYb, false, false],
+    ]);
     expect(PostsView.parse(ofB.body).posts.map((post) => post.text)).toEqual(["Newer post by B.", "Older post by B."]);
     expect(badId.statusCode).toBe(404);
   });
@@ -336,6 +338,138 @@ describe("Edit profile: the name and the photo", () => {
     } finally {
       await send({ method: "PUT", url: routes.people.updateName.path, token: y.b.sessionToken, payload: { displayName: "Test B" } });
     }
+  });
+});
+
+describe("sharing posts and stories, and likes", () => {
+  // The smallest bytes that pass as a JPEG: FF D8 FF at the start, FF D9 at the end.
+  const jpeg = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe1]), Buffer.alloc(300, 7), Buffer.from([0xff, 0xd9])]);
+
+  // Shares one post or story as one person and returns the response.
+  async function share(token: string, body: { kind: "post" | "story"; text: string; photo: string | null }): Promise<{ statusCode: number; body: unknown }> {
+    return send({ method: "POST", url: routes.social.createPost.path, token, payload: body });
+  }
+
+  // The feed as one person sees it.
+  async function feedOf(token: string): Promise<PostsView["posts"]> {
+    return PostsView.parse((await send({ method: "GET", url: routes.social.listPosts.path, token })).body).posts;
+  }
+
+  // The stories as one person sees them.
+  async function storiesOf(token: string): Promise<StoriesView["stories"]> {
+    return StoriesView.parse((await send({ method: "GET", url: routes.social.listStories.path, token })).body).stories;
+  }
+
+  // The status of reading one photo by id as one person.
+  async function photoStatus(token: string, id: string): Promise<{ statusCode: number; bytes: Buffer }> {
+    const response = await t.app.inject({ method: "GET", url: pathOf(routes.people.readPhoto, id), headers: { origin: ORIGIN, cookie: `${SESSION_COOKIE}=${token}` } });
+    return { statusCode: response.statusCode, bytes: response.rawPayload };
+  }
+
+  it("W7-SHARE-API-T1: a post of words shows on your own Posts list and, once you are listed, in everyone's feed marked as yours to you; only you can delete it", async () => {
+    const shared = await share(x.a.sessionToken, { kind: "post", text: "  Shipping the stories row tonight.  ", photo: null });
+    const created = PostCreated.parse(shared.body);
+    const mine = MyPostsView.parse((await send({ method: "GET", url: routes.social.listMyPosts.path, token: x.a.sessionToken })).body).posts;
+
+    expect(shared.statusCode).toBe(201);
+    expect(created).toMatchObject({ kind: "post", expiresAt: null });
+    expect(mine[0]).toMatchObject({ postId: created.postId, text: "Shipping the stories row tonight.", photo: null });
+    expect((await feedOf(x.a.sessionToken)).find((post) => post.postId === created.postId)).toMatchObject({ isMine: true, isLiked: false, listingId: listingXa, photo: null });
+    expect((await feedOf(y.b.sessionToken)).find((post) => post.postId === created.postId)).toMatchObject({ isMine: false, displayName: "Test A" });
+    const byOther = await send({ method: "DELETE", url: pathOf(routes.social.deletePost, created.postId), token: y.b.sessionToken });
+    const byOwner = await send({ method: "DELETE", url: pathOf(routes.social.deletePost, created.postId), token: x.a.sessionToken });
+    expect(byOther.statusCode).toBe(404);
+    expect(byOwner.statusCode).toBe(204);
+    expect((await feedOf(y.b.sessionToken)).some((post) => post.postId === created.postId)).toBe(false);
+  });
+
+  it("W7-SHARE-API-T2: a photo post with no words is served to someone else signed in by its id; a body with neither, bytes that are not a JPEG, and a bad kind are 400", async () => {
+    const shared = PostCreated.parse((await share(y.b.sessionToken, { kind: "post", text: "", photo: jpeg.toString("base64") })).body);
+    const read = await photoStatus(x.a.sessionToken, shared.postId);
+    const empty = await share(y.b.sessionToken, { kind: "post", text: "   ", photo: null });
+    const notJpeg = await share(y.b.sessionToken, { kind: "post", text: "", photo: Buffer.alloc(300, 1).toString("base64") });
+    const badKind = await send({ method: "POST", url: routes.social.createPost.path, token: y.b.sessionToken, payload: { kind: "reel", text: "Hi", photo: null } });
+
+    expect(read.statusCode).toBe(200);
+    expect(read.bytes.equals(jpeg)).toBe(true);
+    expect((await feedOf(x.a.sessionToken)).find((post) => post.postId === shared.postId)).toMatchObject({ photo: `photos/${shared.postId}`, text: "" });
+    expect([empty.statusCode, notJpeg.statusCode, badKind.statusCode]).toEqual([400, 400, 400]);
+    await send({ method: "DELETE", url: pathOf(routes.social.deletePost, shared.postId), token: y.b.sessionToken });
+    expect((await photoStatus(x.a.sessionToken, shared.postId)).statusCode).toBe(404);
+  });
+
+  it("W7-SHARE-API-T3: a story shows first to its writer and to others for 24 hours, never in a feed or on a Posts list, and its photo goes when it expires", async () => {
+    const created = PostCreated.parse((await share(x.a.sessionToken, { kind: "story", text: "Sunrise run.", photo: jpeg.toString("base64") })).body);
+    const hours = (Date.parse(created.expiresAt ?? "") - Date.now()) / 3_600_000;
+    const ownRow = await storiesOf(x.a.sessionToken);
+    const otherRow = await storiesOf(y.b.sessionToken);
+
+    expect(created.kind).toBe("story");
+    expect(hours).toBeGreaterThan(23.9);
+    expect(hours).toBeLessThanOrEqual(24);
+    expect(ownRow[0]).toMatchObject({ storyId: created.postId, isMine: true, listingId: listingXa, text: "Sunrise run.", photo: `photos/${created.postId}` });
+    expect(otherRow.find((story) => story.storyId === created.postId)).toMatchObject({ isMine: false, displayName: "Test A" });
+    expect((await feedOf(y.b.sessionToken)).some((post) => post.postId === created.postId)).toBe(false);
+    expect(MyPostsView.parse((await send({ method: "GET", url: routes.social.listMyPosts.path, token: x.a.sessionToken })).body).posts.some((post) => post.postId === created.postId)).toBe(false);
+    expect((await photoStatus(y.b.sessionToken, created.postId)).statusCode).toBe(200);
+
+    await withPerson(t.db, x.a.personId, (trx) => trx.updateTable("posts").set({ expires_at: new Date(Date.now() - 1000) }).where("id", "=", created.postId).execute());
+    expect((await storiesOf(y.b.sessionToken)).some((story) => story.storyId === created.postId)).toBe(false);
+    expect((await photoStatus(y.b.sessionToken, created.postId)).statusCode).toBe(404);
+  });
+
+  it("W7-SHARE-API-T4: someone not in Explore sees their own post and story, with no listing, and nobody else sees either", async () => {
+    const post = PostCreated.parse((await share(y.a.sessionToken, { kind: "post", text: "Not listed yet.", photo: null })).body);
+    const story = PostCreated.parse((await share(y.a.sessionToken, { kind: "story", text: "Still not listed.", photo: null })).body);
+
+    expect(MyPostsView.parse((await send({ method: "GET", url: routes.social.listMyPosts.path, token: y.a.sessionToken })).body).posts[0]?.postId).toBe(post.postId);
+    expect((await storiesOf(y.a.sessionToken))[0]).toMatchObject({ storyId: story.postId, isMine: true, listingId: null });
+    expect((await feedOf(x.a.sessionToken)).some((row) => row.postId === post.postId)).toBe(false);
+    expect((await storiesOf(x.a.sessionToken)).some((row) => row.storyId === story.postId)).toBe(false);
+  });
+
+  it("W7-SHARE-API-T5: a sample person's newest photo post shows as their story, after real people's, with no end", async () => {
+    const mayaPost = "Founders: send me the one number you check every morning. Not the deck, just the number and why it matters to you.";
+    await withPerson(t.db, y.b.personId, (trx) => trx.updateTable("people").set({ is_sample: true, display_name: "Maya" }).where("id", "=", y.b.personId).execute());
+    const real = PostCreated.parse((await share(x.a.sessionToken, { kind: "story", text: "A real story.", photo: null })).body);
+    try {
+      const stories = await storiesOf(x.b.sessionToken);
+      const maya = stories.filter((story) => story.displayName === "Maya");
+
+      expect(maya).toHaveLength(1);
+      expect(maya[0]).toMatchObject({ isSample: true, isMine: false, listingId: listingYb, photo: "maya-morning", authorPhoto: "faces/maya", expiresAt: null, text: mayaPost });
+      expect(stories.findIndex((story) => story.storyId === real.postId)).toBeLessThan(stories.findIndex((story) => story.displayName === "Maya"));
+    } finally {
+      await withPerson(t.db, y.b.personId, (trx) => trx.updateTable("people").set({ is_sample: false, display_name: "Test B" }).where("id", "=", y.b.personId).execute());
+    }
+  });
+
+  it("W7-LIKE-API-T1: a like shows only to the person who liked, liking twice changes nothing, unliking takes it away, and a post you are not shown cannot be liked", async () => {
+    const post = PostCreated.parse((await share(y.b.sessionToken, { kind: "post", text: "Like me if you also plan on Sundays.", photo: null })).body);
+    const story = PostCreated.parse((await share(y.b.sessionToken, { kind: "story", text: "A story, not a post.", photo: null })).body);
+    const hidden = PostCreated.parse((await share(y.a.sessionToken, { kind: "post", text: "A post of someone not listed.", photo: null })).body);
+    const likePath = pathOf(routes.social.likePost, post.postId);
+
+    const liked = await send({ method: "PUT", url: likePath, token: x.a.sessionToken });
+    const again = await send({ method: "PUT", url: likePath, token: x.a.sessionToken });
+    expect([liked.statusCode, again.statusCode]).toEqual([200, 200]);
+    expect(PostLiked.parse(liked.body)).toEqual({ postId: post.postId, isLiked: true });
+    expect((await feedOf(x.a.sessionToken)).find((row) => row.postId === post.postId)?.isLiked).toBe(true);
+    expect((await feedOf(y.b.sessionToken)).find((row) => row.postId === post.postId)?.isLiked).toBe(false);
+
+    const unliked = await send({ method: "DELETE", url: likePath, token: x.a.sessionToken });
+    expect(PostLiked.parse(unliked.body)).toEqual({ postId: post.postId, isLiked: false });
+    expect((await feedOf(x.a.sessionToken)).find((row) => row.postId === post.postId)?.isLiked).toBe(false);
+    const statuses = await Promise.all([story.postId, hidden.postId, "00000000-0000-4000-8000-000000000999", "not-a-uuid"].map(async (id) => (await send({ method: "PUT", url: pathOf(routes.social.likePost, id), token: x.a.sessionToken })).statusCode));
+    expect(statuses).toEqual([404, 404, 404, 404]);
+  });
+
+  it("W7-SHARE-API-T6: after the day's shares, one more is refused with post_daily_cap", async () => {
+    await withPerson(t.db, x.b.personId, (trx) => trx.insertInto("posts").values([...Array(SHARES_PER_DAY).keys()].map((index) => ({ person_id: x.b.personId, text: `Share ${String(index)}` }))).execute());
+    const refused = await share(x.b.sessionToken, { kind: "post", text: "One too many.", photo: null });
+
+    expect(refused.statusCode).toBe(429);
+    expect(ErrorBody.parse(refused.body).code).toBe("post_daily_cap");
   });
 });
 

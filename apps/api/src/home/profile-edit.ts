@@ -1,7 +1,7 @@
 // Instagram's Edit profile for the signed-in person (3 Nov 2026, Ambar: "i cant change mine own photo and profile dtails"): a new
 // display name, and a profile photo put up, replaced or taken down. The browser draws the photo itself as a square JPEG, which drops
 // any camera or location data, and sends the bytes; the api checks they are a JPEG of a sane size and stores them. GET /api/photos/:id
-// serves a photo to anyone signed in who was shown its id, and a new photo always gets a new id.
+// serves a photo, a profile's or a post's, to anyone signed in who was shown its id, and a new photo always gets a new id.
 import type { FastifyInstance } from "fastify";
 import { sql } from "kysely";
 import { z } from "zod";
@@ -60,14 +60,16 @@ function registerPhotoUpdate(app: FastifyInstance, deps: RouteDeps): void {
   });
 }
 
-// Registers GET /api/photos/:id: 200 with the JPEG, kept by the browser for a year since an id never changes its image; 404 for an id
-// that is not a photo of an active person, or not an id at all.
+// Registers GET /api/photos/:id: 200 with the JPEG, kept by the browser for a year since an id never changes its image. The id is a
+// profile photo's, or since migration 0013 a post's or a story's, whose photo shows while the story has not expired. 404 for an id that
+// is not a photo of an active person, or not an id at all.
 function registerPhotoRead(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.people.readPhoto.path, async (request, reply) => {
     const personId = requirePerson(request);
     const params = PhotoParams.safeParse(request.params);
     if (!params.success) throw makeNotFoundError();
-    const image = await withPerson(deps.db, personId, async (trx) => (await sql<{ image: Buffer | null }>`SELECT profile_photo_read(${params.data.id}::uuid) AS image`.execute(trx)).rows[0]?.image ?? null);
+    const id = params.data.id;
+    const image = await withPerson(deps.db, personId, async (trx) => (await sql<{ image: Buffer | null }>`SELECT coalesce(profile_photo_read(${id}::uuid), post_photo_read(${id}::uuid)) AS image`.execute(trx)).rows[0]?.image ?? null);
     if (image === null) throw makeNotFoundError();
     return reply
       .code(200)

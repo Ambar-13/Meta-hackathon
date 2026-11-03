@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { postAgeWords } from "../people/index.js";
 import type { DirectoryListing, Post } from "@meet-first/contracts";
-import { keyWords, noteItemFor, peopleRowAt, storyPeople } from "./explore-state.js";
+import { keyWords, noteItemFor, peopleRowAt } from "./explore-state.js";
 
 describe("where the suggested people sit in the feed", () => {
   it("W7-SAMPLE-WEB-T6: after the second post, after the last when there are fewer, and first when there are none", () => {
@@ -56,19 +56,5 @@ describe("the line under a post, from what its writer shared", () => {
   it("W7-NOTE-T2: key words are four letters or more, not common, without a plural s, and never the writer's own name", () => {
     expect([...keyWords("Draw the three screens before you write any code")]).toEqual(["draw", "three", "screen", "write", "code"]);
     expect(noteItemFor(junPost("Jun says hello."), { ...JUN, items: [{ kind: "habit", claim: "Jun likes tea", quote: "Jun here" }] })).toBeNull();
-  });
-});
-
-describe("the row of faces", () => {
-  it("W7-FACES-T2: friends come first, then everyone else, each group in its order on the page", () => {
-    const person = (n: number, displayName: string): DirectoryListing => ({
-      listingId: `00000000-0000-4000-8000-00000000061${String(n)}`, displayName, line: "", openToRomance: false, isSample: false, items: [],
-    });
-    const listings = [person(1, "Ravi"), person(2, "Mira"), person(3, "Jun"), person(4, "Leila")];
-    const friendIds = new Set([listings[2]?.listingId, listings[3]?.listingId]);
-
-    expect(storyPeople(listings, (listingId) => friendIds.has(listingId)).map((listing) => listing.displayName)).toEqual(["Jun", "Leila", "Ravi", "Mira"]);
-    expect(storyPeople(listings, () => false).map((listing) => listing.displayName)).toEqual(["Ravi", "Mira", "Jun", "Leila"]);
-    expect(storyPeople([], () => true)).toEqual([]);
   });
 });

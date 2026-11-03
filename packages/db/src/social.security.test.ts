@@ -189,3 +189,72 @@ describe("profile photos in the database", () => {
   });
 });
 
+
+describe("posts, stories and likes in the database", () => {
+  // A stand-in for a JPEG: the start and end marks around some bytes, which is all the table checks.
+  const jpeg = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(120, 5), Buffer.from([0xff, 0xd9])]);
+  // One hour in milliseconds.
+  const hour = 3_600_000;
+
+  it("W7-POST-DB-T1: a person reads only their own posts and likes rows, cannot like as someone else, and liked_posts gives the worker, and only the worker, that person's likes", async () => {
+    const postId = (await asPerson(t.db, y.b.personId, (trx) => trx.insertInto("posts").values({ person_id: y.b.personId, text: "Sundays are for planning." }).returning("id").executeTakeFirstOrThrow())).id;
+    try {
+      expect(await asPerson(t.db, x.a.personId, (trx) => trx.selectFrom("posts").select("id").where("id", "=", postId).execute())).toEqual([]);
+      await asPerson(t.db, x.a.personId, (trx) => trx.insertInto("post_likes").values({ post_id: postId, person_id: x.a.personId }).execute());
+      const forged = await caught(() => asPerson(t.db, x.a.personId, (trx) => trx.insertInto("post_likes").values({ post_id: postId, person_id: y.a.personId }).execute()));
+      const seenByWriter = await asPerson(t.db, y.b.personId, (trx) => trx.selectFrom("post_likes").select("person_id").execute());
+      const likedByA = await asPerson(worker, x.a.personId, async (trx) => (await sql<{ display_name: string; text: string; has_photo: boolean }>`SELECT display_name, text, has_photo FROM liked_posts(10)`.execute(trx)).rows);
+      const likedByB = await asPerson(worker, y.b.personId, async (trx) => (await sql`SELECT * FROM liked_posts(10)`.execute(trx)).rows);
+      const apiCall = await caught(() => asPerson(t.db, x.a.personId, (trx) => sql`SELECT * FROM liked_posts(10)`.execute(trx)));
+      const anonymous = await withNoContext(t.db, async (trx) => ({
+        liked: await withNoContext(worker, async (workerTrx) => (await sql`SELECT * FROM liked_posts(10)`.execute(workerTrx)).rows),
+        stories: (await sql`SELECT * FROM story_feed(10)`.execute(trx)).rows,
+        visible: (await sql<{ visible: boolean }>`SELECT post_is_visible(${postId}::uuid) AS visible`.execute(trx)).rows[0]?.visible,
+      }));
+
+      expect(Reflect.get(forged ?? {}, "code")).toBe("42501");
+      expect(Reflect.get(apiCall ?? {}, "code")).toBe("42501");
+      expect(seenByWriter).toEqual([]);
+      expect(likedByA).toEqual([{ display_name: "Test B", text: "Sundays are for planning.", has_photo: false }]);
+      expect(likedByB).toEqual([]);
+      expect(anonymous).toEqual({ liked: [], stories: [], visible: false });
+    } finally {
+      await asPerson(t.db, y.b.personId, (trx) => trx.deleteFrom("posts").where("id", "=", postId).execute());
+    }
+  });
+
+  it("W7-POST-DB-T2: story_feed shows a listed person's unexpired story to anyone signed in and an unlisted person's only to them, and a story's photo ends with it", async () => {
+    const listedStory = (await asPerson(t.db, y.b.personId, (trx) => trx.insertInto("posts").values({ person_id: y.b.personId, kind: "story", text: "", photo: jpeg, expires_at: new Date(Date.now() + hour) }).returning("id").executeTakeFirstOrThrow())).id;
+    const unlistedStory = (await asPerson(t.db, x.a.personId, (trx) => trx.insertInto("posts").values({ person_id: x.a.personId, kind: "story", text: "Mine alone.", expires_at: new Date(Date.now() + hour) }).returning("id").executeTakeFirstOrThrow())).id;
+    const storiesOf = async (personId: string) => (await asPerson(t.db, personId, async (trx) => (await sql<{ story_id: string; listing_id: string | null; is_mine: boolean; has_photo: boolean }>`SELECT story_id, listing_id, is_mine, has_photo FROM story_feed(10)`.execute(trx)).rows));
+    const photoAs = async (personId: string) => (await asPerson(t.db, personId, async (trx) => (await sql<{ photo: Buffer | null }>`SELECT post_photo_read(${listedStory}::uuid) AS photo`.execute(trx)).rows[0]?.photo)) ?? null;
+    try {
+      expect(await storiesOf(x.a.personId)).toEqual([
+        { story_id: unlistedStory, listing_id: null, is_mine: true, has_photo: false },
+        { story_id: listedStory, listing_id: listingYb, is_mine: false, has_photo: true },
+      ]);
+      expect(await storiesOf(y.a.personId)).toEqual([{ story_id: listedStory, listing_id: listingYb, is_mine: false, has_photo: true }]);
+      expect((await photoAs(x.a.personId))?.equals(jpeg)).toBe(true);
+      const isStoryVisible = await asPerson(t.db, x.a.personId, async (trx) => (await sql<{ visible: boolean }>`SELECT post_is_visible(${listedStory}::uuid) AS visible`.execute(trx)).rows[0]?.visible);
+      expect(isStoryVisible).toBe(false);
+
+      await asPerson(t.db, y.b.personId, (trx) => trx.updateTable("posts").set({ expires_at: new Date(Date.now() - 1000) }).where("id", "=", listedStory).execute());
+      expect(await storiesOf(y.a.personId)).toEqual([]);
+      expect(await photoAs(x.a.personId)).toBeNull();
+    } finally {
+      await asPerson(t.db, y.b.personId, (trx) => trx.deleteFrom("posts").where("id", "=", listedStory).execute());
+      await asPerson(t.db, x.a.personId, (trx) => trx.deleteFrom("posts").where("id", "=", unlistedStory).execute());
+    }
+  });
+
+  it("W7-POST-DB-T3: a story needs an end and a post none, and every share needs words or a photo", async () => {
+    const insertAsB = (values: { kind?: "post" | "story"; text: string; photo?: Buffer; expires_at?: Date }): Promise<unknown> => caught(() => asPerson(t.db, y.b.personId, (trx) => trx.insertInto("posts").values({ person_id: y.b.personId, ...values }).execute()));
+    const codes = await Promise.all([
+      insertAsB({ kind: "story", text: "No end." }),
+      insertAsB({ kind: "post", text: "An end.", expires_at: new Date(Date.now() + hour) }),
+      insertAsB({ kind: "post", text: "" }),
+    ]);
+
+    expect(codes.map((error): unknown => Reflect.get(error ?? {}, "code"))).toEqual(["23514", "23514", "23514"]);
+  });
+});

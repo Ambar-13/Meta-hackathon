@@ -16,7 +16,7 @@
 /* ---------- phone: the top bar with Settings, and the floating pill of icons ---------- */
 @media (max-width: 767.98px) {
   .social-frame { --tab-bar: 80px; }
-  .social-rail .rail-logo, .social-pages.tab-bar a.rail-only { display: none; }
+  .social-rail .rail-logo, .social-pages.tab-bar a.rail-only, .social-pages.tab-bar a.phone-hidden { display: none; }
   /* Instagram's top bar: a button at each end and the logo in the middle. */
   .social-frame .social-top { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; height: 56px; padding: 0 4px;
     background: color-mix(in oklab, var(--ui-bg) 94%, transparent); box-shadow: 0 1px 0 var(--ui-line); }

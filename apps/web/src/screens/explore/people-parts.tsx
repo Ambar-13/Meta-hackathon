@@ -74,16 +74,17 @@ export const PersonRow = (props: { listing: DirectoryListing; friends: ExploreFr
   );
 };
 
-// The photos as Instagram's Explore grid: every photo post as a tall tile with square corners, three to a row, newest first, each
-// opening its writer's Posts tab. On a laptop the writer's face and name show over the tile on hover. Nothing shows without photos.
+// The photos as Instagram's Explore grid: every photo post of someone else as a tall tile with square corners, three to a row, newest
+// first, each opening its writer's Posts tab. On a laptop the writer's face and name show over the tile on hover. Nothing shows without
+// photos.
 export const PhotoGrid = (props: { posts: readonly Post[] }): ReactElement | null => {
-  const photos = props.posts.filter((post) => photoOf(post.photo) !== null);
+  const photos = props.posts.filter((post) => post.isMine !== true && photoOf(post.photo) !== null);
   if (photos.length === 0) return null;
   return (
     <ul className="photo-grid">
       {photos.map((post) => (
         <li key={post.postId}>
-          <Link className="photo-cell" to={personPostsPath(post.listingId)} aria-label={`${post.displayName}'s posts: ${post.photoAlt ?? post.text}`}>
+          <Link className="photo-cell" to={personPostsPath(post.listingId)} aria-label={`${post.displayName}'s posts: ${post.photoAlt ?? (post.text === "" ? "a photo" : post.text)}`}>
             <img src={photoOf(post.photo)?.src} alt="" loading="lazy" decoding="async" />
             <span className="photo-cell-who" aria-hidden="true">
               <PersonAvatar name={post.displayName} size="s" photo={post.authorPhoto} isSample={post.isSample} />

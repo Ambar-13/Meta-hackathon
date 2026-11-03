@@ -42,14 +42,15 @@ const OpenFrame = (props: { main: ReactElement; hasSettingsLink: boolean; pathna
   );
 };
 
-// The frame of a signed-in page: the phone's top bar as Instagram's, Invite a friend at its left end, the logo in the middle and Settings
-// at its right end (Ambar, 3 Nov 2026: "like instagram you had the logo centred"), then the rail or tab bar and the content column.
+// The frame of a signed-in page: the phone's top bar as Instagram's, Create at its left end (the + that shares a post or a story; Create
+// links to Invite a friend), the logo in the middle and Settings at its right end (Ambar, 3 Nov 2026: "like instagram you had the logo
+// centred"), then the rail or tab bar and the content column.
 const SignedInFrame = (props: { main: ReactElement; hasSettingsLink: boolean; pathname: string }): ReactElement => {
   return (
     <div className="social-frame">
       <header className="top-bar social-top">
-        <Link className="top-invite" to={APP_PATHS.pair} aria-label="Invite a friend">
-          <Icon name="invite" size={24} />
+        <Link className="top-invite" to={APP_PATHS.create} aria-label="Create a post or story">
+          <Icon name="create" size={24} />
         </Link>
         <Link className="logo" to={APP_PATHS.home}>
           <Sticker name="tags" />

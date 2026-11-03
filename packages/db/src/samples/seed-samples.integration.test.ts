@@ -102,18 +102,19 @@ describe("the sample people seed", () => {
 });
 
 describe("posts", () => {
-  it("W7-SAMPLE-T8: explore_posts shows the newest posts of listed people, leaving out your own, and never a person id", async () => {
+  it("W7-SAMPLE-T8: explore_posts shows the newest posts of listed people, your own among them marked as yours, and never a person id", async () => {
     const rows = await asPerson(t.db, viewer, async (trx) => (await sql<Record<string, unknown>>`SELECT * FROM explore_posts(30)`.execute(trx)).rows);
-    const own = await asPerson(t.db, listedReal.personId, async (trx) => (await sql<{ display_name: string }>`SELECT display_name FROM explore_posts(30)`.execute(trx)).rows);
+    const own = await asPerson(t.db, listedReal.personId, async (trx) => (await sql<{ display_name: string; is_mine: boolean }>`SELECT display_name, is_mine FROM explore_posts(30)`.execute(trx)).rows);
     const postCount = SAMPLE_PEOPLE.reduce((sum, person) => sum + person.posts.length, 0);
 
     expect(rows).toHaveLength(postCount + 1);
-    expect(Object.keys(rows[0] ?? {}).sort()).toEqual(["created_at", "display_name", "is_sample", "listing_id", "post_id", "text"]);
-    expect(rows[0]).toMatchObject({ display_name: "Real Person", is_sample: false, text: "A post by a real person." });
+    expect(Object.keys(rows[0] ?? {}).sort()).toEqual(["created_at", "display_name", "has_photo", "is_liked", "is_mine", "is_sample", "listing_id", "post_id", "text"]);
+    expect(rows[0]).toMatchObject({ display_name: "Real Person", is_sample: false, text: "A post by a real person.", is_mine: false, is_liked: false, has_photo: false });
     expect(rows[1]).toMatchObject({ display_name: "Jun", is_sample: true });
     const times = rows.map((row) => (row.created_at as Date).getTime());
     expect([...times].sort((a, b) => b - a)).toEqual(times);
-    expect(own.some((row) => row.display_name === "Real Person")).toBe(false);
+    expect(own.filter((row) => row.display_name === "Real Person")).toEqual([{ display_name: "Real Person", is_mine: true }]);
+    expect(own.filter((row) => row.is_mine)).toHaveLength(1);
   });
 
   it("W7-SAMPLE-T9: listing_posts shows one listed person's posts, and nothing without a person set", async () => {

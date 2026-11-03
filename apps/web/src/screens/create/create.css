@@ -1,0 +1,45 @@
+/* Create, after Instagram's (3 Nov 2026): Post or Story as a two-choice pill, the photo, the words, a line on what your Meety learns,
+   then Share, full width and the page's one blue. A post's photo is square and a story's is the whole picture on its blurred copy, both
+   with square corners as every photo in the app; on a laptop the photo sits left of the words. Spacing is on a 4px grid. */
+.create { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; max-width: 935px; margin: 0 auto; }
+.create-kinds { display: inline-flex; justify-self: start; gap: 4px; padding: 4px; border-radius: 999px; background: var(--ui-soft); }
+.create-kind { min-height: 40px; padding: 0 20px; border: 0; border-radius: 999px; background: none; color: var(--ui-ink-2); font: 600 15px/20px var(--ui-font); cursor: pointer; }
+.create-kind:hover { color: var(--ui-ink); }
+.create-kind[aria-pressed="true"] { background: var(--ui-bg); color: var(--ui-ink); box-shadow: 0 1px 2px color-mix(in oklab, var(--ui-ink) 12%, transparent); }
+.create-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+
+/* the place to choose a photo, the size of the photo it becomes; the file picker fills it, so a tap anywhere opens the photos */
+.create-drop { position: relative; display: grid; place-items: center; aspect-ratio: 1 / 1; border: 1px dashed var(--line-strong); background: var(--ui-soft); cursor: pointer; }
+.create-drop.is-story { width: min(100%, calc(min(56vh, 560px) * 9 / 16)); aspect-ratio: 9 / 16; justify-self: center; }
+.create-drop:hover { background: var(--ui-hover); }
+.create-drop:focus-within, .create-change:focus-within { outline: 2px solid var(--ui-blue); outline-offset: 2px; }
+.create-drop.is-busy, .create-change.is-busy { opacity: 0.6; cursor: progress; }
+.create-drop-inner { display: grid; justify-items: center; gap: 8px; padding: 24px; color: var(--ui-ink); text-align: center; }
+.create-drop-inner b { font: 600 16px/22px var(--ui-font); }
+.create-drop-inner small { color: var(--ui-ink-2); font: 400 14px/20px var(--ui-font); }
+.create-file { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.create-photo { display: grid; gap: 12px; align-content: start; }
+.create.is-story .create-preview { width: min(100%, calc(min(56vh, 560px) * 9 / 16)); justify-self: center; }
+.create-photo-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; }
+.create-change { position: relative; cursor: pointer; }
+
+/* the words, the lines under them, and Share */
+.create-words { display: grid; gap: 12px; align-content: start; }
+.create-caption { display: grid; gap: 6px; margin: 0; font: 600 14px/20px var(--ui-font); }
+.create-caption textarea { min-height: 112px; padding: 12px 14px; border: 1px solid var(--ui-line); border-radius: var(--ui-radius); background: var(--ui-bg); color: var(--ui-ink);
+  font: 400 16px/24px var(--ui-font); resize: vertical; }
+.create-caption textarea:focus { border-color: var(--ui-ink-2); outline: none; }
+.create-count, .create-note { margin: 0; color: var(--ui-ink-2); font: 400 14px/20px var(--ui-font); }
+.create-meety { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--ui-ink-2); font: 400 14px/20px var(--ui-font); }
+.create-meety .meety-mark { --a-size: 22px; }
+.create-refusal { margin: 0; color: var(--ui-red); font-weight: 600; }
+.create-share { width: 100%; min-height: 48px; margin-top: 4px; }
+.create-invite { justify-self: center; display: inline-flex; align-items: center; min-height: 44px; font: 600 14px/20px var(--ui-font); }
+
+@media (min-width: 900px) {
+  .create-body { grid-template-columns: minmax(0, 1.15fr) minmax(300px, 1fr); align-items: start; gap: 32px; }
+  .create.is-story .create-body { grid-template-columns: minmax(0, 1fr) minmax(300px, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .create-kind { transition: none; }
+}

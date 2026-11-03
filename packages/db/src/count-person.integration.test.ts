@@ -11,7 +11,7 @@ let worker: Kysely<Database>;
 let m: SeededMeeting;
 
 // The row counts a fully deleted person must show: every key of the count, at zero.
-const ZERO_COUNTS = { people: 0, briefs: 0, card_items: 0, cards: 0, claims: 0, comics: 0, directory_listings: 0, friend_requests: 0, ledger: 0, meeting_members: 0, names_passes: 0, orchestrator_messages: 0, pairs: 0, persona_answers: 0, persona_asks: 0, posts: 0, profile_photos: 0, quiz_items: 0, quizzes: 0, redactions: 0, sessions: 0, source_names: 0, sources: 0, transfer_links: 0, turns: 0 };
+const ZERO_COUNTS = { people: 0, briefs: 0, card_items: 0, cards: 0, claims: 0, comics: 0, directory_listings: 0, friend_requests: 0, ledger: 0, meeting_members: 0, names_passes: 0, orchestrator_messages: 0, pairs: 0, persona_answers: 0, persona_asks: 0, post_likes: 0, posts: 0, profile_photos: 0, quiz_items: 0, quizzes: 0, redactions: 0, sessions: 0, source_names: 0, sources: 0, transfer_links: 0, turns: 0 };
 
 beforeAll(async () => {
   t = await freshTestDatabase();
@@ -35,7 +35,7 @@ describe("count person", () => {
       { table: "ledger", columns: ["person_id"] }, { table: "meeting_members", columns: ["person_id"] }, { table: "names_passes", columns: ["person_id"] },
       { table: "orchestrator_messages", columns: ["person_id"] },
       { table: "pairs", columns: ["creator_person_id", "joiner_person_id"] },
-      { table: "persona_answers", columns: ["asker_person_id", "subject_person_id"] }, { table: "persona_asks", columns: ["person_id"] }, { table: "posts", columns: ["person_id"] }, { table: "profile_photos", columns: ["person_id"] },
+      { table: "persona_answers", columns: ["asker_person_id", "subject_person_id"] }, { table: "persona_asks", columns: ["person_id"] }, { table: "post_likes", columns: ["person_id"] }, { table: "posts", columns: ["person_id"] }, { table: "profile_photos", columns: ["person_id"] },
       { table: "quiz_items", columns: ["person_id"] }, { table: "quizzes", columns: ["person_id"] },
       { table: "redactions", columns: ["person_id"] }, { table: "sessions", columns: ["person_id"] }, { table: "source_names", columns: ["person_id"] },
       { table: "sources", columns: ["person_id"] }, { table: "transfer_links", columns: ["person_id"] }, { table: "turns", columns: ["person_id"] },
@@ -45,8 +45,8 @@ describe("count person", () => {
   it("D69-T2: counts a seeded person's rows table by table", async () => {
     const counts = await countRowsForPerson(t.db, m.a.personId);
 
-    expect(counts).toEqual({ people: 1, briefs: 0, card_items: 6, cards: 1, claims: 0, comics: 0, directory_listings: 0, friend_requests: 0, ledger: 0, meeting_members: 1, names_passes: 1, orchestrator_messages: 0, pairs: 1, persona_answers: 0, persona_asks: 0, posts: 0, profile_photos: 0, quiz_items: 0, quizzes: 0, redactions: 0, sessions: 1, source_names: 0, sources: 1, transfer_links: 0, turns: 3 });
-    expect(Object.keys(counts)).toEqual(["people", "briefs", "card_items", "cards", "claims", "comics", "directory_listings", "friend_requests", "ledger", "meeting_members", "names_passes", "orchestrator_messages", "pairs", "persona_answers", "persona_asks", "posts", "profile_photos", "quiz_items", "quizzes", "redactions", "sessions", "source_names", "sources", "transfer_links", "turns"]);
+    expect(counts).toEqual({ people: 1, briefs: 0, card_items: 6, cards: 1, claims: 0, comics: 0, directory_listings: 0, friend_requests: 0, ledger: 0, meeting_members: 1, names_passes: 1, orchestrator_messages: 0, pairs: 1, persona_answers: 0, persona_asks: 0, post_likes: 0, posts: 0, profile_photos: 0, quiz_items: 0, quizzes: 0, redactions: 0, sessions: 1, source_names: 0, sources: 1, transfer_links: 0, turns: 3 });
+    expect(Object.keys(counts)).toEqual(["people", "briefs", "card_items", "cards", "claims", "comics", "directory_listings", "friend_requests", "ledger", "meeting_members", "names_passes", "orchestrator_messages", "pairs", "persona_answers", "persona_asks", "post_likes", "posts", "profile_photos", "quiz_items", "quizzes", "redactions", "sessions", "source_names", "sources", "transfer_links", "turns"]);
   });
 
   it("D69-T3: formatCounts prints one line per table and exits 1 while rows remain", async () => {
@@ -55,9 +55,9 @@ describe("count person", () => {
     const empty = formatCounts({ people: 0 });
     const lines = full.text.split("\n");
 
-    expect(lines).toHaveLength(26);
+    expect(lines).toHaveLength(27);
     expect(lines[0]).toBe(`${"people".padEnd(20)}1`);
-    expect(lines[25]).toBe(`${"total".padEnd(20)}16`);
+    expect(lines[26]).toBe(`${"total".padEnd(20)}16`);
     expect(full.exitCode).toBe(1);
     expect(empty.text).toBe(`${"people".padEnd(20)}0\n${"total".padEnd(20)}0`);
     expect(empty.exitCode).toBe(0);
@@ -98,6 +98,6 @@ describe("count person", () => {
     await asPerson(t.db, own.a.personId, (trx) => trx.deleteFrom("people").where("id", "=", own.a.personId).execute());
     const counts = await countRowsForPerson(t.db, own.b.personId);
 
-    expect(counts).toEqual({ people: 1, briefs: 0, card_items: 6, cards: 1, claims: 0, comics: 0, directory_listings: 0, friend_requests: 0, ledger: 0, meeting_members: 0, names_passes: 1, orchestrator_messages: 0, pairs: 0, persona_answers: 0, persona_asks: 0, posts: 0, profile_photos: 0, quiz_items: 0, quizzes: 0, redactions: 0, sessions: 1, source_names: 0, sources: 1, transfer_links: 0, turns: 3 });
+    expect(counts).toEqual({ people: 1, briefs: 0, card_items: 6, cards: 1, claims: 0, comics: 0, directory_listings: 0, friend_requests: 0, ledger: 0, meeting_members: 0, names_passes: 1, orchestrator_messages: 0, pairs: 0, persona_answers: 0, persona_asks: 0, post_likes: 0, posts: 0, profile_photos: 0, quiz_items: 0, quizzes: 0, redactions: 0, sessions: 1, source_names: 0, sources: 1, transfer_links: 0, turns: 3 });
   });
 });

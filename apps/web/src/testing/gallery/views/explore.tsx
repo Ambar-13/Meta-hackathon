@@ -1,10 +1,10 @@
-import { DirectoryListing, DirectoryPage, FriendRequestsView, FriendsView, PostsView, type Friend, type FriendRequestView, type Post } from "@meet-first/contracts";
+import { DirectoryListing, DirectoryPage, FriendRequestsView, FriendsView, PostsView, StoriesView, type Friend, type FriendRequestView, type HomeView, type Post, type Story } from "@meet-first/contracts";
 import { ROUTE_PATTERNS, routes } from "../../../app-shell/index.js";
 import { FeedScreen, SearchScreen } from "../../../screens/explore/index.js";
 import { FOREVER_MS, type GalleryReply, type GalleryStub } from "../fetch-stub.js";
 import type { GalleryView } from "../gallery-views.js";
 import { AfterSteps } from "./help.js";
-import { SERVER_NOW } from "../../fixtures.js";
+import { IDS, SERVER_NOW } from "../../fixtures.js";
 
 // The gallery's fixed ids for the rail, which the other wave 7 views reuse.
 const ID = (n: number): string => `00000000-0000-4000-8000-${String(950 + n).padStart(12, "0")}`;
@@ -75,6 +75,20 @@ export const SAMPLE_POSTS: Post[] = [
   POST(10, TOMAS, { text: "If your eval looks too good, check where the test data came from. Nine times out of ten that is the whole story.", hoursAgo: 70 }),
 ];
 
+// The stories of Home, as the live site shows them after the seed (3 Nov 2026): Mira's story of words an hour ago, then each sample
+// person's newest photo post as their story, as GET /api/stories gives them.
+const MIRA_LISTING = EXPLORE_LISTINGS[0] as DirectoryListing;
+const STORIES: Story[] = [
+  { storyId: LISTING(80), listingId: MIRA_LISTING.listingId, displayName: MIRA_LISTING.displayName, isSample: false, isMine: false, authorPhoto: null, text: "Shipping the stories row tonight. Who wants to test it with me?", photo: null, photoAlt: null,
+    createdAt: new Date(Date.now() - 3_600_000).toISOString(), expiresAt: new Date(Date.now() + 23 * 3_600_000).toISOString() },
+  ...SAMPLE_POSTS.filter((post) => post.photo !== null).filter((post, index, all) => all.findIndex((other) => other.listingId === post.listingId) === index).map((post) => ({
+    storyId: post.postId, listingId: post.listingId, displayName: post.displayName, isSample: true, isMine: false, authorPhoto: post.authorPhoto ?? null, text: post.text,
+    photo: post.photo ?? null, photoAlt: post.photoAlt ?? null, createdAt: post.createdAt, expiresAt: null,
+  })),
+];
+// Ana's home view with an approved card, so the feed shows no next step and Your story shows her initial.
+const FEED_HOME: HomeView = { displayName: "Ana", source: { id: IDS.source, namesPassDone: true, namesReviewed: true }, card: { id: IDS.card, state: "approved", itemCount: 2, items: [] }, meetings: [], pairs: [], serverNow: SERVER_NOW };
+
 // One page of Explore.
 function page(listings: DirectoryListing[], hasMore: boolean): GalleryReply {
   return { status: 200, body: DirectoryPage.parse({ listings, page: 0, hasMore }) };
@@ -85,9 +99,13 @@ function postsReply(posts: Post[]): GalleryReply {
   return { status: 200, body: PostsView.parse({ posts }) };
 }
 
-// The page's reads: these Explore replies, these posts (none unless given), and these friends (the rail's five unless given).
-function reads(pages: GalleryReply | GalleryReply[], others: { posts?: GalleryReply; friends?: Friend[] } = {}): GalleryStub[] {
-  return [...railStubs(others.friends ?? railFriends(5)), { route: routes.directory.browse, replies: pages }, { route: routes.social.listPosts, replies: others.posts ?? postsReply([]) }];
+// The page's reads: these Explore replies, these posts and stories (none unless given), these friends (the rail's five unless given),
+// and Ana's home view.
+function reads(pages: GalleryReply | GalleryReply[], others: { posts?: GalleryReply; stories?: Story[]; friends?: Friend[] } = {}): GalleryStub[] {
+  return [
+    ...railStubs(others.friends ?? railFriends(5)), { route: routes.directory.browse, replies: pages }, { route: routes.social.listPosts, replies: others.posts ?? postsReply([]) },
+    { route: routes.social.listStories, replies: { status: 200, body: StoriesView.parse({ stories: others.stories ?? [] }) } }, { route: routes.people.readHome, replies: { status: 200, body: FEED_HOME } },
+  ];
 }
 
 // The rail's five friends and Jun, a sample person whose agent can be asked, so the feed shows Ask Meety on Jun's post.
@@ -108,7 +126,17 @@ function searchView(head: { name: string; title: string }, stubs: GalleryStub[],
 export const views: readonly GalleryView[] = [
   feedView(
     { name: "home-feed", title: "Home, the feed" },
-    reads(page([...EXPLORE_LISTINGS.slice(0, 1), ...SAMPLE_LISTINGS], false), { posts: postsReply(SAMPLE_POSTS), friends: FEED_FRIENDS }),
+    reads(page([...EXPLORE_LISTINGS.slice(0, 1), ...SAMPLE_LISTINGS], false), { posts: postsReply(SAMPLE_POSTS.map((post, index) => ({ ...post, isLiked: index === 1 }))), stories: STORIES, friends: FEED_FRIENDS }),
+  ),
+  feedView(
+    { name: "home-story", title: "Home, Maya's story open" },
+    reads(page([...EXPLORE_LISTINGS.slice(0, 1), ...SAMPLE_LISTINGS], false), { posts: postsReply(SAMPLE_POSTS), stories: STORIES, friends: FEED_FRIENDS }),
+    <AfterSteps steps={[{ press: "Maya, new story" }, { press: "Pause" }]}><FeedScreen /></AfterSteps>,
+  ),
+  feedView(
+    { name: "home-story-words", title: "Home, Mira's story of words open" },
+    reads(page([...EXPLORE_LISTINGS.slice(0, 1), ...SAMPLE_LISTINGS], false), { posts: postsReply(SAMPLE_POSTS), stories: STORIES, friends: FEED_FRIENDS }),
+    <AfterSteps steps={[{ press: "Mira, new story" }, { press: "Pause" }]}><FeedScreen /></AfterSteps>,
   ),
   feedView({ name: "home-loading", title: "Home, loading" }, reads({ ...page(EXPLORE_LISTINGS, false), delayMs: FOREVER_MS })),
   feedView({ name: "home-error", title: "Home, the people failed to load" }, reads({ status: 500, body: { code: "server_error", message: "Something went wrong on our side. Try again in a minute." } })),

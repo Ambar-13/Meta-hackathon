@@ -17,10 +17,10 @@ afterEach(() => {
 
 // The pair that makes the viewer and Mira friends.
 const PAIR = "00000000-0000-4000-8000-000000000141";
-// The own-profile words of the Posts tab, word for word (wave 7).
+// The own-profile words of an empty Posts tab, word for word (3 Nov 2026, once anyone could share).
 const OWN_POSTS = {
-  heading: "Coming soon: your Meety posts.",
-  body: "Your Meety will draft posts from your chats or on a topic you give, and nothing goes up until you say yes. You will also be able to repost your Instagram posts here.",
+  heading: "Share your first post",
+  body: "Your posts show here and, once you are in Explore, in everyone's feed. Your Meety reads them to learn what you are into.",
 } as const;
 
 // Renders the profile of one listing with these replies for GET /api/directory/:id; search is added to the address.
@@ -123,8 +123,9 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
     expect(posts.getAttribute("aria-selected")).toBe("true");
     expect(document.activeElement).toBe(posts);
     const panel = screen.getByRole("tabpanel", { name: "Posts" });
-    expect(within(panel).getByRole("heading", { name: "Coming soon: posts by Mira's Meety." })).toBeTruthy();
-    expect(within(panel).getByText("Mira's Meety will draft posts from Mira's chats or on a topic Mira gives, and nothing goes up until Mira says yes.")).toBeTruthy();
+    expect(within(panel).getByRole("heading", { name: "No posts yet" })).toBeTruthy();
+    expect(within(panel).getByText("Mira has not shared a post yet.")).toBeTruthy();
+    expect(within(panel).queryByRole("link", { name: "New post" })).toBeNull();
     fireEvent.keyDown(posts, { key: "ArrowLeft" });
     expect(screen.getByRole("tab", { name: "About" }).getAttribute("aria-selected")).toBe("true");
     cleanup();
@@ -135,6 +136,7 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
     const own = screen.getByRole("tabpanel", { name: "Posts" });
     expect(within(own).getByRole("heading", { name: OWN_POSTS.heading })).toBeTruthy();
     expect(within(own).getByText(OWN_POSTS.body)).toBeTruthy();
+    expect(within(own).getByRole("link", { name: "New post" }).getAttribute("href")).toBe("/create");
   });
 
   it("W7-WEB-A-T9: a 404 profile shows This person is no longer in Explore., with Find people leading to Search", async () => {
@@ -254,12 +256,12 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
     expect(within(head).getByText("Friends")).toBeTruthy();
   });
 
-  it("W7-SAMPLE-WEB-T4: a profile with no posts shows the coming-soon card on Posts, and a real person carries no sample note", async () => {
+  it("W7-SAMPLE-WEB-T4: a profile with no posts says so on Posts, and a real person carries no sample note", async () => {
     stubRoute(routes.social.listListingPosts, [{ posts: [] }]);
     renderProfile(profileView({}), { search: "?tab=posts" });
     const head = await header();
 
-    expect(await screen.findByRole("heading", { name: "Coming soon: posts by Mira's Meety." })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "No posts yet" })).toBeTruthy();
     expect(within(head).queryByText("Sample")).toBeNull();
     expect(requestsTo(routes.social.listListingPosts)).toHaveLength(1);
   });

@@ -3,7 +3,7 @@
 // one of four colours that their name picks, so the same person always looks the same, and a sample person is their face with the
 // orange made-up mark. The landing keeps the name tags and stickers.
 import type { ReactElement } from "react";
-import { ArrowRight, ArrowUp, Check, ChevronRight, Compass, Grid3x3, Handshake, House, LayoutGrid, MessageCircle, Plus, Quote, Rows3, Search, Settings, Sparkles, SquarePlus, UserPlus, UserRound, Users } from "lucide-react";
+import { ArrowRight, ArrowUp, Check, ChevronLeft, ChevronRight, Compass, Grid3x3, Handshake, Heart, House, ImagePlus, LayoutGrid, MessageCircle, Plus, Quote, Rows3, Search, Settings, Sparkles, SquarePlus, UserPlus, UserRound, Users, X } from "lucide-react";
 import { initialOf } from "./look-parts.js";
 import { photoOf, photoUrl } from "./sample-photos.js";
 import { Sticker } from "./stickers.js";
@@ -30,6 +30,11 @@ const ICONS = {
   plus: Plus,
   arrow: ArrowRight,
   invite: SquarePlus,
+  create: SquarePlus,
+  photo: ImagePlus,
+  heart: Heart,
+  back: ChevronLeft,
+  close: X,
 } as const;
 // The name of one icon.
 export type IconName = keyof typeof ICONS;
@@ -72,15 +77,40 @@ export const PersonAvatar = (props: { name: string; size?: AvatarSize; className
   );
 };
 
+// The shape class of a photo by its size: square, tall or wide.
+function shapeOf(photo: { width: number; height: number }): "is-square" | "is-tall" | "is-wide" {
+  if (photo.height === photo.width) return "is-square";
+  return photo.height > photo.width ? "is-tall" : "is-wide";
+}
+
 // A post's photo, with square corners (Ambar, 3 Nov 2026: "instead of curved edges photos and reels use square"): a wide photo at 3:2, a
-// tall one at 4:5 on a phone and square on wider screens. Nothing shows for a key this build does not have.
+// tall one at 4:5 on a phone and square on wider screens, and a photo a person shared square. Nothing shows for a key this build does
+// not have.
 export const PostPhoto = (props: { photo: string | null | undefined; alt: string | null | undefined; className?: string }): ReactElement | null => {
   const found = photoOf(props.photo);
   if (found === null) return null;
-  const classes = ["post-photo", found.height > found.width ? "is-tall" : "is-wide", props.className ?? ""].filter((part) => part !== "").join(" ");
+  const classes = ["post-photo", shapeOf(found), props.className ?? ""].filter((part) => part !== "").join(" ");
   return (
     <div className={classes}>
       <img src={found.src} alt={props.alt ?? ""} width={found.width} height={found.height} loading="lazy" decoding="async" />
+    </div>
+  );
+};
+
+// A story's picture, after Instagram's: a tall 9:16 frame with square corners holding the whole photo on a blurred, darkened copy of
+// itself, so a wide photo shows whole, with the story's words over the foot of it; a story of words alone shows them large on the warm
+// card. alt is what a screen reader reads for the photo.
+export const StoryPicture = (props: { src: string | null; alt: string; text: string; className?: string }): ReactElement => {
+  const classes = ["story-picture", props.src === null ? "is-words" : "", props.className ?? ""].filter((part) => part !== "").join(" ");
+  return (
+    <div className={classes}>
+      {props.src === null ? null : (
+        <>
+          <img className="story-picture-backdrop" src={props.src} alt="" aria-hidden="true" />
+          <img className="story-picture-photo" src={props.src} alt={props.alt} />
+        </>
+      )}
+      {props.text === "" ? null : <p className="story-picture-words">{props.text}</p>}
     </div>
   );
 };

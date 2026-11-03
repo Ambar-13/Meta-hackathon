@@ -2,13 +2,15 @@ import "./explore.css";
 import { useState, type ReactElement } from "react";
 import { Link } from "react-router-dom";
 import type { DirectoryListing, Post, PostsView, PublicItem } from "@meet-first/contracts";
-import { APP_PATHS, chatPathWithDraft, ErrorNotice, personPostsPath, ScreenFrame, type PolledView } from "../../app-shell/index.js";
+import { APP_PATHS, chatPathWithDraft, ErrorNotice, personPostsPath, PROFILE_TAB_QUERY, ScreenFrame, type PolledView } from "../../app-shell/index.js";
 import { EmptyState, Icon, LoadingLine, MeetyMark, PersonAvatar, photoOf, PostPhoto } from "../../look/index.js";
 import { NextStep } from "../chat/index.js";
 import { useDirectoryBrowse, type BrowseHook } from "../directory/index.js";
-import { postAgeWords } from "../people/index.js";
-import { noteItemFor, peopleRowAt, storyPeople, useExploreFriends, useExplorePosts, useFeedHome, type ExploreFriends } from "./explore-state.js";
+import { DeletePost, postAgeWords } from "../people/index.js";
+import { noteItemFor, peopleRowAt, useExploreFriends, useExplorePosts, useFeedHome, type ExploreFriends } from "./explore-state.js";
 import { FriendControl, lineFor, PersonCard } from "./people-parts.js";
+import { StoriesRow } from "./stories.js";
+import { useLikes, useStories, type LikesModel } from "./story-state.js";
 
 // The words of Home, the feed (wave 7; Explore until 3 Nov 2026, when Ambar asked for the feed as the default page, named for what it
 // is: "explore should be the like default page... and it shouldnt be called eplroe because has feed + explroe both").
@@ -21,9 +23,9 @@ const FEED_COPY = {
   emptyLine: "Nobody has posted yet. Find people in Search.",
   retry: "Try again",
   postsFailed: "Posts did not load.",
-  storiesLabel: "People to meet",
-  yourMeety: "Your Meety",
   feedLabel: "Posts",
+  yourPost: "Your post",
+  yourPosts: "Your posts",
   more: "Show more",
   sample: "Sample person",
   suggestedTitle: "Suggested for you",
@@ -58,37 +60,6 @@ function todayWords(now: Date): string {
   return now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 }
 
-// The row of round faces at the top, as Instagram's stories and the "Other" concept's people: Your Meety first, which opens what your
-// Meety shares, then the people on the loaded pages of Explore, friends first, each opening their profile.
-const StoriesRow = (props: { browse: BrowseHook; friends: ExploreFriends }): ReactElement => {
-  const people = storyPeople(props.browse.listings, props.friends.isFriend);
-  return (
-    <section className="stories" aria-label={FEED_COPY.storiesLabel}>
-      <ul>
-        <li>
-          <Link className="story is-you" to={APP_PATHS.me}>
-            <span className="story-ring">
-              <MeetyMark size="l" />
-              <span className="story-plus" aria-hidden="true"><Icon name="plus" size={14} isBold /></span>
-            </span>
-            <span className="story-name">{FEED_COPY.yourMeety}</span>
-          </Link>
-        </li>
-        {people.map((listing) => (
-          <li key={listing.listingId}>
-            <Link className="story" to={APP_PATHS.person(listing.listingId)}>
-              <span className="story-ring">
-                <PersonAvatar name={listing.displayName} size="l" photo={listing.photo} isSample={listing.isSample} />
-              </span>
-              <span className="story-name">{listing.displayName}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-};
-
 // The strip under a post that ties it to what its writer shared: their own words from the public item that shares the most words with
 // the post, one link to their profile. Nothing shows when no item shares a word.
 const FeedNote = (props: { post: Post; item: PublicItem }): ReactElement => {
@@ -105,64 +76,104 @@ const FeedNote = (props: { post: Post; item: PublicItem }): ReactElement => {
   );
 };
 
-// One post, after the "Other" concept and Instagram: a header with the writer's picture (a sample person's face with the orange mark),
-// their name, the post's age and their line, with Add friend at the end; then the post, its words over its photo, or, with no photo, its
-// words large on a warm card; the strip tying it to what they shared; and Ask NAME's Meety, which opens the chat with a friend ask when
-// it can, and else says why under the post, and Posts, their Posts tab.
-const FeedPost = (props: { post: Post; listing: DirectoryListing | undefined; friends: ExploreFriends }): ReactElement => {
+// A post's head: the writer's picture (a sample person's face with the orange mark), their name, the post's age and their line, with
+// Add friend at the end; your own post leads to your own profile and has no Add friend.
+const FeedHead = (props: { post: Post; listing: DirectoryListing | undefined; friends: ExploreFriends }): ReactElement => {
+  const { post, friends } = props;
+  const listing = props.listing ?? listingOfPost(post);
+  const profile = post.isMine === true ? APP_PATHS.me : APP_PATHS.person(post.listingId);
+  const line = lineFor(listing.line, friends.adds.stateOf(post.listingId));
+  return (
+    <header className="feed-head">
+      <Link className="feed-avatar" to={profile} tabIndex={-1} aria-hidden="true">
+        <PersonAvatar name={post.displayName} photo={post.authorPhoto} isSample={post.isSample} />
+      </Link>
+      <div className="feed-who">
+        <p className="feed-name-row">
+          <Link className="feed-name" to={profile}>{post.displayName}</Link>
+          {post.isSample ? <span className="hidden-words">{FEED_COPY.sample}</span> : null}
+          <time className="feed-time" dateTime={post.createdAt}>{postAgeWords(post.createdAt, new Date())}</time>
+        </p>
+        {line === "" ? null : <p className="feed-line">{line}</p>}
+      </div>
+      {post.isMine === true ? null : <FriendControl listing={listing} friends={friends} look="post" />}
+    </header>
+  );
+};
+
+// A post's body: its words over its photo, or, with no photo, its words large on a warm card. A photo with no words shows alone.
+const FeedBody = (props: { post: Post }): ReactElement => {
+  const { post } = props;
+  if (photoOf(post.photo) === null) {
+    return (
+      <blockquote className={post.text.length > LONG_POST_CHARS ? "feed-quote is-long" : "feed-quote"}>
+        <p>{post.text}</p>
+      </blockquote>
+    );
+  }
+  return (
+    <>
+      {post.text === "" ? null : <p className="feed-text">{post.text}</p>}
+      <PostPhoto photo={post.photo} alt={post.photoAlt ?? `${post.displayName}'s photo`} className="feed-photo" />
+    </>
+  );
+};
+
+// Ask NAME's Meety, which opens the chat with a friend ask when it can, and else says why under the post.
+const AskAction = (props: { post: Post; friends: ExploreFriends }): ReactElement => {
   const { post, friends } = props;
   const [isWhyOpen, setIsWhyOpen] = useState(false);
-  const listing = props.listing ?? listingOfPost(post);
-  const profile = APP_PATHS.person(post.listingId);
-  const line = lineFor(listing.line, friends.adds.stateOf(post.listingId));
-  const item = noteItemFor(post, props.listing);
-  const hasPhoto = photoOf(post.photo) !== null;
   const askLabel = `Ask ${post.displayName}'s Meety`;
+  if (friends.canAsk(post.listingId)) {
+    return (
+      <Link className="feed-action is-ask" to={chatPathWithDraft(`How would ${post.displayName} react to `)}>
+        <Icon name="meety" size={20} />
+        {askLabel}
+      </Link>
+    );
+  }
   return (
-    <article className="feed-post" aria-label={`${post.displayName}'s post`}>
-      <header className="feed-head">
-        <Link className="feed-avatar" to={profile} tabIndex={-1} aria-hidden="true">
-          <PersonAvatar name={post.displayName} photo={post.authorPhoto} isSample={post.isSample} />
-        </Link>
-        <div className="feed-who">
-          <p className="feed-name-row">
-            <Link className="feed-name" to={profile}>{post.displayName}</Link>
-            {post.isSample ? <span className="hidden-words">{FEED_COPY.sample}</span> : null}
-            <time className="feed-time" dateTime={post.createdAt}>{postAgeWords(post.createdAt, new Date())}</time>
-          </p>
-          {line === "" ? null : <p className="feed-line">{line}</p>}
-        </div>
-        <FriendControl listing={listing} friends={friends} look="post" />
-      </header>
-      {hasPhoto ? (
-        <>
-          <p className="feed-text">{post.text}</p>
-          <PostPhoto photo={post.photo} alt={post.photoAlt} className="feed-photo" />
-        </>
-      ) : (
-        <blockquote className={post.text.length > LONG_POST_CHARS ? "feed-quote is-long" : "feed-quote"}>
-          <p>{post.text}</p>
-        </blockquote>
-      )}
+    <>
+      <button type="button" className="feed-action is-ask" aria-expanded={isWhyOpen} onClick={() => { setIsWhyOpen(!isWhyOpen); }}>
+        <Icon name="meety" size={20} />
+        {askLabel}
+      </button>
+      {isWhyOpen ? <p className="feed-why" role="status">{askWhyNot(post.displayName, post.listingId, friends)}</p> : null}
+    </>
+  );
+};
+
+// A post's foot: Like, the heart filled red once you like it, then Ask NAME's Meety and Posts, their Posts tab; on your own post, Like,
+// Posts, your own Posts tab, and Delete.
+const FeedFoot = (props: { post: Post; friends: ExploreFriends; likes: LikesModel; onDeleted: () => void }): ReactElement => {
+  const { post, likes } = props;
+  const isMine = post.isMine === true;
+  return (
+    <footer className="feed-actions">
+      <button type="button" className="feed-action" aria-pressed={likes.isLiked(post)} aria-label={isMine ? "Like your post" : `Like ${post.displayName}'s post`} onClick={() => void likes.toggle(post)}>
+        <Icon name="heart" size={20} />
+        Like
+      </button>
+      {isMine ? null : <AskAction post={post} friends={props.friends} />}
+      <Link className="feed-action" to={isMine ? `${APP_PATHS.me}?${PROFILE_TAB_QUERY}=posts` : personPostsPath(post.listingId)} aria-label={isMine ? FEED_COPY.yourPosts : `${post.displayName}'s posts`}>
+        <Icon name="posts" size={20} />
+        Posts
+      </Link>
+      {isMine ? <DeletePost postId={post.postId} onDeleted={props.onDeleted} buttonClass="feed-action" /> : null}
+    </footer>
+  );
+};
+
+// One post, after the "Other" concept and Instagram: the head, the body, the strip tying it to what its writer shared, and the foot.
+const FeedPost = (props: { post: Post; listing: DirectoryListing | undefined; friends: ExploreFriends; likes: LikesModel; onDeleted: () => void }): ReactElement => {
+  const { post } = props;
+  const item = noteItemFor(post, props.listing);
+  return (
+    <article className="feed-post" aria-label={post.isMine === true ? FEED_COPY.yourPost : `${post.displayName}'s post`}>
+      <FeedHead post={post} listing={props.listing} friends={props.friends} />
+      <FeedBody post={post} />
       {item === null ? null : <FeedNote post={post} item={item} />}
-      <footer className="feed-actions">
-        {friends.canAsk(post.listingId) ? (
-          <Link className="feed-action is-ask" to={chatPathWithDraft(`How would ${post.displayName} react to `)}>
-            <Icon name="meety" size={20} />
-            {askLabel}
-          </Link>
-        ) : (
-          <button type="button" className="feed-action is-ask" aria-expanded={isWhyOpen} onClick={() => { setIsWhyOpen(!isWhyOpen); }}>
-            <Icon name="meety" size={20} />
-            {askLabel}
-          </button>
-        )}
-        <Link className="feed-action" to={personPostsPath(post.listingId)} aria-label={`${post.displayName}'s posts`}>
-          <Icon name="posts" size={20} />
-          Posts
-        </Link>
-        {isWhyOpen && !friends.canAsk(post.listingId) ? <p className="feed-why" role="status">{askWhyNot(post.displayName, post.listingId, friends)}</p> : null}
-      </footer>
+      <FeedFoot post={post} friends={props.friends} likes={props.likes} onDeleted={props.onDeleted} />
     </article>
   );
 };
@@ -201,18 +212,19 @@ const PostsFailed = (props: { posts: PolledView<PostsView> }): ReactElement | nu
 };
 
 // The feed: the newest posts, with the row of suggested people after the second; each post's line comes from the loaded people.
-const Feed = (props: { browse: BrowseHook; posts: PolledView<PostsView>; friends: ExploreFriends }): ReactElement => {
-  const { browse, posts, friends } = props;
+const Feed = (props: { browse: BrowseHook; posts: PolledView<PostsView>; friends: ExploreFriends; likes: LikesModel }): ReactElement => {
+  const { browse, posts, friends, likes } = props;
   const list = posts.value?.posts ?? [];
   const at = peopleRowAt(list.length);
   const byListing = new Map(browse.listings.map((listing) => [listing.listingId, listing]));
   const postItem = (post: Post): ReactElement => (
     <li key={post.postId}>
-      <FeedPost post={post} listing={byListing.get(post.listingId)} friends={friends} />
+      <FeedPost post={post} listing={byListing.get(post.listingId)} friends={friends} likes={likes} onDeleted={posts.reload} />
     </li>
   );
   return (
     <section className="feed" aria-label={FEED_COPY.feedLabel}>
+      {likes.error === null ? null : <ErrorNotice error={likes.error} />}
       <ul className="feed-list">
         {list.slice(0, at).map(postItem)}
         {browse.listings.length === 0 ? null : (
@@ -296,13 +308,16 @@ function isNothingShown(browse: BrowseHook, posts: PolledView<PostsView>): boole
 
 // Home, the feed, as Instagram's home (Ambar, 3 Nov 2026: "it should have been looking like linkedin or instagram feed", then "explore
 // should be the like default page"), in the look of the "Other" concept: on a laptop a small line over the title with today's date at
-// the right, which a phone leaves out as Instagram does; your next step while you have no approved card; the row of faces; then the
+// the right, which a phone leaves out as Instagram does; your next step while you have no approved card; the row of stories; then the
 // posts with the people Explore suggests. On a laptop the right-hand column sits beside it.
 export const FeedScreen = (): ReactElement => {
   const browse = useDirectoryBrowse();
   const posts = useExplorePosts();
   const friends = useExploreFriends();
   const home = useFeedHome();
+  const stories = useStories();
+  const likes = useLikes();
+  const me = home.value === null ? null : { name: home.value.displayName, photo: home.value.photo ?? null };
   return (
     <ScreenFrame title={FEED_COPY.title} hasOwnHeading isWide>
       <div className="explore">
@@ -316,8 +331,8 @@ export const FeedScreen = (): ReactElement => {
           </div>
           {home.value === null ? null : <NextStep home={home.value} />}
           <FeedStatus browse={browse} isEmpty={isNothingShown(browse, posts)} />
-          {browse.listings.length === 0 ? null : <StoriesRow browse={browse} friends={friends} />}
-          <Feed browse={browse} posts={posts} friends={friends} />
+          <StoriesRow stories={stories} me={me} friends={friends} />
+          <Feed browse={browse} posts={posts} friends={friends} likes={likes} />
         </div>
         <FeedRail browse={browse} friends={friends} />
       </div>

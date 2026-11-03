@@ -34,7 +34,7 @@ function pageLinks(): Array<[string | null, string | null, string | null]> {
 }
 
 describe("screen frame links", () => {
-  it("W6-DWEB-T37, updated for 3 Nov: a page that needs a session shows Home, Search, Meety, Friends and Me, as Instagram orders its tabs, then Invite a friend (the laptop sidebar's) and Settings, and no Directory or Find help", () => {
+  it("W6-DWEB-T37, updated for 3 Nov: a page that needs a session shows Home, Search, Meety, Friends, Create and Me, as Instagram orders its pages, then Invite a friend (the laptop sidebar's) and Settings, and no Directory or Find help", () => {
     renderFrame({ pattern: ROUTE_PATTERNS.card, url: APP_PATHS.card(IDS.card) });
 
     expect(pageLinks().map(([words, href]) => [words, href])).toEqual([
@@ -42,12 +42,14 @@ describe("screen frame links", () => {
       ["Search", "/search"],
       ["Meety", "/meety"],
       ["Friends", "/friends"],
+      ["Create", "/create"],
       ["Me", "/me"],
       ["Invite a friend", "/pair"],
       ["Settings", "/settings"],
     ]);
     expect(screen.queryByRole("link", { name: "Directory" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Find help" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Create a post or story" }).getAttribute("href")).toBe("/create");
   });
 
   it("W6-DWEB-T38 (design section 7): the start, claim, join and share pages show no link into the app", () => {
@@ -76,7 +78,7 @@ describe("screen frame links", () => {
     expect(screen.queryByRole("link", { name: "Settings" })).toBeNull();
   });
 
-  it("W7-WEB-A-T1, updated for 3 Nov: the Pages nav lists Home, Search, Meety, Friends, Me and Settings in order with aria-current on the current page, and the frame lists no friends, which the chat's right-hand column does", () => {
+  it("W7-WEB-A-T1, updated for 3 Nov: the Pages nav lists Home, Search, Meety, Friends, Create, Me and Settings in order with aria-current on the current page, and the frame lists no friends, which the chat's right-hand column does", () => {
     renderFrame({ pattern: ROUTE_PATTERNS.search, url: APP_PATHS.search, width: 1024 });
 
     expect(pageLinks()).toEqual([
@@ -84,6 +86,7 @@ describe("screen frame links", () => {
       ["Search", "/search", "page"],
       ["Meety", "/meety", null],
       ["Friends", "/friends", null],
+      ["Create", "/create", null],
       ["Me", "/me", null],
       ["Invite a friend", "/pair", null],
       ["Settings", "/settings", null],
@@ -107,7 +110,7 @@ describe("screen frame links", () => {
 
     expect(await screen.findByText("The page body.")).toBeTruthy();
     await new Promise((resolve) => setTimeout(resolve, 50));
-    expect(pageLinks()).toHaveLength(7);
+    expect(pageLinks()).toHaveLength(8);
     expect(screen.queryByRole("navigation", { name: "Friends" })).toBeNull();
     expect(screen.queryByRole("alert")).toBeNull();
   });

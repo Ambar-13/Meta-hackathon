@@ -121,11 +121,11 @@ async function freshScenario(): Promise<Scenario> {
 }
 
 // The row counts a fully deleted person shows: the same keys as the seeded counts, all at zero.
-const ZERO_COUNTS = { sources: 0, turns: 0, redactions: 0, cards: 0, card_items: 0, quizzes: 0, quiz_items: 0, sessions: 0, transfer_links: 0, pairs: 0, meetings: 0, meeting_members: 0, meeting_steps: 0, meeting_events: 0, claims: 0, briefs: 0, comics: 0, comic_panels: 0, share_pages: 0, ledger_nulled: 0, people: 0, names_passes: 0, source_names: 0, directory_listings: 0, persona_asks: 0, persona_answers: 0, friend_requests: 0, orchestrator_messages: 0, posts: 0, profile_photos: 0 };
+const ZERO_COUNTS = { sources: 0, turns: 0, redactions: 0, cards: 0, card_items: 0, quizzes: 0, quiz_items: 0, sessions: 0, transfer_links: 0, pairs: 0, meetings: 0, meeting_members: 0, meeting_steps: 0, meeting_events: 0, claims: 0, briefs: 0, comics: 0, comic_panels: 0, share_pages: 0, ledger_nulled: 0, people: 0, names_passes: 0, source_names: 0, directory_listings: 0, persona_asks: 0, persona_answers: 0, friend_requests: 0, orchestrator_messages: 0, posts: 0, post_likes: 0, profile_photos: 0 };
 
 // The counts the record of a's deletion must hold, as the seed gives them (T3 in table-list.integration.test.ts).
 // briefs is 1: the person's own transaction sees only their own brief (as-built item 1).
-const SEEDED_COUNTS = { sources: 1, turns: 4, redactions: 2, cards: 1, card_items: 6, quizzes: 1, quiz_items: 10, sessions: 2, transfer_links: 1, pairs: 1, meetings: 1, meeting_members: 2, meeting_steps: 3, meeting_events: 8, claims: 4, briefs: 1, comics: 1, comic_panels: 6, share_pages: 1, ledger_nulled: 6, people: 1, names_passes: 1, source_names: 0, directory_listings: 0, persona_asks: 0, persona_answers: 0, friend_requests: 0, orchestrator_messages: 0, posts: 0, profile_photos: 0 };
+const SEEDED_COUNTS = { sources: 1, turns: 4, redactions: 2, cards: 1, card_items: 6, quizzes: 1, quiz_items: 10, sessions: 2, transfer_links: 1, pairs: 1, meetings: 1, meeting_members: 2, meeting_steps: 3, meeting_events: 8, claims: 4, briefs: 1, comics: 1, comic_panels: 6, share_pages: 1, ledger_nulled: 6, people: 1, names_passes: 1, source_names: 0, directory_listings: 0, persona_asks: 0, persona_answers: 0, friend_requests: 0, orchestrator_messages: 0, posts: 0, post_likes: 0, profile_photos: 0 };
 
 // Context for the delete job: the worker connection, a recording enqueue and a silent log.
 function jobContext(): ReturnType<typeof makeTestJobContext> {
