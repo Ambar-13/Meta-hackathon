@@ -82,7 +82,7 @@ describe("your AI's summary, against the MSW route stubs (a fake server)", () =>
     expect(within(list).getAllByRole("listitem")).toHaveLength(2);
     fireEvent.click(within(list).getByRole("button", { name: "Remove this point: Believes Rentably was never a bad idea." }));
     expect(within(screen.getByRole("list", { name: "1 point to save" })).getAllByRole("listitem")).toHaveLength(1);
-    const toggle = screen.getByRole("switch", { name: "Friends can ask my Meety" });
+    const toggle = screen.getByRole("switch", { name: "Friends' asks can use my summary" });
     expect((toggle as HTMLInputElement).checked).toBe(false);
     fireEvent.click(toggle);
     expect(unlabelledControls(document.body)).toEqual([]);
