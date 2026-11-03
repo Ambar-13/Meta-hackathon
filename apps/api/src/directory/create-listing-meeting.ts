@@ -1,6 +1,6 @@
 // A meeting with a listed persona, asked for from the directory. The caller's own daily cap is checked first; then
 // directory_meeting_create makes the meeting with its own pair, both go-aheads given, the listed side public-only and the
-// question's kind set (6 and 11).
+// question's kind set.
 import type { FastifyInstance } from "fastify";
 import { sql, type Transaction } from "kysely";
 import { z } from "zod";

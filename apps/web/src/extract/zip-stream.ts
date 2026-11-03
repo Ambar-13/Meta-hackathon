@@ -16,9 +16,9 @@ export const TEXT_FILE_NAME = /\.(json|jsonl|md|txt)$/i;
 // Shown when a file cannot be read; the worker also uses it for any failure it did not expect.
 export const FILE_UNREADABLE_SENTENCE = "This file could not be read. Pick the .zip, .json, .jsonl, .md or .txt file again, or paste your notes instead.";
 
-// Shown when a zip is over 150 MB; the code is zip_too_large (table of 4.4).
+// Shown when a zip is over 150 MB; the code is zip_too_large.
 const ZIP_TOO_LARGE_SENTENCE = "This file is over 150 MB, more than a phone browser can read. Export a shorter date range, or paste your notes instead.";
-// Shown when a zip unpacks to more than 1.5 GB; the code is zip_inflated_too_large (table of 4.4).
+// Shown when a zip unpacks to more than 1.5 GB; the code is zip_inflated_too_large.
 const ZIP_INFLATED_TOO_LARGE_SENTENCE = "This zip unpacks to more than 1.5 GB, so reading stopped. Pick conversations.json on its own, or export a shorter date range.";
 
 // How one read reports and limits inflation; the cap is a parameter so a test can use a small one.

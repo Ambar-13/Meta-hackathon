@@ -24,7 +24,7 @@ function firstHeader(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
-// Counts the sources one person holds, for the cap of.
+// Counts the sources one person holds, for SOURCES_PER_PERSON_MAX.
 async function countSources(trx: DatabaseTransaction, personId: string): Promise<number> {
   const counted = await trx.selectFrom("sources").select((eb) => eb.fn.countAll().as("count")).where("person_id", "=", personId).executeTakeFirstOrThrow();
   return Number(counted.count);

@@ -89,7 +89,7 @@ export function englishItem(row: EnglishItemRow): Record<string, string> {
   return { kind, claim, lang: "en", gloss: claim, turn_id: turnId, quote };
 }
 
-// The fixture case data: names cases first, then card cases, exactly as the spec's section 5.6 gives them.
+// The fixture case data: names cases first, then card cases.
 const ZERO = { cachedTokens: 0, reasoningTokens: 0 };
 export const NAMES_FIXTURE_CASES: readonly NamesFixtureCase[] = [
   { name: "names-allowlist", displayName: "Tom", affiliations: ["Kopi Club"],

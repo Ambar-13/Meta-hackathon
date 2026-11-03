@@ -74,7 +74,7 @@ async function findNamesOrStop(context: JobContext, payload: JobPayload<"scrub_n
   }
 }
 
-// The names of every chunk, in chunk order and then reply order (section 4.11 step 3).
+// The names of every chunk, in chunk order and then reply order.
 async function findNames(context: JobContext, payload: JobPayload<"scrub_names">, input: NamesInput): Promise<FoundName[]> {
   const person = input.person;
   const allowlist = [person?.display_name ?? "", ...(person?.affiliations ?? [])].map((entry) => entry.replace(/\s+/g, " ").trim());

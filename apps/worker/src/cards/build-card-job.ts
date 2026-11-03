@@ -39,7 +39,7 @@ export const buildCardTask: JobTask<"build_card"> = async (payload, context) => 
   }
 };
 
-// The turn of the sample a card call sees, from a turn row (section 4.14 step 3).
+// The turn of the sample a card call sees, from a turn row.
 function toSampledTurn(turn: TurnRow): SampledTurn {
   return { id: turn.id, turnIndex: turn.turn_index, text: turn.text, normText: turn.norm_text, isSensitive: turn.sensitive_categories.length > 0 };
 }

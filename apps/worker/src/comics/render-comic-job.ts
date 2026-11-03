@@ -9,9 +9,9 @@ import { appendMeetingEvent } from "../meetings/index.js";
 import { raceWithDeadline, renderPanels, type PanelRender, type Raced } from "./image-calls.js";
 import { buildImagePrompts, buildPanelsPromptInput, pickHeadlines } from "./panel-prompts.js";
 
-// the whole comic has 60 s from job start; the brief is already on screen, so a slow comic is skipped, not waited for.
+// The whole comic has 60 s from job start; the brief is already on screen, so a slow comic is skipped, not waited for.
 export const COMIC_DEADLINE_MS = 60_000;
-// exactly six panels.
+// Exactly six panels.
 export const PANEL_COUNT = 6;
 
 // Why a comic was not made, as comic.skipped gives it. render_failed ends the comic as failed; the others end it as skipped.

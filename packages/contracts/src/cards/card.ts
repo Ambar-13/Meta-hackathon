@@ -74,7 +74,7 @@ export type CardApproveResponse = z.infer<typeof CardApproveResponse>;
 export const CardRequestResponse = z.object({ cardId: Uuid });
 // The type of CardRequestResponse, read from the schema above.
 export type CardRequestResponse = z.infer<typeof CardRequestResponse>;
-// The words shown next to the recall switch. The text is fixed by.
+// The words shown next to the recall switch, kept word for word.
 export const RECALL_SWITCH_COPY = "Let my Meety search my notes during meetings, with names hidden and secrets removed. The other person may see quotes from them.";
 // What the card model returns: items with a kind, a claim, a language, a gloss, a turn label and a quote.
 // The per-field maximums bound parsing and are picked here.

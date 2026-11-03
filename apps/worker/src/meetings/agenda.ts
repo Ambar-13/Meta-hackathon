@@ -40,7 +40,7 @@ export function startsNewPhase(lastPhase: StepPhase | null, next: NextStep): boo
   return next.kind === "step" && next.phase !== lastPhase;
 }
 
-// True when the meeting's tokens so far reach the stop of.
+// True when the meeting's tokens so far reach the meeting's token stop.
 export function isOverTokenStop(tokensUsed: number): boolean {
   return tokensUsed >= MEETING_TOKEN_STOP;
 }

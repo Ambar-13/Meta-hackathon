@@ -3,7 +3,7 @@ import { NamesPassOutput, toStrictJsonSchema } from "@meet-first/contracts";
 import { readPrompt } from "@meet-first/prompts";
 import { chunkTurnsForNames, formatTurnBlock, namesPassCall } from "./name-chunks.js";
 
-// The eight messages of the names-none case, copied from the spec's fixture case list.
+// The eight messages of the names-none case.
 const NAMES_NONE_TURNS = [
   "I write my to-do list by hand because typing it makes me ignore it.",
   "Mornings are for deep work and afternoons are for meetings.",

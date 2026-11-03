@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// The 17 redaction categories of.
+// The 17 redaction categories.
 export const CATEGORIES = [
   "secret", "email", "phone", "url_credentials", "jwt", "nric", "aadhaar", "pan", "postal", "iban", "card",
   "address", "person", "health", "minor", "identifier", "code",

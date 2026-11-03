@@ -48,7 +48,7 @@ export function withScriptedReplies(client: LlmClient, script: ReplyScript, opti
   };
 }
 
-// The stream replay layout of one scripted speech reply (wave-1-dossier.md section 4.3); tool call ids are call_<n> with n from the run's counter.
+// The stream replay layout of one scripted speech reply; tool call ids are call_<n> with n from the run's counter.
 export function speechReplyLayout(reply: ScriptedSpeech, firstCallNumber: number): Record<string, unknown> {
   const calls = reply.toolCalls ?? [];
   if (calls.length === 0) {

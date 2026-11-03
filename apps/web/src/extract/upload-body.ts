@@ -3,7 +3,7 @@ import { ContractError, HTTP, UPLOAD_COMPRESSED_MAX_BYTES, UPLOAD_DECODED_MAX_BY
 // Shown when the body is over a cap; the API uses the same code and sentence.
 export const UPLOAD_TOO_LARGE_SENTENCE = "The upload is over the size limit. Export a shorter date range, or paste fewer notes.";
 
-// The request body and the sizes checked against the caps of.
+// The request body and the sizes checked against the upload caps.
 export type EncodedBody = { body: Blob; contentEncoding: "gzip" | null; decodedBytes: number; encodedBytes: number };
 
 // The refusal for a body over one of the two caps.

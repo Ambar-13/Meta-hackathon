@@ -23,7 +23,7 @@ export type UploadReady = {
 
 // A refusal the screen shows as is: a stable code and the sentence to show.
 export type UploadRefused = { ok: false; code: UploadRefusalCode; message: string };
-// The refusal codes, each with its sentence in the table of 4.4.
+// The refusal codes, each with its sentence.
 export type UploadRefusalCode = "source_no_own_turns" | "source_file_not_json" | "zip_too_large" | "zip_inflated_too_large" | "file_unreadable" | "upload_too_large" | "upload_cancelled";
 
 // The sentence for an upload the person stopped before it finished (the upload_cancelled row of the table in 4.4).

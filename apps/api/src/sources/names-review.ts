@@ -102,7 +102,7 @@ async function reviewableNames(trx: DatabaseTransaction, sourceId: string): Prom
   return rows.map((row) => ({ text: row.text, roleToken: row.role_token, placeholderIds: row.placeholder_ids }));
 }
 
-// Registers POST /api/sources/:id/names-review: 200 NamesReviewResponse; 400, 404, 409 and 422 as in the table of 4.3.
+// Registers POST /api/sources/:id/names-review: 200 NamesReviewResponse; 400, 404, 409 or 422 when it is refused.
 export function registerNamesReviewRoute(app: FastifyInstance, deps: RouteDeps): void {
   app.post(routes.sources.namesReview.path, async (request, reply) => {
     const personId = requirePerson(request);

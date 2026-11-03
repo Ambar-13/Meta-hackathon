@@ -183,7 +183,7 @@ export const PollResponse = z.object({
 });
 // The type of PollResponse, read from the schema above.
 export type PollResponse = z.infer<typeof PollResponse>;
-// The words a person sees when the model refused to answer. The text is fixed by.
+// The words a person sees when the model refused to answer, kept word for word.
 export const REFUSAL_TEXT = "I'd rather my human speak to this";
 // The words shown when a browser is on an older event version.
 export const REFRESH_COPY = "refresh for the new version";
