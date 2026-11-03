@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { ROUTE_PATTERNS, routes } from "../../app-shell/index.js";
 import { renderScreen, requestsTo, stubRoute } from "../../testing/index.js";
 import { unlabelledControls } from "../../testing/render-screen.js";
@@ -7,6 +7,10 @@ import { personCreated, RECOVERY_CODE, TRANSFER_TOKEN, IDS } from "../../testing
 import { readAllowlist } from "../../app-shell/browser-session.js";
 import { WelcomeScreen } from "./screen.js";
 import { ClaimScreen } from "./claim-screen.js";
+
+beforeEach(() => {
+  stubRoute(routes.people.authOptions, { google: false });
+});
 
 afterEach(() => {
   cleanup();
@@ -123,4 +127,33 @@ describe("welcome screens", () => {
     renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/" });
     expect(unlabelledControls(document.body)).toEqual([]);
   });
+
+  it("W7-GOOGLE-WEB-T1: with Google on, Continue with Google sits above the name tag form and links to the api's Google start; with it off, nothing shows", async () => {
+    stubRoute(routes.people.authOptions, { google: true });
+    renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/" });
+
+    const google = await screen.findByRole("link", { name: "Continue with Google" });
+    expect(google.getAttribute("href")).toBe("/api/auth/google");
+    expect(screen.getByText("or start with only your name")).toBeTruthy();
+    expect(google.compareDocumentPosition(screen.getByLabelText("Your display name")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    cleanup();
+
+    stubRoute(routes.people.authOptions, { google: false });
+    renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/" });
+    await waitFor(() => {
+      expect(requestsTo(routes.people.authOptions).length).toBeGreaterThan(1);
+    });
+    expect(screen.queryByRole("link", { name: "Continue with Google" })).toBeNull();
+  });
+
+  it("W7-GOOGLE-WEB-T2: a Google sign-in that came back unfinished says so, cancelled or failed", async () => {
+    stubRoute(routes.people.authOptions, { google: true });
+    renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/?google=cancelled" });
+    expect((await screen.findByText("Google sign-in was cancelled. Try again whenever you like.")).getAttribute("role")).toBe("status");
+    cleanup();
+
+    renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/?google=failed" });
+    expect((await screen.findByText("Google sign-in did not finish. Try again.")).getAttribute("role")).toBe("status");
+  });
 });
+

@@ -9,9 +9,9 @@ import { Icon, Sticker } from "../look/index.js";
 export const COPIED_MS = 2_000;
 // The pages a visitor may open before they have a session: the start page, the claim page and the join page. The session cookie is
 // HttpOnly, so the browser cannot tell whether a session exists, and the frame goes by the page instead [confirm].
-const NO_SESSION_PATHS: readonly string[] = [APP_PATHS.welcome, APP_PATHS.claim, APP_PATHS.join];
+const NO_SESSION_PATHS: readonly string[] = [APP_PATHS.welcome, APP_PATHS.claim, APP_PATHS.join, APP_PATHS.privacy];
 
-// True on every page except the three above and the public share pages, which anyone with the link may open (design section 7).
+// True on every page except the four above and the public share pages, which anyone with the link may open (design section 7).
 function showsAppLinks(pathname: string): boolean {
   return !NO_SESSION_PATHS.includes(pathname) && !pathname.startsWith(APP_PATHS.sharePage(""));
 }

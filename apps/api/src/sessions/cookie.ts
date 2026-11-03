@@ -11,8 +11,13 @@ import { makeSessionMissingError } from "../route-errors.js";
 export const SESSION_TOKEN_PATTERN = /^[0-9a-f]{64}$/;
 // The cookie's Max-Age in seconds: 90 days (D33), which is 7,776,000.
 export const SESSION_MAX_AGE_SECONDS = SESSION_LIFETIME_DAYS * 86_400;
-// The api routes that answer with no session, by their contracts names; IMPLEMENTATION.md 2.2 marks exactly these five public. Every other /api route refuses with session_missing when no live session came (A7) [confirm] (refusing by default is this spec's choice).
-export const PUBLIC_ROUTES = [routes.people.createPerson, routes.people.recover, routes.people.claim, routes.people.health, routes.briefs.readShare] as const;
+// The api routes that answer with no session, by their contracts names: IMPLEMENTATION.md 2.2's five, and since 3 Nov 2026 the three of
+// Google sign-in. Every other /api route refuses with session_missing when no live session came (A7) [confirm] (refusing by default is
+// this spec's choice).
+export const PUBLIC_ROUTES = [
+  routes.people.createPerson, routes.people.recover, routes.people.claim, routes.people.health, routes.briefs.readShare,
+  routes.people.authOptions, routes.people.googleStart, routes.people.googleCallback,
+] as const;
 
 // n random bytes as lower-case hex: 32 for a session (D33), 16 for a transfer link (D33) or an invite (D32).
 export function newHexToken(bytes: number): string {

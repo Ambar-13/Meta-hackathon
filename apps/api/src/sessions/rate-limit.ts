@@ -26,7 +26,8 @@ export const ACCOUNT_RATE_LIMIT = {
   errorResponseBuilder: buildTooManyAccounts,
 };
 
-// Registers the limiter with no global limit, so only a route whose config names ACCOUNT_RATE_LIMIT is counted.
+// Registers the limiter with no global limit, so only a route whose config names a limit is counted: ACCOUNT_RATE_LIMIT here, and the
+// Google sign-in callback's own (google-sign-in.ts).
 export async function registerAccountRateLimit(app: FastifyInstance): Promise<void> {
   await app.register(rateLimit, { global: false });
 }

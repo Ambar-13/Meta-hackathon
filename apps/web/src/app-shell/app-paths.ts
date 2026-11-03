@@ -6,7 +6,7 @@ export type Side = MeetingView["members"][number]["side"];
 
 // Every client path the app links to; screens build links with these, never with string literals (seams S11). Since 3 Nov 2026, as in
 // Instagram, home is the feed and the signed-in start, search finds people and shows the photos, and meety is the chat with Meety;
-// explore and directory lead to search; create shares a post or a story.
+// explore and directory lead to search; create shares a post or a story; privacy says what Meety keeps.
 export const APP_PATHS = {
   welcome: "/", upload: "/upload", pair: "/pair", join: "/join", claim: "/claim", settings: "/settings",
   namesReview: (sourceId: string) => `/sources/${sourceId}/names`,
@@ -23,7 +23,7 @@ export const APP_PATHS = {
   home: "/home",
   explore: "/explore", me: "/me",
   person: (listingId: string) => `/people/${listingId}`,
-  meety: "/meety", search: "/search", create: "/create",
+  meety: "/meety", search: "/search", create: "/create", privacy: "/privacy",
 } as const;
 
 // The route patterns, with the keys and parameter names of APP_PATHS, in the same order (seams S11).
@@ -34,7 +34,7 @@ export const ROUTE_PATTERNS = {
   consent: "/meetings/:meetingId/share", sharePage: "/share/:slug",
   directory: "/directory", help: "/help", friends: "/friends", ask: "/asks/:askId", home: "/home",
   explore: "/explore", me: "/me", person: "/people/:listingId",
-  meety: "/meety", search: "/search", create: "/create",
+  meety: "/meety", search: "/search", create: "/create", privacy: "/privacy",
 } as const;
 
 // The query name that carries the approved card a meeting is created with, so a reload keeps it [confirm] (no contract field carries it).

@@ -29,7 +29,7 @@ it("D33-T4: hashToken is the 32-byte sha256 of the token text", () => {
   expect(hashToken("abc").length).toBe(32);
 });
 
-it("A7-T6: isPublicRoute matches the five public routes, counts HEAD as GET, and nothing else", () => {
+it("A7-T6: isPublicRoute matches the eight public routes, counts HEAD as GET, and nothing else", () => {
   const publicCases: [string, string][] = [
     ["POST", "/api/people"],
     ["POST", "/api/sessions/recover"],
@@ -37,6 +37,9 @@ it("A7-T6: isPublicRoute matches the five public routes, counts HEAD as GET, and
     ["GET", "/api/health"],
     ["HEAD", "/api/health"],
     ["GET", "/api/share/:slug"],
+    ["GET", "/api/auth/options"],
+    ["GET", "/api/auth/google"],
+    ["GET", "/api/auth/google/callback"],
   ];
   const privateCases: [string, string][] = [
     ["POST", "/api/sessions/transfer"],

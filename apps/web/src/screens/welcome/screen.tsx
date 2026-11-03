@@ -2,13 +2,13 @@ import type { ReactElement } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { APP_PATHS } from "../../app-shell/index.js";
 import { Cloud, NameTag, Sticker } from "../../look/index.js";
-import { WelcomeForm } from "./welcome-forms.js";
+import { GoogleSignIn, WelcomeForm } from "./welcome-forms.js";
 import { FirstCoffee, QuestionKinds, SampleMeeting, WhatItDoes } from "./welcome-story.js";
 import { BackAgain, LastCall, Promises, ThreeSteps, WelcomeFooter } from "./welcome-close.js";
 import "./welcome.css";
 
-// The first screen: the sky, the headline with two name tags stuck beside its last word, what it does in one line, and the
-// name-tag form, so a phone shows the purpose and the main action before any scroll (design pass fix 1).
+// The first screen: the sky, the headline with two name tags stuck beside its last word, what it does in one line, Continue with Google
+// when the site offers it, and the name-tag form, so a phone shows the purpose and the main action before any scroll (design pass fix 1).
 const WelcomeHero = (props: { onDone: () => void }): ReactElement => {
   return (
     <section className="wl-hero sky" aria-labelledby="wl-hero-title">
@@ -34,6 +34,7 @@ const WelcomeHero = (props: { onDone: () => void }): ReactElement => {
         <NameTag name="Jonah" colour="blue" className="wl-hl-tag b" />
       </h1>
       <p className="wl-lede">They play out how the two of you would probably get on. Then you get a short brief, and every line shows the words it came from.</p>
+      <GoogleSignIn />
       <WelcomeForm onDone={props.onDone} />
       <div className="scallop" aria-hidden="true" />
     </section>

@@ -4,7 +4,7 @@ A simulation of how two people would probably react, not a guarantee; it gives n
 
 No age check: the site does not ask anyone's age or say who it is for (Ambar, 2 Nov 2026). Wave 5 added an 18-and-over line with the dating questions, and this file then said the Meta terms and the hackathon require it, which no design input backed. Dating questions still need both people to switch them on.
 
-Invite-only on the deployed site: sign-up needs the access code (ACCESS_CODE on the Render service), so a script cannot make accounts and spend the model budget through them. A link with ?access= fills the code in, and the invite link a person shares carries the code they signed up with. Wrong codes count toward the 10 accounts per address per hour. If the code leaks, the spend caps still hold: $15 a day and $60 in all on Render (render.yaml).
+Invite-only on the deployed site: sign-up with a name needs the access code (ACCESS_CODE on the Render service), so a script cannot make accounts and spend the model budget through them. Continue with Google needs no code, since a script cannot make Google accounts at will; it shows only when GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are set on the service, and allows 60 sign-ins per address per hour. A link with ?access= fills the code in, and the invite link a person shares carries the code they signed up with. Wrong codes count toward the 10 accounts per address per hour. If the code leaks, the spend caps still hold: $15 a day and $60 in all on Render (render.yaml).
 
 No sexually explicit questions: dating and romance questions are allowed, but the question check refuses anything that asks for sexual content.
 

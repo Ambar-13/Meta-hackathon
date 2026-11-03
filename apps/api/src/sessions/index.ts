@@ -1,18 +1,22 @@
-// The sessions folder: who a request acts for, and the five routes that make, recover, move and end a session (A5, A7, D33, D69).
+// The sessions folder: who a request acts for, the five routes that make, recover, move and end a session (A5, A7, D33, D69), and
+// sign in with Google.
 import type { RoutePlugin } from "../app-types.js";
 import { registerClaim } from "./claim.js";
 import { registerCreatePerson } from "./create-person.js";
 import { registerDeletePerson } from "./delete-person.js";
+import { registerGoogleSignIn } from "./google-sign-in.js";
 import { registerRecover } from "./recover.js";
 import { registerTransfer } from "./transfer.js";
 
-// The sessions routes as one plugin for server.ts slot 1, in this order: create person, recover, transfer, claim, delete me (seams S2).
+// The sessions routes as one plugin for server.ts slot 1, in this order: create person, recover, transfer, claim, delete me (seams S2),
+// then sign in with Google (3 Nov 2026).
 export const registerSessionsRoutes: RoutePlugin = (app, deps) => {
   registerCreatePerson(app, deps);
   registerRecover(app, deps);
   registerTransfer(app, deps);
   registerClaim(app, deps);
   registerDeletePerson(app, deps);
+  registerGoogleSignIn(app, deps);
   return Promise.resolve();
 };
 

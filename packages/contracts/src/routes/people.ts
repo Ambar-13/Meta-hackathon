@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { HomeView, MyPhoto, NameUpdate, NameUpdated, PersonCreate, PersonCreateResponse, Recover, RecoverResponse, TransferClaim, TransferClaimResponse, TransferResponse } from "../people/index.js";
+import { AuthOptions, HomeView, MyPhoto, NameUpdate, NameUpdated, PersonCreate, PersonCreateResponse, Recover, RecoverResponse, TransferClaim, TransferClaimResponse, TransferResponse } from "../people/index.js";
 import { DeletionResponse, Health } from "../operations/index.js";
 
 // Routes for people and sessions. Paths come from IMPLEMENTATION.md 2.2; no app retypes them.
@@ -18,4 +18,9 @@ export const peopleRoutes = {
   removePhoto: { method: "DELETE", path: "/api/people/me/photo", request: z.undefined(), response: MyPhoto },
   readPhoto: { method: "GET", path: "/api/photos/:id", request: z.undefined(), response: z.undefined() },
   health: { method: "GET", path: "/api/health", request: z.undefined(), response: Health, public: true },
+  // Sign in with Google (3 Nov 2026): the ways to sign in, the start, which sends the browser to Google, and the callback, where Google
+  // sends it back; all three answer with no session.
+  authOptions: { method: "GET", path: "/api/auth/options", request: z.undefined(), response: AuthOptions, public: true },
+  googleStart: { method: "GET", path: "/api/auth/google", request: z.undefined(), response: z.undefined(), public: true },
+  googleCallback: { method: "GET", path: "/api/auth/google/callback", request: z.undefined(), response: z.undefined(), public: true },
 } as const;

@@ -23,6 +23,14 @@
 @keyframes wl-slap { from { opacity: 0; transform: rotate(calc(var(--r) - 8deg)) scale(1.25); } to { opacity: 1; transform: rotate(var(--r)) scale(1); } }
 .wl-lede { position: relative; z-index: 2; font: 500 18px/1.42 var(--sans); max-width: 31ch; margin: 22px auto 0; }
 
+/* Continue with Google above the name tag form: a light pill with Google's own G, as wide as the form, and a small line that leads on to
+   the form (3 Nov 2026). */
+.wl-google { position: relative; z-index: 2; display: grid; justify-items: center; gap: 10px; max-width: 420px; margin: 24px auto 0; }
+.wl-google-btn { width: 100%; gap: 12px; }
+.wl-google-mark { flex: none; }
+.wl-google-line { margin: 0; padding: 10px 16px; border: 2px solid var(--ink); border-radius: 14px; background: var(--paper); font-weight: 600; }
+.wl-or { margin: 4px 0 0; color: var(--ink-2); font-size: 15px; }
+.wl-google + .wl-signup { margin-top: 8px; }
 .wl-signup { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 420px; margin: 24px auto 0; }
 .wl-signup > button { width: 100%; }
 .wl-formtag { --s: 16px; --r: -1.5deg; width: 100%; text-align: left; }

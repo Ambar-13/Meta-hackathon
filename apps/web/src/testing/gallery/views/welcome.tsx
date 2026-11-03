@@ -1,4 +1,5 @@
 import { APP_PATHS, ROUTE_PATTERNS, routes } from "../../../app-shell/index.js";
+import { PrivacyScreen } from "../../../screens/privacy/index.js";
 import { ClaimScreen, WelcomeScreen } from "../../../screens/welcome/index.js";
 import { IDS, personCreated, RECOVERY_CODE, TRANSFER_TOKEN } from "../../fixtures.js";
 import { press, typeInto, type GalleryView } from "../gallery-views.js";
@@ -11,6 +12,14 @@ export const views: readonly GalleryView[] = [
     pattern: ROUTE_PATTERNS.welcome,
     url: APP_PATHS.welcome,
     element: <WelcomeScreen />,
+  },
+  {
+    name: "welcome-google",
+    title: "Welcome, with Continue with Google",
+    pattern: ROUTE_PATTERNS.welcome,
+    url: APP_PATHS.welcome,
+    element: <WelcomeScreen />,
+    stubs: [{ route: routes.people.authOptions, replies: { status: 200, body: { google: true } } }],
   },
   {
     name: "welcome-recovery-code",
@@ -63,4 +72,5 @@ export const views: readonly GalleryView[] = [
     url: APP_PATHS.claim,
     element: <ClaimScreen />,
   },
+  { name: "privacy", title: "Privacy, what Meety keeps", pattern: ROUTE_PATTERNS.privacy, url: APP_PATHS.privacy, element: <PrivacyScreen /> },
 ];

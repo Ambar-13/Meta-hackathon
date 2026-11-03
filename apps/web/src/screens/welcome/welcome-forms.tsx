@@ -1,9 +1,52 @@
 import { useEffect, useState, type FormEvent, type ReactElement } from "react";
 import { useLocation } from "react-router-dom";
-import { ErrorNotice, CopyButton } from "../../app-shell/index.js";
+import { ErrorNotice, CopyButton, routes } from "../../app-shell/index.js";
 import { Sticker } from "../../look/index.js";
 import { accessCodeIn } from "./access-code.js";
-import { useCreatePerson, useRecover } from "./welcome-state.js";
+import { googleResultIn, useCreatePerson, useGoogleSignIn, useRecover } from "./welcome-state.js";
+
+// The words of Continue with Google and of a Google sign-in that came back unfinished (3 Nov 2026).
+const GOOGLE_COPY = {
+  button: "Continue with Google",
+  or: "or start with only your name",
+  failed: "Google sign-in did not finish. Try again.",
+  cancelled: "Google sign-in was cancelled. Try again whenever you like.",
+} as const;
+
+// Google's own G, in its own four colours, as Google's sign-in guidelines ask; the one place green shows in the app.
+const GoogleMark = (): ReactElement => {
+  return (
+    <svg className="wl-google-mark" viewBox="0 0 48 48" width="22" height="22" aria-hidden="true" focusable="false">
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+    </svg>
+  );
+};
+
+// Continue with Google, when the site offers it (Ambar, 3 Nov 2026: "add oauth google and let people just use meety"): Google's G and plain-words: allow (his words, quoted)
+// the words on a light pill, a plain link to the api, which sends the browser to Google and back signed in; then the line that leads
+// to the name tag form. A sign-in that came back unfinished says so above it.
+export const GoogleSignIn = (): ReactElement | null => {
+  const isOn = useGoogleSignIn();
+  const result = googleResultIn(useLocation().search);
+  if (!isOn && result === null) return null;
+  return (
+    <div className="wl-google">
+      {result === null ? null : <p className="wl-google-line" role="status">{result === "cancelled" ? GOOGLE_COPY.cancelled : GOOGLE_COPY.failed}</p>}
+      {isOn ? (
+        <>
+          <a className="btn quiet big wl-google-btn" href={routes.people.googleStart.path}>
+            <GoogleMark />
+            {GOOGLE_COPY.button}
+          </a>
+          <p className="wl-or">{GOOGLE_COPY.or}</p>
+        </>
+      ) : null}
+    </div>
+  );
+};
 
 // The server's two codes for a sign-up the site's access code stops (R9.5).
 const ACCESS_CODE_REFUSALS: readonly string[] = ["access_code_needed", "access_code_wrong"];

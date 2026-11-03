@@ -11,6 +11,10 @@ export const apiEnv = z.object({ ...base,
   // The code a person gives to sign up, or empty for open sign-up. The deployed site sets one, so a script cannot make accounts
   // and spend the model budget through them (R9.5).
   ACCESS_CODE: z.string().trim().default(""),
+  // The site's Google sign-in client from Google Cloud, or empty to leave Continue with Google off (3 Nov 2026). The secret is set only
+  // in the host's settings, never in the repo. A Google sign-in needs no access code: a script cannot make Google accounts at will.
+  GOOGLE_CLIENT_ID: z.string().trim().default(""),
+  GOOGLE_CLIENT_SECRET: z.string().trim().default(""),
 });
 // The variables apps/worker reads at boot. Production refuses LLM_MODE=replay (D74).
 export const workerEnv = z.object({ ...base,

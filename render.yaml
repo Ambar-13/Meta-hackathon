@@ -29,6 +29,10 @@ services:
         sync: false          # the worker process only; the start script keeps it out of the api (ARCHITECTURE.md 8)
       - key: ACCESS_CODE
         sync: false          # sign-up needs this code, so scripts cannot make accounts and spend the model budget (R9.5); the api process only
+      - key: GOOGLE_CLIENT_ID
+        sync: false          # the Google sign-in client of the Meety project in Google Cloud; Continue with Google shows only when both are set
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false          # set only in Render's settings, never in the repo
       - key: META_API_BASE_URL
         value: https://api.meta.ai/v1   # ARCHITECTURE.md 2
       - key: LLM_MODE

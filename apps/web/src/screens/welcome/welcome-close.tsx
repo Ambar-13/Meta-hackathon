@@ -119,7 +119,7 @@ export const WelcomeFooter = (): ReactElement => {
         <a className="wl-puff c-green" href="#kinds">Questions</a>
         <a className="wl-puff c-coral" href="#code">I have a code</a>
       </nav>
-      <p className="wl-foot-small">Probably, never will. No scores, ever.</p>
+      <p className="wl-foot-small">Probably, never will. No scores, ever. <Link to={APP_PATHS.privacy}>Privacy</Link></p>
     </footer>
   );
 };

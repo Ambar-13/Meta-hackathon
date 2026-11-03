@@ -244,3 +244,9 @@ button.receipt { min-height: 0; border: 0; font: inherit; cursor: pointer; }
   .msg { max-width: 82%; }
   .bubble { font-size: 17.5px; }
 }
+
+/* The privacy page: plain sections at a reading width, a hairline between them. */
+.privacy-date { color: var(--ink-2); }
+.privacy-section { max-width: 66ch; padding: 16px 0; border-top: 1px solid var(--line); }
+.privacy-section h2 { margin: 0 0 8px; font-size: 20px; }
+.privacy-section p { margin: 0 0 10px; }

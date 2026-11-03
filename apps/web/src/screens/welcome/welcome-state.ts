@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { PersonCreate, Recover, type PersonCreateResponse } from "@meet-first/contracts";
+import { GOOGLE_RESULT_QUERY, GoogleSignInResult, PersonCreate, Recover, type PersonCreateResponse } from "@meet-first/contracts";
 import { apiFetch, asApiError, ApiError, readFragmentToken, rememberAllowlist, routes } from "../../app-shell/index.js";
 import { rememberAccessCode } from "./access-code.js";
 
@@ -109,3 +109,29 @@ export function useClaim(): { state: ClaimState; claim: () => Promise<void> } {
   };
   return { state, claim };
 }
+
+// Whether this site offers Continue with Google (GET /api/auth/options): false while it is read and when it cannot be read, so the start
+// page never shows a button that leads nowhere (3 Nov 2026).
+export function useGoogleSignIn(): boolean {
+  const [isOn, setIsOn] = useState(false);
+  useEffect(() => {
+    let isActive = true;
+    apiFetch(routes.people.authOptions, {}).then(
+      (options) => {
+        if (isActive) setIsOn(options.google);
+      },
+      () => undefined,
+    );
+    return () => {
+      isActive = false;
+    };
+  }, []);
+  return isOn;
+}
+
+// Why a Google sign-in came back unfinished, from the start page's address, or null when it did not come back from one.
+export function googleResultIn(search: string): GoogleSignInResult | null {
+  const parsed = GoogleSignInResult.safeParse(new URLSearchParams(search).get(GOOGLE_RESULT_QUERY));
+  return parsed.success ? parsed.data : null;
+}
+

@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { sql, type Kysely } from "kysely";
 import { makeDatabase, POOL_SIZE } from "./client.js";
@@ -272,5 +273,28 @@ describe("posts, stories and likes in the database", () => {
     ]);
 
     expect(codes.map((error): unknown => Reflect.get(error ?? {}, "code"))).toEqual(["23514", "23514", "23514"]);
+  });
+});
+
+describe("Google accounts in the database", () => {
+  // Signs in with a Google subject through the definer function, as the api does after checking Google's token; the person, or null.
+  const signIn = async (sub: string, name: string): Promise<string | null> =>
+    (await sql<{ person_id: string | null }>`SELECT auth_google_person(${sub}, ${name}, ${randomBytes(32)}) AS person_id`.execute(t.db)).rows[0]?.person_id ?? null;
+
+  it("W7-GOOGLE-DB-T1: a Google subject makes one person and comes back to them; the person reads only their own link, nobody writes one directly, and a person being deleted cannot sign in", async () => {
+    const first = await signIn("google-sub-db-1", "Asha Rao");
+    const again = await signIn("google-sub-db-1", "Asha R.");
+    const other = await signIn("google-sub-db-2", "Ben Okafor");
+    if (first === null || other === null) throw new Error("auth_google_person made no person");
+    const ownRows = await asPerson(t.db, first, (trx) => trx.selectFrom("google_accounts").select(["google_sub", "person_id"]).execute());
+    const forged = await caught(() => asPerson(t.db, other, (trx) => trx.insertInto("google_accounts").values({ google_sub: "google-sub-forged", person_id: other }).execute()));
+    const name = await asPerson(t.db, first, async (trx) => (await trx.selectFrom("people").select("display_name").where("id", "=", first).executeTakeFirst())?.display_name);
+
+    expect(again).toBe(first);
+    expect(ownRows).toEqual([{ google_sub: "google-sub-db-1", person_id: first }]);
+    expect(Reflect.get(forged ?? {}, "code")).toBe("42501");
+    expect(name).toBe("Asha Rao");
+    await asPerson(t.db, other, (trx) => trx.updateTable("people").set({ state: "deleted" }).where("id", "=", other).execute());
+    expect(await signIn("google-sub-db-2", "Ben Okafor")).toBeNull();
   });
 });
