@@ -112,7 +112,7 @@ export const BackAgain = (props: { onDone: () => void }): ReactElement => {
 export const WelcomeFooter = (): ReactElement => {
   return (
     <footer className="wl-foot">
-      <p className="wl-foot-name">Meet First</p>
+      <p className="wl-foot-name">Meety</p>
       <p>Your Meety meets theirs first. With receipts.</p>
       <nav className="wl-puffs" aria-label="On this page">
         <a className="wl-puff c-yellow" href="#how">How it works</a>

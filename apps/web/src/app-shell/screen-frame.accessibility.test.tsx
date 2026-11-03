@@ -50,6 +50,8 @@ describe("screen frame links", () => {
     expect(screen.queryByRole("link", { name: "Directory" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Find help" })).toBeNull();
     expect(screen.getByRole("link", { name: "Create a post or story" }).getAttribute("href")).toBe("/create");
+    expect(screen.getAllByRole("link", { name: "Meety home" }).map((link) => link.getAttribute("href"))).toEqual(["/home", "/home"]);
+    expect(screen.getByRole("link", { name: "Meety" }).getAttribute("href")).toBe("/meety");
   });
 
   it("W6-DWEB-T38 (design section 7): the start, claim, join and share pages show no link into the app", () => {
@@ -119,7 +121,7 @@ describe("screen frame links", () => {
     renderFrame({ pattern: ROUTE_PATTERNS.welcome, url: APP_PATHS.welcome, width: 1024 });
 
     expect(pageLinks()).toEqual([["Settings", "/settings", null]]);
-    expect(screen.getByRole("link", { name: "Meet First" }).getAttribute("href")).toBe("/");
+    expect(screen.getByRole("link", { name: "Meety start page" }).getAttribute("href")).toBe("/");
     await new Promise((resolve) => setTimeout(resolve, 50));
     expect(screen.queryByRole("navigation", { name: "Friends" })).toBeNull();
     expect(document.querySelector(".social-rail")).toBeNull();

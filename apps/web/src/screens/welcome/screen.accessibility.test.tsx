@@ -31,7 +31,7 @@ describe("welcome screens", () => {
 
   it("R9.5-T5: when the server asks for an access code, the form shows the field, and the next try sends the code", async () => {
     stubRoute(routes.people.createPerson, [
-      { status: 403, body: { code: "access_code_needed", message: "Meet First is invite-only for now. Enter the access code you were given." } },
+      { status: 403, body: { code: "access_code_needed", message: "Meety is invite-only for now. Enter the access code you were given." } },
       { status: 201, body: personCreated() },
     ]);
     renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/" });
@@ -40,7 +40,7 @@ describe("welcome screens", () => {
     fireEvent.click(screen.getByRole("button", { name: "Create my profile" }));
 
     const field = await screen.findByLabelText("Access code");
-    expect(screen.getByText("Meet First is invite-only for now. Enter the access code you were given.")).toBeTruthy();
+    expect(screen.getByText("Meety is invite-only for now. Enter the access code you were given.")).toBeTruthy();
     fireEvent.change(field, { target: { value: "judges" } });
     fireEvent.click(screen.getByRole("button", { name: "Create my profile" }));
 

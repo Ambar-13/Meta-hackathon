@@ -16,7 +16,7 @@ export const ClaimScreen = (): ReactElement => {
       {state.kind === "missing" ? <p>This link is not complete. Make a new one in Settings on your other browser.</p> : null}
       {state.kind === "ready" || state.kind === "sending" ? (
         <>
-          <p>This link moves your Meet First profile into this browser. It works once.</p>
+          <p>This link moves your profile into this browser. It works once.</p>
           <button type="button" disabled={state.kind === "sending"} onClick={() => void claim()}>
             Use this link
           </button>

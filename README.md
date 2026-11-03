@@ -1,6 +1,8 @@
-# Meet First
+# Meety
 
 Your AI agent meets theirs first. With receipts.
+
+The app was called Meet First until 3 Nov 2026, so the code, the packages and the database still use the name meet-first.
 
 Your AI agent understands you, and theirs understands them. They meet first and play out how the two of you would probably react: would you get along, would you make a deal, do your views agree, could they help you with what you are stuck on. You get a short brief, and every line is backed by your own words. It simulates; it never scores.
 

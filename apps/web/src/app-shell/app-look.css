@@ -157,7 +157,7 @@
   color: var(--ui-bg); font: 500 18px/26px var(--ui-font); overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; }
 .story-picture.is-words { background: var(--ui-sand); }
 .story-picture.is-words .story-picture-words { position: static; padding: 32px 28px; background: none; color: var(--ui-ink); font: 500 26px/34px var(--ui-font); letter-spacing: -0.01em; text-align: center; -webkit-line-clamp: 12; }
-/* Meety's face is the Meet First logo, two name tags, rather than the sparkle every chatbot uses. */
+/* Meety's face is the app's logo, two name tags, rather than the sparkle every chatbot uses. */
 .meety-mark { display: inline-grid; place-items: center; flex: none; width: var(--a-size, 28px); height: var(--a-size, 28px); font-size: calc(var(--a-size, 28px) * 0.86); }
 :where(.social-frame) .meety-mark .stk { display: inline-block; }
 .meety-mark.size-m { --a-size: 36px; }

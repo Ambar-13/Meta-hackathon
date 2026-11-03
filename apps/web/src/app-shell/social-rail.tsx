@@ -21,7 +21,7 @@ const RAIL_PAGES: readonly RailPage[] = [
 ];
 
 // The sidebar's own words on a laptop.
-const RAIL_COPY = { home: "Meet First home", tagline: "Your Meety meets theirs first.", invite: "Invite a friend", meety: "Your Meety", meetyLine: "Shares only what you choose" } as const;
+const RAIL_COPY = { home: "Meety home", tagline: "Your Meety meets theirs first.", invite: "Invite a friend", meety: "Your Meety", meetyLine: "Shares only what you choose" } as const;
 
 // The class of one page link: rail-only for the one the laptop keeps at the sidebar's foot, phone-hidden for one the phone keeps elsewhere.
 function pageClass(page: RailPage): string | undefined {
@@ -52,7 +52,7 @@ const PageLink = (props: { page: RailPage; pathname: string; incomingCount: numb
   );
 };
 
-// The signed-in nav. On a laptop a sidebar after the "Other" concept Ambar liked (3 Nov 2026): the Meet First mark and words, the
+// The signed-in nav. On a laptop a sidebar after the "Other" concept Ambar liked (3 Nov 2026): the Meety mark and words, the
 // tagline, the pages with their words, Invite a friend, Settings at the foot, and a line on what your Meety shares. Between laptop and
 // phone a narrow rail of icons; on a phone a bottom bar of icons with their words. It is one Pages nav at every width; the stylesheet
 // moves it. hasSettingsLink is false on Settings itself.
@@ -64,7 +64,7 @@ export const SocialRail = (props: { pathname: string; hasSettingsLink: boolean }
     <div className="social-rail">
       <Link className="rail-logo" to={APP_PATHS.home} aria-label={RAIL_COPY.home}>
         <Sticker name="tags" />
-        <span className="rail-wordmark" aria-hidden="true">Meet First</span>
+        <span className="rail-wordmark" aria-hidden="true">Meety</span>
       </Link>
       <p className="rail-tagline">{RAIL_COPY.tagline}</p>
       <nav className="tab-bar social-pages" aria-label="Pages">

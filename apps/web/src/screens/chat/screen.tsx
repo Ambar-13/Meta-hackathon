@@ -21,7 +21,7 @@ import { FriendsRow, HomeSide } from "./home-parts.js";
 const UNDER_GREETING = "Ask who could help you with something, or how a friend would probably react to something.";
 const LOADING_LINE = "Loading your chat.";
 // The line under Meety's name at the top of the chat, as Instagram shows who you are talking to.
-const INTRO_LINE = "Your personal AI on Meet First";
+const INTRO_LINE = "Your personal AI";
 
 // Today's next step while the person has no approved card: one line and its button, above the chat and the feed.
 export const NextStep = (props: { home: HomeView }): ReactElement | null => {

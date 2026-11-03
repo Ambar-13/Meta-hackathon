@@ -1,4 +1,4 @@
-# How Meet First is built
+# How Meety is built
 
 Two people each upload what their AI assistant knows about them. The browser extracts the turns and runs a first scrub, so the raw export never leaves the device. The api scrubs the turns again, stores them, and queues the work. The worker builds a card for each person, runs a ten-minute meeting between the two personas, and writes each person a brief with a support check on every line. A share page exists only while both people consent, and deletion removes every row that belongs to a person.
 
@@ -90,5 +90,5 @@ Every table has row security turned on and forced. Two reference tables can be r
 - SAFETY.md lists who may read which rows, what leaves the device, and how consent and deletion work.
 - ../GLOSSARY.md defines each word the code and the documents use.
 - ../decisions.md is the decision ledger, with a row id for every rule in the code.
-- ../known-limits.md lists what Meet First does not do.
+- ../known-limits.md lists what Meety does not do.
 - ../ai-use.md says how AI was used to build the product and what runs in it.

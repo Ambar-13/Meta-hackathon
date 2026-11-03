@@ -43,7 +43,7 @@ export function initialOf(name: string): string {
   return first === undefined ? "·" : first.toLocaleUpperCase();
 }
 
-// A person as a round initial in their side's colour. People never have photos in Meet First, so this is how a face is shown.
+// A person as a round initial in their side's colour, as the meeting screens show both people.
 export const Avatar = (props: { name: string; side: VoiceSide; isSmall?: boolean }): ReactElement => {
   const size = props.isSmall === true ? " small" : "";
   return (

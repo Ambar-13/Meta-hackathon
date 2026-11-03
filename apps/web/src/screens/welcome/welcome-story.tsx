@@ -5,7 +5,7 @@ import { Avatar, NameTag, Receipt, ReceiptFlag, Sticker, TypingDots, type Sticke
 // The welcome page below the first screen: what it does, a sample meeting, the kinds of question, the three steps, the
 // promises and the last call. Mira and Jonah are made up, and the page says so; nothing here is a real person's data.
 
-// The paragraph that says what Meet First does, with small stickers inside the sentence (Lofty Lab's "who we are").
+// The paragraph that says what Meety does, with small stickers inside the sentence (Lofty Lab's "who we are").
 export const WhatItDoes = (): ReactElement => {
   return (
     <section className="wl-mission" id="how" aria-labelledby="wl-mission-title">

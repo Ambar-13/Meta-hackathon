@@ -1,6 +1,6 @@
-# Gitleaks rules for Meet First. The default rules stay on; the allowlist names planted and synthetic test
+# Gitleaks rules for Meety. The default rules stay on; the allowlist names planted and synthetic test
 # data only, so a real key found in any other file still fails the job.
-title = "Meet First gitleaks rules"
+title = "Meety gitleaks rules"
 
 [extend]
 useDefault = true

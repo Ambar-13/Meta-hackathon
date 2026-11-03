@@ -3,7 +3,7 @@ Rows: D49, D51, D52, D66, A3, A8, R1.3, R2.4, R3.4, R5.11, R7.2, R8.1 to R8.4, R
 
 ## What this does
 
-The browser app of Meet First. A person uploads what their AI assistant knows about them, checks the names and the card, takes the quiz, pairs with someone, and watches the two personas meet. The api serves it from the same address, so the session cookie never reaches JavaScript.
+The browser app of Meety. A person uploads what their AI assistant knows about them, checks the names and the card, takes the quiz, pairs with someone, and watches the two personas meet. The api serves it from the same address, so the session cookie never reaches JavaScript.
 
 ## What this never does
 

@@ -16,9 +16,9 @@ const WelcomeHero = (props: { onDone: () => void }): ReactElement => {
       <Cloud className="wl-cloud-b" />
       <Cloud className="wl-cloud-c" />
       <nav className="wl-nav" aria-label="Main">
-        <Link className="logo" to={APP_PATHS.welcome}>
+        <Link className="logo" to={APP_PATHS.welcome} aria-label="Meety start page">
           <Sticker name="tags" />
-          Meet First
+          Meety
         </Link>
         <span className="wl-nav-chips">
           <a className="chip c-green wl-desk" href="#how">How it works</a>

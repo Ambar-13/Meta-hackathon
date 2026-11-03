@@ -16,7 +16,7 @@ const PAGE_TITLE = "Shared meeting";
 const PUBLIC_COPY = {
   loading: "Opening the shared meeting.",
   notFoundTitle: "Nothing to read here",
-  whatIs: "What is Meet First?",
+  whatIs: "What is Meety?",
 } as const;
 
 // The public share page: the two name tags over the sky, the question as the heading, then the snapshot, then the report link.

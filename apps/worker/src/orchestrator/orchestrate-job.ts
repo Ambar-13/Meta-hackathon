@@ -9,8 +9,8 @@ import { checkPlan, goneFriendSentence, PLAN_FAILED_SENTENCE, planCallArgs, plan
 
 // The sentence of a reply when a dollar cap stopped the call, by the cap's code (D60).
 const CAP_SENTENCES: Readonly<Record<string, string>> = {
-  daily_cap_reached: "Meet First has used today's model budget, so I cannot plan this now. Try again tomorrow.",
-  total_cap_reached: "Meet First's model budget for this event is used up, so I cannot plan this.",
+  daily_cap_reached: "Today's model budget is used up, so I cannot plan this now. Try again tomorrow.",
+  total_cap_reached: "The model budget for this event is used up, so I cannot plan this.",
 };
 
 // What a failed call writes: the sentence, and no action.

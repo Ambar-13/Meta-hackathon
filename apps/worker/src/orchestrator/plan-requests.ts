@@ -19,7 +19,7 @@ export const PLAN_FAILED_SENTENCE = "I could not work that out just now. Try aga
 // The sentence when a help or react plan came without a question that fits an ask.
 export const NO_QUESTION_SENTENCE = "I could not turn that into a question to ask. Tell me in one sentence what you want to know.";
 // The sentence when the person has no friends yet and asked how one would react.
-export const NO_FRIENDS_SENTENCE = "You have no friends on Meet First yet. Find someone in Explore and send a friend request, then ask me how they would react.";
+export const NO_FRIENDS_SENTENCE = "You have no friends here yet. Find someone in Explore and send a friend request, then ask me how they would react.";
 
 // One earlier message of the thread as the request shows it.
 export type RecentMessage = { role: "you" | "agent"; text: string };

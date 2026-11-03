@@ -1,4 +1,4 @@
-# What Meet First does not do
+# What Meety does not do
 
 A simulation of how two people would probably react, not a guarantee; it gives no score.
 

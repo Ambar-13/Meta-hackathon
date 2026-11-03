@@ -2,7 +2,7 @@
 
 ## In the product
 
-Meet First calls the Meta Model API. The model is muse-spark-1.3 for the names pass, the card, the quiz answers and the quiz judge, the meeting turns and their receipts, the brief and its support judge, and the comic panels. muse-image-1.0 draws the comic panels.
+Meety calls the Meta Model API. The model is muse-spark-1.3 for the names pass, the card, the quiz answers and the quiz judge, the meeting turns and their receipts, the brief and its support judge, and the comic panels. muse-image-1.0 draws the comic panels.
 
 The model never decides what is stored, what is public, or what is deleted. Those rules are code. Every claim and every brief quote is checked by string match in code against the turn it names, and a second, separate judge call reports whether each brief quote backs its line.
 

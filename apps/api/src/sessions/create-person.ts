@@ -23,7 +23,7 @@ export async function insertPerson(db: Kysely<Database>, input: { displayName: s
 }
 
 // The sentence for a sign-up with no access code on a site that sets one (R9.5).
-export const ACCESS_CODE_NEEDED_SENTENCE = "Meet First is invite-only for now. Enter the access code you were given.";
+export const ACCESS_CODE_NEEDED_SENTENCE = "Meety is invite-only for now. Enter the access code you were given.";
 // The sentence for a sign-up with another access code than the site's (R9.5).
 export const ACCESS_CODE_WRONG_SENTENCE = "That access code is not right. Check it and try again.";
 

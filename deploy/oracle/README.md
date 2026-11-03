@@ -4,7 +4,7 @@ Rows D70 and D71 on one Oracle Cloud server (Always Free: Arm, 2 cores, 12 GB) i
 
 ## What this does
 
-It runs Meet First on one server: Postgres, the api (which also serves the web app), the worker, and Caddy, which gives the server an HTTPS name on sslip.io and renews its certificate. `deploy.sh` deploys a tag on the release branch from this machine over SSH, and its first run sets the server up.
+It runs Meety on one server: Postgres, the api (which also serves the web app), the worker, and Caddy, which gives the server an HTTPS name on sslip.io and renews its certificate. `deploy.sh` deploys a tag on the release branch from this machine over SSH, and its first run sets the server up.
 
 ## What this never does
 

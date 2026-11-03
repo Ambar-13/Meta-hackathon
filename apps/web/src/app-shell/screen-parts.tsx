@@ -24,9 +24,9 @@ const OpenFrame = (props: { main: ReactElement; hasSettingsLink: boolean; pathna
   return (
     <>
       <header className="top-bar">
-        <Link className="logo" to={APP_PATHS.welcome}>
+        <Link className="logo" to={APP_PATHS.welcome} aria-label="Meety start page">
           <Sticker name="tags" />
-          Meet First
+          Meety
         </Link>
       </header>
       {props.main}
@@ -52,9 +52,9 @@ const SignedInFrame = (props: { main: ReactElement; hasSettingsLink: boolean; pa
         <Link className="top-invite" to={APP_PATHS.create} aria-label="Create a post or story">
           <Icon name="create" size={24} />
         </Link>
-        <Link className="logo" to={APP_PATHS.home}>
+        <Link className="logo" to={APP_PATHS.home} aria-label="Meety home">
           <Sticker name="tags" />
-          Meet First
+          Meety
         </Link>
         {props.hasSettingsLink ? (
           <Link className="top-settings" to={SETTINGS_LINK.to} aria-label={SETTINGS_LINK.label}>

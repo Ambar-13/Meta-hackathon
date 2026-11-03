@@ -1,6 +1,6 @@
 // The home page's Instagram parts around Meety's chat (Ambar's screenshot of 3 Nov 2026): your friends as a row of circles across the
 // top, as Instagram shows stories, and on a wide screen a right-hand column with you, your friends and people Explore suggests, as
-// Instagram shows "Suggested for you". A ring in Meet First's two colours means that friend's agent can be asked.
+// Instagram shows "Suggested for you". A ring in the app's two colours means that friend's agent can be asked.
 import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import type { DirectoryListing, Friend, HomeView } from "@meet-first/contracts";
@@ -149,7 +149,7 @@ export const HomeSide = (props: { home: HomeView | null; friends: readonly Frien
       )}
       {props.friends === null ? null : <SideFriends friends={friends} onAsk={props.onAsk} />}
       {props.suggestions === null ? null : <SideSuggestions people={suggestedPeople(props.suggestions, friends)} adds={props.adds} />}
-      <p className="side-foot">Meet First. Your Meety meets theirs first.</p>
+      <p className="side-foot">Your Meety meets theirs first.</p>
     </aside>
   );
 };
