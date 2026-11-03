@@ -107,6 +107,15 @@ describe("the summary routes", () => {
     expect(row.text).not.toMatch(/\[(?:person|code|redacted)\s*:/);
   });
 
+  it("W7-SUMMARY-API-T8: a placeholder shape hidden by invisible characters is turned round too, since storing strips those characters", async () => {
+    const person = await createTestPerson(t.db, "Summary Invisible");
+
+    await send("PUT", person.sessionToken, { text: `${SUMMARY}\nQuote: built it with [​person:Leon Hartley] and [per­son: Leon Hartley]`, friendsCanAsk: false });
+    const row = await withPerson(t.db, person.personId, (trx) => trx.selectFrom("person_summaries").select("text").where("person_id", "=", person.personId).executeTakeFirstOrThrow());
+
+    expect(row.text).not.toMatch(/\[(?:person|code|redacted)\s*:/iu);
+  });
+
   it("W7-SUMMARY-API-T5: DELETE removes the summary, and reading it then answers 404", async () => {
     const person = await createTestPerson(t.db, "Summary Gone");
     await send("PUT", person.sessionToken, { text: SUMMARY, friendsCanAsk: false });
