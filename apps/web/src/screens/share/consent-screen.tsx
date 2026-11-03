@@ -67,7 +67,7 @@ const ShareLink = (props: { state: ConsentState }): ReactElement | null => {
   const url = shareUrlOf(props.state);
   if (url === null) return null;
   return (
-    <section className="colour-panel c-green share-live" aria-labelledby="share-live-title">
+    <section className="share-live" aria-labelledby="share-live-title">
       <Sticker name="check" className="share-live-sticker" />
       <h2 id="share-live-title">{CONSENT_COPY.liveTitle}</h2>
       <p className="share-url">{url}</p>

@@ -4,7 +4,7 @@
 .me-edit { margin: 18px 0 8px; }
 .me-listing-form label:first-child { margin-top: 0; }
 .me-listing-form button[type="submit"] { margin-top: 12px; }
-.me-listing-form .soft-panel, .me-listing-form .notice { margin-bottom: 0; }
+.me-listing-form [role="status"], .me-listing-form .notice { margin-bottom: 0; }
 .me-refusal { margin: 12px 0 0; font-weight: 600; color: var(--ui-red); }
 .me-need-card { margin: 0 0 12px; font-weight: 600; }
 .me-edit > a:not(.btn) { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }

@@ -29,7 +29,7 @@ const SaveLine = (props: { state: ListingSaveState }): ReactElement | null => {
   const { state } = props;
   if (state.kind === "refused") return <p className="me-refusal" role="alert">{state.sentence}</p>;
   if (state.kind === "failed") return <ErrorNotice error={state.error} />;
-  if (state.kind === "saved") return <p className="soft-panel" role="status">{ME_COPY.saved}</p>;
+  if (state.kind === "saved") return <p role="status">{ME_COPY.saved}</p>;
   return null;
 };
 
@@ -63,7 +63,7 @@ const ListingForm = (props: { cardId: string; listing: MyListing | null; submitL
 export const EditListing = (props: { listing: MyListing; yours: YourListingHook; onSaved: (listing: MyListing) => void }): ReactElement => {
   const { leaveState } = props.yours;
   return (
-    <section className="panel me-edit" aria-label="Your listing">
+    <section className="me-edit" aria-label="Your listing">
       <ListingForm cardId={props.listing.cardId} listing={props.listing} submitLabel={ME_COPY.save} onSaved={props.onSaved} />
       <Link to={APP_PATHS.card(props.listing.cardId)}>{ME_COPY.pickPublic}</Link>
       <div className="actions">
@@ -78,10 +78,10 @@ export const EditListing = (props: { listing: MyListing; yours: YourListingHook;
 export const JoinExplore = (props: { home: HomeView | null; yours: YourListingHook }): ReactElement | null => {
   const card = props.home?.card ?? null;
   const hasLeft = props.yours.leaveState.kind === "left";
-  if (props.home === null) return hasLeft ? <p className="soft-panel" role="status">{ME_COPY.left}</p> : null;
+  if (props.home === null) return hasLeft ? <p role="status">{ME_COPY.left}</p> : null;
   return (
-    <section className="panel me-edit" aria-label="Join Explore">
-      {hasLeft ? <p className="soft-panel" role="status">{ME_COPY.left}</p> : null}
+    <section className="me-edit" aria-label="Join Explore">
+      {hasLeft ? <p role="status">{ME_COPY.left}</p> : null}
       {card?.state === "approved" ? (
         <>
           <ListingForm cardId={card.id} listing={null} submitLabel={ME_COPY.join} onSaved={props.yours.replaceListing} />

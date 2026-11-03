@@ -10,7 +10,7 @@
 
 .pair-lead { font-size: 18px; max-width: 34ch; }
 
-.invite-card { display: grid; gap: 4px 28px; justify-items: center; padding: 22px 18px 18px; border-radius: var(--radius-l); box-shadow: var(--lift); }
+.invite-card { display: grid; gap: 4px 28px; justify-items: center; padding: 22px 18px 18px; border-radius: var(--radius-l); background: var(--paper); box-shadow: var(--lift); }
 .invite-qr { width: 100%; max-width: 240px; }
 .invite-qr svg { max-width: 240px; margin: 0 auto; box-shadow: none; padding: 6px; }
 .qr-paper { fill: var(--paper); }

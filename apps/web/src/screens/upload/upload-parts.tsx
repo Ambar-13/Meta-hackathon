@@ -89,7 +89,7 @@ function stageState(stage: UploadProgress["stage"], progress: UploadProgress | n
 export const PreparingLine = (props: { progress: UploadProgress | null; onCancel: () => void }): ReactElement => {
   const words = props.progress === null ? "Getting ready." : `${STAGE_WORDS[props.progress.stage]}. ${String(props.progress.keptTurns)} messages kept so far.`;
   return (
-    <section className="panel up-working">
+    <section className="up-working">
       <LoadingLine text={words} />
       <ol className="up-steps" aria-label="Steps">
         {STAGE_ORDER.map((stage) => (
@@ -119,7 +119,7 @@ export const PreviewPanel = (props: { ready: UploadReady; isAttested: boolean; i
   const { ready } = props;
   return (
     <section className="up-preview" aria-labelledby="preview-title">
-      <div className="colour-panel c-green up-counts">
+      <div className="up-counts">
         <Sticker name="check" className="up-counts-stk" />
         <h2 id="preview-title">What will be sent</h2>
         <p>{`We found ${String(ready.foundTurns)} of your messages and kept ${String(ready.keptTurns)}.`}</p>
@@ -127,7 +127,7 @@ export const PreviewPanel = (props: { ready: UploadReady; isAttested: boolean; i
       </div>
       <p className="up-consent">{CONSENT_COPY}</p>
       {ready.isLowSignal ? (
-        <div className="soft-panel c-yellow up-low">
+        <div className="up-low">
           <p>{LOW_SIGNAL_NOTE}</p>
           <button type="button" className="quiet" onClick={props.onPasteInstead}>
             Paste notes instead

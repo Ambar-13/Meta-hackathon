@@ -19,40 +19,58 @@ import { FriendsRow, HomeSide } from "./home-parts.js";
 // The lines of this page that the design gives word for word, and the loading line it does not.
 const UNDER_GREETING = "Ask who could help you with something, or how a friend would probably react to something.";
 const LOADING_LINE = "Loading your chat.";
+// The line under Meety's name at the top of the chat, as Instagram shows who you are talking to.
+const INTRO_LINE = "Your personal AI on Meet First";
 
-// Today's next step while the person has no approved card, as one quiet panel with its link.
+// Today's next step while the person has no approved card: one line and its button, above the chat.
 const NextStep = (props: { home: HomeView }): ReactElement | null => {
   if (props.home.card?.state === "approved") return null;
   const step = nextStepOf(props.home);
   return (
-    <section className="soft-panel chat-next" aria-label="Your next step">
+    <section className="chat-next" aria-label="Your next step">
       <Sticker name={step.sticker} />
       <p>
         <strong>{step.title}</strong> {step.text}
       </p>
-      <Link className="btn quiet" to={step.action.to}>{step.action.label}</Link>
+      <Link className="btn" to={step.action.to}>{step.action.label}</Link>
     </section>
   );
 };
 
-// The empty thread: Meety's mark, the greeting as the page's visual title with the person's name in coral, and the line under it.
-const Greeting = (props: { displayName: string | null }): ReactElement => {
+// The top of the chat, as Instagram opens a chat with someone: Meety's picture, its name, and what it is.
+const Intro = (): ReactElement => {
+  return (
+    <div className="chat-intro">
+      <MeetyMark size="xl" />
+      <p className="chat-intro-name">Meety</p>
+      <p className="chat-intro-line">{INTRO_LINE}</p>
+    </div>
+  );
+};
+
+// The empty thread: Meety's first message, the greeting with the person's name in coral and the line under it, as two grey bubbles
+// beside its logo, then the example chips.
+const Greeting = (props: { displayName: string | null; chips: ReactElement }): ReactElement => {
   const name = props.displayName?.trim() ?? "";
   const text = greetingOf(name);
   const at = name === "" ? -1 : text.indexOf(name);
   return (
-    <div className="chat-hello">
-      <MeetyMark size="l" />
-      <h2 className="chat-greeting" aria-label={text}>
-        {at < 0 ? text : (
-          <>
-            {text.slice(0, at)}
-            <span className="chat-greeting-name">{name}</span>
-            {text.slice(at + name.length)}
-          </>
-        )}
-      </h2>
-      <p>{UNDER_GREETING}</p>
+    <div className="chat-agent chat-hello">
+      <MeetyMark />
+      <div className="chat-agent-body">
+        <span className="chat-who">Meety</span>
+        <h2 className="chat-bubble chat-greeting" aria-label={text}>
+          {at < 0 ? text : (
+            <>
+              {text.slice(0, at)}
+              <span className="chat-greeting-name">{name}</span>
+              {text.slice(at + name.length)}
+            </>
+          )}
+        </h2>
+        <p className="chat-bubble chat-text">{UNDER_GREETING}</p>
+        {props.chips}
+      </div>
     </div>
   );
 };
@@ -60,7 +78,7 @@ const Greeting = (props: { displayName: string | null }): ReactElement => {
 // The colour of each example chip, in order: a help search is yellow everywhere, and the two friend asks take the two voices.
 const CHIP_TINTS = ["c-yellow", "c-coral", "c-blue"] as const;
 
-// The three example chips under the composer; pressing one fills the box and never sends.
+// The three example chips under the greeting, as quick replies; pressing one fills the box and never sends.
 const Chips = (props: { model: ChatModel }): ReactElement => {
   const texts = chipTexts(props.model.friends.value?.friends ?? null);
   return (
@@ -149,11 +167,11 @@ const ChatColumn = (props: { model: ChatModel; isEmpty: boolean; end: RefObject<
   return (
     <div className={rootClass(model.thread.value !== null, isEmpty)}>
       {home === null ? null : <NextStep home={home} />}
-      {isEmpty ? <Greeting displayName={home?.displayName ?? null} /> : null}
+      {model.thread.value === null ? null : <Intro />}
+      {isEmpty ? <Greeting displayName={home?.displayName ?? null} chips={<Chips model={model} />} /> : null}
       {model.messages.length > 0 ? <Thread messages={model.messages} actions={replyActions(model)} /> : null}
       <ThreadState model={model} />
       <Composer model={model.composer} />
-      {isEmpty ? <Chips model={model} /> : null}
       <div className="chat-end" ref={props.end} />
     </div>
   );

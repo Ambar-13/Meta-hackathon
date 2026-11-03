@@ -36,11 +36,11 @@ const DeleteAccountSection = (): ReactElement => {
     triggerRef.current?.focus();
   };
   return (
-    <section className="panel settings-section" aria-labelledby="delete-account-heading">
+    <section className="settings-section" aria-labelledby="delete-account-heading">
       <h2 id="delete-account-heading">Delete my account</h2>
       <p>{SECTION_BODY}</p>
       {flow.kind === "deleted" ? (
-        <div className="soft-panel c-green settings-deleted">
+        <div className="settings-deleted">
           <Sticker name="check" />
           <p role="status">{DELETED_NOTICE}</p>
         </div>
@@ -70,7 +70,7 @@ export const SettingsScreen = (): ReactElement => {
   };
   return (
     <ScreenFrame title="Settings" hideSettingsLink>
-      <section className="panel settings-section" aria-labelledby="transfer-title">
+      <section className="settings-section" aria-labelledby="transfer-title">
         <h2 id="transfer-title">Open this profile in Safari</h2>
         <p>Opened inside another app? Make a one-time link, then open it in Safari.</p>
         <button type="button" className="settings-main" disabled={state.kind === "sending"} onClick={() => void makeLink()}>
@@ -78,7 +78,7 @@ export const SettingsScreen = (): ReactElement => {
         </button>
         {state.kind === "sending" ? <LoadingLine text={MAKING_LINK_LINE} /> : null}
         {state.kind === "created" ? (
-          <div className="soft-panel settings-link">
+          <div className="settings-link">
             <label>
               One-time link
               <input type="text" readOnly value={state.url} />

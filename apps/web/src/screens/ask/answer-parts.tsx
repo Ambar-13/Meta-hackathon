@@ -71,7 +71,7 @@ const MeetControl = (props: { answerId: string; cardId: string | null; isBusy: b
 export const HelpAnswerItem = (props: { answer: AskAnswer; cardId: string | null; isBusy: boolean; onMeet: (answerId: string, cardId: string) => void }): ReactElement => {
   const { answer } = props;
   return (
-    <li className="panel ask-answer">
+    <li className="ask-answer">
       <div className="ask-answer-head">
         <Avatar name={answer.displayName} side="b" />
         <div>

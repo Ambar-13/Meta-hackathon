@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { ASK_POLL_MS, type AskMode, type AskView } from "@meet-first/contracts";
 import { apiFetch, APP_PATHS, routes, usePolledView, type PolledView } from "../../app-shell/index.js";
-import { PersonAvatar, TypingDots, tintOf } from "../../look/index.js";
+import { PersonAvatar, TypingDots } from "../../look/index.js";
 import { isAskRunning } from "../ask/ask-state.js";
 import { ASK_CARD_ANSWERS_MAX, firstSentence } from "./chat-words.js";
 
@@ -35,13 +35,18 @@ export const WaitLine = (props: { text: string }): ReactElement => {
   );
 };
 
+// The colour of a card by its kind: a help search is yellow everywhere, a friend ask coral.
+export function kindTint(mode: AskMode): string {
+  return mode === "help" ? "c-yellow" : "c-coral";
+}
+
 // The kind's words and the question at the top of a plan or an ask.
 export const KindHead = (props: { mode: AskMode; question: string }): ReactElement => {
   const chip = ASK_KIND_CHIP[props.mode];
   return (
     <>
       <span className="chat-kind">{chip.label}</span>
-      <p className={`chat-question ${props.mode === "help" ? "c-yellow" : "c-coral"}`}>{`“${props.question}”`}</p>
+      <p className="chat-question">{`“${props.question}”`}</p>
     </>
   );
 };
@@ -56,10 +61,10 @@ const AskAnswers = (props: { view: AskView }): ReactElement => {
       ) : (
         <ul className="chat-answers">
           {shown.map((answer) => (
-            <li key={answer.answerId} className={tintOf(answer.displayName)}>
+            <li key={answer.answerId}>
               <PersonAvatar name={answer.displayName} size="s" />
               <span>
-                <strong>{answer.displayName}</strong>
+                <strong>{`${answer.displayName}'s agent`}</strong>
                 <span className="chat-answer-line">{firstSentence(answer.answer)}</span>
               </span>
             </li>
@@ -101,7 +106,7 @@ export const AskCard = (props: { askId: string; mode: AskMode; question: string 
   const ask = usePolledView(() => apiFetch(routes.asks.readAsk, { params: { id: props.askId } }), { key: props.askId, intervalMs: ASK_POLL_MS, keepPolling: isAskRunning });
   const question = props.question === "" ? (ask.value?.text ?? "") : props.question;
   return (
-    <section className="chat-card" aria-label="The ask">
+    <section className={`chat-card ${kindTint(ask.value?.mode ?? props.mode)}`} aria-label="The ask">
       <KindHead mode={ask.value?.mode ?? props.mode} question={question} />
       <AskState ask={ask} askId={props.askId} />
     </section>

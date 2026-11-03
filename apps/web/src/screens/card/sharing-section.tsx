@@ -71,7 +71,7 @@ const SharingForm = (props: { cardId: string; items: CardItem[]; saved: SavedSha
       <PillSwitch label={FRIENDS_ASK_SWITCH_COPY} isOn={draft.friendsCanAsk} isDisabled={false} onChange={hook.setFriendsCanAsk} />
       <PublicItemBoxes items={props.items} draft={draft} onToggle={hook.togglePublic} />
       <DirectoryControls draft={draft} hook={hook} />
-      {isListedElsewhere ? <p className="soft-panel c-yellow other-card">{SHARING_COPY.otherCard}</p> : null}
+      {isListedElsewhere ? <p className="other-card">{SHARING_COPY.otherCard}</p> : null}
       <div className="actions sharing-actions">
         <button type="button" disabled={hook.status.kind === "sending"} onClick={() => void hook.save()}>
           {SHARING_COPY.save}
@@ -91,7 +91,7 @@ export const SharingSection = (props: { cardId: string; items: CardItem[] }): Re
   const hook = useSharing(props.cardId);
   const { load } = hook;
   return (
-    <section className="panel sharing" aria-labelledby="sharing-title">
+    <section className="sharing" aria-labelledby="sharing-title">
       <div className="sharing-head">
         <h2 id="sharing-title">Sharing</h2>
         <Sticker name="tags" />

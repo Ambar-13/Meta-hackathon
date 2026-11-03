@@ -28,7 +28,7 @@ export const PairScreen = (): ReactElement => {
       {state.kind === "created" ? (
         <>
           <InviteView inviteUrl={state.pair.inviteUrl} pairId={state.pair.pairId} cardId={cardId} />
-          <p className="soft-panel invite-wait">When they accept, you both show up in the lobby.</p>
+          <p className="invite-wait">When they accept, you both show up in the lobby.</p>
         </>
       ) : null}
       {state.kind === "created" ? null : (
@@ -57,7 +57,7 @@ const InviteView = (props: { inviteUrl: string; pairId: string; cardId: string |
   const link = withAccessCode(props.inviteUrl, readAccessCode());
   const { path, size } = qrPathFor(link);
   return (
-    <section className="panel invite-card" aria-label="Your invite">
+    <section className="invite-card" aria-label="Your invite">
       <div className="qr invite-qr">
         <svg role="img" aria-label="QR code of the invite link" shapeRendering="crispEdges" viewBox={`0 0 ${String(size)} ${String(size)}`}>
           <rect className="qr-paper" width={size} height={size} />

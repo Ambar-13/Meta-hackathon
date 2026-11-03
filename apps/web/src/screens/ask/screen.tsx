@@ -89,8 +89,8 @@ const HelpResults = (props: { view: AskView; cardId: string | null; model: AskSc
     <>
       <section className="ask-section">
         <h2>{HELP_RESULTS_HEADING}</h2>
-        {props.view.answers.length === 0 ? <p className="soft-panel ask-none">{NO_MATCH_LINE}</p> : null}
-        {props.view.answers.length > 0 && placed.length === 0 ? <p className="soft-panel ask-none">{NONE_PLACED_LINE}</p> : null}
+        {props.view.answers.length === 0 ? <p className="ask-none">{NO_MATCH_LINE}</p> : null}
+        {props.view.answers.length > 0 && placed.length === 0 ? <p className="ask-none">{NONE_PLACED_LINE}</p> : null}
         {placed.length > 0 ? <ul className="ask-answers">{placed.map((answer) => toItem(answer))}</ul> : null}
       </section>
       {unplaced.length > 0 ? (

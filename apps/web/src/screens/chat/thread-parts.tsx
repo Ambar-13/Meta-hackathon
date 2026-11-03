@@ -1,9 +1,10 @@
-// The messages of the thread: the person's soft bubbles on the right, and the orchestrator's plain replies on the left with what each
-// reply does by its state: thinking dots, a plan card with its one button, the ask card, or a way to try again.
+// The messages of the thread, as Instagram draws a direct chat: your blue bubbles on the right, and Meety's group on the left, its name
+// over its grey bubble and its small logo at the foot, with what each reply does by its state under the words: thinking dots, a plan
+// card with its one button, the ask card, or a way to try again.
 import type { ReactElement } from "react";
 import { HELP_SEND_COPY, type OrchestratorMessage } from "@meet-first/contracts";
 import { MeetyMark } from "../../look/index.js";
-import { AskCard, KindHead, WaitLine } from "./ask-card.js";
+import { AskCard, KindHead, kindTint, WaitLine } from "./ask-card.js";
 import type { RunStatus } from "./chat-state.js";
 
 // The words of a reply that is still being planned.
@@ -30,7 +31,7 @@ function reactWords(name: string | null): { line: string; button: string } {
   return { line: capitalised(`${who}'s agent answers from what ${who} chose to share. ${capitalised(who)} gets a copy of the answer.`), button: `Ask ${who}'s agent` };
 }
 
-// The person's own message: a soft bubble on the right, with no avatar.
+// The person's own message: a blue bubble on the right, with no avatar.
 const YouBubble = (props: { message: OrchestratorMessage }): ReactElement => {
   return (
     <article className="chat-you" aria-label="You said">
@@ -39,14 +40,15 @@ const YouBubble = (props: { message: OrchestratorMessage }): ReactElement => {
   );
 };
 
-// A planned reply's card: the kind, the question in quotation marks, who it goes to, and the one button that starts it.
+// A planned reply's card, in the kind's colour: the kind, the question in quotation marks, who it goes to, and the one button that
+// starts it.
 const PlanCard = (props: { message: OrchestratorMessage; status: RunStatus; onRun: () => void }): ReactElement => {
   const { message, status } = props;
   const isHelp = message.action === "help";
   const words = isHelp ? { line: HELP_LINE, button: "Start the help search" } : reactWords(message.actionFriendName);
   return (
     <>
-      <section className="chat-card" aria-label="The plan">
+      <section className={`chat-card ${kindTint(isHelp ? "help" : "react")}`} aria-label="The plan">
         <KindHead mode={isHelp ? "help" : "react"} question={message.actionQuestion ?? ""} />
         <p className="chat-card-line">{words.line}</p>
         <button type="button" disabled={status.isRunning} onClick={props.onRun}>
@@ -91,15 +93,20 @@ const ReplyExtra = (props: { message: OrchestratorMessage; actions: ReplyActions
   return null;
 };
 
-// Meety's reply: its mark and name, then the words as plain text (or the thinking dots), then what the reply does.
+// Meety's reply: its name, its words in a grey bubble (or the thinking dots in one), then what the reply does, with its small logo at
+// the foot of the group as Instagram puts a person's picture beside their last message.
 const AgentReply = (props: { message: OrchestratorMessage; actions: ReplyActions }): ReactElement => {
   const { message } = props;
   return (
     <article className="chat-agent" aria-label="Meety replied">
       <MeetyMark />
-      <span className="chat-who">Meety</span>
-      <div className="chat-body">
-        {message.state === "thinking" ? <WaitLine text={THINKING_LINE} /> : <p className="chat-text">{message.text}</p>}
+      <div className="chat-agent-body">
+        <span className="chat-who">Meety</span>
+        {message.state === "thinking" ? (
+          <div className="chat-bubble">
+            <WaitLine text={THINKING_LINE} />
+          </div>
+        ) : <p className="chat-bubble chat-text">{message.text}</p>}
         <ReplyExtra message={message} actions={props.actions} />
       </div>
     </article>

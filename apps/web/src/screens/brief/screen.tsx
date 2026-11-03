@@ -51,7 +51,7 @@ const BriefBody = (props: { brief: Brief; meetingId: string; hook: BriefScreenHo
     <>
       <div className="brief-lead">
         <span className={`pill ${kind.colour}`}><span className="dot" />{kind.label}</span>
-        <p className="soft-panel brief-support">{supportLine(props.brief)}</p>
+        <p className="brief-support">{supportLine(props.brief)}</p>
       </div>
       <BriefSection title={labels.agree} points={sections.agree} onQuote={props.hook.showQuote} tone="agree" />
       <BriefSection title={labels.clash} points={sections.clash} onQuote={props.hook.showQuote} tone="clash" />

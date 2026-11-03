@@ -39,7 +39,7 @@
 .up-working .actions { margin: 14px 0 0; }
 
 /* the preview: the counts on the one tilted panel, the consent words, the box and the button */
-.up-counts { --r: -1deg; margin-top: 26px; padding-right: 74px; }
+.up-counts { margin-top: 26px; }
 .up-counts h2 { margin: 0 0 8px; }
 .up-counts p { margin: 4px 0 0; font-weight: 600; }
 .up-counts-stk { position: absolute; right: 14px; top: -22px; font-size: 54px; transform: rotate(10deg); }

@@ -61,7 +61,7 @@ const ApproveBar = (props: { isNothingTicked: boolean; isSending: boolean; onApp
 // The approved state's next step: the quiz button (left out for a thin card) and the link to pair (design section 7).
 const ApprovedNext = (props: { card: CardView; isSending: boolean; onQuiz: () => void }): ReactElement => {
   return (
-    <section className="colour-panel c-green card-next" aria-labelledby="card-next-title">
+    <section className="card-next" aria-labelledby="card-next-title">
       <Sticker name="check" />
       <h2 id="card-next-title">Card approved.</h2>
       <p>Your agent may now say these things about you, each with its quote.</p>
@@ -82,7 +82,7 @@ const ApprovedNext = (props: { card: CardView; isSending: boolean; onQuiz: () =>
 // The notice on a thin card: fewer than 6 items had a quote that checked out (D23).
 const ThinNote = (props: { isThin: boolean }): ReactElement | null => {
   if (!props.isThin) return null;
-  return <p className="soft-panel c-yellow thin-note">Thin card: fewer than 6 items had a quote that checked out. Meetings still work; the quiz is skipped.</p>;
+  return <p className="thin-note">Thin card: fewer than 6 items had a quote that checked out. Meetings still work; the quiz is skipped.</p>;
 };
 
 // A built card: the next step or the hello line, the items, the recall switch, then Sharing once approved or the approve bar before.

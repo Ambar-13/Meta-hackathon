@@ -128,4 +128,5 @@
 :where(.social-frame) .meety-mark .stk { display: inline-block; }
 .meety-mark.size-m { --a-size: 36px; }
 .meety-mark.size-l { --a-size: 56px; }
+.meety-mark.size-xl { --a-size: 80px; }
 .icon { flex: none; }
