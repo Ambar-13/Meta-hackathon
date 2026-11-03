@@ -6,6 +6,8 @@ export { canonicalise, guessLang } from "./canonicalise.js";
 export { computePersonaSignal } from "./persona-signal.js";
 // The ranking and cutting to the size caps.
 export { rankAndCut } from "./rank-and-cut.js";
+// A pasted summary read into points, and the quotes and topics the browser keeps first.
+export { parseSummary, summaryPriority, type SummaryPriority } from "./summary-format.js";
 // The file name of a Codex session log, and the lines of it the Codex reader needs, so the upload can stream a large log line by line.
 export { CODEX_FILE_NAME, isCodexLineWanted } from "./codex-shapes.js";
 // A message before canonicalisation, as the shape parsers return it.
