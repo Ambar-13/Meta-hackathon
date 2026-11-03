@@ -7,8 +7,8 @@ services:
   - type: web
     name: meet-first
     runtime: docker
-    plan: free               # 0.1 CPU, 512 MB; 0.5c-512mb ($7 a month) never sleeps and has 0.5 CPU [confirm]
-    region: singapore        # ARCHITECTURE.md 12: availability and latency to api.meta.ai are unverified [confirm]
+    plan: free               # 0.1 CPU, 512 MB; 0.5c-512mb ($7 a month) never sleeps and has 0.5 CPU
+    region: singapore        # close to the people using it; latency to api.meta.ai is not measured
     dockerfilePath: ./Dockerfile.render   # the whole workspace; starts as root so the api and the worker run as two users
     dockerContext: .
     dockerCommand: bash /app/scripts/start-api-and-worker.sh   # migrations, then the api and the worker (D71)
@@ -26,7 +26,7 @@ services:
       - key: APP_ORIGIN
         sync: false          # https://<service>.onrender.com until a domain exists (A7)
       - key: META_API_KEY
-        sync: false          # the worker process only; the start script keeps it out of the api (ARCHITECTURE.md 8)
+        sync: false          # the worker process only; the start script keeps it out of the api
       - key: ACCESS_CODE
         sync: false          # sign-up needs this code, so scripts cannot make accounts and spend the model budget (R9.5); the api process only
       - key: GOOGLE_CLIENT_ID
@@ -34,13 +34,13 @@ services:
       - key: GOOGLE_CLIENT_SECRET
         sync: false          # set only in Render's settings, never in the repo
       - key: META_API_BASE_URL
-        value: https://api.meta.ai/v1   # ARCHITECTURE.md 2
+        value: https://api.meta.ai/v1
       - key: LLM_MODE
         value: live          # D74: production refuses replay
       - key: DAILY_USD_CAP
         value: "15"          # D60, lowered on 2 Nov 2026 so a leaked access code cannot spend a day's credit fast
       - key: TOTAL_USD_CAP
-        value: "111"         # D60: at most $111 of the Meta credit in all, raised from 60 by Ambar on 3 Nov 2026 for Google sign-in
+        value: "111"         # at most $111 of the Meta credit in all
       - key: MAX_CONCURRENT_MEETINGS
         value: "5"           # D57, lowered: both processes share 512 MB, and one meeting took them to 368 MB together (28 Oct)
       - key: SEED_SAMPLES
@@ -51,6 +51,6 @@ services:
         value: production
 databases:
   - name: meet-first-db
-    plan: free               # 1 GB, expires 30 days after it is made; 0.1c-256mb ($6 a month) keeps it [confirm]
+    plan: free               # 1 GB, expires 30 days after it is made; 0.1c-256mb ($6 a month) keeps it
     postgresMajorVersion: "16"
     region: singapore
