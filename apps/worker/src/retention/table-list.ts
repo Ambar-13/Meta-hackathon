@@ -47,6 +47,7 @@ export const PERSON_TABLES: readonly PersonTable[] = [
   { table: "post_likes", reach: "person_id" },
   { table: "profile_photos", reach: "person_id" },
   { table: "google_accounts", reach: "person_id" },
+  { table: "person_summaries", reach: "person_id" },
   { table: "ledger", reach: "ledger_nulled" },
   { table: "deletions", reach: "record" },
   { table: "people", reach: "person_id" },

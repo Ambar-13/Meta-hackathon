@@ -9,6 +9,7 @@ import { makeApiEnqueue } from "./job-queue.js";
 import { handleNotFound, handleRouteError, replaceJsonParser } from "./route-errors.js";
 import { addOriginCheck, addSessionHook, registerAccountRateLimit, registerSessionsRoutes } from "./sessions/index.js";
 import { registerHomeRoutes } from "./home/index.js";
+import { registerSummaryRoutes } from "./summary/index.js";
 import { registerCardsRoutes } from "./cards/index.js";
 import { registerMeetingsRoutes } from "./meetings/index.js";
 import { registerPairsRoutes } from "./pairs/index.js";
@@ -81,6 +82,7 @@ export async function buildApp(deps: RouteDeps, options: BuildAppOptions): Promi
 export async function registerAllRoutes(app: FastifyInstance, deps: RouteDeps): Promise<void> {
   await registerSessionsRoutes(app, deps);
   await registerHomeRoutes(app, deps);
+  await registerSummaryRoutes(app, deps);
   await registerSourcesRoutes(app, deps);
   await registerCardsRoutes(app, deps);
   await registerQuizRoutes(app, deps);

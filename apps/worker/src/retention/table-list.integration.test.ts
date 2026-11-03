@@ -117,7 +117,7 @@ afterAll(async () => {
 });
 
 // The row counts of the seeded person a that the deletion must clear, keyed as countPersonRows keys them. briefs is 1: the person's own transaction sees only their own brief.
-const EXPECTED_COUNTS = { sources: 1, turns: 4, redactions: 2, cards: 1, card_items: 6, quizzes: 1, quiz_items: 10, sessions: 2, transfer_links: 1, pairs: 1, meetings: 1, meeting_members: 2, meeting_steps: 3, meeting_events: 8, claims: 4, briefs: 1, comics: 1, comic_panels: 6, share_pages: 1, ledger_nulled: 6, people: 1, names_passes: 1, source_names: 0, directory_listings: 0, persona_asks: 0, persona_answers: 0, friend_requests: 0, orchestrator_messages: 0, posts: 0, post_likes: 0, profile_photos: 0, google_accounts: 0 };
+const EXPECTED_COUNTS = { sources: 1, turns: 4, redactions: 2, cards: 1, card_items: 6, quizzes: 1, quiz_items: 10, sessions: 2, transfer_links: 1, pairs: 1, meetings: 1, meeting_members: 2, meeting_steps: 3, meeting_events: 8, claims: 4, briefs: 1, comics: 1, comic_panels: 6, share_pages: 1, ledger_nulled: 6, people: 1, names_passes: 1, source_names: 0, directory_listings: 0, persona_asks: 0, persona_answers: 0, friend_requests: 0, orchestrator_messages: 0, posts: 0, post_likes: 0, profile_photos: 0, google_accounts: 0, person_summaries: 0 };
 
 // The names of the base tables (not views, which hold no rows) that have a column with the given name, read from the catalog as the superuser.
 async function tablesWithColumn(columnName: string): Promise<string[]> {

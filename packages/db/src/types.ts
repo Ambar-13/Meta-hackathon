@@ -164,6 +164,12 @@ export interface PostsTable {
 }
 // One row of the google_accounts table, as migration 0015 defines it: the Google account a person signs in with, by its subject only.
 export interface GoogleAccountsTable { google_sub: string; person_id: string; created_at: GeneratedTimestamp; }
+// One row of the person_summaries table, as migration 0016 defines it: the summary a person's own AI wrote; points is jsonb.
+export interface PersonSummariesTable {
+  person_id: string; text: string; points: JSONColumnType<unknown[], string | undefined>;
+  state: Generated<"checking" | "ready" | "failed">; friends_can_ask: Generated<boolean>; save_day: ColumnType<Date, Date | string | undefined, Date | string>;
+  saves_today: Generated<number>; created_at: GeneratedTimestamp; updated_at: GeneratedTimestamp;
+}
 // One row of the post_likes table, as migration 0013 defines it: a post a person liked.
 export interface PostLikesTable { post_id: string; person_id: string; created_at: GeneratedTimestamp; }
 // One row of the profile_photos table, as migration 0012 defines it: a person's own photo as JPEG bytes.
@@ -179,5 +185,5 @@ export interface Database {
   briefs: BriefsTable; comics: ComicsTable; comic_panels: ComicPanelsTable; share_pages: SharePagesTable; ledger: LedgerTable; deletions: DeletionsTable;
   service_heartbeats: ServiceHeartbeatsTable; schema_migrations: SchemaMigrationsTable; names_passes: NamesPassesTable; source_names: SourceNamesTable; recall_corpus: RecallCorpusView;
   directory_listings: DirectoryListingsTable; persona_asks: PersonaAsksTable; persona_answers: PersonaAnswersTable;
-  friend_requests: FriendRequestsTable; orchestrator_messages: OrchestratorMessagesTable; posts: PostsTable; post_likes: PostLikesTable; profile_photos: ProfilePhotosTable; google_accounts: GoogleAccountsTable;
+  friend_requests: FriendRequestsTable; orchestrator_messages: OrchestratorMessagesTable; posts: PostsTable; post_likes: PostLikesTable; profile_photos: ProfilePhotosTable; google_accounts: GoogleAccountsTable; person_summaries: PersonSummariesTable;
 }

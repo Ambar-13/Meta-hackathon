@@ -12,7 +12,7 @@ import { withMeeting, withPerson, type DatabaseTransaction } from "./transaction
 import type { Database } from "./types.js";
 
 // The user-data tables; names_passes and source_names come from migration 0002, the directory's three from 0006, friend_requests and orchestrator_messages from 0008, and posts from 0009.
-const USER_DATA_TABLES = ["people", "sessions", "transfer_links", "sources", "turns", "redactions", "cards", "card_items", "quizzes", "quiz_items", "pairs", "meetings", "meeting_members", "meeting_steps", "meeting_events", "claims", "briefs", "comics", "comic_panels", "share_pages", "ledger", "deletions", "names_passes", "source_names", "directory_listings", "persona_asks", "persona_answers", "friend_requests", "orchestrator_messages", "posts", "post_likes", "profile_photos", "google_accounts"] as const;
+const USER_DATA_TABLES = ["people", "sessions", "transfer_links", "sources", "turns", "redactions", "cards", "card_items", "quizzes", "quiz_items", "pairs", "meetings", "meeting_members", "meeting_steps", "meeting_events", "claims", "briefs", "comics", "comic_panels", "share_pages", "ledger", "deletions", "names_passes", "source_names", "directory_listings", "persona_asks", "persona_answers", "friend_requests", "orchestrator_messages", "posts", "post_likes", "profile_photos", "google_accounts", "person_summaries"] as const;
 // The three reference tables with no person or meeting column.
 const REFERENCE_TABLES = ["quiz_bank", "service_heartbeats", "schema_migrations"] as const;
 // The tables keyed by meeting_id that a member of another meeting must not read (R8.7-T1, R8.7-T2).
@@ -96,7 +96,7 @@ describe("schema security", () => {
   it("R9.1-T1: every table in public has row security enabled and forced", async () => {
     const rows = await catalog<{ name: string; enabled: boolean; forced: boolean }>(`SELECT c.relname AS name, c.relrowsecurity AS enabled, c.relforcerowsecurity AS forced FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relkind = 'r' ORDER BY c.relname COLLATE "C"`);
 
-    expect(rows.map((row) => row.name)).toEqual(["briefs", "card_items", "cards", "claims", "comic_panels", "comics", "deletions", "directory_listings", "friend_requests", "google_accounts", "ledger", "meeting_events", "meeting_members", "meeting_steps", "meetings", "names_passes", "orchestrator_messages", "pairs", "people", "persona_answers", "persona_asks", "post_likes", "posts", "profile_photos", "quiz_bank", "quiz_items", "quizzes", "redactions", "schema_migrations", "service_heartbeats", "sessions", "share_pages", "source_names", "sources", "transfer_links", "turns"]);
+    expect(rows.map((row) => row.name)).toEqual(["briefs", "card_items", "cards", "claims", "comic_panels", "comics", "deletions", "directory_listings", "friend_requests", "google_accounts", "ledger", "meeting_events", "meeting_members", "meeting_steps", "meetings", "names_passes", "orchestrator_messages", "pairs", "people", "person_summaries", "persona_answers", "persona_asks", "post_likes", "posts", "profile_photos", "quiz_bank", "quiz_items", "quizzes", "redactions", "schema_migrations", "service_heartbeats", "sessions", "share_pages", "source_names", "sources", "transfer_links", "turns"]);
     expect(rows.every((row) => row.enabled && row.forced)).toBe(true);
   });
 
@@ -113,7 +113,7 @@ describe("schema security", () => {
     expect(roles.map((role) => role.rolname)).toEqual(["app_api", "app_definer", "app_migrate", "app_worker"]);
     expect(roles.every((role) => !role.rolsuper && !role.rolbypassrls)).toBe(true);
     expect(roles.map((role) => role.rolcanlogin)).toEqual([true, false, true, true]);
-    expect(Object.fromEntries(owned.map((row) => [row.owner, numberFromPostgres(row.n)]))).toEqual({ app_migrate: 37 });
+    expect(Object.fromEntries(owned.map((row) => [row.owner, numberFromPostgres(row.n)]))).toEqual({ app_migrate: 38 });
   });
 
   it("R9.1-T4: the security definer functions are exactly the twenty-eight of migrations 0001 to 0009", async () => {

@@ -31,3 +31,31 @@ export const SummaryPoint = z.object({
 });
 // The type of SummaryPoint, read from the schema above.
 export type SummaryPoint = z.infer<typeof SummaryPoint>;
+
+// Longest summary a person may paste, in characters.
+export const SUMMARY_MAX_CHARS = 20_000;
+// Most times a person may save their summary in one UTC day; each save runs one names check.
+export const SUMMARY_SAVES_PER_DAY = 10;
+
+// Where one point's quote was found: the quote as it stands in the person's own message, and that message's index.
+export const SummaryFound = z.object({ quote: z.string().min(1), turnIndex: z.number().int().min(0) });
+// The type of SummaryFound, read from the schema above.
+export type SummaryFound = z.infer<typeof SummaryFound>;
+// One point as the person sees it: the point, and where its quote was found in their messages, or null when it was not.
+export const SummaryPointView = SummaryPoint.extend({ found: SummaryFound.nullable() });
+// The type of SummaryPointView, read from the schema above.
+export type SummaryPointView = z.infer<typeof SummaryPointView>;
+// A person's summary as they see it: checking until the names check and the quote lookups finish, then ready (or failed), with its
+// points, whether friends' asks may use it, and when it was last saved.
+export const SummaryView = z.object({
+  state: z.enum(["checking", "ready", "failed"]),
+  points: z.array(SummaryPointView),
+  friendsCanAsk: z.boolean(),
+  updatedAt: z.string(),
+});
+// The type of SummaryView, read from the schema above.
+export type SummaryView = z.infer<typeof SummaryView>;
+// The body of PUT /api/people/me/summary: the pasted text, trimmed and not empty, and whether friends' asks may use it.
+export const SummarySave = z.object({ text: z.string().trim().min(1).max(SUMMARY_MAX_CHARS), friendsCanAsk: z.boolean() });
+// The type of SummarySave, read from the schema above.
+export type SummarySave = z.infer<typeof SummarySave>;

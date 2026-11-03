@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AuthOptions, HomeView, MyPhoto, NameUpdate, NameUpdated, PersonCreate, PersonCreateResponse, Recover, RecoverResponse, TransferClaim, TransferClaimResponse, TransferResponse } from "../people/index.js";
+import { AuthOptions, HomeView, MyPhoto, NameUpdate, NameUpdated, PersonCreate, PersonCreateResponse, Recover, RecoverResponse, SummarySave, SummaryView, TransferClaim, TransferClaimResponse, TransferResponse } from "../people/index.js";
 import { DeletionResponse, Health } from "../operations/index.js";
 
 // Routes for people and sessions. No app retypes these paths.
@@ -11,6 +11,9 @@ export const peopleRoutes = {
   claim: { method: "POST", path: "/api/sessions/claim", request: TransferClaim, response: TransferClaimResponse, public: true },
   deleteMe: { method: "DELETE", path: "/api/people/me", request: z.undefined(), response: DeletionResponse },
   readHome: { method: "GET", path: "/api/home", request: z.undefined(), response: HomeView },
+  readSummary: { method: "GET", path: "/api/people/me/summary", request: z.undefined(), response: SummaryView },
+  saveSummary: { method: "PUT", path: "/api/people/me/summary", request: SummarySave, response: SummaryView },
+  deleteSummary: { method: "DELETE", path: "/api/people/me/summary", request: z.undefined(), response: z.undefined() },
   // Instagram's Edit profile: a new display name, and a profile photo sent as the JPEG bytes themselves (image/jpeg), which
   // GET /api/photos/:id sends back as image/jpeg to anyone signed in who was shown its id.
   updateName: { method: "PUT", path: "/api/people/me/name", request: NameUpdate, response: NameUpdated },

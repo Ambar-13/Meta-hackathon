@@ -298,3 +298,21 @@ describe("Google accounts in the database", () => {
     expect(await signIn("google-sub-db-2", "Ben Okafor")).toBeNull();
   });
 });
+
+describe("summaries in the database", () => {
+  it("W7-SUMMARY-DB-T1: a person reads and writes only their own summary; another person's session sees no row and cannot write one for them", async () => {
+    const owner = (await createTestPerson(t.db, "Summary Owner")).personId;
+    const other = (await createTestPerson(t.db, "Summary Other")).personId;
+    await asPerson(t.db, owner, (trx) => trx.insertInto("person_summaries").values({ person_id: owner, text: "Kind: view\nPoint: Rentably was never a bad idea." }).execute());
+
+    const ownRows = await asPerson(t.db, owner, (trx) => trx.selectFrom("person_summaries").select(["person_id", "state", "friends_can_ask"]).execute());
+    const seenByOther = await asPerson(t.db, other, (trx) => trx.selectFrom("person_summaries").select("person_id").execute());
+    const changedByOther = await asPerson(t.db, other, (trx) => trx.updateTable("person_summaries").set({ text: "changed" }).where("person_id", "=", owner).executeTakeFirst());
+    const forged = await caught(() => asPerson(t.db, other, (trx) => trx.insertInto("person_summaries").values({ person_id: owner, text: "forged" }).execute()));
+
+    expect(ownRows).toEqual([{ person_id: owner, state: "checking", friends_can_ask: false }]);
+    expect(seenByOther).toEqual([]);
+    expect(Number(changedByOther.numUpdatedRows)).toBe(0);
+    expect(Reflect.get(forged ?? {}, "code")).toBe("42501");
+  });
+});

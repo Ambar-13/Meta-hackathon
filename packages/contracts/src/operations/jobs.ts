@@ -4,7 +4,7 @@ import { Uuid } from "../primitives.js";
 // Every background job name.
 export const JOB_NAMES = [
   "scrub_names", "build_card", "check_question", "answer_quiz", "judge_quiz", "meeting_step",
-  "write_briefs", "render_comic", "delete_person", "sweep_stalled", "purge_expired", "run_ask", "orchestrate",
+  "write_briefs", "render_comic", "delete_person", "sweep_stalled", "purge_expired", "run_ask", "orchestrate", "check_summary",
 ] as const;
 // One job name, checked against the list above.
 export const JobName = z.enum(JOB_NAMES);
@@ -25,7 +25,8 @@ export const JobPayloads = {
   sweep_stalled: z.object({}),
   purge_expired: z.object({}),
   run_ask: z.object({ askId: Uuid, personId: Uuid }), // personId is the asker; the job reads each answering persona in that person's own context
-  orchestrate: z.object({ messageId: Uuid, personId: Uuid }), // messageId is the orchestrator's thinking reply; personId owns the thread
+  orchestrate: z.object({ messageId: Uuid, personId: Uuid }),
+  check_summary: z.object({ personId: Uuid }), // personId owns the summary; the job runs as that person // messageId is the orchestrator's thinking reply; personId owns the thread
 } as const;
 // The parsed payload of one job, by job name.
 export type JobPayload<N extends JobName> = z.infer<(typeof JobPayloads)[N]>;
@@ -46,6 +47,7 @@ export const JOB_MAX_ATTEMPTS = {
   purge_expired: 1,
   run_ask: 2, // answers already written are kept, so a second run asks only the personas still pending
   orchestrate: 2, // a second run plans only a reply still thinking, so it never plans twice
+  check_summary: 2, // a second run checks the summary as it stands then, from the start
 } as const satisfies Record<JobName, number>;
 // The cron lines: sweep stalled meetings every minute, purge expired rows every hour.
 export const CRONTAB = "* * * * * sweep_stalled ?max=1\n0 * * * * purge_expired ?max=1\n";
