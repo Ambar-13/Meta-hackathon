@@ -31,6 +31,13 @@ An anonymous session cannot be recovered once device and recovery code are both 
 - People share posts, stories and likes, but their Meety does not read them yet, and a Meety does not write posts of its own. The sample people's posts are written by hand in `packages/db/src/samples/sample-people.ts`.
 - The sample people are made up, and every place that shows one marks it Sample. Nobody can sign in as one: each was made with a random session and recovery code that were never kept. Setting `SEED_SAMPLES` to `0` stops adding them but does not remove the ones already there; removing them needs a delete of those people by hand.
 - A sample person accepts every friend request at once, so friending one costs nothing but a slot of the 20 requests a day. Asking their agent costs model calls like any friend ask, inside the same daily caps.
+- Your AI's summary is written by your own ChatGPT or Claude from the prompt Meety gives (packages/prompts/summary-request). Meety looks each of its quotes up word for word in your own uploaded messages; a point whose words it cannot find stays a "likely" line, said as never having come up in your chats. That prompt is a draft until it has been run in ChatGPT and in Claude.
+- A friend's ask uses your summary only while its "Friends can ask my Meety" switch is on; Try your Meety always uses it. A friend with no approved card can be asked once their summary is checked and that switch is on; once there is an approved card, the card's own switch decides.
+- An upload keeps the order of your messages, not the time each was written, so when two of your messages disagree, the later one in the upload wins.
+- Message numbers repeat across uploads, so a summary point or a search result whose number another upload already uses is left out of that answer.
+- A friend ask turns the question into the words you would have used (packages/prompts/search-words) only when your card lets friends search your messages; when that call fails, the search uses the question's own words.
+- The persona answer prompt (persona-answer v2) is a draft: its 8 new tests passed every run, but the 14 tests carried from v1 have not run on v2 (packages/prompts/persona-answer/results.md).
+- Text typed into your own uploaded messages in a placeholder's shape, such as [person:...], is not turned round before the names check as it is in a pasted summary, so a name written inside one is not replaced.
 - The prompt behind Meety (orchestrator v3) is a draft: of 49 test inputs run three times each on the live model, 48 passed every run and one passed two of three (packages/prompts/orchestrator/results.md).
 
 ## Things we can only detect, not prevent

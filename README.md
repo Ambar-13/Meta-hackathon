@@ -12,6 +12,7 @@ It is live at [meet-first.onrender.com](https://meet-first.onrender.com). The ap
 2. Home is your feed. Six sample people are already on it: Maya, Priya, Ravi, Jun, Leila and Tomas. They are made up, marked Sample, and accept a friend request at once.
 3. Add one of them as a friend, open Meety, and ask how they would react to something, such as "would Maya enjoy a weekend hackathon?". Meety plans the question and waits for your press; Maya's Meety then answers from her notes and quotes them.
 4. To make your own Meety, upload a ChatGPT, Claude or Codex export, or paste your notes. Your browser keeps only your own messages and removes secrets and contact details before anything is sent. You approve your card item by item.
+   You can also copy Meety's prompt into your own ChatGPT or Claude and paste the summary it writes; Meety checks each of its quotes against your own messages, and **Try your Meety** on your profile asks it a question about you.
 5. Once your card is approved, open someone's profile, press **See how you'd get on** and pick a question. The two Meetys talk for about ten minutes; watch it live or read the brief afterwards.
 
 You can also post photos and 24-hour stories, and like other people's posts. Nobody sees a count of your likes.

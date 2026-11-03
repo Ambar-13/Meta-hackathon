@@ -20,7 +20,7 @@ const CREATE_COPY = {
   caption: { post: "Caption", story: "Words on your story" },
   placeholder: { post: "Write a caption", story: "Add words to your story" },
   storyLine: "Your story shows for 24 hours, then it is gone.",
-  meety: "Your Meety reads what you share and the posts you like, to learn what you are into.",
+  meety: "Your Meety learns from your chats and your AI's summary of you.",
   notListed: "Only you see your posts until you join Explore.",
   share: "Share",
   sharing: "Sharing",

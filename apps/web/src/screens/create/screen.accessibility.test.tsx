@@ -62,7 +62,7 @@ describe("Create, against the MSW route stubs (a fake server)", () => {
     expect(screen.getByRole("button", { name: "Post" }).getAttribute("aria-pressed")).toBe("true");
     const share = screen.getByRole("button", { name: "Share" });
     expect(share.hasAttribute("disabled")).toBe(true);
-    expect(screen.getByText("Your Meety reads what you share and the posts you like, to learn what you are into.")).toBeTruthy();
+    expect(screen.getByText("Your Meety learns from your chats and your AI's summary of you.")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Invite a friend instead" }).getAttribute("href")).toBe("/pair");
     fireEvent.change(screen.getByRole("textbox", { name: "Caption" }), { target: { value: "  Shipping the stories row tonight.  " } });
     fireEvent.click(share);

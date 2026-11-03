@@ -34,17 +34,17 @@ describe("the boot self-test", () => {
     expect((await readLedgerWindow(workerDb, 600)).callCount).toBe(0);
   });
 
-  it("R3.1-T3: the boot self-test answers all eleven schemas from their fixtures and writes eleven ledger rows", async () => {
+  it("R3.1-T3: the boot self-test answers all twelve schemas from their fixtures and writes twelve ledger rows", async () => {
     const client = makeLlmClient({ db: workerDb, env: replayEnv, now: () => new Date(), sleep: noSleep, random: () => 0.5 });
     const lines: string[] = [];
     const results = await runBootSelfTest(client, (line) => lines.push(line));
-    expect(results).toHaveLength(11);
+    expect(results).toHaveLength(12);
     expect(results.map((result) => result.name)).toEqual(Object.keys(MODEL_OUTPUT_SCHEMAS));
     for (const result of results) expect(result).toEqual({ name: result.name, ok: true, httpStatus: 200, detail: null });
     expect(selfTestExitCode(results)).toBe(0);
-    expect(lines).toHaveLength(11);
+    expect(lines).toHaveLength(12);
     for (const result of results) expect(lines).toContain(`self-test ${result.name}: ok`);
-    expect((await readLedgerWindow(workerDb, 600)).callCount).toBe(11);
+    expect((await readLedgerWindow(workerDb, 600)).callCount).toBe(12);
   });
 
   it("R10.2-T1: selfTestMain names a missing DATABASE_URL_WORKER and returns 1", async () => {
