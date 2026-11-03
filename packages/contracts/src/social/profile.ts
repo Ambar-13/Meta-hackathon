@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { PublicItem } from "../directory/directory.js";
-import { Uuid } from "../primitives.js";
+import { PhotoKey, Uuid } from "../primitives.js";
 
 // How the caller stands with the person behind a profile: it is them, friends, a request they sent, a request they received, or none.
 export const Friendship = z.enum(["self", "friends", "requested", "incoming", "none"]);
@@ -20,6 +20,8 @@ export const ProfileView = z.object({
   requestId: Uuid.nullable(),
   pairId: Uuid.nullable(),
   canAsk: z.boolean(),
+  // The face of a sample person (3 Nov 2026); null for everyone else.
+  photo: PhotoKey.nullable().optional(),
 });
 // The type of ProfileView, read from the schema above.
 export type ProfileView = z.infer<typeof ProfileView>;

@@ -12,9 +12,13 @@
   --ui-line: oklch(90% 0.006 78.3);
   --ui-soft: oklch(95.8% 0.005 78.3);
   --ui-hover: oklch(93.5% 0.006 78.3);
+  /* The warm card of the "Other" concept (its #eee9df), for a post of words alone and the card on what your Meety does. */
+  --ui-sand: oklch(93.8% 0.013 84);
   --ui-blue: oklch(54% 0.22 268);
   --ui-blue-hover: oklch(47% 0.21 268);
   --ui-red: oklch(56% 0.2 22);
+  /* The made-up mark's orange, as in the "Other" concept's asterisk; Ambar asked for it on 3 Nov 2026. Nothing else is orange. */
+  --ui-orange: oklch(64.5% 0.19 37);
   --ui-radius: 10px;
   /* The kit's tokens, pointed at the new ones, so every older screen that reads them takes the look too. */
   --paper: var(--ui-bg);
@@ -122,10 +126,26 @@
 /* ---------- people and Meety ---------- */
 .person-avatar { display: inline-grid; place-items: center; flex: none; width: var(--a-size, 44px); height: var(--a-size, 44px); border-radius: 50%;
   background: var(--k-soft, oklch(95% 0.02 265)); color: var(--c, oklch(40% 0.1 265)); font: 600 var(--a-font, 18px)/1 var(--ui-font, system-ui); }
+/* A face fills the circle; the small orange asterisk sits on the circle's edge at the top right of a made-up person's picture, a halo of
+   the ground around it, a third of a small picture and never more than 20px on a large one. */
+.person-avatar { position: relative; }
+.person-avatar.has-photo { background: var(--ui-soft); }
+.person-avatar > img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.made-up-mark { --mark: clamp(12px, 32%, 20px); position: absolute; top: calc(12% - var(--mark) / 2); right: calc(12% - var(--mark) / 2); width: var(--mark); height: var(--mark);
+  overflow: visible; filter: drop-shadow(0 0 1px var(--ui-bg)) drop-shadow(0 0 1px var(--ui-bg)); }
+.made-up-mark path { fill: none; stroke: var(--ui-orange); stroke-width: 3.4; stroke-linecap: round; }
 .person-avatar.size-s { --a-size: 32px; --a-font: 14px; }
 .person-avatar.size-m { --a-size: 44px; --a-font: 18px; }
 .person-avatar.size-l { --a-size: 86px; --a-font: 34px; }
 .person-avatar.size-xl { --a-size: 150px; --a-font: 56px; }
+/* A post's photo, with square corners where every other surface is round (Ambar, 3 Nov 2026: "instead of curved edges photos and
+   reels use square"): a wide photo at 3:2, a tall one at 4:5 on a phone and square on wider screens, on a soft ground while it loads. */
+.post-photo { overflow: hidden; background: var(--ui-soft); }
+.post-photo > img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
+.post-photo.is-tall > img { aspect-ratio: 4 / 5; }
+@media (min-width: 664px) {
+  .post-photo.is-tall > img { aspect-ratio: 1 / 1; }
+}
 /* Meety's face is the Meet First logo, two name tags, rather than the sparkle every chatbot uses. */
 .meety-mark { display: inline-grid; place-items: center; flex: none; width: var(--a-size, 28px); height: var(--a-size, 28px); font-size: calc(var(--a-size, 28px) * 0.86); }
 :where(.social-frame) .meety-mark .stk { display: inline-block; }

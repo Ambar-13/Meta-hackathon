@@ -3,7 +3,7 @@
 import type { FastifyInstance } from "fastify";
 import { sql } from "kysely";
 import { DIRECTORY_PAGE_SIZE, DirectoryPage, DirectoryQuery, FriendsView, routes } from "@meet-first/contracts";
-import { withPerson } from "@meet-first/db";
+import { sampleFaceKey, withPerson } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { makePayloadInvalidError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
@@ -13,13 +13,13 @@ const BROWSE_PAGE_MAX = 100_000;
 
 // One row of directory_browse by its SQL names (migration 0009): listing fields, the dating switch, the sample mark and the public items, never an id of a person, card, item or turn.
 export type BrowseRow = { listing_id: string; display_name: string; line: string; open_to_romance: boolean; is_sample: boolean; items: unknown };
-// One row of friend_list by its SQL names (migration 0008).
-export type FriendRow = { pair_id: string; display_name: string; can_ask: boolean; listing_id: string | null };
+// One row of friend_list by its SQL names (migration 0010): with the friend's sample mark since 3 Nov 2026.
+export type FriendRow = { pair_id: string; display_name: string; can_ask: boolean; listing_id: string | null; is_sample: boolean };
 
 // One directory page from one read. The read asks for one row more than a page holds: when that extra row comes back a next page exists, and the row is dropped (design section 6).
 export function toDirectoryPage(rows: readonly BrowseRow[], page: number): DirectoryPage {
   return DirectoryPage.parse({
-    listings: rows.slice(0, DIRECTORY_PAGE_SIZE).map((row) => ({ listingId: row.listing_id, displayName: row.display_name, line: row.line, openToRomance: row.open_to_romance, isSample: row.is_sample, items: row.items })),
+    listings: rows.slice(0, DIRECTORY_PAGE_SIZE).map((row) => ({ listingId: row.listing_id, displayName: row.display_name, line: row.line, openToRomance: row.open_to_romance, isSample: row.is_sample, items: row.items, photo: row.is_sample ? sampleFaceKey(row.display_name) : null })),
     page,
     hasMore: rows.length > DIRECTORY_PAGE_SIZE,
   });
@@ -50,7 +50,7 @@ export function registerBrowse(app: FastifyInstance, deps: RouteDeps): void {
 export function registerFriends(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.directory.friends.path, async (request, reply) => {
     const personId = requirePerson(request);
-    const rows = await withPerson(deps.db, personId, async (trx) => (await sql<FriendRow>`SELECT pair_id, display_name, can_ask, listing_id FROM friend_list()`.execute(trx)).rows);
-    return reply.code(200).send(FriendsView.parse({ friends: rows.map((row) => ({ pairId: row.pair_id, displayName: row.display_name, canAsk: row.can_ask, listingId: row.listing_id })) }));
+    const rows = await withPerson(deps.db, personId, async (trx) => (await sql<FriendRow>`SELECT pair_id, display_name, can_ask, listing_id, is_sample FROM friend_list()`.execute(trx)).rows);
+    return reply.code(200).send(FriendsView.parse({ friends: rows.map((row) => ({ pairId: row.pair_id, displayName: row.display_name, canAsk: row.can_ask, listingId: row.listing_id, isSample: row.is_sample, photo: row.is_sample ? sampleFaceKey(row.display_name) : null })) }));
   });
 }

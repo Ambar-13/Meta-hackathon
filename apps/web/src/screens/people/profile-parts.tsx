@@ -1,7 +1,7 @@
-import { useId, useRef, useState, type KeyboardEvent, type ReactElement, type ReactNode } from "react";
-import type { PostsView, PublicItem } from "@meet-first/contracts";
+import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactElement, type ReactNode } from "react";
+import type { Post, PostsView, PublicItem } from "@meet-first/contracts";
 import { ErrorNotice, type PolledView } from "../../app-shell/index.js";
-import { EmptyState, Icon, LoadingLine, PersonAvatar, Receipt, SampleChip } from "../../look/index.js";
+import { EmptyState, Icon, LoadingLine, PersonAvatar, photoOf, PostPhoto, Receipt, SampleChip } from "../../look/index.js";
 import { postAgeWords, postsSoonCopy } from "./people-state.js";
 
 // The tabs under a profile header, in order, with their icons; Meetings shows only on your own profile.
@@ -18,10 +18,10 @@ const SAMPLE_NOTE = "A sample person, not a real one. Friend requests to them ar
 // The Instagram-style header of a profile: the person's round picture, then the name as the h1, the line, the sample note for a sample
 // person, and the buttons. No count of anything about the person shows here (PRODUCT.md principle 5). On a phone the picture sits left
 // of the name and the buttons go full width under them.
-export const ProfileHeader = (props: { name: string; line: string | null; isSample?: boolean; children: ReactNode }): ReactElement => {
+export const ProfileHeader = (props: { name: string; line: string | null; isSample?: boolean; photo?: string | null | undefined; children: ReactNode }): ReactElement => {
   return (
     <header className="profile-head">
-      <PersonAvatar name={props.name} size="xl" className="profile-avatar" />
+      <PersonAvatar name={props.name} size="xl" className="profile-avatar" photo={props.photo} isSample={props.isSample} />
       <div className="profile-words">
         <h1>{props.name}</h1>
         {props.line === null ? null : <p className="profile-line">{props.line}</p>}
@@ -66,9 +66,77 @@ const AboutPanel = (props: { items: PublicItem[]; source: string }): ReactElemen
   );
 };
 
-// The Posts tab: the person's posts, newest first, each with how long ago it went up; the coming-soon card when there are none.
+// How the Posts tab shows the posts: a grid of square tiles, as Instagram shows a profile, or one under another.
+type PostsLook = "grid" | "list";
+// The two ways, with their words and icons, in the order of the switch.
+const POSTS_LOOKS = [
+  { key: "grid", label: "Grid", icon: "grid" },
+  { key: "list", label: "List", icon: "list" },
+] as const;
+
+// The switch between the grid and the list, as two buttons that say which one is on.
+const LookSwitch = (props: { look: PostsLook; onChange: (look: PostsLook) => void }): ReactElement => {
+  return (
+    <div className="posts-look" role="group" aria-label="Show posts as">
+      {POSTS_LOOKS.map((option) => (
+        <button key={option.key} type="button" className="posts-look-button" aria-pressed={props.look === option.key} onClick={() => { props.onChange(option.key); }}>
+          <Icon name={option.icon} size={18} />
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+};
+
+// The grid: three square tiles to a row with square corners, a photo post as its photo and a post of words as its words on a soft
+// ground. A tile opens its post in the list.
+const PostGrid = (props: { posts: readonly Post[]; onOpen: (postId: string) => void }): ReactElement => {
+  return (
+    <ul className="post-grid">
+      {props.posts.map((post) => {
+        const found = photoOf(post.photo);
+        return (
+          <li key={post.postId}>
+            <button type="button" className={found === null ? "post-tile is-words" : "post-tile"} onClick={() => { props.onOpen(post.postId); }}>
+              {found === null ? <span className="post-tile-words">{post.text}</span> : <img src={found.src} alt={post.photoAlt ?? post.text} loading="lazy" decoding="async" />}
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+};
+
+// The list: each post with its photo when it has one and how long ago it went up. The post opened from the grid scrolls into view and
+// takes the focus, so the reader lands on it.
+const PostList = (props: { posts: readonly Post[]; openId: string | null }): ReactElement => {
+  const now = new Date();
+  const openRef = useRef<HTMLLIElement | null>(null);
+  useEffect(() => {
+    const opened = openRef.current;
+    if (opened === null) return;
+    if (typeof opened.scrollIntoView === "function") opened.scrollIntoView({ block: "start" });
+    opened.focus({ preventScroll: true });
+  }, [props.openId]);
+  return (
+    <ul className="profile-posts">
+      {props.posts.map((post) => (
+        <li key={post.postId} className="profile-post" ref={post.postId === props.openId ? openRef : undefined} tabIndex={post.postId === props.openId ? -1 : undefined}>
+          <p className="post-text">{post.text}</p>
+          <PostPhoto photo={post.photo} alt={post.photoAlt} />
+          <time className="post-time" dateTime={post.createdAt}>{postAgeWords(post.createdAt, now)}</time>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+// The Posts tab: the person's posts, newest first. With a photo among them they open as the grid, with the switch to the list; posts
+// of words alone show as the list with no switch. The coming-soon card shows when there are none.
 const PostsPanel = (props: { posts: PolledView<PostsView> | null; name: string | null }): ReactElement => {
   const { posts } = props;
+  const [chosenLook, setChosenLook] = useState<PostsLook | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
   if (posts === null) return <PostsSoonCard name={props.name} />;
   if (posts.value === null) {
     if (posts.error === null) return <LoadingLine text="Loading posts." />;
@@ -79,17 +147,23 @@ const PostsPanel = (props: { posts: PolledView<PostsView> | null; name: string |
       </div>
     );
   }
-  if (posts.value.posts.length === 0) return <PostsSoonCard name={props.name} />;
-  const now = new Date();
+  const list = posts.value.posts;
+  if (list.length === 0) return <PostsSoonCard name={props.name} />;
+  const hasPhotos = list.some((post) => photoOf(post.photo) !== null);
+  const look = hasPhotos ? (chosenLook ?? "grid") : "list";
+  const choose = (next: PostsLook): void => {
+    setOpenId(null);
+    setChosenLook(next);
+  };
+  const open = (postId: string): void => {
+    setOpenId(postId);
+    setChosenLook("list");
+  };
   return (
-    <ul className="profile-posts">
-      {posts.value.posts.map((post) => (
-        <li key={post.postId} className="profile-post">
-          <p className="post-text">{post.text}</p>
-          <time className="post-time" dateTime={post.createdAt}>{postAgeWords(post.createdAt, now)}</time>
-        </li>
-      ))}
-    </ul>
+    <div className="profile-posts-panel">
+      {hasPhotos ? <LookSwitch look={look} onChange={choose} /> : null}
+      {look === "grid" ? <PostGrid posts={list} onOpen={open} /> : <PostList posts={list} openId={openId} />}
+    </div>
   );
 };
 

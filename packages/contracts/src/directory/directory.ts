@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { CARD_ITEMS_MAX, ItemKind } from "../cards/card.js";
 import { MeetingState } from "../meetings/meeting.js";
-import { IsoTime, Uuid } from "../primitives.js";
+import { IsoTime, PhotoKey, Uuid } from "../primitives.js";
 
 // Most directory meetings one listed persona takes part in per UTC day. Ambar's default; he can change it.
 export const DIRECTORY_MEETINGS_PER_LISTING_PER_DAY = 10;
@@ -20,9 +20,9 @@ export const FRIENDS_ASK_SWITCH_COPY = "Let friends I've met here ask my Meety h
 export const PublicItem = z.object({ kind: ItemKind, claim: z.string(), quote: z.string() });
 // The type of PublicItem, read from the schema above.
 export type PublicItem = z.infer<typeof PublicItem>;
-// One listing as anyone in the directory sees it: only listing fields and the sample mark, never a person id, a turn or an item that
-// is not public.
-export const DirectoryListing = z.object({ listingId: Uuid, displayName: z.string(), line: z.string(), openToRomance: z.boolean(), isSample: z.boolean(), items: z.array(PublicItem) });
+// One listing as anyone in the directory sees it: only listing fields, the sample mark and the face of a sample person, never a person
+// id, a turn or an item that is not public.
+export const DirectoryListing = z.object({ listingId: Uuid, displayName: z.string(), line: z.string(), openToRomance: z.boolean(), isSample: z.boolean(), items: z.array(PublicItem), photo: PhotoKey.nullable().optional() });
 // The type of DirectoryListing, read from the schema above.
 export type DirectoryListing = z.infer<typeof DirectoryListing>;
 // What GET /api/directory returns: one page of listings, newest first or best match first when there is a query. The caller's own listing is left out.
@@ -56,8 +56,9 @@ export const CardSharing = z.object({ friendsCanAsk: z.boolean(), publicPosition
 // The type of CardSharing, read from the schema above.
 export type CardSharing = z.infer<typeof CardSharing>;
 // One friend: a person the caller joined a pair with by invite or by an accepted friend request, named by that pair. canAsk is the friend's own switch;
-// listingId is their listing when Explore shows it, so the friend links to their profile.
-export const Friend = z.object({ pairId: Uuid, displayName: z.string(), canAsk: z.boolean(), listingId: Uuid.nullable() });
+// listingId is their listing when Explore shows it, so the friend links to their profile; isSample and photo mark a sample person and
+// give their face (migration 0010).
+export const Friend = z.object({ pairId: Uuid, displayName: z.string(), canAsk: z.boolean(), listingId: Uuid.nullable(), isSample: z.boolean().optional(), photo: PhotoKey.nullable().optional() });
 // The type of Friend, read from the schema above.
 export type Friend = z.infer<typeof Friend>;
 // What GET /api/friends returns, most recently joined first.

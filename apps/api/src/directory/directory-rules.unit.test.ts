@@ -31,7 +31,7 @@ describe("directory rules", () => {
     expect(full.page).toBe(3);
     expect(full.hasMore).toBe(true);
     expect(full.listings).toHaveLength(20);
-    expect(full.listings[0]).toEqual({ listingId: "00000000-0000-4000-8000-000000000001", displayName: "Row 1", line: "Line 1", openToRomance: true, isSample: false, items: [{ kind: "goal", claim: "c", quote: "q" }] });
+    expect(full.listings[0]).toEqual({ listingId: "00000000-0000-4000-8000-000000000001", displayName: "Row 1", line: "Line 1", openToRomance: true, isSample: false, items: [{ kind: "goal", claim: "c", quote: "q" }], photo: null });
     expect(full.listings[1]?.openToRomance).toBe(false);
     expect(full.listings[1]?.isSample).toBe(true);
     expect(full.listings[19]?.displayName).toBe("Row 20");

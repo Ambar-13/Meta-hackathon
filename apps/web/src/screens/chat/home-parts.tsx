@@ -39,7 +39,7 @@ export const FriendsRow = (props: { friends: readonly Friend[] }): ReactElement 
           <li key={friend.pairId}>
             <Link className="story" to={friendPath(friend)}>
               <span className={friend.canAsk ? "story-ring is-on" : "story-ring"}>
-                <PersonAvatar name={friend.displayName} size="l" />
+                <PersonAvatar name={friend.displayName} size="l" photo={friend.photo} isSample={friend.isSample} />
               </span>
               <span className="story-name">{friend.displayName}</span>
             </Link>
@@ -86,7 +86,7 @@ const SideFriends = (props: { friends: readonly Friend[]; onAsk: (name: string) 
         <ul className="side-list">
           {shown.map((friend) => (
             <li key={friend.pairId} className="side-row">
-              <PersonAvatar name={friend.displayName} />
+              <PersonAvatar name={friend.displayName} photo={friend.photo} isSample={friend.isSample} />
               <span className="side-who">
                 <Link className="side-name" to={friendPath(friend)}>{friend.displayName}</Link>
                 <small>{friend.canAsk ? "Their Meety can be asked" : "Friend asks are off"}</small>
@@ -115,7 +115,7 @@ const SideSuggestions = (props: { people: readonly DirectoryListing[]; adds: Add
           const state = props.adds.stateOf(listing.listingId);
           return (
             <li key={listing.listingId} className="side-row">
-              <PersonAvatar name={listing.displayName} />
+              <PersonAvatar name={listing.displayName} photo={listing.photo} isSample={listing.isSample} />
               <span className="side-who">
                 <span className="side-name-row">
                   <Link className="side-name" to={APP_PATHS.person(listing.listingId)}>{listing.displayName}</Link>

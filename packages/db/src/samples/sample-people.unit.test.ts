@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { CARD_ITEMS_MIN, LISTING_LINE_MAX_CHARS } from "@meet-first/contracts";
 import { normQuote, verifyQuote } from "@meet-first/receipts";
+import { existsSync } from "node:fs";
+import { PhotoKey } from "@meet-first/contracts";
 import { SAMPLE_PEOPLE } from "./sample-people.js";
+import { sampleFaceKey, samplePostPhoto } from "./sample-photos.js";
 
 describe("the sample people", () => {
   it("W7-SAMPLE-T1: every item quotes its own note word for word, as the card job checks a quote", () => {
@@ -32,5 +35,29 @@ describe("the sample people", () => {
     const texts = SAMPLE_PEOPLE.flatMap((person) => [person.line, ...person.notes, ...person.items.map((item) => item.claim), ...person.posts.map((post) => post.text)]);
 
     expect(texts.filter((text) => /[\u2013\u2014]|\s-\s|--/.test(text))).toEqual([]);
+  });
+
+  it("W7-PHOTO-T6: each sample person has a face, each photo key fits the contract and has its picture in the web build, and each photo has its words", () => {
+    const keys = SAMPLE_PEOPLE.flatMap((person) => [person.face, ...person.posts.flatMap((post) => (post.photo === undefined ? [] : [post.photo.key]))]);
+
+    expect(SAMPLE_PEOPLE.map((person) => person.face)).toEqual(SAMPLE_PEOPLE.map((person) => `faces/${person.displayName.toLowerCase()}`));
+    expect(keys.filter((key) => !PhotoKey.safeParse(key).success)).toEqual([]);
+    expect(keys.filter((key) => !existsSync(new URL(`../../../../apps/web/src/look/samples/${key}.jpg`, import.meta.url)))).toEqual([]);
+    for (const post of SAMPLE_PEOPLE.flatMap((person) => person.posts)) {
+      if (post.photo !== undefined) expect(post.photo.alt).toMatch(/^[A-Z].{9,298}\.$/);
+    }
+  });
+
+  it("W7-PHOTO-T7: a face and a post's photo are found by the sample person's name and the post's words, and nothing for anyone or anything else", () => {
+    const maya = SAMPLE_PEOPLE.find((person) => person.displayName === "Maya");
+    const withPhoto = maya?.posts.find((post) => post.photo !== undefined);
+    const withoutPhoto = maya?.posts.find((post) => post.photo === undefined);
+
+    expect(sampleFaceKey("Maya")).toBe("faces/maya");
+    expect(sampleFaceKey("Mira")).toBeNull();
+    expect(samplePostPhoto("Maya", withPhoto?.text ?? "")).toEqual(withPhoto?.photo);
+    expect(samplePostPhoto("Maya", withoutPhoto?.text ?? "")).toBeNull();
+    expect(samplePostPhoto("Mira", withPhoto?.text ?? "")).toBeNull();
+    expect(samplePostPhoto("Maya", "A post nobody wrote.")).toBeNull();
   });
 });

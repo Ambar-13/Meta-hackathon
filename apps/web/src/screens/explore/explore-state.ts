@@ -45,6 +45,12 @@ export function noteItemFor(post: Post, listing: DirectoryListing | undefined): 
   return best;
 }
 
+// The people of the row of faces: everyone on the loaded pages of Explore, friends first, each group in its order on the page.
+// Example: Ravi, Mira and Jun, with Jun a friend, give Jun, Ravi, Mira.
+export function storyPeople(listings: readonly DirectoryListing[], isFriend: (listingId: string) => boolean): DirectoryListing[] {
+  return [...listings.filter((listing) => isFriend(listing.listingId)), ...listings.filter((listing) => !isFriend(listing.listingId))];
+}
+
 // The newest posts of people in Explore (GET /api/posts), read once when the page opens; a failed read is tried again after 30 s.
 export function useExplorePosts(): PolledView<PostsView> {
   return usePolledView(() => apiFetch(routes.social.listPosts, {}), { key: "explore-posts", intervalMs: 30_000, keepPolling: () => false });

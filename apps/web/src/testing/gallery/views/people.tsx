@@ -25,10 +25,10 @@ function personView(head: { name: string; title: string }, profile: ProfileView 
   return { ...head, pattern: ROUTE_PATTERNS.person, url: `/people/${LISTING}?card=${IDS.card}${more.search ?? ""}`, element: more.element ?? <PersonScreen />, stubs: reads(profile, more.posts ?? { posts: [] }) };
 }
 
-// Maya, the first sample person, as her profile shows her, with her two posts.
+// Maya, the first sample person, as her profile shows her, with her face and her two posts, the first with a photo.
 const MAYA = SAMPLE_LISTINGS[0];
-const MAYA_PROFILE = profileView({ listingId: LISTING, displayName: "Maya", line: MAYA?.line ?? "", isSample: true, items: MAYA?.items ?? [] });
-const MAYA_POSTS = PostsView.parse({ posts: SAMPLE_POSTS.filter((post) => post.displayName === "Maya").map((post) => ({ ...post, listingId: LISTING })).concat([{ postId: "00000000-0000-4000-8000-000000000591", listingId: LISTING, displayName: "Maya", isSample: true, text: "A reminder I give every team I back: bad news early is a favour. I can help with a problem in March. I can't help with a surprise in June.", createdAt: new Date(Date.now() - 30 * 3_600_000).toISOString() }]) });
+const MAYA_PROFILE = profileView({ listingId: LISTING, displayName: "Maya", line: MAYA?.line ?? "", isSample: true, photo: "faces/maya", items: MAYA?.items ?? [] });
+const MAYA_POSTS = PostsView.parse({ posts: SAMPLE_POSTS.filter((post) => post.displayName === "Maya").map((post) => ({ ...post, listingId: LISTING })) });
 
 // A profile in every friendship state, the Posts tab, and a person who left Explore.
 export const views: readonly GalleryView[] = [
@@ -41,6 +41,8 @@ export const views: readonly GalleryView[] = [
   personView({ name: "people-posts", title: "Profile, the Posts tab" }, profileView({}), { element: <AfterSteps steps={[{ press: "Posts" }]}><PersonScreen /></AfterSteps> }),
   personView({ name: "people-missing", title: "Profile, no longer in Explore" }, { status: 404, body: { code: "listing_not_found", message: "This listing is gone." } }),
   personView({ name: "people-sample", title: "Profile, a sample person" }, MAYA_PROFILE),
-  personView({ name: "people-sample-posts", title: "Profile, a sample person's posts" }, MAYA_PROFILE, { posts: MAYA_POSTS, search: "&tab=posts" }),
+  personView({ name: "people-sample-posts", title: "Profile, a sample person's posts as the grid" }, MAYA_PROFILE, { posts: MAYA_POSTS, search: "&tab=posts" }),
+  personView({ name: "people-sample-posts-list", title: "Profile, a sample person's posts as the list" }, MAYA_PROFILE,
+    { posts: MAYA_POSTS, search: "&tab=posts", element: <AfterSteps steps={[{ press: "List" }]}><PersonScreen /></AfterSteps> }),
   personView({ name: "people-sample-friends", title: "Profile, friends with a sample person" }, { ...MAYA_PROFILE, friendship: "friends", pairId: PAIR, canAsk: true }),
 ];

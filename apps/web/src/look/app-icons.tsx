@@ -1,9 +1,11 @@
 // The signed-in app's line icons and round avatars, the look of Instagram and ChatGPT that Ambar asked for on 3 Nov 2026 ("instagram +
 // chatgpt chat combined"). Icons come from lucide at one size and stroke; a person is the first letter of their name on a soft circle in
-// one of four colours that their name picks, so the same person always looks the same. The landing keeps the name tags and stickers.
+// one of four colours that their name picks, so the same person always looks the same, and a sample person is their face with the
+// orange made-up mark. The landing keeps the name tags and stickers.
 import type { ReactElement } from "react";
-import { ArrowUp, Check, ChevronRight, Compass, Handshake, LayoutGrid, MessageCircle, Quote, Search, Settings, Sparkles, UserPlus, UserRound, Users } from "lucide-react";
+import { ArrowRight, ArrowUp, Check, ChevronRight, Compass, Grid3x3, Handshake, LayoutGrid, MessageCircle, Plus, Quote, Rows3, Search, Settings, Sparkles, UserPlus, UserRound, Users } from "lucide-react";
 import { initialOf } from "./look-parts.js";
+import { photoOf, photoUrl } from "./sample-photos.js";
 import { Sticker } from "./stickers.js";
 
 // Every icon the app draws, by what it means here.
@@ -22,6 +24,10 @@ const ICONS = {
   about: Quote,
   meetings: Handshake,
   next: ChevronRight,
+  grid: Grid3x3,
+  list: Rows3,
+  plus: Plus,
+  arrow: ArrowRight,
 } as const;
 // The name of one icon.
 export type IconName = keyof typeof ICONS;
@@ -49,13 +55,40 @@ export function tintOf(name: string): (typeof TINTS)[number] {
 // A person's sizes: s for lists (32 px), m for rows (44 px), l for a phone profile (86 px), xl for a laptop profile (150 px).
 export type AvatarSize = "s" | "m" | "l" | "xl";
 
-// A person as a round picture: their first letter on their colour. Hidden from screen readers, because their name is always next to it.
-export const PersonAvatar = (props: { name: string; size?: AvatarSize; className?: string }): ReactElement => {
-  const classes = ["person-avatar", `size-${props.size ?? "m"}`, tintOf(props.name), props.className ?? ""].filter((part) => part !== "").join(" ");
+// A person as a round picture: their face when there is one (only sample people have one so far), else their first letter on their
+// colour; a sample person also carries a small orange asterisk at the top right, so nobody takes a made-up face for a real one (Ambar,
+// 3 Nov 2026: "a small orange colored * near their head so we know"). Hidden from screen readers, because their name, and the Sample
+// mark in words, are always next to it.
+export const PersonAvatar = (props: { name: string; size?: AvatarSize; className?: string; photo?: string | null | undefined; isSample?: boolean | undefined }): ReactElement => {
+  const url = photoUrl(props.photo);
+  const classes = ["person-avatar", `size-${props.size ?? "m"}`, tintOf(props.name), url === null ? "" : "has-photo", props.className ?? ""].filter((part) => part !== "").join(" ");
   return (
     <span className={classes} aria-hidden="true">
-      {initialOf(props.name)}
+      {url === null ? initialOf(props.name) : <img src={url} alt="" loading="lazy" />}
+      {props.isSample === true ? <MadeUpMark /> : null}
     </span>
+  );
+};
+
+// A post's photo, with square corners (Ambar, 3 Nov 2026: "instead of curved edges photos and reels use square"): a wide photo at 3:2, a
+// tall one at 4:5 on a phone and square on wider screens. Nothing shows for a key this build does not have.
+export const PostPhoto = (props: { photo: string | null | undefined; alt: string | null | undefined; className?: string }): ReactElement | null => {
+  const found = photoOf(props.photo);
+  if (found === null) return null;
+  const classes = ["post-photo", found.height > found.width ? "is-tall" : "is-wide", props.className ?? ""].filter((part) => part !== "").join(" ");
+  return (
+    <div className={classes}>
+      <img src={found.src} alt={props.alt ?? ""} width={found.width} height={found.height} loading="lazy" decoding="async" />
+    </div>
+  );
+};
+
+// The orange asterisk on a made-up person's picture: three crossed strokes, as in the "Other" concept's wordmark.
+const MadeUpMark = (): ReactElement => {
+  return (
+    <svg className="made-up-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9" />
+    </svg>
   );
 };
 

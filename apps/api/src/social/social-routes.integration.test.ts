@@ -104,8 +104,8 @@ describe("friend requests", () => {
     expect(ErrorBody.parse(twice.body).code).toBe("friend_request_decided");
     const aFriends = FriendsView.parse((await send({ method: "GET", url: routes.directory.friends.path, token: x.a.sessionToken })).body).friends;
     const bFriends = FriendsView.parse((await send({ method: "GET", url: routes.directory.friends.path, token: y.b.sessionToken })).body).friends;
-    expect(aFriends.find((friend) => friend.pairId === pairId)).toEqual({ pairId, displayName: "Test B", canAsk: false, listingId: listingYb });
-    expect(bFriends.find((friend) => friend.pairId === pairId)).toEqual({ pairId, displayName: "Test A", canAsk: false, listingId: listingXa });
+    expect(aFriends.find((friend) => friend.pairId === pairId)).toEqual({ pairId, displayName: "Test B", canAsk: false, listingId: listingYb, isSample: false, photo: null });
+    expect(bFriends.find((friend) => friend.pairId === pairId)).toEqual({ pairId, displayName: "Test A", canAsk: false, listingId: listingXa, isSample: false, photo: null });
     expect(await profile(x.a.sessionToken, listingYb)).toMatchObject({ friendship: "friends", pairId, requestId: null });
     expect(FriendRequestsView.parse((await send({ method: "GET", url: routes.social.listFriendRequests.path, token: x.a.sessionToken })).body)).toEqual({ incoming: [], outgoing: [] });
   });
@@ -240,5 +240,32 @@ describe("posts and the sample mark", () => {
     expect(page.listings.find((listing) => listing.listingId === listingYb)?.isSample).toBe(true);
     expect(shown.isSample).toBe(true);
     expect((await profile(y.b.sessionToken, listingXa)).isSample).toBe(false);
+  });
+
+  it("W7-PHOTO-API-T1: a sample person's face shows in Explore, on their profile and among friends, their post carries its photo and the words for it, and a real person carries none", async () => {
+    const mayaPost = "Founders: send me the one number you check every morning. Not the deck, just the number and why it matters to you.";
+    await withPerson(t.db, y.b.personId, (trx) => trx.updateTable("people").set({ is_sample: true, display_name: "Maya" }).where("id", "=", y.b.personId).execute());
+    await withPerson(t.db, y.b.personId, (trx) => trx.insertInto("posts").values([
+      { person_id: y.b.personId, text: mayaPost, created_at: new Date() },
+      { person_id: y.b.personId, text: "A post with no photo.", created_at: new Date(Date.now() - 60_000) },
+    ]).execute());
+    try {
+      const page = DirectoryPage.parse((await send({ method: "GET", url: routes.directory.browse.path, token: x.a.sessionToken })).body);
+      const pageOfYb = DirectoryPage.parse((await send({ method: "GET", url: routes.directory.browse.path, token: y.b.sessionToken })).body);
+      const feed = PostsView.parse((await send({ method: "GET", url: routes.social.listPosts.path, token: x.a.sessionToken })).body).posts;
+      const friendsOfYa = FriendsView.parse((await send({ method: "GET", url: routes.directory.friends.path, token: y.a.sessionToken })).body).friends;
+      const withPhoto = feed.find((post) => post.text === mayaPost);
+      const withoutPhoto = feed.find((post) => post.text === "A post with no photo.");
+
+      expect(page.listings.find((listing) => listing.listingId === listingYb)?.photo).toBe("faces/maya");
+      expect(pageOfYb.listings.find((listing) => listing.listingId === listingXa)?.photo).toBeNull();
+      expect((await profile(x.a.sessionToken, listingYb)).photo).toBe("faces/maya");
+      expect((await profile(y.b.sessionToken, listingXa)).photo).toBeNull();
+      expect(withPhoto).toMatchObject({ authorPhoto: "faces/maya", photo: "maya-morning", photoAlt: "A latte on a book by a sunny window." });
+      expect(withoutPhoto).toMatchObject({ authorPhoto: "faces/maya", photo: null, photoAlt: null });
+      expect(friendsOfYa.find((friend) => friend.displayName === "Maya")).toMatchObject({ isSample: true, photo: "faces/maya" });
+    } finally {
+      await withPerson(t.db, y.b.personId, (trx) => trx.updateTable("people").set({ is_sample: false, display_name: "Test B" }).where("id", "=", y.b.personId).execute());
+    }
   });
 });

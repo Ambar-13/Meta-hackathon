@@ -1,6 +1,7 @@
 /* A profile, after Instagram's (3 Nov 2026): the round picture beside the name, the count, the line and the buttons, then a hairline
-   tab strip with About and Posts. About is a list of quotes and Posts a feed, both with hairlines between and no boxes. /me reuses
-   these rules. */
+   tab strip with About and Posts. About is a list of quotes with hairlines between and no boxes. Posts with a photo among them open as
+   Instagram's grid of square tiles with square corners, with a switch to the list; posts of words alone are the list. /me reuses these
+   rules. */
 
 .profile-page { max-width: 935px; margin: 0 auto; }
 
@@ -34,11 +35,41 @@
 .about-claim { margin: 0 0 6px; font: 600 15px/1.4 var(--ui-font); }
 .about-item .receipt q { font-size: 16px; font-weight: 400; color: var(--ui-ink); }
 .profile-posts { list-style: none; max-width: 600px; margin: 8px auto 0; padding: 0; }
-.profile-post { display: grid; gap: 8px; padding: 18px 0; border-top: 1px solid var(--ui-line); }
+.profile-post { display: grid; gap: 8px; padding: 18px 0; border-top: 1px solid var(--ui-line); scroll-margin-top: 16px; }
+.profile-post:focus { outline: none; }
 .profile-post:first-child { border-top: 0; }
 .profile-post .post-text { margin: 0; font: 400 16px/1.45 var(--ui-font); overflow-wrap: anywhere; }
 .profile-post .post-time { font-size: 13px; color: var(--ui-ink-2); }
 .profile-posts-error { margin-top: 18px; }
+
+/* The switch between the grid and the list, at the right above them: grey words, the one on in ink on a soft ground. */
+.profile-posts-panel { max-width: 935px; margin: 0 auto; }
+.posts-look { display: flex; justify-content: flex-end; gap: 4px; margin: 8px 0; }
+.profile-posts-panel:has(.profile-posts) .posts-look { max-width: 600px; margin-inline: auto; }
+:where(.social-frame) .posts-look-button { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 0; border-radius: 22px;
+  background: none; color: var(--ui-ink-2); font: 500 14px/20px var(--ui-font); }
+:where(.social-frame) .posts-look-button:hover:not(:disabled) { filter: none; background: var(--ui-soft); color: var(--ui-ink); }
+:where(.social-frame) .posts-look-button[aria-pressed="true"] { background: var(--ui-soft); color: var(--ui-ink); font-weight: 600; }
+/* The grid, as Instagram's profile since 2025: three tall 3:4 tiles to a row, 3px apart, with square corners, to the screen's edges on a
+   phone; a post of words shows its words on the warm ground. */
+.post-grid { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; margin: 0; padding: 0; }
+@media (max-width: 663px) {
+  .post-grid { margin-inline: -16px; }
+}
+:where(.social-frame) .post-tile { display: block; width: 100%; aspect-ratio: 3 / 4; padding: 0; overflow: hidden; border: 0; border-radius: 0; background: var(--ui-soft); color: var(--ui-ink);
+  text-align: left; cursor: pointer; }
+:where(.social-frame) .post-tile:hover:not(:disabled) { filter: none; }
+.post-tile > img { display: block; width: 100%; height: 100%; object-fit: cover; transition: opacity 0.15s var(--ease); }
+.post-tile:hover > img { opacity: 0.88; }
+:where(.social-frame) .post-tile.is-words { display: flex; align-items: flex-start; justify-content: flex-start; background: var(--ui-sand); }
+:where(.social-frame) .post-tile.is-words:hover:not(:disabled) { background: oklch(91.6% 0.015 84); }
+.post-tile-words { display: -webkit-box; margin: 12px; overflow: hidden; font: 400 14px/20px var(--ui-font); overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 6; }
+@media (max-width: 663px) {
+  .post-tile-words { margin: 8px; font-size: 13px; line-height: 18px; -webkit-line-clamp: 5; }
+}
+@media (min-width: 900px) {
+  .post-tile-words { margin: 20px; font-size: 17px; line-height: 26px; -webkit-line-clamp: 9; }
+}
 .posts-soon { display: grid; justify-items: center; gap: 10px; max-width: 420px; margin: 40px auto 20px; text-align: center; }
 .posts-soon-icon { display: inline-grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--ui-ink); }
 .posts-soon h2 { margin: 6px 0 0; font: 700 20px/1.25 var(--ui-font); }

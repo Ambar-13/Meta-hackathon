@@ -42,10 +42,11 @@ export const EXPLORE_LISTINGS: DirectoryListing[] = [
   { listingId: LISTING(6), displayName: "Sung-min", line: "First hackathon, here to meet people.", openToRomance: false, isSample: false, items: [{ kind: "boundary", claim: "Done by 9 pm", quote: "After nine I am no use to anyone." }] },
 ].map((listing) => DirectoryListing.parse(listing));
 
-// Explore as the live site shows it after the seed (3 Nov 2026): one real person first, then the six sample people with their lines,
-// first public items and posts, as packages/db/src/samples/sample-people.ts writes them.
+// Explore as the live site shows it after the seed (3 Nov 2026): one real person first, then the six sample people with their faces,
+// lines, first public items and posts with their photos, as packages/db/src/samples/sample-people.ts writes them.
 const SAMPLE = (n: number, listing: { displayName: string; line: string; claim: string; quote: string }): DirectoryListing =>
-  DirectoryListing.parse({ listingId: LISTING(10 + n), displayName: listing.displayName, line: listing.line, openToRomance: false, isSample: true, items: [{ kind: "habit", claim: listing.claim, quote: listing.quote }] });
+  DirectoryListing.parse({ listingId: LISTING(10 + n), displayName: listing.displayName, line: listing.line, openToRomance: false, isSample: true, photo: `faces/${listing.displayName.toLowerCase()}`,
+    items: [{ kind: "habit", claim: listing.claim, quote: listing.quote }] });
 // The six sample people as Explore lists them.
 export const SAMPLE_LISTINGS: DirectoryListing[] = [
   SAMPLE(1, { displayName: "Maya", line: "Angel investor. I back small teams early and answer every founder within a week.", claim: "Prefers a seed extension to a bridge when the numbers are moving", quote: "A seed extension makes sense to me when the numbers are moving" }),
@@ -56,17 +57,22 @@ export const SAMPLE_LISTINGS: DirectoryListing[] = [
   SAMPLE(6, { displayName: "Tomas", line: "Machine learning researcher. I never trust a result I have only run once.", claim: "Distrusts any result that was run only once", quote: "I never trust a result I have only run once" }),
 ];
 // The posts of Explore, newest first, dated back from the moment the gallery renders, since a post shows its age against the clock.
-const POST = (n: number, listing: DirectoryListing, post: { text: string; hoursAgo: number }): Post => ({
+const POST = (n: number, listing: DirectoryListing, post: { text: string; hoursAgo: number; photo?: { key: string; alt: string } }): Post => ({
   postId: LISTING(40 + n), listingId: listing.listingId, displayName: listing.displayName, isSample: listing.isSample, text: post.text, createdAt: new Date(Date.now() - post.hoursAgo * 3_600_000).toISOString(),
+  authorPhoto: listing.photo ?? null, photo: post.photo?.key ?? null, photoAlt: post.photo?.alt ?? null,
 });
 const [MAYA, PRIYA, RAVI, JUN, LEILA, TOMAS] = SAMPLE_LISTINGS as [DirectoryListing, DirectoryListing, DirectoryListing, DirectoryListing, DirectoryListing, DirectoryListing];
 export const SAMPLE_POSTS: Post[] = [
-  POST(1, JUN, { text: "Looking for a team that needs someone to own the hardware. I bring an Arduino, a box of motors and a soldering iron.", hoursAgo: 2 }),
-  POST(2, MAYA, { text: "Founders: send me the one number you check every morning. Not the deck, just the number and why it matters to you.", hoursAgo: 3 }),
-  POST(3, PRIYA, { text: "Hackathon tip: draw the three screens the judges will see before you write any code. Everything else can wait until Sunday.", hoursAgo: 6 }),
-  POST(4, RAVI, { text: "Before every demo I ask one question: if this breaks on stage, what is the undo? If nobody knows, we fix that first.", hoursAgo: 9 }),
-  POST(5, LEILA, { text: "Our best week of sign-ups came from twelve personal messages, not from the launch post. Write to people one at a time.", hoursAgo: 12 }),
-  POST(6, TOMAS, { text: "Ran our new model with five seeds instead of one. Two of the five lost to the baseline. Glad we checked before the demo.", hoursAgo: 20 }),
+  POST(1, JUN, { text: "Looking for a team that needs someone to own the hardware. I bring an Arduino, a box of motors and a soldering iron.", hoursAgo: 2, photo: { key: "jun-workbench", alt: "Electronic parts laid out on a white table: an Arduino board, small motors, a battery pack and wires." } }),
+  POST(2, MAYA, { text: "Founders: send me the one number you check every morning. Not the deck, just the number and why it matters to you.", hoursAgo: 3, photo: { key: "maya-morning", alt: "A latte on a book by a sunny window." } }),
+  POST(3, PRIYA, { text: "Hackathon tip: draw the three screens the judges will see before you write any code. Everything else can wait until Sunday.", hoursAgo: 6, photo: { key: "priya-sketches", alt: "A hand sketching phone screens on paper with a yellow pen." } }),
+  POST(4, RAVI, { text: "Before every demo I ask one question: if this breaks on stage, what is the undo? If nobody knows, we fix that first.", hoursAgo: 9, photo: { key: "ravi-whiteboard", alt: "A hand drawing circles and arrows on a whiteboard." } }),
+  POST(5, LEILA, { text: "Our best week of sign-ups came from twelve personal messages, not from the launch post. Write to people one at a time.", hoursAgo: 12, photo: { key: "leila-letters", alt: "Handwritten letters and old envelopes spread on a table." } }),
+  POST(6, TOMAS, { text: "Ran our new model with five seeds instead of one. Two of the five lost to the baseline. Glad we checked before the demo.", hoursAgo: 20, photo: { key: "tomas-charts", alt: "Charts and graphs on a dark laptop screen." } }),
+  POST(7, MAYA, { text: "A reminder I give every team I back: bad news early is a favour. I can help with a problem in March. I can't help with a surprise in June.", hoursAgo: 30 }),
+  POST(8, JUN, { text: "Got a two-wheel robot to follow a line on my desk tonight. It still falls off the edge, but it is getting there.", hoursAgo: 40, photo: { key: "jun-robot", alt: "A small boxy robot toy on a wooden desk." } }),
+  POST(9, PRIYA, { text: "Tested our sign-up page on my mom today. She found the button in four seconds. Shipping it.", hoursAgo: 52, photo: { key: "priya-phone", alt: "Two hands holding a phone with an app open, over a wooden table." } }),
+  POST(10, TOMAS, { text: "If your eval looks too good, check where the test data came from. Nine times out of ten that is the whole story.", hoursAgo: 70 }),
 ];
 
 // One page of Explore.
@@ -92,12 +98,17 @@ function exploreView(head: { name: string; title: string }, stubs: GalleryStub[]
   return { ...head, pattern: ROUTE_PATTERNS.explore, url: "/explore", element, stubs };
 }
 
-// Explore: the feed as the live site shows it, with one friend in it; everyone after See all, with more to show; a search that finds
-// nobody; loading; and a failed load.
+// Explore: the feed as the live site shows it, with one friend in it; its Photos tab; everyone after See all, with more to show; a
+// search that finds nobody; loading; and a failed load.
 export const views: readonly GalleryView[] = [
   exploreView(
     { name: "explore-feed", title: "Explore, the feed" },
     reads(page([...EXPLORE_LISTINGS.slice(0, 1), ...SAMPLE_LISTINGS], false), { posts: postsReply(SAMPLE_POSTS), friends: FEED_FRIENDS }),
+  ),
+  exploreView(
+    { name: "explore-photos", title: "Explore, the Photos tab" },
+    reads(page([...EXPLORE_LISTINGS.slice(0, 1), ...SAMPLE_LISTINGS], false), { posts: postsReply(SAMPLE_POSTS), friends: FEED_FRIENDS }),
+    <AfterSteps steps={[{ press: "Photos" }]}><ExploreScreen /></AfterSteps>,
   ),
   exploreView(
     { name: "explore-everyone", title: "Explore, everyone after See all" },

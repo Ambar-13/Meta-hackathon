@@ -93,7 +93,7 @@ describe("directory and friends routes", () => {
     expect(page.page).toBe(0);
     expect(page.hasMore).toBe(true);
     expect(page.listings.map((listing) => listing.displayName)).toEqual(["Lister 21", "Lister 20", "Lister 19", "Lister 18", "Lister 17", "Lister 16", "Lister 15", "Lister 14", "Lister 13", "Lister 12", "Lister 11", "Lister 10", "Lister 09", "Lister 08", "Lister 07", "Lister 06", "Lister 05", "Lister 04", "Lister 03", "Lister 02"]);
-    expect(page.listings[0]).toEqual({ listingId: lister(21).listingId, displayName: "Lister 21", line: "Line 21", openToRomance: true, isSample: false, items: [{ kind: "value", claim: "Test claim 1", quote: "I plan the week on Sunday night and keep to it." }] });
+    expect(page.listings[0]).toEqual({ listingId: lister(21).listingId, displayName: "Lister 21", line: "Line 21", openToRomance: true, isSample: false, items: [{ kind: "value", claim: "Test claim 1", quote: "I plan the week on Sunday night and keep to it." }], photo: null });
     expect(page.listings.filter((listing) => listing.openToRomance)).toHaveLength(1);
     for (const word of ['"personId"', '"cardId"', '"person_id"', '"card_id"', '"turnId"', '"turn_id"', '"itemId"', '"position"']) {
       expect(response.body).not.toContain(word);
@@ -125,7 +125,7 @@ describe("directory and friends routes", () => {
     const missing = await send(viewer, { method: "GET", url: routes.directory.browse.path + "?query=zebra" });
 
     expect(plain.statusCode).toBe(200);
-    expect(DirectoryPage.parse(plain.json())).toEqual({ listings: [{ listingId: lister(7).listingId, displayName: "Lister 07", line: "I fix flaky Postgres tests.", openToRomance: false, isSample: false, items: [{ kind: "value", claim: "Test claim 1", quote: "I plan the week on Sunday night and keep to it." }] }], page: 0, hasMore: false });
+    expect(DirectoryPage.parse(plain.json())).toEqual({ listings: [{ listingId: lister(7).listingId, displayName: "Lister 07", line: "I fix flaky Postgres tests.", openToRomance: false, isSample: false, items: [{ kind: "value", claim: "Test claim 1", quote: "I plan the week on Sunday night and keep to it." }], photo: null }], page: 0, hasMore: false });
     expect(padded.statusCode).toBe(200);
     expect(DirectoryPage.parse(padded.json()).listings.map((listing) => listing.displayName)).toEqual(["Lister 07"]);
     expect(DirectoryPage.parse(padded.json()).hasMore).toBe(false);
@@ -162,9 +162,9 @@ describe("directory and friends routes", () => {
     expect(sharing.statusCode).toBe(200);
     expect(meeting.statusCode).toBe(201);
     expect(aView.statusCode).toBe(200);
-    expect(FriendsView.parse(aView.json())).toEqual({ friends: [{ pairId: m.pairId, displayName: "Test B", canAsk: true, listingId: null }] });
+    expect(FriendsView.parse(aView.json())).toEqual({ friends: [{ pairId: m.pairId, displayName: "Test B", canAsk: true, listingId: null, isSample: false, photo: null }] });
     expect(bView.statusCode).toBe(200);
-    expect(FriendsView.parse(bView.json())).toEqual({ friends: [{ pairId: m.pairId, displayName: "Test A", canAsk: false, listingId: null }] });
+    expect(FriendsView.parse(bView.json())).toEqual({ friends: [{ pairId: m.pairId, displayName: "Test A", canAsk: false, listingId: null, isSample: false, photo: null }] });
     expect(listerView.statusCode).toBe(200);
     expect(FriendsView.parse(listerView.json())).toEqual({ friends: [] });
   });

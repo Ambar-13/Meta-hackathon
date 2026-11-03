@@ -7,15 +7,19 @@ import type { ItemKind } from "@meet-first/contracts";
 // One item of a sample card: its kind and claim, the note it quotes by index, the quote, which must be part of that note word for
 // word, and whether Explore shows it.
 export type SampleItem = { kind: ItemKind; claim: string; note: number; quote: string; isPublic: boolean };
-// One sample post, dated this many hours before the seed runs, so the feed reads as a few days of posts.
-export type SamplePost = { text: string; hoursAgo: number };
-// One sample person.
-export type SamplePerson = { displayName: string; line: string; notes: readonly string[]; items: readonly SampleItem[]; posts: readonly SamplePost[] };
+// A photo of a sample post: its key, which the web build maps to the bundled image (apps/web/src/look/sample-photos.ts), and the words
+// a screen reader reads for it. The photos are free Unsplash photos picked on 3 Nov 2026 (docs/sample-photos.md).
+export type SamplePhoto = { key: string; alt: string };
+// One sample post, dated this many hours before the seed runs, so the feed reads as a few days of posts, with its photo when it has one.
+export type SamplePost = { text: string; hoursAgo: number; photo?: SamplePhoto };
+// One sample person, with the key of the face the app shows for them (Ambar, 3 Nov: "cute human avatars", marked as made up).
+export type SamplePerson = { displayName: string; face: string; line: string; notes: readonly string[]; items: readonly SampleItem[]; posts: readonly SamplePost[] };
 
 // The six sample people, in the order the seed adds them.
 export const SAMPLE_PEOPLE: readonly SamplePerson[] = [
   {
     displayName: "Maya",
+    face: "faces/maya",
     line: "Angel investor. I back small teams early and answer every founder within a week.",
     notes: [
       "A seed extension makes sense to me when the numbers are moving and the team just needs six more months.",
@@ -36,12 +40,13 @@ export const SAMPLE_PEOPLE: readonly SamplePerson[] = [
       { kind: "boundary", claim: "Will not take a board seat", note: 7, quote: "I say no to anything that needs me on the board", isPublic: false },
     ],
     posts: [
-      { text: "Founders: send me the one number you check every morning. Not the deck, just the number and why it matters to you.", hoursAgo: 3 },
+      { text: "Founders: send me the one number you check every morning. Not the deck, just the number and why it matters to you.", hoursAgo: 3, photo: { key: "maya-morning", alt: "A latte on a book by a sunny window." } },
       { text: "A reminder I give every team I back: bad news early is a favour. I can help with a problem in March. I can't help with a surprise in June.", hoursAgo: 30 },
     ],
   },
   {
     displayName: "Priya",
+    face: "faces/priya",
     line: "Product designer who also writes the front end. I sketch three versions before I pick one.",
     notes: [
       "I always sketch three versions of a screen before I pick one. The first idea is usually the obvious one.",
@@ -62,12 +67,13 @@ export const SAMPLE_PEOPLE: readonly SamplePerson[] = [
       { kind: "habit", claim: "Needs a quiet hour in the morning to design", note: 6, quote: "I need about an hour of quiet in the morning to design", isPublic: false },
     ],
     posts: [
-      { text: "Hackathon tip: draw the three screens the judges will see before you write any code. Everything else can wait until Sunday.", hoursAgo: 6 },
-      { text: "Tested our sign-up page on my mom today. She found the button in four seconds. Shipping it.", hoursAgo: 52 },
+      { text: "Hackathon tip: draw the three screens the judges will see before you write any code. Everything else can wait until Sunday.", hoursAgo: 6, photo: { key: "priya-sketches", alt: "A hand sketching phone screens on paper with a yellow pen." } },
+      { text: "Tested our sign-up page on my mom today. She found the button in four seconds. Shipping it.", hoursAgo: 52, photo: { key: "priya-phone", alt: "Two hands holding a phone with an app open, over a wooden table." } },
     ],
   },
   {
     displayName: "Ravi",
+    face: "faces/ravi",
     line: "Backend and data. I write the rollback before the feature.",
     notes: [
       "I keep a not-now list. Every idea goes on it, and we only build what still matters on Friday.",
@@ -88,11 +94,12 @@ export const SAMPLE_PEOPLE: readonly SamplePerson[] = [
       { kind: "preference", claim: "Explains ideas with drawings of boxes and arrows", note: 6, quote: "I explain things with a drawing of boxes and arrows", isPublic: false },
     ],
     posts: [
-      { text: "Before every demo I ask one question: if this breaks on stage, what is the undo? If nobody knows, we fix that first.", hoursAgo: 9 },
+      { text: "Before every demo I ask one question: if this breaks on stage, what is the undo? If nobody knows, we fix that first.", hoursAgo: 9, photo: { key: "ravi-whiteboard", alt: "A hand drawing circles and arrows on a whiteboard." } },
     ],
   },
   {
     displayName: "Jun",
+    face: "faces/jun",
     line: "First hackathon. I build small robots and I am here to meet people.",
     notes: [
       "This is my first hackathon. Honestly I came to meet people more than to win.",
@@ -113,12 +120,13 @@ export const SAMPLE_PEOPLE: readonly SamplePerson[] = [
       { kind: "boundary", claim: "Would rather build the demo than pitch it", note: 6, quote: "I would happily build the demo if someone else does the talking", isPublic: false },
     ],
     posts: [
-      { text: "Looking for a team that needs someone to own the hardware. I bring an Arduino, a box of motors and a soldering iron.", hoursAgo: 2 },
-      { text: "Got a two-wheel robot to follow a line on my desk tonight. It still falls off the edge, but it is getting there.", hoursAgo: 40 },
+      { text: "Looking for a team that needs someone to own the hardware. I bring an Arduino, a box of motors and a soldering iron.", hoursAgo: 2, photo: { key: "jun-workbench", alt: "Electronic parts laid out on a white table: an Arduino board, small motors, a battery pack and wires." } },
+      { text: "Got a two-wheel robot to follow a line on my desk tonight. It still falls off the edge, but it is getting there.", hoursAgo: 40, photo: { key: "jun-robot", alt: "A small boxy robot toy on a wooden desk." } },
     ],
   },
   {
     displayName: "Leila",
+    face: "faces/leila",
     line: "Growth. I message every new user myself and keep a waitlist instead of a launch day.",
     notes: [
       "The first ten users come from trust, not ads. Friends of friends who will tell you the truth.",
@@ -139,11 +147,12 @@ export const SAMPLE_PEOPLE: readonly SamplePerson[] = [
       { kind: "habit", claim: "Tracks one number at a time", note: 7, quote: "I measure one number at a time. Five numbers at once and nobody knows what to fix.", isPublic: false },
     ],
     posts: [
-      { text: "Our best week of sign-ups came from twelve personal messages, not from the launch post. Write to people one at a time.", hoursAgo: 12 },
+      { text: "Our best week of sign-ups came from twelve personal messages, not from the launch post. Write to people one at a time.", hoursAgo: 12, photo: { key: "leila-letters", alt: "Handwritten letters and old envelopes spread on a table." } },
     ],
   },
   {
     displayName: "Tomas",
+    face: "faces/tomas",
     line: "Machine learning researcher. I never trust a result I have only run once.",
     notes: [
       "I never trust a result I have only run once. Run it three times with different seeds, then we can talk.",
@@ -164,7 +173,7 @@ export const SAMPLE_PEOPLE: readonly SamplePerson[] = [
       { kind: "habit", claim: "Checks for leakage when a model looks too good", note: 7, quote: "If a model looks too good, I check for leakage before I celebrate", isPublic: false },
     ],
     posts: [
-      { text: "Ran our new model with five seeds instead of one. Two of the five lost to the baseline. Glad we checked before the demo.", hoursAgo: 20 },
+      { text: "Ran our new model with five seeds instead of one. Two of the five lost to the baseline. Glad we checked before the demo.", hoursAgo: 20, photo: { key: "tomas-charts", alt: "Charts and graphs on a dark laptop screen." } },
       { text: "If your eval looks too good, check where the test data came from. Nine times out of ten that is the whole story.", hoursAgo: 70 },
     ],
   },

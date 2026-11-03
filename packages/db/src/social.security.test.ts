@@ -89,6 +89,20 @@ describe("friend requests in the database", () => {
     expect(parseDatabaseError(already)?.code).toBe("already_friends");
   });
 
+  it("W7-PHOTO-DB-T1: friend_list (migration 0010) carries each friend's sample mark, so the app can show a sample friend's face", async () => {
+    const markOf = async (personId: string, displayName: string): Promise<boolean | undefined> => {
+      const rows = await asPerson(t.db, personId, async (trx) => (await sql<{ display_name: string; is_sample: boolean }>`SELECT display_name, is_sample FROM friend_list()`.execute(trx)).rows);
+      return rows.find((row) => row.display_name === displayName)?.is_sample;
+    };
+    expect(await markOf(y.a.personId, "Test B")).toBe(false);
+    await asPerson(t.db, y.b.personId, (trx) => trx.updateTable("people").set({ is_sample: true }).where("id", "=", y.b.personId).execute());
+    try {
+      expect(await markOf(y.a.personId, "Test B")).toBe(true);
+    } finally {
+      await asPerson(t.db, y.b.personId, (trx) => trx.updateTable("people").set({ is_sample: false }).where("id", "=", y.b.personId).execute());
+    }
+  });
+
   it("W7-DB-T4: directory_profile answers nothing with no person set, and friend_requests_mine never names a person id", async () => {
     const none = await withNoContext(t.db, async (trx) => (await sql`SELECT * FROM directory_profile(${listingYb}::uuid)`.execute(trx)).rows);
     expect(none).toEqual([]);

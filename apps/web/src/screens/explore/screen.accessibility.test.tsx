@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { DirectoryListing, DirectoryPage, type FriendsView, type PostsView } from "@meet-first/contracts";
-import { APP_PATHS, chatPathWithDraft, clearClientState, ROUTE_PATTERNS, routes } from "../../app-shell/index.js";
+import { APP_PATHS, chatPathWithDraft, clearClientState, personPostsPath, ROUTE_PATTERNS, routes } from "../../app-shell/index.js";
 import { renderScreen, requestsTo, stubRoute, type StubInput } from "../../testing/index.js";
 import { unlabelledControls } from "../../testing/render-screen.js";
 import { LISTING_IDS } from "../../testing/fixtures.js";
@@ -61,6 +61,11 @@ async function personLinkOf(name: string): Promise<HTMLElement> {
   const link = (await screen.findByRole("heading", { name })).closest("a");
   if (link === null) throw new Error(`the name of ${name} is not in a link`);
   return link;
+}
+
+// The same post with a photo: this key and these words for it.
+function withPhoto(base: PostsView["posts"][number], photo: string, photoAlt: string): PostsView["posts"][number] {
+  return { ...base, photo, photoAlt };
 }
 
 const MIRA = listing(LISTING_IDS.mira, "Mira", true);
@@ -167,9 +172,9 @@ describe("Explore page, against the MSW route stubs (a fake server)", () => {
     expect(unlabelledControls(document.body)).toEqual([]);
   });
 
-  it("W7-SAMPLE-WEB-T1: the feed shows the posts newest first with the suggested people after the second; each post has its writer's name linking to their profile, the Sample mark, its age, their line and More from them; a search shows people only", async () => {
+  it("W7-SAMPLE-WEB-T1: For you shows the posts newest first with the suggested people after the second; each post has its writer's name linking to their profile, the sample mark, its age, their line and Posts; a search shows people only", async () => {
     renderExplore([page(0, [MIRA, SAMPLE_RAVI], false), page(0, [SAMPLE_RAVI], false)], { posts: [{ posts: [post(1, "Ravi", 3), post(2, "Mira", 30), post(3, "Mira", 50)] }] });
-    const feed = await screen.findByRole("region", { name: "Posts in Explore" });
+    const feed = await screen.findByRole("tabpanel", { name: "For you" });
     await within(feed).findByText("Post number 3 by Mira.");
     const posts = within(feed).getAllByRole("article");
     const suggested = within(feed).getByRole("region", { name: "Suggested for you" });
@@ -181,10 +186,12 @@ describe("Explore page, against the MSW route stubs (a fake server)", () => {
     expect(within(first).getByText("Post number 1 by Ravi.")).toBeTruthy();
     expect(within(first).getByRole("link", { name: "Ravi" }).getAttribute("href")).toBe(`/people/${LISTING_IDS.ravi}`);
     expect(within(first).getByRole("link", { name: "Ravi's posts" }).getAttribute("href")).toBe(`/people/${LISTING_IDS.ravi}?tab=posts`);
-    expect(within(first).getByText("Sample")).toBeTruthy();
+    expect(within(first).getByText("Sample person")).toBeTruthy();
+    expect(first.querySelector(".feed-avatar .made-up-mark")).not.toBeNull();
     expect(within(first).getByText("3 hours ago")).toBeTruthy();
     expect(within(first).getByText("Ravi builds small tools")).toBeTruthy();
-    expect(within(second).queryByText("Sample")).toBeNull();
+    expect(within(second).queryByText("Sample person")).toBeNull();
+    expect(second.querySelector(".feed-avatar .made-up-mark")).toBeNull();
     expect(within(await personLinkOf("Ravi")).getByText("Sample")).toBeTruthy();
     expect(within(await personLinkOf("Mira")).queryByText("Sample")).toBeNull();
 
@@ -263,7 +270,7 @@ describe("Explore page, against the MSW route stubs (a fake server)", () => {
     renderExplore([page(0, [MIRA, RAVI], false)], { friends });
     const rail = await screen.findByRole("complementary", { name: "Your Meety and people you might click with" });
 
-    expect(within(rail).getByRole("heading", { name: "Let your Meety go first." })).toBeTruthy();
+    expect(within(rail).getByRole("heading", { name: "You're more than your posts." })).toBeTruthy();
     expect(within(rail).getByRole("link", { name: "See what it shares" }).getAttribute("href")).toBe(APP_PATHS.me);
     await waitFor(() => {
       expect(within(rail).queryByRole("link", { name: "Mira" })).toBeNull();
@@ -272,5 +279,79 @@ describe("Explore page, against the MSW route stubs (a fake server)", () => {
     fireEvent.click(within(rail).getByRole("button", { name: "See everyone" }));
 
     expect(await screen.findByRole("heading", { name: "Everyone in Explore" })).toBeTruthy();
+  });
+  it("W7-PHOTO-T1: a post with a photo shows it with its words for the photo; a sample writer's picture is their face with the orange made-up mark, a real writer's their initial", async () => {
+    const ravisPost = { ...withPhoto(post(1, "Ravi", 1), "ravi-whiteboard", "A hand drawing circles and arrows on a whiteboard."), authorPhoto: "faces/ravi" };
+    renderExplore([page(0, [MIRA, SAMPLE_RAVI], false)], { posts: [{ posts: [ravisPost, post(2, "Mira", 2)] }] });
+    const ravis = await screen.findByRole("article", { name: "Ravi's post" });
+    const miras = screen.getByRole("article", { name: "Mira's post" });
+
+    expect(within(ravis).getByRole("img", { name: "A hand drawing circles and arrows on a whiteboard." }).getAttribute("src")).toContain("ravi-whiteboard");
+    expect(within(miras).queryByRole("img")).toBeNull();
+    const ravisPicture = ravis.querySelector(".feed-avatar .person-avatar");
+    const mirasPicture = miras.querySelector(".feed-avatar .person-avatar");
+    expect(ravisPicture?.querySelector("img")?.getAttribute("src")).toContain("ravi");
+    expect(ravisPicture?.querySelector(".made-up-mark")).not.toBeNull();
+    expect(mirasPicture?.querySelector("img")).toBeNull();
+    expect(mirasPicture?.querySelector(".made-up-mark")).toBeNull();
+    expect(mirasPicture?.textContent).toBe("M");
+  });
+
+  it("W7-PHOTO-T2: the Photos tab shows every photo post, newest first, as a link to its writer's Posts tab named with the words for the photo; with no photos it says so", async () => {
+    const posts = [
+      withPhoto(post(1, "Ravi", 1), "ravi-whiteboard", "A whiteboard."),
+      post(2, "Mira", 2),
+      withPhoto(post(3, "Ravi", 3), "jun-robot", "A robot."),
+    ];
+    renderExplore([page(0, [MIRA, SAMPLE_RAVI], false)], { posts: [{ posts }] });
+    fireEvent.click(await screen.findByRole("tab", { name: "Photos" }));
+    const grid = await screen.findByRole("tabpanel", { name: "Photos" });
+    const tiles = within(grid).getAllByRole("link");
+
+    expect(tiles.map((tile) => tile.getAttribute("aria-label"))).toEqual(["Ravi's posts: A whiteboard.", "Ravi's posts: A robot."]);
+    expect(tiles.map((tile) => tile.getAttribute("href"))).toEqual([personPostsPath(LISTING_IDS.ravi), personPostsPath(LISTING_IDS.ravi)]);
+    expect(tiles[1]?.querySelector("img")?.getAttribute("src")).toContain("jun-robot");
+    expect(within(grid).queryByRole("article")).toBeNull();
+    cleanup();
+    renderExplore([page(0, [MIRA, RAVI], false)], { posts: [{ posts: [post(1, "Ravi", 1), post(2, "Mira", 2)] }] });
+    fireEvent.click(await screen.findByRole("tab", { name: "Photos" }));
+
+    expect(await within(await screen.findByRole("tabpanel", { name: "Photos" })).findByText("No photos yet.")).toBeTruthy();
+  });
+
+  it("W7-FACES-T1: the row of faces starts with Your Meety, a link to Me, then the people of Explore, friends first, each a link to their profile", async () => {
+    const friends: FriendsView = { friends: [{ pairId: LISTING_IDS.request, displayName: "Ravi", canAsk: true, listingId: LISTING_IDS.ravi }] };
+    renderExplore([page(0, [MIRA, RAVI], false)], { friends });
+    const faces = await screen.findByRole("region", { name: "People in Explore" });
+    await waitFor(() => {
+      expect(within(faces).getAllByRole("link").map((link) => link.querySelector(".story-name")?.textContent)).toEqual(["Your Meety", "Ravi", "Mira"]);
+    });
+    const [you, ravi, mira] = within(faces).getAllByRole("link");
+
+    expect(you?.getAttribute("href")).toBe(APP_PATHS.me);
+    expect(ravi?.getAttribute("href")).toBe(`/people/${LISTING_IDS.ravi}`);
+    expect(mira?.getAttribute("href")).toBe(`/people/${LISTING_IDS.mira}`);
+  });
+
+  it("W7-TABS-T1: Friends shows only your friends' posts, or how to get some when there are none, and the arrow keys move between the tabs", async () => {
+    const friends: FriendsView = { friends: [{ pairId: LISTING_IDS.request, displayName: "Mira", canAsk: true, listingId: LISTING_IDS.mira }] };
+    renderExplore([page(0, [MIRA, RAVI], false)], { friends, posts: [{ posts: [post(1, "Ravi", 1), post(2, "Mira", 2)] }] });
+    const forYou = await screen.findByRole("tab", { name: "For you" });
+    expect(forYou.getAttribute("aria-selected")).toBe("true");
+    await screen.findByRole("article", { name: "Ravi's post" });
+    fireEvent.keyDown(forYou, { key: "ArrowRight" });
+
+    const friendsTab = screen.getByRole("tab", { name: "Friends" });
+    expect(friendsTab.getAttribute("aria-selected")).toBe("true");
+    expect(document.activeElement).toBe(friendsTab);
+    const panel = screen.getByRole("tabpanel", { name: "Friends" });
+    await waitFor(() => {
+      expect(within(panel).getAllByRole("article").map((article) => article.getAttribute("aria-label"))).toEqual(["Mira's post"]);
+    });
+    cleanup();
+    renderExplore([page(0, [MIRA, RAVI], false)], { posts: [{ posts: [post(1, "Ravi", 1)] }] });
+    fireEvent.click(await screen.findByRole("tab", { name: "Friends" }));
+
+    expect(await screen.findByText("No posts from your friends yet. Add a friend from For you, and their posts show here.")).toBeTruthy();
   });
 });

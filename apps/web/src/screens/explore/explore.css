@@ -1,33 +1,45 @@
-/* Explore as a feed (3 Nov 2026). Ambar: "it should have been looking like linkedin or instagram feed", not "an ai generated layout of
-   cards"; then the look of the "Other" concept he liked the same day, its slop left out (no capitals, nothing under 13px, no made-up
-   counts, no stock faces, no green or orange). One column: the large light title, the grey search field, then the posts with a
-   hairline between them. A post has its writer's picture in the left column and, on the right, their name, the Sample mark, the post's
-   age and their line, with Add friend in blue words at the end; the post; a soft strip with their own words from what they shared; then
-   Ask NAME's Meety and More from them. On a phone the people Explore suggests are a row of cards inside the feed; on a laptop they sit
-   in a right-hand column under a card on what your Meety does. A search, or See all, shows people as plain rows. Spacing is on a 4px
-   grid. */
+/* Explore as a feed (3 Nov 2026). Ambar: "it should have been looking like linkedin or instagram feed"; then "I WANT THE OTHERS AND
+   INSTAGRAM LOOK", the "Other" concept he liked and Instagram's app, with photos in square corners and faces for the sample people, each
+   with the orange made-up mark. Left out of the concept: capitals, type under 13px, made-up counts, green. The page follows the
+   concept's measures: a small grey line over a large light title with today's date at the right, the grey search field, a row of round
+   faces as Instagram's stories, the tabs For you, Friends and Photos with a hairline under them, then the posts with a hairline between
+   them. A post has its writer's picture, name, age and line in a header; its words over its photo, or alone and large on a warm card; a
+   soft strip with their own words from what they shared; and Ask NAME's Meety and Posts. Photos is Instagram's Explore grid of tall
+   tiles. On a phone the photos, the faces and the grid run to the screen's edges as in Instagram's app, and the people Explore suggests
+   are a row of cards inside the feed; on a laptop they sit in a right-hand column under the warm card on what your Meety does. Spacing
+   is on a 4px grid. */
 
 /* ---------- the page: one column, and on a laptop the right-hand column beside it ---------- */
-main.screen.wide:has(.explore) { max-width: 664px; }
+main.screen.wide:has(.explore) { max-width: 700px; }
 .explore { width: 100%; }
 .explore-rail { display: none; }
 @media (min-width: 1200px) {
-  main.screen.wide:has(.explore) { max-width: 1012px; }
-  .explore { display: grid; grid-template-columns: minmax(0, 600px) 300px; gap: 48px; align-items: start; }
-  .explore-rail { position: sticky; top: 24px; display: grid; gap: 32px; padding-top: 24px; }
+  main.screen.wide:has(.explore) { max-width: 1120px; }
+  .explore { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 48px; align-items: start; }
+  .explore-rail { position: sticky; top: 24px; display: grid; gap: 36px; padding-top: 12px; }
   /* The right-hand column lists people here, so the row inside the feed steps aside. */
   .feed-list > li.feed-suggested { display: none; }
 }
+.hidden-words { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+
+/* ---------- the title: the small line, the large title, and today's date at the right ---------- */
+.explore-title { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin: 4px 0 0; }
+.explore .explore-eyebrow { margin: 0 0 8px; color: var(--ui-ink-2); font: 500 13px/16px var(--ui-font); letter-spacing: 0.01em; }
+.explore .explore-title h1 { margin: 0; font-size: 34px; font-weight: 500; line-height: 1.1; letter-spacing: -0.045em; }
+.explore .explore-date { display: none; margin: 0 0 4px; color: var(--ui-ink-2); font-size: 13px; line-height: 20px; text-align: right; }
+@media (min-width: 720px) {
+  .explore .explore-title h1 { font-size: 40px; }
+  .explore .explore-date { display: block; }
+}
 
 /* ---------- search ---------- */
-.explore-search { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+.explore-search { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; margin-top: 20px; }
 .explore-field { position: relative; display: block; margin: 0; }
-.explore-label { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 .explore-glass { position: absolute; left: 12px; top: 50%; translate: 0 -50%; color: var(--ui-ink-2); pointer-events: none; }
 .explore-search .explore-field input, .explore-search .explore-field input:focus { margin: 0; padding-left: 40px; border-color: transparent; border-radius: 12px; background: var(--ui-soft); }
 .explore-search .explore-field input:focus { border-color: var(--ui-line); background: var(--ui-bg); }
 .explore-search button { min-height: 44px; border-radius: 12px; }
-.explore-stuck { margin: 8px 0 0; font-size: 14px; line-height: 20px; color: var(--ui-ink-2); }
+.explore .explore-stuck { margin: 8px 0 0; font-size: 14px; line-height: 20px; color: var(--ui-ink-2); }
 .explore-error { margin-top: 16px; }
 .explore-error > button { margin-top: 4px; }
 .explore-posts-failed { margin: 16px 0 0; font-size: 14px; color: var(--ui-ink-2); }
@@ -41,45 +53,108 @@ main.screen.wide:has(.explore) { max-width: 664px; }
 .explore .friend-add { flex: none; white-space: nowrap; }
 .explore .listing-open { color: var(--ui-ink-2); font: 400 13px/16px var(--ui-font); }
 
+/* ---------- the row of faces: Your Meety, then the people, each a round picture in a thin ring with the name under it ---------- */
+.stories { margin-top: 24px; }
+.stories ul { list-style: none; display: flex; gap: 16px; margin: 0; padding: 2px 0 8px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; }
+.stories ul::-webkit-scrollbar { display: none; }
+.stories li { flex: none; }
+.explore .story { display: grid; justify-items: center; gap: 8px; width: 76px; color: var(--ui-ink); font-weight: 400; }
+.explore .story:hover { text-decoration: none; }
+.story-ring { position: relative; display: grid; place-items: center; width: 72px; height: 72px; padding: 3px; border: 1px solid var(--line-strong); border-radius: 50%;
+  transition: transform 0.2s var(--ease); }
+.story:hover .story-ring { transform: translateY(-2px); }
+.story-ring .person-avatar.size-l { --a-size: 64px; --a-font: 26px; }
+.story.is-you .story-ring { border-style: dashed; }
+.story.is-you .meety-mark { width: 64px; height: 64px; border-radius: 50%; background: var(--ui-soft); font-size: 40px; }
+.story-plus { position: absolute; right: -2px; bottom: -2px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--ui-blue); color: var(--ui-bg); box-shadow: 0 0 0 3px var(--ui-bg); }
+.story-name { max-width: 100%; overflow: hidden; font: 400 13px/16px var(--ui-font); text-overflow: ellipsis; white-space: nowrap; }
+.story:hover .story-name { text-decoration: underline; text-underline-offset: 0.18em; }
+/* On a phone the row runs to the screen's edges, so the next face peeks in as the sign that it scrolls. */
+@media (max-width: 663px) {
+  .stories ul { gap: 12px; margin-inline: -16px; padding-inline: 16px; scroll-padding-inline: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .story-ring { transition: none; }
+  .story:hover .story-ring { transform: none; }
+}
+
+/* ---------- the tabs: grey words, the one on in ink with a line under it, on the hairline that ends the header ---------- */
+.feed-tabs { display: flex; gap: 28px; margin-top: 16px; border-bottom: 1px solid var(--ui-line); }
+.explore .feed-tab { position: relative; min-height: 44px; padding: 0; border: 0; border-radius: 0; background: none; color: var(--ui-ink-2); font: 500 15px/20px var(--ui-font); }
+.explore .feed-tab:hover:not(:disabled) { filter: none; background: none; color: var(--ui-ink); }
+.explore .feed-tab[aria-selected="true"] { color: var(--ui-ink); font-weight: 600; }
+.explore .feed-tab[aria-selected="true"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; border-radius: 2px; background: var(--ui-ink); }
+.explore .feed-empty { margin: 24px 0 0; color: var(--ui-ink-2); font-size: 15px; line-height: 24px; }
+
 /* ---------- the feed: posts with a hairline between them ---------- */
-.feed { margin-top: 12px; }
 .feed-list { list-style: none; margin: 0; padding: 0; }
 .feed-list > li + li { border-top: 1px solid var(--ui-line); }
-.feed-post { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 12px; padding: 20px 0; }
-.feed-avatar { grid-column: 1; grid-row: 1 / span 4; align-self: start; display: block; width: 44px; height: 44px; border-radius: 50%; }
-.feed-head { grid-column: 2; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.feed-post { padding: 24px 0 20px; }
+.feed-head { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.feed-avatar { flex: none; display: block; width: 44px; height: 44px; border-radius: 50%; }
 .feed-who { flex: 1; min-width: 0; }
 .explore .feed-name-row { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 6px; margin: 0; font-size: 15px; line-height: 20px; }
 .explore .feed-name { color: var(--ui-ink); font-weight: 600; }
-.feed-name-row .sample-chip, .feed-time { padding: 0; background: none; color: var(--ui-ink-2); font: 400 14px/20px var(--ui-font); }
-.feed-name-row .sample-chip::before, .feed-time::before { content: "\00B7"; margin-right: 6px; }
-.explore .feed-line { margin: 0; overflow: hidden; color: var(--ui-ink-2); font-size: 14px; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
-.explore .feed-text { grid-column: 2; max-width: 62ch; margin: 8px 0 0; color: var(--ui-ink); font: 400 16px/26px var(--ui-font); white-space: pre-wrap; overflow-wrap: anywhere; }
+.feed-time { color: var(--ui-ink-2); font: 400 14px/20px var(--ui-font); }
+.feed-time::before { content: "\00B7"; margin-right: 6px; }
+.explore .feed-line { margin: 2px 0 0; overflow: hidden; color: var(--ui-ink-2); font-size: 14px; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
+.explore .feed-text { max-width: 62ch; margin: 14px 0 0; color: var(--ui-ink); font: 400 16px/26px var(--ui-font); white-space: pre-wrap; overflow-wrap: anywhere; }
+.feed-photo { margin-top: 14px; }
+/* On a phone the photo runs to the screen's edges, as Instagram's app shows one. */
+@media (max-width: 663px) {
+  .feed-photo { margin-inline: -16px; }
+}
+
+/* A post of words alone, as the concept's open thought: large words on a warm card. */
+.explore .feed-quote { margin: 14px 0 0; padding: 28px; border-radius: 16px; background: var(--ui-sand); }
+.explore .feed-quote p { margin: 0; color: var(--ui-ink); font: 500 24px/34px var(--ui-font); letter-spacing: -0.02em; white-space: pre-wrap; overflow-wrap: anywhere; }
+.explore .feed-quote.is-long p { font: 400 18px/28px var(--ui-font); letter-spacing: -0.01em; }
+@media (max-width: 663px) {
+  .explore .feed-quote { padding: 22px 20px; }
+  .explore .feed-quote p { font-size: 21px; line-height: 30px; }
+  .explore .feed-quote.is-long p { font-size: 17px; line-height: 26px; }
+}
 
 /* The strip with the writer's own words from what they shared: one link to their profile. */
-.explore .feed-note { grid-column: 2; display: flex; align-items: center; gap: 12px; margin: 12px 0 0; padding: 12px 16px; border-radius: 12px; background: var(--ui-soft);
+.explore .feed-note { display: flex; align-items: center; gap: 12px; margin: 12px 0 0; padding: 14px 16px; border-radius: 12px; background: var(--ui-soft);
   color: var(--ui-ink); font-weight: 400; transition: background-color 0.15s var(--ease); }
 .explore .feed-note:hover { background: var(--ui-hover); text-decoration: none; }
 .feed-note .meety-mark { flex: none; }
 .feed-note-words { flex: 1; min-width: 0; }
 .feed-note-words b { display: block; font: 600 14px/20px var(--ui-font); }
 .feed-note-words q { display: block; color: var(--ui-ink-2); font: 400 14px/20px var(--ui-font); quotes: "\201C" "\201D"; }
-.feed-note-go { flex: none; color: var(--ui-ink-2); }
+.feed-note-go { flex: none; color: var(--ui-ink); }
 
-/* Ask NAME's Meety and More from them, as grey icon and word buttons; Ask in ink, as the post's one action. */
-.feed-actions { grid-column: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 0 4px; margin: 8px 0 -8px -12px; }
+/* Ask NAME's Meety and Posts, as icon and word buttons in a row under the post; Ask in ink, as the post's one action. */
+.feed-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0 4px; margin: 10px 0 -8px -12px; }
 .explore .feed-action { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; border: 0; border-radius: 22px; background: none;
   color: var(--ui-ink-2); font: 500 14px/20px var(--ui-font); transition: background-color 0.15s var(--ease), color 0.15s var(--ease); }
 .explore .feed-action:hover, .explore .feed-action:hover:not(:disabled) { filter: none; background: var(--ui-soft); color: var(--ui-ink); text-decoration: none; }
 .explore .feed-action.is-ask { color: var(--ui-ink); font-weight: 600; }
 .explore .feed-why { flex-basis: 100%; margin: 0 0 8px 12px; color: var(--ui-ink-2); font-size: 14px; line-height: 20px; }
 
+/* ---------- Photos: Instagram's Explore grid, three tall tiles to a row with square corners and 3px between them ---------- */
+.photo-grid { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; margin: 3px 0 0; padding: 0; }
+@media (max-width: 663px) {
+  .photo-grid { margin-inline: -16px; }
+}
+.explore .photo-cell { position: relative; display: block; aspect-ratio: 3 / 4; overflow: hidden; background: var(--ui-soft); color: var(--ui-bg); font-weight: 400; }
+.explore .photo-cell:hover { text-decoration: none; }
+.photo-cell > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* On a laptop the writer's face and name show over the tile on hover, on a dark wash. */
+.photo-cell::after { content: ""; position: absolute; inset: 0; background: oklch(18% 0.01 78.3 / 0.32); opacity: 0; transition: opacity 0.15s var(--ease); pointer-events: none; }
+.photo-cell-who { position: absolute; z-index: 1; left: 12px; right: 12px; bottom: 12px; display: flex; align-items: center; gap: 8px; min-width: 0; opacity: 0;
+  transition: opacity 0.15s var(--ease); }
+.photo-cell-who b { overflow: hidden; font: 600 14px/20px var(--ui-font); text-overflow: ellipsis; white-space: nowrap; }
+.photo-cell:hover::after, .photo-cell:hover .photo-cell-who, .photo-cell:focus-visible::after, .photo-cell:focus-visible .photo-cell-who { opacity: 1; }
+
 /* ---------- the people Explore suggests inside the feed (phone and tablet): a row of cards that scrolls sideways ---------- */
-.feed-suggested { padding: 20px 0; }
+.feed-suggested { padding: 24px 0; }
 .person-cards { list-style: none; display: flex; gap: 8px; margin: 12px 0 0; padding: 0 0 8px; overflow-x: auto; overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory; scrollbar-width: thin; }
 /* On a phone the row runs to the screen's edges, so the next card peeks in as the sign that it scrolls. */
-@media (max-width: 719px) {
+@media (max-width: 663px) {
   .person-cards { margin-inline: -16px; padding-inline: 16px; scroll-padding-inline: 16px; }
 }
 .person-card { flex: 0 0 160px; display: flex; flex-direction: column; gap: 12px; padding: 16px 12px 12px; border: 1px solid var(--ui-line); border-radius: 16px; scroll-snap-align: start; }
@@ -95,22 +170,32 @@ main.screen.wide:has(.explore) { max-width: 664px; }
 .person-card .friend-state { min-height: 40px; }
 .person-card.is-more { justify-content: center; align-items: center; border-color: transparent; }
 
-/* ---------- the right-hand column on a laptop ---------- */
-.rail-meety { padding: 20px; border-radius: 16px; background: var(--ui-soft); }
-.explore .rail-meety-label { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--ui-ink-2); font: 500 13px/20px var(--ui-font); }
-.explore .rail-meety h2 { margin: 16px 0 0; font: 500 24px/30px var(--ui-font); letter-spacing: -0.02em; }
-.explore .rail-meety-line { margin: 8px 0 0; color: var(--ui-ink-2); font-size: 14px; line-height: 22px; }
-.explore .rail-meety-link { display: inline-flex; align-items: center; min-height: 44px; margin-top: 4px; font: 600 15px/20px var(--ui-font); }
-.explore .rail-people h2 { margin: 0; font: 600 16px/24px var(--ui-font); letter-spacing: 0; }
-.rail-people-list { list-style: none; display: grid; gap: 4px; margin: 8px 0 0; padding: 0; }
-.explore .rail-see-everyone { margin-top: 4px; padding: 0; }
+/* ---------- the right-hand column on a laptop: the warm card with its slow circles, then people you might click with ---------- */
+.rail-meety { position: relative; overflow: hidden; padding: 24px 24px 20px; border-radius: 16px; background: var(--ui-sand); }
+.explore .rail-meety-label { margin: 0; color: var(--ui-ink-2); font: 500 13px/16px var(--ui-font); letter-spacing: 0.01em; }
+.explore .rail-meety h2 { max-width: 200px; margin: 16px 0 0; font: 500 26px/32px var(--ui-font); letter-spacing: -0.035em; }
+.explore .rail-meety-line { max-width: 236px; margin: 12px 0 20px; color: var(--ui-ink-2); font-size: 14px; line-height: 22px; }
+.explore .rail-meety-link { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px;
+  background: var(--ui-bg); color: var(--ui-ink); font: 600 14px/20px var(--ui-font); transition: box-shadow 0.15s var(--ease); }
+.explore .rail-meety-link:hover { text-decoration: none; box-shadow: 0 1px 4px oklch(20% 0.01 78.3 / 0.14); }
+/* Three thin circles turning slowly in the card's corner, as the concept drew its other. */
+.rail-orbit { position: absolute; top: 28px; right: -20px; width: 96px; height: 96px; opacity: 0.6; transform: rotate(-25deg); pointer-events: none; }
+.rail-orbit i { position: absolute; inset: 0; border: 1px solid oklch(62% 0.03 78.3); border-radius: 50%; animation: rail-orbit 14s linear infinite; }
+.rail-orbit i:nth-child(2) { transform: rotateY(55deg); }
+.rail-orbit i:nth-child(3) { transform: rotateX(65deg); }
+@keyframes rail-orbit { to { rotate: 360deg; } }
+@media (prefers-reduced-motion: reduce) {
+  .rail-orbit i { animation: none; }
+}
+.rail-people-list { list-style: none; display: grid; gap: 8px; margin: 12px 0 0; padding: 0; }
+.explore .rail-see-everyone { padding: 0; }
 .rail-person { display: flex; align-items: center; gap: 12px; min-height: 56px; }
 .rail-person-words { flex: 1; display: grid; min-width: 0; }
 .explore .rail-person-words a { color: var(--ui-ink); font: 600 15px/20px var(--ui-font); }
 .rail-person-words small { overflow: hidden; color: var(--ui-ink-2); font: 400 13px/18px var(--ui-font); text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---------- people as rows: what a search found, and everyone ---------- */
-.people-list { margin-top: 16px; }
+.people-list { margin-top: 24px; }
 .person-rows { list-style: none; margin: 4px 0 0; padding: 0; }
 .person-row { display: flex; align-items: center; gap: 8px; padding: 12px 0; }
 .person-row + .person-row { border-top: 1px solid var(--ui-line); }

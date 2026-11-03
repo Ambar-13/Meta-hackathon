@@ -4,7 +4,7 @@ import type { FastifyInstance } from "fastify";
 import { sql } from "kysely";
 import { z } from "zod";
 import { EXPLORE_POSTS_MAX, PostsView, PROFILE_POSTS_MAX, routes, Uuid } from "@meet-first/contracts";
-import { withPerson } from "@meet-first/db";
+import { sampleFaceKey, samplePostPhoto, withPerson } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { makeNotFoundError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
@@ -17,7 +17,23 @@ type PostRow = { post_id: string; listing_id: string; display_name: string; is_s
 
 // The posts view of some post rows, in their order.
 export function toPostsView(rows: readonly PostRow[]): PostsView {
-  return PostsView.parse({ posts: rows.map((row) => ({ postId: row.post_id, listingId: row.listing_id, displayName: row.display_name, isSample: row.is_sample, text: row.text, createdAt: row.created_at.toISOString() })) });
+  return PostsView.parse({ posts: rows.map(toPost) });
+}
+
+// One post row as the contract has it, with the author's face and the post's photo when a sample person wrote it (3 Nov 2026).
+function toPost(row: PostRow): PostsView["posts"][number] {
+  const photo = row.is_sample ? samplePostPhoto(row.display_name, row.text) : null;
+  return {
+    postId: row.post_id,
+    listingId: row.listing_id,
+    displayName: row.display_name,
+    isSample: row.is_sample,
+    text: row.text,
+    createdAt: row.created_at.toISOString(),
+    authorPhoto: row.is_sample ? sampleFaceKey(row.display_name) : null,
+    photo: photo?.key ?? null,
+    photoAlt: photo?.alt ?? null,
+  };
 }
 
 // Registers GET /api/posts: 200 PostsView, the newest EXPLORE_POSTS_MAX posts of people listed in Explore, leaving out the caller's own.

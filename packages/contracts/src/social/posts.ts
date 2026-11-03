@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { IsoTime, Uuid } from "../primitives.js";
+import { IsoTime, PhotoKey, Uuid } from "../primitives.js";
 
 // The most posts GET /api/posts returns for Explore, newest first.
 export const EXPLORE_POSTS_MAX = 30;
@@ -7,8 +7,19 @@ export const EXPLORE_POSTS_MAX = 30;
 export const PROFILE_POSTS_MAX = 50;
 
 // One post as Explore and a profile show it: the text, when it went up, and its author by their listing, display name and sample
-// mark, never a person id (migration 0009).
-export const Post = z.object({ postId: Uuid, listingId: Uuid, displayName: z.string(), isSample: z.boolean(), text: z.string(), createdAt: IsoTime });
+// mark, never a person id (migration 0009); the author's face, the post's photo and the words a screen reader reads for it, for a
+// sample person's post that has them (3 Nov 2026).
+export const Post = z.object({
+  postId: Uuid,
+  listingId: Uuid,
+  displayName: z.string(),
+  isSample: z.boolean(),
+  text: z.string(),
+  createdAt: IsoTime,
+  authorPhoto: PhotoKey.nullable().optional(),
+  photo: PhotoKey.nullable().optional(),
+  photoAlt: z.string().max(300).nullable().optional(),
+});
 // The type of Post, read from the schema above.
 export type Post = z.infer<typeof Post>;
 

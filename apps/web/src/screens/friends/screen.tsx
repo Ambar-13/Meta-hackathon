@@ -124,7 +124,7 @@ const FriendsBody = (props: { model: FriendsScreenModel }): ReactElement => {
     <ul className="friends-list">
       {friends.value.friends.map((friend) => (
         <li className="friends-row" key={friend.pairId}>
-          <PersonAvatar name={friend.displayName} />
+          <PersonAvatar name={friend.displayName} photo={friend.photo} isSample={friend.isSample} />
           <PersonName name={friend.displayName} listingId={friend.listingId} />
           <FriendAction friend={friend} model={props.model} />
         </li>

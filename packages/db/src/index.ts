@@ -44,3 +44,5 @@ export { queryWords, searchRecallCorpus } from "./recall-search.js";
 export { nextEventSeq, appendMeetingEvent } from "./event-seq.js";
 // Counts, table by table, the rows that still point at one person (D69, invariant 16). The golden path reads it after a deletion.
 export { countRowsForPerson } from "./count-person.js";
+// The sample people's faces and post photos, as keys the web build maps to its images (3 Nov 2026).
+export { sampleFaceKey, samplePostPhoto } from "./samples/sample-photos.js";

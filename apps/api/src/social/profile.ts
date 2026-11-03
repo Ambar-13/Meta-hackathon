@@ -4,7 +4,7 @@ import type { FastifyInstance } from "fastify";
 import { sql } from "kysely";
 import { z } from "zod";
 import { ContractError, HTTP, ProfileView, routes, Uuid } from "@meet-first/contracts";
-import { withPerson } from "@meet-first/db";
+import { sampleFaceKey, withPerson } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { makeNotFoundError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
@@ -22,6 +22,7 @@ export type ProfileRow = {
 export function toProfileView(row: ProfileRow): ProfileView {
   return ProfileView.parse({
     listingId: row.listing_id, displayName: row.display_name, line: row.line, openToRomance: row.open_to_romance, isSample: row.is_sample, items: row.items,
+    photo: row.is_sample ? sampleFaceKey(row.display_name) : null,
     friendship: row.friendship, requestId: row.request_id, pairId: row.pair_id, canAsk: row.can_ask,
   });
 }

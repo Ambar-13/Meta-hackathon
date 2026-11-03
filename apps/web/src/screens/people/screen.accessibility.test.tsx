@@ -262,4 +262,42 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
     expect(within(head).queryByText("Sample")).toBeNull();
     expect(requestsTo(routes.social.listListingPosts)).toHaveLength(1);
   });
+  it("W7-PHOTO-T3: posts with a photo among them open as the grid with Grid pressed; a tile opens its post in the list, which takes the focus and shows the photo", async () => {
+    const posts = [
+      { postId: "00000000-0000-4000-8000-000000000701", listingId: LISTING_IDS.mira, displayName: "Mira", isSample: true, text: "The post with a photo.", createdAt: new Date(Date.now() - 2 * 3_600_000).toISOString(),
+        authorPhoto: "faces/maya", photo: "maya-morning", photoAlt: "A latte on a book by a sunny window." },
+      { postId: "00000000-0000-4000-8000-000000000702", listingId: LISTING_IDS.mira, displayName: "Mira", isSample: true, text: "The post of words.", createdAt: new Date(Date.now() - 50 * 3_600_000).toISOString() },
+    ];
+    stubRoute(routes.social.listListingPosts, [{ posts }]);
+    renderProfile(profileView({ isSample: true, photo: "faces/maya" }), { search: "?tab=posts" });
+
+    const grid = await screen.findByRole("button", { name: "Grid" });
+    expect(grid.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: "List" }).getAttribute("aria-pressed")).toBe("false");
+    expect(screen.getByRole("button", { name: "The post of words." })).toBeTruthy();
+    expect(document.querySelector(".profile-avatar img")?.getAttribute("src")).toContain("maya");
+    expect(document.querySelector(".profile-avatar .made-up-mark")).not.toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "A latte on a book by a sunny window." }));
+
+    expect(screen.getByRole("button", { name: "List" }).getAttribute("aria-pressed")).toBe("true");
+    await waitFor(() => {
+      expect(document.activeElement?.querySelector("p")?.textContent).toBe("The post with a photo.");
+    });
+    expect(within(document.activeElement as HTMLElement).getByRole("img", { name: "A latte on a book by a sunny window." })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Grid" }));
+
+    expect(screen.getByRole("button", { name: "The post of words." })).toBeTruthy();
+  });
+
+  it("W7-PHOTO-T4: posts of words alone show as the list, with no Grid and List switch", async () => {
+    const posts = [
+      { postId: "00000000-0000-4000-8000-000000000701", listingId: LISTING_IDS.mira, displayName: "Mira", isSample: false, text: "Only words here.", createdAt: new Date(Date.now() - 2 * 3_600_000).toISOString() },
+    ];
+    stubRoute(routes.social.listListingPosts, [{ posts }]);
+    renderProfile(profileView({}), { search: "?tab=posts" });
+
+    expect(await screen.findByText("Only words here.")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Grid" })).toBeNull();
+    expect(screen.queryByRole("group", { name: "Show posts as" })).toBeNull();
+  });
 });
