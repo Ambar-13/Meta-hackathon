@@ -144,7 +144,7 @@ export const HomeSide = (props: { home: HomeView | null; friends: readonly Frien
             <Link className="side-name" to={APP_PATHS.me}>{props.home.displayName}</Link>
             <small>Your profile</small>
           </span>
-          <Link className="side-link" to={APP_PATHS.me} aria-label="Open your profile">Open</Link>
+          <Link className="side-link" to={APP_PATHS.me} aria-label="View your profile">View</Link>
         </div>
       )}
       {props.friends === null ? null : <SideFriends friends={friends} onAsk={props.onAsk} />}

@@ -9,11 +9,12 @@ import { Link, useLocation } from "react-router-dom";
 import type { HomeView } from "@meet-first/contracts";
 import { ErrorNotice, ScreenFrame } from "../../app-shell/index.js";
 import { LoadingLine, MeetyMark, Sticker } from "../../look/index.js";
+import { KindIcon } from "./ask-card.js";
 import { nextStepOf } from "../home/home-state.js";
 import { readDraftQuery, useChatScreen, type ChatModel } from "./chat-state.js";
 import { chipTexts, greetingOf, messageBefore } from "./chat-words.js";
 import { Composer } from "./composer.js";
-import { Thread, type ReplyActions } from "./thread-parts.js";
+import { MeetyName, Thread, type ReplyActions } from "./thread-parts.js";
 import { FriendsRow, HomeSide } from "./home-parts.js";
 
 // The lines of this page that the design gives word for word, and the loading line it does not.
@@ -48,44 +49,40 @@ const Intro = (): ReactElement => {
   );
 };
 
-// The empty thread: Meety's first message, the greeting with the person's name in coral and the line under it, as two grey bubbles
-// beside its logo, then the example chips.
+// The empty thread: Meety's first message, its logo in line with its name over two grey bubbles from the left edge (the greeting with
+// the person's name in coral, then the line under it), then the example chips.
 const Greeting = (props: { displayName: string | null; chips: ReactElement }): ReactElement => {
   const name = props.displayName?.trim() ?? "";
   const text = greetingOf(name);
   const at = name === "" ? -1 : text.indexOf(name);
   return (
     <div className="chat-agent chat-hello">
-      <MeetyMark />
-      <div className="chat-agent-body">
-        <span className="chat-who">Meety</span>
-        <h2 className="chat-bubble chat-greeting" aria-label={text}>
-          {at < 0 ? text : (
-            <>
-              {text.slice(0, at)}
-              <span className="chat-greeting-name">{name}</span>
-              {text.slice(at + name.length)}
-            </>
-          )}
-        </h2>
-        <p className="chat-bubble chat-text">{UNDER_GREETING}</p>
-        {props.chips}
-      </div>
+      <MeetyName />
+      <h2 className="chat-bubble chat-greeting joins-next" aria-label={text}>
+        {at < 0 ? text : (
+          <>
+            {text.slice(0, at)}
+            <span className="chat-greeting-name">{name}</span>
+            {text.slice(at + name.length)}
+          </>
+        )}
+      </h2>
+      <p className="chat-bubble chat-text joins-prev">{UNDER_GREETING}</p>
+      {props.chips}
     </div>
   );
 };
 
-// The colour of each example chip, in order: a help search is yellow everywhere, and the two friend asks take the two voices.
-const CHIP_TINTS = ["c-yellow", "c-coral", "c-blue"] as const;
-
-// The three example chips under the greeting, as quick replies; pressing one fills the box and never sends.
+// The three example chips under the greeting, as quick replies, each with its kind's icon: the first finds who could help, the other two
+// ask a friend's Meety. Pressing one fills the box and never sends.
 const Chips = (props: { model: ChatModel }): ReactElement => {
   const texts = chipTexts(props.model.friends.value?.friends ?? null);
   return (
     <div className="chat-chips" role="group" aria-label="Examples to start from">
       {texts.map((text, index) => (
-        <button key={text} type="button" className={`chat-chip ${CHIP_TINTS[index] ?? "c-blue"}`} onClick={() => { props.model.composer.fill(text); }}>
-          {text}
+        <button key={text} type="button" className="chat-chip" onClick={() => { props.model.composer.fill(text); }}>
+          <KindIcon mode={index === 0 ? "help" : "react"} />
+          <span>{text}</span>
         </button>
       ))}
     </div>

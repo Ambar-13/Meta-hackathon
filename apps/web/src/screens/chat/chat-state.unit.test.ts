@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { threadOf, replied, youSaid, chatId } from "./chat-fixtures.js";
 import { readDraftQuery } from "./chat-state.js";
-import { ANSWER_LINE_MAX, chipTexts, firstSentence, greetingOf, messageBefore, shouldPollThread, shownMessages } from "./chat-words.js";
+import { ANSWER_LINE_MAX, chipTexts, firstSentence, greetingOf, joinsPrevious, messageBefore, shouldPollThread, shownMessages, startsTimeLine, timeLineOf } from "./chat-words.js";
 
 describe("chat words", () => {
   it("W7-WEB-B-U1: the chips name the first two friends, else Mira and my investor", () => {
@@ -55,5 +55,30 @@ describe("chat words", () => {
     const shown = shownMessages({ server: messages.slice(0, 2), ran, sent: [messages[2], messages[1]].filter((m) => m !== undefined) });
     expect(shown.map((m) => m.id)).toEqual([chatId(1), chatId(2), chatId(3)]);
     expect(shown[1]?.text).toBe("Ran");
+  });
+});
+
+describe("time lines and groups in the thread", () => {
+  // A message on one side sent at this local time.
+  const at = (n: number, role: "you" | "agent", time: Date) => ({ ...(role === "you" ? youSaid(chatId(80 + n), "Hi") : replied(chatId(80 + n), { text: "Hello" })), createdAt: time.toISOString() });
+
+  it("W7-CHAT-U1: a time line says Today, Yesterday, the weekday within a week, or the date, with the local time on a 12-hour clock", () => {
+    const now = new Date(2026, 10, 3, 15, 0);
+
+    expect(timeLineOf(new Date(2026, 10, 3, 14, 41).toISOString(), now)).toBe("Today 2:41 PM");
+    expect(timeLineOf(new Date(2026, 10, 3, 0, 5).toISOString(), now)).toBe("Today 12:05 AM");
+    expect(timeLineOf(new Date(2026, 10, 2, 9, 10).toISOString(), now)).toBe("Yesterday 9:10 AM");
+    expect(timeLineOf(new Date(2026, 9, 30, 21, 0).toISOString(), now)).toBe("Fri 9:00 PM");
+    expect(timeLineOf(new Date(2026, 9, 20, 9, 10).toISOString(), now)).toBe("Oct 20, 9:10 AM");
+  });
+
+  it("W7-CHAT-U2: the first message and any after a 30-minute pause start a time line; a message joins the one before it on the same side with no time line between", () => {
+    const start = new Date(2026, 10, 3, 14, 0);
+    const minutes = (m: number): Date => new Date(start.getTime() + m * 60_000);
+    const messages = [at(1, "you", minutes(0)), at(2, "you", minutes(1)), at(3, "agent", minutes(2)), at(4, "agent", minutes(40)), at(5, "you", minutes(41))];
+
+    expect(messages.map((message) => startsTimeLine(messages, messages.indexOf(message)))).toEqual([true, false, false, true, false]);
+    expect(messages.map((message) => joinsPrevious(messages, messages.indexOf(message)))).toEqual([false, true, false, false, false]);
+    expect(startsTimeLine([], 0)).toBe(false);
   });
 });

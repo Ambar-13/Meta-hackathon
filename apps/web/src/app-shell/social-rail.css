@@ -1,8 +1,9 @@
 /* The signed-in frame. On a laptop (1200px and wider) a sidebar after the "Other" concept Ambar liked on 3 Nov 2026: the Meet First mark
    and words with the tagline under them, the pages with their words, Invite a friend, Settings at the foot, and a line on what your
    Meety shares. Between 768px and 1200px the narrow Instagram rail of icons, each icon's words on hover. On a phone, as Instagram's app
-   since 2025, a top bar with the logo and Settings, and a bar of icons with their words floating over the foot of the page in a pill.
-   Pages without a session keep app.css's frame. Spacing is on a 4px grid. */
+   since 2025, a top bar with the logo and Settings, and a frosted pill of icons floating over the foot of the page, the current page's
+   icon bold on a round grey patch and the request count as a small red badge; each icon keeps its words for screen readers (Ambar, 3
+   Nov: "also study instagrams tab (the navigation pane down)"). Pages without a session keep app.css's frame. Spacing is on a 4px grid. */
 
 .social-pages .page-word { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 .social-pages .page-icon { position: relative; display: inline-grid; place-items: center; }
@@ -12,24 +13,26 @@
 /* The sidebar's words, Invite and foot show only on a laptop. Invite is a link in the nav, so it needs the nav links' weight to stay hidden. */
 .rail-wordmark, .rail-tagline, .rail-foot, .social-pages.tab-bar a.rail-invite { display: none; }
 
-/* ---------- phone: the top bar with Settings, and the floating bar of icons with their words ---------- */
+/* ---------- phone: the top bar with Settings, and the floating pill of icons ---------- */
 @media (max-width: 767.98px) {
-  .social-frame { --tab-bar: 84px; }
+  .social-frame { --tab-bar: 80px; }
   .social-rail .rail-logo, .social-pages.tab-bar a.rail-only { display: none; }
   .social-frame .social-top { height: 56px; padding: 0 4px 0 16px; background: color-mix(in oklab, var(--ui-bg) 94%, transparent); box-shadow: 0 1px 0 var(--ui-line); }
   .social-top .logo { font-size: 24px; }
   .top-settings { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; color: var(--ui-ink); }
   .top-settings:hover { background: var(--ui-soft); text-decoration: none; }
-  .social-pages.tab-bar { left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); justify-content: space-around; gap: 4px; margin: 0 auto;
-    max-width: 440px; padding: 4px; border-radius: 999px; background: color-mix(in oklab, var(--ui-bg) 84%, transparent);
-    -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5);
-    box-shadow: 0 0 0 1px oklch(20% 0.01 70 / 0.07), 0 10px 30px -10px oklch(20% 0.01 70 / 0.32); }
-  .social-pages.tab-bar a { flex: 1; max-width: 104px; min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-    padding: 0; border-radius: 999px; color: var(--ui-ink-2); }
-  .social-pages.tab-bar a:hover { background: var(--ui-soft); }
-  .social-pages.tab-bar a[aria-current="page"] { background: var(--ui-soft); box-shadow: none; color: var(--ui-ink); }
-  .social-pages.tab-bar .page-word { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; clip-path: none; font: 500 13px/16px var(--ui-font); }
-  .social-pages.tab-bar a[aria-current="page"] .page-word { font-weight: 600; }
+  .social-pages.tab-bar { left: 20px; right: 20px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); justify-content: space-around; gap: 0; margin: 0 auto;
+    max-width: 360px; padding: 6px; border-radius: 999px; background: color-mix(in oklab, var(--ui-bg) 82%, transparent);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6); backdrop-filter: blur(20px) saturate(1.6);
+    box-shadow: 0 0 0 1px oklch(20% 0.01 70 / 0.06), 0 12px 32px -12px oklch(20% 0.01 70 / 0.34); }
+  .social-pages.tab-bar a { flex: 1; display: grid; place-items: center; min-height: 52px; padding: 0; border-radius: 999px; background: none; color: var(--ui-ink); }
+  .social-pages.tab-bar a:hover { background: none; text-decoration: none; }
+  .social-pages.tab-bar a[aria-current="page"] { background: none; box-shadow: none; }
+  /* The icon's round patch: grey under the current page, a lighter grey on hover. */
+  .social-pages.tab-bar .page-icon { width: 60px; height: 44px; border-radius: 22px; transition: background-color 0.15s var(--ease); }
+  .social-pages.tab-bar a:hover .page-icon { background: color-mix(in oklab, var(--ui-ink) 5%, transparent); }
+  .social-pages.tab-bar a[aria-current="page"] .page-icon { background: color-mix(in oklab, var(--ui-ink) 9%, transparent); }
+  .social-pages.tab-bar .count-pill { top: 4px; right: 10px; min-width: 18px; height: 18px; padding: 0 5px; font-size: 12px; }
 }
 
 /* ---------- 768px and wider: the rail on the left ---------- */

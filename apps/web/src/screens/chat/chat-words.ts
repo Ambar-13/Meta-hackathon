@@ -10,6 +10,11 @@ export const ANSWER_LINE_MAX = 140;
 // The most answers an ask card shows.
 export const ASK_CARD_ANSWERS_MAX = 3;
 
+// How long a pause between two messages starts a new time line over the thread, as Instagram marks a gap in a chat.
+export const TIME_GAP_MS = 30 * 60_000;
+// The milliseconds in a day, for telling today, yesterday and this week apart.
+const DAY_MS = 86_400_000;
+
 // The names the chips use when the person has too few friends.
 const FIRST_FRIEND_FALLBACK = "Mira";
 const SECOND_FRIEND_FALLBACK = "my investor";
@@ -65,4 +70,48 @@ export function shownMessages(input: { server: readonly OrchestratorMessage[]; r
   const known = new Set(input.server.map((message) => message.id));
   const server = input.server.map((message) => input.ran.get(message.id) ?? message);
   return [...server, ...input.sent.filter((message) => !known.has(message.id)).map((message) => input.ran.get(message.id) ?? message)];
+}
+
+// True when a message starts a time line: the first message, and any message sent TIME_GAP_MS or more after the one before it.
+export function startsTimeLine(messages: readonly OrchestratorMessage[], index: number): boolean {
+  const message = messages[index];
+  const before = messages[index - 1];
+  if (message === undefined || before === undefined) return message !== undefined;
+  return Date.parse(message.createdAt) - Date.parse(before.createdAt) >= TIME_GAP_MS;
+}
+
+// True when a message continues the group of the one before it: the same side, with no time line between them. A group shows its name
+// once, and its bubbles sit close with their joined corners tucked in, as Instagram groups a run of messages.
+export function joinsPrevious(messages: readonly OrchestratorMessage[], index: number): boolean {
+  const message = messages[index];
+  const before = messages[index - 1];
+  if (message === undefined || before === undefined) return false;
+  return message.role === before.role && !startsTimeLine(messages, index);
+}
+
+// The short names of the weekdays and months the time lines use, written out so every browser says them the same way.
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+
+// The midnight that starts the local day of a time.
+function dayStart(time: Date): number {
+  return new Date(time.getFullYear(), time.getMonth(), time.getDate()).getTime();
+}
+
+// A local time of day on a 12-hour clock. Example: 14:41 gives "2:41 PM", 00:05 gives "12:05 AM".
+function clockOf(time: Date): string {
+  const hours = time.getHours() % 12 === 0 ? 12 : time.getHours() % 12;
+  return `${String(hours)}:${String(time.getMinutes()).padStart(2, "0")} ${time.getHours() < 12 ? "AM" : "PM"}`;
+}
+
+// When a message was sent, as Instagram's time lines say it, in local time: "Today 2:41 PM", "Yesterday 9:10 AM", the weekday within the
+// last week ("Fri 9:10 AM"), else the date ("Oct 20, 9:10 AM"). Example: a message from 10 minutes ago gives "Today" and its time.
+export function timeLineOf(iso: string, now: Date): string {
+  const sent = new Date(iso);
+  const clock = clockOf(sent);
+  const days = Math.round((dayStart(now) - dayStart(sent)) / DAY_MS);
+  if (days <= 0) return `Today ${clock}`;
+  if (days === 1) return `Yesterday ${clock}`;
+  if (days < 7) return `${WEEKDAYS[sent.getDay()] ?? ""} ${clock}`;
+  return `${MONTHS[sent.getMonth()] ?? ""} ${String(sent.getDate())}, ${clock}`;
 }

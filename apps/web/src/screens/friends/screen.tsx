@@ -36,7 +36,7 @@ const COPY_ANSWER_LABEL = "Your Meety's answer"; // [confirm]
 const SELF_NAME = "You"; // [confirm]
 // The words for where each sent ask is, and its kind [confirm].
 const SENT_STATE_LINES: Record<AskSummary["state"], string> = { checking: "Still running", asking: "Still running", ranking: "Still running", done: "Answered", refused: "Not allowed", failed: "Could not finish" }; // [confirm]
-const SENT_MODE_LINES: Record<AskSummary["mode"], string> = { react: "Friend ask", help: "Help search" }; // [confirm]
+const SENT_MODE_LINES: Record<AskSummary["mode"], string> = { react: "Asked a friend's Meety", help: "Found who could help" };
 // The most characters the ask box takes, the upper bound of AskCreate.
 const ASK_MAX_CHARACTERS = 300;
 

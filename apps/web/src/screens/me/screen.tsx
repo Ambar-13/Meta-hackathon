@@ -14,7 +14,7 @@ const ME_SCREEN_COPY = {
   title: "Me",
   loading: "Opening your profile.",
   loadingHome: "Opening your next step.",
-  editListing: "Edit my listing",
+  editListing: "Edit profile",
   yourCard: "Your card",
   notListed: "You are not in Explore yet. Join so friends can find you.",
   source: "In your own words",

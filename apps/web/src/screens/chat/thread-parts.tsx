@@ -1,17 +1,21 @@
-// The messages of the thread, as Instagram draws a direct chat: your blue bubbles on the right, and Meety's group on the left, its name
-// over its grey bubble and its small logo at the foot, with what each reply does by its state under the words: thinking dots, a plan
-// card with its one button, the ask card, or a way to try again.
-import type { ReactElement } from "react";
+// The messages of the thread, as Instagram draws a direct chat: your blue bubbles on the right, Meety's grey bubbles on the left from the
+// edge, with its logo in line with its name over each run of its messages (Ambar, 3 Nov: "the logo can be in line with meety and the
+// message can be more left"), a time line wherever the chat paused, and what each reply does by its state under its words: thinking
+// dots, a plan card with its one button, the ask card, or a way to try again.
+import { Fragment, type ReactElement } from "react";
 import { HELP_SEND_COPY, type OrchestratorMessage } from "@meet-first/contracts";
 import { MeetyMark } from "../../look/index.js";
-import { AskCard, KindHead, kindTint, WaitLine } from "./ask-card.js";
+import { AskCard, KindHead, WaitLine } from "./ask-card.js";
 import type { RunStatus } from "./chat-state.js";
+import { joinsPrevious, startsTimeLine, timeLineOf } from "./chat-words.js";
 
 // The words of a reply that is still being planned.
 export const THINKING_LINE = "Working out what to do";
 // The line on a help search's card: the /help page's consent words, because pressing the button sends the question to up to 20 people,
 // each of whom gets a copy with the person's display name.
 const HELP_LINE = HELP_SEND_COPY;
+// The words of a help search's button, which say what pressing it does.
+const HELP_BUTTON = "Find who could help";
 // The line under a reply whose ask is gone, for example because the friend deleted their account after it ran.
 export const ASK_GONE_LINE = "This ask is no longer here. Send your message again to ask again.";
 // The name a friend ask uses when the reply did not name the friend.
@@ -19,6 +23,8 @@ const FRIEND_FALLBACK = "your friend";
 
 // What a reply needs from the page: whether its plan is being started, and the actions of its buttons.
 export type ReplyActions = { runStatus: (replyId: string) => RunStatus; runPlan: (replyId: string) => void; tryAgain: (replyId: string) => void };
+// Where a bubble sits in its group: whether it joins the bubble before it and the one after it, so its joined corners tuck in.
+type GroupPlace = { joinsPrev: boolean; joinsNext: boolean };
 
 // A sentence with its first letter in upper case, for a line that starts with a name.
 function capitalised(text: string): string {
@@ -31,27 +37,41 @@ function reactWords(name: string | null): { line: string; button: string } {
   return { line: capitalised(`${who}'s Meety answers from what ${who} chose to share. ${capitalised(who)} gets a copy of the answer.`), button: `Ask ${who}'s Meety` };
 }
 
-// The person's own message: a blue bubble on the right, with no avatar.
-const YouBubble = (props: { message: OrchestratorMessage }): ReactElement => {
+// The classes of a bubble by its place in its group.
+function placeClass(base: string, place: GroupPlace): string {
+  return [base, place.joinsPrev ? "joins-prev" : "", place.joinsNext ? "joins-next" : ""].filter((part) => part !== "").join(" ");
+}
+
+// Meety's logo in line with its name, over the first message of each run of its messages.
+export const MeetyName = (): ReactElement => {
   return (
-    <article className="chat-you" aria-label="You said">
+    <p className="chat-who">
+      <MeetyMark />
+      <span>Meety</span>
+    </p>
+  );
+};
+
+// The person's own message: a blue bubble on the right, with no name or picture.
+const YouBubble = (props: { message: OrchestratorMessage; place: GroupPlace }): ReactElement => {
+  return (
+    <article className={placeClass("chat-you", props.place)} aria-label="You said">
       <p className="chat-text">{props.message.text}</p>
     </article>
   );
 };
 
-// A planned reply's card, in the kind's colour: the kind, the question in quotation marks, who it goes to, and the one button that
-// starts it.
+// A planned reply's card: the kind with its icon, the question in quotation marks, who it goes to, and the one button that starts it.
 const PlanCard = (props: { message: OrchestratorMessage; status: RunStatus; onRun: () => void }): ReactElement => {
   const { message, status } = props;
   const isHelp = message.action === "help";
-  const words = isHelp ? { line: HELP_LINE, button: "Start the help search" } : reactWords(message.actionFriendName);
+  const words = isHelp ? { line: HELP_LINE, button: HELP_BUTTON } : reactWords(message.actionFriendName);
   return (
     <>
-      <section className={`chat-card ${kindTint(isHelp ? "help" : "react")}`} aria-label="The plan">
-        <KindHead mode={isHelp ? "help" : "react"} question={message.actionQuestion ?? ""} />
+      <section className="chat-card" aria-label="The plan">
+        <KindHead mode={isHelp ? "help" : "react"} question={message.actionQuestion ?? ""} friendName={message.actionFriendName} />
         <p className="chat-card-line">{words.line}</p>
-        <button type="button" disabled={status.isRunning} onClick={props.onRun}>
+        <button type="button" className="chat-card-go" disabled={status.isRunning} onClick={props.onRun}>
           {status.isRunning ? "Starting" : words.button}
         </button>
       </section>
@@ -81,7 +101,9 @@ const ReplyExtra = (props: { message: OrchestratorMessage; actions: ReplyActions
   const { message, actions } = props;
   const stage = replyStage(message);
   if (stage === "plan") return <PlanCard message={message} status={actions.runStatus(message.id)} onRun={() => { actions.runPlan(message.id); }} />;
-  if (stage === "ask") return <AskCard askId={message.askId ?? ""} mode={message.action === "react" ? "react" : "help"} question={message.actionQuestion ?? ""} />;
+  if (stage === "ask") {
+    return <AskCard askId={message.askId ?? ""} mode={message.action === "react" ? "react" : "help"} question={message.actionQuestion ?? ""} friendName={message.actionFriendName} />;
+  }
   if (stage === "gone") return <p className="chat-ask-line">{ASK_GONE_LINE}</p>;
   if (stage === "failed") {
     return (
@@ -93,33 +115,38 @@ const ReplyExtra = (props: { message: OrchestratorMessage; actions: ReplyActions
   return null;
 };
 
-// Meety's reply: its name, its words in a grey bubble (or the thinking dots in one), then what the reply does, with its small logo at
-// the foot of the group as Instagram puts a person's picture beside their last message.
-const AgentReply = (props: { message: OrchestratorMessage; actions: ReplyActions }): ReactElement => {
-  const { message } = props;
+// Meety's reply: its logo and name when the reply starts a run of its messages, its words in a grey bubble from the left edge (or the
+// thinking dots in one), then what the reply does.
+const AgentReply = (props: { message: OrchestratorMessage; actions: ReplyActions; place: GroupPlace }): ReactElement => {
+  const { message, place } = props;
   return (
-    <article className="chat-agent" aria-label="Meety replied">
-      <MeetyMark />
-      <div className="chat-agent-body">
-        <span className="chat-who">Meety</span>
-        {message.state === "thinking" ? (
-          <div className="chat-bubble">
-            <WaitLine text={THINKING_LINE} />
-          </div>
-        ) : <p className="chat-bubble chat-text">{message.text}</p>}
-        <ReplyExtra message={message} actions={props.actions} />
-      </div>
+    <article className={placeClass("chat-agent", place)} aria-label="Meety replied">
+      {place.joinsPrev ? null : <MeetyName />}
+      {message.state === "thinking" ? (
+        <div className="chat-bubble">
+          <WaitLine text={THINKING_LINE} />
+        </div>
+      ) : <p className="chat-bubble chat-text">{message.text}</p>}
+      <ReplyExtra message={message} actions={props.actions} />
     </article>
   );
 };
 
-// The thread: every message in order, in a log that screen readers follow politely.
+// The thread: every message in order, a time line wherever the chat paused, in a log that screen readers follow politely.
 export const Thread = (props: { messages: readonly OrchestratorMessage[]; actions: ReplyActions }): ReactElement => {
+  const { messages } = props;
+  const now = new Date();
   return (
     <div className="chat-log" role="log" aria-live="polite" aria-label="Your chat with Meety">
-      {props.messages.map((message) =>
-        message.role === "you" ? <YouBubble key={message.id} message={message} /> : <AgentReply key={message.id} message={message} actions={props.actions} />,
-      )}
+      {messages.map((message, index) => {
+        const place = { joinsPrev: joinsPrevious(messages, index), joinsNext: joinsPrevious(messages, index + 1) };
+        return (
+          <Fragment key={message.id}>
+            {startsTimeLine(messages, index) ? <p className="chat-time">{timeLineOf(message.createdAt, now)}</p> : null}
+            {message.role === "you" ? <YouBubble message={message} place={place} /> : <AgentReply message={message} actions={props.actions} place={place} />}
+          </Fragment>
+        );
+      })}
     </div>
   );
 };

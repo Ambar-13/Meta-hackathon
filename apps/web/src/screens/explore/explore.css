@@ -58,25 +58,25 @@ main.screen.wide:has(.explore) { max-width: 700px; }
 .stories ul { list-style: none; display: flex; gap: 16px; margin: 0; padding: 2px 0 8px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; }
 .stories ul::-webkit-scrollbar { display: none; }
 .stories li { flex: none; }
-.explore .story { display: grid; justify-items: center; gap: 8px; width: 76px; color: var(--ui-ink); font-weight: 400; }
-.explore .story:hover { text-decoration: none; }
-.story-ring { position: relative; display: grid; place-items: center; width: 72px; height: 72px; padding: 3px; border: 1px solid var(--line-strong); border-radius: 50%;
+.explore .stories .story { display: grid; justify-items: center; gap: 8px; width: 76px; color: var(--ui-ink); font-weight: 400; }
+.explore .stories .story:hover { text-decoration: none; }
+.stories .story-ring { position: relative; display: grid; place-items: center; width: 72px; height: 72px; padding: 3px; border: 1px solid var(--line-strong); border-radius: 50%;
   transition: transform 0.2s var(--ease); }
-.story:hover .story-ring { transform: translateY(-2px); }
-.story-ring .person-avatar.size-l { --a-size: 64px; --a-font: 26px; }
-.story.is-you .story-ring { border-style: dashed; }
-.story.is-you .meety-mark { width: 64px; height: 64px; border-radius: 50%; background: var(--ui-soft); font-size: 40px; }
-.story-plus { position: absolute; right: -2px; bottom: -2px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%;
+.stories .story:hover .story-ring { transform: translateY(-2px); }
+.stories .story-ring .person-avatar.size-l { --a-size: 64px; --a-font: 26px; }
+.stories .story.is-you .story-ring { border-style: dashed; }
+.stories .story.is-you .meety-mark { width: 64px; height: 64px; border-radius: 50%; background: var(--ui-soft); font-size: 40px; }
+.stories .story-plus { position: absolute; right: -2px; bottom: -2px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%;
   background: var(--ui-blue); color: var(--ui-bg); box-shadow: 0 0 0 3px var(--ui-bg); }
-.story-name { max-width: 100%; overflow: hidden; font: 400 13px/16px var(--ui-font); text-overflow: ellipsis; white-space: nowrap; }
-.story:hover .story-name { text-decoration: underline; text-underline-offset: 0.18em; }
+.stories .story-name { max-width: 100%; overflow: hidden; font: 400 13px/16px var(--ui-font); text-overflow: ellipsis; white-space: nowrap; }
+.stories .story:hover .story-name { text-decoration: underline; text-underline-offset: 0.18em; }
 /* On a phone the row runs to the screen's edges, so the next face peeks in as the sign that it scrolls. */
 @media (max-width: 663px) {
   .stories ul { gap: 12px; margin-inline: -16px; padding-inline: 16px; scroll-padding-inline: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .story-ring { transition: none; }
-  .story:hover .story-ring { transform: none; }
+  .stories .story-ring { transition: none; }
+  .stories .story:hover .story-ring { transform: none; }
 }
 
 /* ---------- the tabs: grey words, the one on in ink with a line under it, on the hairline that ends the header ---------- */

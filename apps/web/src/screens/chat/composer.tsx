@@ -1,8 +1,10 @@
-// The box at the foot of the chat, a slim pill as Instagram's message box: a text box that grows to six lines, Send in blue words inside
-// it, the characters left near the limit, and the line that says nothing goes out until a reply's button is pressed.
+// The box at the foot of the chat, a filled pill as Instagram's message box: a text box that grows to six lines, a round blue Send button
+// with an arrow inside it (grey until there is something to send), the characters left near the limit, and the line that says nothing
+// goes out until a reply's button is pressed.
 import { useEffect, useId, useRef, type KeyboardEvent, type ReactElement } from "react";
 import { ORCHESTRATOR_MESSAGE_MAX_CHARS } from "@meet-first/contracts";
 import { ErrorNotice } from "../../app-shell/index.js";
+import { Icon } from "../../look/index.js";
 import type { ComposerModel } from "./chat-state.js";
 import { COUNTER_FROM_CHARS } from "./chat-words.js";
 
@@ -67,8 +69,8 @@ export const Composer = (props: { model: ComposerModel }): ReactElement => {
         />
         <div className="chat-box-row">
           {used > COUNTER_FROM_CHARS ? <span className="chat-left">{`${String(ORCHESTRATOR_MESSAGE_MAX_CHARS - used)} left`}</span> : null}
-          <button type="submit" className="chat-send" disabled={!canSend}>
-            {model.isSending ? "Sending" : "Send"}
+          <button type="submit" className="chat-send" disabled={!canSend} aria-label={model.isSending ? "Sending" : "Send"}>
+            <Icon name="send" size={20} isBold />
           </button>
         </div>
       </form>

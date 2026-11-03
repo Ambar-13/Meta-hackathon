@@ -142,7 +142,7 @@ describe("chat screen", () => {
     expect(screen.queryByRole("button", { name: "Ask Mira's Meety" })).toBeNull();
   });
 
-  it("W7-WEB-B-T6: a running reply's card shows Their Meetys are answering, then the answers' first sentences and See the answers", async () => {
+  it("W7-WEB-B-T6: a running reply's card shows Their Meetys are answering, then the answers' first sentences and See all the answers", async () => {
     const running = replied(CHAT_IDS.reply, { state: "running", action: "help", text: "I started a help search.", actionQuestion: "Who could help me get my first ten users?", askId: CHAT_IDS.ask });
     stubReads({ thread: [[youSaid(CHAT_IDS.sent, "Who could help me get my first ten users?"), running]] });
     const answers = [answerFrom(1, "Bea", "Bea would probably start with a waitlist. She did that twice."), answerFrom(2, "Cal", "Cal would probably post in student groups first.")];
@@ -153,8 +153,8 @@ describe("chat screen", () => {
     expect(await screen.findByText("Bea would probably start with a waitlist.", {}, { timeout: 6_000 })).toBeTruthy();
     expect(screen.getByText("Cal would probably post in student groups first.")).toBeTruthy();
     expect(screen.queryByText("She did that twice.", { exact: false })).toBeNull();
-    expect(screen.getByRole("link", { name: "See the answers" }).getAttribute("href")).toBe(`/asks/${CHAT_IDS.ask}`);
-    expect(screen.getByText("Help search")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "See all the answers" }).getAttribute("href")).toBe(`/asks/${CHAT_IDS.ask}`);
+    expect(screen.getByText("Finding who could help")).toBeTruthy();
   });
 
   it("W7-WEB-B-T7: a done reply with a refusal shows its text and no button", async () => {
@@ -191,7 +191,7 @@ describe("chat screen", () => {
 
     const card = await screen.findByRole("region", { name: "The plan" });
     expect(within(card).getByText(HELP_SEND_COPY)).toBeTruthy();
-    expect(within(card).getByRole("button", { name: "Start the help search" })).toBeTruthy();
+    expect(within(card).getByRole("button", { name: "Find who could help" })).toBeTruthy();
   });
 
   it("W7-CHECK-T2: a running reply whose ask is gone says so, instead of showing nothing under its words", async () => {
@@ -266,5 +266,25 @@ describe("chat screen", () => {
     fireEvent.click(within(suggested).getByRole("button", { name: "Add Leo as a friend" }));
     expect(await within(suggested).findByText("Requested")).toBeTruthy();
     expect(requestsTo(routes.directory.friends)).toHaveLength(2);
+  });
+
+  it("W7-CHAT-T1: Meety's logo sits in line with its name over a run of its replies, a later reply in the run carries no name, and a time line opens the thread", async () => {
+    const asked = youSaid(chatId(60), "Who could help me?");
+    const first = replied(chatId(61), { text: "I can ask around." });
+    const second = replied(chatId(62), { text: "Or ask a friend's Meety." });
+    stubReads({ thread: [[asked, first, second]] });
+    renderChat();
+    await waitFor(() => {
+      expect(replies()).toHaveLength(2);
+    });
+    const [opening, following] = replies() as [HTMLElement, HTMLElement];
+    const name = opening.querySelector(".chat-who");
+
+    expect(name?.textContent).toBe("Meety");
+    expect(name?.querySelector(".meety-mark")).not.toBeNull();
+    expect(following.querySelector(".chat-who")).toBeNull();
+    expect(following.classList.contains("joins-prev")).toBe(true);
+    expect(document.querySelectorAll(".chat-time")).toHaveLength(1);
+    expect(document.querySelector(".chat-time")?.compareDocumentPosition(screen.getByRole("article", { name: "You said" })) ?? 0).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 });

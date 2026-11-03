@@ -1,18 +1,21 @@
-// The ask under a running reply: it reads the ask every ASK_POLL_MS until it is done, refused or failed, and fills in as the agents
-// answer. A read error is one quiet line with a link to the ask page, never a full error notice inside the thread.
+// The ask under a running reply: it reads the ask every ASK_POLL_MS until it is done, refused or failed, and fills in as the Meetys
+// answer. A read error is one quiet line with a link to the ask page, never a full error notice inside the thread. The card is drawn as
+// Instagram draws a shared post in a chat: a card with a hairline, the kind's icon on a round patch of its colour (yellow for finding who
+// could help, coral for a friend's Meety), the question, then the answers with a hairline between them.
 import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { ASK_POLL_MS, type AskMode, type AskView } from "@meet-first/contracts";
 import { apiFetch, APP_PATHS, routes, usePolledView, type PolledView } from "../../app-shell/index.js";
-import { PersonAvatar, TypingDots } from "../../look/index.js";
+import { Icon, PersonAvatar, TypingDots } from "../../look/index.js";
 import { isAskRunning } from "../ask/ask-state.js";
 import { ASK_CARD_ANSWERS_MAX, firstSentence } from "./chat-words.js";
 
-// The small grey words over each kind of ask.
-export const ASK_KIND_CHIP: Record<AskMode, { label: string }> = {
-  help: { label: "Help search" },
-  react: { label: "Friend ask" },
-};
+// The words beside each kind's icon at the top of its card (3 Nov 2026: Ambar asked for names that say what happens). A friend ask names
+// the friend when it can. Example: "Asking Mira's Meety".
+export function kindLabel(mode: AskMode, friendName: string | null | undefined): string {
+  if (mode === "help") return "Finding who could help";
+  return friendName === null || friendName === undefined || friendName === "" ? "Asking a friend's Meety" : `Asking ${friendName}'s Meety`;
+}
 
 // The waiting line of each running state of an ask.
 const WAITING_LINES = { checking: "Checking the question", asking: "Their Meetys are answering", ranking: "Putting the answers in order" } as const;
@@ -21,7 +24,7 @@ const LOADING_LINE = "Loading the ask";
 const NO_ANSWERS_LINE = "No Meety had an answer this time.";
 const FAILED_LINE = "This ask could not finish. Try asking again in a minute.";
 const READ_ERROR_LINE = "Could not load this ask.";
-const SEE_ANSWERS = "See the answers";
+const SEE_ANSWERS = "See all the answers";
 // The refusal line when the ask came back with no reason.
 const REFUSED_FALLBACK = "the question check said no";
 
@@ -35,17 +38,28 @@ export const WaitLine = (props: { text: string }): ReactElement => {
   );
 };
 
-// The colour of a card by its kind: a help search is yellow everywhere, a friend ask coral.
+// The colour of a kind: finding who could help is yellow everywhere, asking a friend's Meety coral.
 export function kindTint(mode: AskMode): string {
   return mode === "help" ? "c-yellow" : "c-coral";
 }
 
-// The kind's words and the question at the top of a plan or an ask.
-export const KindHead = (props: { mode: AskMode; question: string }): ReactElement => {
-  const chip = ASK_KIND_CHIP[props.mode];
+// A kind's icon on a round patch of its colour: a magnifier for finding who could help, a speech bubble for a friend's Meety.
+export const KindIcon = (props: { mode: AskMode }): ReactElement => {
+  return (
+    <span className={`chat-kind-icon ${kindTint(props.mode)}`} aria-hidden="true">
+      <Icon name={props.mode === "help" ? "search" : "meety"} size={16} isBold />
+    </span>
+  );
+};
+
+// The top of a plan or an ask: the kind's icon and words, then the question in quotation marks.
+export const KindHead = (props: { mode: AskMode; question: string; friendName?: string | null | undefined }): ReactElement => {
   return (
     <>
-      <span className="chat-kind">{chip.label}</span>
+      <p className="chat-card-head">
+        <KindIcon mode={props.mode} />
+        <span className="chat-kind">{kindLabel(props.mode, props.friendName)}</span>
+      </p>
       <p className="chat-question">{`“${props.question}”`}</p>
     </>
   );
@@ -71,7 +85,10 @@ const AskAnswers = (props: { view: AskView }): ReactElement => {
           ))}
         </ul>
       )}
-      <Link className="chat-see" to={APP_PATHS.ask(props.view.askId)}>{SEE_ANSWERS}</Link>
+      <Link className="chat-see" to={APP_PATHS.ask(props.view.askId)}>
+        {SEE_ANSWERS}
+        <Icon name="arrow" size={18} />
+      </Link>
     </>
   );
 };
@@ -101,13 +118,13 @@ const AskState = (props: { ask: PolledView<AskView>; askId: string }): ReactElem
   return props.ask.error === null ? <WaitLine text={LOADING_LINE} /> : <ReadError askId={props.askId} />;
 };
 
-// The ask card of a running or finished reply; mode and question come from the reply until the ask is read.
-export const AskCard = (props: { askId: string; mode: AskMode; question: string }): ReactElement => {
+// The ask card of a running or finished reply; mode, question and the friend's name come from the reply until the ask is read.
+export const AskCard = (props: { askId: string; mode: AskMode; question: string; friendName?: string | null }): ReactElement => {
   const ask = usePolledView(() => apiFetch(routes.asks.readAsk, { params: { id: props.askId } }), { key: props.askId, intervalMs: ASK_POLL_MS, keepPolling: isAskRunning });
   const question = props.question === "" ? (ask.value?.text ?? "") : props.question;
   return (
-    <section className={`chat-card ${kindTint(ask.value?.mode ?? props.mode)}`} aria-label="The ask">
-      <KindHead mode={ask.value?.mode ?? props.mode} question={question} />
+    <section className="chat-card" aria-label="The ask">
+      <KindHead mode={ask.value?.mode ?? props.mode} question={question} friendName={ask.value?.aboutName ?? props.friendName} />
       <AskState ask={ask} askId={props.askId} />
     </section>
   );

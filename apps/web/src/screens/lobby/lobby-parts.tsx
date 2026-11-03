@@ -51,7 +51,7 @@ export const QuestionPicker = (props: { isSending: boolean; error: string | null
   return (
     <form className="q-picker" onSubmit={onSubmit}>
       <fieldset>
-        <legend>Pick a question for the meeting</legend>
+        <legend>What should your Meetys talk about?</legend>
         {groups.map((group) => (
           <div key={group.title} className={`q-group ${group.colour}`} role="group" aria-label={group.title}>
             <p className="q-group-title">

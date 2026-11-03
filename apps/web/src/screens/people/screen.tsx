@@ -22,9 +22,10 @@ const PROFILE_COPY = {
   decline: "Decline",
   friends: "Friends",
   askAgent: (name: string) => `Ask ${name}'s Meety`,
-  meetAgent: (name: string) => `Meet ${name}'s Meety`,
-  noCard: "To meet their Meety, open your approved card first.",
-  editListing: "Edit my listing",
+  // The button that lets your Meety and theirs talk a question through, named by what you get (Ambar, 3 Nov: "wdym by meet button").
+  meetAgent: (name: string) => `See how you'd get on with ${name}`,
+  noCard: "To see how you'd get on, open your approved card first.",
+  editListing: "Edit profile",
 } as const;
 
 // The quote source line under each public item of this person.
@@ -32,7 +33,8 @@ function sourceFor(name: string): string {
   return `${name}, in their own words`;
 }
 
-// Meet their Meety: the button that opens today's directory meeting picker for this listing, or the line that a card is needed.
+// See how you'd get on: the button that opens the meeting picker for this listing, where your Meety and theirs talk a question you pick
+// through and you get a short brief, or the line that a card is needed.
 const MeetAgent = (props: { profile: ProfileView; meet: MeetControls | null }): ReactElement => {
   const { profile, meet } = props;
   if (meet === null) return <p className="profile-note">{PROFILE_COPY.noCard}</p>;
@@ -51,7 +53,7 @@ const MeetAgent = (props: { profile: ProfileView; meet: MeetControls | null }): 
   );
 };
 
-// The buttons of a friend's profile: the Friends chip, Ask their Meety (or why not), and Meet their Meety.
+// The buttons of a friend's profile: the Friends chip, Ask their Meety (or why not), and See how you'd get on.
 const FriendButtons = (props: { profile: ProfileView; meet: MeetControls | null }): ReactElement => {
   const { profile } = props;
   return (

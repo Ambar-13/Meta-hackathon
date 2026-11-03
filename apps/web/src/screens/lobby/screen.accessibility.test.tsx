@@ -83,7 +83,7 @@ describe("lobby screen", () => {
     stubRoute(routes.meetings.readPair, pairView({ hasJoiner: true, meetings: [] }));
     stubRoute(routes.meetings.createMeeting, { status: 201, body: { meetingId: IDS.meeting } });
     renderLobby();
-    const picker = await screen.findByRole("group", { name: "Pick a question for the meeting" });
+    const picker = await screen.findByRole("group", { name: "What should your Meetys talk about?" });
     expect(picker.querySelectorAll('input[type="radio"]')).toHaveLength(CURATED_QUESTIONS.length + 1);
     fireEvent.click(screen.getByRole("radio", { name: "Write your own question" }));
     fireEvent.change(screen.getByLabelText("Your question"), { target: { value: "Hm?" } });
@@ -101,7 +101,7 @@ describe("lobby screen", () => {
   it("R10.5-T7: the curated questions sit in five named groups of four", async () => {
     stubRoute(routes.meetings.readPair, pairView({ hasJoiner: true, meetings: [] }));
     renderLobby();
-    await screen.findByRole("group", { name: "Pick a question for the meeting" });
+    await screen.findByRole("group", { name: "What should your Meetys talk about?" });
     for (const name of ["Would you get along?", "Could you help each other?", "Would you make a deal?", "Where would your views split?", "Would you get on as a couple?"]) {
       expect(screen.getByRole("group", { name }).querySelectorAll('input[type="radio"]')).toHaveLength(4);
     }
@@ -120,7 +120,7 @@ describe("lobby screen", () => {
   it("D54-T2: every control on the lobby has an accessible name at 375 px", async () => {
     stubRoute(routes.meetings.readPair, pairView({ hasJoiner: true, meetings: [] }));
     renderLobby();
-    await screen.findByRole("group", { name: "Pick a question for the meeting" });
+    await screen.findByRole("group", { name: "What should your Meetys talk about?" });
     expect(unlabelledControls(document.body)).toEqual([]);
     cleanup();
     stubRoute(routes.meetings.readPair, pairView({ hasJoiner: true, meetings: [READY_ROW] }));

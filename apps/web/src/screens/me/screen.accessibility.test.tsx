@@ -66,7 +66,7 @@ async function header(): Promise<HTMLElement> {
 }
 
 describe("/me, against the MSW route stubs (a fake server)", () => {
-  it("W7-WEB-A-T8a: listed, /me shows your profile as others see it with Edit my listing and Your card, the next step above the tabs, your own Posts words, and Add more chats under About", async () => {
+  it("W7-WEB-A-T8a: listed, /me shows your profile as others see it with Edit profile and Your card, the next step above the tabs, your own Posts words, and Add more chats under About", async () => {
     stubMeReads({ listing: myListing(true) });
     renderMe();
     const head = await header();
@@ -76,7 +76,7 @@ describe("/me, against the MSW route stubs (a fake server)", () => {
     });
     expect(within(head).getByText("Builds hackathon tools")).toBeTruthy();
     expect(within(head).queryByText(/things? shared/)).toBeNull();
-    expect(within(head).getByRole("button", { name: "Edit my listing" }).getAttribute("aria-expanded")).toBe("false");
+    expect(within(head).getByRole("button", { name: "Edit profile" }).getAttribute("aria-expanded")).toBe("false");
     expect(requestsTo(routes.social.readProfile)[0]?.url).toContain(`/api/directory/${LISTING_IDS.mine}`);
     expect(within(head).getByRole("link", { name: "Your card" }).getAttribute("href")).toBe(`/cards/${IDS.card}`);
     const next = await screen.findByRole("heading", { level: 2, name: "Meet someone." });
@@ -119,7 +119,7 @@ describe("/me, against the MSW route stubs (a fake server)", () => {
     fireEvent.change(await screen.findByRole("textbox", { name: "Your line in Explore" }), { target: { value: "  Builds hackathon tools  " } });
     fireEvent.click(screen.getByRole("button", { name: "Join Explore" }));
 
-    expect(await screen.findByRole("button", { name: "Edit my listing" })).toBeTruthy();
+    expect(await screen.findByRole("button", { name: "Edit profile" })).toBeTruthy();
     expect(requestsTo(routes.directory.upsertMyListing)[0]?.body).toEqual({ cardId: IDS.card, line: "Builds hackathon tools", openToRomance: false });
   });
 
@@ -139,12 +139,12 @@ describe("/me, against the MSW route stubs (a fake server)", () => {
     expect(screen.queryByRole("button", { name: "Join Explore" })).toBeNull();
   });
 
-  it("W6-DWEB-T33, moved to /me: Edit my listing shows the line and the dating switch, Save sends them, and Leave sends one DELETE and says so", async () => {
+  it("W6-DWEB-T33, moved to /me: Edit profile shows the line and the dating switch, Save sends them, and Leave sends one DELETE and says so", async () => {
     stubMeReads({ listing: myListing(true) });
     stubRoute(routes.directory.upsertMyListing, myListing(false));
     stubRoute(routes.directory.leave, { status: 204, body: null });
     renderMe();
-    fireEvent.click(within(await header()).getByRole("button", { name: "Edit my listing" }));
+    fireEvent.click(within(await header()).getByRole("button", { name: "Edit profile" }));
     const section = screen.getByRole("region", { name: "Your listing" });
 
     expect(within(section).getByRole<HTMLInputElement>("textbox", { name: "Your line in Explore" }).value).toBe("Builds hackathon tools");
@@ -192,7 +192,7 @@ describe("/me, against the MSW route stubs (a fake server)", () => {
   it("W6-DWEB-T36, moved to /me: every control on /me has an accessible name at 375 px, with the listing controls open", async () => {
     stubMeReads({ listing: myListing(true) });
     renderMe();
-    fireEvent.click(within(await header()).getByRole("button", { name: "Edit my listing" }));
+    fireEvent.click(within(await header()).getByRole("button", { name: "Edit profile" }));
     await screen.findByText("Your next step");
 
     await waitFor(() => {
