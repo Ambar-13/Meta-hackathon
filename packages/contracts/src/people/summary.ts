@@ -37,8 +37,9 @@ export const SUMMARY_MAX_CHARS = 20_000;
 // Most times a person may save their summary in one UTC day; each save runs one names check.
 export const SUMMARY_SAVES_PER_DAY = 10;
 
-// Where one point's quote was found: the quote as it stands in the person's own message, and that message's index.
-export const SummaryFound = z.object({ quote: z.string().min(1), turnIndex: z.number().int().min(0) });
+// Where one point's quote was found: the quote as it stands in the person's own message, that message's index in its upload, and
+// its id, since indexes repeat across uploads.
+export const SummaryFound = z.object({ quote: z.string().min(1), turnIndex: z.number().int().min(0), turnId: z.string().uuid() });
 // The type of SummaryFound, read from the schema above.
 export type SummaryFound = z.infer<typeof SummaryFound>;
 // One point as the person sees it: the point, and where its quote was found in their messages, or null when it was not.
