@@ -1,0 +1,19 @@
+{
+  "name": "search-words",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "words": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "words"
+    ],
+    "additionalProperties": false
+  }
+}

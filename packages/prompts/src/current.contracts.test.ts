@@ -59,7 +59,7 @@ describe("prompt texts", () => {
     expect(text).toContain("Never invent a quote to reach 6.");
   });
 
-  it("R3.9-T2: current.ts names every prompt folder, the question-kind prompts at v5, v4 or v2 and the rest at v1, and readPrompt reads that version", () => {
+  it("R3.9-T2: current.ts names every prompt folder, the question-kind prompts at v5, v4 or v2, persona-answer at v2 and the rest at v1, and readPrompt reads that version", () => {
     expect(PROMPT_NAMES).toEqual([
       "dossier",
       "scrub-names",
@@ -77,8 +77,9 @@ describe("prompt texts", () => {
       "persona-answer",
       "orchestrator",
       "summary-request",
+      "search-words",
     ]);
-    const changed: Record<string, string> = { "question-check": "v5", "meeting-moderator": "v5", "meeting-speech": "v2", brief: "v5", "brief-support-judge": "v2", orchestrator: "v3" };
+    const changed: Record<string, string> = { "question-check": "v5", "meeting-moderator": "v5", "meeting-speech": "v2", brief: "v5", "brief-support-judge": "v2", orchestrator: "v3", "persona-answer": "v2" };
     for (const name of PROMPT_NAMES) expect(currentVersion(name)).toBe(changed[name] ?? "v1");
     for (const name of ["dossier", "scrub-names", "untrusted-data-rules", "question-check", "meeting-moderator", "meeting-speech"] as const) {
       const prompt = readPrompt(name);

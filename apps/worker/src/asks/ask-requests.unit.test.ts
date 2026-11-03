@@ -13,7 +13,7 @@ const HELP_INPUT: PersonaAnswerInput = {
     { turnIndex: 0, kind: "value", claim: "Test claim 1", quote: ASK_TURNS.kai[0] },
     { turnIndex: 1, kind: "preference", claim: "Test claim 2", quote: ASK_TURNS.kai[1] },
   ],
-  recall: [], misses: [],
+  recall: [], misses: [], summaryFound: [], summaryOnly: [],
 };
 
 it("W6-ASKW-T1 (design section 3, R7.3): a friend ask's check message escapes the text and the name, and drops the name's double quotes", () => {
@@ -56,7 +56,7 @@ it("W6-ASKW-T5 (design section 4 step 4, D31, D38): a friend request adds the re
   const input: PersonaAnswerInput = {
     mode: "react", askText: "How would Kai react if I moved the demo date to Friday?", subjectName: "Kai", askerName: "Ana",
     items: [{ turnIndex: 2, kind: "habit", claim: "Test claim 3", quote: ASK_TURNS.kai[2] }],
-    recall: [{ turnIndex: 3, text: ASK_TURNS.kai[3] }], misses: ["Would you rather plan a trip or improvise it?"],
+    recall: [{ turnIndex: 3, text: ASK_TURNS.kai[3] }], misses: ["Would you rather plan a trip or improvise it?"], summaryFound: [], summaryOnly: [],
   };
 
   expect(personaAnswerUserText(input)).toBe([

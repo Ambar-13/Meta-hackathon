@@ -2,7 +2,7 @@
 // owner, as the app's routes would.
 import { randomBytes } from "node:crypto";
 import { sql, type Kysely, type Selectable } from "kysely";
-import { PAIR_LIFETIME_HOURS, PAIR_TOKEN_BYTES, QUIZ_BANK, sampleQuiz } from "@meet-first/contracts";
+import { PAIR_LIFETIME_HOURS, PAIR_TOKEN_BYTES, QUIZ_BANK, sampleQuiz, type SummaryPointView } from "@meet-first/contracts";
 import { withPerson, type Database } from "@meet-first/db";
 import { createApprovedCard, createFrozenSource, createTestPerson, sha256Text } from "@meet-first/db/testing";
 
@@ -160,4 +160,12 @@ export async function readAskRow(db: Kysely<Database>, asker: AskPerson, askId: 
 // The ask's answer rows, read as the asker, by shortlist rank.
 export async function readAnswerRows(db: Kysely<Database>, asker: AskPerson, askId: string): Promise<Array<Selectable<Database["persona_answers"]>>> {
   return withPerson(db, asker.personId, (trx) => trx.selectFrom("persona_answers").selectAll().where("ask_id", "=", askId).orderBy("shortlist_rank").execute());
+}
+
+// Stores a checked summary for the person, as the check_summary job leaves it, with friend asks on or off.
+export async function seedReadySummary(db: Kysely<Database>, person: AskPerson, summary: { points: readonly SummaryPointView[]; isFriendsOn: boolean }): Promise<void> {
+  await withPerson(db, person.personId, (trx) => trx.insertInto("person_summaries")
+    .values({ person_id: person.personId, text: "Kind: view\nPoint: Seeded for a test.", points: JSON.stringify(summary.points), state: "ready", friends_can_ask: summary.isFriendsOn })
+    .onConflict((conflict) => conflict.column("person_id").doUpdateSet({ points: JSON.stringify(summary.points), state: "ready", friends_can_ask: summary.isFriendsOn }))
+    .execute());
 }

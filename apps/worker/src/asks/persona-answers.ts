@@ -1,16 +1,20 @@
 // Asks each pending answer's persona once and stores the checked reply. A request holds only what its subject
 // allowed: public items for a help search; approved, verified items and, when the friend switched recall on, recall results for
-// a friend ask; and the subject's quiz misses as do-not-guess topics.
+// a friend ask, searched with the words the search-words call gives; for a friend ask, when the subject's summary switch is on, the
+// summary's points; and the subject's quiz misses as do-not-guess topics.
 import type { Kysely } from "kysely";
 import { ContractError, PersonaAnswerOutput, RECALL_TOP_K } from "@meet-first/contracts";
 import { searchRecallCorpus, withPerson, type Database, type DatabaseTransaction } from "@meet-first/db";
 import { LimiterBusy } from "@meet-first/llm";
+import { summaryPriority } from "@meet-first/parsers";
 import { readPrompt, type Prompt } from "@meet-first/prompts";
 import type { JobContext } from "../job-context.js";
 import type { CitableTurn } from "../meetings/receipts.js";
 import { quizMisses } from "../quizzes/index.js";
 import { checkAnswerClaims, personaAnswerCallArgs, personaAnswerMessages, type PersonaItem, type RecallLine } from "./ask-requests.js";
 import { markAnswerFailed, readAnswers, readDisplayName, storeAnswer, type AnswerRow, type AskRow } from "./ask-store.js";
+import { searchQueryOf, searchWordsCall } from "./search-words.js";
+import { readSummaryMaterial, readUsablePoints, type SummaryMaterial } from "./summary-material.js";
 
 // What one persona call ended with: a stored answer, a failed answer, or a full token window that leaves the answer pending.
 type AnswerOutcome = "answered" | "failed" | "limited";
@@ -23,7 +27,9 @@ type ItemWithTurn = { item: PersonaItem; turn: CitableTurn };
 // One recall result with the whole turn it came from.
 type RecallWithTurn = { line: RecallLine; turn: CitableTurn };
 // What one request is built from, and the turns its claims may cite, by turn index.
-type SubjectMaterial = { items: PersonaItem[]; recall: RecallLine[]; misses: string[]; turns: Map<number, CitableTurn> };
+type SubjectMaterial = { items: PersonaItem[]; recall: RecallLine[]; misses: string[]; summaryFound: PersonaItem[]; summaryOnly: string[]; turns: Map<number, CitableTurn> };
+// What the material is read from: the items with their turns, the recall results, the quiz misses and the summary.
+type MaterialParts = { items: readonly ItemWithTurn[]; recall: readonly RecallWithTurn[]; misses: string[]; summary: SummaryMaterial };
 
 // Asks every pending answer's persona at the same time, at most HELP_SHORTLIST_MAX of them, and stores each reply as it arrives.
 // "limited" when any call met a full token window; those answers stay pending for the next run.
@@ -38,11 +44,13 @@ export async function answerPending(context: JobContext, ask: AskRow): Promise<"
 // the schema fails this answer only, and the others go on.
 async function answerOne(context: JobContext, scope: AnswerScope): Promise<AnswerOutcome> {
   const { ask, row, prompts } = scope;
-  const material = await readSubjectMaterial(context.db, ask, row);
+  const query = await recallQueryFor(context, ask, row);
+  if (query === null) return "limited";
+  const material = await readSubjectMaterial(context.db, { ask, row, query });
   if (material === null) return failAnswer(context, scope, "persona_subject_gone");
   const messages = personaAnswerMessages({ personaAnswer: prompts.personaAnswer.text, untrustedRules: prompts.untrustedRules.text }, {
     mode: ask.mode, askText: ask.text, subjectName: row.subjectDisplayName, askerName: row.askerDisplayName,
-    items: material.items, recall: material.recall, misses: material.misses,
+    items: material.items, recall: material.recall, misses: material.misses, summaryFound: material.summaryFound, summaryOnly: material.summaryOnly,
   });
   let reply: unknown;
   try {
@@ -66,11 +74,32 @@ async function failAnswer(context: JobContext, scope: AnswerScope, code: string)
   return "failed";
 }
 
+// The recall query of a friend ask whose card allows recall: the words the search-words call gives for the ask and the subject's
+// summary topics, or the ask's own text when that call fails. Any other ask searches nothing, so it gets the ask's text without a
+// call. Null when the token window is full, so the answer stays pending for the next run.
+async function recallQueryFor(context: JobContext, ask: AskRow, row: AnswerRow): Promise<string | null> {
+  if (ask.mode === "help") return ask.text;
+  const scope = await withPerson(context.db, row.subjectPersonId, async (trx) => {
+    const card = await trx.selectFrom("cards").select("recall_allowed").where("id", "=", row.subjectCardId).executeTakeFirst();
+    return { isRecallOn: card?.recall_allowed === true, topics: summaryPriority(await readUsablePoints(trx, row.subjectPersonId, ask.mode)).topics };
+  });
+  if (!scope.isRecallOn) return ask.text;
+  try {
+    const result = await context.llm.complete({ ...searchWordsCall({ askText: ask.text, topics: scope.topics }), ledger: { personId: ask.personId, meetingId: null } });
+    return searchQueryOf(result.parsed, ask.text);
+  } catch (error) {
+    if (error instanceof LimiterBusy) return null;
+    context.log.warn({ code: error instanceof ContractError ? error.code : "search_words_failed", askId: ask.id, answerId: row.id }, "The search words failed; this answer searches with the ask's text.");
+    return ask.text;
+  }
+}
+
 // Reads one subject's material in the subject's own context, and only reads. Null when a help answer's listing is gone, names another
 // card or, for a romance ask, has its dating switch off; when the subject's account deletion has started; when the card
 // is gone or no longer approved; and, for a friend ask, when the friend has turned friend asks off since the answer row was written.
-//A help answer never reads recall.
-async function readSubjectMaterial(db: Kysely<Database>, ask: AskRow, row: AnswerRow): Promise<SubjectMaterial | null> {
+// A help answer never reads recall or the summary; a friend ask searches recall with the query.
+async function readSubjectMaterial(db: Kysely<Database>, subject: { ask: AskRow; row: AnswerRow; query: string }): Promise<SubjectMaterial | null> {
+  const { ask, row } = subject;
   return withPerson(db, row.subjectPersonId, async (trx) => {
     if ((await readDisplayName(trx, row.subjectPersonId)) === null) return null;
     if (ask.mode === "help" && !(await isListingCurrent(trx, ask, row))) return null;
@@ -78,8 +107,9 @@ async function readSubjectMaterial(db: Kysely<Database>, ask: AskRow, row: Answe
     if (card === undefined || card.state !== "approved" || (ask.mode === "react" && !card.friends_can_ask)) return null;
     const items = await readItems(trx, row.subjectCardId, ask.mode === "help");
     const misses = await quizMisses(trx, row.subjectCardId);
-    const recall = ask.mode === "react" && card.recall_allowed ? await readRecall(trx, row.subjectCardId, ask.text) : [];
-    return materialOf(items, recall, misses);
+    const recall = ask.mode === "react" && card.recall_allowed ? await readRecall(trx, row.subjectCardId, subject.query) : [];
+    const summary = await readSummaryMaterial(trx, await readUsablePoints(trx, row.subjectPersonId, ask.mode));
+    return materialOf({ items, recall, misses, summary });
   });
 }
 
@@ -120,10 +150,22 @@ async function readRecall(trx: DatabaseTransaction, cardId: string, askText: str
   return results;
 }
 
-// The request's material and the turns its claims may cite: every item's turn, then every recall turn not already there.
-function materialOf(items: readonly ItemWithTurn[], recall: readonly RecallWithTurn[], misses: string[]): SubjectMaterial {
+// The request's material and the turns its claims may cite: every item's turn, then every found summary point's turn, then every recall
+// turn. Turn numbers repeat across uploads, so a summary point or a recall result whose number is taken by another turn is left out:
+// a claim citing that number would be checked against the wrong message.
+function materialOf(parts: MaterialParts): SubjectMaterial {
   const turns = new Map<number, CitableTurn>();
-  for (const entry of items) turns.set(entry.item.turnIndex, entry.turn);
-  for (const entry of recall) if (!turns.has(entry.line.turnIndex)) turns.set(entry.line.turnIndex, entry.turn);
-  return { items: items.map((entry) => entry.item), recall: recall.map((entry) => entry.line), misses, turns };
+  for (const entry of parts.items) turns.set(entry.item.turnIndex, entry.turn);
+  const isFree = (turn: CitableTurn): boolean => {
+    const taken = turns.get(turn.turnIndex);
+    if (taken !== undefined && taken.turnId !== turn.turnId) return false;
+    turns.set(turn.turnIndex, turn);
+    return true;
+  };
+  const found = parts.summary.found.filter((entry) => isFree(entry.turn));
+  const recall = parts.recall.filter((entry) => isFree(entry.turn));
+  return {
+    items: parts.items.map((entry) => entry.item), recall: recall.map((entry) => entry.line), misses: parts.misses,
+    summaryFound: found.map((entry) => entry.item), summaryOnly: parts.summary.only, turns,
+  };
 }

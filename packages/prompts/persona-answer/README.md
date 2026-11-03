@@ -4,7 +4,7 @@ One persona answers one question about its own person: in a help search, whether
 
 ## What this does
 
-The run_ask job sends this text, then the untrusted-data rules, as the system message of one persona_answer call. The user message holds the ask, the two names, the card items the persona may use and, when the person switched recall on, a few of their own messages found for the ask. The reply is a short hedged answer with up to three claims, each with an exact quote and its turn label, which the program checks inside the named turn.
+The run_ask job sends this text, then the untrusted-data rules, as the system message of one persona_answer call. The user message holds the ask, the two names, the card items the persona may use and, when the person switched recall on, a few of their own messages found with the search words (search-words prompt); for a friend ask when the summary's friends switch is on, the points of the summary their own AI wrote, those found in their messages apart from those that were not. The reply is a short answer with up to three claims, as firm as the person's own words, each with an exact quote and its turn label, which the program checks inside the named turn. v2's recorded runs are in results.md.
 
 ## What this never does
 

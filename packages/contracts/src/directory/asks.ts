@@ -105,3 +105,8 @@ export const PersonaAnswerOutput = z.object({
 });
 // The type of PersonaAnswerOutput, read from the schema above.
 export type PersonaAnswerOutput = z.infer<typeof PersonaAnswerOutput>;
+// What the search-words model returns: 1 to 8 words or short phrases, each 1 to 40 characters, that the person would likely have used
+// in their own messages about what an ask is about (search-words prompt).
+export const SearchWordsOutput = z.object({ words: z.array(z.string().min(1).max(40)).min(1).max(8) });
+// The type of SearchWordsOutput, read from the schema above.
+export type SearchWordsOutput = z.infer<typeof SearchWordsOutput>;

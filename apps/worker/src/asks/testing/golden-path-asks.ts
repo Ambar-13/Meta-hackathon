@@ -27,6 +27,8 @@ const FIXTURE_DIR = fileURLToPath(new URL("../../../../../packages/evals/fixture
 // The ids the writer reads from the golden path's report: the two people and their invite pair.
 const ReportIds = z.object({ ids: z.object({ personA: Uuid, personB: Uuid, pairId: Uuid }) });
 
+// The search words for the friend ask, by rule: the words of its subject.
+const GOLDEN_SEARCH_WORDS = { words: ["demo day", "Saturday", "weekend"] };
 // The question check's replies: a friend ask about a plan, and a help search about a problem; neither is about dating.
 const REACT_CHECK = { allowed: true, reason: "An ask about how a friend would probably react to a change of plan.", kind: "situation", romantic: false };
 const HELP_CHECK = { allowed: true, reason: "An ask about who could probably help with a problem.", kind: "help", romantic: false };
@@ -79,7 +81,8 @@ function replyFor(args: CompleteArgs): Record<string, unknown> {
   if (args.callSite === "question_check") return user.startsWith('<ask_question for="react"') ? REACT_CHECK : HELP_CHECK;
   if (args.callSite === "persona_answer") return personaReply(user);
   if (args.callSite === "ask_support_judge") return judgeReply(user);
-  throw new ContractError("golden_call_unexpected", `The ask writer answers question_check, persona_answer and ask_support_judge calls only, not ${args.callSite}.`, 500);
+  if (args.callSite === "search_words") return GOLDEN_SEARCH_WORDS;
+  throw new ContractError("golden_call_unexpected", `The ask writer answers question_check, search_words, persona_answer and ask_support_judge calls only, not ${args.callSite}.`, 500);
 }
 
 // A client that writes each request's reply as a fixture, then lets the replay client answer from that fixture.

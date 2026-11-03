@@ -11,11 +11,12 @@ import type { JobContext } from "../../job-context.js";
 import { chatBodyFor, scriptedRecordedCall, structuredReplyLayout } from "../../meetings/testing/index.js";
 import { makeTestJobContext, type EnqueuedJob } from "../../testing/index.js";
 
-// The three call sites of the run_ask job.
-export type AskCallSite = "question_check" | "persona_answer" | "ask_support_judge";
+// The four call sites of the run_ask job.
+export type AskCallSite = "question_check" | "search_words" | "persona_answer" | "ask_support_judge";
 // The replies of one ask test: question-check and support-check replies in call order, persona replies by the subject's display name.
+// searchWords holds the search-words replies in call order; with none left, the call fails and the job searches with the ask's text.
 // limiterBusy makes the next `times` calls of one call site throw LimiterBusy before they reach the client (a fake full window).
-export type AskReplyScript = { questionCheck: unknown[]; personaAnswers: Record<string, unknown>; judge: unknown[]; limiterBusy?: { callSite: AskCallSite; times: number } };
+export type AskReplyScript = { questionCheck: unknown[]; searchWords?: unknown[]; personaAnswers: Record<string, unknown>; judge: unknown[]; limiterBusy?: { callSite: AskCallSite; times: number } };
 // One call that reached the replay client: its call site and its user message.
 export type SeenCall = { callSite: CallSite; user: string };
 // What an ask test gets: the job context, the jobs it enqueued, the calls it saw in order, and the call that removes its fixture folder.
@@ -126,8 +127,9 @@ async function writeScriptedFixture(args: CompleteArgs, script: AskReplyScript, 
 function scriptedReply(args: CompleteArgs, script: AskReplyScript): unknown {
   if (args.callSite === "question_check") return script.questionCheck.shift();
   if (args.callSite === "ask_support_judge") return script.judge.shift();
+  if (args.callSite === "search_words") return script.searchWords?.shift();
   if (args.callSite === "persona_answer") return script.personaAnswers[subjectNameOf(userTextOf(args.messages))];
-  throw new ContractError("script_call_site_unknown", "The ask test script covers question_check, persona_answer and ask_support_judge only.", 500);
+  throw new ContractError("script_call_site_unknown", "The ask test script covers question_check, search_words, persona_answer and ask_support_judge only.", 500);
 }
 
 // The text of the request's user message, or "" when it has none.

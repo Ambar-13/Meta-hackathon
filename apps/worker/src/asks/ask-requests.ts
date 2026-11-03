@@ -17,10 +17,12 @@ export type AskCallInput = { askerId: string; promptVersion: string; messages: C
 export type PersonaItem = { turnIndex: number; kind: string; claim: string; quote: string };
 // One recall result as a persona request shows it: the turn's index and the snippet the search returned.
 export type RecallLine = { turnIndex: number; text: string };
-// Everything the user message of one persona_answer call holds.
+// Everything the user message of one persona_answer call holds. summaryFound are the subject's summary points found in their own
+// messages, shown like card items; summaryOnly are the texts of the points that were not found.
 export type PersonaAnswerInput = {
   mode: AskMode; askText: string; subjectName: string; askerName: string;
   items: readonly PersonaItem[]; recall: readonly RecallLine[]; misses: readonly string[];
+  summaryFound: readonly PersonaItem[]; summaryOnly: readonly string[];
 };
 // The two prompt texts a persona_answer system message joins.
 export type PersonaPromptTexts = { personaAnswer: string; untrustedRules: string };
@@ -73,6 +75,7 @@ export function promptLine(name: string): string {
 
 // The user message of one persona_answer call, line by line. The ask text and the names are
 // escaped; item quotes, claims and recall texts are not, because each quote must match its turn exactly, as in the meeting prefix.
+// The summary's texts were written by the subject's own AI, so they are escaped; a found point's quote is not, for the same reason.
 export function personaAnswerUserText(input: PersonaAnswerInput): string {
   const lines = [
     '<ask kind="' + input.mode + '">' + escapeBlockText(input.askText) + "</ask>",
@@ -82,7 +85,9 @@ export function personaAnswerUserText(input: PersonaAnswerInput): string {
     ...(input.items.length === 0 ? ["(no items)"] : input.items.map(itemLine)),
     "</your_card>",
   ];
+  if (input.summaryFound.length > 0) lines.push("<summary_points>", ...input.summaryFound.map(summaryPointLine), "</summary_points>");
   if (input.recall.length > 0) lines.push("<recall_result>", ...input.recall.map((row) => "[" + turnLabel(row.turnIndex) + "] " + row.text), "</recall_result>");
+  if (input.summaryOnly.length > 0) lines.push("<summary_only>", ...input.summaryOnly.map((text) => "- " + escapeBlockText(text)), "</summary_only>");
   if (input.misses.length > 0) lines.push("<do_not_guess>", ...input.misses.map((text) => "- " + text), "</do_not_guess>");
   return lines.join("\n");
 }
@@ -162,6 +167,11 @@ export function askJudgeCallArgs(input: AskCallInput): CompleteArgs {
 // One item line of <your_card>: the turn label, the kind, the claim and the quote in double quotes.
 function itemLine(item: PersonaItem): string {
   return "[" + turnLabel(item.turnIndex) + "] " + item.kind + " | " + item.claim + ' | "' + item.quote + '"';
+}
+
+// One line of <summary_points>: like an item line, with the point's text escaped.
+function summaryPointLine(point: PersonaItem): string {
+  return "[" + turnLabel(point.turnIndex) + "] " + point.kind + " | " + escapeBlockText(point.claim) + ' | "' + point.quote + '"';
 }
 
 // A claim in the shape isFlippedLine reads. It reads only the text and the quote; side and verified are filled because the

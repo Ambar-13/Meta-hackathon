@@ -1,0 +1,77 @@
+{
+  "callSite": "self_test",
+  "promptVersion": "v1",
+  "requestHash": "e743e8f7f389feb3d05e503d114526d2a12c2c7edd3247ca8ec4da4f192ef782",
+  "request": {
+    "callSite": "self_test",
+    "promptVersion": "v1",
+    "body": {
+      "model": "muse-spark-1.3",
+      "messages": [
+        {
+          "role": "user",
+          "content": "ok"
+        }
+      ],
+      "max_tokens": 1,
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "search-words",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "words": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "words"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "response": {
+    "id": "chatcmpl-01a1a1f7-75e8-7572-82a6-b8bf650fe767",
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": null,
+          "refusal": null,
+          "role": "assistant"
+        },
+        "logprobs": null
+      }
+    ],
+    "created": 1793718711,
+    "model": "muse-spark-1.3",
+    "object": "chat.completion",
+    "usage": {
+      "completion_tokens": 1,
+      "prompt_tokens": 9,
+      "total_tokens": 10,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    }
+  },
+  "usage": {
+    "promptTokens": 9,
+    "cachedTokens": 0,
+    "completionTokens": 1,
+    "reasoningTokens": 0
+  },
+  "recordedAt": "2026-11-03T15:11:52.116Z"
+}

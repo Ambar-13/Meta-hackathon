@@ -6,7 +6,7 @@ import { fakeClock } from "../testing/index.js";
 import { runAsk } from "./run-ask-job.js";
 import {
   ALLOWED_HELP, ASK_LINES, ASK_TURNS, KAI_ALTERED, KAI_HELP, KAI_NOTEBOOK_CLAIM, KAI_VALIDATION_CLAIM, LENA_HELP, NOOR_HELP, REFUSED, ROMANTIC_HELP, ROSA_HELP,
-  allSupported, countCalls, createAskPerson, insertHelpAsk, leaveDirectory, listInDirectory, makeAskTestContext, markPublic, readAnswerRows, readAskRow,
+  allSupported, countCalls, createAskPerson, insertHelpAsk, leaveDirectory, listInDirectory, makeAskTestContext, markPublic, readAnswerRows, readAskRow, seedReadySummary,
   setRomanceSwitch, userTexts, type AskPerson, type AskReplyScript, type AskTestContext,
 } from "./testing/index.js";
 
@@ -307,4 +307,17 @@ it("W6-ASKW-T29 (design section 11, P8): a listed person who turns dating questi
   expect((await readAnswerRows(fresh.db, ana, askId)).map((row) => [row.subject_display_name, row.state])).toEqual([["Iris", "failed"]]);
   expect(await readAskRow(fresh.db, ana, askId)).toMatchObject({ state: "done", question_kind: "romance" });
   expect(countCalls(test, "persona_answer")).toBe(0);
+});
+
+it("W7-ASK-T23: a help ask's request carries no summary, and no search words are asked for", async () => {
+  await seedReadySummary(fresh.db, kai, { points: [{ kind: "work", topic: "Training", point: "Trains small models every weekend.", strength: "strong", quotes: [], found: null }], isFriendsOn: true });
+  const askId = await insertHelpAsk(fresh.db, ana, ML_ASK);
+  const test = await openTest({ questionCheck: [ALLOWED_HELP], personaAnswers: { Kai: KAI_HELP, Lena: LENA_HELP }, judge: [allSupported(3)] });
+
+  await runAsk({ askId, personId: ana.personId }, test.context);
+
+  const requests = userTexts(test, "persona_answer");
+  expect(requests).toHaveLength(2);
+  for (const request of requests) expect(request).not.toMatch(/<summary_(points|only)>/);
+  expect(countCalls(test, "search_words")).toBe(0);
 });

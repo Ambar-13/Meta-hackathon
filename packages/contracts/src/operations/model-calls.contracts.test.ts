@@ -94,7 +94,7 @@ describe("model output schemas", () => {
       return JSON.stringify(saved) !== JSON.stringify(toStrictJsonSchema(schema, name));
     });
 
-    expect(folders).toHaveLength(11);
+    expect(folders).toHaveLength(12);
     expect(mismatches).toEqual([]);
   });
 });

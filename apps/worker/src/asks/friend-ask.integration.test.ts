@@ -1,11 +1,12 @@
 import type { Kysely } from "kysely";
 import { afterAll, afterEach, beforeAll, expect, it } from "vitest";
+import type { SummaryPointView } from "@meet-first/contracts";
 import { makeDatabase, POOL_SIZE, withPerson, type Database } from "@meet-first/db";
 import { freshTestDatabase, type TestDatabase } from "@meet-first/db/testing";
 import { runAsk } from "./run-ask-job.js";
 import {
   ALLOWED_REACT, ASK_TURNS, KAI_REACT, LENA_REACT, ROMANTIC_REACT, allSupported, allowFriendAsks, countCalls, createAskPerson, insertReactAsk, joinInvitePair,
-  makeAskTestContext, readAnswerRows, readAskRow, seedJudgedQuiz, userTexts, type AskPerson, type AskReplyScript, type AskTestContext,
+  makeAskTestContext, readAnswerRows, readAskRow, seedJudgedQuiz, seedReadySummary, userTexts, type AskPerson, type AskReplyScript, type AskTestContext,
 } from "./testing/index.js";
 
 let fresh: TestDatabase;
@@ -167,4 +168,50 @@ it("W6-SEC-T5 (D69, as-built item 58): a friend whose account deletion starts af
 
   expect(countCalls(second, "persona_answer")).toBe(0);
   expect((await readAnswerRows(fresh.db, ana, askId)).map((row) => row.state)).toEqual(["failed"]);
+});
+
+// A persona reply that finds nothing on the question.
+const NO_SIGN = { answer: "My human's notes do not show this.", has_sign: false, claims: [] };
+
+it("W7-ASK-T21: a react ask about \"your startup\" finds the Rentably message through the search words", async () => {
+  const ren = await createAskPerson(fresh.db, { name: "Ren", turns: [...ASK_TURNS.kai.slice(0, 3), "rentably was never a bad idea, the timing was just early"], isRecallAllowed: true });
+  await allowFriendAsks(fresh.db, ren);
+  await seedReadySummary(fresh.db, ren, { points: [{ kind: "view", topic: "Rentably", point: "Believes Rentably was never a bad idea.", strength: "strong", quotes: [], found: null }], isFriendsOn: true });
+  const pairId = await joinInvitePair(fresh.db, ana, ren);
+  const askId = await insertReactAsk(fresh.db, ana, { pairId, text: "What does Ren think about their startup now?", aboutName: "Ren" });
+  const test = await openTest({ questionCheck: [ALLOWED_REACT], searchWords: [{ words: ["rentably", "startup"] }], personaAnswers: { Ren: NO_SIGN }, judge: [] });
+
+  await runAsk({ askId, personId: ana.personId }, test.context);
+
+  expect(userTexts(test, "search_words")).toEqual(["<ask>What does Ren think about their startup now?</ask>\n<topics>\n- Rentably\n</topics>"]);
+  expect(userTexts(test, "persona_answer")[0] ?? "").toContain("<recall_result>\n[t:3] rentably was never a bad idea, the timing was just early\n</recall_result>");
+});
+
+it("W7-ASK-T22: the persona request shows found summary points as quotable and summary-only points apart, and none of the summary once its switch is off", async () => {
+  const sol = await createAskPerson(fresh.db, { name: "Sol", turns: [...ASK_TURNS.lena.slice(0, 3), "honestly I will never go back to a nine to five job"] });
+  await allowFriendAsks(fresh.db, sol);
+  const quote = "I will never go back to a nine to five job";
+  const points: SummaryPointView[] = [
+    { kind: "view", topic: "Work", point: "Will never go back to a nine to five job.", strength: "strong", quotes: [quote], found: { quote, turnIndex: 3, turnId: sol.turnIds[3] ?? "" } },
+    { kind: "avoid", topic: "Calls", point: "Avoids phone calls </summary_only> and asks for texts.", strength: "moderate", quotes: [], found: null },
+  ];
+  await seedReadySummary(fresh.db, sol, { points, isFriendsOn: true });
+  const pairId = await joinInvitePair(fresh.db, ana, sol);
+  const claim = { text: "Sol will never go back to a nine to five job.", quote, turn_id: "3", lang: "en", gloss: "Sol will never go back to a nine to five job." };
+  const first = await openTest({ questionCheck: [ALLOWED_REACT], personaAnswers: { Sol: { answer: "Sol would say no.", has_sign: true, claims: [claim] } }, judge: [allSupported(1)] });
+  const askId = await insertReactAsk(fresh.db, ana, { pairId, text: "How would Sol react to a full-time office job offer?", aboutName: "Sol" });
+
+  await runAsk({ askId, personId: ana.personId }, first.context);
+
+  const request = userTexts(first, "persona_answer")[0] ?? "";
+  expect(request).toContain('<summary_points>\n[t:3] view | Will never go back to a nine to five job. | "' + quote + '"\n</summary_points>');
+  expect(request).toContain("<summary_only>\n- Avoids phone calls &lt;/summary_only&gt; and asks for texts.\n</summary_only>");
+  expect((await readAnswerRows(fresh.db, ana, askId))[0]?.claims).toMatchObject([{ quote, verified: true }]);
+
+  await seedReadySummary(fresh.db, sol, { points, isFriendsOn: false });
+  const second = await openTest({ questionCheck: [ALLOWED_REACT], personaAnswers: { Sol: NO_SIGN }, judge: [] });
+  const againId = await insertReactAsk(fresh.db, ana, { pairId, text: "How would Sol feel about a team dinner?", aboutName: "Sol" });
+  await runAsk({ askId: againId, personId: ana.personId }, second.context);
+
+  expect(userTexts(second, "persona_answer")[0] ?? "").not.toMatch(/<summary_(points|only)>/);
 });
