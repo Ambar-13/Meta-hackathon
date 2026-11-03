@@ -1,13 +1,14 @@
 import "./explore.css";
-import { useState, type ReactElement } from "react";
+import { useEffect, useRef, useState, type ReactElement } from "react";
 import { Link } from "react-router-dom";
-import type { DirectoryListing, Post, PostsView, PublicItem } from "@meet-first/contracts";
-import { APP_PATHS, chatPathWithDraft, ErrorNotice, personPostsPath, PROFILE_TAB_QUERY, ScreenFrame, type PolledView } from "../../app-shell/index.js";
+import type { DirectoryListing, Post, PublicItem } from "@meet-first/contracts";
+import { APP_PATHS, chatPathWithDraft, ErrorNotice, personPostsPath, PROFILE_TAB_QUERY, ScreenFrame } from "../../app-shell/index.js";
 import { EmptyState, Icon, LoadingLine, MeetyMark, PersonAvatar, photoOf, PostPhoto } from "../../look/index.js";
 import { NextStep } from "../chat/index.js";
 import { useDirectoryBrowse, type BrowseHook } from "../directory/index.js";
 import { DeletePost, postAgeWords } from "../people/index.js";
-import { noteItemFor, peopleRowAt, useExploreFriends, useExplorePosts, useFeedHome, type ExploreFriends } from "./explore-state.js";
+import { noteItemFor, peopleRowAt, useExploreFriends, useFeedHome, type ExploreFriends } from "./explore-state.js";
+import { useEndlessFeed, type EndlessFeed } from "./feed-state.js";
 import { FriendControl, lineFor, PersonCard } from "./people-parts.js";
 import { StoriesRow } from "./stories.js";
 import { useLikes, useStories, type LikesModel } from "./story-state.js";
@@ -23,6 +24,14 @@ const FEED_COPY = {
   emptyLine: "Nobody has posted yet. Find people in Search.",
   retry: "Try again",
   postsFailed: "Posts did not load.",
+  caughtUp: "You're all caught up",
+  caughtUpLine: "You've seen every post from your friends.",
+  othersTitle: "Suggested posts",
+  othersLine: "Your friends' posts show here first.",
+  findFriends: "Find friends in Search",
+  end: "That's every post for now.",
+  endLink: "Find people in Search",
+  morePosts: "Show more posts",
   feedLabel: "Posts",
   yourPost: "Your post",
   yourPosts: "Your posts",
@@ -200,42 +209,112 @@ const SuggestedRow = (props: { browse: BrowseHook; friends: ExploreFriends }): R
   );
 };
 
-// The line under the feed when the posts did not load, with Try again.
-const PostsFailed = (props: { posts: PolledView<PostsView> }): ReactElement | null => {
-  if (props.posts.error === null) return null;
+// The line under the feed when a page did not load, with Try again, which asks for the same page again.
+const PostsFailed = (props: { feed: EndlessFeed }): ReactElement | null => {
+  if (props.feed.error === null) return null;
   return (
     <p className="explore-posts-failed">
       {`${FEED_COPY.postsFailed} `}
-      <button type="button" className="text-button" onClick={props.posts.reload}>{FEED_COPY.retry}</button>
+      <button type="button" className="text-button" onClick={props.feed.loadMore}>{FEED_COPY.retry}</button>
     </p>
   );
 };
 
-// The feed: the newest posts, with the row of suggested people after the second; each post's line comes from the loaded people.
-const Feed = (props: { browse: BrowseHook; posts: PolledView<PostsView>; friends: ExploreFriends; likes: LikesModel }): ReactElement => {
-  const { browse, posts, friends, likes } = props;
-  const list = posts.value?.posts ?? [];
-  const at = peopleRowAt(list.length);
-  const byListing = new Map(browse.listings.map((listing) => [listing.listingId, listing]));
-  const postItem = (post: Post): ReactElement => (
-    <li key={post.postId}>
-      <FeedPost post={post} listing={byListing.get(post.listingId)} friends={friends} likes={likes} onDeleted={posts.reload} />
+// The line between your friends' posts and everyone else's, as Instagram's "You're all caught up": a check in a ring and the words over
+// the posts that follow, under the heading Suggested posts. With none of your friends' posts above it, only the heading shows, with where
+// theirs will go.
+const CaughtUp = (props: { hasFriendsPosts: boolean; hasOthers: boolean }): ReactElement => {
+  return (
+    <li className="feed-caught-up">
+      {props.hasFriendsPosts ? (
+        <div className="caught-up">
+          <span className="caught-up-check" aria-hidden="true"><Icon name="check" size={30} /></span>
+          <h2>{FEED_COPY.caughtUp}</h2>
+          <p>{FEED_COPY.caughtUpLine}</p>
+        </div>
+      ) : null}
+      {props.hasOthers ? <h2 className="feed-others-title">{FEED_COPY.othersTitle}</h2> : null}
+      {props.hasFriendsPosts ? null : (
+        <p className="feed-others-line">
+          {`${FEED_COPY.othersLine} `}
+          <Link to={APP_PATHS.search}>{FEED_COPY.findFriends}</Link>
+        </p>
+      )}
     </li>
   );
+};
+
+// Calls onNear when the element at the feed's end comes within 800px of the screen, so the next page loads before the reader gets there.
+// The watch starts again after each page, so a page too short to fill the screen loads the one after it. Where the browser has no
+// IntersectionObserver nothing happens, and Show more posts does it by hand.
+function useNearEnd(onNear: () => void, isActive: boolean): (element: HTMLDivElement | null) => void {
+  const latest = useRef(onNear);
+  latest.current = onNear;
+  const [element, setElement] = useState<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (element === null || !isActive || typeof IntersectionObserver === "undefined") return undefined;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) latest.current();
+    }, { rootMargin: "800px 0px" });
+    observer.observe(element);
+    return () => { observer.disconnect(); };
+  }, [element, isActive]);
+  return setElement;
+}
+
+// The foot of the feed: loading, a failed page with Try again, Show more posts while more pages exist, and, at the end, a line that
+// says so with a link to Search, so the feed ends honestly instead of filling itself with anything.
+const FeedEnd = (props: { feed: EndlessFeed; nearEnd: (element: HTMLDivElement | null) => void }): ReactElement => {
+  const { feed } = props;
+  return (
+    <div className="feed-foot" ref={props.nearEnd}>
+      {feed.isLoading ? <LoadingLine text={FEED_COPY.loadingPosts} /> : null}
+      <PostsFailed feed={feed} />
+      {!feed.isLoading && feed.error === null && feed.hasLoaded && feed.part !== "end" ? (
+        <button type="button" className="quiet feed-more" onClick={feed.loadMore}>{FEED_COPY.morePosts}</button>
+      ) : null}
+      {feed.part === "end" ? (
+        <p className="feed-end">
+          {`${FEED_COPY.end} `}
+          <Link to={APP_PATHS.search}>{FEED_COPY.endLink}</Link>
+        </p>
+      ) : null}
+    </div>
+  );
+};
+
+// The entries of the feed in order: your friends' posts, then the line between the parts once your friends' posts have run out and there
+// is anything around it, then everyone else's posts.
+function feedEntries(feed: EndlessFeed): Array<Post | "caught-up"> {
+  const isPastFriends = feed.part !== "friends" && (feed.friends.length > 0 || feed.others.length > 0 || feed.part === "others");
+  return [...feed.friends, ...(isPastFriends ? ["caught-up" as const] : []), ...feed.others];
+}
+
+// The feed, endless and honest (Ambar chose "Endless and honest" on 3 Nov 2026): your friends' posts and your own a page at a time, the
+// line that you are all caught up, then everyone else's, the next page loading as you near the end, until the end says so. The row of
+// suggested people sits after the second post; each post's line comes from the loaded people.
+const Feed = (props: { browse: BrowseHook; feed: EndlessFeed; friends: ExploreFriends; likes: LikesModel }): ReactElement => {
+  const { browse, feed, friends, likes } = props;
+  const nearEnd = useNearEnd(feed.loadMore, feed.hasLoaded && !feed.isLoading && feed.error === null && feed.part !== "end");
+  const entries = feedEntries(feed);
+  const at = peopleRowAt(feed.friends.length + feed.others.length);
+  const byListing = new Map(browse.listings.map((listing) => [listing.listingId, listing]));
+  const suggested = browse.listings.length === 0 ? null : <li key="suggested" className="feed-suggested"><SuggestedRow browse={browse} friends={friends} /></li>;
+  let posts = 0;
+  const items = entries.flatMap((entry): ReactElement[] => {
+    if (entry === "caught-up") return [<CaughtUp key="caught-up" hasFriendsPosts={feed.friends.length > 0} hasOthers={feed.others.length > 0 || feed.part === "others"} />];
+    posts += 1;
+    const item = <li key={entry.postId}><FeedPost post={entry} listing={byListing.get(entry.listingId)} friends={friends} likes={likes} onDeleted={() => { feed.remove(entry.postId); }} /></li>;
+    return posts === at && suggested !== null ? [item, suggested] : [item];
+  });
   return (
     <section className="feed" aria-label={FEED_COPY.feedLabel}>
       {likes.error === null ? null : <ErrorNotice error={likes.error} />}
       <ul className="feed-list">
-        {list.slice(0, at).map(postItem)}
-        {browse.listings.length === 0 ? null : (
-          <li className="feed-suggested">
-            <SuggestedRow browse={browse} friends={friends} />
-          </li>
-        )}
-        {list.slice(at).map(postItem)}
+        {at === 0 ? suggested : null}
+        {items}
       </ul>
-      {posts.value === null && posts.error === null ? <LoadingLine text={FEED_COPY.loadingPosts} /> : null}
-      <PostsFailed posts={posts} />
+      <FeedEnd feed={feed} nearEnd={nearEnd} />
     </section>
   );
 };
@@ -299,11 +378,11 @@ const FeedStatus = (props: { browse: BrowseHook; isEmpty: boolean }): ReactEleme
   );
 };
 
-// True when the feed has nothing to show: nobody in Explore and no posts, once both have loaded or failed.
-function isNothingShown(browse: BrowseHook, posts: PolledView<PostsView>): boolean {
+// True when the feed has nothing to show: nobody in Explore and no posts, once both have loaded to their end or failed.
+function isNothingShown(browse: BrowseHook, feed: EndlessFeed): boolean {
   const isNobody = browse.hasLoaded && !browse.isLoading && browse.error === null && browse.listings.length === 0;
-  if (!isNobody) return false;
-  return posts.value === null ? posts.error !== null : posts.value.posts.length === 0;
+  const hasNoPosts = feed.friends.length === 0 && feed.others.length === 0 && (feed.part === "end" || feed.error !== null);
+  return isNobody && hasNoPosts;
 }
 
 // Home, the feed, as Instagram's home (Ambar, 3 Nov 2026: "it should have been looking like linkedin or instagram feed", then "explore
@@ -312,7 +391,7 @@ function isNothingShown(browse: BrowseHook, posts: PolledView<PostsView>): boole
 // posts with the people Explore suggests. On a laptop the right-hand column sits beside it.
 export const FeedScreen = (): ReactElement => {
   const browse = useDirectoryBrowse();
-  const posts = useExplorePosts();
+  const feed = useEndlessFeed();
   const friends = useExploreFriends();
   const home = useFeedHome();
   const stories = useStories();
@@ -330,9 +409,9 @@ export const FeedScreen = (): ReactElement => {
             <p className="explore-date">{todayWords(new Date())}</p>
           </div>
           {home.value === null ? null : <NextStep home={home.value} />}
-          <FeedStatus browse={browse} isEmpty={isNothingShown(browse, posts)} />
+          <FeedStatus browse={browse} isEmpty={isNothingShown(browse, feed)} />
           <StoriesRow stories={stories} me={me} friends={friends} />
-          <Feed browse={browse} posts={posts} friends={friends} likes={likes} />
+          <Feed browse={browse} feed={feed} friends={friends} likes={likes} />
         </div>
         <FeedRail browse={browse} friends={friends} />
       </div>

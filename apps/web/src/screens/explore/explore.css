@@ -94,6 +94,20 @@ main.screen.wide:has(.explore), main.screen.wide:has(.search-page) { max-width: 
 .feed-list { list-style: none; margin: 0; padding: 0; }
 .feed-list > li + li { border-top: 1px solid var(--ui-line); }
 .feed-post { padding: 24px 0 20px; }
+
+/* ---------- the feed's honest end (3 Nov 2026): "You're all caught up" between your friends' posts and everyone else's, as Instagram's,
+   a check in an ink ring, then Suggested posts; Show more posts while more pages exist; a line at the very end ---------- */
+.feed-caught-up { padding: 28px 0 4px; }
+.caught-up { display: grid; justify-items: center; gap: 6px; padding: 4px 0 28px; text-align: center; }
+.caught-up-check { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--ui-ink); color: var(--ui-ink); }
+.caught-up h2 { margin: 8px 0 0; font: 600 18px/24px var(--ui-font); }
+.caught-up p { margin: 0; color: var(--ui-ink-2); font: 400 14px/20px var(--ui-font); }
+.feed-others-title { margin: 0; font: 600 16px/22px var(--ui-font); }
+.feed-others-line { margin: 4px 0 0; color: var(--ui-ink-2); font: 400 14px/20px var(--ui-font); }
+.feed-foot { display: grid; justify-items: center; gap: 12px; padding: 20px 0 32px; }
+.feed-foot:empty { padding: 0; }
+.feed-more { min-width: 200px; }
+.feed-end { margin: 0; color: var(--ui-ink-2); font: 400 14px/20px var(--ui-font); text-align: center; }
 .feed-head { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .feed-avatar { flex: none; display: block; width: 44px; height: 44px; border-radius: 50%; }
 .feed-who { flex: 1; min-width: 0; }

@@ -8,6 +8,7 @@ import {
   OrchestratorSend,
   OrchestratorSendResponse,
   OrchestratorThread,
+  FeedPage,
   MyPostsView,
   PostCreate,
   PostCreated,
@@ -36,4 +37,6 @@ export const socialRoutes = {
   unlikePost: { method: "DELETE", path: "/api/posts/:id/like", request: z.undefined(), response: PostLiked },
   listMyPosts: { method: "GET", path: "/api/people/me/posts", request: z.undefined(), response: MyPostsView },
   listStories: { method: "GET", path: "/api/stories", request: z.undefined(), response: StoriesView },
+  // Home's feed a page at a time (FeedQuery in the query string): your friends' posts and your own first, then everyone else's.
+  listFeed: { method: "GET", path: "/api/feed", request: z.undefined(), response: FeedPage },
 } as const;

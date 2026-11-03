@@ -46,6 +46,27 @@ export const POST_PHOTO_SIDE = 1080;
 // The most stories GET /api/stories returns, newest first after your own.
 export const STORIES_MAX = 60;
 
+// How many posts one page of Home's feed holds; the next page loads as the reader nears the end.
+export const FEED_PAGE_SIZE = 10;
+
+// Which part of Home's feed a page reads: your friends' posts and your own, which come first, or everyone else's.
+export const FeedScope = z.enum(["friends", "others"]);
+// The type of FeedScope, read from the schema above.
+export type FeedScope = z.infer<typeof FeedScope>;
+// Where a page of the feed starts: after the post with this time and id, or at the newest when both are absent.
+export const FeedCursor = z.object({ before: IsoTime, beforeId: Uuid });
+// The type of FeedCursor, read from the schema above.
+export type FeedCursor = z.infer<typeof FeedCursor>;
+// The query of GET /api/feed: the part, and where the page starts.
+export const FeedQuery = z.object({ scope: FeedScope, before: IsoTime.optional(), beforeId: Uuid.optional() })
+  .refine((query) => (query.before === undefined) === (query.beforeId === undefined), { message: "Give both before and beforeId, or neither." });
+// The type of FeedQuery, read from the schema above.
+export type FeedQuery = z.infer<typeof FeedQuery>;
+// What GET /api/feed returns: up to FEED_PAGE_SIZE posts, newest first, and where the next page starts, or null after the last one.
+export const FeedPage = z.object({ posts: z.array(Post), next: FeedCursor.nullable() });
+// The type of FeedPage, read from the schema above.
+export type FeedPage = z.infer<typeof FeedPage>;
+
 // What one share is: a post for the feed and your profile, or a story for the row of faces for STORY_HOURS.
 export const PostKind = z.enum(["post", "story"]);
 // The type of PostKind, read from the schema above.

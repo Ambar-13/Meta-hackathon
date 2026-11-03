@@ -209,6 +209,7 @@ describe("posts, stories and likes in the database", () => {
       const anonymous = await withNoContext(t.db, async (trx) => ({
         liked: await withNoContext(worker, async (workerTrx) => (await sql`SELECT * FROM liked_posts(10)`.execute(workerTrx)).rows),
         stories: (await sql`SELECT * FROM story_feed(10)`.execute(trx)).rows,
+        feed: (await sql`SELECT * FROM feed_posts(false, null, null, 10)`.execute(trx)).rows,
         visible: (await sql<{ visible: boolean }>`SELECT post_is_visible(${postId}::uuid) AS visible`.execute(trx)).rows[0]?.visible,
       }));
 
@@ -217,7 +218,7 @@ describe("posts, stories and likes in the database", () => {
       expect(seenByWriter).toEqual([]);
       expect(likedByA).toEqual([{ display_name: "Test B", text: "Sundays are for planning.", has_photo: false }]);
       expect(likedByB).toEqual([]);
-      expect(anonymous).toEqual({ liked: [], stories: [], visible: false });
+      expect(anonymous).toEqual({ liked: [], stories: [], feed: [], visible: false });
     } finally {
       await asPerson(t.db, y.b.personId, (trx) => trx.deleteFrom("posts").where("id", "=", postId).execute());
     }

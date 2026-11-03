@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { ContractError, DirectoryPage, ErrorBody, FriendRequestAcceptResponse, FriendRequestCreateResponse, FriendRequestsView, FriendsView, HomeView, MyPhoto, MyPostsView, OrchestratorMessage, OrchestratorSendResponse, OrchestratorThread, PostCreated, PostLiked, PostsView, PROFILE_PHOTO_MAX_BYTES, ProfileView, routes, SESSION_COOKIE, SHARES_PER_DAY, StoriesView } from "@meet-first/contracts";
+import { ContractError, DirectoryPage, ErrorBody, FEED_PAGE_SIZE, FeedPage, FriendRequestAcceptResponse, FriendRequestCreateResponse, FriendRequestsView, FriendsView, HomeView, MyPhoto, MyPostsView, OrchestratorMessage, OrchestratorSendResponse, OrchestratorThread, PostCreated, PostLiked, PostsView, PROFILE_PHOTO_MAX_BYTES, ProfileView, routes, SESSION_COOKIE, SHARES_PER_DAY, StoriesView } from "@meet-first/contracts";
 import { withPerson } from "@meet-first/db";
 import { createPairedMeetingWithTurns, createTestPerson, type SeededMeeting } from "@meet-first/db/testing";
 import { registerAsksRoutes } from "../asks/index.js";
@@ -489,3 +489,66 @@ describe("sharing posts and stories, and likes", () => {
     expect((await shared)?.statusCode).toBe(201);
   });
 });
+
+describe("Home's feed a page at a time", () => {
+  // A friend pair listed in Explore, and someone listed who is friends with neither.
+  let pair: SeededMeeting;
+  let stranger: SeededMeeting;
+  let listingFriend: string;
+  let listingStranger: string;
+
+  beforeAll(async () => {
+    pair = await createPairedMeetingWithTurns(t.db);
+    stranger = await createPairedMeetingWithTurns(t.db);
+    await listMember(pair.a.personId, pair.a.cardId, "Reads the feed.");
+    listingFriend = await listMember(pair.b.personId, pair.b.cardId, "Posts a lot.");
+    listingStranger = await listMember(stranger.a.personId, stranger.a.cardId, "A stranger who posts.");
+  });
+
+  // One page of the feed as pair.a reads it.
+  async function feedPage(query: string): Promise<{ statusCode: number; page: FeedPage | null }> {
+    const response = await send({ method: "GET", url: `${routes.social.listFeed.path}?${query}`, token: pair.a.sessionToken });
+    return { statusCode: response.statusCode, page: response.statusCode === 200 ? FeedPage.parse(response.body) : null };
+  }
+
+  // One page of the feed that must answer 200.
+  async function okPage(query: string): Promise<FeedPage> {
+    const { page } = await feedPage(query);
+    if (page === null) throw new Error(`the feed page ${query} did not answer 200`);
+    return page;
+  }
+
+  it("W7-FEED-API-T1: friends' posts and your own come first, a page at a time with no post lost between pages, even two in the same millisecond; everyone else's come apart", async () => {
+    const minute = 60_000;
+    const base = Date.parse("2026-11-03T10:00:00.000Z");
+    const friendPosts = [...Array(8).keys()].map((index) => ({ person_id: pair.b.personId, text: `Friend post ${String(index)}`, created_at: new Date(base + (20 - index) * minute) }));
+    await withPerson(t.db, pair.b.personId, (trx) => trx.insertInto("posts").values([
+      ...friendPosts,
+      { person_id: pair.b.personId, text: "Same millisecond, later", created_at: "2026-11-03T10:00:00.123456Z" },
+      { person_id: pair.b.personId, text: "Same millisecond, earlier", created_at: "2026-11-03T10:00:00.123300Z" },
+    ]).execute());
+    await withPerson(t.db, pair.a.personId, (trx) => trx.insertInto("posts").values({ person_id: pair.a.personId, text: "My own post", created_at: new Date(base + 30 * minute) }).execute());
+    await withPerson(t.db, stranger.a.personId, (trx) => trx.insertInto("posts").values({ person_id: stranger.a.personId, text: "A stranger's post", created_at: new Date(base + 40 * minute) }).execute());
+
+    const first = await okPage("scope=friends");
+    if (first.next === null) throw new Error("the first page of friends' posts has no next page");
+    const second = await okPage(`scope=friends&before=${encodeURIComponent(first.next.before)}&beforeId=${first.next.beforeId}`);
+    const others = await okPage("scope=others");
+    const friendsTexts = [...first.posts, ...second.posts].map((post) => post.text);
+
+    expect(first.posts).toHaveLength(FEED_PAGE_SIZE);
+    expect(first.posts[0]).toMatchObject({ text: "My own post", isMine: true });
+    expect(friendsTexts).toEqual(["My own post", ...friendPosts.map((post) => post.text), "Same millisecond, later", "Same millisecond, earlier"]);
+    expect(second.next).toBeNull();
+    expect(second.posts.every((post) => post.listingId === listingFriend)).toBe(true);
+    expect(others.posts.some((post) => post.text === "A stranger's post" && post.listingId === listingStranger)).toBe(true);
+    expect(others.posts.some((post) => post.listingId === listingFriend || post.isMine === true)).toBe(false);
+  });
+
+  it("W7-FEED-API-T2: a query with no part, an unknown part, or a start with only half its cursor is 400", async () => {
+    const statuses = await Promise.all(["", "scope=everyone", "scope=friends&before=2026-11-03T10:00:00.000Z", `scope=others&beforeId=${pair.pairId}`].map(async (query) => (await feedPage(query)).statusCode));
+
+    expect(statuses).toEqual([400, 400, 400, 400]);
+  });
+});
+

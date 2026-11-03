@@ -1,4 +1,4 @@
-import { DirectoryListing, DirectoryPage, FriendRequestsView, FriendsView, PostsView, StoriesView, type Friend, type FriendRequestView, type HomeView, type Post, type Story } from "@meet-first/contracts";
+import { DirectoryListing, DirectoryPage, FeedPage, FriendRequestsView, FriendsView, PostsView, StoriesView, type Friend, type FriendRequestView, type HomeView, type Post, type Story } from "@meet-first/contracts";
 import { ROUTE_PATTERNS, routes } from "../../../app-shell/index.js";
 import { FeedScreen, SearchScreen } from "../../../screens/explore/index.js";
 import { FOREVER_MS, type GalleryReply, type GalleryStub } from "../fetch-stub.js";
@@ -99,11 +99,17 @@ function postsReply(posts: Post[]): GalleryReply {
   return { status: 200, body: PostsView.parse({ posts }) };
 }
 
-// The page's reads: these Explore replies, these posts and stories (none unless given), these friends (the rail's five unless given),
-// and Ana's home view.
-function reads(pages: GalleryReply | GalleryReply[], others: { posts?: GalleryReply; stories?: Story[]; friends?: Friend[] } = {}): GalleryStub[] {
+// The feed's two parts as GET /api/feed answers them, one page each: the friends' posts, then everyone else's.
+function feedReplies(friendsPosts: Post[], otherPosts: Post[]): GalleryReply[] {
+  return [friendsPosts, otherPosts].map((posts) => ({ status: 200, body: FeedPage.parse({ posts, next: null }) }));
+}
+
+// The page's reads: these Explore replies, these posts and stories (none unless given), the feed (Jun's posts as a friend's, then the
+// rest, unless given), these friends (the rail's five unless given), and Ana's home view.
+function reads(pages: GalleryReply | GalleryReply[], others: { posts?: GalleryReply; feed?: GalleryReply[]; stories?: Story[]; friends?: Friend[] } = {}): GalleryStub[] {
   return [
     ...railStubs(others.friends ?? railFriends(5)), { route: routes.directory.browse, replies: pages }, { route: routes.social.listPosts, replies: others.posts ?? postsReply([]) },
+    { route: routes.social.listFeed, replies: others.feed ?? feedReplies([], []) },
     { route: routes.social.listStories, replies: { status: 200, body: StoriesView.parse({ stories: others.stories ?? [] }) } }, { route: routes.people.readHome, replies: { status: 200, body: FEED_HOME } },
   ];
 }
@@ -126,7 +132,10 @@ function searchView(head: { name: string; title: string }, stubs: GalleryStub[],
 export const views: readonly GalleryView[] = [
   feedView(
     { name: "home-feed", title: "Home, the feed" },
-    reads(page([...EXPLORE_LISTINGS.slice(0, 1), ...SAMPLE_LISTINGS], false), { posts: postsReply(SAMPLE_POSTS.map((post, index) => ({ ...post, isLiked: index === 1 }))), stories: STORIES, friends: FEED_FRIENDS }),
+    reads(page([...EXPLORE_LISTINGS.slice(0, 1), ...SAMPLE_LISTINGS], false), {
+      posts: postsReply(SAMPLE_POSTS), stories: STORIES, friends: FEED_FRIENDS,
+      feed: feedReplies(SAMPLE_POSTS.filter((post) => post.listingId === JUN.listingId), SAMPLE_POSTS.filter((post) => post.listingId !== JUN.listingId).map((post, index) => ({ ...post, isLiked: index === 0 }))),
+    }),
   ),
   feedView(
     { name: "home-story", title: "Home, Maya's story open" },

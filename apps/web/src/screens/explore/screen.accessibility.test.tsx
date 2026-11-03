@@ -50,13 +50,19 @@ function story(n: number, writer: "Mira" | "Ravi" | "You", hoursAgo: number): St
   };
 }
 
-// What the feed's other reads answer in a test: the replies for GET /api/posts and GET /api/stories, the friends list, and whether the
-// card is approved.
-type OtherReads = { posts?: StubInput[]; stories?: StubInput[]; friends?: FriendsView; hasCard?: boolean };
+// What the feed's other reads answer in a test: the pages of everyone else's posts (posts), or every reply of GET /api/feed in order
+// (feed), the replies of GET /api/stories, the friends list, and whether the card is approved.
+type OtherReads = { posts?: StubInput[]; feed?: StubInput[]; stories?: StubInput[]; friends?: FriendsView; hasCard?: boolean };
+
+// One page of everyone else's posts as GET /api/feed answers it, the last page; an error reply as it is.
+function feedReply(reply: StubInput): StubInput {
+  return "status" in reply ? reply : { posts: (reply as { posts: unknown[] }).posts, next: null };
+}
 
 // Renders Home, the feed, with these replies for GET /api/directory; no posts, no stories, no friends and an approved card unless given.
+// Unless feed is given, the feed answers no posts of friends, then the posts given, as everyone else's.
 function renderFeed(pages: StubInput[], others: OtherReads = {}): void {
-  stubRoute(routes.social.listPosts, others.posts ?? [{ posts: [] }]);
+  stubRoute(routes.social.listFeed, others.feed ?? [{ posts: [], next: null }, ...(others.posts ?? [{ posts: [] }]).map(feedReply)]);
   stubRoute(routes.social.listStories, others.stories ?? [{ stories: [] }]);
   stubRoute(routes.directory.friends, others.friends ?? { friends: [] });
   stubRoute(routes.people.readHome, homeOf(others.hasCard ?? true));
@@ -318,8 +324,9 @@ describe("Home, the feed, against the MSW route stubs (a fake server)", () => {
     expect(like.getAttribute("aria-pressed")).toBe("false");
   });
 
-  it("W7-SHARE-WEB-T5: your own post shows with Like, Posts leading to your own Posts tab and Delete, and no Add friend or Ask", async () => {
+  it("W7-SHARE-WEB-T5: your own post shows with Like, Posts leading to your own Posts tab and Delete, and no Add friend or Ask; Delete asks once more, then takes it out of the feed", async () => {
     const own = { ...post(2, "Mira", 1), displayName: "Ana", listingId: LISTING_IDS.mine, isMine: true, isLiked: false };
+    stubRoute(routes.social.deletePost, { status: 204, body: null });
     renderFeed([page(0, [MIRA], false)], { posts: [{ posts: [own] }] });
     const article = await screen.findByRole("article", { name: "Your post" });
 
@@ -329,5 +336,45 @@ describe("Home, the feed, against the MSW route stubs (a fake server)", () => {
     expect(within(article).getByRole("button", { name: "Delete" })).toBeTruthy();
     expect(within(article).queryByRole("button", { name: /Add .* as a friend/ })).toBeNull();
     expect(within(article).queryByText(/Ask .*'s Meety/)).toBeNull();
+    fireEvent.click(within(article).getByRole("button", { name: "Delete" }));
+    fireEvent.click(within(article).getByRole("button", { name: "Delete" }));
+    await waitFor(() => {
+      expect(screen.queryByRole("article", { name: "Your post" })).toBeNull();
+    });
+    expect(requestsTo(routes.social.deletePost)[0]?.url).toContain(`/api/posts/${own.postId}`);
+  });
+
+  it("W7-FEED-WEB-T1: your friends' posts come first; Show more posts starts where the last page ended; then You're all caught up over Suggested posts, and the end says so", async () => {
+    const cursor = { before: "2026-11-03T09:00:00.123456Z", beforeId: post(1, "Mira", 1).postId };
+    renderFeed([page(0, [MIRA, RAVI], false)], {
+      feed: [{ posts: [post(1, "Mira", 1)], next: cursor }, { posts: [post(2, "Mira", 2)], next: null }, { posts: [post(3, "Ravi", 3)], next: null }],
+    });
+    expect(await screen.findByText("Post number 1 by Mira.")).toBeTruthy();
+    expect(screen.queryByText("You're all caught up")).toBeNull();
+
+    fireEvent.click(await screen.findByRole("button", { name: "Show more posts" }));
+    expect(await screen.findByText("Post number 2 by Mira.")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "You're all caught up" })).toBeTruthy();
+    expect(screen.getByText("You've seen every post from your friends.")).toBeTruthy();
+    fireEvent.click(await screen.findByRole("button", { name: "Show more posts" }));
+    expect(await screen.findByText("Post number 3 by Ravi.")).toBeTruthy();
+
+    const queries = requestsTo(routes.social.listFeed).map((request) => Object.fromEntries(new URL(request.url).searchParams));
+    expect(queries).toEqual([{ scope: "friends" }, { scope: "friends", ...cursor }, { scope: "others" }]);
+    expect(screen.getByRole("heading", { name: "Suggested posts" })).toBeTruthy();
+    expect(await screen.findByText("That's every post for now.")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Show more posts" })).toBeNull();
+    const caughtUp = screen.getByRole("heading", { name: "You're all caught up" });
+    expect(caughtUp.compareDocumentPosition(screen.getByText("Post number 3 by Ravi.")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("W7-FEED-WEB-T2: with no posts by friends, the feed goes straight to everyone else's under Suggested posts, says where friends' posts will show, and shows no caught-up line", async () => {
+    renderFeed([page(0, [MIRA, RAVI], false)], { posts: [{ posts: [post(1, "Ravi", 1)] }] });
+
+    expect(await screen.findByText("Post number 1 by Ravi.")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Suggested posts" })).toBeTruthy();
+    expect(screen.getByText(/Your friends' posts show here first\./)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Find friends in Search" }).getAttribute("href")).toBe("/search");
+    expect(screen.queryByText("You're all caught up")).toBeNull();
   });
 });

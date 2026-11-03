@@ -4,10 +4,10 @@
 import type { FastifyInstance } from "fastify";
 import { sql } from "kysely";
 import { z } from "zod";
-import { EXPLORE_POSTS_MAX, MyPostsView, PostsView, PROFILE_POSTS_MAX, routes, STORIES_MAX, StoriesView, Uuid, type Story } from "@meet-first/contracts";
+import { EXPLORE_POSTS_MAX, FEED_PAGE_SIZE, FeedPage, FeedQuery, MyPostsView, PostsView, PROFILE_POSTS_MAX, routes, STORIES_MAX, StoriesView, Uuid, type Story } from "@meet-first/contracts";
 import { sampleFaceKey, samplePostPhoto, withPerson, type DatabaseTransaction } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
-import { makeNotFoundError } from "../route-errors.js";
+import { makeNotFoundError, makePayloadInvalidError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
 import { personPhoto, photoKeyOf, readListingPhotos, readOwnPhoto, type PhotoIds } from "../home/person-photos.js";
 
@@ -140,6 +140,35 @@ export function registerListStories(app: FastifyInstance, deps: RouteDeps): void
     const stories = await withPerson(deps.db, personId, (trx) => readStories(trx, personId));
     reply.header("cache-control", "no-store");
     return reply.code(200).send(StoriesView.parse({ stories }));
+  });
+}
+
+// One row of feed_posts by its SQL names (migration 0014), with its time to the microsecond as text, so the next page starts exactly
+// after it; a JavaScript Date keeps only milliseconds.
+type FeedRow = PostRow & { cursor_at: string };
+
+// One page of Home's feed and where the next one starts: the first FEED_PAGE_SIZE rows of a read of one more, and a cursor at the last
+// of them when that one more came back.
+async function readFeedPage(trx: DatabaseTransaction, query: FeedQuery): Promise<FeedPage> {
+  const rows = (await sql<FeedRow>`SELECT ${POST_COLUMNS}, to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS cursor_at
+    FROM feed_posts(${query.scope === "friends"}, ${query.before ?? null}::timestamptz, ${query.beforeId ?? null}::uuid, ${FEED_PAGE_SIZE + 1}::int)`.execute(trx)).rows;
+  const page = rows.slice(0, FEED_PAGE_SIZE);
+  const read = await readPosts(trx, page);
+  const last = page[page.length - 1];
+  const next = rows.length > FEED_PAGE_SIZE && last !== undefined ? { before: last.cursor_at, beforeId: last.post_id } : null;
+  return FeedPage.parse({ posts: toPostsView(read.rows, read.photos).posts, next });
+}
+
+// Registers GET /api/feed: 200 FeedPage, one page of Home's feed (FeedQuery): your friends' posts and your own, or everyone else's,
+// newest first, FEED_PAGE_SIZE at a time, with where the next page starts; 400 payload_invalid for a query it cannot read.
+export function registerListFeed(app: FastifyInstance, deps: RouteDeps): void {
+  app.get(routes.social.listFeed.path, async (request, reply) => {
+    const personId = requirePerson(request);
+    const query = FeedQuery.safeParse(request.query);
+    if (!query.success) throw makePayloadInvalidError();
+    const page = await withPerson(deps.db, personId, (trx) => readFeedPage(trx, query.data));
+    reply.header("cache-control", "no-store");
+    return reply.code(200).send(page);
   });
 }
 
