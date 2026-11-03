@@ -4,8 +4,9 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { SummaryPointView } from "@meet-first/contracts";
 import { makeDatabase, POOL_SIZE, withPerson, type Database } from "@meet-first/db";
 import { createTestPerson, freshTestDatabase, type TestDatabase } from "@meet-first/db/testing";
-import type { LiveCaller } from "@meet-first/llm";
+import { LimiterBusy, type LiveCaller } from "@meet-first/llm";
 import { normQuote } from "@meet-first/receipts";
+import type { JobContext } from "../job-context.js";
 import { makeTestJobContext, runJobOnce } from "../testing/index.js";
 
 let fresh: TestDatabase;
@@ -87,6 +88,16 @@ describe("the check_summary job", () => {
     expect(point?.found).toMatchObject({ quote: "Rentably was never a bad idea, the timing was just early.", turnIndex: 1 });
   });
 
+  it("W7-SUMMARY-JOB-T8: a quote that names someone is found in the message that holds that person's own role token, as the message has it", async () => {
+    const summary = ["Kind: avoid", "Topic: Cofounder", "Point: Will not work with a past cofounder again.", "Strength: strong", "Quote: I will never work with Leon again"].join("\n");
+    const personId = await seedPerson("Summary Names", { messages: ["I had pasta for lunch today, nothing special.", "honestly I will never work with [person:co-founder] again, it was a mess"], summary });
+
+    await check(personId, namesModel([{ text: "Leon", role: "cofounder" }]));
+    const [point] = (await summaryOf(personId)).points;
+
+    expect(point?.found).toMatchObject({ quote: "I will never work with [person:co-founder] again", turnIndex: 1 });
+  });
+
   it("W7-SUMMARY-JOB-T3: a quote in no stored message, or under 20 characters, leaves the point not found", async () => {
     const summary = [
       ["Kind: view", "Point: Likes long walks.", "Quote: i walk ten kilometres every single morning"].join("\n"),
@@ -118,5 +129,29 @@ describe("the check_summary job", () => {
 
     expect(after.state).toBe("failed");
     expect(after.points).toEqual([]);
+  });
+
+  it("W7-SUMMARY-JOB-T7: the names call shows each block of the summary as a labelled message, as the names prompt expects", async () => {
+    const personId = await seedPerson("Summary Labels", { messages: [], summary: ["Kind: view", "Point: Rentably was never a bad idea.", "", "Kind: habit", "Point: Writes before checking messages."].join("\n") });
+    const seen: string[] = [];
+    const names = namesModel([]);
+    const capturing: LiveCaller = (request, signal) => {
+      const messages = request.body.messages as Array<{ role: string; content: string }>;
+      seen.push(messages.find((message) => message.role === "user")?.content ?? "");
+      return names(request, signal);
+    };
+
+    await check(personId, capturing);
+
+    expect(seen[0]).toContain("<source_turns>\n[t:0] Kind: view\nPoint: Rentably was never a bad idea.\n\n[t:1] Kind: habit\nPoint: Writes before checking messages.\n</source_turns>");
+  });
+
+  it("W7-SUMMARY-JOB-T6: a full token window leaves the summary checking and hands the job back to run again", async () => {
+    const personId = await seedPerson("Summary Busy", { messages: [], summary: ["Kind: view", "Point: Rentably was never a bad idea."].join("\n") });
+    const { context } = makeTestJobContext({ db: workerDb });
+    const busy: JobContext = { ...context, llm: { ...context.llm, complete: () => Promise.reject(new LimiterBusy(Date.now() + 5_000)) } };
+
+    await expect(runJobOnce(busy, "check_summary", { personId })).rejects.toBeInstanceOf(LimiterBusy);
+    expect((await summaryOf(personId)).state).toBe("checking");
   });
 });

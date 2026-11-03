@@ -4,7 +4,7 @@
 import type { Kysely } from "kysely";
 import { NamesPassOutput, SUMMARY_MAX_CHARS, type SummaryPointView } from "@meet-first/contracts";
 import { withPerson, type Database } from "@meet-first/db";
-import { CapReached } from "@meet-first/llm";
+import { CapReached, LimiterBusy } from "@meet-first/llm";
 import { parseSummary } from "@meet-first/parsers";
 import { applyRoleTokens, assignTokens, isAllowlisted, namesPassCall, namesPassRetryAt, PROTECTED_TOKEN } from "../cards/index.js";
 import type { JobContext, JobTask } from "../job-context.js";
@@ -25,14 +25,23 @@ async function readSummaryInput(db: Kysely<Database>, personId: string): Promise
   });
 }
 
-// The names in the summary, from one names call. A daily cap runs the job again after midnight UTC; any other failure ends as failed.
+// The summary as the names prompt expects its messages: each block of fields on its own, after its label [t:N], with a blank line
+// between blocks. The names come back as text, so the labels never reach the stored summary.
+function labelledBlocks(text: string): string {
+  const blocks = text.split(/\n\s*\n/u).map((block) => block.trim()).filter((block) => block !== "");
+  return blocks.map((block, index) => `[t:${String(index)}] ${block}`).join("\n\n");
+}
+
+// The names in the summary, from one names call. A full token window is thrown on, so the job runs again in 5 s, as every job does; a
+// daily cap runs the job again after midnight UTC; any other failure, after the client's own retry, ends as failed.
 async function findSummaryNames(context: JobContext, personId: string, input: SummaryInput): Promise<NamesOutcome> {
   const allowlist = [input.displayName, ...input.affiliations].map((entry) => entry.replace(/\s+/g, " ").trim());
   try {
-    const reply = await context.llm.complete({ ...namesPassCall({ allowlist, chunkText: input.text }), ledger: { personId, meetingId: null } });
+    const reply = await context.llm.complete({ ...namesPassCall({ allowlist, chunkText: labelledBlocks(input.text) }), ledger: { personId, meetingId: null } });
     const parsed = NamesPassOutput.safeParse(reply.parsed);
     return parsed.success ? { names: parsed.data.names } : "failed";
   } catch (error) {
+    if (error instanceof LimiterBusy) throw error;
     if (error instanceof CapReached && error.code === "daily_cap_reached") {
       await context.enqueue("check_summary", { personId }, { runAt: namesPassRetryAt(context.now()) });
       return "capped";
