@@ -1,38 +1,44 @@
-/* The signed-in frame, after Instagram's 2026 web app (Ambar's screenshot of 3 Nov 2026): on a laptop a narrow white rail of line
-   icons, the logo at its top, the pages in the middle and Settings at its foot, each icon's words shown beside it on hover; on a phone a
-   top bar with the logo and Settings, and a bottom bar of icons with a hairline above it. Pages without a session keep app.css's frame. */
+/* The signed-in frame. On a laptop (1200px and wider) a sidebar after the "Other" concept Ambar liked on 3 Nov 2026: the Meet First mark
+   and words with the tagline under them, the pages with their words, Invite a friend, Settings at the foot, and a line on what your
+   Meety shares. Between 768px and 1200px the narrow Instagram rail of icons, each icon's words on hover. On a phone a top bar with the
+   logo and Settings, and a bottom bar of icons with their words. Pages without a session keep app.css's frame. Spacing is on a 4px grid. */
 
 .social-pages .page-word { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 .social-pages .page-icon { position: relative; display: inline-grid; place-items: center; }
-.count-pill { position: absolute; top: -7px; right: -11px; display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px;
+.count-pill { position: absolute; top: -7px; right: -11px; display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px;
   background: var(--ui-red); color: var(--ui-bg); box-shadow: 0 0 0 2px var(--ui-bg); font: 700 13px/1 var(--ui-font); }
-.social-frame .logo { font-family: "Bricolage Grotesque Variable", system-ui, sans-serif; font-weight: 800; letter-spacing: -0.04em; color: var(--ui-ink); }
+.social-frame .logo, .rail-wordmark { font-family: "Bricolage Grotesque Variable", system-ui, sans-serif; font-weight: 800; letter-spacing: -0.04em; color: var(--ui-ink); }
+/* The sidebar's words, Invite and foot show only on a laptop. Invite is a link in the nav, so it needs the nav links' weight to stay hidden. */
+.rail-wordmark, .rail-tagline, .rail-foot, .social-pages.tab-bar a.rail-invite { display: none; }
 
-/* ---------- phone and tablet: the top bar with Settings, and the icon bar at the bottom ---------- */
+/* ---------- phone: the top bar with Settings, and the bottom bar of icons with their words ---------- */
 @media (max-width: 767.98px) {
-  .social-frame { --tab-bar: 58px; }
-  .social-rail .rail-logo, .social-pages .rail-only { display: none; }
-  .social-frame .social-top { height: 56px; padding: 0 6px 0 16px; background: color-mix(in oklch, var(--ui-bg) 94%, transparent); box-shadow: 0 1px 0 var(--ui-line); }
+  .social-frame { --tab-bar: 64px; }
+  .social-rail .rail-logo, .social-pages.tab-bar a.rail-only { display: none; }
+  .social-frame .social-top { height: 56px; padding: 0 4px 0 16px; background: color-mix(in oklab, var(--ui-bg) 94%, transparent); box-shadow: 0 1px 0 var(--ui-line); }
   .social-top .logo { font-size: 21px; }
   .top-settings { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; color: var(--ui-ink); }
   .top-settings:hover { background: var(--ui-soft); text-decoration: none; }
-  .social-pages.tab-bar { left: 0; right: 0; bottom: 0; justify-content: space-around; gap: 0; margin: 0; padding: 2px 8px calc(2px + env(safe-area-inset-bottom, 0px));
-    border-radius: 0; background: color-mix(in oklch, var(--ui-bg) 97%, transparent); box-shadow: 0 -1px 0 var(--ui-line); }
-  .social-pages.tab-bar a { flex: 1; max-width: 96px; min-height: 52px; padding: 0; border-radius: 12px; color: var(--ui-ink); }
+  .social-pages.tab-bar { left: 0; right: 0; bottom: 0; justify-content: space-around; gap: 0; margin: 0; padding: 4px 8px calc(4px + env(safe-area-inset-bottom, 0px));
+    border-radius: 0; background: color-mix(in oklab, var(--ui-bg) 97%, transparent); box-shadow: 0 -1px 0 var(--ui-line); }
+  .social-pages.tab-bar a { flex: 1; max-width: 96px; min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    padding: 0; border-radius: 12px; color: var(--ui-ink-2); }
   .social-pages.tab-bar a:hover { background: var(--ui-soft); }
-  .social-pages.tab-bar a[aria-current="page"] { background: none; box-shadow: none; }
+  .social-pages.tab-bar a[aria-current="page"] { background: none; box-shadow: none; color: var(--ui-ink); }
+  .social-pages.tab-bar .page-word { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; clip-path: none; font: 500 13px/16px var(--ui-font); }
+  .social-pages.tab-bar a[aria-current="page"] .page-word { font-weight: 600; }
 }
 
-/* ---------- laptop and tablet: the icon rail on the left ---------- */
+/* ---------- 768px and wider: the rail on the left ---------- */
 @media (min-width: 768px) {
   :root { --tab-bar: 0px; }
   .social-frame { --tab-bar: 0px; }
   /* Two classes, so app.css's .top-bar { display: flex }, which can come later in the built stylesheet, never shows the phone bar here. */
   .social-frame .social-top { display: none; }
   .social-rail { position: fixed; z-index: 30; top: 0; bottom: 0; left: 0; width: 72px; display: flex; flex-direction: column; align-items: center;
-    padding: 22px 0 18px; background: var(--ui-bg); box-shadow: 1px 0 0 var(--ui-line); }
+    padding: 20px 0 16px; background: var(--ui-bg); box-shadow: 1px 0 0 var(--ui-line); }
   .rail-logo { display: inline-grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; font-size: 28px; }
-  .rail-logo:hover { background: var(--ui-soft); }
+  .rail-logo:hover { background: var(--ui-soft); text-decoration: none; }
   .rail-logo .stk { display: inline-block; }
   .social-body { padding-left: 72px; }
 
@@ -44,8 +50,36 @@
   .social-pages.tab-bar a.rail-only { margin-top: auto; }
   .social-pages.tab-bar a:hover { background: var(--ui-soft); text-decoration: none; }
   .social-pages.tab-bar a[aria-current="page"] { background: none; box-shadow: none; }
-  /* The words beside the icon, on hover and on keyboard focus, as a small dark label. */
+}
+
+/* ---------- 768px to 1200px: each icon's words beside it on hover and on keyboard focus, as a small dark label ---------- */
+@media (min-width: 768px) and (max-width: 1199.98px) {
   .social-pages.tab-bar a::after { content: attr(data-label); position: absolute; left: calc(100% + 10px); top: 50%; translate: 0 -50%; padding: 6px 10px; border-radius: 8px;
     background: var(--ui-ink); color: var(--ui-bg); font: 600 13px/1 var(--ui-font); white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.12s var(--ease); }
   .social-pages.tab-bar a:hover::after, .social-pages.tab-bar a:focus-visible::after { opacity: 1; }
+}
+
+/* ---------- 1200px and wider: the sidebar with words ---------- */
+@media (min-width: 1200px) {
+  .social-rail { width: 248px; align-items: stretch; padding: 28px 20px 20px; }
+  .social-body { padding-left: 248px; }
+  .rail-logo { display: flex; align-items: center; gap: 12px; width: auto; height: auto; padding: 4px 8px; font-size: 32px; }
+  .rail-wordmark { display: inline; font-size: 26px; line-height: 1; }
+  .rail-tagline { display: block; margin: 8px 8px 28px; color: var(--ui-ink-2); font-size: 13px; line-height: 20px; }
+  .social-pages.tab-bar { align-items: stretch; gap: 4px; }
+  /* Row, not app.css's column: the icon beside its words. */
+  .social-pages.tab-bar a { display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 16px; width: auto; min-height: 48px; padding: 0 14px;
+    color: var(--ui-ink-2); font: 500 15px/20px var(--ui-font); }
+  .social-pages.tab-bar a:first-child { margin-top: 0; }
+  .social-pages.tab-bar a:hover { color: var(--ui-ink); }
+  .social-pages.tab-bar a[aria-current="page"] { background: var(--ui-soft); color: var(--ui-ink); font-weight: 600; }
+  .social-pages .page-word { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; clip-path: none; }
+  .social-pages .page-icon { position: static; }
+  .social-pages .count-pill { top: 50%; right: 14px; translate: 0 -50%; box-shadow: none; }
+  .social-pages.tab-bar a.rail-invite { display: flex; flex-direction: row; justify-content: space-between; align-items: center; gap: 8px; margin-top: 20px; padding: 0 20px;
+    border-radius: 999px; background: var(--ui-blue); color: var(--ui-bg); font: 600 15px/20px var(--ui-font); }
+  .social-pages.tab-bar a.rail-invite:hover { background: var(--ui-blue-hover); color: var(--ui-bg); }
+  .rail-foot { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 16px 8px 4px; border-top: 1px solid var(--ui-line); }
+  .rail-foot b { display: block; color: var(--ui-ink); font: 600 14px/20px var(--ui-font); }
+  .rail-foot small { display: block; color: var(--ui-ink-2); font: 400 13px/16px var(--ui-font); }
 }

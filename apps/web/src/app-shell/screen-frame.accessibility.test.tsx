@@ -34,7 +34,7 @@ function pageLinks(): Array<[string | null, string | null, string | null]> {
 }
 
 describe("screen frame links", () => {
-  it("W6-DWEB-T37, updated for wave 7: a page that needs a session shows Chat, Explore, Friends and Me, then Settings, and no Directory or Find help", () => {
+  it("W6-DWEB-T37, updated for wave 7: a page that needs a session shows Chat, Explore, Friends and Me, then Invite a friend (the laptop sidebar's) and Settings, and no Directory or Find help", () => {
     renderFrame({ pattern: ROUTE_PATTERNS.card, url: APP_PATHS.card(IDS.card) });
 
     expect(pageLinks().map(([words, href]) => [words, href])).toEqual([
@@ -42,6 +42,7 @@ describe("screen frame links", () => {
       ["Explore", "/explore"],
       ["Friends", "/friends"],
       ["Me", "/me"],
+      ["Invite a friend", "/pair"],
       ["Settings", "/settings"],
     ]);
     expect(screen.queryByRole("link", { name: "Directory" })).toBeNull();
@@ -82,6 +83,7 @@ describe("screen frame links", () => {
       ["Explore", "/explore", "page"],
       ["Friends", "/friends", null],
       ["Me", "/me", null],
+      ["Invite a friend", "/pair", null],
       ["Settings", "/settings", null],
     ]);
     expect(screen.queryByRole("navigation", { name: "Friends" })).toBeNull();
@@ -103,7 +105,7 @@ describe("screen frame links", () => {
 
     expect(await screen.findByText("The page body.")).toBeTruthy();
     await new Promise((resolve) => setTimeout(resolve, 50));
-    expect(pageLinks()).toHaveLength(5);
+    expect(pageLinks()).toHaveLength(6);
     expect(screen.queryByRole("navigation", { name: "Friends" })).toBeNull();
     expect(screen.queryByRole("alert")).toBeNull();
   });

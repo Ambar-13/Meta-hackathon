@@ -180,7 +180,7 @@ describe("Explore page, against the MSW route stubs (a fake server)", () => {
     expect(suggested.compareDocumentPosition(third) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(within(first).getByText("Post number 1 by Ravi.")).toBeTruthy();
     expect(within(first).getByRole("link", { name: "Ravi" }).getAttribute("href")).toBe(`/people/${LISTING_IDS.ravi}`);
-    expect(within(first).getByRole("link", { name: "More from Ravi" }).getAttribute("href")).toBe(`/people/${LISTING_IDS.ravi}?tab=posts`);
+    expect(within(first).getByRole("link", { name: "Ravi's posts" }).getAttribute("href")).toBe(`/people/${LISTING_IDS.ravi}?tab=posts`);
     expect(within(first).getByText("Sample")).toBeTruthy();
     expect(within(first).getByText("3 hours ago")).toBeTruthy();
     expect(within(first).getByText("Ravi builds small tools")).toBeTruthy();
@@ -227,17 +227,50 @@ describe("Explore page, against the MSW route stubs (a fake server)", () => {
     expect(requestsTo(routes.social.sendFriendRequest)[1]?.body).toEqual({ listingId: LISTING_IDS.mira });
   });
 
-  it("W7-FEED-T2: a friend's post shows no Add friend, and Ask Meety about them opens the chat with their name in the box when their agent can be asked", async () => {
+  it("W7-FEED-T2: a friend's post shows no Add friend, and Ask NAME's Meety opens the chat with their name in the box when their Meety can be asked; for anyone else it says why under the post", async () => {
     const friends: FriendsView = { friends: [{ pairId: LISTING_IDS.request, displayName: "Mira", canAsk: true, listingId: LISTING_IDS.mira }] };
     renderExplore([page(0, [MIRA, RAVI], false)], { posts: [{ posts: [post(1, "Mira", 1), post(2, "Ravi", 2)] }], friends });
     const mirasPost = await screen.findByRole("article", { name: "Mira's post" });
-    const ask = await within(mirasPost).findByRole("link", { name: "Ask Meety about Mira" });
+    const ask = await within(mirasPost).findByRole("link", { name: "Ask Mira's Meety" });
 
     expect(ask.getAttribute("href")).toBe(chatPathWithDraft("How would Mira react to "));
     expect(within(mirasPost).queryByRole("button", { name: /as a friend/ })).toBeNull();
     const ravisPost = screen.getByRole("article", { name: "Ravi's post" });
-    expect(within(ravisPost).queryByRole("link", { name: /Ask Meety/ })).toBeNull();
+    expect(within(ravisPost).queryByRole("link", { name: "Ask Ravi's Meety" })).toBeNull();
     expect(within(ravisPost).getByRole("button", { name: "Add Ravi as a friend" })).toBeTruthy();
     expect(within(screen.getByRole("region", { name: "Suggested for you" })).getByText("Friends")).toBeTruthy();
+    const askRavi = within(ravisPost).getByRole("button", { name: "Ask Ravi's Meety" });
+    fireEvent.click(askRavi);
+
+    expect(askRavi.getAttribute("aria-expanded")).toBe("true");
+    expect(within(ravisPost).getByRole("status").textContent).toBe("Ravi's Meety answers questions from Ravi's friends. Add Ravi as a friend first.");
+  });
+
+  it("W7-NOTE-T3: a post whose writer shared a matching item shows their own words from it, one link to their profile; a post with none shows no line", async () => {
+    const withHardware = DirectoryListing.parse({ ...RAVI, items: [{ kind: "habit", claim: "Writes the rollback before the change", quote: "I write the rollback first. If I can't undo a change, I am not ready" }] });
+    const rollbackPost = { ...post(1, "Ravi", 1), text: "Before every demo I ask one question: what is the undo?" };
+    renderExplore([page(0, [MIRA, withHardware], false)], { posts: [{ posts: [rollbackPost, post(2, "Mira", 2)] }] });
+    const ravisPost = await screen.findByRole("article", { name: "Ravi's post" });
+    const note = await within(ravisPost).findByRole("link", { name: /From what Ravi shared/ });
+
+    expect(note.textContent).toContain("I write the rollback first. If I can't undo a change, I am not ready");
+    expect(note.getAttribute("href")).toBe(`/people/${LISTING_IDS.ravi}`);
+    expect(within(screen.getByRole("article", { name: "Mira's post" })).queryByRole("link", { name: /From what Mira shared/ })).toBeNull();
+  });
+
+  it("W7-RAIL-T1: the right-hand column says what your Meety does with a link to Me, lists people you are not friends with yet, and See everyone opens everyone", async () => {
+    const friends: FriendsView = { friends: [{ pairId: LISTING_IDS.request, displayName: "Mira", canAsk: true, listingId: LISTING_IDS.mira }] };
+    renderExplore([page(0, [MIRA, RAVI], false)], { friends });
+    const rail = await screen.findByRole("complementary", { name: "Your Meety and people you might click with" });
+
+    expect(within(rail).getByRole("heading", { name: "Let your Meety go first." })).toBeTruthy();
+    expect(within(rail).getByRole("link", { name: "See what it shares" }).getAttribute("href")).toBe(APP_PATHS.me);
+    await waitFor(() => {
+      expect(within(rail).queryByRole("link", { name: "Mira" })).toBeNull();
+    });
+    expect(within(rail).getByRole("link", { name: "Ravi" }).getAttribute("href")).toBe(`/people/${LISTING_IDS.ravi}`);
+    fireEvent.click(within(rail).getByRole("button", { name: "See everyone" }));
+
+    expect(await screen.findByRole("heading", { name: "Everyone in Explore" })).toBeTruthy();
   });
 });

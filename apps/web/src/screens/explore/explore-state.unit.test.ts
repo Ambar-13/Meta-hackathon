@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { postAgeWords } from "../people/index.js";
-import { peopleRowAt } from "./explore-state.js";
+import type { DirectoryListing, Post } from "@meet-first/contracts";
+import { keyWords, noteItemFor, peopleRowAt } from "./explore-state.js";
 
 describe("where the suggested people sit in the feed", () => {
   it("W7-SAMPLE-WEB-T6: after the second post, after the last when there are fewer, and first when there are none", () => {
@@ -24,5 +25,36 @@ describe("a post's age in words", () => {
     expect(ago(23 * 3_600_000)).toBe("23 hours ago");
     expect(ago(2 * 86_400_000)).toBe("2 days ago");
     expect(ago(10 * 86_400_000)).toBe("Oct 24");
+  });
+});
+
+// Jun's listing with three public items, and one of Jun's posts with this text.
+const JUN: DirectoryListing = {
+  listingId: "00000000-0000-4000-8000-000000000601",
+  displayName: "Jun",
+  line: "First hackathon.",
+  openToRomance: false,
+  isSample: true,
+  items: [
+    { kind: "goal", claim: "Came to the hackathon to meet people more than to win", quote: "I came to meet people more than to win" },
+    { kind: "habit", claim: "Builds small robots at home", quote: "I build small robots at home, mostly with an Arduino" },
+    { kind: "preference", claim: "Will own the hardware on a team", quote: "If the team needs hardware, I will own it" },
+  ],
+};
+function junPost(text: string): Post {
+  return { postId: "00000000-0000-4000-8000-000000000602", listingId: JUN.listingId, displayName: "Jun", isSample: true, text, createdAt: "2026-11-03T00:00:00.000Z" };
+}
+
+describe("the line under a post, from what its writer shared", () => {
+  it("W7-NOTE-T1: picks the item sharing the most words, the first on a tie, and none when no word is shared or the writer is not loaded", () => {
+    expect(noteItemFor(junPost("Looking for a team that needs someone to own the hardware. I bring an Arduino."), JUN)?.claim).toBe("Will own the hardware on a team");
+    expect(noteItemFor(junPost("Got a two-wheel robot to follow a line tonight."), JUN)?.claim).toBe("Builds small robots at home");
+    expect(noteItemFor(junPost("Great coffee this morning."), JUN)).toBeNull();
+    expect(noteItemFor(junPost("Looking for a team"), undefined)).toBeNull();
+  });
+
+  it("W7-NOTE-T2: key words are four letters or more, not common, without a plural s, and never the writer's own name", () => {
+    expect([...keyWords("Draw the three screens before you write any code")]).toEqual(["draw", "three", "screen", "write", "code"]);
+    expect(noteItemFor(junPost("Jun says hello."), { ...JUN, items: [{ kind: "habit", claim: "Jun likes tea", quote: "Jun here" }] })).toBeNull();
   });
 });

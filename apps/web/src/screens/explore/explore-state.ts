@@ -1,4 +1,4 @@
-import type { PostsView } from "@meet-first/contracts";
+import type { DirectoryListing, Post, PostsView, PublicItem } from "@meet-first/contracts";
 import { apiFetch, routes, usePolledView, type PolledView } from "../../app-shell/index.js";
 import { useAdds, type AddsModel } from "../chat/index.js";
 
@@ -9,6 +9,40 @@ const POSTS_BEFORE_PEOPLE = 2;
 // Example: 5 posts give 2, 1 post gives 1, no posts give 0.
 export function peopleRowAt(postCount: number): number {
   return Math.min(POSTS_BEFORE_PEOPLE, postCount);
+}
+
+// Words too common to tie a post to one of its writer's items.
+const COMMON_WORDS: ReadonlySet<string> = new Set([
+  "about", "after", "again", "also", "before", "being", "been", "does", "done", "every", "from", "have", "here", "into", "just", "like", "more", "most",
+  "much", "only", "over", "some", "than", "that", "their", "them", "then", "there", "they", "this", "those", "very", "what", "when", "where", "which",
+  "while", "will", "with", "would", "your", "yours",
+]);
+
+// The words of a text that can tie it to another: lower case, four letters or more, not common, a plural s taken off, and none of leaveOut.
+// Example: "Draw the three screens" gives draw, three, screen.
+export function keyWords(text: string, leaveOut: ReadonlySet<string> = new Set()): Set<string> {
+  const words = text.toLowerCase().match(/[a-z]+/g) ?? [];
+  const kept = words.filter((word) => word.length >= 4 && !COMMON_WORDS.has(word)).map((word) => (word.length > 4 && word.endsWith("s") ? word.slice(0, -1) : word));
+  return new Set(kept.filter((word) => !leaveOut.has(word)));
+}
+
+// The public item of a post's writer that shares the most words with the post, for the line under it: the first such item on a tie,
+// and null when no item shares a word or the writer is not on the loaded pages. The writer's own name never counts as a shared word.
+// Example: Jun's post "Looking for a team that needs someone to own the hardware" picks "Will own the hardware on a team".
+export function noteItemFor(post: Post, listing: DirectoryListing | undefined): PublicItem | null {
+  if (listing === undefined) return null;
+  const name = keyWords(post.displayName);
+  const postWords = keyWords(post.text, name);
+  let best: PublicItem | null = null;
+  let bestScore = 0;
+  for (const item of listing.items) {
+    const score = [...keyWords(`${item.claim} ${item.quote}`, name)].filter((word) => postWords.has(word)).length;
+    if (score > bestScore) {
+      best = item;
+      bestScore = score;
+    }
+  }
+  return best;
 }
 
 // The newest posts of people in Explore (GET /api/posts), read once when the page opens; a failed read is tried again after 30 s.
