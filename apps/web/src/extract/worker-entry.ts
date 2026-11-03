@@ -1,13 +1,13 @@
 import { ContractError, PERSONA_SIGNAL_LOW, type SourceHeader } from "@meet-first/contracts";
-import { extractOwnTurns, PARSER_VERSION, type ExtractInput } from "@meet-first/parsers";
+import { extractOwnTurns, PARSER_VERSION, type ExtractInput, type SummaryPriority } from "@meet-first/parsers";
 import { SCRUB_VERSION } from "@meet-first/scrub";
 import type { UploadInput, UploadProgress, UploadReady, UploadRefused, UploadRefusalCode } from "./index.js";
 import { scrubForUpload } from "./scrub-preview.js";
 import { buildNdjson, encodeUploadBody } from "./upload-body.js";
 import { FILE_UNREADABLE_SENTENCE, INFLATED_MAX_BYTES, readPickedFile } from "./zip-stream.js";
 
-// What the page sends the worker: one input and the allowlist.
-export type WorkerRequest = { input: UploadInput; allowlist: string[] };
+// What the page sends the worker: one input, the allowlist, and the summary's quotes and topics to keep first when there is one.
+export type WorkerRequest = { input: UploadInput; allowlist: string[]; priority?: SummaryPriority };
 // What the worker sends back: any number of progress messages, then exactly one done message.
 export type WorkerMessage = { type: "progress"; progress: UploadProgress } | { type: "done"; result: UploadReady | UploadRefused };
 // The refusal codes the worker itself can produce; upload_cancelled is produced on the page.
@@ -57,7 +57,7 @@ async function prepare(request: WorkerRequest, onProgress: (progress: UploadProg
   const inputs = await readInputs(request.input, onProgress, reading);
   const kindHint = request.input.kind === "paste" ? "paste" : null;
   onProgress({ stage: "parsing", inflatedBytes: reading.inflatedBytes, keptTurns: 0 });
-  const extracted = extractOwnTurns(inputs, kindHint);
+  const extracted = extractOwnTurns(inputs, kindHint, request.priority);
   onProgress({ stage: "scrubbing", inflatedBytes: reading.inflatedBytes, keptTurns: extracted.turns.length });
   const preview = scrubForUpload(extracted.turns, request.allowlist);
   const header: SourceHeader = {

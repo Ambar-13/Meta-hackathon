@@ -6,6 +6,7 @@ import { CODEX_FILE_NAME, parseCodexRollout } from "./codex-shapes.js";
 import { walkGeneric } from "./generic-walker.js";
 import { computePersonaSignal } from "./persona-signal.js";
 import { rankAndCut } from "./rank-and-cut.js";
+import type { SummaryPriority } from "./summary-format.js";
 
 // One file from the archive or the paste box, already read into memory by the worker.
 export type ExtractInput = { name: string; text: string };
@@ -113,8 +114,9 @@ function withoutRepeats(turns: RawTurn[], seen: Set<string>): RawTurn[] {
 
 // Pulls the uploader's own turns out of any supported export. Throws source_no_own_turns when nothing is found.
 // Order of attempts: ChatGPT 2024 mapping, ChatGPT 2026 messages, Claude chat_messages, generic walker, then notes or paste for plain text.
-// A Codex .jsonl session log goes to the Codex reader, and a message repeated in a later session is kept once.
-export function extractOwnTurns(inputs: ExtractInput[], kindHint: SourceKind | null): ExtractResult {
+// A Codex .jsonl session log goes to the Codex reader, and a message repeated in a later session is kept once. With a summary, its
+// quotes and topics decide first which messages are kept.
+export function extractOwnTurns(inputs: ExtractInput[], kindHint: SourceKind | null, priority?: SummaryPriority): ExtractResult {
   const collected: RawTurn[] = [];
   const seenCodexTexts = new Set<string>();
   let kind: SourceKind | null = null;
@@ -131,7 +133,7 @@ export function extractOwnTurns(inputs: ExtractInput[], kindHint: SourceKind | n
   }
   const candidates = collected.map((turn, index) => ({ ...turn, exportOrder: index, canonical: turn.text }));
   const personaSignal = computePersonaSignal(candidates.map((turn) => turn.canonical));
-  const kept = rankAndCut(candidates);
+  const kept = rankAndCut(candidates, priority);
   const turns: Turn[] = kept.map((turn, index) => ({
     turnIndex: index,
     role: "user",

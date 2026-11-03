@@ -29,6 +29,17 @@ async function gunzipped(body: Blob): Promise<string> {
 }
 
 describe("prepareInWorker", () => {
+  it("W7-SUMMARY-T9: the summary's quotes reach the ranking, so the oldest quoted message is sent even when 10,000 newer ones outrank it", async () => {
+    const prose = "I think the weather is nice today and tomorrow";
+    const blocks = ["rentably was never a bad idea, the timing was just early", ...Array.from({ length: 10_000 }, (value, index) => `${prose} ${String(index)}`)];
+    const priority = { quotes: ["Rentably was never a bad idea, the timing was just early"], topics: [] };
+
+    const ready = readyOf(await prepareInWorker({ input: { kind: "paste", text: blocks.join("\n\n") }, allowlist: [], priority }, () => undefined));
+
+    expect(ready.keptTurns).toBe(10_000);
+    expect(await gunzipped(ready.body)).toContain("rentably was never a bad idea");
+  });
+
   it("D1-T1: a zipped ChatGPT export becomes a body of own turns only", async () => {
     stages.length = 0;
     const zip = zipSync({ "conversations.json": strToU8(chatgpt2024Text) });
