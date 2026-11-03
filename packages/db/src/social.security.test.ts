@@ -147,3 +147,45 @@ describe("the request lists", () => {
     expect(rows[0]?.other_display_name).toBe("Sender 100");
   });
 });
+
+describe("profile photos in the database", () => {
+  // A stand-in for a JPEG: the start and end marks around some bytes, which is all the table checks.
+  const jpeg = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(120, 7), Buffer.from([0xff, 0xd9])]);
+
+  it("W7-PHOTO-DB-T2: a person reads and changes only their own photo row; anyone signed in reads the image by its id, nobody without a person set, and nobody once the owner is deleted", async () => {
+    const photoId = (await asPerson(t.db, y.b.personId, (trx) => trx.insertInto("profile_photos").values({ person_id: y.b.personId, image: jpeg }).returning("id").executeTakeFirstOrThrow())).id;
+    const readAs = async (personId: string) => (await asPerson(t.db, personId, async (trx) => (await sql<{ image: Buffer | null }>`SELECT profile_photo_read(${photoId}::uuid) AS image`.execute(trx)).rows[0]?.image)) ?? null;
+
+    expect(await asPerson(t.db, x.a.personId, (trx) => trx.selectFrom("profile_photos").select("id").execute())).toEqual([]);
+    const forged = await caught(() => asPerson(t.db, x.a.personId, (trx) => trx.insertInto("profile_photos").values({ person_id: y.b.personId, image: jpeg }).execute()));
+    expect(Reflect.get(forged ?? {}, "code")).toBe("42501");
+    const removedByOther = await asPerson(t.db, x.a.personId, (trx) => trx.deleteFrom("profile_photos").where("id", "=", photoId).executeTakeFirst());
+    expect(Number(removedByOther.numDeletedRows)).toBe(0);
+    expect((await readAs(x.a.personId))?.equals(jpeg)).toBe(true);
+    const anonymous = await withNoContext(t.db, async (trx) => (await sql<{ image: Buffer | null }>`SELECT profile_photo_read(${photoId}::uuid) AS image`.execute(trx)).rows[0]?.image);
+    expect(anonymous ?? null).toBeNull();
+    await asPerson(t.db, y.b.personId, (trx) => trx.updateTable("people").set({ state: "deleted" }).where("id", "=", y.b.personId).execute());
+    try {
+      expect(await readAs(x.a.personId)).toBeNull();
+    } finally {
+      await asPerson(t.db, y.b.personId, (trx) => trx.updateTable("people").set({ state: "active" }).where("id", "=", y.b.personId).execute());
+      await asPerson(t.db, y.b.personId, (trx) => trx.deleteFrom("profile_photos").where("person_id", "=", y.b.personId).execute());
+    }
+  });
+
+  it("W7-PHOTO-DB-T3: listing_photo_ids gives a listed person's photo id by listing, and pair_photo_ids gives it only for the caller's own pairs", async () => {
+    const photoId = (await asPerson(t.db, y.a.personId, (trx) => trx.insertInto("profile_photos").values({ person_id: y.a.personId, image: jpeg }).returning("id").executeTakeFirstOrThrow())).id;
+    try {
+      const byListing = await asPerson(t.db, x.a.personId, async (trx) => (await sql<{ listing_id: string; photo_id: string }>`SELECT listing_id, photo_id FROM listing_photo_ids(${[listingYa, listingYb]}::uuid[])`.execute(trx)).rows);
+      const byOwnPair = await asPerson(t.db, y.b.personId, async (trx) => (await sql<{ pair_id: string; photo_id: string }>`SELECT pair_id, photo_id FROM pair_photo_ids(${[y.pairId]}::uuid[])`.execute(trx)).rows);
+      const byOtherPair = await asPerson(t.db, x.a.personId, async (trx) => (await sql<{ pair_id: string }>`SELECT pair_id FROM pair_photo_ids(${[y.pairId]}::uuid[])`.execute(trx)).rows);
+
+      expect(byListing).toEqual([{ listing_id: listingYa, photo_id: photoId }]);
+      expect(byOwnPair).toEqual([{ pair_id: y.pairId, photo_id: photoId }]);
+      expect(byOtherPair).toEqual([]);
+    } finally {
+      await asPerson(t.db, y.a.personId, (trx) => trx.deleteFrom("profile_photos").where("person_id", "=", y.a.personId).execute());
+    }
+  });
+});
+

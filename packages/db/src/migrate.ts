@@ -10,7 +10,7 @@ import { describeError } from "./database-errors.js";
 import type { Database } from "./types.js";
 
 // The schema version this build was written for; the worker refuses to start on any other (D71). Raise it in the same change as each new migration file.
-export const SCHEMA_VERSION = 11;
+export const SCHEMA_VERSION = 12;
 
 // The advisory lock key every migrator takes first, so two migrators never run at once (D71, R12.1).
 export const MIGRATION_LOCK_KEY = 42;

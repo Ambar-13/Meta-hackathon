@@ -4,10 +4,11 @@ import type { FastifyInstance } from "fastify";
 import { sql } from "kysely";
 import { z } from "zod";
 import { ContractError, HTTP, ProfileView, routes, Uuid } from "@meet-first/contracts";
-import { sampleFaceKey, withPerson } from "@meet-first/db";
+import { withPerson } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { makeNotFoundError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
+import { personPhoto, readListingPhotos } from "../home/person-photos.js";
 
 // The :id of GET /api/directory/:id: a listing id. One that is not a uuid is not_found, so a bad id tells nothing.
 const ListingParams = z.object({ id: Uuid });
@@ -18,11 +19,11 @@ export type ProfileRow = {
   friendship: string; request_id: string | null; pair_id: string | null; can_ask: boolean;
 };
 
-// The profile view of one directory_profile row.
-export function toProfileView(row: ProfileRow): ProfileView {
+// The profile view of one directory_profile row, with the photo id of its person when they put up a photo.
+export function toProfileView(row: ProfileRow, photoId?: string): ProfileView {
   return ProfileView.parse({
     listingId: row.listing_id, displayName: row.display_name, line: row.line, openToRomance: row.open_to_romance, isSample: row.is_sample, items: row.items,
-    photo: row.is_sample ? sampleFaceKey(row.display_name) : null,
+    photo: personPhoto({ isSample: row.is_sample, displayName: row.display_name, photoId }),
     friendship: row.friendship, requestId: row.request_id, pairId: row.pair_id, canAsk: row.can_ask,
   });
 }
@@ -33,12 +34,13 @@ export function registerReadProfile(app: FastifyInstance, deps: RouteDeps): void
     const personId = requirePerson(request);
     const params = ListingParams.safeParse(request.params);
     if (!params.success) throw makeNotFoundError();
-    const row = await withPerson(deps.db, personId, async (trx) => {
+    const read = await withPerson(deps.db, personId, async (trx) => {
       const result = await sql<ProfileRow>`SELECT listing_id, display_name, line, open_to_romance, is_sample, items, friendship, request_id, pair_id, can_ask FROM directory_profile(${params.data.id}::uuid)`.execute(trx);
-      return result.rows[0];
+      const row = result.rows[0];
+      return row === undefined ? undefined : { row, photos: await readListingPhotos(trx, [row.listing_id]) };
     });
-    if (row === undefined) throw new ContractError("listing_not_found", "This person is no longer in Explore.", HTTP.notFound);
+    if (read === undefined) throw new ContractError("listing_not_found", "This person is no longer in Explore.", HTTP.notFound);
     reply.header("cache-control", "no-store");
-    return reply.code(200).send(toProfileView(row));
+    return reply.code(200).send(toProfileView(read.row, read.photos.get(read.row.listing_id)));
   });
 }

@@ -159,6 +159,8 @@ export interface OrchestratorMessagesTable {
 }
 // One row of the posts table, as migration 0009 defines it.
 export interface PostsTable { id: Generated<string>; person_id: string; text: string; created_at: GeneratedTimestamp; }
+// One row of the profile_photos table, as migration 0012 defines it: a person's own photo as JPEG bytes.
+export interface ProfilePhotosTable { id: Generated<string>; person_id: string; image: Buffer; created_at: GeneratedTimestamp; }
 // One row of the recall_corpus view, as migration 0001 defines it.
 export interface RecallCorpusView { turn_id: string; person_id: string; source_id: string; text: string; norm_text: string; card_id: string; }
 
@@ -170,5 +172,5 @@ export interface Database {
   briefs: BriefsTable; comics: ComicsTable; comic_panels: ComicPanelsTable; share_pages: SharePagesTable; ledger: LedgerTable; deletions: DeletionsTable;
   service_heartbeats: ServiceHeartbeatsTable; schema_migrations: SchemaMigrationsTable; names_passes: NamesPassesTable; source_names: SourceNamesTable; recall_corpus: RecallCorpusView;
   directory_listings: DirectoryListingsTable; persona_asks: PersonaAsksTable; persona_answers: PersonaAnswersTable;
-  friend_requests: FriendRequestsTable; orchestrator_messages: OrchestratorMessagesTable; posts: PostsTable;
+  friend_requests: FriendRequestsTable; orchestrator_messages: OrchestratorMessagesTable; posts: PostsTable; profile_photos: ProfilePhotosTable;
 }

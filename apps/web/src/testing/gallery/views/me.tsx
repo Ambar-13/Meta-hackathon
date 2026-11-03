@@ -53,6 +53,14 @@ function reads(listing: GalleryReply, meetings: unknown): GalleryStub[] {
 export const views: readonly GalleryView[] = [
   { name: "me-listed", title: "Me, in Explore", pattern: ROUTE_PATTERNS.me, url: "/me", element: <MeScreen />, stubs: reads(ok(LISTING), MEETINGS) },
   {
+    name: "me-edit",
+    title: "Me, Edit profile open",
+    pattern: ROUTE_PATTERNS.me,
+    url: "/me",
+    element: <AfterSteps steps={[{ press: "Edit profile" }]}><MeScreen /></AfterSteps>,
+    stubs: reads(ok(LISTING), MEETINGS),
+  },
+  {
     name: "me-meetings",
     title: "Me, the Meetings tab",
     pattern: ROUTE_PATTERNS.me,

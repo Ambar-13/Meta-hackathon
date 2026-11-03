@@ -1,4 +1,4 @@
-import { ErrorBody, routes, SourceCreateResponse } from "@meet-first/contracts";
+import { ErrorBody, routes, SourceCreateResponse, type MyPhoto } from "@meet-first/contracts";
 import { z } from "zod";
 import { setServerOffsetOnce } from "./server-clock.js";
 
@@ -179,6 +179,16 @@ export async function apiUpload(upload: { body: Blob; contentEncoding: "gzip" | 
   const json = await readJson(response);
   if (!response.ok) throw errorFor(response.status, json);
   return parseReply(routes.sources.createSource.response, json, response.status);
+}
+
+// Puts up a profile photo with PUT /api/people/me/photo: the JPEG bytes the browser drew, sent as image/jpeg (3 Nov 2026).
+export async function apiPhotoUpload(photo: Blob, options: Pick<ApiFetchOptions, "fetchImpl" | "origin"> = {}): Promise<MyPhoto> {
+  const url = new URL(routes.people.uploadPhoto.path, options.origin ?? pageOrigin());
+  const init: RequestInit = { method: "PUT", credentials: "same-origin", cache: "no-store", headers: { "Content-Type": "image/jpeg", Accept: "application/json" }, body: photo };
+  const response = await send(url, init, options.fetchImpl ?? fetch);
+  const json = await readJson(response);
+  if (!response.ok) throw errorFor(response.status, json);
+  return parseReply(routes.people.uploadPhoto.response, json, response.status);
 }
 
 // Makes sure a thrown value is an ApiError, so a screen always shows a sentence (4.2.2).

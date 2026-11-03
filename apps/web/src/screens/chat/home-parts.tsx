@@ -139,7 +139,7 @@ export const HomeSide = (props: { home: HomeView | null; friends: readonly Frien
     <aside className="home-side" aria-label="You, your friends and people to meet">
       {props.home === null ? null : (
         <div className="side-row side-me">
-          <PersonAvatar name={props.home.displayName} />
+          <PersonAvatar name={props.home.displayName} photo={props.home.photo} />
           <span className="side-who">
             <Link className="side-name" to={APP_PATHS.me}>{props.home.displayName}</Link>
             <small>Your profile</small>

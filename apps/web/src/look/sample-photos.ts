@@ -1,6 +1,7 @@
 // The sample people's photos (3 Nov 2026): free Unsplash photos picked for their posts, and a face for each of them, which Ambar asked
 // for ("cute human avatars"), each marked as made up. They are bundled into the web build, so the app's own site serves them: its
 // content security policy loads images from itself only. The api names a photo by its key (packages/db/src/samples/sample-photos.ts).
+import { routes } from "@meet-first/contracts";
 import faceJun from "./samples/faces/jun.jpg";
 import faceLeila from "./samples/faces/leila.jpg";
 import faceMaya from "./samples/faces/maya.jpg";
@@ -43,7 +44,14 @@ export function photoOf(key: string | null | undefined): BundledPhoto | null {
   return PHOTOS[key] ?? null;
 }
 
-// The address of a bundled photo by its key; null for no key, or for one this build does not have.
+// The start of the key of a profile photo a person put up themselves (3 Nov 2026), which the api serves by its id.
+const UPLOADED_PREFIX = "photos/";
+
+// The address of a photo by its key: a profile photo a person put up, from GET /api/photos/:id, or a bundled photo; null for no key,
+// or for one this build does not have.
 export function photoUrl(key: string | null | undefined): string | null {
+  if (key !== null && key !== undefined && key.startsWith(UPLOADED_PREFIX)) {
+    return routes.people.readPhoto.path.replace(":id", encodeURIComponent(key.slice(UPLOADED_PREFIX.length)));
+  }
   return photoOf(key)?.src ?? null;
 }

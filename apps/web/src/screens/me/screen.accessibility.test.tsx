@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { CURATED_QUESTIONS, ListedMeetingsView, MyListing, type HomeMeetingRow, type HomeView } from "@meet-first/contracts";
 import { APP_PATHS, clearClientState, ROUTE_PATTERNS, routes } from "../../app-shell/index.js";
@@ -6,6 +6,17 @@ import { renderScreen, requestsTo, stubRoute, type StubInput } from "../../testi
 import { unlabelledControls } from "../../testing/render-screen.js";
 import { IDS, LISTING_IDS, profileView, SERVER_NOW } from "../../testing/fixtures.js";
 import { MeScreen } from "./screen.js";
+
+// The browser's drawing of a picture as a square JPEG, which jsdom cannot do: a picture file gives a small JPEG, any other file the
+// error the browser gives for a file it cannot draw.
+vi.mock("./photo-file.js", async (importOriginal) => {
+  const original = await importOriginal<typeof import("./photo-file.js")>();
+  return {
+    ...original,
+    squareJpeg: (file: Blob): Promise<Blob> =>
+      file.type.startsWith("image/") ? Promise.resolve(new Blob([new Uint8Array([0xff, 0xd8, 0xff, 0xd9])], { type: "image/jpeg" })) : Promise.reject(new original.PhotoFileError("not a picture")),
+  };
+});
 
 beforeEach(() => {
   clearClientState();
@@ -200,4 +211,56 @@ describe("/me, against the MSW route stubs (a fake server)", () => {
     });
     expect(window.innerWidth).toBe(375);
   });
+
+  it("W7-EDIT-T1: Edit profile shows your picture and name; Save name sends the name trimmed and reads you again, and an empty name is refused before any request", async () => {
+    stubMeReads({ home: [home(), home({ displayName: "Ana Rao" })] });
+    stubRoute(routes.people.updateName, { displayName: "Ana Rao" });
+    renderMe();
+    fireEvent.click(within(await header()).getByRole("button", { name: "Edit profile" }));
+    const panel = screen.getByRole("region", { name: "Edit profile" });
+    const name = within(panel).getByRole("textbox", { name: "Name" });
+
+    expect(within(panel).getByLabelText("Add a photo")).toBeTruthy();
+    expect(within(panel).queryByRole("button", { name: "Remove photo" })).toBeNull();
+    fireEvent.change(name, { target: { value: "   " } });
+    fireEvent.click(within(panel).getByRole("button", { name: "Save name" }));
+    expect(within(panel).getByRole("alert").textContent).toBe("Write a name of 1 to 80 characters.");
+    expect(requestsTo(routes.people.updateName)).toHaveLength(0);
+    fireEvent.change(name, { target: { value: "  Ana Rao  " } });
+    fireEvent.click(within(panel).getByRole("button", { name: "Save name" }));
+
+    expect(await within(panel).findByText("Saved. Everyone sees your new name now.")).toBeTruthy();
+    expect(requestsTo(routes.people.updateName)[0]?.body).toEqual({ displayName: "Ana Rao" });
+    expect(await screen.findByRole("heading", { level: 1, name: "Ana Rao" })).toBeTruthy();
+  });
+
+  it("W7-EDIT-T2: with a photo, the header shows it; Change photo sends the square JPEG and Remove photo takes it down, each reading you again; a file that is not a picture is refused before any request", async () => {
+    const withPhoto = home({ photo: "photos/0f3c2a1e-8d4b-4c6f-9a7e-2b1d5c8e9f00" });
+    stubMeReads({ home: [withPhoto, withPhoto, home()] });
+    stubRoute(routes.people.uploadPhoto, { photo: "photos/1a2b3c4d-8d4b-4c6f-9a7e-2b1d5c8e9f00" });
+    stubRoute(routes.people.removePhoto, { photo: null });
+    renderMe();
+    const head = await header();
+
+    expect(head.querySelector(".profile-avatar img")?.getAttribute("src")).toBe("/api/photos/0f3c2a1e-8d4b-4c6f-9a7e-2b1d5c8e9f00");
+    fireEvent.click(within(head).getByRole("button", { name: "Edit profile" }));
+    const panel = screen.getByRole("region", { name: "Edit profile" });
+    const picker = within(panel).getByLabelText("Change photo");
+    fireEvent.change(picker, { target: { files: [new File(["notes"], "notes.txt", { type: "text/plain" })] } });
+    expect(await within(panel).findByRole("alert")).toBeTruthy();
+    expect(within(panel).getByRole("alert").textContent).toBe("That file is not a photo this browser can open. Try a JPEG or PNG.");
+    expect(requestsTo(routes.people.uploadPhoto)).toHaveLength(0);
+    fireEvent.change(picker, { target: { files: [new File(["png"], "me.png", { type: "image/png" })] } });
+
+    expect(await within(panel).findByText("Your new photo is up.")).toBeTruthy();
+    expect(requestsTo(routes.people.uploadPhoto)).toHaveLength(1);
+    fireEvent.click(within(panel).getByRole("button", { name: "Remove photo" }));
+
+    expect(await within(panel).findByText("Your photo is gone.")).toBeTruthy();
+    expect(requestsTo(routes.people.removePhoto)).toHaveLength(1);
+    await waitFor(() => {
+      expect(requestsTo(routes.people.readHome).length).toBeGreaterThanOrEqual(3);
+    });
+  });
 });
+

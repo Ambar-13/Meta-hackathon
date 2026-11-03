@@ -5,6 +5,7 @@ import { sql } from "kysely";
 import { HOME_CARD_ITEMS_MAX, HOME_LIST_MAX, HomeView, type HomeCard, type HomeMeetingRow, type HomePairRow, type HomeSource } from "@meet-first/contracts";
 import type { DatabaseTransaction } from "@meet-first/db";
 import { readMemberNames } from "../meetings/start.js";
+import { readOwnPhoto } from "./person-photos.js";
 
 // The names pair_display_names returns for one pair the caller is in.
 type PairNames = { creator_display_name: string; joiner_display_name: string | null };
@@ -92,6 +93,7 @@ export async function readHomeView(trx: DatabaseTransaction, input: { personId: 
   const person = await trx.selectFrom("people").select("display_name").where("id", "=", input.personId).executeTakeFirstOrThrow();
   return HomeView.parse({
     displayName: person.display_name,
+    photo: await readOwnPhoto(trx, input.personId),
     source: await readHomeSource(trx, input.personId),
     card: await readHomeCard(trx, input.personId),
     meetings: await readHomeMeetings(trx, input.personId),

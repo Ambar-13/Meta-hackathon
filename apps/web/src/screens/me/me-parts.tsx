@@ -1,11 +1,11 @@
 import { useState, type FormEvent, type ReactElement } from "react";
 import { Link } from "react-router-dom";
-import { DIRECTORY_SWITCH_COPY, LISTING_LINE_MAX_CHARS, ROMANCE_SWITCH_COPY, type HomeView, type MyListing } from "@meet-first/contracts";
+import { DIRECTORY_SWITCH_COPY, DISPLAY_NAME_MAX_CHARS, LISTING_LINE_MAX_CHARS, ROMANCE_SWITCH_COPY, type HomeView, type MyListing } from "@meet-first/contracts";
 import { APP_PATHS, ErrorNotice } from "../../app-shell/index.js";
 import { EmptyState, Icon, PersonAvatar } from "../../look/index.js";
 import type { YourListingHook } from "../directory/index.js";
 import { meetingLink, meetingStateWords, nextStepOf, shortDay } from "../home/index.js";
-import { useListingSave, type ListingSaveState } from "./me-state.js";
+import { useListingSave, type EditState, type ListingSaveState, type ProfileEditHook } from "./me-state.js";
 
 // The words of your listing's controls, your next step and your meetings on /me (wave 7).
 const ME_COPY = {
@@ -71,6 +71,57 @@ export const EditListing = (props: { listing: MyListing; yours: YourListingHook;
         <button type="button" className="quiet" disabled={leaveState.kind === "sending"} onClick={() => void props.yours.leave()}>{ME_COPY.leave}</button>
       </div>
       {leaveState.kind === "failed" ? <ErrorNotice error={leaveState.error} /> : null}
+    </section>
+  );
+};
+
+// The line under a change in Edit profile: the refusal, the api's sentence, or that it is done.
+const EditLine = (props: { state: EditState }): ReactElement | null => {
+  const { state } = props;
+  if (state.kind === "refused") return <p className="me-refusal" role="alert">{state.sentence}</p>;
+  if (state.kind === "failed") return <ErrorNotice error={state.error} />;
+  if (state.kind === "done") return <p className="me-done" role="status">{state.sentence}</p>;
+  return null;
+};
+
+// Instagram's Edit profile (3 Nov 2026, Ambar: "i cant change mine own photo and profile dtails"): your picture with Change photo, which
+// opens your photos or camera, and Remove photo while you have one; then your name with Save name. The photo is drawn as a square.
+export const EditProfile = (props: { name: string; photo: string | null; edit: ProfileEditHook }): ReactElement => {
+  const { edit } = props;
+  const [text, setText] = useState(props.name);
+  const isPhotoBusy = edit.photo.kind === "sending";
+  const onName = (event: FormEvent<HTMLFormElement>): void => {
+    event.preventDefault();
+    void edit.saveName(text);
+  };
+  return (
+    <section className="me-edit me-profile" aria-label="Edit profile">
+      <div className="me-photo">
+        <PersonAvatar name={props.name} size="l" photo={props.photo} />
+        <div className="me-photo-actions">
+          <label className={isPhotoBusy ? "btn quiet me-photo-pick is-busy" : "btn quiet me-photo-pick"}>
+            {props.photo === null ? "Add a photo" : "Change photo"}
+            <input type="file" accept="image/*" className="me-file" disabled={isPhotoBusy}
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                event.target.value = "";
+                if (file !== undefined) void edit.putPhoto(file);
+              }} />
+          </label>
+          {props.photo === null ? null : (
+            <button type="button" className="text-button" disabled={isPhotoBusy} onClick={() => void edit.removePhoto()}>Remove photo</button>
+          )}
+        </div>
+      </div>
+      <EditLine state={edit.photo} />
+      <form className="me-name" onSubmit={onName}>
+        <label>
+          Name
+          <input type="text" value={text} maxLength={DISPLAY_NAME_MAX_CHARS} autoComplete="name" onChange={(event) => { setText(event.target.value); }} />
+        </label>
+        <button type="submit" className="quiet" disabled={edit.name.kind === "sending"}>{edit.name.kind === "sending" ? "Saving" : "Save name"}</button>
+      </form>
+      <EditLine state={edit.name} />
     </section>
   );
 };

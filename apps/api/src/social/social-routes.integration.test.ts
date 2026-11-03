@@ -1,9 +1,10 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { ContractError, DirectoryPage, ErrorBody, FriendRequestAcceptResponse, FriendRequestCreateResponse, FriendRequestsView, FriendsView, OrchestratorMessage, OrchestratorSendResponse, OrchestratorThread, PostsView, ProfileView, routes, SESSION_COOKIE } from "@meet-first/contracts";
+import { ContractError, DirectoryPage, ErrorBody, FriendRequestAcceptResponse, FriendRequestCreateResponse, FriendRequestsView, FriendsView, HomeView, MyPhoto, OrchestratorMessage, OrchestratorSendResponse, OrchestratorThread, PostsView, PROFILE_PHOTO_MAX_BYTES, ProfileView, routes, SESSION_COOKIE } from "@meet-first/contracts";
 import { withPerson } from "@meet-first/db";
 import { createPairedMeetingWithTurns, createTestPerson, type SeededMeeting } from "@meet-first/db/testing";
 import { registerAsksRoutes } from "../asks/index.js";
 import { registerDirectoryRoutes } from "../directory/index.js";
+import { registerHomeRoutes } from "../home/index.js";
 import { buildTestApp } from "../testing/index.js";
 import { enqueuedJobs } from "../testing/app-factory.js";
 import { registerSocialRoutes } from "./index.js";
@@ -20,7 +21,7 @@ let listingYb: string;
 let listingXa: string;
 
 beforeAll(async () => {
-  t = await buildTestApp({ routes: [registerDirectoryRoutes, registerAsksRoutes, registerSocialRoutes], env: { APP_ORIGIN: ORIGIN } });
+  t = await buildTestApp({ routes: [registerHomeRoutes, registerDirectoryRoutes, registerAsksRoutes, registerSocialRoutes], env: { APP_ORIGIN: ORIGIN } });
   x = await createPairedMeetingWithTurns(t.db);
   y = await createPairedMeetingWithTurns(t.db);
   listingYb = await listMember(y.b.personId, y.b.cardId, "Plans the week on Sunday.");
@@ -37,7 +38,7 @@ async function listMember(personId: string, cardId: string, line: string): Promi
 }
 
 // One request: method, URL, the session token of the person making it, and a JSON payload.
-type Call = { method: "GET" | "POST"; url: string; token: string; payload?: unknown };
+type Call = { method: "GET" | "POST" | "PUT" | "DELETE"; url: string; token: string; payload?: unknown };
 
 // Makes one request through the app's injector and returns the status and the parsed body.
 async function send(call: Call): Promise<{ statusCode: number; body: unknown }> {
@@ -269,3 +270,72 @@ describe("posts and the sample mark", () => {
     }
   });
 });
+
+describe("Edit profile: the name and the photo", () => {
+  // A stand-in for a JPEG: the start and end marks around some bytes, which is all the api checks.
+  const jpeg = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(200, 9), Buffer.from([0xff, 0xd9])]);
+
+  // Sends raw bytes to a route as one person, with this content type.
+  async function sendBytes(call: { method: "PUT" | "GET" | "DELETE"; url: string; token: string | null; type?: string; body?: Buffer }) {
+    const headers: Record<string, string> = { origin: ORIGIN };
+    if (call.token !== null) headers["cookie"] = `${SESSION_COOKIE}=${call.token}`;
+    if (call.type !== undefined) headers["content-type"] = call.type;
+    return t.app.inject({ method: call.method, url: call.url, headers, ...(call.body === undefined ? {} : { payload: call.body }) });
+  }
+
+  it("W7-PHOTO-API-T2: a JPEG put up is served as image/jpeg to someone else signed in and shows on the listing, the profile, the friends list and the person's own home; taking it down ends all of that", async () => {
+    const put = await sendBytes({ method: "PUT", url: routes.people.uploadPhoto.path, token: y.b.sessionToken, type: "image/jpeg", body: jpeg });
+    const key = MyPhoto.parse(put.json()).photo ?? "";
+    const photoPath = pathOf(routes.people.readPhoto, key.replace("photos/", ""));
+    const served = await sendBytes({ method: "GET", url: photoPath, token: x.a.sessionToken });
+
+    expect(put.statusCode).toBe(200);
+    expect(key).toMatch(/^photos\/[0-9a-f-]{36}$/);
+    expect(served.statusCode).toBe(200);
+    expect(served.headers["content-type"]).toBe("image/jpeg");
+    expect(served.rawPayload.equals(jpeg)).toBe(true);
+    const page = DirectoryPage.parse((await send({ method: "GET", url: routes.directory.browse.path, token: x.a.sessionToken })).body);
+    expect(page.listings.find((listing) => listing.listingId === listingYb)?.photo).toBe(key);
+    expect((await profile(x.a.sessionToken, listingYb)).photo).toBe(key);
+    const friendsOfYa = FriendsView.parse((await send({ method: "GET", url: routes.directory.friends.path, token: y.a.sessionToken })).body).friends;
+    expect(friendsOfYa.find((friend) => friend.pairId === y.pairId)?.photo).toBe(key);
+    expect(HomeView.parse((await send({ method: "GET", url: routes.people.readHome.path, token: y.b.sessionToken })).body).photo).toBe(key);
+
+    const removed = await sendBytes({ method: "DELETE", url: routes.people.removePhoto.path, token: y.b.sessionToken });
+    expect(MyPhoto.parse(removed.json()).photo).toBeNull();
+    expect((await sendBytes({ method: "GET", url: photoPath, token: x.a.sessionToken })).statusCode).toBe(404);
+    expect((await profile(x.a.sessionToken, listingYb)).photo).toBeNull();
+  });
+
+  it("W7-PHOTO-API-T3: bytes that are not a JPEG are 400, a body over the limit is 413, a photo needs a session to read, and an id that is not a photo is 404", async () => {
+    const notJpeg = await sendBytes({ method: "PUT", url: routes.people.uploadPhoto.path, token: y.b.sessionToken, type: "image/jpeg", body: Buffer.alloc(200, 1) });
+    const tooBig = await sendBytes({ method: "PUT", url: routes.people.uploadPhoto.path, token: y.b.sessionToken, type: "image/jpeg", body: Buffer.concat([jpeg, Buffer.alloc(PROFILE_PHOTO_MAX_BYTES, 0)]) });
+    const noSession = await sendBytes({ method: "GET", url: pathOf(routes.people.readPhoto, "00000000-0000-4000-8000-000000000999"), token: null });
+    const unknown = await sendBytes({ method: "GET", url: pathOf(routes.people.readPhoto, "00000000-0000-4000-8000-000000000999"), token: x.a.sessionToken });
+    const notAnId = await sendBytes({ method: "GET", url: pathOf(routes.people.readPhoto, "not-a-uuid"), token: x.a.sessionToken });
+
+    expect(notJpeg.statusCode).toBe(400);
+    expect(tooBig.statusCode).toBe(413);
+    expect(noSession.statusCode).toBe(401);
+    expect(unknown.statusCode).toBe(404);
+    expect(notAnId.statusCode).toBe(404);
+  });
+
+  it("W7-NAME-API-T1: a new name is saved trimmed and shows on the home view and in Explore; an empty or too long name is 400", async () => {
+    const renamed = await send({ method: "PUT", url: routes.people.updateName.path, token: y.b.sessionToken, payload: { displayName: "  Bea Lin  " } });
+    const empty = await send({ method: "PUT", url: routes.people.updateName.path, token: y.b.sessionToken, payload: { displayName: "   " } });
+    const long = await send({ method: "PUT", url: routes.people.updateName.path, token: y.b.sessionToken, payload: { displayName: "a".repeat(81) } });
+    try {
+      expect(renamed.statusCode).toBe(200);
+      expect(renamed.body).toEqual({ displayName: "Bea Lin" });
+      expect(HomeView.parse((await send({ method: "GET", url: routes.people.readHome.path, token: y.b.sessionToken })).body).displayName).toBe("Bea Lin");
+      const page = DirectoryPage.parse((await send({ method: "GET", url: routes.directory.browse.path, token: x.a.sessionToken })).body);
+      expect(page.listings.find((listing) => listing.listingId === listingYb)?.displayName).toBe("Bea Lin");
+      expect(empty.statusCode).toBe(400);
+      expect(long.statusCode).toBe(400);
+    } finally {
+      await send({ method: "PUT", url: routes.people.updateName.path, token: y.b.sessionToken, payload: { displayName: "Test B" } });
+    }
+  });
+});
+

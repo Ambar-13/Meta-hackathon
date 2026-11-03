@@ -10,9 +10,9 @@ const FRIEND = { pairId: "00000000-0000-4000-8000-000000000612", displayName: "M
 const POST = { postId: "00000000-0000-4000-8000-000000000613", listingId: LISTING.listingId, displayName: "Maya", isSample: true, text: "A post.", createdAt: "2026-11-03T00:00:00.000Z" };
 
 describe("photos in the contracts", () => {
-  it("W7-PHOTO-T8: a photo key is a plain lower-case name, or one under faces/, of 64 characters at most; anything else is refused", () => {
-    for (const key of ["faces/maya", "jun-robot", "a"]) expect(PhotoKey.safeParse(key).success).toBe(true);
-    for (const key of ["", "Faces/Maya", "../secrets", "faces/", "faces/maya/x", "https://example.com/a.jpg", "jun robot", "a".repeat(65)]) {
+  it("W7-PHOTO-T8: a photo key is a plain lower-case name, or one under faces/ or photos/, of 64 characters at most; anything else is refused", () => {
+    for (const key of ["faces/maya", "jun-robot", "a", "photos/0f3c2a1e-8d4b-4c6f-9a7e-2b1d5c8e9f00"]) expect(PhotoKey.safeParse(key).success).toBe(true);
+    for (const key of ["", "Faces/Maya", "../secrets", "faces/", "faces/maya/x", "photos/", "photos/../x", "uploads/a", "https://example.com/a.jpg", "jun robot", "a".repeat(65)]) {
       expect(PhotoKey.safeParse(key).success).toBe(false);
     }
   });

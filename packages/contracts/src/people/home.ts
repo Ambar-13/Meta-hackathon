@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { IsoTime, Uuid } from "../primitives.js";
+import { IsoTime, PhotoKey, Uuid } from "../primitives.js";
 import { CardState, ItemKind } from "../cards/card.js";
 import { MeetingState, QuestionKind } from "../meetings/meeting.js";
 
@@ -56,6 +56,8 @@ export type HomePairRow = z.infer<typeof HomePairRow>;
 // beyond the display names already shown in their pairs and meetings.
 export const HomeView = z.object({
   displayName: z.string(),
+  // The person's own profile photo, when they put one up (3 Nov 2026).
+  photo: PhotoKey.nullable().optional(),
   source: HomeSource.nullable(),
   card: HomeCard.nullable(),
   meetings: z.array(HomeMeetingRow).max(HOME_LIST_MAX), // newest first, by createdAt

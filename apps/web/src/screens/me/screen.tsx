@@ -1,13 +1,14 @@
 import "./me.css";
 import { useState, type ReactElement, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import type { HomeView, MyListing } from "@meet-first/contracts";
+import type { HomeView, MyListing, ProfileView } from "@meet-first/contracts";
 import { APP_PATHS, ErrorNotice, ScreenFrame, type PolledView } from "../../app-shell/index.js";
 import { LoadingLine } from "../../look/index.js";
 import { useYourListing, type YourListingHook } from "../directory/index.js";
 import { useHomeView } from "../home/index.js";
 import { ProfileHeader, ProfileTabs, useProfile } from "../people/index.js";
-import { AddChats, EditListing, JoinExplore, MeMeetings, MeNext } from "./me-parts.js";
+import { AddChats, EditListing, EditProfile, JoinExplore, MeMeetings, MeNext } from "./me-parts.js";
+import { useProfileEdit } from "./me-state.js";
 
 // The words of /me (wave 7).
 const ME_SCREEN_COPY = {
@@ -23,38 +24,62 @@ const ME_SCREEN_COPY = {
 // What /me shows under your profile from GET /api/home: the next step, the end of the About tab, and the Meetings tab's panel.
 type MeBelow = { next: ReactNode; aboutEnd: ReactNode; meetings: ReactNode };
 
-// Your profile when you are in Explore: the header as others see it (GET /api/directory/:id, friendship self) with Edit my listing
-// and Your card, your listing controls under it while open, the next step, then the tabs.
-const ListedMe = (props: { listing: MyListing; home: HomeView | null; yours: YourListingHook; below: MeBelow }): ReactElement => {
+// What your header shows when you are in Explore: your name and line as Explore shows them once read, else from your home view and your
+// listing, and your photo.
+function listedHeader(profile: ProfileView | null, home: HomeView | null, listing: MyListing): { name: string; line: string; photo: string | null } {
+  return { name: profile?.displayName ?? home?.displayName ?? ME_SCREEN_COPY.title, line: profile?.line ?? listing.line, photo: home?.photo ?? null };
+}
+
+// Your profile when you are in Explore: the header as others see it (GET /api/directory/:id, friendship self) with Edit profile and
+// Your card; while Edit profile is open, your photo and name, then your listing's line and dating switch; the next step, then the tabs.
+const ListedMe = (props: { listing: MyListing; home: HomeView | null; yours: YourListingHook; below: MeBelow; onChanged: () => void }): ReactElement => {
   const { listing } = props;
   const model = useProfile(listing.listingId);
   const profile = model.profile.value;
   const [isEditing, setIsEditing] = useState(false);
+  const edit = useProfileEdit(() => {
+    props.onChanged();
+    model.profile.reload();
+  });
   const onSaved = (saved: MyListing): void => {
     props.yours.replaceListing(saved);
     model.profile.reload();
   };
+  const { name, line, photo } = listedHeader(profile, props.home, listing);
   return (
     <>
-      <ProfileHeader name={profile?.displayName ?? props.home?.displayName ?? ME_SCREEN_COPY.title} line={profile?.line ?? listing.line}>
+      <ProfileHeader name={name} line={line} photo={photo}>
         <button type="button" className="quiet" aria-expanded={isEditing} onClick={() => { setIsEditing(!isEditing); }}>{ME_SCREEN_COPY.editListing}</button>
         <Link className="btn quiet" to={APP_PATHS.card(listing.cardId)}>{ME_SCREEN_COPY.yourCard}</Link>
       </ProfileHeader>
-      {isEditing ? <EditListing listing={listing} yours={props.yours} onSaved={onSaved} /> : null}
+      {isEditing ? (
+        <>
+          <EditProfile name={name} photo={photo} edit={edit} />
+          <EditListing listing={listing} yours={props.yours} onSaved={onSaved} />
+        </>
+      ) : null}
       {props.below.next}
       <ProfileTabs items={profile?.items ?? listing.items} source={ME_SCREEN_COPY.source} postsName={null} aboutEnd={props.below.aboutEnd} meetings={props.below.meetings} />
     </>
   );
 };
 
-// Your profile when you are not in Explore: your name, the line that says so, the join controls once your card is approved, the next
-// step, then the tabs.
-const UnlistedMe = (props: { home: HomeView | null; yours: YourListingHook; below: MeBelow }): ReactElement => {
+// Your profile when you are not in Explore: your name and photo, the line that says so with Edit profile (your photo and name while
+// open), the join controls once your card is approved, the next step, then the tabs.
+const UnlistedMe = (props: { home: HomeView | null; yours: YourListingHook; below: MeBelow; onChanged: () => void }): ReactElement => {
+  const [isEditing, setIsEditing] = useState(false);
+  const edit = useProfileEdit(props.onChanged);
+  const name = props.home?.displayName ?? ME_SCREEN_COPY.title;
+  const photo = props.home?.photo ?? null;
   return (
     <>
-      <ProfileHeader name={props.home?.displayName ?? ME_SCREEN_COPY.title} line={null}>
+      <ProfileHeader name={name} line={null} photo={photo}>
         <p className="profile-note">{ME_SCREEN_COPY.notListed}</p>
+        {props.home === null ? null : (
+          <button type="button" className="quiet" aria-expanded={isEditing} onClick={() => { setIsEditing(!isEditing); }}>{ME_SCREEN_COPY.editListing}</button>
+        )}
       </ProfileHeader>
+      {isEditing && props.home !== null ? <EditProfile name={name} photo={photo} edit={edit} /> : null}
       <JoinExplore home={props.home} yours={props.yours} />
       {props.below.next}
       <ProfileTabs items={[]} source={ME_SCREEN_COPY.source} postsName={null} aboutEnd={props.below.aboutEnd} meetings={props.below.meetings} />
@@ -90,8 +115,8 @@ export const MeScreen = (): ReactElement => {
       <div className="profile-page">
         {load.kind === "loading" ? <LoadingLine text={ME_SCREEN_COPY.loading} /> : null}
         {load.kind === "failed" ? <><ErrorNotice error={load.error} />{below.next}</> : null}
-        {isReady && load.listing !== null ? <ListedMe listing={load.listing} home={home.value} yours={yours} below={below} /> : null}
-        {isReady && load.listing === null ? <UnlistedMe home={home.value} yours={yours} below={below} /> : null}
+        {isReady && load.listing !== null ? <ListedMe listing={load.listing} home={home.value} yours={yours} below={below} onChanged={home.reload} /> : null}
+        {isReady && load.listing === null ? <UnlistedMe home={home.value} yours={yours} below={below} onChanged={home.reload} /> : null}
       </div>
     </ScreenFrame>
   );
