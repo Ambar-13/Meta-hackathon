@@ -12,7 +12,7 @@ export type MeetingViewRow = { id: string; state: string; phase: string | null; 
 // One member row as the view reads it; the name comes from readMemberNames, not from people.
 export type MemberViewRow = { side: "a" | "b"; person_id: string; ready_at: Date | null; last_seen_at: Date | null };
 
-// Shapes the MeetingView: members in side order with their names, connected when seen within 30 s (watching now, shown only), the caller's side, optional fields left out when null (D53).
+// Shapes the MeetingView: members in side order with their names, connected when seen within 30 s (watching now, shown only), the caller's side, optional fields left out when null.
 export function toMeetingView(meeting: MeetingViewRow, people: { members: readonly MemberViewRow[]; names: { a: string; b: string }; viewerPersonId: string }, now: Date): MeetingView {
   const viewer = people.members.find((member) => member.person_id === people.viewerPersonId);
   if (viewer === undefined) throw makeNotFoundError();

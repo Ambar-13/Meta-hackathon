@@ -3,11 +3,11 @@ import { ItemKind } from "../cards/card.js";
 import { QuestionKind } from "../meetings/meeting.js";
 import { Side } from "../primitives.js";
 
-// Keys a share page must never send, because they would reveal who the people are (R9.4).
+// Keys a share page must never send, because they would reveal who the people are.
 export const FORBIDDEN_SHARE_KEYS = ["person_id", "email", "pair_id"] as const;
 // One supported brief point as the public page shows it: the text and its quotes, with no turn ids (share_read never returns ids).
 const SharedPoint = z.object({ text: z.string(), quotes: z.array(z.object({ text: z.string(), side: Side })).min(1).max(3) });
-// The public snapshot of a meeting. It is strict, so an extra key fails the build (D68).
+// The public snapshot of a meeting. It is strict, so an extra key fails the build.
 export const ShareSnapshot = z
   .object({
     question: z.string(),
@@ -21,7 +21,7 @@ export const ShareSnapshot = z
         claims: z.array(z.object({ text: z.string(), quote: z.string() })),
       }),
     ),
-    brief: z.object({ agree: z.array(SharedPoint), clash: z.array(SharedPoint), decideFirst: z.array(SharedPoint) }), // supported lines only, A1
+    brief: z.object({ agree: z.array(SharedPoint), clash: z.array(SharedPoint), decideFirst: z.array(SharedPoint) }), // supported lines only
     comic: z.array(z.object({ caption: z.string(), imageUrl: z.string() })).optional(),
   })
   .strict();
@@ -40,5 +40,5 @@ export type ConsentResponse = z.infer<typeof ConsentResponse>;
 export const ConsentWithdrawResponse = z.object({ published: z.literal(false) });
 // The type of ConsentWithdrawResponse, read from the schema above.
 export type ConsentWithdrawResponse = z.infer<typeof ConsentWithdrawResponse>;
-// Random bytes in a share slug: 128 bits, which is 22 URL-safe base64 characters (R9.4; the share spec's value, as-built item 37).
+// Random bytes in a share slug: 128 bits, which is 22 URL-safe base64 characters (the share spec's value).
 export const SHARE_SLUG_BYTES = 16;

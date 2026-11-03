@@ -37,8 +37,4 @@ pnpm test:contracts packages/contracts
 
 ## Not built yet
 
-- `sampleQuiz` needs the shuffle rule from the integrator (request `requests/build-w0-contracts-001.md`).
-- `rowToEvent` needs its signature and the row shape from the integrator (request `requests/build-w0-contracts-002.md`).
-- The import of `requestHash` into a contracts test needs a package rule from the integrator (request `requests/build-w0-contracts-003.md`).
-
-This package changes only through `requests/` after the freeze (D75).
+Nothing.

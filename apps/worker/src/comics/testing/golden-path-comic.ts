@@ -13,9 +13,9 @@ import { scriptedRecordedCall, structuredReplyLayout } from "../../meetings/test
 
 // The repository root, from this file's folder five levels down.
 const REPO_ROOT = fileURLToPath(new URL("../../../../../", import.meta.url));
-// The folder of the recorded replies, relative to the repository root (ARCHITECTURE.md section 8).
+// The folder of the recorded replies, relative to the repository root.
 const FIXTURE_DIR = join(REPO_ROOT, "packages/evals/fixtures/model-replies");
-// The fixed captions and image prompts of the golden comic: plain sentences, no name, no email, no run of digits (D65).
+// The fixed captions and image prompts of the golden comic: plain sentences, no name, no email, no run of digits.
 const GOLDEN_PANELS = [
   { caption: "A and B sit down to talk about the work.", image_prompt: "A and B sit at a round wooden table in a sunny garden, both leaning in with calm faces." },
   { caption: "A and B agree on a plan that both can read.", image_prompt: "A and B hold one open notebook between them, both nodding, with a tall window behind them." },
@@ -49,7 +49,7 @@ function positionOf(prompt: unknown): number {
   return Number(match[1]);
 }
 
-// Writes the recorded reply of every call the job makes, and returns the reply the job reads (D74).
+// Writes the recorded reply of every call the job makes, and returns the reply the job reads.
 async function scriptedReply(request: LlmRequest, folder: string, written: string[]): Promise<Record<string, unknown>> {
   const callSite = request.callSite;
   const response: Record<string, unknown> = callSite === "comic_image" ? { data: [{ b64_json: Buffer.from(await panelWebp(positionOf(request.body.prompt))).toString("base64") }] } : structuredReplyLayout({ panels: GOLDEN_PANELS });

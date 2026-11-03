@@ -1,4 +1,4 @@
-// Writes an ask's answer rows once (design section 4 step 3): up to 20 listed personas whose public items match a help search, or the
+// Writes an ask's answer rows once: up to 20 listed personas whose public items match a help search, or the
 // one friend of a friend ask. Subjects are read in their own context and only read; the rows are written in the asker's context.
 import { sql, type Kysely } from "kysely";
 import { HELP_SHORTLIST_MAX } from "@meet-first/contracts";
@@ -9,7 +9,7 @@ import { countAnswers, insertAnswers, lockAsk, readDisplayName, type AskRow, typ
 
 // What choosing the subjects ended with: answer rows exist, nobody can answer this help search, or the friend ask cannot be answered.
 export type SubjectsOutcome = "rows" | "none" | "failed";
-// One row of directory_shortlist (migration 0006; its fourth argument, p_romance_only, is from as-built item 54).
+// One row of directory_shortlist (migration 0006; its fourth argument is p_romance_only).
 type ShortlistRow = { listing_id: string; person_id: string; card_id: string; display_name: string; line: string; match_rank: number };
 
 // Makes sure the ask has its answer rows: rows an earlier run wrote are kept, and otherwise the subjects are chosen and written once.
@@ -35,7 +35,7 @@ async function writeSubjects(trx: DatabaseTransaction, ask: AskRow, subjects: re
 
 // The listed personas of a help search, in shortlist order. The shortlist runs on the worker connection with no person context,
 // because only the worker may run directory_shortlist and it reads every listing (migration 0006). A romance ask reaches only
-// listings open to dating questions (design section 11).
+// listings open to dating questions.
 async function helpSubjects(db: Kysely<Database>, ask: AskRow): Promise<NewAnswer[]> {
   const words = shortlistWords(ask.text);
   if (words.length === 0) return [];
@@ -50,7 +50,7 @@ async function helpSubjects(db: Kysely<Database>, ask: AskRow): Promise<NewAnswe
 }
 
 // One shortlisted persona, read in its owner's context: the display name and the listing's line. Null when the person or the listing
-// is gone, or the listing now names another card, so the shortlist's match no longer holds [confirm].
+// is gone, or the listing now names another card, so the shortlist's match no longer holds.
 async function readListedSubject(db: Kysely<Database>, row: ShortlistRow): Promise<NewAnswer | null> {
   return withPerson(db, row.person_id, async (trx) => {
     const name = await readDisplayName(trx, row.person_id);
@@ -61,7 +61,7 @@ async function readListedSubject(db: Kysely<Database>, row: ShortlistRow): Promi
 }
 
 // The friend of a friend ask: the other member of the ask's invite pair, read in the asker's context, with that friend's most recently
-// approved card whose friends switch is on. "failed" when the pair is missing, not joined or made by the directory, or no such card exists [confirm].
+// approved card whose friends switch is on. "failed" when the pair is missing, not joined or made by the directory, or no such card exists.
 async function friendSubject(db: Kysely<Database>, ask: AskRow): Promise<NewAnswer[] | "failed"> {
   const pairId = ask.pairId;
   if (pairId === null) return "failed";

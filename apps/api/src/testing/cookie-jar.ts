@@ -1,6 +1,6 @@
 // A browser keeps the session cookie and sends it back on the next request; light-my-request does not, so route
-// tests use this jar (docs/contracts.md section 4). Every request it builds also carries the Origin of the test app,
-// because every request the web app sends does, and the Origin check refuses a POST without it (A7) [confirm].
+// tests use this jar. Every request it builds also carries the Origin of the test app,
+// because every request the web app sends does, and the Origin check refuses a POST without it.
 import type { LightMyRequestResponse } from "fastify";
 import { SESSION_COOKIE } from "@meet-first/contracts";
 import { TEST_APP_ORIGIN } from "./app-factory.js";

@@ -9,21 +9,21 @@ import { MAX_INT_COLUMN, type FanOut } from "./listen-fan-out.js";
 import { readPollResponse, type StreamReads } from "./replay-and-poll.js";
 import { connectionKey, createSubscriber, SSE_HEADERS, SSE_PADDING, type ConnectionLimit, type StreamTiming, type Subscriber } from "./subscriber.js";
 
-// A seq as text: 0, or a whole number with no leading zero, at most ten digits (D52).
+// A seq as text: 0, or a whole number with no leading zero, at most ten digits.
 export const SEQ_TEXT_PATTERN = /^(0|[1-9][0-9]{0,9})$/;
-// The :id parameter of the stream (R8.7). A value that is not a uuid is not_found; the schema is local because contracts has no params schemas.
+// The :id parameter of the stream. A value that is not a uuid is not_found; the schema is local because contracts has no params schemas.
 export const MeetingParams = z.object({ id: z.string().uuid() });
-// The query: ?after=n switches the route to the JSON poll (D49). A repeated after is an array, which fails this schema.
+// The query: ?after=n switches the route to the JSON poll. A repeated after is an array, which fails this schema.
 export const EventsQuery = z.object({ after: z.string().optional() });
 // The parts one process shares across its streams.
 export type StreamParts = { fanOut: FanOut; connections: ConnectionLimit<Subscriber>; reads: StreamReads; timing: StreamTiming };
 
-// Reads a seq from text; null when it is not a whole number between 0 and MAX_INT_COLUMN (D52).
+// Reads a seq from text; null when it is not a whole number between 0 and MAX_INT_COLUMN.
 export function readSeqText(text: string): number | null {
   return SEQ_TEXT_PATTERN.test(text) && Number(text) <= MAX_INT_COLUMN ? Number(text) : null;
 }
 
-// Reads Last-Event-ID: absent is 0, so the stream replays from the start (D52); a seq is that seq; anything else is last_event_id_invalid [confirm] (no input says what a bad header does).
+// Reads Last-Event-ID: absent is 0, so the stream replays from the start; a seq is that seq; anything else is last_event_id_invalid.
 export function readLastEventId(header: string | string[] | undefined): number {
   if (header === undefined) {
     return 0;
@@ -35,7 +35,7 @@ export function readLastEventId(header: string | string[] | undefined): number {
   return seq;
 }
 
-// The error for an after value that is not a whole number (D49).
+// The error for an after value that is not a whole number.
 function makePollAfterInvalidError(): ContractError {
   return new ContractError("poll_after_invalid", "The after value must be a whole number. Poll with the last seq you received.", HTTP.badRequest);
 }
@@ -44,7 +44,7 @@ function makePollAfterInvalidError(): ContractError {
 type StreamInput = { request: FastifyRequest; reply: FastifyReply; parts: StreamParts; deps: RouteDeps; meetingId: string; personId: string; lastSeq: number; sessionHash: Buffer };
 
 // True while the session that opened the stream still belongs to this person, and the person is still in a meeting
-// that is not deleted (A7, invariant 21, R9.6). Two reads: the session hash through auth_person_for_session, and the
+// that is not deleted. Two reads: the session hash through auth_person_for_session, and the
 // membership and the meeting's state in withPerson.
 async function stillAllowed(input: { deps: RouteDeps; parts: StreamParts; sessionHash: Buffer; personId: string; meetingId: string }): Promise<boolean> {
   const holder = await findPersonForSessionHash(input.deps.db, input.sessionHash);
@@ -56,7 +56,7 @@ async function stillAllowed(input: { deps: RouteDeps; parts: StreamParts; sessio
 }
 
 // Writes the padding and wires the subscriber to the response, the fan-out, the connection limit and the session
-// re-check (D50, D51, D52, A7).
+// re-check.
 function openStream(input: StreamInput): void {
   const { request, reply, parts, deps, meetingId, personId, lastSeq, sessionHash } = input;
   reply.hijack();
@@ -99,7 +99,7 @@ function openStream(input: StreamInput): void {
   subscriber.start();
 }
 
-// Registers GET /api/meetings/:id/events: the SSE stream (ARCHITECTURE.md 6.1), or the JSON poll when ?after= is present (6.4).
+// Registers GET /api/meetings/:id/events: the SSE stream, or the JSON poll when ?after= is present.
 export function registerEventsRoute(app: FastifyInstance, deps: RouteDeps, parts: StreamParts): void {
   app.get(routes.meetings.events.path, async (request, reply) => {
     const personId = requirePerson(request);

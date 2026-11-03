@@ -6,7 +6,7 @@ import type { GalleryView } from "../gallery-views.js";
 import { AfterSteps } from "./help.js";
 import { IDS, SERVER_NOW } from "../../fixtures.js";
 
-// The gallery's fixed ids for the rail, which the other wave 7 views reuse.
+// The gallery's fixed ids for the rail, which the other views reuse.
 const ID = (n: number): string => `00000000-0000-4000-8000-${String(950 + n).padStart(12, "0")}`;
 // Fourteen first names, so the rail shows 12 and then See all friends.
 const NAMES = ["Bea", "Cal", "Jonah", "Maximiliana", "Ola", "Pim", "Ravi", "Sung-min", "Tomasz", "Uma", "Vik", "Wren", "Yara", "Zed"];
@@ -42,7 +42,7 @@ export const EXPLORE_LISTINGS: DirectoryListing[] = [
   { listingId: LISTING(6), displayName: "Sung-min", line: "First hackathon, here to meet people.", openToRomance: false, isSample: false, items: [{ kind: "boundary", claim: "Done by 9 pm", quote: "After nine I am no use to anyone." }] },
 ].map((listing) => DirectoryListing.parse(listing));
 
-// Explore as the live site shows it after the seed (3 Nov 2026): one real person first, then the six sample people with their faces,
+// Explore as the live site shows it after the seed: one real person first, then the six sample people with their faces,
 // lines, first public items and posts with their photos, as packages/db/src/samples/sample-people.ts writes them.
 const SAMPLE = (n: number, listing: { displayName: string; line: string; claim: string; quote: string }): DirectoryListing =>
   DirectoryListing.parse({ listingId: LISTING(10 + n), displayName: listing.displayName, line: listing.line, openToRomance: false, isSample: true, photo: `faces/${listing.displayName.toLowerCase()}`,
@@ -75,7 +75,7 @@ export const SAMPLE_POSTS: Post[] = [
   POST(10, TOMAS, { text: "If your eval looks too good, check where the test data came from. Nine times out of ten that is the whole story.", hoursAgo: 70 }),
 ];
 
-// The stories of Home, as the live site shows them after the seed (3 Nov 2026): Mira's story of words an hour ago, then each sample
+// The stories of Home, as the live site shows them after the seed: Mira's story of words an hour ago, then each sample
 // person's newest photo post as their story, as GET /api/stories gives them.
 const MIRA_LISTING = EXPLORE_LISTINGS[0] as DirectoryListing;
 const STORIES: Story[] = [

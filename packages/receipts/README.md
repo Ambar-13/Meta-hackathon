@@ -35,4 +35,4 @@ pnpm test:unit packages/receipts
 
 ## Not built yet
 
-Nothing; frozen after Wave 0.
+Nothing.

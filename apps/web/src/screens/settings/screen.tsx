@@ -1,4 +1,4 @@
-// The settings page: the one-time "open in Safari" link (R9.2) and the delete-account flow (R9.7, D69).
+// The settings page: the one-time "open in Safari" link and the delete-account flow.
 import "./settings.css";
 import { useRef, useState, type ReactElement } from "react";
 import { type TransferResponse } from "@meet-first/contracts";
@@ -16,8 +16,8 @@ const DELETED_NOTICE = "Your account is being deleted. Everything is removed wit
 // The sentence for a session the server no longer accepts, and the app's general sentence for any other failure.
 const SESSION_ENDED = "Your session has ended. Open the app again to continue.";
 const GENERAL_FAILURE = "The server could not finish this. Try again in a minute.";
-// The line while the one-time link is being made [confirm].
-const MAKING_LINK_LINE = "Making your link."; // [confirm]
+// The line while the one-time link is being made.
+const MAKING_LINK_LINE = "Making your link.";
 
 // The sentence the dialog shows for a failed delete, or null when nothing failed.
 function failureText(flow: DeleteFlowState): string | null {

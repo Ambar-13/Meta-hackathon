@@ -1,5 +1,5 @@
 -- package: db
--- Lets the takedown script hide a share page by its public slug after a report, which needs an owner-run function because no share_pages row is visible without a person or meeting set (R2.7).
+-- Lets the takedown script hide a share page by its public slug after a report, which needs an owner-run function because no share_pages row is visible without a person or meeting set.
 
 CREATE FUNCTION share_revoke(s text) RETURNS boolean
 LANGUAGE sql SECURITY DEFINER SET search_path = public, pg_temp AS $$

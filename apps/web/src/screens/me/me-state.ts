@@ -38,7 +38,7 @@ export function useListingSave(onSaved: (listing: MyListing) => void): { state: 
   return { state, save };
 }
 
-// The sentences of Edit profile (3 Nov 2026): a file that is not a picture, a name outside 1 to 80 characters, and each change done.
+// The sentences of Edit profile: a file that is not a picture, a name outside 1 to 80 characters, and each change done.
 const EDIT_SENTENCES = {
   notPicture: "That file is not a photo this browser can open. Try a JPEG or PNG.",
   name: `Write a name of 1 to ${String(DISPLAY_NAME_MAX_CHARS)} characters.`,

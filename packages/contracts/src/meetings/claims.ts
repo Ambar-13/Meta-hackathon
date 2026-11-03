@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Side, Uuid } from "../primitives.js";
 
-// One claim a persona made in a turn, with the quote it rests on (R6.4 and R6.5).
+// One claim a persona made in a turn, with the quote it rests on.
 export const Claim = z.object({
   id: Uuid,
   side: Side,
@@ -33,5 +33,5 @@ export const ReceiptsOutput = z.object({
 });
 // The type of ReceiptsOutput, read from the schema above.
 export type ReceiptsOutput = z.infer<typeof ReceiptsOutput>;
-// Most claims one turn may carry. This bounds the receipts output and is picked here [confirm].
+// Most claims one turn may carry. This bounds the receipts output and is picked here.
 export const CLAIMS_PER_TURN_MAX = 8;

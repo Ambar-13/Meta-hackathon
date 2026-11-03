@@ -30,7 +30,7 @@ const LocationProbe = (): ReactElement => {
   return <p data-testid="location">{location.pathname + location.search}</p>;
 };
 
-// Renders one screen inside the app's router at a phone width, with the MSW server running (seams S11).
+// Renders one screen inside the app's router at a phone width, with the MSW server running.
 export function renderScreen(element: ReactElement, options: { pattern: string; url: string; width?: 375 | 1024 }): RenderResult {
   const width = options.width ?? 375;
   Object.defineProperty(window, "innerWidth", { value: width, configurable: true });

@@ -5,7 +5,7 @@ import { ContractError, HTTP, routes, ShareSnapshot } from "@meet-first/contract
 import type { Database } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 
-// A slug is 22 URL-safe base64 characters, from 16 random bytes (SLUG_BYTES in snapshot.ts, R9.4). Any other text is not a slug.
+// A slug is 22 URL-safe base64 characters, from 16 random bytes (SLUG_BYTES in snapshot.ts). Any other text is not a slug.
 export const SLUG_PATTERN = /^[A-Za-z0-9_-]{22}$/;
 // The params of the public read: the slug from the address.
 const SlugParams = z.object({ slug: z.string() });
@@ -15,7 +15,7 @@ export function shareNotFound(): ContractError {
   return new ContractError("share_not_found", "No page here. It may have been taken down.", HTTP.notFound);
 }
 
-// Reads a published page by slug through share_read, which returns nothing once either consent is withdrawn or revoked_at is set (D68).
+// Reads a published page by slug through share_read, which returns nothing once either consent is withdrawn or revoked_at is set.
 // A malformed slug returns null before any query runs. A stored snapshot that no longer parses also returns null, so nothing leaks.
 export async function readSharePage(db: Kysely<Database>, slug: string): Promise<ShareSnapshot | null> {
   if (!SLUG_PATTERN.test(slug)) return null;

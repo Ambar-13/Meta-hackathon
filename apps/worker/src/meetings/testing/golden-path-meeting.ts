@@ -32,7 +32,7 @@ export function firstWords(text: string): string {
 // concede and holds.
 type MeetingWords = { turns: readonly string[]; concede: string; holdA: string; holdB: string };
 
-// The words of the golden-path meeting on curated question 1 (section 4.29).
+// The words of the golden-path meeting on curated question 1.
 const GOLDEN_WORDS: MeetingWords = {
   turns: [
     "My human would probably enjoy a 10-day hackathon, as long as the mornings stay quiet. They do deep work in the morning and keep meetings for the afternoon, so long build days suit them when the talking happens after lunch. They would likely find a chat that pings all day harder, since they answer messages in batches twice a day. What my human has not said is how they feel about late nights near the deadline.",
@@ -51,7 +51,7 @@ const GOLDEN_WORDS: MeetingWords = {
   holdB: "My human would likely enjoy it if most evenings stay free after six.",
 };
 
-// The words of the directory meeting on curated question 13, a debate (design section 9). They differ from GOLDEN_WORDS, so no
+// The words of the directory meeting on curated question 13, a debate. They differ from GOLDEN_WORDS, so no
 // request of this meeting repeats one of the first meeting's: a repeated request reads the first meeting's reply, and the script
 // would then be one reply out of step.
 const DIRECTORY_WORDS: MeetingWords = {
@@ -79,7 +79,7 @@ function turnOf(words: MeetingWords, index: number): string {
   return text;
 }
 
-// The replies of one scripted meeting, in call order, built from the two sides' approved items and the words (section 4.29).
+// The replies of one scripted meeting, in call order, built from the two sides' approved items and the words.
 async function scriptFor(db: Kysely<Database>, meetingId: string, words: MeetingWords): Promise<ReplyScript> {
   const sideA = await readSideItems(db, meetingId, "a");
   const sideB = await readSideItems(db, meetingId, "b");
@@ -111,12 +111,12 @@ async function scriptFor(db: Kysely<Database>, meetingId: string, words: Meeting
   return { speech, receipts, questionCheck: [] };
 }
 
-// The replies of the scripted golden-path meeting, in call order, built from the two sides' approved items (section 4.29).
+// The replies of the scripted golden-path meeting, in call order, built from the two sides' approved items.
 export async function goldenPathScript(db: Kysely<Database>, meetingId: string): Promise<ReplyScript> {
   return scriptFor(db, meetingId, GOLDEN_WORDS);
 }
 
-// The replies of the golden path's directory meeting, in call order, with B's side quoting public items only (design section 9).
+// The replies of the golden path's directory meeting, in call order, with B's side quoting public items only.
 export async function directoryMeetingScript(db: Kysely<Database>, meetingId: string): Promise<ReplyScript> {
   return scriptFor(db, meetingId, DIRECTORY_WORDS);
 }

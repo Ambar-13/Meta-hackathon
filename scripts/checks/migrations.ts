@@ -1,4 +1,4 @@
-// Migration rules for packages/db/migrations (IMPLEMENTATION.md section 1).
+// Migration rules for packages/db/migrations.
 // Every file starts with the package line and a one-sentence comment, and its number is unique and inside a range
 // from ranges.txt. Every CREATE TABLE in public needs ENABLE and FORCE row-level security and a policy, unless the
 // table is listed in global-tables.txt. The words BYPASSRLS and SUPERUSER are banned, because a role that can bypass
@@ -12,7 +12,7 @@ import { walkFiles } from "./walk-files.js";
 const MIGRATIONS_FOLDER = "packages/db/migrations";
 /** The file that lists the number ranges, one "NNNN-NNNN owner" line per owner. */
 const RANGES_FILE = "packages/db/migrations/ranges.txt";
-/** The file that lists tables exempt from the row-level security rule. It is empty today (D55). */
+/** The file that lists tables exempt from the row-level security rule. It is empty today. */
 const GLOBAL_TABLES_FILE = "packages/db/migrations/global-tables.txt";
 /** The first line every migration must have. */
 const PACKAGE_LINE = /^--\s*package:\s*db\s*$/;

@@ -55,7 +55,7 @@ function questionCheck(verdict: unknown): ReplyScript {
   return { speech: [], receipts: [], questionCheck: [verdict] };
 }
 
-// Makes the test meeting free text that has not been checked yet, with the kind a new free-text meeting has (ARCHITECTURE.md 4.1).
+// Makes the test meeting free text that has not been checked yet, with the kind a new free-text meeting has.
 async function freeText(meetingId: string): Promise<void> {
   await withMeeting(workerDb, meetingId, (trx) => trx.updateTable("meetings")
     .set({ question_id: null, question_text: FREE_TEXT, question_checked_at: null, question_kind: "situation" }).where("id", "=", meetingId).execute());

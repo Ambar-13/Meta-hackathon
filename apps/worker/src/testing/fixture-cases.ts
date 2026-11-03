@@ -30,7 +30,7 @@ export function caseTurnId(index: number): string {
   return `00000000-0000-4000-8000-${String(index).padStart(12, "0")}`;
 }
 
-// The calls a names case makes, in order, built with the job's own functions (section 4.12).
+// The calls a names case makes, in order, built with the job's own functions.
 export function namesCaseCalls(fixtureCase: NamesFixtureCase): ModelCall[] {
   const allowlist = [fixtureCase.displayName, ...fixtureCase.affiliations].map((entry) => entry.replace(/\s+/g, " ").trim());
   return chunkTurnsForNames(fixtureCase.turns.map((text, index) => ({ turnIndex: index, text }))).map((chunk) => namesPassCall({ allowlist, chunkText: chunk.text }));
@@ -65,7 +65,7 @@ export function cardCaseCalls(fixtureCase: CardFixtureCase): ModelCall[] {
   return [first, cardRegenerationCall(first, JSON.stringify(fixtureCase.firstReply), failures)];
 }
 
-// The LlmRequest of one call, its body built as the client builds it (section 4.7), so its hash names the fixture file.
+// The LlmRequest of one call, its body built as the client builds it, so its hash names the fixture file.
 export function fixtureRequest(call: ModelCall): LlmRequest {
   return { callSite: call.callSite, promptVersion: call.promptVersion, body: buildChatRequest({ callSite: call.callSite, messages: call.messages, schema: call.schema, stream: false }) };
 }

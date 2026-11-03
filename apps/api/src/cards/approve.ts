@@ -10,7 +10,7 @@ import { requirePerson } from "../sessions/index.js";
 // The params of the approve route: a uuid id.
 const CardParams = z.object({ id: Uuid });
 
-// Refuses an approval: no such card, a card still building or failed, a card already approved, no item chosen, or an item not on the card (R7.1).
+// Refuses an approval: no such card, a card still building or failed, a card already approved, no item chosen, or an item not on the card.
 export function assertCanApprove(card: { state: string } | undefined, chosenIds: readonly string[], cardItemIds: ReadonlySet<string>): void {
   if (card === undefined) throw makeNotFoundError();
   if (card.state === "building") throw new ContractError("card_not_ready", "The card is still being built. Wait until it is ready, then approve it.", HTTP.conflict);
@@ -20,7 +20,7 @@ export function assertCanApprove(card: { state: string } | undefined, chosenIds:
   if (chosenIds.some((id) => !cardItemIds.has(id))) throw new ContractError("card_item_unknown", "One of the chosen items is not on this card. Reload the card and choose again.", HTTP.badRequest);
 }
 
-// Approves the chosen items, unapproves the rest, then marks the card approved with the recall switch (R7.1).
+// Approves the chosen items, unapproves the rest, then marks the card approved with the recall switch.
 export async function applyApproval(trx: Transaction<Database> | DatabaseTransaction, args: { cardId: string; itemIds: readonly string[]; isRecallAllowed: boolean; now: Date }): Promise<void> {
   const chosen = [...new Set(args.itemIds)];
   await trx.updateTable("card_items").set({ approved: true }).where("card_id", "=", args.cardId).where("id", "in", chosen).execute();

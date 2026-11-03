@@ -34,7 +34,7 @@ function readSchema(schemaPath: string): Record<string, unknown> | null {
   return parsed.data;
 }
 
-// Reads the current version of one prompt at call time, so a version change in current.ts reaches the next call (seams S7).
+// Reads the current version of one prompt at call time, so a version change in current.ts reaches the next call.
 export function readPrompt(name: PromptName): Prompt {
   const version = currentVersion(name);
   const mdPath = promptFilePath(name, version, "prompt.md");

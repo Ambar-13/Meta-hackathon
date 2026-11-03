@@ -14,7 +14,7 @@ import {
 const ML_ASK = "My model training stalls and validation looks wrong, who knows gradient norms?";
 // The fake clock's start, so the runAt of a re-queued job is exact.
 const CLOCK_START = new Date("2026-10-27T09:00:00.000Z");
-// The runAt of a job re-queued at CLOCK_START: 5,000 ms later (LIMITER_RETRY_MS, D58).
+// The runAt of a job re-queued at CLOCK_START: 5,000 ms later (LIMITER_RETRY_MS).
 const RETRY_AT = new Date("2026-10-27T09:00:05.000Z");
 
 // The answer rows of one ask, as readAnswerRows returns them.

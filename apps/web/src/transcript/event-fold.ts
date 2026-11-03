@@ -38,10 +38,10 @@ export type MeetingFoldState = {
 };
 // A poll reply after the lenient parse of poll-fallback.ts.
 export type PollReply = { v: number; events: unknown[]; partial: PartialTurn | null; serverNow: string };
-// What one raw event is: readable, from a newer version that needs a refresh, or something to ignore (R5.11).
+// What one raw event is: readable, from a newer version that needs a refresh, or something to ignore.
 export type EventReading = { kind: "event"; event: MeetingEvent } | { kind: "refresh" } | { kind: "ignored" };
 
-// How long a running meeting may be silent before the screen says it is still thinking (R10.3) [confirm: 20 s, the first-token deadline of D39].
+// How long a running meeting may be silent before the screen says it is still thinking (20 s).
 export const THINKING_AFTER_MS = 20_000;
 
 // A fresh state for one meeting, before any event.
@@ -62,7 +62,7 @@ export function emptyMeetingState(meetingId: string): MeetingFoldState {
   };
 }
 
-// Reads one raw event: a v other than EVENT_VERSION needs a refresh, an unknown or unreadable event is ignored (R5.11).
+// Reads one raw event: a v other than EVENT_VERSION needs a refresh, an unknown or unreadable event is ignored.
 export function readMeetingEvent(raw: unknown): EventReading {
   if (typeof raw !== "object" || raw === null) return { kind: "ignored" };
   const version: unknown = "v" in raw ? raw.v : undefined;
@@ -79,7 +79,7 @@ export function foldRaw(state: MeetingFoldState, raw: unknown): MeetingFoldState
   return foldEvent(state, reading.event);
 }
 
-// Folds a delta through the partial-text rule (R8.1, ARCHITECTURE.md 6.3).
+// Folds a delta through the partial-text rule.
 function foldDelta(state: MeetingFoldState, delta: TurnDelta): MeetingFoldState {
   const outcome = applyDelta(state.partial, delta, state.lastCommittedStepSeq);
   if (outcome.kind === "apply") return { ...state, partial: outcome.partial };
@@ -87,7 +87,7 @@ function foldDelta(state: MeetingFoldState, delta: TurnDelta): MeetingFoldState 
   return state;
 }
 
-// Folds one parsed event: committed events strictly in seq order, deltas by the partial-text rule (R8.1, ARCHITECTURE.md 6.3).
+// Folds one parsed event: committed events strictly in seq order, deltas by the partial-text rule.
 export function foldEvent(state: MeetingFoldState, event: MeetingEvent): MeetingFoldState {
   if (event.type === "turn.delta") return foldDelta(state, event);
   if (event.seq <= state.lastSeq) return state;
@@ -169,7 +169,7 @@ function committedFrom(raw: unknown): CommittedEvent | null {
   return reading.event;
 }
 
-// Folds a poll reply: its events after lastSeq in seq order, its partial in place of ours, and the resync request cleared (D49).
+// Folds a poll reply: its events after lastSeq in seq order, its partial in place of ours, and the resync request cleared.
 export function foldPollReply(state: MeetingFoldState, reply: PollReply): MeetingFoldState {
   if (Math.trunc(reply.v) !== EVENT_VERSION) return { ...state, needsRefresh: true, resyncRequested: false };
   const readings = reply.events.map(readMeetingEvent);
@@ -186,17 +186,17 @@ export function foldPollReply(state: MeetingFoldState, reply: PollReply): Meetin
   return { ...applied, partial, resyncRequested: false };
 }
 
-// The refresh line to show, REFRESH_COPY, or null (R5.11).
+// The refresh line to show, REFRESH_COPY, or null.
 export function refreshNotice(state: MeetingFoldState): string | null {
   return state.needsRefresh ? REFRESH_COPY : null;
 }
 
-// True when a claim carries the "no receipt" mark because its quote did not verify (R6.5).
+// True when a claim carries the "no receipt" mark because its quote did not verify.
 export function claimNeedsMark(claim: Claim): boolean {
   return !claim.verified;
 }
 
-// True when the meeting has started and not ended, and nothing arrived for THINKING_AFTER_MS (R10.3).
+// True when the meeting has started and not ended, and nothing arrived for THINKING_AFTER_MS.
 export function isThinking(state: MeetingFoldState, lastActivityMs: number, nowMs: number): boolean {
   return state.started !== null && state.ended === null && nowMs - lastActivityMs >= THINKING_AFTER_MS;
 }

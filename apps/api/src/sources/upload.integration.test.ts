@@ -40,7 +40,7 @@ async function newPerson(): Promise<{ personId: string; sessionToken: string }> 
   return createTestPerson(testApp.db, "Asha Rao");
 }
 
-// The body of an upload: a header line, then one turn line per text (Wave 0 4.4.3).
+// The body of an upload: a header line, then one turn line per text.
 function makeBody(texts: string[], header: Record<string, unknown> = {}): string {
   const headerLine = JSON.stringify({ kind: "paste", parserVersion: "1", scrubVersion: "1", personaSignal: 0.5, attested: true, turnCount: texts.length, ...header });
   const turnLines = texts.map((text, index) => JSON.stringify({ turnIndex: index, role: "user", text, lang: "en", sensitiveCategories: [] }));

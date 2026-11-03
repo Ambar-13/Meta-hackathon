@@ -10,7 +10,7 @@ import { ProfileHeader, ProfileTabs, useProfile } from "../people/index.js";
 import { AddChats, EditListing, EditProfile, JoinExplore, MeMeetings, MeNext } from "./me-parts.js";
 import { useMyPosts, useProfileEdit } from "./me-state.js";
 
-// The words of /me (wave 7).
+// The words of /me.
 const ME_SCREEN_COPY = {
   title: "Me",
   loading: "Opening your profile.",

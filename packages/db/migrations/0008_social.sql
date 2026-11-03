@@ -1,5 +1,5 @@
 -- package: db
--- Adds friend requests, which become invite-style friendships when accepted, and the orchestrator chat, one thread per person whose replies plan one ask each (wave 7).
+-- Adds friend requests, which become invite-style friendships when accepted, and the orchestrator chat, one thread per person whose replies plan one ask each.
 
 -- The ledger takes the orchestrator's call site.
 ALTER TABLE ledger DROP CONSTRAINT ledger_call_site_check;

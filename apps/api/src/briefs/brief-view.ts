@@ -8,7 +8,7 @@ export type BriefRow = { agree: unknown; clash: unknown; decide_first: unknown; 
 // The three sections of a brief: exactly three lines each, every one a parsed BriefPoint.
 const Section = z.array(BriefPoint).length(3);
 
-// Turns a briefs row into the Brief contract (R6.5, A1, invariant 19), with the meeting's question kind so the screen picks the
+// Turns a briefs row into the Brief contract, with the meeting's question kind so the screen picks the
 // section labels. A stored null support flag stays null.
 export function toBriefView(row: BriefRow, questionKind: QuestionKind): Brief {
   return Brief.parse({

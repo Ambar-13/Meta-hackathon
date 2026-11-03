@@ -3,16 +3,16 @@ import type { FastifyBaseLogger } from "fastify";
 import { z } from "zod";
 import { RECONNECT } from "@meet-first/contracts";
 
-// The one NOTIFY channel (D48, seams S9).
+// The one NOTIFY channel.
 export const LISTEN_CHANNEL = "meeting_events";
-// The application_name of the LISTEN connection, so a test or an operator can find it in pg_stat_activity [confirm] (no input names it).
+// The application_name of the LISTEN connection, so a test or an operator can find it in pg_stat_activity.
 export const LISTEN_APPLICATION_NAME = "meet-first-listen";
-// The largest value a Postgres int column holds (seq, step_seq, attempt and partial_len are int columns, Wave 0 section 4.5.2); a number above it is not a real payload.
+// The largest value a Postgres int column holds (seq, step_seq, attempt and partial_len are int columns); a number above it is not a real payload.
 export const MAX_INT_COLUMN = 2_147_483_647;
-// How long one connect attempt may take before it counts as failed: 5 s, the pool's connectionTimeoutMillis in the database spec 4.1 [confirm] (node-pg waits forever by default, which would stop the api from booting).
+// How long one connect attempt may take before it counts as failed: 5 s, the pool's connectionTimeoutMillis in the database spec 4.1 (node-pg waits forever by default, which would stop the api from booting).
 export const LISTEN_CONNECT_TIMEOUT_MS = 5_000;
 
-// One parsed NOTIFY payload: a committed event, or a flush of a running step's partial text (seams S9).
+// One parsed NOTIFY payload: a committed event, or a flush of a running step's partial text.
 export type ListenPayload = { kind: "event"; meetingId: string; seq: number } | { kind: "delta"; meetingId: string; stepSeq: number; attempt: number; len: number };
 // What wakes one stream: a payload for its meeting, or a poll (the 10 s safety poll, or a LISTEN reconnect).
 export type WakeSignal = ListenPayload | { kind: "poll" };
@@ -58,7 +58,7 @@ function parseDeltaPayload(meetingId: string, rest: string[]): ListenPayload | n
   return { kind: "delta", meetingId, stepSeq, attempt, len };
 }
 
-// Reads one payload: e:{meeting_id}:{seq} or d:{meeting_id}:{step_seq}:{attempt}:{len}; any other text is null and is ignored (seams S9, D47, D48).
+// Reads one payload: e:{meeting_id}:{seq} or d:{meeting_id}:{step_seq}:{attempt}:{len}; any other text is null and is ignored.
 export function parseListenPayload(payload: string): ListenPayload | null {
   const [kind, meetingId, ...rest] = payload.split(":");
   if (meetingId === undefined || !isUuid(meetingId)) {
@@ -74,12 +74,12 @@ export function parseListenPayload(payload: string): ListenPayload | null {
   return null;
 }
 
-// The wait before reconnect attempt n (0-based): 1 s doubling to a cap of 30 s, no jitter, because there is one connection per process (RECONNECT, D51, R8.5) [confirm] (R8.5 says "with backoff" and gives no numbers).
+// The wait before reconnect attempt n (0-based): 1 s doubling to a cap of 30 s, no jitter, because there is one connection per process (RECONNECT).
 export function listenReconnectDelayMs(attempt: number): number {
   return Math.min(RECONNECT.capMs, RECONNECT.firstMs * RECONNECT.factor ** attempt);
 }
 
-// This process's one LISTEN connection and the streams waiting on it (D48). Built only through startListenFanOut.
+// This process's one LISTEN connection and the streams waiting on it. Built only through startListenFanOut.
 export class ListenFanOut implements FanOut {
   private readonly registry = new Map<string, Set<(signal: WakeSignal) => void>>();
   private current: pg.Client | null = null;
@@ -132,7 +132,7 @@ export class ListenFanOut implements FanOut {
     this.hasConnectedOnce = true;
   }
 
-  // Wakes every open stream with a poll, so a notice lost during a reconnect is read at once (R8.5).
+  // Wakes every open stream with a poll, so a notice lost during a reconnect is read at once.
   private wakeEveryStream(): void {
     for (const wakes of this.registry.values()) {
       for (const wake of wakes) {
@@ -201,7 +201,7 @@ export class ListenFanOut implements FanOut {
   }
 }
 
-// Opens the LISTEN connection, then returns the fan-out; a failed first attempt is retried in the background, so the api still boots (D48, R8.5).
+// Opens the LISTEN connection, then returns the fan-out; a failed first attempt is retried in the background, so the api still boots.
 export async function startListenFanOut(options: { connectionString: string; log: FastifyBaseLogger }): Promise<FanOut> {
   const fanOut = new ListenFanOut(options);
   await fanOut.connect();

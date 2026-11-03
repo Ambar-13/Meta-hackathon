@@ -7,7 +7,7 @@ import { MEETING_STATE_LABELS, type QuestionPick } from "./lobby-state.js";
 
 // The label of the free-text box in the picker.
 const FREE_TEXT_LABEL = "Your question";
-// The longest free-text question the picker accepts (R10.5).
+// The longest free-text question the picker accepts.
 const FREE_TEXT_MAX_CHARS = 300;
 
 // The five groups the picker shows the 20 curated questions in, by kind, each with its colour class; the decision sits with the deals
@@ -35,8 +35,8 @@ const QuestionOption = (props: { value: string; text: string; choice: string | n
   );
 };
 
-// The 20 curated questions in their five groups, and a free-text choice (R10.5). A kind in leaveOutKinds is not offered, and a group
-// left with no question is not shown, so a listing closed to dating questions gets no couple group (design section 11).
+// The 20 curated questions in their five groups, and a free-text choice. A kind in leaveOutKinds is not offered, and a group
+// left with no question is not shown, so a listing closed to dating questions gets no couple group.
 export const QuestionPicker = (props: { isSending: boolean; error: string | null; onCreate: (pick: QuestionPick) => void; leaveOutKinds?: readonly QuestionKind[] }): ReactElement => {
   const [choice, setChoice] = useState<string | null>(null);
   const [freeText, setFreeText] = useState("");
@@ -136,7 +136,7 @@ const ReadyNote = (props: { meeting: MeetingView }): ReactElement | null => {
   return <p className="ready-note">Waiting for the other person to say ready.</p>;
 };
 
-// The next meeting: its question, both members' ready and watching marks, and the ready button (D53, R10.5).
+// The next meeting: its question, both members' ready and watching marks, and the ready button.
 export const StartPanel = (props: { meeting: MeetingView; isBusy: boolean; error: ApiError | null; onReady: () => void }): ReactElement => {
   const { meeting } = props;
   const viewer = meeting.members.find((member) => member.side === meeting.viewerSide);

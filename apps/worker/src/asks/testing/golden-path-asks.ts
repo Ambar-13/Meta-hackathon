@@ -1,6 +1,6 @@
-// The golden path's ask writer (design section 9). Run it once the golden path has stopped before step 20 (friend-ask): it reads the
+// The golden path's ask writer. Run it once the golden path has stopped before step 20 (friend-ask): it reads the
 // run's people from the run's report, sends the same friend ask and help search the golden path sends, answers each model call by
-// rule, writes the reply as a recorded fixture, then lets the replay client answer from it (D74). A request holds no id or time, so
+// rule, writes the reply as a recorded fixture, then lets the replay client answer from it. A request holds no id or time, so
 // the golden path's own asks later send the same requests and read these replies.
 import { readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -82,7 +82,7 @@ function replyFor(args: CompleteArgs): Record<string, unknown> {
   throw new ContractError("golden_call_unexpected", `The ask writer answers question_check, persona_answer and ask_support_judge calls only, not ${args.callSite}.`, 500);
 }
 
-// A client that writes each request's reply as a fixture, then lets the replay client answer from that fixture (D74).
+// A client that writes each request's reply as a fixture, then lets the replay client answer from that fixture.
 function recordingClient(options: { replay: LlmClient; fixtureRoot: string; written: string[] }): LlmClient {
   return {
     complete: async (args) => {

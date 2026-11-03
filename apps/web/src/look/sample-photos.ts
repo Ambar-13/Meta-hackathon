@@ -1,5 +1,5 @@
-// The sample people's photos (3 Nov 2026): free Unsplash photos picked for their posts, and a face for each of them, which Ambar asked
-// for ("cute human avatars"), each marked as made up. They are bundled into the web build, so the app's own site serves them: its
+// The sample people's photos: free Unsplash photos picked for their posts, and a face for each of them,
+// each marked as made up. They are bundled into the web build, so the app's own site serves them: its
 // content security policy loads images from itself only. The api names a photo by its key (packages/db/src/samples/sample-photos.ts).
 import { POST_PHOTO_SIDE, routes } from "@meet-first/contracts";
 import faceJun from "./samples/faces/jun.jpg";
@@ -38,7 +38,7 @@ const PHOTOS: Readonly<Record<string, BundledPhoto>> = {
   "tomas-charts": { src: tomasCharts, width: 1080, height: 720 },
 };
 
-// The start of the key of a photo a person put up themselves (3 Nov 2026), a profile photo or a post's, which the api serves by its id.
+// The start of the key of a photo a person put up themselves, a profile photo or a post's, which the api serves by its id.
 const UPLOADED_PREFIX = "photos/";
 
 // A post's photo by its key: a bundled photo with its size, or a photo a person shared, served by the api and drawn square; null for no

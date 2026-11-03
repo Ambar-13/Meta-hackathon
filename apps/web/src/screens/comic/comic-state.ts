@@ -2,11 +2,11 @@ import { useState } from "react";
 import type { Avatar, ComicView } from "@meet-first/contracts";
 import { apiFetch, asApiError, ApiError, routes, usePolledView, type PolledView } from "../../app-shell/index.js";
 
-// How often the page reads the comic while it is drawing, in milliseconds: the card screen's interval (R3.4) [confirm].
+// How often the page reads the comic while it is drawing, in milliseconds: the card screen's interval.
 export const COMIC_POLL_MS = 3_000;
-// The reasons a comic was not drawn that the copy names (D64). A failed comic is always render_failed; a skipped one has no reason on its view.
+// The reasons a comic was not drawn that the copy names. A failed comic is always render_failed; a skipped one has no reason on its view.
 export type ComicSkipReason = "deadline" | "prompt_blocked" | "render_failed" | "no_supported_lines";
-// The sentence each skip reason shows, from the copy table of the comic spec (D64).
+// The sentence each skip reason shows, from the copy table of the comic spec.
 export const SKIP_COPY: Readonly<Record<ComicSkipReason, string>> = {
   deadline: "The drawing took too long this time. The brief stays.",
   prompt_blocked: "We did not draw this one: a line in the brief carried something we never send to an image model.",
@@ -32,7 +32,7 @@ export type ComicScreenState =
 // The page's state plus the two actions: pick an avatar, and ask for the comic.
 export type ComicHook = ComicScreenState & { isSending: boolean; requestError: ApiError | null; pick: (avatar: Avatar) => void; request: () => Promise<void> };
 
-// Reads the comic view, polls while it draws, and posts the request for the chosen avatar (R11.2, D64).
+// Reads the comic view, polls while it draws, and posts the request for the chosen avatar.
 export function useComicState(meetingId: string): ComicHook {
   const polled: PolledView<ComicView> = usePolledView(() => apiFetch(routes.briefs.readComic, { params: { id: meetingId } }), {
     key: meetingId,

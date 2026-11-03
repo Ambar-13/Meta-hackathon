@@ -14,9 +14,9 @@ import { computeAllMetrics, parseTargets, type MetricResult } from "./metrics/in
 import { decideExitCode, formatResultsTable, generatedByLine, thresholdFailuresOf, thresholdLinesOf, writeReadmeBlock, writeResultsFile, type EvalResults } from "./results-writer.js";
 import { buildHumanTable } from "./human-table.js";
 
-// How many pairs run at once: the replay stack stays calm and the live run stays under the daily cap (ARCHITECTURE.md 4.10).
+// How many pairs run at once: the replay stack stays calm and the live run stays under the daily cap.
 const PAIRS_IN_FLIGHT = 4;
-// The folder of the human response files, and the planted secrets file (4.9).
+// The folder of the human response files, and the planted secrets file.
 const RESPONSES_DIR = join(REPO_ROOT, "packages", "evals", "fixtures", "human", "responses");
 const PLANTED_FILE = join(REPO_ROOT, "packages", "evals", "fixtures", "secrets", "planted.ndjson");
 // The longest the health read may take before the api counts as unreachable.
@@ -41,7 +41,7 @@ const PairsFile = z
 // One pair that did not finish, recorded with its code.
 type PairError = { pair: string; code: string };
 
-// Reads the commit the numbers came from, so the results file names it (R12.8).
+// Reads the commit the numbers came from, so the results file names it.
 function commitHash(): string {
   return execFileSync("git", ["rev-parse", "HEAD"], { cwd: REPO_ROOT, encoding: "utf8" }).trim();
 }

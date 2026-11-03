@@ -8,7 +8,7 @@ import { requirePerson } from "../sessions/index.js";
 
 // The :id of every /api/sources/:id route: a uuid, or the source cannot exist (404).
 export const SourceParams = z.object({ id: Uuid });
-// The ?page= query: a whole number from 1 to 100,000, 1 when absent (R2.4). No contracts schema names it.
+// The ?page= query: a whole number from 1 to 100,000, 1 when absent. No contracts schema names it.
 export const PageQuery = z.object({ page: z.coerce.number().int().min(1).max(100_000).default(1) });
 
 // One name the names pass found, as this module reads it: the text, and the role token that stands for it in the turns.
@@ -19,7 +19,7 @@ function wordsOf(text: string): string[] {
   return text.split(/\s+/).filter((word) => word !== "");
 }
 
-// Up to 3 words before and 3 after the first place a role token appears in the turns, with the token in the middle (R2.3).
+// Up to 3 words before and 3 after the first place a role token appears in the turns, with the token in the middle.
 export function nameContext(turnTexts: readonly string[], roleToken: string): string {
   for (const text of turnTexts) {
     const index = text.indexOf(roleToken);
@@ -31,14 +31,14 @@ export function nameContext(turnTexts: readonly string[], roleToken: string): st
   return roleToken;
 }
 
-// Orders names as the list groups them: by role token, then by name, comparing code units so every database orders them alike (R2.4).
+// Orders names as the list groups them: by role token, then by name, comparing code units so every database orders them alike.
 export function compareNames(a: { text: string; roleToken: string }, b: { text: string; roleToken: string }): number {
   if (a.roleToken !== b.roleToken) return a.roleToken < b.roleToken ? -1 : 1;
   if (a.text !== b.text) return a.text < b.text ? -1 : 1;
   return 0;
 }
 
-// The names of a source that may be kept, in list order. A minor's name is never listed (D18).
+// The names of a source that may be kept, in list order. A minor's name is never listed.
 async function listedNames(trx: DatabaseTransaction, sourceId: string): Promise<FoundName[]> {
   const rows = await trx.selectFrom("source_names").select(["text", "role_token"]).where("source_id", "=", sourceId).where("is_minor", "=", false).execute();
   return rows.map((row) => ({ text: row.text, roleToken: row.role_token })).sort(compareNames);
@@ -52,7 +52,7 @@ async function pageRows(trx: DatabaseTransaction, sourceId: string, names: Found
   return names.map((name) => ({ text: name.text, roleToken: name.roleToken, context: nameContext(turnTexts, name.roleToken), keep: false }));
 }
 
-// Reads the source as the caller sees it: its numbers, whether the names pass has finished, and one page of names (R2.3, R2.4, R2.5).
+// Reads the source as the caller sees it: its numbers, whether the names pass has finished, and one page of names.
 async function sourceViewOf(trx: DatabaseTransaction, input: { sourceId: string; page: number; now: Date }): Promise<SourceView> {
   const source = await trx
     .selectFrom("sources")

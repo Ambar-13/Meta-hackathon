@@ -13,7 +13,7 @@ export function asMeeting<T>(db: Kysely<Database>, meetingId: string, run: (trx:
   return withMeeting(db, meetingId, run);
 }
 
-// Runs run in a transaction with both settings set to empty, so every policy sees no person and no meeting (invariant 15).
+// Runs run in a transaction with both settings set to empty, so every policy sees no person and no meeting.
 export async function withNoContext<T>(db: Kysely<Database>, run: (trx: DatabaseTransaction) => Promise<T>): Promise<T> {
   return db.transaction().execute(async (trx) => {
     await sql`SELECT set_config('app.person_id', '', true), set_config('app.meeting_id', '', true)`.execute(trx);

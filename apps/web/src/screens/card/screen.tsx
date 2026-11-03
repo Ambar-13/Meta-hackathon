@@ -19,7 +19,7 @@ const CardHello = (props: { children: ReactNode }): ReactElement => {
   );
 };
 
-// The page while the card builds: the seconds so far, counted on the server clock (R3.4).
+// The page while the card builds: the seconds so far, counted on the server clock.
 const BuildingBody = (props: { seconds: number }): ReactElement => {
   return (
     <>
@@ -58,7 +58,7 @@ const ApproveBar = (props: { isNothingTicked: boolean; isSending: boolean; onApp
   );
 };
 
-// The approved state's next step: the quiz button (left out for a thin card) and the link to pair (design section 7).
+// The approved state's next step: the quiz button (left out for a thin card) and the link to pair.
 const ApprovedNext = (props: { card: CardView; isSending: boolean; onQuiz: () => void }): ReactElement => {
   return (
     <section className="card-next" aria-labelledby="card-next-title">
@@ -79,7 +79,7 @@ const ApprovedNext = (props: { card: CardView; isSending: boolean; onQuiz: () =>
   );
 };
 
-// The notice on a thin card: fewer than 6 items had a quote that checked out (D23).
+// The notice on a thin card: fewer than 6 items had a quote that checked out.
 const ThinNote = (props: { isThin: boolean }): ReactElement | null => {
   if (!props.isThin) return null;
   return <p className="thin-note">Your card is short: fewer than 6 items had a quote that checked out. Meetings still work; the quiz is skipped.</p>;
@@ -110,7 +110,7 @@ const CardBody = (props: { card: CardView; screen: ReturnType<typeof useCardScre
   );
 };
 
-// The card page: watch it build, read and approve items, set the recall switch, then quiz, pair or choose what to share (R3.4, R7.1, D23, design section 7).
+// The card page: watch it build, read and approve items, set the recall switch, then quiz, pair or choose what to share.
 export const CardScreen = (): ReactElement => {
   const navigate = useNavigate();
   const cardId = useParams()["cardId"] ?? "";

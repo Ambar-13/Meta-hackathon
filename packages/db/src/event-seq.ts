@@ -6,7 +6,7 @@ import type { Database } from "./types.js";
 // A meeting event as a writer builds it before its seq is chosen: every variant of MeetingEvent without its seq field.
 export type EventWithoutSeq = MeetingEvent extends infer E ? (E extends unknown ? Omit<E, "seq"> : never) : never;
 
-// The next seq of a meeting's event log, read after locking the meeting row so two writers in one meeting take turns (invariant 11, D52).
+// The next seq of a meeting's event log, read after locking the meeting row so two writers in one meeting take turns.
 export async function nextEventSeq(trx: Transaction<Database>, meetingId: string): Promise<number> {
   const meeting = await trx.selectFrom("meetings").select("id").where("id", "=", meetingId).forUpdate().executeTakeFirst();
   if (meeting === undefined) throw new ContractError("not_found", "This no longer exists or is not yours.", 404);
@@ -14,7 +14,7 @@ export async function nextEventSeq(trx: Transaction<Database>, meetingId: string
   return numberFromPostgres(result.rows[0]?.seq);
 }
 
-// Writes one committed event at the next seq, with the event's own version and time, and returns the seq it used (invariant 11, R5.11).
+// Writes one committed event at the next seq, with the event's own version and time, and returns the seq it used.
 export async function appendMeetingEvent(trx: Transaction<Database>, meetingId: string, event: EventWithoutSeq): Promise<number> {
   if (event.type === "turn.delta") {
     throw new ContractError("event_type_unknown", `${event.type} is not a committed event type. Use a name from packages/contracts meetings/events.ts.`, 500);

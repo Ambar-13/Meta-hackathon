@@ -1,10 +1,10 @@
-// The quiz routes as one plugin for apps/api/src/server.ts: create, read, submit answers (IMPLEMENTATION.md 2.2).
+// The quiz routes as one plugin for apps/api/src/server.ts: create, read, submit answers.
 import type { RoutePlugin } from "../app-types.js";
 import { registerCreateQuiz } from "./create-quiz.js";
 import { registerReadQuiz } from "./read-quiz.js";
 import { registerSubmitAnswers } from "./submit-answers.js";
 
-// The three quiz routes, registered in this order on the root instance (seams S2).
+// The three quiz routes, registered in this order on the root instance.
 export const registerQuizRoutes: RoutePlugin = (app, deps) => {
   registerCreateQuiz(app, deps);
   registerReadQuiz(app, deps);

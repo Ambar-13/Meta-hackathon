@@ -1,5 +1,4 @@
-// The signed-in app's line icons and round avatars, the look of Instagram and ChatGPT that Ambar asked for on 3 Nov 2026 ("instagram +
-// chatgpt chat combined"). Icons come from lucide at one size and stroke; a person is the first letter of their name on a soft circle in
+// The signed-in app's line icons and round avatars, the look of Instagram and ChatGPT. Icons come from lucide at one size and stroke; a person is the first letter of their name on a soft circle in
 // one of four colours that their name picks, so the same person always looks the same, and a sample person is their face with the
 // orange made-up mark. The landing keeps the name tags and stickers.
 import type { ReactElement } from "react";
@@ -63,8 +62,7 @@ export function tintOf(name: string): (typeof TINTS)[number] {
 export type AvatarSize = "s" | "m" | "l" | "xl";
 
 // A person as a round picture: their face when there is one (only sample people have one so far), else their first letter on their
-// colour; a sample person also carries a small orange asterisk at the top right, so nobody takes a made-up face for a real one (Ambar,
-// 3 Nov 2026: "a small orange colored * near their head so we know"). Hidden from screen readers, because their name, and the Sample
+// colour; a sample person also carries a small orange asterisk at the top right, so nobody takes a made-up face for a real one. Hidden from screen readers, because their name, and the Sample
 // mark in words, are always next to it.
 export const PersonAvatar = (props: { name: string; size?: AvatarSize; className?: string; photo?: string | null | undefined; isSample?: boolean | undefined }): ReactElement => {
   const url = photoUrl(props.photo);
@@ -83,7 +81,7 @@ function shapeOf(photo: { width: number; height: number }): "is-square" | "is-ta
   return photo.height > photo.width ? "is-tall" : "is-wide";
 }
 
-// A post's photo, with square corners (Ambar, 3 Nov 2026: "instead of curved edges photos and reels use square"): a wide photo at 3:2, a
+// A post's photo, with square corners: a wide photo at 3:2, a
 // tall one at 4:5 on a phone and square on wider screens, and a photo a person shared square. Nothing shows for a key this build does
 // not have.
 export const PostPhoto = (props: { photo: string | null | undefined; alt: string | null | undefined; className?: string }): ReactElement | null => {

@@ -1,5 +1,5 @@
 -- package: db
--- Adds deal and debate to the kinds a meeting question can have, and lets curated question ids run to 16 (R10.5).
+-- Adds deal and debate to the kinds a meeting question can have, and lets curated question ids run to 16.
 
 ALTER TABLE meetings DROP CONSTRAINT meetings_question_kind_check;
 ALTER TABLE meetings ADD CONSTRAINT meetings_question_kind_check

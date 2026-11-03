@@ -1,5 +1,5 @@
 -- package: db
--- Adds sample people, who are marked Sample and accept every friend request at once so Explore works before real people list themselves, and posts, which Explore and profiles show (3 Nov 2026).
+-- Adds sample people, who are marked Sample and accept every friend request at once so Explore works before real people list themselves, and posts, which Explore and profiles show.
 
 ALTER TABLE people ADD COLUMN is_sample boolean NOT NULL DEFAULT false;
 COMMENT ON COLUMN people.is_sample IS 'True for the sample people seeded for the demo (pnpm db:seed-samples). The app marks them Sample, and they accept every friend request at once, because no human answers for them. Nobody can sign in as one: their session and recovery code were random and never kept.';

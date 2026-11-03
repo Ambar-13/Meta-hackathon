@@ -17,7 +17,7 @@ afterEach(() => {
 
 // The pair that makes the viewer and Mira friends.
 const PAIR = "00000000-0000-4000-8000-000000000141";
-// The own-profile words of an empty Posts tab, word for word (3 Nov 2026, once anyone could share).
+// The own-profile words of an empty Posts tab, word for word (once anyone could share).
 const OWN_POSTS = {
   heading: "Share your first post",
   body: "Your posts show here and, once you are in Explore, in everyone's feed. Your Meety reads them to learn what you are into.",

@@ -8,7 +8,7 @@ import { QuoteSheet } from "./quote-sheet.js";
 import { splitBriefForDisplay, useBriefState, type BriefScreenHook, type OpenQuote } from "./brief-state.js";
 import "./brief.css";
 
-// The one line under the title: the rate as a rate, or the note that the check did not run (A1).
+// The one line under the title: the rate as a rate, or the note that the check did not run.
 export function supportLine(brief: Brief): string {
   if (brief.supportReliable !== true || brief.supportRate === null) return "The support check did not run. Every line is marked weak quote.";
   const lines = [...brief.agree, ...brief.clash, ...brief.decideFirst];
@@ -67,7 +67,7 @@ const BriefBody = (props: { brief: Brief; meetingId: string; hook: BriefScreenHo
   );
 };
 
-// The brief page: waits while the brief is written, then shows the three sections with tappable quotes (R6.5, A1).
+// The brief page: waits while the brief is written, then shows the three sections with tappable quotes.
 export const BriefScreen = (): ReactElement => {
   const meetingId = useParams()["meetingId"] ?? "";
   const hook = useBriefState(meetingId);

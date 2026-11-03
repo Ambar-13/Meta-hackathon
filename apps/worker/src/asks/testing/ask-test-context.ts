@@ -1,5 +1,5 @@
 // The job context of one ask test: a replay model client over a new temporary fixture folder, which writes each missing fixture from
-// the test's script right before the client reads it (a fake fixture folder, in the layouts of seams S6), and the scripted replies.
+// the test's script right before the client reads it (a fake fixture folder), and the scripted replies.
 import { access, mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { Kysely } from "kysely";
@@ -21,11 +21,11 @@ export type SeenCall = { callSite: CallSite; user: string };
 // What an ask test gets: the job context, the jobs it enqueued, the calls it saw in order, and the call that removes its fixture folder.
 export type AskTestContext = { context: JobContext; enqueued: EnqueuedJob[]; calls: SeenCall[]; close: () => Promise<void> };
 
-// The question check's reply for an allowed help search (design section 3); romantic is the field of question-check v5.
+// The question check's reply for an allowed help search; romantic is the field of question-check v5.
 export const ALLOWED_HELP = { allowed: true, reason: "An ask about who could probably help with a problem.", kind: "help", romantic: false };
 // The question check's reply for an allowed friend ask.
 export const ALLOWED_REACT = { allowed: true, reason: "An ask about how one person would probably react to news.", kind: "situation", romantic: false };
-// The question check's reply for a help search about dating: allowed, kind help, marked romantic (design section 11).
+// The question check's reply for a help search about dating: allowed, kind help, marked romantic.
 export const ROMANTIC_HELP = { allowed: true, reason: "An ask about who might enjoy a date.", kind: "help", romantic: true };
 // The question check's reply for a friend ask about a date: allowed, kind situation, marked romantic.
 export const ROMANTIC_REACT = { allowed: true, reason: "An ask about how one person would probably feel about a date.", kind: "situation", romantic: true };
@@ -64,7 +64,7 @@ export const ROSA_HELP = { answer: "Rosa would probably enjoy a salsa evening.",
   { text: "Rosa dances salsa on Thursday evenings.", quote: "Μου αρέσει να χορεύω σάλσα κάθε Πέμπτη βράδυ", turn_id: "0", lang: "el", gloss: "Rosa likes to dance salsa every Thursday evening." },
 ] };
 
-// Builds the job context of one ask test over db, the worker database, with this script and clock (D74: the real client in replay mode).
+// Builds the job context of one ask test over db, the worker database, with this script and clock (the real client in replay mode).
 export async function makeAskTestContext(options: { db: Kysely<Database>; script: AskReplyScript; now?: () => Date }): Promise<AskTestContext> {
   const now = options.now ?? (() => new Date());
   const base = makeTestJobContext({ db: options.db, now });
@@ -85,7 +85,7 @@ export function userTexts(test: AskTestContext, callSite: AskCallSite): string[]
   return test.calls.filter((call) => call.callSite === callSite).map((call) => call.user);
 }
 
-// The support-check reply that backs each of count items, indexes 0 to count - 1 (A1).
+// The support-check reply that backs each of count items, indexes 0 to count - 1.
 export function allSupported(count: number): { lines: Array<{ index: number; supported: boolean; reason: string }> } {
   return { lines: Array.from(Array(count).keys(), (index) => ({ index, supported: true, reason: "The quote carries the statement." })) };
 }

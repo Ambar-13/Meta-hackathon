@@ -4,9 +4,9 @@ import { NO_SPACE_SCRIPT, PROTECTED_TOKEN } from "./apply-role-tokens.js";
 import { formatTurnBlock, TURN_BLOCK_SEPARATOR, type ModelCall } from "./name-chunks.js";
 import type { FailedItem } from "./verify-items.js";
 
-// Share of the card input filled first by the newest turns; the rest goes to keyword diversity (D19).
+// Share of the card input filled first by the newest turns; the rest goes to keyword diversity.
 export const RECENCY_SHARE = 0.5;
-// Common English words that do not count as keywords for diversity (D19 gives no list [confirm]).
+// Common English words that do not count as keywords for diversity.
 export const STOP_WORDS: ReadonlySet<string> = new Set([
   "the", "and", "for", "you", "that", "with", "this", "have", "are", "was", "but", "not", "what", "all", "can", "her", "his", "one", "our", "out", "had", "has", "she", "they", "them", "their", "there", "from", "your", "about", "would", "which", "will", "like", "into", "than", "then", "when", "where", "who", "how", "also", "been", "did", "does", "some", "any", "more", "much", "other",
 ]);
@@ -20,7 +20,7 @@ function blockCost(turn: SampledTurn): number {
   return formatTurnBlock(turn).length + TURN_BLOCK_SEPARATOR.length;
 }
 
-// The newest turns, from the newest down, while they fit the recency allowance (D19).
+// The newest turns, from the newest down, while they fit the recency allowance.
 function takeRecent(candidates: readonly Candidate[], chosen: Set<number>, allowance: number): number {
   let used = 0;
   for (let index = candidates.length - 1; index >= 0; index -= 1) {
@@ -36,7 +36,7 @@ function takeRecent(candidates: readonly Candidate[], chosen: Set<number>, allow
 // The room left in the card input: the budget and the cost already taken.
 type Room = { budget: number; used: number };
 
-// The turns that add new keywords, most new keywords first, each taken while it fits the budget (D19).
+// The turns that add new keywords, most new keywords first, each taken while it fits the budget.
 function takeDiverse(candidates: readonly Candidate[], chosen: Set<number>, room: Room): number {
   const covered = new Set<string>();
   for (const index of chosen) for (const keyword of candidates[index]?.keywords ?? []) covered.add(keyword);
@@ -57,7 +57,7 @@ function takeDiverse(candidates: readonly Candidate[], chosen: Set<number>, room
   return total;
 }
 
-// The newest turns that still fit, taken after the diversity step (D19).
+// The newest turns that still fit, taken after the diversity step.
 function takeFill(candidates: readonly Candidate[], chosen: Set<number>, room: Room): void {
   let total = room.used;
   for (let index = candidates.length - 1; index >= 0; index -= 1) {
@@ -70,7 +70,7 @@ function takeFill(candidates: readonly Candidate[], chosen: Set<number>, room: R
   }
 }
 
-// Picks whole turns for the card prompt: the newest up to half the cap, then the turns that add the most new keywords, then the newest of the rest, never over maxChars (D19).
+// Picks whole turns for the card prompt: the newest up to half the cap, then the turns that add the most new keywords, then the newest of the rest, never over maxChars.
 export function sampleTurns(turns: readonly SampledTurn[], maxChars: number): SampledTurn[] {
   const ordered = [...turns].sort((a, b) => a.turnIndex - b.turnIndex);
   const budget = maxChars + TURN_BLOCK_SEPARATOR.length;
@@ -84,7 +84,7 @@ export function sampleTurns(turns: readonly SampledTurn[], maxChars: number): Sa
   return candidates.flatMap((candidate, index) => (chosen.has(index) ? [candidate.turn] : []));
 }
 
-// The keywords of a text: lower-case letter and digit runs of 3 or more characters minus STOP_WORDS; in scripts written without spaces, every 2-character window of a run (D19).
+// The keywords of a text: lower-case letter and digit runs of 3 or more characters minus STOP_WORDS; in scripts written without spaces, every 2-character window of a run.
 export function keywordsOf(text: string): Set<string> {
   const plain = text.replace(PROTECTED_TOKEN, " ").toLowerCase();
   const words = plain.match(/[\p{L}\p{M}\p{N}]+/gu) ?? [];
@@ -100,7 +100,7 @@ export function keywordsOf(text: string): Set<string> {
   return keywords;
 }
 
-// The first card call: the dossier prompt and the untrusted-data rules as the system message, the sampled turns in turn_index order as the user message (ARCHITECTURE.md section 5 step 7).
+// The first card call: the dossier prompt and the untrusted-data rules as the system message, the sampled turns in turn_index order as the user message.
 export function cardCall(turns: readonly SampledTurn[]): ModelCall {
   const prompt = readPrompt("dossier");
   const rules = readPrompt("untrusted-data-rules");
@@ -116,7 +116,7 @@ export function cardCall(turns: readonly SampledTurn[]): ModelCall {
   };
 }
 
-// The one regeneration call: the first call's messages, the first reply as the assistant message, and the failed items as a new user message (R3.2).
+// The one regeneration call: the first call's messages, the first reply as the assistant message, and the failed items as a new user message.
 export function cardRegenerationCall(first: ModelCall, firstReplyText: string, failures: readonly FailedItem[]): ModelCall {
   const lines = failures.map((failure) => `item ${String(failure.position)}: turn_id "${failure.item.turn_id}", reason ${failure.reason}`).join("\n");
   return {

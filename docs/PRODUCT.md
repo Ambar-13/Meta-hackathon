@@ -20,15 +20,15 @@ Success looks like two people who would click finding each other faster, and eve
 
 Playful, social, bold. The voice is plain and short, warm and candid, and honest about what it does not know: the agents say "probably", never "will". It should feel like a lively room where two friends of yours are talking about you kindly, and you get to listen in.
 
-References, in Ambar's words: a merge of Lofty Lab (loftylab.framer.website: photos cut into shapes, stickers inside sentences, tilted colour panels that stack) and Nudge (nudge-folio.framer.website: a speech bubble that types, sticky notes, floating cursors with name tags, three accents at full strength). Taken from them: the energy, the cut-out photos, the stickers and notes, the cursors and bubbles. Not taken: condensed display type, monospace labels, all-caps headlines.
+References: a merge of Lofty Lab (loftylab.framer.website: photos cut into shapes, stickers inside sentences, tilted colour panels that stack) and Nudge (nudge-folio.framer.website: a speech bubble that types, sticky notes, floating cursors with name tags, three accents at full strength). Taken from them: the energy, the cut-out photos, the stickers and notes, the cursors and bubbles. Not taken: condensed display type, monospace labels, all-caps headlines.
 
 ## Anti-references
 
-- Generic AI product UI: a grey page, rounded cards stacked in a column, cards inside cards, pill labels on top of boxes, lots of empty space, a sentence of filler under every heading. (The app's ground is off-white #fffefd by Ambar's choice on 3 Nov 2026; what makes this look generic is the boxes, not the warmth of the ground.) Ambar's words on the first attempt: "super ai slop and emptish, just curved cards and bad design, not intuitive at all and a lot of bs". <!-- plain-words: allow (his words, quoted) -->
+- Generic AI product UI: a grey page, rounded cards stacked in a column, cards inside cards, pill labels on top of boxes, lots of empty space, a sentence of filler under every heading.
 - The techy look: monospace, terminal styling, codes, hazard or hi-vis colours, condensed docket type, anything taken from tickets or back-office paperwork.
 - The quiet editorial-magazine lane: cream ground, italic serif headlines, ruled columns, no pictures.
 - Dating and matching apps: swipe stacks, percent matches, scores, flames, hearts on everything. Meety never scores a person.
-- The looks of Ambar's other products, Makelet and Rentably.
+- The looks of two other products by the same maker, Makelet and Rentably.
 
 ## Design Principles
 

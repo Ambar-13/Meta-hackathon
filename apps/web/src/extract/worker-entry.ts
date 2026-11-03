@@ -6,11 +6,11 @@ import { scrubForUpload } from "./scrub-preview.js";
 import { buildNdjson, encodeUploadBody } from "./upload-body.js";
 import { FILE_UNREADABLE_SENTENCE, INFLATED_MAX_BYTES, readPickedFile } from "./zip-stream.js";
 
-// What the page sends the worker: one input and the allowlist (seams S4).
+// What the page sends the worker: one input and the allowlist.
 export type WorkerRequest = { input: UploadInput; allowlist: string[] };
 // What the worker sends back: any number of progress messages, then exactly one done message.
 export type WorkerMessage = { type: "progress"; progress: UploadProgress } | { type: "done"; result: UploadReady | UploadRefused };
-// The refusal codes the worker itself can produce; upload_cancelled is produced on the page (4.4.5).
+// The refusal codes the worker itself can produce; upload_cancelled is produced on the page.
 export const WORKER_REFUSAL_CODES: readonly UploadRefusalCode[] = [
   "source_no_own_turns",
   "source_file_not_json",
@@ -19,7 +19,7 @@ export const WORKER_REFUSAL_CODES: readonly UploadRefusalCode[] = [
   "file_unreadable",
   "upload_too_large",
 ];
-// A reading progress message is sent each time another 16 MiB has been inflated [confirm].
+// A reading progress message is sent each time another 16 MiB has been inflated.
 export const READING_PROGRESS_STEP_BYTES = 16_777_216;
 
 // True when a code is one the worker itself can produce, so it may be shown as the refusal's code.
@@ -83,7 +83,7 @@ async function prepare(request: WorkerRequest, onProgress: (progress: UploadProg
   };
 }
 
-// Read, extract, scrub for the preview, and compress, in that order; resolves once with the prepared upload or a refusal, never rejects (D1, D9).
+// Read, extract, scrub for the preview, and compress, in that order; resolves once with the prepared upload or a refusal, never rejects.
 export async function prepareInWorker(request: WorkerRequest, onProgress: (progress: UploadProgress) => void): Promise<UploadReady | UploadRefused> {
   try {
     return await prepare(request, onProgress);

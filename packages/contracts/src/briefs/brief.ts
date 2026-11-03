@@ -6,7 +6,7 @@ import { Side, Uuid } from "../primitives.js";
 export const Quote = z.object({ text: z.string(), side: Side, turnId: Uuid, verified: z.boolean() });
 // The type of Quote, read from the schema above.
 export type Quote = z.infer<typeof Quote>;
-// One line of a brief, with up to three quotes. supported is null when the support judge could not decide (A1).
+// One line of a brief, with up to three quotes. supported is null when the support judge could not decide.
 export const BriefPoint = z.object({
   text: z.string(),
   quotes: z.array(Quote).min(1).max(3),
@@ -38,7 +38,7 @@ export const BriefOutput = z.object({
 });
 // The type of BriefOutput, read from the schema above.
 export type BriefOutput = z.infer<typeof BriefOutput>;
-// What the support judge returns: one verdict for each of the nine lines, in index order (A1).
+// What the support judge returns: one verdict for each of the nine lines, in index order.
 export const BriefSupportJudgeOutput = z.object({
   lines: z
     .array(
@@ -52,9 +52,9 @@ export const BriefSupportJudgeOutput = z.object({
 });
 // The type of BriefSupportJudgeOutput, read from the schema above.
 export type BriefSupportJudgeOutput = z.infer<typeof BriefSupportJudgeOutput>;
-// The label shown when a line has a quote the judge did not support (A1).
+// The label shown when a line has a quote the judge did not support.
 export const WEAK_RECEIPT_COPY = "weak quote";
-// The label shown when a line has no quote at all (R6.5).
+// The label shown when a line has no quote at all.
 export const NO_RECEIPT_COPY = "no quote";
 // The three section headings of a brief for each kind of question. The data stays agree, clash and decideFirst; only the words
 // change, so a get-along brief reads "where you'd click" and a deal reads "where you agree". The brief screen and the share page read it.

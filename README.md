@@ -1,47 +1,66 @@
 # Meety
 
-Your AI agent meets theirs first. With receipts.
+Your Meety meets theirs first. With receipts.
 
-The app was called Meet First until 3 Nov 2026, so the code, the packages and the database still use the name meet-first.
+Meety builds an AI of you from your own chat history, using only the parts you approve. Before two people spend an evening, a weekend or a company on each other, their two Meetys talk first and play out how the two of them would probably react: would they get along, could one help the other, would they agree on a deal. Each person gets a short brief, and every line of it quotes the words it rests on. Meety never scores a person.
 
-Your AI agent understands you, and theirs understands them. They meet first and play out how the two of you would probably react: would you get along, would you make a deal, do your views agree, could they help you with what you are stuck on. You get a short brief, and every line is backed by your own words. It simulates; it never scores.
+It is live at [meet-first.onrender.com](https://meet-first.onrender.com). The app was called Meet First until November 2026, so the code, the packages and the database still use that name.
+
+## Try it
+
+1. Open the site and choose **Continue with Google**. It runs on a free plan, so the first visit after a quiet spell can take about a minute.
+2. Home is your feed. Six sample people are already on it: Maya, Priya, Ravi, Jun, Leila and Tomas. They are made up, marked Sample, and accept a friend request at once.
+3. Add one of them as a friend, open Meety, and ask how they would react to something, such as "would Maya enjoy a weekend hackathon?". Meety plans the question and waits for your press; Maya's Meety then answers from her notes and quotes them.
+4. To make your own Meety, upload a ChatGPT, Claude or Codex export, or paste your notes. Your browser keeps only your own messages and removes secrets and contact details before anything is sent. You approve your card item by item.
+5. Once your card is approved, open someone's profile, press **See how you'd get on** and pick a question. The two Meetys talk for about ten minutes; watch it live or read the brief afterwards.
+
+You can also post photos and 24-hour stories, and like other people's posts. Nobody sees a count of your likes.
 
 ## How it works
 
-You upload your chat history from ChatGPT, Claude, Codex or a paste, and your browser pulls out your own messages and scrubs them before anything is sent. The server scrubs them again and counts what it removed, and that count is the number you see. A card is built from your messages, each item on it carries a quote from the message it came from, and you approve the items one by one. A short blind quiz drawn from a fixed bank of 30 questions gives the result "matched n of 10". Your persona and theirs play out the question in a ten-minute conversation, each saying how its person would probably react, and nobody needs to be online: it starts once both of you say you are ready, and either of you can watch it live or replay it later. Each person then gets a brief in three short parts that follow the question: where you would click, where you would rub and what to talk about first for getting along; what they could help with, where they could not and what to ask first for help; how you would each probably react, where you would differ and what to settle first for a situation; or what you agree on, where you clash and what to decide first for a deal. Every line carries its quote. A second check reports the rate at which those quotes support their lines. A share page exists only while both people consent, and deletion removes everything that belongs to a person.
+Your browser reads the export, keeps your own messages, and scrubs them; the server scrubs them again and stores how many things it removed, which is the number you see. A model builds your card from those messages, and each card item carries the quote it came from. When two people meet, each Meety speaks from its own card, and every claim it makes carries a quote from a message or is marked as having none. Code checks every quote word for word against the message it names, and a second model call reports how often the brief's quotes back their lines.
 
 ```mermaid
 flowchart LR
-  B[apps/web in the browser] -->|gzip NDJSON, JSON routes| A[apps/api]
-  A --> P[(Postgres 16, forced RLS)]
-  P -->|graphile_worker jobs| W[apps/worker]
+  B[apps/web in the browser] -->|scrubbed messages, JSON routes| A[apps/api]
+  A --> P[(Postgres 16, row-level security)]
+  P -->|background jobs| W[apps/worker]
   W --> L[packages/llm]
   L --> M[Meta Model API]
   W --> P
-  P -. NOTIFY meeting_events .-> A
-  A -->|SSE, 2 s poll fallback| B
-  B --- X[packages/parsers and packages/scrub run in the browser too]
+  P -. meeting events .-> A
+  A -->|live meeting stream| B
 ```
 
-Notice that the raw export never leaves the browser, and only the worker reaches the model.
+The raw export never leaves the browser, and only the worker talks to the model.
 
-## Friends and Meety
-
-Explore lists the people who chose to be found, each with only the items they marked public. From someone's profile you send a friend request, and once they accept you are friends, exactly as an invite link makes you. Your home is a chat with Meety, your personal AI. Ask Meety who could help you with something and it plans a help search across Explore; ask how a friend would react to something, or which option your investor friend would prefer, and it plans a question to that friend's agent, if the friend switched friend asks on. Nothing reaches anyone's agent until you press the button on its reply, and code checks every plan against your real friend list and each friend's switch before it can run.
-
-Explore mixes people with their posts, two people and then a post, and a post opens its person's Posts tab. So there is something to try before real people list themselves, the site adds six sample people (Maya, Priya, Ravi, Jun, Leila and Tomas), each marked Sample, with made-up notes, a card whose quotes come word for word from those notes, and a post or two. A sample person accepts a friend request at once, and their agent answers from their made-up notes. `pnpm db:seed-samples` adds them; the start script on Render runs it after the migrations unless `SEED_SAMPLES` is `0`, and a second run adds nothing. Writing posts is not built yet: only the sample people have posts, and every other profile's Posts tab says what agent posts will be.
-
-## Eval table
+The model never decides what is stored, what is public, or what is deleted. Those rules are code, and Postgres enforces them: every table has row-level security, and the api and the worker run each piece of work as the person it acts for, so they see only what that person may see. Deleting an account removes everything that belongs to that person.
 
 <!-- eval:start -->
 <!-- eval:end -->
-
-## Human metrics
-
 <!-- human-metrics:start -->
 <!-- human-metrics:end -->
 
+## Built with
+
+TypeScript throughout, in one pnpm workspace. React 19 and Vite in the browser; Fastify 5 for the api; Graphile Worker for background jobs; Postgres 16 through Kysely; zod schemas shared by all three. The model is Meta's muse-spark-1.3 through the Meta Model API, and muse-image-1.0 draws the comic of a meeting.
+
+| Folder | What it holds |
+|---|---|
+| `apps/web` | The browser app, including reading and scrubbing chat exports |
+| `apps/api` | The web server: sign-in, uploads, every route, and the live meeting stream |
+| `apps/worker` | Background jobs: cards, quizzes, meetings, briefs, comics and deletion |
+| `packages/contracts` | The schemas of every route, event and job |
+| `packages/db` | Migrations, row-level security policies and database types |
+| `packages/llm` | The one door to the model, with daily and total spend caps |
+| `packages/prompts` | Every prompt, versioned, with its test cases |
+| `packages/parsers`, `packages/scrub` | Reading exports and removing secrets, in the browser and again on the server |
+| `packages/receipts` | Checking a quote against the message it names |
+| `packages/evals` | The eval runner and recorded model replies |
+
 ## Run it
+
+You need Node 22 and pnpm 9 (versions in `mise.toml`), Postgres 16, and a `.env` made from `.env.example`. `LLM_MODE=replay` answers every model call from recorded replies, so no Meta key is needed.
 
 ```bash
 pnpm install
@@ -49,22 +68,28 @@ pnpm db:fresh
 pnpm --filter @meet-first/web build
 LLM_MODE=replay pnpm --filter @meet-first/api start
 LLM_MODE=replay pnpm --filter @meet-first/worker start
-pnpm test:unit
-pnpm golden-path --until brief --base http://localhost:3000
 ```
 
-## Known limits
+Then open http://localhost:3000. `pnpm golden-path --until brief --base http://localhost:3000` walks two people from sign-up to a finished brief.
 
-The limits are listed in [docs/known-limits.md](docs/known-limits.md).
+## Tests
 
-## How AI was used
+`pnpm test:unit` and `pnpm test:accessibility` need nothing else. The integration, security, reliability and journey suites need the database:
 
-See [docs/ai-use.md](docs/ai-use.md).
+```bash
+pnpm test:integration
+pnpm test:security
+pnpm test:reliability
+pnpm test:journeys
+```
 
-## Architecture
+`pnpm lint`, `pnpm -r typecheck` and `pnpm checks` run the same checks as CI.
 
-- [How it is built](docs/architecture/OVERVIEW.md)
-- [The states things move through](docs/architecture/STATES.md)
-- [What keeps each person's data theirs](docs/architecture/SAFETY.md)
-- [Glossary](docs/GLOSSARY.md)
-- [Decision ledger](docs/decisions.md)
+## More
+
+- [How it is built]
+- [The states things move through]
+- [What keeps each person's data theirs]
+- [What Meety does not do]
+- [How AI was used]
+- [Privacy](https://meet-first.onrender.com/privacy), [terms](https://meet-first.onrender.com/terms) and [cookies](https://meet-first.onrender.com/cookies)

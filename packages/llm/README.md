@@ -47,4 +47,4 @@ sequenceDiagram
 
 `pnpm test:unit packages/llm` and `pnpm test:integration packages/llm`. Tests replay hand-written replies from `packages/evals/fixtures/scripted-replies`; the golden path and the eval replay the recordings of the real model in `packages/evals/fixtures/model-replies`.
 
-Not built yet: the price check against the dashboard (Ambar).
+Not built yet: the price check against the dashboard.

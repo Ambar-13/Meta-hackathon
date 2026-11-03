@@ -1,5 +1,5 @@
 -- package: db
--- Adds the open directory, friend asks and help searches (as-built item 49): public card items, a listing per person, the friends switch, directory meetings, and asks answered by personas.
+-- Adds the open directory, friend asks and help searches: public card items, a listing per person, the friends switch, directory meetings, and asks answered by personas.
 
 -- What a person shows strangers: only items they mark public, and only approved, verified ones.
 ALTER TABLE card_items ADD COLUMN is_public boolean NOT NULL DEFAULT false;

@@ -1,5 +1,5 @@
 // Posts as the feed and a profile show them (migration 0009): the newest posts of people listed in Explore, one listed person's posts for
-// their profile's Posts tab, and, since 3 Nov 2026 (migration 0013), your own posts and the stories in the row of faces. Others' posts and
+// their profile's Posts tab, and (migration 0013), your own posts and the stories in the row of faces. Others' posts and
 // stories read through definer functions that never return a person id; your own read through row security.
 import type { FastifyInstance } from "fastify";
 import { sql } from "kysely";
@@ -44,7 +44,7 @@ function postPhotoOf(row: { post_id: string; display_name: string; is_sample: bo
 }
 
 // One post row as the contract has it: the writer's picture (a sample person's face, or the photo a real person put up), the post's
-// photo, and whether it is the caller's and the caller liked it (3 Nov 2026).
+// photo, and whether it is the caller's and the caller liked it.
 function toPost(row: PostRow, writerPhotoId: string | undefined): PostsView["posts"][number] {
   const photo = postPhotoOf(row);
   return {

@@ -6,7 +6,7 @@ import { readLines } from "./read-lines.js";
 import { walkFiles } from "./walk-files.js";
 
 const EM_DASH = String.fromCodePoint(0x2014);
-// Recorded model replies are the model's own words, kept exactly as received and never edited by hand (D74), so this rule
+// Recorded model replies are the model's own words, kept exactly as received and never edited by hand, so this rule
 // for the text we write does not read them.
 const RECORDINGS = ["packages", "evals", "fixtures", "model-replies"].join(sep) + sep;
 const TEXT_FILE = /\.(ts|tsx|js|mjs|cjs|json|md|yaml|yml|sql|txt|html|css|py|toml)$|^Dockerfile$/;

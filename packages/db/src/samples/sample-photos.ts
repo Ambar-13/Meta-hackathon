@@ -1,4 +1,4 @@
-// The photos of the sample people (3 Nov 2026): the face of each, and the photo of a post that has one. The api adds them to what it
+// The photos of the sample people: the face of each, and the photo of a post that has one. The api adds them to what it
 // sends for a sample person, by display name and post text, as keys the web build maps to its bundled images. Real people have none yet.
 import { SAMPLE_PEOPLE, type SamplePhoto } from "./sample-people.js";
 

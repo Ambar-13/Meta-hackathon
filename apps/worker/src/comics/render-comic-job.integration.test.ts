@@ -8,9 +8,9 @@ import { appendMeetingEvent } from "../meetings/index.js";
 import { loadRecordedReply, makeTestJobContext } from "../testing/index.js";
 import { renderComicTask } from "./render-comic-job.js";
 
-// The largest stored panel in bytes (D64).
+// The largest stored panel in bytes.
 const PANEL_CAP_BYTES = 153_600;
-// One ledger estimate per image call (R11.4).
+// One ledger estimate per image call.
 const IMAGE_EST_TOKENS = 1_000;
 
 let fresh: TestDatabase;

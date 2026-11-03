@@ -4,7 +4,7 @@ import { Sticker } from "../../look/index.js";
 
 // The width from which the grid shows two columns: 640 px, the same breakpoint the upload screen uses (comic spec 4.8).
 export const TWO_COLUMN_QUERY = "(min-width: 640px)";
-// The pixel size of each panel, which the image elements declare so the layout does not jump (D64).
+// The pixel size of each panel, which the image elements declare so the layout does not jump.
 const PANEL_PX = 1024;
 // How many empty frames the drawing state shows, one per panel to come.
 const DRAWING_FRAMES = 6;
@@ -52,7 +52,7 @@ const Panel = (props: { panel: ComicView["panels"][number] }): ReactElement => {
   );
 };
 
-// The six panels in reading order as tilted photo frames: each image has its caption as its alt text, and no name or badge (R11.3).
+// The six panels in reading order as tilted photo frames: each image has its caption as its alt text, and no name or badge.
 // The column count and the image width stay as style properties because the comic tests read them there (requests/design-pair-001.md).
 export const PanelGrid = (props: { panels: ComicView["panels"] }): ReactElement => {
   const columns = useColumnCount();

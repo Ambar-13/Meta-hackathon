@@ -2,9 +2,9 @@ import { EVENT_VERSION, PollResponse, rowToEvent, type CommittedEvent, type Meet
 import { withPerson } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 
-// The running step's partial text, as one stream needs it (ARCHITECTURE.md 6.3).
+// The running step's partial text, as one stream needs it.
 export type RunningPartial = { stepSeq: number; attempt: number; side: "a" | "b"; text: string };
-// The reads and the one write a meeting stream makes, each in its own withPerson transaction as the viewer, so row security decides what comes back (R8.7, D55).
+// The reads and the one write a meeting stream makes, each in its own withPerson transaction as the viewer, so row security decides what comes back.
 export type StreamReads = {
   readMembership: (personId: string, meetingId: string) => Promise<{ state: MeetingState } | null>;
   readEventsAfter: (personId: string, meetingId: string, afterSeq: number) => Promise<CommittedEvent[]>;
@@ -12,7 +12,7 @@ export type StreamReads = {
   touchPresence: (personId: string, meetingId: string) => Promise<void>;
 };
 
-// Builds the four functions over the api's database and clock (D52, D53, R8.7).
+// Builds the four functions over the api's database and clock.
 export function makeStreamReads(deps: Pick<RouteDeps, "db" | "now">): StreamReads {
   return {
     readMembership: (personId, meetingId) =>
@@ -53,7 +53,7 @@ export function makeStreamReads(deps: Pick<RouteDeps, "db" | "now">): StreamRead
   };
 }
 
-// The ?after= poll body: the events after afterSeq, the running partial or null, and the server time (D49).
+// The ?after= poll body: the events after afterSeq, the running partial or null, and the server time.
 export async function readPollResponse(reads: StreamReads, input: { personId: string; meetingId: string; afterSeq: number; now: Date }): Promise<PollResponse> {
   const [events, partial] = await Promise.all([reads.readEventsAfter(input.personId, input.meetingId, input.afterSeq), reads.readRunningPartial(input.personId, input.meetingId)]);
   return PollResponse.parse({ v: EVENT_VERSION, events, partial, serverNow: input.now.toISOString() });

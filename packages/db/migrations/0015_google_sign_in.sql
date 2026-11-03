@@ -1,5 +1,5 @@
 -- package: db
--- Lets a person sign in with their Google account and keeps only Google's id for it, never the email (3 Nov 2026).
+-- Lets a person sign in with their Google account and keeps only Google's id for it, never the email.
 
 -- One Google account a person signs in with, by Google's own id for it (the OpenID subject). Meety never keeps the email. A person has
 -- at most one, a Google account belongs to at most one person, and the row goes with the person's account.

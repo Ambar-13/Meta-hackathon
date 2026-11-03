@@ -1,10 +1,8 @@
 import type { ReactElement } from "react";
-import { Link } from "react-router-dom";
-import { APP_PATHS, ScreenFrame } from "../../app-shell/index.js";
+import { PolicyPage, PolicySections, type PolicySection } from "./policy-page.js";
 
-// The privacy page (3 Nov 2026), which Google's sign-in screen links to: what Meety keeps, what it does with it, who sees what, how to
-// delete it, and who to write to, in plain words and true to what the code does.
-const PRIVACY_SECTIONS: ReadonlyArray<{ title: string; lines: readonly string[] }> = [
+// What Meety keeps, what it does with it, who sees what, what it keeps in the browser, and how to delete it, true to what the code does.
+const PRIVACY_SECTIONS: readonly PolicySection[] = [
   {
     title: "What Meety keeps",
     lines: [
@@ -31,7 +29,7 @@ const PRIVACY_SECTIONS: ReadonlyArray<{ title: string; lines: readonly string[] 
   {
     title: "Cookies and your browser",
     lines: [
-      "One cookie keeps you signed in for 90 days. Signing in with Google uses a second one for 10 minutes. Your browser also remembers which stories you watched; that never leaves it.",
+      "One cookie keeps you signed in for 90 days, and signing in with Google uses a second one for 10 minutes. Your browser also keeps two notes for the app. The Cookies page lists all four.",
     ],
   },
   {
@@ -42,30 +40,11 @@ const PRIVACY_SECTIONS: ReadonlyArray<{ title: string; lines: readonly string[] 
   },
 ];
 
-// Who to write to about privacy.
-const CONTACT_EMAIL = "hey.meety@gmail.com";
-
-// /privacy: the sections above, then who to write to and the way back to the start page.
+// /privacy, which Google's sign-in screen links to.
 export const PrivacyScreen = (): ReactElement => {
   return (
-    <ScreenFrame title="Privacy">
-      <p className="privacy-date">Last changed 3 November 2026.</p>
-      {PRIVACY_SECTIONS.map((section) => (
-        <section key={section.title} className="privacy-section">
-          <h2>{section.title}</h2>
-          {section.lines.map((line) => <p key={line}>{line}</p>)}
-        </section>
-      ))}
-      <section className="privacy-section">
-        <h2>Questions</h2>
-        <p>
-          {"Write to "}
-          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
-        </p>
-      </section>
-      <p>
-        <Link to={APP_PATHS.welcome}>Back to Meety</Link>
-      </p>
-    </ScreenFrame>
+    <PolicyPage title="Privacy" changed="3 November 2026">
+      <PolicySections sections={PRIVACY_SECTIONS} />
+    </PolicyPage>
   );
 };

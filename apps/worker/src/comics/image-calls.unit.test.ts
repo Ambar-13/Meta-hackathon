@@ -3,7 +3,7 @@ import sharp from "sharp";
 import { beforeAll, describe, expect, it } from "vitest";
 import { encodePanelWebp, renderPanels, type EncodedPipeline } from "./image-calls.js";
 
-// The largest stored panel in bytes (D64, R11.5).
+// The largest stored panel in bytes.
 const CAP_BYTES = 153_600;
 // The meeting id the fake calls name in their ledger.
 const MEETING_ID = "00000000-0000-4000-8000-000000000501";
@@ -14,7 +14,7 @@ async function flatPng(): Promise<Uint8Array> {
   return pipeline.toBuffer();
 }
 
-// A 1024 by 1024 PNG of random pixels, which stays over the cap after two webp encodes (D64).
+// A 1024 by 1024 PNG of random pixels, which stays over the cap after two webp encodes.
 async function noisePng(): Promise<Uint8Array> {
   const raw = new Uint8Array(1024 * 1024 * 3);
   let seed = 20261026;

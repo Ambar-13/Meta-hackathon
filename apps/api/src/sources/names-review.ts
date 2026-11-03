@@ -9,10 +9,10 @@ import { SourceParams } from "./read-source.js";
 
 // One name the names pass found and the person may keep: its text, its role token and the placeholder ids of its redactions.
 export type VisibleName = { text: string; roleToken: string; placeholderIds: string[] };
-// What a review changes: the kept names to put back into the text, and the sensitive categories to keep in (D18).
+// What a review changes: the kept names to put back into the text, and the sensitive categories to keep in.
 export type ReviewPlan = { keptNames: VisibleName[]; sensitiveOptIn: NamesReview["sensitiveOptIn"] };
 
-// The sentence for a sensitive category outside the four the person may keep in (D18).
+// The sentence for a sensitive category outside the four the person may keep in.
 const SENSITIVE_INVALID_SENTENCE = "Only health, minor, address and identifier can be kept in. Remove the other choice and send again.";
 // The sentence for a review that names a name the pass did not find, or a minor's name.
 const UNKNOWN_NAME_SENTENCE = "A name in the review is not on this source's list. Reload the list and review again.";
@@ -23,12 +23,12 @@ const NAMES_RUNNING_SENTENCE = "The names check is still running. Wait a few sec
 // The sentence for a kept name that would make a message longer than the turn limit.
 const TURN_TOO_LONG_SENTENCE = "Putting a kept name back would make a message longer than 20,000 characters. Replace that name instead.";
 
-// True when a category is one the person may opt into (D18).
+// True when a category is one the person may opt into.
 function isSensitive(category: string): boolean {
   return (SENSITIVE_CATEGORIES as readonly string[]).includes(category);
 }
 
-// Refuses an opt-in outside the sensitive list, and drops repeats, keeping the first (D18).
+// Refuses an opt-in outside the sensitive list, and drops repeats, keeping the first.
 function sensitiveOptInOf(categories: NamesReview["sensitiveOptIn"]): NamesReview["sensitiveOptIn"] {
   if (!categories.every(isSensitive)) {
     throw new ContractError("sensitive_category_invalid", SENSITIVE_INVALID_SENTENCE, HTTP.unprocessable);
@@ -36,13 +36,13 @@ function sensitiveOptInOf(categories: NamesReview["sensitiveOptIn"]): NamesRevie
   return [...new Set(categories)];
 }
 
-// Refuses a review that gives two decisions for one name (R2.4).
+// Refuses a review that gives two decisions for one name.
 function checkDecisionsUnique(decisions: NamesReview["decisions"]): void {
   const texts = decisions.map((decision) => decision.text);
   if (new Set(texts).size !== texts.length) throw makePayloadInvalidError();
 }
 
-// Refuses a decision for a name the pass did not find for this source, or for a minor's name, which is never listed (R2.4, D18).
+// Refuses a decision for a name the pass did not find for this source, or for a minor's name, which is never listed.
 function checkDecisionsVisible(decisions: NamesReview["decisions"], visibleNames: readonly VisibleName[]): void {
   const visible = new Set(visibleNames.map((name) => name.text));
   if (decisions.some((decision) => !visible.has(decision.text))) {
@@ -50,7 +50,7 @@ function checkDecisionsVisible(decisions: NamesReview["decisions"], visibleNames
   }
 }
 
-// Checks a review against the names the pass found, refusing unknown names and categories outside the sensitive list (D17, D18).
+// Checks a review against the names the pass found, refusing unknown names and categories outside the sensitive list.
 export function planReview(review: NamesReview, visibleNames: readonly VisibleName[]): ReviewPlan {
   const sensitiveOptIn = sensitiveOptInOf(review.sensitiveOptIn);
   checkDecisionsUnique(review.decisions);
@@ -59,7 +59,7 @@ export function planReview(review: NamesReview, visibleNames: readonly VisibleNa
   return { keptNames: visibleNames.filter((name) => keptTexts.has(name.text)), sensitiveOptIn };
 }
 
-// Puts each kept name back in place of its role token, in every turn of the source, and drops the redactions those names made (R2.4, R2.5).
+// Puts each kept name back in place of its role token, in every turn of the source, and drops the redactions those names made.
 async function putBackNames(trx: DatabaseTransaction, sourceId: string, kept: VisibleName[]): Promise<void> {
   const turns = await trx.selectFrom("turns").select(["id", "text"]).where("source_id", "=", sourceId).orderBy("turn_index").execute();
   for (const turn of turns) {
@@ -74,7 +74,7 @@ async function putBackNames(trx: DatabaseTransaction, sourceId: string, kept: Vi
   }
 }
 
-// Applies a planned review in the caller's transaction: kept names go back, their redaction rows go, and the source freezes (D16).
+// Applies a planned review in the caller's transaction: kept names go back, their redaction rows go, and the source freezes.
 export async function applyReview(trx: DatabaseTransaction, input: { sourceId: string; plan: ReviewPlan }, now: Date): Promise<{ frozenAt: Date; redactionCount: number }> {
   if (input.plan.keptNames.length > 0) await putBackNames(trx, input.sourceId, input.plan.keptNames);
   const updated = await trx
@@ -91,7 +91,7 @@ export async function applyReview(trx: DatabaseTransaction, input: { sourceId: s
   return { frozenAt: now, redactionCount: Number(counted.count) };
 }
 
-// Reads the names of a source the review may act on, and refuses the review when the source is missing, frozen or not yet checked (D15, D16).
+// Reads the names of a source the review may act on, and refuses the review when the source is missing, frozen or not yet checked.
 async function reviewableNames(trx: DatabaseTransaction, sourceId: string): Promise<VisibleName[]> {
   const source = await trx.selectFrom("sources").select(["id", "frozen_at"]).where("id", "=", sourceId).forUpdate().executeTakeFirst();
   if (source === undefined) throw makeNotFoundError();

@@ -74,7 +74,7 @@ export const UploadView = (props: { flow: UploadFlow; tab: "paste" | "file"; isN
   );
 };
 
-// The upload page: paste or pick, see what will be sent, attest, upload (seams S4, A3, R1.3, R2.7).
+// The upload page: paste or pick, see what will be sent, attest, upload.
 export const UploadScreen = (props: { prepare?: typeof prepareUpload }): ReactElement => {
   const navigate = useNavigate();
   const isNarrow = useIsNarrowScreen();

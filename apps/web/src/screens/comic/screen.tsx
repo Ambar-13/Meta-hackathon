@@ -76,7 +76,7 @@ const ComicBody = (props: { comic: ComicHook; meetingId: string }): ReactElement
   );
 };
 
-// The comic page: pick a character, ask for the comic, watch it draw, then see the six panels (R11.2, R11.3).
+// The comic page: pick a character, ask for the comic, watch it draw, then see the six panels.
 export const ComicScreen = (): ReactElement => {
   const meetingId = useParams()["meetingId"] ?? "";
   const comic = useComicState(meetingId);

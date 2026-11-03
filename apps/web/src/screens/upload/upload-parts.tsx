@@ -3,12 +3,12 @@ import type { UploadProgress, UploadReady } from "../../extract/index.js";
 import { LoadingLine, Sticker } from "../../look/index.js";
 import { CONSENT_COPY, STAGE_WORDS } from "./upload-state.js";
 
-// The words for a low persona signal [confirm] (drafted copy, no input gives it).
+// The words for a low persona signal (drafted copy).
 const LOW_SIGNAL_NOTE = "Most of these messages look like tasks or code, not about you, so the card may come out thin. Pasting a few notes about yourself works better.";
 // The worker's stages in the order it reports them, for the step list under the progress line.
 const STAGE_ORDER: readonly UploadProgress["stage"][] = ["reading", "parsing", "scrubbing", "compressing"];
 
-// The two tabs; under 640 px paste is first, otherwise the file tab is first (R1.3).
+// The two tabs; under 640 px paste is first, otherwise the file tab is first.
 export const UploadTabs = (props: { isNarrow: boolean; selected: "paste" | "file"; onSelect: (tab: "paste" | "file") => void }): ReactElement => {
   const paste = (
     <button key="paste" type="button" role="tab" id="tab-paste" aria-controls="panel-paste" aria-selected={props.selected === "paste"} onClick={() => { props.onSelect("paste"); }}>
@@ -49,7 +49,7 @@ export const PasteTab = (props: { isBusy: boolean; onSubmit: (text: string) => v
   );
 };
 
-// The file picker, which offers the five export types, .jsonl being a Codex session log (R1.3); the picker's own button is the main action.
+// The file picker, which offers the five export types, .jsonl being a Codex session log; the picker's own button is the main action.
 export const FileTab = (props: { isBusy: boolean; onPick: (file: File) => void }): ReactElement => {
   return (
     <div role="tabpanel" id="panel-file" aria-labelledby="tab-file" className="up-pane">
@@ -114,7 +114,7 @@ function redactionLine(count: number): string {
   return `${String(count)} private details will be hidden before upload.`;
 }
 
-// What will be sent: the counts, the consent copy, the low-signal note, the attestation box and the upload button (A3, R2.7, R3.8).
+// What will be sent: the counts, the consent copy, the low-signal note, the attestation box and the upload button.
 export const PreviewPanel = (props: { ready: UploadReady; isAttested: boolean; isUploading: boolean; onAttest: (isAttested: boolean) => void; onUpload: () => void; onPasteInstead: () => void }): ReactElement => {
   const { ready } = props;
   return (

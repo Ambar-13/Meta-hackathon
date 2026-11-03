@@ -23,7 +23,7 @@ export function toCardItem(row: CardItemRow): CardItem {
   return { id: row.id, position: row.position, kind: row.kind, claim: row.claim, lang: row.lang, gloss: row.gloss, turnId: row.turn_id, quote: row.quote, verified: row.verified, flagged: row.flagged, approved: row.approved, sensitive: row.sensitive };
 }
 
-// The card and its items as CardView, with the server time (R3.4).
+// The card and its items as CardView, with the server time.
 export function toCardView(card: CardRow, items: readonly CardItemRow[], serverNow: Date): CardView {
   return CardView.parse({
     id: card.id,
@@ -57,7 +57,7 @@ export function registerReadCard(app: FastifyInstance, deps: RouteDeps): Promise
   return Promise.resolve();
 }
 
-// Where an item's quote sits in its turn's original text, through the receipts offset map; null when the quote is not in the turn (R3.2, D7).
+// Where an item's quote sits in its turn's original text, through the receipts offset map; null when the quote is not in the turn.
 export function highlightFor(turnText: string, quote: string): CardItemSource["highlight"] {
   const map = buildOffsetMap(turnText);
   const needle = normQuote(quote);

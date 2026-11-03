@@ -10,7 +10,7 @@ import { TASKS } from "../runner.js";
 // One job a test context was asked to enqueue.
 export type EnqueuedJob = { name: JobName; payload: unknown; options: { runAt?: Date } | undefined };
 
-// Runs one task of the merged task list inline, with the real database and no Graphile (docs/contracts.md section 4).
+// Runs one task of the merged task list inline, with the real database and no Graphile.
 export async function runJobOnce(context: JobContext, name: JobName, payload: unknown): Promise<void> {
   const task = TASKS[name] as JobTask<JobName> | undefined;
   if (task === undefined) throw new ContractError("task_missing", "No task is registered for this job name. Check the slot block in runner.ts.", 500);

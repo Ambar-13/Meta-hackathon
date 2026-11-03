@@ -3,7 +3,7 @@ import type { QuestionKind, BriefOutput, BriefPoint, Claim } from "@meet-first/c
 import type { ChatMessage } from "@meet-first/llm";
 import { verifyQuote } from "@meet-first/receipts";
 
-// The number of lines in each of the three sections of a brief (ARCHITECTURE.md 3.19).
+// The number of lines in each of the three sections of a brief.
 export const LINES_PER_SECTION = 3;
 // The id a quote carries when the turn it names is not in the notes. The screen treats it as no receipt.
 export const UNKNOWN_TURN_ID = "00000000-0000-0000-0000-000000000000";
@@ -82,7 +82,7 @@ function claimLine(stepSeq: number, claim: Claim, context: PromptContext): strin
   return `  [claim ${String(stepSeq)}-${String(claim.position)} | ${status}] "${claim.quote}" | side=${claim.side} | turn=${label}${gloss}`;
 }
 
-// Builds the two messages of one recipient's brief call and the quotes it may copy (R7.3, D20).
+// Builds the two messages of one recipient's brief call and the quotes it may copy.
 export function buildBriefPromptInput(input: BriefPromptInput): { messages: ChatMessage[]; citable: CitableQuote[] } {
   const context: PromptContext = { turnIndexById: new Map(input.sourceTurns.map((turn) => [turn.id, turn.turnIndex])), citable: [] };
   const people = input.recipient.side === "a" ? [input.recipient, input.other] : [input.other, input.recipient];
@@ -101,7 +101,7 @@ export function buildBriefPromptInput(input: BriefPromptInput): { messages: Chat
 // What a quote check needs: the notes by side and index, the owners by side, and the question the quote must not copy.
 type CheckContext = { notes: Map<string, SourceTurn>; personBySide: Record<"a" | "b", string>; questionText: string };
 
-// Checks one quote the model returned against the note it names, and the person who owns that note (D25, D26).
+// Checks one quote the model returned against the note it names, and the person who owns that note.
 function checkQuote(quote: BriefOutput["agree"][number]["quotes"][number], context: CheckContext): BriefPoint["quotes"][number] {
   const index = parseSourceTurnLabel(quote.turn_id);
   const turn = index === null ? undefined : context.notes.get(`${quote.side}:${String(index)}`);
@@ -110,7 +110,7 @@ function checkQuote(quote: BriefOutput["agree"][number]["quotes"][number], conte
   return { text: quote.text, side: quote.side, turnId: turn.id, verified: check.ok && turn.personId === context.personBySide[quote.side] };
 }
 
-// Turns the model's three sections into brief points, each quote checked inside its named note (D25, D26). Nothing else changes.
+// Turns the model's three sections into brief points, each quote checked inside its named note. Nothing else changes.
 export function verifyBriefQuotes(input: { output: BriefOutput; sourceTurns: SourceTurn[]; personBySide: Record<"a" | "b", string>; questionText: string }): BriefSections {
   const context: CheckContext = { notes: new Map(input.sourceTurns.map((turn) => [`${turn.side}:${String(turn.turnIndex)}`, turn])), personBySide: input.personBySide, questionText: input.questionText };
   const toPoint = (point: BriefOutput["agree"][number]): BriefPoint => ({

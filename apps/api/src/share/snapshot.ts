@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { type QuestionKind, BriefPoint, ContractError, FORBIDDEN_SHARE_KEYS, HTTP, rowToEvent, SHARE_SLUG_BYTES, ShareSnapshot } from "@meet-first/contracts";
 import type { DatabaseTransaction } from "@meet-first/db";
 
-// Random bytes in a share slug, from the contracts: 16 bytes, which is 22 URL-safe base64 characters (R9.4, D68).
+// Random bytes in a share slug, from the contracts: 16 bytes, which is 22 URL-safe base64 characters.
 export const SLUG_BYTES = SHARE_SLUG_BYTES;
 
 // The side letter of a member, as ShareSnapshot spells it.
@@ -23,12 +23,12 @@ function snapshotInvalid(): ContractError {
   return new ContractError("share_snapshot_invalid", "The share snapshot failed its own check and was not stored. Nothing is public. Report this with the meeting id.", HTTP.internal);
 }
 
-// Returns a new random slug of 22 characters, unrelated to any id (R9.4).
+// Returns a new random slug of 22 characters, unrelated to any id.
 export function makeSlug(): string {
   return randomBytes(SLUG_BYTES).toString("base64url");
 }
 
-// Walks every key of a value and throws share_snapshot_forbidden_key when one of FORBIDDEN_SHARE_KEYS appears at any depth (R9.4).
+// Walks every key of a value and throws share_snapshot_forbidden_key when one of FORBIDDEN_SHARE_KEYS appears at any depth.
 // Values may contain those words; only keys are checked.
 export function assertNoForbiddenKeys(value: unknown): void {
   if (Array.isArray(value)) {
@@ -46,7 +46,7 @@ export function assertNoForbiddenKeys(value: unknown): void {
   }
 }
 
-// Returns true when a brief line may be shared: the support judge said yes and every quote was found in its turn (A1, invariant 19).
+// Returns true when a brief line may be shared: the support judge said yes and every quote was found in its turn.
 export function isShareableLine(point: BriefPoint): boolean {
   return point.supported === true && point.quotes.length > 0 && point.quotes.every((quote) => quote.verified);
 }
@@ -70,7 +70,7 @@ async function readMembers(trx: DatabaseTransaction, meetingId: string): Promise
 }
 
 // Reads the approved, verified card items of both sides, in side order and then in card position order; a listed persona met through the
-// directory shows only its public items (as-built item 49).
+// directory shows only its public items.
 async function readItems(trx: DatabaseTransaction, meetingId: string): Promise<Array<{ side: Side; kind: "value" | "preference" | "habit" | "boundary" | "goal"; claim: string; quote: string }>> {
   const rows = await trx
     .selectFrom("card_items as ci")
@@ -86,7 +86,7 @@ async function readItems(trx: DatabaseTransaction, meetingId: string): Promise<A
   return rows.map((row) => ({ side: row.side, kind: row.kind, claim: row.claim, quote: row.quote }));
 }
 
-// Reads each committed turn in order, keeping only the claims that were verified (R6.5).
+// Reads each committed turn in order, keeping only the claims that were verified.
 async function readTurns(trx: DatabaseTransaction, meetingId: string): Promise<Array<{ side: Side; text: string; claims: Array<{ text: string; quote: string }> }>> {
   const rows = await trx
     .selectFrom("meeting_events")
@@ -131,7 +131,7 @@ function toSharedLine(point: BriefPoint): SharedLine {
   return { text: point.text, quotes: point.quotes.map((quote) => ({ text: quote.text, side: quote.side })) };
 }
 
-// The shareable lines of one section across both briefs, deduplicated by exact text, side a's brief first (A1, R7.6).
+// The shareable lines of one section across both briefs, deduplicated by exact text, side a's brief first.
 function sharedSection(briefs: readonly BriefRow[], section: Section): SharedLine[] {
   const seen = new Set<string>();
   const lines: SharedLine[] = [];

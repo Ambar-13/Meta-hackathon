@@ -8,7 +8,7 @@ import { ExitError } from "./report.js";
 
 // The folder the fixtures come from when GOLDEN_PATH_FIXTURES is not set, relative to the repository root.
 export const DEFAULT_FIXTURE_FOLDER = "packages/evals/fixtures/people";
-// A's notes, pasted as blocks of text, one block per turn (D10).
+// A's notes, pasted as blocks of text, one block per turn.
 export const PASTE_FIXTURE = "notes.paste.txt";
 // B's export, in the ChatGPT 2024 mapping shape.
 export const CHATGPT_FIXTURE = "alice.chatgpt.json";
@@ -20,25 +20,25 @@ export const FIXTURE_EMAIL = "rohan.mehta@example.com";
 export const ANSWER_TEXT = "golden path answer: Tuesday evenings only";
 // The expiry text the removed ask step would have shown. Kept with its value for the record.
 export const EXPIRY_TEXT = "my human is away, going with what I know";
-// The curated question both people pick (R10.5): question 1, a get-along question.
+// The curated question both people pick: question 1, a get-along question.
 export const QUESTION_ID = 1;
-// The seq at which reader A's connection is cut on purpose, so the replay after it is tested (step 8, D52). Seq 10 falls in the first
+// The seq at which reader A's connection is cut on purpose, so the replay after it is tested (step 8). Seq 10 falls in the first
 // half of the recorded meeting's 28 events, so the meeting is still running when the stream resumes and when step 11 closes it.
 export const PLANNED_DISCONNECT_SEQ = 10;
-// The free-text question the question check must allow (R10.5), a help question. It starts a second meeting that is never started.
+// The free-text question the question check must allow, a help question. It starts a second meeting that is never started.
 export const FREE_TEXT_QUESTION = "Where could each of us help the other most on a 10-day hackathon?";
-// The avatar B picks for the comic, the first of the fixed list (R11.3).
+// The avatar B picks for the comic, the first of the fixed list.
 export const AVATAR = AVATARS[0];
 // How many of B's items B makes public in step 16: three, because the brief writer needs three distinct quotes of a side to fill
 // a brief's nine lines, and in the directory meeting B's side may quote only public items.
 export const PUBLIC_ITEM_COUNT = 3;
 // The words of B's item that the help search of step 21 must find. Step 16 always makes this item public.
 export const HELP_ITEM_WORDS = "When I feel stuck";
-// The line B lists their persona with (design section 9).
+// The line B lists their persona with.
 export const LISTING_LINE = "Plans the week on Sunday and likes one clear owner for every task.";
-// The curated question A puts to B's listed persona: question 13, a debate (design section 9).
+// The curated question A puts to B's listed persona: question 13, a debate.
 export const DIRECTORY_QUESTION_ID = 13;
-// A curated dating question, 17. B's listing refuses it, because B leaves the dating switch off (P8).
+// A curated dating question, 17. B's listing refuses it, because B leaves the dating switch off.
 export const ROMANCE_QUESTION_ID = 17;
 // The friend ask A sends about B in step 20. apps/worker/src/asks/testing/golden-path-asks.ts writes its replies for the same text.
 export const REACT_ASK_TEXT = "How would you probably react if the team moved the demo day to a Saturday?";
@@ -47,7 +47,7 @@ export const REACT_ASK_TEXT = "How would you probably react if the team moved th
 export const ORCHESTRATOR_MESSAGE = `Can you ask B: "${REACT_ASK_TEXT}"`;
 // The help search A sends in step 21; its words meet B's public item about getting stuck. golden-path-asks.ts uses the same text.
 export const HELP_ASK_TEXT = "I keep getting stuck on one hard problem and go round in circles. Who could help me think it through?";
-// The consent sentence the phone gate reads on screen before any upload (A3). The script cannot see the screen.
+// The consent sentence the phone gate reads on screen before any upload. The script cannot see the screen.
 export const CONSENT_COPY = "Your original archive stays on your device. After you review redactions, we upload and store only the selected excerpts shown here. You can delete them at any time.";
 
 // One fixture made ready for the upload: its turns, its header, its NDJSON body, and the redactions the browser preview would show.
@@ -60,7 +60,7 @@ export function fixtureFolder(): string {
   return process.env.GOLDEN_PATH_FIXTURES ?? DEFAULT_FIXTURE_FOLDER;
 }
 
-// Writes the NDJSON body (the header line, then one line per turn) and counts the redactions the browser preview would show (D11).
+// Writes the NDJSON body (the header line, then one line per turn) and counts the redactions the browser preview would show.
 export function buildNdjson(header: SourceHeader, turns: readonly Turn[]): { ndjson: string; previewRedactions: number } {
   const previewRedactions = turns.reduce((total, turn) => total + scrub(turn.text, { allowlist: [] }).redactions.length, 0);
   const ndjson = [JSON.stringify(header), ...turns.map((turn) => JSON.stringify(turn))].join("\n");

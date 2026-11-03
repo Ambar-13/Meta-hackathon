@@ -9,7 +9,7 @@ import { leaveOutKindsFor, useListingMeeting, type MeetControls } from "../direc
 import { useListingPosts, useMeetingCard, useProfile, type ProfileModel } from "./people-state.js";
 import { ProfileHeader, ProfileTabs } from "./profile-parts.js";
 
-// The words of the profile page (wave 7).
+// The words of the profile page.
 const PROFILE_COPY = {
   title: "Profile",
   loading: "Loading this profile.",
@@ -22,7 +22,7 @@ const PROFILE_COPY = {
   decline: "Decline",
   friends: "Friends",
   askAgent: (name: string) => `Ask ${name}'s Meety`,
-  // The button that lets your Meety and theirs talk a question through, named by what you get (Ambar, 3 Nov: "wdym by meet button").
+  // The button that lets your Meety and theirs talk a question through, named by what you get.
   meetAgent: (name: string) => `See how you'd get on with ${name}`,
   noCard: "To see how you'd get on, open your approved card first.",
   editListing: "Edit profile",
@@ -139,7 +139,7 @@ const ProfileWaiting = (props: { model: ProfileModel }): ReactElement => {
   );
 };
 
-// One person's profile from Explore, at /people/:listingId: Instagram's header and tabs, with the buttons of a friend request (wave 7).
+// One person's profile from Explore, at /people/:listingId: Instagram's header and tabs, with the buttons of a friend request.
 export const PersonScreen = (): ReactElement => {
   const { listingId = "" } = useParams();
   const model = useProfile(listingId);

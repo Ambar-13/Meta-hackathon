@@ -8,9 +8,9 @@ import { readCardView } from "./steps-people-and-sources.js";
 
 // The brief may take 300 s after the meeting ends (two brief calls and two judge calls, ARCHITECTURE 8).
 const BRIEF_WAIT_MS = 300_000;
-// The comic may take 60 s, plus 10 s for its event to arrive (D64).
+// The comic may take 60 s, plus 10 s for its event to arrive.
 const COMIC_WAIT_MS = 70_000;
-// The largest panel image in bytes (D64).
+// The largest panel image in bytes.
 const PANEL_MAX_BYTES = 153_600;
 // The deletion may take 60 s to clear every table (the job runs now with 5 attempts).
 const DELETE_WAIT_MS = 60_000;
@@ -19,7 +19,7 @@ const DELETE_POLL_MS = 3_000;
 // The path of the share page that the web app serves at its own address (IMPLEMENTATION 2.2).
 const SHARE_PAGE = "/share/";
 
-// Every key the share snapshot must never carry, found at any depth of the JSON (R9.4, invariant 13).
+// Every key the share snapshot must never carry, found at any depth of the JSON.
 function forbiddenKeysIn(value: unknown): string[] {
   if (Array.isArray(value)) return value.flatMap((item: unknown) => forbiddenKeysIn(item));
   if (typeof value !== "object" || value === null) return [];
@@ -54,13 +54,13 @@ export async function step13Brief(run: RunState): Promise<StepResult> {
   ];
   // How many lines the support judge backs, and where the unsupported ones sit, is the model's choice: the recorded judge left many
   // lines unsupported, some in decide first, which the contract allows (decideFirst is always three lines) and the brief screen sets
-  // aside (A1). So no run counts them (wave 3 section 4.4). Under --mock the replayed judgments must still both be reliable.
+  // aside. So no run counts them. Under --mock the replayed judgments must still both be reliable.
   if (run.options.mode === "mock") assertions.push(check("both support judgments are reliable", [true, true], [briefA.body.supportReliable, briefB.body.supportReliable]));
   run.manual.push(`3 lines each with tappable quotes; ${String(claims.flagged)} flagged claim(s) read "no quote" on both screens; any unsupported line reads "weak receipt" and is not in decide first; the support rate is shown as a rate, never as proof (A1)`);
   return finishStep(13, "brief", { rows: ["R6.5", "R7.6", "A1", "invariant 19"], detail: `briefs ready; ${String(unsupported.length)} unsupported line(s); ${String(claims.flagged)} flagged claim(s)`, assertions });
 }
 
-// The checks on a ready comic: six panels from one to six, and panel one is a webp image under 150 KB (D64).
+// The checks on a ready comic: six panels from one to six, and panel one is a webp image under 150 KB.
 async function readyComicChecks(run: RunState, comicId: string, view: ComicView): Promise<Assertion[]> {
   const image = await run.b.getRaw(routePath(routes.briefs.panelImage.path, { id: comicId, position: "1" }));
   return [
@@ -71,7 +71,7 @@ async function readyComicChecks(run: RunState, comicId: string, view: ComicView)
   ];
 }
 
-// The checks on the comic row: it is written after the brief, its state is final, and its panel count matches its state (R11.1, R11.2).
+// The checks on the comic row: it is written after the brief, its state is final, and its panel count matches its state.
 function comicRowChecks(view: ComicView, row: { state: string; panels: number } | undefined, isAfterBrief: boolean): Assertion[] {
   return [
     check("the comic is written after the brief", true, isAfterBrief),

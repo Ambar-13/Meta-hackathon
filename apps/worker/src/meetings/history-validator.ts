@@ -12,7 +12,7 @@ type Fault = { reason: string; index: number };
 type Pending = { open: Set<string>; answered: Set<string> };
 
 // Throws history_invalid unless the messages are: the system prefix, one user message, then assistant messages each
-// followed by exactly one tool message per tool call, in any order of ids (R5.1).
+// followed by exactly one tool message per tool call, in any order of ids.
 export function assertValidHistory(messages: readonly ChatMessage[]): void {
   const fault = prefixFault(messages) ?? walkFault(messages);
   if (fault === null) return;

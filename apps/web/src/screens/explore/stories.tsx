@@ -1,5 +1,4 @@
-// The row of stories at the top of Home and the viewer a story opens in, after Instagram's (3 Nov 2026, Ambar: "can people share story
-// and post also? like insta?").
+// The row of stories at the top of Home and the viewer a story opens in, after Instagram's.
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactElement } from "react";
 import { Link } from "react-router-dom";
 import type { StoriesView, Story } from "@meet-first/contracts";

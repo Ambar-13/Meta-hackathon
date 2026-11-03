@@ -1,4 +1,4 @@
-// Normalises text so a model's quote and the stored turn compare like with like (D24, R6.1).
+// Normalises text so a model's quote and the stored turn compare like with like.
 // Steps, in order: NFC; case fold (toLowerCase after NFC); curly quotes and dashes to ASCII; runs of ASCII whitespace to one space;
 // trim; then strip leading and trailing punctuation.
 
@@ -8,9 +8,9 @@ export const QUOTE_FOLDS: ReadonlyMap<string, string> = new Map([
   ["\u201C", '"'], ["\u201D", '"'], ["\u201E", '"'], ["\u201F", '"'],
   ["\u2010", "-"], ["\u2011", "-"], ["\u2012", "-"], ["\u2013", "-"], ["\u2014", "-"], ["\u2015", "-"], ["\u2212", "-"],
 ]);
-// Leading or trailing whitespace and punctuation, removed at both ends of a normalised quote (D24).
+// Leading or trailing whitespace and punctuation, removed at both ends of a normalised quote.
 export const LEADING_TRAILING_PUNCTUATION = /^[\s\p{P}]+|[\s\p{P}]+$/gu;
-// A run of ordinary spaces, tabs or line breaks, collapsed to one space (D24).
+// A run of ordinary spaces, tabs or line breaks, collapsed to one space.
 export const ASCII_WHITESPACE_RUN = /[ \t\n\r\f\v]+/g;
 // A base character with the combining marks that follow it. NFC composes inside one cluster, so clusters are normalised alone.
 const CLUSTER = /\P{M}\p{M}*|\p{M}+/gu;
@@ -18,7 +18,7 @@ const CLUSTER = /\P{M}\p{M}*|\p{M}+/gu;
 // The normalised text and, for each of its UTF-16 code units, the index in the original text that produced it.
 export type FoldedText = { normalised: string; sources: number[] };
 
-// Runs the normalisation steps and keeps track of where each output code unit came from (D7).
+// Runs the normalisation steps and keeps track of where each output code unit came from.
 export function foldQuote(text: string): FoldedText {
   let folded = "";
   const sources: number[] = [];

@@ -26,7 +26,7 @@ export const FIXTURE_CARD_ITEMS: readonly PersonaCardItem[] = [
   { position: 6, kind: "preference", claim: "Prefers a loose weekly plan with room to move", gloss: "Prefers a loose weekly plan with room to move", quote: "I like a rough plan for the week but I hate when every hour is booked" },
 ];
 
-// The bank question ids of every fixture quiz, positions 1 to 10 (D28 ids, fixed here so fixtures can match).
+// The bank question ids of every fixture quiz, positions 1 to 10 (fixed here so fixtures can match).
 export const FIXTURE_QUESTION_IDS: readonly number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 // The persona answers to questions 1 to 10 from the six-item card.
@@ -60,7 +60,7 @@ export const FIXTURE_HUMAN_ANSWERS: readonly string[] = [
 // The other human answer at position 6 that the unreadable-reply test stores.
 export const FIXTURE_HUMAN_ANSWER_6_VARIANT = "Nothing after dinner, ever.";
 
-// Positions whose flipped flag is true, so run 1 shows the human answer first there (D30).
+// Positions whose flipped flag is true, so run 1 shows the human answer first there.
 export const FIXTURE_FLIPPED_POSITIONS: ReadonlySet<number> = new Set([2, 4, 6, 8, 10]);
 
 // The verdicts the item fixtures return in run 1 (7 agree), positions 1 to 10.
@@ -98,7 +98,7 @@ function itemAt(position: number): { personaAnswer: string; humanAnswer: string;
   };
 }
 
-// The persona cases pa-01 to pa-12 (4.19).
+// The persona cases pa-01 to pa-12.
 function personaCases(): FixtureCase[] {
   const cases: FixtureCase[] = [];
   for (let question = 1; question <= 10; question += 1) {
@@ -125,7 +125,7 @@ function personaCases(): FixtureCase[] {
   return cases;
 }
 
-// The calibration cases jc-<entry>-identical and jc-<entry>-contradicting (4.20).
+// The calibration cases jc-<entry>-identical and jc-<entry>-contradicting.
 function calibrationCases(): FixtureCase[] {
   const cases: FixtureCase[] = [];
   const expected: Array<{ entry: number; identical: boolean; contradicting: boolean }> = [
@@ -153,7 +153,7 @@ function calibrationCases(): FixtureCase[] {
   return cases;
 }
 
-// The item cases j1-01 to j1-10 and j2-01 to j2-10, and the unreadable variant j2-06-variant (4.20).
+// The item cases j1-01 to j1-10 and j2-01 to j2-10, and the unreadable variant j2-06-variant.
 function itemCases(): FixtureCase[] {
   const cases: FixtureCase[] = [];
   for (const run of [1, 2] as const) {
@@ -179,7 +179,7 @@ function itemCases(): FixtureCase[] {
   return cases;
 }
 
-// All 43 fixture cases, persona answers first, then judge calls (4.19, 4.20).
+// All 43 fixture cases, persona answers first, then judge calls.
 export function fixtureCases(): FixtureCase[] {
   return [...personaCases(), ...calibrationCases(), ...itemCases()];
 }

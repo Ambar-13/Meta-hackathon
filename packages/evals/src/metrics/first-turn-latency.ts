@@ -1,4 +1,4 @@
-// First-turn latency: the time from a meeting's start to its first model token, as nearest-rank percentiles in milliseconds (R10.3).
+// First-turn latency: the time from a meeting's start to its first model token, as nearest-rank percentiles in milliseconds.
 import type { EvalRows } from "../collect-rows.js";
 import type { MetricResult } from "./index.js";
 

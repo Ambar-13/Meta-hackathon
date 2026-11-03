@@ -1,10 +1,10 @@
 import { PLACEHOLDER_PATTERN, ROLE_TOKEN, SENSITIVE_CATEGORIES, TURN_TEXT_MAX_CHARS } from "@meet-first/contracts";
 
-// The role the scrub-names prompt gives a person under 18 (D18); such a name stays replaced, with no keep choice in the names review.
+// The role the scrub-names prompt gives a person under 18; such a name stays replaced, with no keep choice in the names review.
 export const MINOR_ROLE = "child";
 // Scripts written without spaces between words: a name in them is matched as a plain substring.
 export const NO_SPACE_SCRIPT = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Thai}]/u;
-// The pattern text of a protected token: a redaction placeholder, a code placeholder, or a role token such as [person:colleague 2] (D13, D14, R2.3).
+// The pattern text of a protected token: a redaction placeholder, a code placeholder, or a role token such as [person:colleague 2].
 export const PROTECTED_TOKEN_SOURCE = String.raw`\[(?:redacted:[a-z_]+:[0-9a-f]{8}|code: [^\]\n]{0,80}|person:[^[\]\n]{1,60})\]`;
 // Every protected token in a text. Use it only with matchAll, replace or split, because its g flag keeps state between test or exec calls.
 export const PROTECTED_TOKEN = new RegExp(PROTECTED_TOKEN_SOURCE, "g");
@@ -43,7 +43,7 @@ export function assignTokens(names: ReadonlyArray<{ text: string; role: string }
   return tokens;
 }
 
-// True when a name is the person's own: the display name, a word of it, or an affiliation, ignoring case (D17).
+// True when a name is the person's own: the display name, a word of it, or an affiliation, ignoring case.
 export function isAllowlisted(name: string, person: { displayName: string; affiliations: readonly string[] }): boolean {
   const key = name.trim().toLowerCase();
   const words = person.displayName.split(/\s+/).filter((word) => word.length >= 2);
@@ -59,7 +59,7 @@ function namePattern(name: string): RegExp {
   return new RegExp(`(?<![\\p{L}\\p{M}\\p{N}])${escaped}(?![\\p{L}\\p{M}\\p{N}])`, "giu");
 }
 
-// Orders tokens longest name first, so a full name is replaced before its first name (R2.3).
+// Orders tokens longest name first, so a full name is replaced before its first name.
 function longestFirst(left: NameToken, right: NameToken): number {
   if (left.text.length !== right.text.length) return right.text.length - left.text.length;
   if (left.text < right.text) return -1;
@@ -88,7 +88,7 @@ function replaceInSegments(segments: readonly Segment[], token: NameToken): Segm
   return next;
 }
 
-// Rewrites every occurrence of every name in one turn's text into its role token; protected tokens are never touched (R2.3).
+// Rewrites every occurrence of every name in one turn's text into its role token; protected tokens are never touched.
 export function applyRoleTokens(text: string, tokens: readonly NameToken[]): string {
   const split = text.split(new RegExp(`(${PROTECTED_TOKEN_SOURCE})`));
   let segments: Segment[] = split.map((part, index) => ({ text: part, isProtected: index % 2 === 1 }));
@@ -96,7 +96,7 @@ export function applyRoleTokens(text: string, tokens: readonly NameToken[]): str
   return segments.map((segment) => segment.text).join("");
 }
 
-// Cuts a rewritten turn back to TURN_TEXT_MAX_CHARS (D5) without splitting a token.
+// Cuts a rewritten turn back to TURN_TEXT_MAX_CHARS without splitting a token.
 export function fitTurnLength(text: string): string {
   if (text.length <= TURN_TEXT_MAX_CHARS) return text;
   const head = text.slice(0, TURN_TEXT_MAX_CHARS);
@@ -113,12 +113,12 @@ export function fitTurnLength(text: string): string {
   return text.slice(0, end).trimEnd();
 }
 
-// How many times one token occurs in a text: one redaction row for each occurrence the pass wrote (D15).
+// How many times one token occurs in a text: one redaction row for each occurrence the pass wrote.
 export function countToken(text: string, token: string): number {
   return text.split(token).length - 1;
 }
 
-// The sensitive categories of one turn after the names pass: existing tags, every SENSITIVE_CATEGORIES placeholder in the text, and minor when a child's name was replaced (D18, R2.8).
+// The sensitive categories of one turn after the names pass: existing tags, every SENSITIVE_CATEGORIES placeholder in the text, and minor when a child's name was replaced.
 export function sensitiveCategoriesFor(text: string, existing: readonly string[], hasMinor: boolean): string[] {
   const categories = new Set<string>(existing);
   for (const match of text.matchAll(PLACEHOLDER_PATTERN)) {

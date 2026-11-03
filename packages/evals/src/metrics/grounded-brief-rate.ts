@@ -1,4 +1,4 @@
-// Grounded brief rate: the share of brief lines whose every quote passes the quote check again inside the right side's turn (R3.2).
+// Grounded brief rate: the share of brief lines whose every quote passes the quote check again inside the right side's turn.
 // The stored verified flag is read, but the quote is checked again with verifyQuote, so an altered quote fails.
 import { verifyQuote } from "@meet-first/receipts";
 import type { Quote } from "@meet-first/contracts";

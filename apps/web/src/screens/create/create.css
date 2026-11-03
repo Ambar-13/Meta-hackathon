@@ -1,4 +1,4 @@
-/* Create, after Instagram's (3 Nov 2026): Post or Story as a two-choice pill, the photo, the words, a line on what your Meety learns,
+/* Create, after Instagram's: Post or Story as a two-choice pill, the photo, the words, a line on what your Meety learns,
    then Share, full width and the page's one blue. A post's photo is square and a story's is the whole picture on its blurred copy, both
    with square corners as every photo in the app; on a laptop the photo sits left of the words. Spacing is on a 4px grid. */
 .create { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; max-width: 935px; margin: 0 auto; }

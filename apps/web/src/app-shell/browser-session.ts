@@ -8,12 +8,12 @@ const session: { allowlist: string[]; approvedCardId: string | null; sides: Map<
   sides: new Map(),
 };
 
-// Keeps the display name and groups typed at signup; the upload screen passes them to prepareUpload as the allowlist (D17, seams S4).
+// Keeps the display name and groups typed at signup; the upload screen passes them to prepareUpload as the allowlist.
 export function rememberAllowlist(displayName: string, affiliations: readonly string[]): void {
   session.allowlist = [displayName, ...affiliations];
 }
 
-// The allowlist for prepareUpload: the display name then the groups, or [] after a reload, because it is never stored [confirm].
+// The allowlist for prepareUpload: the display name then the groups, or [] after a reload, because it is never stored.
 export function readAllowlist(): string[] {
   return [...session.allowlist];
 }

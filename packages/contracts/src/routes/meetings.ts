@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { MeetingCreate, MeetingCreateResponse, MeetingReadyResponse, MeetingStartResponse, MeetingView, PairCreateResponse, PairJoin, PairJoinResponse, PairView, PollResponse } from "../meetings/index.js";
 
-// Routes for pairs, meetings and the event stream. Paths come from IMPLEMENTATION.md 2.2.
+// Routes for pairs, meetings and the event stream.
 // The events route answers with the poll shape when it has ?after=; the SSE form has no JSON body.
 export const meetingsRoutes = {
   createPair: { method: "POST", path: "/api/pairs", request: z.undefined(), response: PairCreateResponse },

@@ -1,5 +1,5 @@
 # The Oracle server (deploy/oracle/README.md): Postgres, the api, the worker and Caddy on one machine. The api applies the
-# migrations before it listens, as Render's pre-deploy command does (D71), and the worker starts only once the api answers,
+# migrations before it listens, as Render's pre-deploy command does, and the worker starts only once the api answers,
 # so it never boots on an old schema. The ${...} values come from /opt/meet-first/.env on the server, which deploy.sh writes.
 name: meet-first
 
@@ -45,7 +45,7 @@ services:
       MAX_CONCURRENT_MEETINGS: "40"
       LOG_LEVEL: info
       NODE_ENV: production
-    # A 120 s model call can still be draining when a deploy stops the container (D39, D70).
+    # A 120 s model call can still be draining when a deploy stops the container.
     stop_grace_period: 150s
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]

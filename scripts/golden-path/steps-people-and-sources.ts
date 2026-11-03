@@ -7,30 +7,30 @@ import { check, finishStep, need, pollUntil, routePath, type Assertion, type Run
 
 // The names pass is read every 3 seconds (the spec's poll interval for a source).
 const NAMES_POLL_MS = 3_000;
-// The names pass may take 60 s for the paste and 120 s for the export (R2.6).
+// The names pass may take 60 s for the paste and 120 s for the export.
 const NAMES_PASTE_TIMEOUT_MS = 60_000;
 const NAMES_EXPORT_TIMEOUT_MS = 120_000;
-// The card is due within 60 s for the paste (design step 3), and within 300 s for the export (D22 plus a margin).
+// The card is due within 60 s for the paste, and within 300 s for the export (the card call's timeout plus a margin).
 const CARD_PASTE_TIMEOUT_MS = 60_000;
 const CARD_EXPORT_TIMEOUT_MS = 300_000;
-// The card poll interval (R3.4).
+// The card poll interval.
 const CARD_POLL_MS = 3_000;
-// The export must hold at least this many turns (IMPLEMENTATION 2.7) and at most this many (D5).
+// The export must hold at least this many turns (IMPLEMENTATION 2.7) and at most this many.
 const EXPORT_TURNS_MIN = 50;
 const EXPORT_TURNS_MAX = 10_000;
-// The compressed upload limit: 2 MiB (R1.4).
+// The compressed upload limit: 2 MiB.
 const UPLOAD_COMPRESSED_LIMIT = 2_097_152;
-// The words the script prints when a card has too few verified items (D23).
+// The words the script prints when a card has too few verified items.
 const THIN_DETAIL = "card_thin: fewer than 6 verified items from the paste fixture; the fixture or the dossier prompt needs work";
 
-// Reads the source view with its first page of names (R2.4).
+// Reads the source view with its first page of names.
 export async function readSourceView(client: PersonClient, sourceId: string) {
   const path = `${routePath(routes.sources.readSource.path, { id: sourceId })}?page=1`;
   const reply = await client.json({ method: "GET", path, expect: 200, schema: routes.sources.readSource.response });
   return reply.body;
 }
 
-// Reads one card with its items (R3.4). The browser polls this every 3 seconds.
+// Reads one card with its items. The browser polls this every 3 seconds.
 export async function readCardView(client: PersonClient, cardId: string) {
   const reply = await client.json({ method: "GET", path: routePath(routes.cards.readCard.path, { id: cardId }), expect: 200, schema: routes.cards.readCard.response });
   return reply.body;
@@ -69,7 +69,7 @@ function readyCardChecks(card: CardView, prefix: string): Assertion[] {
   ];
 }
 
-// The sign-up body for one display name, with the access code when the site asks for one (ACCESS_CODE in the shell, R9.5).
+// The sign-up body for one display name, with the access code when the site asks for one (ACCESS_CODE in the shell).
 export function signUpBody(displayName: string): { displayName: string; accessCode?: string } {
   const accessCode = (process.env.ACCESS_CODE ?? "").trim();
   return accessCode === "" ? { displayName } : { displayName, accessCode };

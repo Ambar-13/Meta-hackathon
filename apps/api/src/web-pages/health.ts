@@ -4,27 +4,27 @@ import { DISK_DEGRADED_PCT, Health, routes, WORKER_HEARTBEAT_STALE_SECONDS } fro
 import type { Database } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 
-// The Postgres plan's disk in bytes: 16 GB, the size the design sized every cap for (design field 10; the plan is unverified, ARCHITECTURE.md section 12) [confirm] (decimal GB is the smaller reading, so degraded comes early, not late).
+// The Postgres plan's disk in bytes: 16 GB, the size the design sized every cap for (design field 10, the plan is unverified) (decimal GB is the smaller reading, so degraded comes early, not late).
 export const DISK_PLAN_BYTES = 16_000_000_000;
 // What health read from the database; a null field means that read gave nothing.
 export type HealthReads = { schemaVersion: number | null; workerSeenAt: Date | null; databaseBytes: number | null };
 
-// The database size as a share of the plan's disk, rounded to one decimal place, at most 100 (R12.5) [confirm] (no input gives the rounding).
+// The database size as a share of the plan's disk, rounded to one decimal place, at most 100.
 export function diskPercent(databaseBytes: number, planBytes: number): number {
   return Math.min(100, Math.round((databaseBytes / planBytes) * 1000) / 10);
 }
 
-// True when the disk share has reached DISK_DEGRADED_PCT, 80 (R12.5).
+// True when the disk share has reached DISK_DEGRADED_PCT, 80.
 export function isDiskDegraded(diskPct: number | null): boolean {
   return diskPct !== null && diskPct >= DISK_DEGRADED_PCT;
 }
 
-// True when the worker's heartbeat is less than WORKER_HEARTBEAT_STALE_SECONDS, 120 s, old (ARCHITECTURE.md 3.25).
+// True when the worker's heartbeat is less than WORKER_HEARTBEAT_STALE_SECONDS, 120 s, old.
 export function isWorkerFresh(workerSeenAt: Date | null, now: Date): boolean {
   return workerSeenAt !== null && now.getTime() - workerSeenAt.getTime() < WORKER_HEARTBEAT_STALE_SECONDS * 1000;
 }
 
-// Builds the Health body; null reads mean the database did not answer (ARCHITECTURE.md section 9).
+// Builds the Health body; null reads mean the database did not answer.
 export function toHealth(reads: HealthReads | null, now: Date, planBytes: number): Health {
   if (reads === null) {
     return Health.parse({ ok: false, db: false, worker: false, schemaVersion: 0, diskPct: null, degraded: false });
@@ -35,7 +35,7 @@ export function toHealth(reads: HealthReads | null, now: Date, planBytes: number
   return Health.parse({ ok: isWorkerRunning && !isDegraded, db: true, worker: isWorkerRunning, schemaVersion: reads.schemaVersion ?? 0, diskPct, degraded: isDegraded });
 }
 
-// Reads the schema version, the worker heartbeat and the database size; null when the first two reads fail (R12.5).
+// Reads the schema version, the worker heartbeat and the database size; null when the first two reads fail.
 export async function readHealthNumbers(db: Kysely<Database>): Promise<HealthReads | null> {
   let schemaVersion: number | null;
   let workerSeenAt: Date | null;
@@ -58,7 +58,7 @@ export async function readHealthNumbers(db: Kysely<Database>): Promise<HealthRea
   return { schemaVersion, workerSeenAt, databaseBytes };
 }
 
-// Registers GET /api/health, public: always 200, and the body says what is wrong (ARCHITECTURE.md section 9, R12.5) [confirm] (no input gives the status of a failing check).
+// Registers GET /api/health, public: always 200, and the body says what is wrong.
 export function registerHealthRoute(app: FastifyInstance, deps: RouteDeps, planBytes: number): void {
   app.get(routes.people.health.path, async (request, reply) => {
     const reads = await readHealthNumbers(deps.db);

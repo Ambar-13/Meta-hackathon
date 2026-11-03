@@ -11,7 +11,7 @@ function readPersonId(payload: unknown): string {
   return parsed.data.personId;
 }
 
-// Marks every meeting the person is in as deleted, so a step that wakes up finds it gone and exits (D69, R9.6).
+// Marks every meeting the person is in as deleted, so a step that wakes up finds it gone and exits.
 async function markMeetingsDeleted(trx: DatabaseTransaction, personId: string, now: Date): Promise<void> {
   const rows = await trx.selectFrom("meeting_members").select("meeting_id").where("person_id", "=", personId).execute();
   const meetingIds = rows.map((row) => row.meeting_id);
@@ -28,7 +28,7 @@ function isForeignKeyViolation(error: unknown): boolean {
   return typeof error === "object" && error !== null && Reflect.get(error, "code") === "23503";
 }
 
-// Deletes the people row in one statement, so every foreign key cascades through the person's tables (D69).
+// Deletes the people row in one statement, so every foreign key cascades through the person's tables.
 async function deletePersonRow(trx: DatabaseTransaction, personId: string): Promise<void> {
   try {
     await trx.deleteFrom("people").where("id", "=", personId).execute();
@@ -40,7 +40,7 @@ async function deletePersonRow(trx: DatabaseTransaction, personId: string): Prom
   }
 }
 
-// Completes the deletions row the route wrote, or writes it when the route did not. A row already complete is left alone, so a second run adds nothing (D69).
+// Completes the deletions row the route wrote, or writes it when the route did not. A row already complete is left alone, so a second run adds nothing.
 async function finishDeletionRecord(trx: DatabaseTransaction, outcome: { personId: string; counts: Record<string, number>; now: Date }): Promise<void> {
   const { personId, now } = outcome;
   const record = JSON.stringify(outcome.counts);
@@ -51,7 +51,7 @@ async function finishDeletionRecord(trx: DatabaseTransaction, outcome: { personI
   await trx.insertInto("deletions").values({ person_id: personId, requested_at: now, completed_at: now, counts: record }).execute();
 }
 
-// The delete_person job: marks the person and their meetings deleted, counts the rows, deletes the people row so the foreign keys cascade, and records the counts (D69).
+// The delete_person job: marks the person and their meetings deleted, counts the rows, deletes the people row so the foreign keys cascade, and records the counts.
 export const deletePersonTask: JobTask<"delete_person"> = async (payload, context) => {
   const personId = readPersonId(payload);
   await withPerson(context.db, personId, async (trx) => {

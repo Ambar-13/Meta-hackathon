@@ -6,7 +6,7 @@ import { APP_PATHS, ErrorNotice, PROFILE_TAB_QUERY, readCreateKind, ScreenFrame 
 import { Icon, MeetyMark, StoryPicture } from "../../look/index.js";
 import { canShare, useCreate, type CreateModel } from "./create-state.js";
 
-// The words of Create (3 Nov 2026, Ambar: "can people share story and post also? like insta?").
+// The words of Create.
 const CREATE_COPY = {
   post: "New post",
   story: "New story",

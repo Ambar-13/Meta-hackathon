@@ -6,7 +6,7 @@ import { makeNotFoundError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
 import { enqueueAfterStart, meetingIdOf, tryStart } from "./start.js";
 
-// True when a member's last lobby poll or stream heartbeat is at most 30 s old: "watching now", shown only and never a condition to start (D53, as-built item 28).
+// True when a member's last lobby poll or stream heartbeat is at most 30 s old: "watching now", shown only and never a condition to start.
 export function isMemberConnected(lastSeenAt: Date | null, now: Date): boolean {
   return lastSeenAt !== null && now.getTime() - lastSeenAt.getTime() <= PRESENCE_WINDOW_SECONDS * 1000;
 }

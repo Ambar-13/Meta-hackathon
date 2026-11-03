@@ -120,7 +120,7 @@ const FailedBody = (props: { error: ApiError; isLoading: boolean; onRetry: () =>
   );
 };
 
-// The names review: see the names found, keep any you choose, opt in to sensitive kinds, save and build the card (R2.4, D16, D18).
+// The names review: see the names found, keep any you choose, opt in to sensitive kinds, save and build the card.
 // Three states before the review: looking (first load out), failed (first load refused, with a retry that polls again), found.
 export const NamesReviewScreen = (): ReactElement => {
   const navigate = useNavigate();

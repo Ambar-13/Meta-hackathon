@@ -11,9 +11,9 @@ import { asMeeting, asPerson, countVisibleRows, createPairedMeetingWithTurns, fr
 import { withMeeting, withPerson, type DatabaseTransaction } from "./transaction.js";
 import type { Database } from "./types.js";
 
-// The user-data tables (ARCHITECTURE.md section 2, Wave 0 section 7); names_passes and source_names come from migration 0002, the directory's three from 0006, friend_requests and orchestrator_messages from 0008, and posts from 0009.
+// The user-data tables; names_passes and source_names come from migration 0002, the directory's three from 0006, friend_requests and orchestrator_messages from 0008, and posts from 0009.
 const USER_DATA_TABLES = ["people", "sessions", "transfer_links", "sources", "turns", "redactions", "cards", "card_items", "quizzes", "quiz_items", "pairs", "meetings", "meeting_members", "meeting_steps", "meeting_events", "claims", "briefs", "comics", "comic_panels", "share_pages", "ledger", "deletions", "names_passes", "source_names", "directory_listings", "persona_asks", "persona_answers", "friend_requests", "orchestrator_messages", "posts", "post_likes", "profile_photos", "google_accounts"] as const;
-// The three reference tables with no person or meeting column (Wave 0 section 4.5.2).
+// The three reference tables with no person or meeting column.
 const REFERENCE_TABLES = ["quiz_bank", "service_heartbeats", "schema_migrations"] as const;
 // The tables keyed by meeting_id that a member of another meeting must not read (R8.7-T1, R8.7-T2).
 const MEETING_TABLES = ["meeting_members", "meeting_steps", "meeting_events", "claims", "briefs", "comics", "comic_panels", "share_pages", "ledger"] as const;
@@ -233,7 +233,7 @@ describe("schema security", () => {
   });
 
   it("R8.7-T3: each context sees exactly the rows its policies allow", async () => {
-    // Rows per table as: no context, x.a, x.b, meeting x. Changed from the Wave 0 table where the frozen policies differ (see the report).
+    // Rows per table as: no context, x.a, x.b, meeting x.
     const expected: Array<[string, [number, number, number, number]]> = [
       ["people", [0, 1, 1, 2]], ["sessions", [0, 1, 1, 0]], ["transfer_links", [0, 1, 0, 0]], ["sources", [0, 1, 1, 2]], ["turns", [0, 3, 3, 6]],
       ["redactions", [0, 1, 0, 0]], ["cards", [0, 1, 1, 2]], ["card_items", [0, 6, 6, 12]], ["quizzes", [0, 1, 0, 1]], ["quiz_items", [0, 1, 0, 1]],

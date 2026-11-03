@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# D70, R12.3: a deploy happens only from a tag that sits on the release branch, through the deploy hooks.
+# A deploy happens only from a tag that sits on the release branch, through the deploy hooks.
 # With RENDER_DEPLOY_HOOK set, the one service of render.yaml runs the api and the worker, and its start script migrates before
 # either starts, so one hook does it all. With two services instead, the api's hook goes first, and the worker's deploy is
 # requested only once the api's pre-deploy migrations have brought the database to the tag's schema version, because the worker
-# refuses to boot on any other (D71).
-# Usage: scripts/release.sh v1.0.0   (or run it on a checked-out tag with no argument), with RENDER_DEPLOY_HOOK set, or with
+# refuses to boot on any other.
+# Usage: scripts/release.sh v1.0.0 (or run it on a checked-out tag with no argument), with RENDER_DEPLOY_HOOK set, or with
 # RENDER_DEPLOY_HOOK_API, RENDER_DEPLOY_HOOK_WORKER and APP_ORIGIN. RELEASE_WAIT_SECONDS (15) and RELEASE_WAIT_TRIES (160) set
 # the two-service wait, 40 minutes.
 set -euo pipefail
@@ -52,7 +52,7 @@ WAIT_TRIES="${RELEASE_WAIT_TRIES:-160}"
 
 echo "Deploying $TAG ($COMMIT): api first, then the worker once the database is at schema version $EXPECTED."
 curl -fsS -X POST "${RENDER_DEPLOY_HOOK_API}&ref=${COMMIT}" >/dev/null
-# The health route always answers 200 and reports the schema version it reads from the database (R12.5). A read with no answer
+# The health route always answers 200 and reports the schema version it reads from the database. A read with no answer
 # (the api is not up yet) counts as a try like any other.
 seen=""
 tries=0

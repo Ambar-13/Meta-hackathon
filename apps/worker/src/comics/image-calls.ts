@@ -4,7 +4,7 @@ import sharp from "sharp";
 
 // One panel that was encoded and fits under the size cap.
 export type PanelRender = { position: number; bytes: Uint8Array; sizeBytes: number };
-// How the six image calls ended: all six panels, a reason they cannot be stored, the deadline, or a full token window (D64, D58).
+// How the six image calls ended: all six panels, a reason they cannot be stored, the deadline, or a full token window.
 export type RenderOutcome = { kind: "ready"; panels: PanelRender[] } | { kind: "failed"; reason: "render_failed" } | { kind: "deadline" } | { kind: "limiter_busy" };
 // The result of encoding one image: its webp bytes, or the reason it is too large.
 export type EncodeResult = { ok: true; bytes: Uint8Array } | { ok: false; reason: "over_size_cap" };
@@ -13,11 +13,11 @@ type ImageClient = Pick<LlmClient, "image">;
 // The result of a promise that either finished or lost a race to the deadline.
 export type Raced<T> = { kind: "done"; value: T } | { kind: "deadline" };
 
-// The side of a panel image in pixels, 1024 by 1024 (D64).
+// The side of a panel image in pixels, 1024 by 1024.
 const PANEL_EDGE_PX = 1024;
-// The webp quality of the first encode of a panel (D64) [confirm].
+// The webp quality of the first encode of a panel.
 const FIRST_QUALITY = 80;
-// The webp quality of the second encode, used only when the first is over the cap (D64) [confirm].
+// The webp quality of the second encode, used only when the first is over the cap.
 const SECOND_QUALITY = 60;
 
 // Resolves with the promise's value, or with deadline when the signal fires first. A late result is dropped, never returned.
@@ -53,7 +53,7 @@ async function webpAt(bytes: Uint8Array, quality: number): Promise<Uint8Array> {
   return pipeline.toBuffer();
 }
 
-// Encodes image bytes as webp at quality 80; if that is over the cap, once more at quality 60; still over is refused (D64, R11.5).
+// Encodes image bytes as webp at quality 80; if that is over the cap, once more at quality 60; still over is refused.
 export async function encodePanelWebp(bytes: Uint8Array): Promise<EncodeResult> {
   const first = await webpAt(bytes, FIRST_QUALITY);
   if (first.length <= PANEL_MAX_BYTES) return { ok: true, bytes: first };
@@ -79,7 +79,7 @@ export async function renderPanels(llm: ImageClient, prompts: string[], options:
   return { kind: "ready", panels };
 }
 
-// True when one settled call was refused by the full token window, so no bytes came back from it (D58).
+// True when one settled call was refused by the full token window, so no bytes came back from it.
 function isRefusedByLimiter(result: PromiseSettledResult<{ webp: Uint8Array; ledgerId: string }>): boolean {
   return result.status === "rejected" && isLimiterBusy(result.reason);
 }

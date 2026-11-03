@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { CARD_POLL_MS, type CardItem, type CardView } from "@meet-first/contracts";
 import { apiFetch, asApiError, ApiError, APP_PATHS, rememberApprovedCard, routes, usePolledView, type PolledView } from "../../app-shell/index.js";
 
-// The label of each item kind (D21) [confirm] (drafted copy, no input gives it).
+// The label of each item kind (drafted copy).
 export const KIND_LABELS: Record<CardItem["kind"], string> = { value: "Value", preference: "Preference", habit: "Habit", boundary: "Boundary", goal: "Goal" };
 // Where the approve, quiz and rebuild calls stand.
 export type CardActionState = { kind: "idle" } | { kind: "sending" } | { kind: "approved" } | { kind: "failed"; error: ApiError };
@@ -52,7 +52,7 @@ function useCardActions(options: { cardId: string; sourceId: string; reload: () 
   return { action, approve, startQuiz, rebuild };
 }
 
-// The card screen's state and actions; go navigates (R3.4, R7.1).
+// The card screen's state and actions; go navigates.
 export function useCardScreen(
   cardId: string,
   go: (path: string) => void,

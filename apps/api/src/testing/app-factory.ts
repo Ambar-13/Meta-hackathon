@@ -10,9 +10,9 @@ import type { ApiEnv, Enqueue, RoutePlugin } from "../app-types.js";
 import { makeApiEnqueue } from "../job-queue.js";
 import { buildApp } from "../server.js";
 
-// The origin every test app runs as, the APP_ORIGIN of .env.example [confirm] (tests need one fixed value; no input gives it).
+// The origin every test app runs as, the APP_ORIGIN of .env.example (tests need one fixed value).
 export const TEST_APP_ORIGIN = "http://localhost:3000";
-// Connections in a test app's pool: 4, the database builder's POOL_SIZE.test (database spec 4.1) [confirm].
+// Connections in a test app's pool: 4.
 export const TEST_POOL_SIZE = 4;
 // One job the test app put on the queue after Graphile accepted it.
 export type EnqueuedJob = { name: JobName; payload: unknown };
@@ -43,7 +43,7 @@ async function freshDatabaseForApp(): Promise<TestDatabase> {
   }
 }
 
-// Builds the api on a fresh test database with the real hooks, the real job queue and the routes given; every slot when none are given (docs/contracts.md section 4, seams S5).
+// Builds the api on a fresh test database with the real hooks, the real job queue and the routes given; every slot when none are given.
 export async function buildTestApp(options?: { routes?: RoutePlugin[]; env?: Partial<ApiEnv> }): Promise<{ app: FastifyInstance; db: Kysely<Database>; close: () => Promise<void> }> {
   const fresh = await freshDatabaseForApp();
   liveApps += 1;
@@ -81,12 +81,12 @@ export async function buildTestApp(options?: { routes?: RoutePlugin[]; env?: Par
   return { app, db, close };
 }
 
-// Every log line the test app wrote, in order, so a test can prove that no token reached the log (A7, invariant 21).
+// Every log line the test app wrote, in order, so a test can prove that no token reached the log.
 export function testLogLines(app: FastifyInstance): string[] {
   return readRecords(app).lines;
 }
 
-// Every job the test app enqueued after the queue accepted it, in order (D69).
+// Every job the test app enqueued after the queue accepted it, in order.
 export function enqueuedJobs(app: FastifyInstance): EnqueuedJob[] {
   return readRecords(app).jobs;
 }

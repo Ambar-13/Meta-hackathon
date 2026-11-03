@@ -72,7 +72,7 @@ export const Receipt = (props: { quote: string; source: string; onOpen?: () => v
   );
 };
 
-// The flag for a line with no quote, or with a quote the check did not support; the words come from contracts (R6.5, A1).
+// The flag for a line with no quote, or with a quote the check did not support; the words come from contracts.
 export const ReceiptFlag = (props: { isWeak: boolean }): ReactElement => {
   if (props.isWeak) {
     return (

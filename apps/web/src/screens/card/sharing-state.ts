@@ -2,11 +2,11 @@ import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { LISTING_LINE_MAX_CHARS, type CardSharing, type ListingUpsert, type MyListing } from "@meet-first/contracts";
 import { apiFetch, ApiError, APP_PATHS, asApiError, CARD_QUERY, routes } from "../../app-shell/index.js";
 
-// The code GET /api/directory/me answers with when the person has no listing (design section 6). It means not listed, not a failure.
+// The code GET /api/directory/me answers with when the person has no listing. It means not listed, not a failure.
 export const NOT_LISTED_CODE = "not_listed";
-// The sentence for a save with the directory switch on and a line that is empty or longer than LISTING_LINE_MAX_CHARS [confirm].
+// The sentence for a save with the directory switch on and a line that is empty or longer than LISTING_LINE_MAX_CHARS.
 export const LINE_REFUSAL = "Write a line of 1 to 140 characters about yourself.";
-// The sentence for a save with the directory switch on and no public item, which the server would refuse too [confirm].
+// The sentence for a save with the directory switch on and no public item, which the server would refuse too.
 export const NO_PUBLIC_ITEM_REFUSAL = "Mark at least one item public to join Explore.";
 
 // What the server holds: this card's sharing settings, and the person's listing, which may be on another card, or null.
@@ -33,7 +33,7 @@ export type SharingHook = {
   save: () => Promise<void>;
 };
 
-// The directory page carrying this card in its address, so the Meet buttons there speak from it (design section 7).
+// The directory page carrying this card in its address, so the Meet buttons there speak from it.
 export function directoryPathWithCard(cardId: string): string {
   return `${APP_PATHS.directory}?${CARD_QUERY}=${encodeURIComponent(cardId)}`;
 }
@@ -54,7 +54,7 @@ export async function readListingOrNull(): Promise<MyListing | null> {
   }
 }
 
-// The draft a saved state opens with: each control as the server holds it, so every control is off when nothing is shared (design section 7).
+// The draft a saved state opens with: each control as the server holds it, so every control is off when nothing is shared.
 export function draftFromSaved(saved: SavedSharing, cardId: string): SharingDraft {
   const isListedHere = isListedWith(saved.listing, cardId);
   return {
@@ -84,7 +84,7 @@ function listingToSend(input: { cardId: string; listedHere: MyListing | null; dr
   return isUnchanged ? null : { cardId, line, openToRomance: draft.openToRomance };
 }
 
-// Decides what one save sends before any request, so a refused draft sends nothing (design section 7, P2, P8).
+// Decides what one save sends before any request, so a refused draft sends nothing.
 export function planSharingSave(input: { cardId: string; saved: SavedSharing; draft: SharingDraft }): SharingSavePlan {
   const { cardId, saved, draft } = input;
   const refusal = draftRefusal(draft);
@@ -134,7 +134,7 @@ function useSavedSharing(cardId: string): { load: SharingLoad; setLoad: Dispatch
   return { load, setLoad };
 }
 
-// The Sharing section's state and actions for one approved card (design section 7, P1 to P3, P8).
+// The Sharing section's state and actions for one approved card.
 export function useSharing(cardId: string): SharingHook {
   const { load, setLoad } = useSavedSharing(cardId);
   const [status, setStatus] = useState<SharingStatus>({ kind: "idle" });

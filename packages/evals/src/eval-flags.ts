@@ -4,16 +4,16 @@ import { fileURLToPath } from "node:url";
 
 // The repository root, found from this file (packages/evals/src), so the defaults work from any folder.
 export const REPO_ROOT = fileURLToPath(new URL("../../../", import.meta.url));
-// The default time one meeting may take before the run gives up on it: 15 minutes (ARCHITECTURE.md 4.1).
+// The default time one meeting may take before the run gives up on it: 15 minutes.
 export const MEETING_TIMEOUT_MS = 900_000;
 // The pair list of a replay run: one pair of pairs.json, recorded on its own, because replay answers only recorded requests. It shares no
-// person with the golden path, whose recordings would otherwise answer its first calls and lead it off its own recording (wave 3 4.4).
+// person with the golden path, whose recordings would otherwise answer its first calls and lead it off its own recording.
 const REPLAY_PAIRS = "packages/evals/fixtures/pairs.replay.json";
-// The pair list of a live run: the eight fresh pairs of the eval (A2).
+// The pair list of a live run: the eight fresh pairs of the eval.
 const LIVE_PAIRS = "packages/evals/fixtures/pairs.json";
-// The targets the thresholds come from (IMPLEMENTATION.md 2.7).
+// The targets the thresholds come from.
 const TARGETS = "packages/evals/fixtures/expected/targets.json";
-// Where the results file goes by default, at the repository root (R12.8).
+// Where the results file goes by default, at the repository root.
 const RESULTS_FILE = "eval/results.json";
 
 // The four ways the command runs: a replay or a live run of the pairs, the human table, or the README block.

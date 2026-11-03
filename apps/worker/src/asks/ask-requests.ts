@@ -15,9 +15,9 @@ export type AskForCheck = { mode: AskMode; text: string; aboutName: string | nul
 export type AskCallInput = { askerId: string; promptVersion: string; messages: ChatMessage[] };
 // One approved, verified card item as a persona request shows it; turnIndex is turns.turn_index of the item's turn.
 export type PersonaItem = { turnIndex: number; kind: string; claim: string; quote: string };
-// One recall result as a persona request shows it: the turn's index and the snippet the search returned (D38).
+// One recall result as a persona request shows it: the turn's index and the snippet the search returned.
 export type RecallLine = { turnIndex: number; text: string };
-// Everything the user message of one persona_answer call holds (design section 4 step 4).
+// Everything the user message of one persona_answer call holds.
 export type PersonaAnswerInput = {
   mode: AskMode; askText: string; subjectName: string; askerName: string;
   items: readonly PersonaItem[]; recall: readonly RecallLine[]; misses: readonly string[];
@@ -31,7 +31,7 @@ export type StoredAnswerClaim = { text: string; quote: string; turnId: string | 
 export type JudgeClaim = { text: string; quote: string; turnId: string };
 
 // The user message of an ask's question check: the ask inside ask_question tags, escaped, with the friend's name in the about
-// attribute of a react ask, escaped and with every double quote removed (design section 3, R7.3). A missing name is empty [confirm].
+// attribute of a react ask, escaped and with every double quote removed. A missing name is empty.
 export function askCheckUserText(ask: AskForCheck): string {
   const text = escapeBlockText(ask.text);
   if (ask.mode === "help") return '<ask_question for="help">' + text + "</ask_question>";
@@ -47,7 +47,7 @@ export function askCheckMessages(promptText: string, ask: AskForCheck): ChatMess
   ];
 }
 
-// The client arguments of an ask's question check, on the asker's ledger row (design section 3).
+// The client arguments of an ask's question check, on the asker's ledger row.
 export function askCheckCallArgs(input: AskCallInput): CompleteArgs {
   return {
     callSite: "question_check",
@@ -59,7 +59,7 @@ export function askCheckCallArgs(input: AskCallInput): CompleteArgs {
 }
 
 // The kind an allowed ask is stored with: romance when the check marked the ask romantic or gave the kind romance, else the
-// check's own kind (design section 11, as-built item 54).
+// check's own kind.
 export function askKindOf(verdict: QuestionCheckOutput): QuestionKind {
   return verdict.romantic || verdict.kind === "romance" ? "romance" : verdict.kind;
 }
@@ -71,7 +71,7 @@ export function promptLine(name: string): string {
   return name.replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, " ").replace(/[<>&]/g, "").replace(/ {2,}/g, " ").trim();
 }
 
-// The user message of one persona_answer call, line by line as design section 4 step 4 gives it. The ask text and the names are
+// The user message of one persona_answer call, line by line. The ask text and the names are
 // escaped; item quotes, claims and recall texts are not, because each quote must match its turn exactly, as in the meeting prefix.
 export function personaAnswerUserText(input: PersonaAnswerInput): string {
   const lines = [
@@ -96,7 +96,7 @@ export function personaAnswerMessages(texts: PersonaPromptTexts, input: PersonaA
   ];
 }
 
-// The client arguments of one persona_answer call, on the asker's ledger row (design section 4 step 4).
+// The client arguments of one persona_answer call, on the asker's ledger row.
 export function personaAnswerCallArgs(input: AskCallInput): CompleteArgs {
   return {
     callSite: "persona_answer",
@@ -114,7 +114,7 @@ export function shortlistWords(text: string): string[] {
 }
 
 // Checks each claim's quote inside the one turn its turn_id names, among the turns the request showed; a label naming no such turn
-// leaves the claim unverified. The forbidden texts are the ask and the two prompts, so a quote cannot repeat them (D25, D26).
+// leaves the claim unverified. The forbidden texts are the ask and the two prompts, so a quote cannot repeat them.
 export function checkAnswerClaims(claims: PersonaAnswerOutput["claims"], turns: ReadonlyMap<number, CitableTurn>, forbidden: readonly string[]): StoredAnswerClaim[] {
   return claims.map((claim) => {
     const index = parseTurnLabel(claim.turn_id);
@@ -126,11 +126,11 @@ export function checkAnswerClaims(claims: PersonaAnswerOutput["claims"], turns: 
 }
 
 // The user message of one support-check call: one item per claim, indexed from 0 in the order given, in the brief check's format. The
-// brief check's per-item order swap applies: the quote comes first when isFlippedLine says so (design section 4 step 5, A1). The
-// items keep the order given and are not shuffled [confirm].
+// brief check's per-item order swap applies: the quote comes first when isFlippedLine says so. The
+// items keep the order given and are not shuffled.
 export function askJudgeUserText(claims: readonly JudgeClaim[]): string {
   const blocks = claims.flatMap((claim, index) => {
-    // Both are escaped, as every block text is, so a statement or a quote cannot close its item and open another (R7.3).
+    // Both are escaped, as every block text is, so a statement or a quote cannot close its item and open another.
     const statement = "<statement>" + escapeBlockText(claim.text) + "</statement>";
     const quote = '<quote>"' + escapeBlockText(claim.quote) + '"</quote>';
     const body = isFlippedLine(judgePointOf(claim)) ? [quote, statement] : [statement, quote];
@@ -148,7 +148,7 @@ export function askJudgeMessages(promptText: string, claims: readonly JudgeClaim
 }
 
 // The client arguments of one ask_support_judge call. The wire schema is the brief judge's, whose strict form carries no item count;
-// rank-answers.ts checks the count of each reply (as-built item 49).
+// rank-answers.ts checks the count of each reply.
 export function askJudgeCallArgs(input: AskCallInput): CompleteArgs {
   return {
     callSite: "ask_support_judge",

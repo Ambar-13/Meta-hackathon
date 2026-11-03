@@ -9,9 +9,9 @@ import { appendMeetingEvent } from "../meetings/index.js";
 import { raceWithDeadline, renderPanels, type PanelRender, type Raced } from "./image-calls.js";
 import { buildImagePrompts, buildPanelsPromptInput, pickHeadlines } from "./panel-prompts.js";
 
-// D64, R11.2: the whole comic has 60 s from job start; the brief is already on screen, so a slow comic is skipped, not waited for.
+// the whole comic has 60 s from job start; the brief is already on screen, so a slow comic is skipped, not waited for.
 export const COMIC_DEADLINE_MS = 60_000;
-// D64: exactly six panels.
+// exactly six panels.
 export const PANEL_COUNT = 6;
 
 // Why a comic was not made, as comic.skipped gives it. render_failed ends the comic as failed; the others end it as skipped.
@@ -30,7 +30,7 @@ type PlanResult = { kind: "ok"; value: Plan } | { kind: "deadline" } | { kind: "
 // What the drawing of one comic came to: store six panels, retry later, or end it with a reason.
 type Drawing = { kind: "store"; stored: { captions: string[]; prompts: string[]; panels: PanelRender[] } } | { kind: "retry" } | { kind: "skip"; reason: SkipReason };
 
-// Runs the render_comic job: six captions and prompts, scrubbed, six images, all or nothing (D64, R11.1, R11.2).
+// Runs the render_comic job: six captions and prompts, scrubbed, six images, all or nothing.
 export const renderComicTask: JobTask<"render_comic"> = async (payload, context) => {
   const abort = new AbortController();
   const timer = setTimeout(() => {
@@ -108,7 +108,7 @@ async function readComicInput(db: Kysely<Database>, payload: JobPayload<"render_
     const members = await trx.selectFrom("meeting_members as mm").innerJoin("people as p", "p.id", "mm.person_id").select(["mm.side", "mm.person_id", "p.display_name"]).where("mm.meeting_id", "=", payload.meetingId).execute();
     const nameOf = (side: "a" | "b"): string => members.find((member) => member.side === side)?.display_name ?? "";
     const rows = await trx.selectFrom("briefs").select(["person_id", "agree", "clash", "decide_first"]).where("meeting_id", "=", payload.meetingId).execute();
-    // Side a's brief comes first, so the headlines and the model request keep one order on every run (D74).
+    // Side a's brief comes first, so the headlines and the model request keep one order on every run.
     const sideOf = (personId: string): number => (members.find((member) => member.person_id === personId)?.side === "a" ? 0 : 1);
     const briefs = [...rows]
       .sort((first, second) => sideOf(first.person_id) - sideOf(second.person_id))
@@ -146,7 +146,7 @@ async function requestPlan(context: JobContext, payload: JobPayload<"render_comi
   };
 }
 
-// Scrubs every final image prompt; one hit refuses the whole comic, and the scrubbed text is the only text ever sent (D65, R7.5).
+// Scrubs every final image prompt; one hit refuses the whole comic, and the scrubbed text is the only text ever sent.
 export function checkPromptsWithScrubber(prompts: string[]): PromptCheck {
   const scrubbed = prompts.map((prompt) => scrub(prompt, { allowlist: [] }));
   const categories = scrubbed.flatMap((result) => result.redactions.map((redaction) => redaction.category));
@@ -154,7 +154,7 @@ export function checkPromptsWithScrubber(prompts: string[]): PromptCheck {
   return { kind: "ok", prompts: scrubbed.map((result) => result.text) };
 }
 
-// Writes six panels and the ready state in one meeting transaction, then the comic.ready event (R11.1).
+// Writes six panels and the ready state in one meeting transaction, then the comic.ready event.
 async function storeComic(context: JobContext, payload: JobPayload<"render_comic">, stored: { captions: string[]; prompts: string[]; panels: PanelRender[] }): Promise<void> {
   if (stored.panels.length !== PANEL_COUNT) throw new ContractError("comic_panel_count", "A ready comic must have six panels. Check the image step.", 500);
   const now = context.now();
@@ -175,7 +175,7 @@ async function storeComic(context: JobContext, payload: JobPayload<"render_comic
   });
 }
 
-// Ends a comic that will not be drawn, with its reason in comic.skipped; render_failed ends it as failed, the rest as skipped (D64).
+// Ends a comic that will not be drawn, with its reason in comic.skipped; render_failed ends it as failed, the rest as skipped.
 async function finishNotReady(context: JobContext, payload: JobPayload<"render_comic">, reason: SkipReason): Promise<void> {
   const state = reason === "render_failed" ? "failed" : "skipped";
   const now = context.now();

@@ -5,9 +5,9 @@ import { IsoTime, Uuid } from "../primitives.js";
 export const AskMode = z.enum(["help", "react"]);
 // The type of AskMode, read from the schema above.
 export type AskMode = z.infer<typeof AskMode>;
-// Most help searches one person may start per UTC day. Ambar's default; he can change it.
+// Most help searches one person may start per UTC day.
 export const HELP_SEARCHES_PER_PERSON_PER_DAY = 5;
-// Most react asks one person may send per UTC day [confirm].
+// Most react asks one person may send per UTC day.
 export const REACT_ASKS_PER_PERSON_PER_DAY = 20;
 // Most listed personas one help search asks: the shortlist of stage 1.
 export const HELP_SHORTLIST_MAX = 20;

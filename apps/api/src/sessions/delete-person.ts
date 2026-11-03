@@ -24,7 +24,7 @@ async function undoDeletion(deps: RouteDeps, write: DeletionWrite, log: FastifyB
 
 // Marks the person deleted, revokes every session and writes the deletions row in one transaction, then enqueues
 // delete_person after that transaction has committed. If the enqueue throws, the rows are undone and the error is
-// thrown on, so the person can try again (D69, ARCHITECTURE.md 7.7).
+// thrown on, so the person can try again.
 export async function startDeletion(deps: RouteDeps, personId: string, log: FastifyBaseLogger): Promise<string> {
   const now = deps.now();
   const deletionId = await withPerson(deps.db, personId, async (trx) => {
@@ -42,7 +42,7 @@ export async function startDeletion(deps: RouteDeps, personId: string, log: Fast
   return deletionId;
 }
 
-// Registers DELETE /api/people/me: 202 {deletionId} with the session cookie cleared (D69, ARCHITECTURE.md 7.7).
+// Registers DELETE /api/people/me: 202 {deletionId} with the session cookie cleared.
 export function registerDeletePerson(app: FastifyInstance, deps: RouteDeps): void {
   app.delete(routes.people.deleteMe.path, async (request, reply) => {
     const personId = requirePerson(request);

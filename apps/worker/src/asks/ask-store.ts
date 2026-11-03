@@ -5,20 +5,20 @@ import { numberFromPostgres, type DatabaseTransaction } from "@meet-first/db";
 import { z } from "zod";
 import type { StoredAnswerClaim } from "./ask-requests.js";
 
-// One ask as the job reads it from persona_asks; questionKind is the kind the check gave, null until checked (as-built item 54).
+// One ask as the job reads it from persona_asks; questionKind is the kind the check gave, null until checked.
 export type AskRow = { id: string; personId: string; mode: AskMode; pairId: string | null; text: string; state: AskState; aboutName: string | null; questionKind: QuestionKind | null };
 // One answer row as the job reads it from persona_answers, with its claims checked against the stored shape.
 export type AnswerRow = {
   id: string; subjectPersonId: string; subjectCardId: string; listingId: string | null; askerDisplayName: string; subjectDisplayName: string;
   shortlistRank: number; state: "pending" | "answered" | "failed"; hasSign: boolean | null; claims: StoredAnswerClaim[];
 };
-// One answer row to insert: who answers, from which card and listing, with the name and line copied at this moment (P4).
+// One answer row to insert: who answers, from which card and listing, with the name and line copied at this moment.
 export type NewAnswer = { subjectPersonId: string; subjectCardId: string; listingId: string | null; subjectDisplayName: string; subjectLine: string | null; shortlistRank: number };
 // One state change of an ask. It happens only from the state the job read; a finished state stamps finished_at.
 export type AskMove = { askId: string; from: AskState; to: AskState; now: Date; refusedReason?: string; questionKind?: QuestionKind };
-// What one answered row stores (design section 4 step 4).
+// What one answered row stores.
 export type AnswerWrite = { answerId: string; answer: string; hasSign: boolean; claims: readonly StoredAnswerClaim[]; now: Date };
-// One answer's supported count and place (design section 4 step 6).
+// One answer's supported count and place.
 export type Placement = { answerId: string; supportedCount: number; position: number | null };
 
 // The stored claims shape of migration 0006's column comment, checked on every read.
@@ -57,13 +57,13 @@ export async function countAnswers(trx: DatabaseTransaction, askId: string): Pro
 }
 
 // One person's display name, read in that person's own context; null when the row is gone or the person is being deleted, so no
-// one is asked, and no ask goes on, once a deletion has started (D69).
+// one is asked, and no ask goes on, once a deletion has started.
 export async function readDisplayName(trx: DatabaseTransaction, personId: string): Promise<string | null> {
   const row = await trx.selectFrom("people").select("display_name").where("id", "=", personId).where("state", "=", "active").executeTakeFirst();
   return row === undefined ? null : row.display_name;
 }
 
-// Inserts the ask's answer rows in one statement, copying the ask's text and the asker's name onto each (P4). A subject who already
+// Inserts the ask's answer rows in one statement, copying the ask's text and the asker's name onto each. A subject who already
 // has a row for this ask keeps it, by the unique key on (ask_id, subject_person_id).
 export async function insertAnswers(trx: DatabaseTransaction, scope: { ask: AskRow; askerName: string; subjects: readonly NewAnswer[] }): Promise<void> {
   await trx.insertInto("persona_answers").values(scope.subjects.map((subject) => ({
@@ -84,7 +84,7 @@ export async function readAnswers(trx: DatabaseTransaction, askId: string, state
   }));
 }
 
-// Marks one pending answer failed; the ask's other answers go on (design section 4 step 4).
+// Marks one pending answer failed; the ask's other answers go on.
 export async function markAnswerFailed(trx: DatabaseTransaction, answerId: string): Promise<void> {
   await trx.updateTable("persona_answers").set({ state: "failed" }).where("id", "=", answerId).where("state", "=", "pending").execute();
 }

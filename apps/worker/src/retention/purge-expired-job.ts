@@ -26,7 +26,7 @@ async function runPurge(context: JobContext): Promise<PurgeCounts> {
   }
 }
 
-// The hourly purge (IMPLEMENTATION.md 2.3): expired transfer links (D33), pairs nobody joined within 24 hours (D32) and comics past 30 days whose share page is not published (D64, R11.5).
+// The hourly purge: expired transfer links, pairs nobody joined within 24 hours and comics past 30 days whose share page is not published.
 export const purgeExpiredTask: JobTask<"purge_expired"> = async (payload, context) => {
   const counts = await runPurge(context);
   context.log.info({ transfer_links: counts.transfer_links ?? 0, pairs: counts.pairs ?? 0, comics: counts.comics ?? 0 }, "purge_expired_done");

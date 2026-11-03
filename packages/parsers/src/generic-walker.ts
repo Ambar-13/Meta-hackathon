@@ -1,8 +1,8 @@
 import type { RawTurn } from "./chatgpt-shapes.js";
 
-// How deep the walk goes below the root, so a pathological file cannot exhaust the stack (picked here [confirm]).
+// How deep the walk goes below the root, so a pathological file cannot exhaust the stack (picked here).
 const WALK_DEPTH_MAX = 40;
-// The roles that count as the uploader's own words (R1.9).
+// The roles that count as the uploader's own words.
 const OWN_ROLES: ReadonlyArray<string> = ["user", "human"];
 
 // True when a value is a plain object or an array, the only shapes the walk looks inside.

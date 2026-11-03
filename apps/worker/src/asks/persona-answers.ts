@@ -1,6 +1,6 @@
-// Asks each pending answer's persona once and stores the checked reply (design section 4 step 4). A request holds only what its subject
-// allowed: public items for a help search (P1, P7); approved, verified items and, when the friend switched recall on, recall results for
-// a friend ask (P3); and the subject's quiz misses as do-not-guess topics (D31).
+// Asks each pending answer's persona once and stores the checked reply. A request holds only what its subject
+// allowed: public items for a help search; approved, verified items and, when the friend switched recall on, recall results for
+// a friend ask; and the subject's quiz misses as do-not-guess topics.
 import type { Kysely } from "kysely";
 import { ContractError, PersonaAnswerOutput, RECALL_TOP_K } from "@meet-first/contracts";
 import { searchRecallCorpus, withPerson, type Database, type DatabaseTransaction } from "@meet-first/db";
@@ -14,7 +14,7 @@ import { markAnswerFailed, readAnswers, readDisplayName, storeAnswer, type Answe
 
 // What one persona call ended with: a stored answer, a failed answer, or a full token window that leaves the answer pending.
 type AnswerOutcome = "answered" | "failed" | "limited";
-// The two prompts every persona_answer request of one run joins, read at call time (seams S7).
+// The two prompts every persona_answer request of one run joins, read at call time.
 type AnswerPrompts = { personaAnswer: Prompt; untrustedRules: Prompt };
 // One pending answer to ask, with its ask and the prompts.
 type AnswerScope = { ask: AskRow; row: AnswerRow; prompts: AnswerPrompts };
@@ -26,7 +26,7 @@ type RecallWithTurn = { line: RecallLine; turn: CitableTurn };
 type SubjectMaterial = { items: PersonaItem[]; recall: RecallLine[]; misses: string[]; turns: Map<number, CitableTurn> };
 
 // Asks every pending answer's persona at the same time, at most HELP_SHORTLIST_MAX of them, and stores each reply as it arrives.
-// "limited" when any call met a full token window; those answers stay pending for the next run (design section 4 step 4, D58).
+// "limited" when any call met a full token window; those answers stay pending for the next run.
 export async function answerPending(context: JobContext, ask: AskRow): Promise<"settled" | "limited"> {
   const prompts: AnswerPrompts = { personaAnswer: readPrompt("persona-answer"), untrustedRules: readPrompt("untrusted-data-rules") };
   const pending = await withPerson(context.db, ask.personId, (trx) => readAnswers(trx, ask.id, "pending"));
@@ -67,9 +67,9 @@ async function failAnswer(context: JobContext, scope: AnswerScope, code: string)
 }
 
 // Reads one subject's material in the subject's own context, and only reads. Null when a help answer's listing is gone, names another
-// card or, for a romance ask, has its dating switch off [confirm]; when the subject's account deletion has started (D69); when the card
-// is gone or no longer approved; and, for a friend ask, when the friend has turned friend asks off since the answer row was written
-// (P3). A help answer never reads recall (P7).
+// card or, for a romance ask, has its dating switch off; when the subject's account deletion has started; when the card
+// is gone or no longer approved; and, for a friend ask, when the friend has turned friend asks off since the answer row was written.
+//A help answer never reads recall.
 async function readSubjectMaterial(db: Kysely<Database>, ask: AskRow, row: AnswerRow): Promise<SubjectMaterial | null> {
   return withPerson(db, row.subjectPersonId, async (trx) => {
     if ((await readDisplayName(trx, row.subjectPersonId)) === null) return null;
@@ -92,7 +92,7 @@ async function isListingCurrent(trx: DatabaseTransaction, ask: AskRow, row: Answ
   return ask.questionKind !== "romance" || listing.open_to_romance;
 }
 
-// The card's approved, verified items in position order with the turns they quote; public ones only for a help answer (P1).
+// The card's approved, verified items in position order with the turns they quote; public ones only for a help answer.
 async function readItems(trx: DatabaseTransaction, cardId: string, isPublicOnly: boolean): Promise<ItemWithTurn[]> {
   const rows = await trx.selectFrom("card_items as ci").innerJoin("turns as t", "t.id", "ci.turn_id")
     .select(["ci.kind", "ci.claim", "ci.quote", "t.id as turn_id", "t.turn_index", "t.text", "t.norm_text"])
@@ -105,7 +105,7 @@ async function readItems(trx: DatabaseTransaction, cardId: string, isPublicOnly:
   }));
 }
 
-// A friend's recall results for the ask's text, each turn once, in the search's order (D38): the snippet the request shows, and the
+// A friend's recall results for the ask's text, each turn once, in the search's order: the snippet the request shows, and the
 // whole turn the quote check reads.
 async function readRecall(trx: DatabaseTransaction, cardId: string, askText: string): Promise<RecallWithTurn[]> {
   const hits = await searchRecallCorpus(trx, { cardId, query: askText, limit: RECALL_TOP_K });

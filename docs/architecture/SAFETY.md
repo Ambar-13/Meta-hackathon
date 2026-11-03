@@ -62,17 +62,17 @@ When a query must read rows that the policies hide, it calls one of the SECURITY
 
 ## The scrub, twice
 
-The browser runs the scrubber to show a preview, and the api runs the same rules again as the authoritative pass that writes the redactions rows (D11). The number on screen is the count of those rows, so the preview cannot disagree with what is stored. A code fence is stored as a placeholder with its language and line count, never as its text (D13). Each redaction is a placeholder with a category and an eight-character id, and no offsets are stored, because the text is rewritten twice and offsets would drift (D14). The names pass in the worker replaces third-party names with role tokens after the rules have run (D15), and a person may not build a card until the names review has frozen the source (D16).
+The browser runs the scrubber to show a preview, and the api runs the same rules again as the authoritative pass that writes the redactions rows. The number on screen is the count of those rows, so the preview cannot disagree with what is stored. A code fence is stored as a placeholder with its language and line count, never as its text. Each redaction is a placeholder with a category and an eight-character id, and no offsets are stored, because the text is rewritten twice and offsets would drift. The names pass in the worker replaces third-party names with role tokens after the rules have run, and a person may not build a card until the names review has frozen the source.
 
 ## Consent
 
-The copy shown before an upload is this sentence, word for word (A3):
+The copy shown before an upload is this sentence, word for word:
 
 > Your original archive stays on your device. After you review redactions, we upload and store only the selected excerpts shown here. You can delete them at any time.
 
 A share page is served only while both consent flags are true and revoked_at is empty. Either person can withdraw their consent, and the page then returns nothing on the next request. A report on a share page writes revoked_at through the share_revoke function (migration 0003), which a human reviews.
 
-The recall switch on a card shows this text, word for word (R7.1):
+The recall switch on a card shows this text, word for word:
 
 > Let my agent search my notes during meetings, with names hidden and secrets removed. The other person may see quotes from them.
 
@@ -85,15 +85,15 @@ The recall switch on a card shows this text, word for word (R7.1):
 3. Clears the person and meeting ids on their ledger rows, so the cost record stays without the link to a person.
 4. Deletes the people row, and writes the count of rows removed from each table to the deletions record.
 
-The other person keeps their own source and card, and the screen says so (R9.7).
+The other person keeps their own source and card, and the screen says so.
 
 ## The browser side
 
-The session cookie is named `__Host-session`. It is HttpOnly, Secure, has Path=/ and SameSite=Lax, and has no Domain attribute, which the browser needs for the `__Host-` prefix (A7, D33). The api checks the Origin header on every request that is not a GET. The Content-Security-Policy string is, word for word (D67):
+The session cookie is named `__Host-session`. It is HttpOnly, Secure, has Path=/ and SameSite=Lax, and has no Domain attribute, which the browser needs for the `__Host-` prefix. The api checks the Origin header on every request that is not a GET. The Content-Security-Policy string is, word for word:
 
 > default-src 'self'; img-src 'self' data:; connect-src 'self'
 
-Markdown from the model renders only text, emphasis, lists and blockquotes. Links, images and HTML are not rendered (D66). Before any text is stored, canonicalisation removes the Unicode format and control characters (Cf and Cc), except the newline and the tab, so hidden characters cannot carry an instruction past the scrubber (D6, R7.7).
+Markdown from the model renders only text, emphasis, lists and blockquotes. Links, images and HTML are not rendered. Before any text is stored, canonicalisation removes the Unicode format and control characters (Cf and Cc), except the newline and the tab, so hidden characters cannot carry an instruction past the scrubber.
 
 ## How a brief line is protected from start to finish
 

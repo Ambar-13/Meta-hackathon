@@ -14,7 +14,7 @@ export type ProfileModel = {
   decline: (requestId: string) => Promise<void>;
 };
 
-// The words of a Posts tab with no posts (3 Nov 2026, once anyone could share): on your own profile, where your posts show and that your
+// The words of a Posts tab with no posts (once anyone could share): on your own profile, where your posts show and that your
 // Meety reads them; on someone else's, that they have not shared one yet.
 export function postsEmptyCopy(name: string | null): { heading: string; body: string } {
   if (name === null) {

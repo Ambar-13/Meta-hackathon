@@ -1,6 +1,6 @@
-// Tests for the frozen checks in scripts/checks/. Each test writes a small temporary tree that passes every
-// check, changes one thing to break it, and runs `pnpm checks` (run-all.ts) inside that tree. The frozen scripts
-// are read, never edited: the tests only prove that the checks catch what Wave 2 relies on.
+// Tests for the checks in scripts/checks/. Each test writes a small temporary tree that passes every
+// check, changes one thing to break it, and runs `pnpm checks` (run-all.ts) inside that tree. The scripts
+// are read, never edited: the tests prove that each check catches what it is meant to.
 import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";

@@ -27,4 +27,4 @@ Notice that the self-test runs before any task is registered, so a bad schema st
 
 `pnpm test:unit apps/worker/src` and `pnpm test:integration apps/worker/src/cards`.
 
-Not built yet: the brief and comic task lists; each lands with its Wave 2 builder.
+Not built yet: nothing.

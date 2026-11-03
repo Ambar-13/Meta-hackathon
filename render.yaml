@@ -1,4 +1,4 @@
-# D70 as amended on 2 Nov 2026: one web service runs the api and the worker (scripts/start-api-and-worker.sh) beside Postgres,
+# One web service runs the api and the worker (scripts/start-api-and-worker.sh) beside Postgres,
 # on Render's free plans, because Render has no free background worker. Auto-deploy is off; scripts/release.sh deploys the commit
 # of a tag on the release branch through the service's one deploy hook. Limits are Render's on 2026-10-28 (render.com/docs/free,
 # render.com/docs/blueprint-spec): a free web service sleeps after 15 minutes with no visits and has no pre-deploy command, so the
@@ -15,7 +15,7 @@ services:
     autoDeployTrigger: "off"   # D70, R12.3
     healthCheckPath: /api/health        # R12.5
     # No maxShutdownDelaySeconds: Render refuses it on free services, so a deploy stops the service after Render's default
-    # wait, and a model call longer than that can be cut (docs/known-limits.md). On a paid plan, set it to 150 (D70, R12.4).
+    # wait, and a model call longer than that can be cut. On a paid plan, set it to 150.
     envVars:
       - key: DATABASE_URL_MIGRATE
         sync: false          # from pnpm db:render-roles; the start script gives it to the migrate step only (as-built item 9)

@@ -55,7 +55,7 @@ label.up-attest { min-height: 44px; align-items: center; margin-top: 16px; font-
   .up-paste-label textarea { height: 260px; }
 }
 
-/* ---------- signed in (3 Nov 2026): the drop zone in the app's quiet look, with the app's own button ---------- */
+/* ---------- signed in: the drop zone in the app's quiet look, with the app's own button ---------- */
 .social-frame .up-drop { border: 1.5px dashed var(--line-strong); background: none; }
 .social-frame .up-file-label input[type="file"]::file-selector-button { min-height: 44px; border: 0; border-radius: var(--ui-radius); background: var(--ui-blue); color: var(--ui-bg);
   font: 600 15px/1.2 var(--ui-font); box-shadow: none; }

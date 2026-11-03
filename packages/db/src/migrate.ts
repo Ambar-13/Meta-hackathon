@@ -9,13 +9,13 @@ import { numberFromPostgres } from "./client.js";
 import { describeError } from "./database-errors.js";
 import type { Database } from "./types.js";
 
-// The schema version this build was written for; the worker refuses to start on any other (D71). Raise it in the same change as each new migration file.
+// The schema version this build was written for; the worker refuses to start on any other. Raise it in the same change as each new migration file.
 export const SCHEMA_VERSION = 15;
 
-// The advisory lock key every migrator takes first, so two migrators never run at once (D71, R12.1).
+// The advisory lock key every migrator takes first, so two migrators never run at once.
 export const MIGRATION_LOCK_KEY = 42;
 
-// The folder that holds 0001_foundation.sql and every later file (Wave 0 section 4.5).
+// The folder that holds 0001_foundation.sql and every later file.
 export const MIGRATIONS_FOLDER = fileURLToPath(new URL("../migrations/", import.meta.url));
 
 // One migration file on disk: its number, its name without .sql, and its full path.
@@ -24,7 +24,7 @@ export type MigrationFile = { number: number; name: string; path: string };
 // What one migrate run did: the files it applied, in order, and the highest number now recorded.
 export type MigrationReport = { applied: string[]; schemaVersion: number };
 
-// The grants to the app roles on Graphile's tables. They exist only after Graphile's own migrations have run (Wave 0 section 4.5, item 9).
+// The grants to the app roles on Graphile's tables. They exist only after Graphile's own migrations have run.
 // The worker keeps every right. The API gets only what add_job needs: read and insert on the three tables add_job touches,
 // all of which have row security on. add_job also runs an UPDATE on the jobs table on every call, so the API gets UPDATE on
 // that one table; with no UPDATE policy for app_api, that UPDATE matches no row. Graphile's client reads its migrations
@@ -65,7 +65,7 @@ END
 $$;
 `;
 
-// The two catalog checks each migration file must pass before it commits (D55, R9.1; the definer rule of Wave 0 section 4.5).
+// The two catalog checks each migration file must pass before it commits (the definer rule).
 const RLS_MISSING_QUERY = `
 SELECT c.relname AS name
 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
@@ -82,7 +82,7 @@ WHERE n.nspname = 'public' AND p.prosecdef
                   WHERE a.grantee = 0 AND a.privilege_type = 'EXECUTE'))
 ORDER BY p.proname COLLATE "C"`;
 
-// Lists the .sql files of a folder in number order and refuses a bad name, a repeated number or a missing package line (R12.1).
+// Lists the .sql files of a folder in number order and refuses a bad name, a repeated number or a missing package line.
 export async function listMigrationFiles(folder: string): Promise<MigrationFile[]> {
   const entries = (await readdir(folder)).filter((entry) => entry.endsWith(".sql")).sort();
   const seen = new Set<number>();
@@ -101,7 +101,7 @@ export async function listMigrationFiles(folder: string): Promise<MigrationFile[
   return files;
 }
 
-// Refuses a migration file that would leave a table without forced row security, or a definer function outside app_definer (D55, R9.1).
+// Refuses a migration file that would leave a table without forced row security, or a definer function outside app_definer.
 async function assertSchemaSafety(client: pg.Client): Promise<void> {
   const tables = await client.query<{ name: string }>(RLS_MISSING_QUERY);
   if (tables.rows.length > 0) {
@@ -115,7 +115,7 @@ async function assertSchemaSafety(client: pg.Client): Promise<void> {
   }
 }
 
-// Applies one migration file in its own transaction, with its schema_migrations row, or not at all (D71).
+// Applies one migration file in its own transaction, with its schema_migrations row, or not at all.
 async function applyFile(client: pg.Client, file: MigrationFile): Promise<void> {
   const text = await readFile(file.path, "utf8");
   await client.query("BEGIN");
@@ -153,7 +153,7 @@ async function applyDueFiles(client: pg.Client, files: MigrationFile[]): Promise
   return applied;
 }
 
-// Runs the SQL files, then Graphile Worker's own migrations, then the Graphile grants, all under one advisory lock (D71, R12.1).
+// Runs the SQL files, then Graphile Worker's own migrations, then the Graphile grants, all under one advisory lock.
 export async function migrateDatabase(databaseUrl: string, folder: string = MIGRATIONS_FOLDER): Promise<MigrationReport> {
   const client = new pg.Client({ connectionString: databaseUrl });
   await client.connect();
@@ -172,13 +172,13 @@ export async function migrateDatabase(databaseUrl: string, folder: string = MIGR
   }
 }
 
-// Reads the highest migration number recorded in schema_migrations, or 0 when none is (D71).
+// Reads the highest migration number recorded in schema_migrations, or 0 when none is.
 export async function readSchemaVersion(db: Kysely<Database>): Promise<number> {
   const row = await db.selectFrom("schema_migrations").select((eb) => eb.fn.max("number").as("version")).executeTakeFirst();
   return numberFromPostgres(row?.version ?? 0);
 }
 
-// Refuses to go on when the database is not at the version this build expects; the worker calls it at boot (D71).
+// Refuses to go on when the database is not at the version this build expects; the worker calls it at boot.
 export async function assertSchemaVersion(db: Kysely<Database>, expected: number): Promise<void> {
   const found = await readSchemaVersion(db);
   if (found !== expected) {

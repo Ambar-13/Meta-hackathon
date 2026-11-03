@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { RawTurn } from "./chatgpt-shapes.js";
 
-// One message of Claude's export. Every field is optional because the export may leave any of them out (ARCHITECTURE.md section 12).
+// One message of Claude's export. Every field is optional because the export may leave any of them out.
 const ClaudeChatMessage = z.object({
   sender: z.string().optional(),
   text: z.string().nullable().optional(),
@@ -33,7 +33,7 @@ function claudeText(message: z.infer<typeof ClaudeChatMessage>): string {
   return pieces.join("\n");
 }
 
-// Seconds since the epoch for an ISO time string, or null when the string is not a date (D5 ordering).
+// Seconds since the epoch for an ISO time string, or null when the string is not a date.
 function secondsOf(createdAt: string | null | undefined): number | null {
   if (typeof createdAt !== "string") return null;
   const milliseconds = Date.parse(createdAt);

@@ -10,7 +10,7 @@ import { hasEnoughOwnText } from "../cards/index.js";
 import { englishItem, replyResponse } from "./fixture-cases.js";
 import { recordedReplyPath } from "./recorded-replies.js";
 
-// The one third-party name of A's paste, the golden path's FIXTURE_NAME [confirm].
+// The one third-party name of A's paste, the golden path's FIXTURE_NAME.
 export const GOLDEN_PATH_NAME = "Rohan Mehta";
 // The phrase that marks a third-party name in B's export: "my" or "My", a relation word, then one or two capitalised words.
 export const THIRD_PARTY_PATTERN = /\b[Mm]y (friend|colleague|manager|boss|sister|brother|partner|teammate|mentor) (\p{Lu}\p{Ll}+(?: \p{Lu}\p{Ll}+)?)/gu;
@@ -21,7 +21,7 @@ export type GoldenPathReply = { ok: true; response: Record<string, unknown>; usa
 
 const MESSAGES = z.array(z.object({ role: z.string(), content: z.string().nullable() }).passthrough());
 
-// The usage a rule-made reply reports: 4 characters per token for the prompt (an estimate [confirm]) and the given completion tokens.
+// The usage a rule-made reply reports: 4 characters per token for the prompt (an estimate) and the given completion tokens.
 function usageFor(request: LlmRequest, completionTokens: number): { promptTokens: number; cachedTokens: number; completionTokens: number; reasoningTokens: number } {
   return { promptTokens: Math.ceil(requestChars(request.body) / 4), cachedTokens: 0, completionTokens, reasoningTokens: 0 };
 }

@@ -2,15 +2,15 @@
 // a card build, a quiz, a meeting step or a deletion, and the job must exist exactly when the rows it reads exist.
 // The step: a route calls deps.enqueue after its withPerson transaction has committed, never inside it, because the
 // queue writes through its own connection. If the enqueue throws, the route undoes the rows it wrote. This file does
-// not run jobs and does not retry them; the worker owns both (seams S5, IMPLEMENTATION.md 2.3).
+// not run jobs and does not retry them; the worker owns both.
 import type { TaskSpec, WorkerUtils } from "graphile-worker";
 import { ContractError, type Enqueue, JOB_MAX_ATTEMPTS } from "@meet-first/contracts";
 
-// The sentence for a job Graphile did not accept (seams S5).
+// The sentence for a job Graphile did not accept.
 export const ENQUEUE_FAILED_SENTENCE = "The job queue did not accept the job. Retry the request.";
 
 // Builds the enqueue the routes use. maxAttempts is always JOB_MAX_ATTEMPTS[name]; runAt goes only when the caller
-// gave one, because no job has a key any more (D45). A null from addJob is enqueue_failed (seams S5).
+// gave one, because no job has a key any more. A null from addJob is enqueue_failed.
 export function makeApiEnqueue(workerUtils: WorkerUtils): Enqueue {
   return async (name, payload, options) => {
     const spec: TaskSpec = {

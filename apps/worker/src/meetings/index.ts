@@ -1,4 +1,4 @@
-// The meeting jobs as one task list for apps/worker/src/runner.ts, slot 3 (seams S3, without ask_timeout since ask my human was dropped).
+// The meeting jobs as one task list for apps/worker/src/runner.ts, slot 3 (without ask_timeout since ask my human was dropped).
 import type { TaskList } from "../job-context.js";
 import { runCheckQuestion } from "./check-question-job.js";
 import { runMeetingStep } from "./step-job.js";

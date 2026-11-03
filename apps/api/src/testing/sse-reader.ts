@@ -88,7 +88,7 @@ async function readUntilStop(loop: ReadLoop): Promise<StopReason> {
   }
 }
 
-// Reads an SSE body into frames, stopping at the first event whose id is untilSeq or more, at the end of the stream, or at timeoutMs (ARCHITECTURE.md 6.1).
+// Reads an SSE body into frames, stopping at the first event whose id is untilSeq or more, at the end of the stream, or at timeoutMs.
 export async function readSse(response: ReadableStream<Uint8Array>, options: { untilSeq?: number; timeoutMs: number }): Promise<SseItem[]> {
   const reader = response.getReader();
   const decoder = new TextDecoder();

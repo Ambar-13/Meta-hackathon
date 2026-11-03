@@ -1,5 +1,4 @@
-// Sharing as Instagram does (3 Nov 2026, Ambar: "can people share story and post also? like insta? their agent can learn from those as
-// well about what they like and what they post"): anyone signed in shares a post or a story that shows for STORY_HOURS, with words, a
+// Sharing as Instagram does: anyone signed in shares a post or a story that shows for STORY_HOURS, with words, a
 // photo or both, deletes their own, and likes the posts the feed and profiles show them. The browser draws each photo itself as a JPEG,
 // which drops any camera or location data, and sends it as base64; the api checks the bytes are a JPEG of a sane size before storing
 // them (migration 0013).

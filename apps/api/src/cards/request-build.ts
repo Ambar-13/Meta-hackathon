@@ -7,17 +7,17 @@ import type { RouteDeps } from "../app-types.js";
 import { makeNotFoundError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
 
-// What cards.model and cards.prompt_version hold until the job builds the card, because apps/api imports neither packages/llm nor packages/prompts (seams S8) [confirm].
+// What cards.model and cards.prompt_version hold until the job builds the card, because apps/api imports neither packages/llm nor packages/prompts.
 export const CARD_PENDING_LABEL = "pending";
 // The :id of POST /api/sources/:id/cards: a uuid, or the source cannot exist.
 const RouteParams = z.object({ id: Uuid });
 
-// The UTC midnight before now, where the 2-builds-a-day count restarts (D60; the same boundary as the dollar caps of packages/llm).
+// The UTC midnight before now, where the 2-builds-a-day count restarts (the same boundary as the dollar caps of packages/llm).
 export function utcDayStart(now: Date): Date {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 }
 
-// Refuses a card request: no such source for this person, a source not yet frozen, or 2 builds today already (D16, D60, invariant 4).
+// Refuses a card request: no such source for this person, a source not yet frozen, or 2 builds today already.
 export function assertCanRequestCard(source: { frozen_at: Date | null } | undefined, buildsToday: number): void {
   if (source === undefined) throw makeNotFoundError();
   if (source.frozen_at === null) throw new ContractError("source_not_frozen", "Finish the names review before building a card.", HTTP.conflict);
@@ -26,7 +26,7 @@ export function assertCanRequestCard(source: { frozen_at: Date | null } | undefi
   }
 }
 
-// Inserts the card in state building and returns its id; the job writes the model and the prompt version when it builds (R3.9).
+// Inserts the card in state building and returns its id; the job writes the model and the prompt version when it builds.
 export async function insertBuildingCard(trx: DatabaseTransaction | Transaction<Database>, args: { sourceId: string; personId: string }): Promise<string> {
   const row = await trx
     .insertInto("cards")

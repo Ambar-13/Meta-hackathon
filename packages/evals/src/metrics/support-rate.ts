@@ -1,4 +1,4 @@
-// Support rate: the mean support rate over briefs the judge could judge reliably. The unreliable count is shown beside it (A1).
+// Support rate: the mean support rate over briefs the judge could judge reliably. The unreliable count is shown beside it.
 import type { EvalRows } from "../collect-rows.js";
 import type { MetricResult } from "./index.js";
 

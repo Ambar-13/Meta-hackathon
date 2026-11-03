@@ -39,7 +39,7 @@ GRANT SELECT ON names_passes TO app_api;
 GRANT SELECT, DELETE ON source_names TO app_api;
 
 -- A source can be frozen only after its names check has finished, so no name the check would have replaced reaches a
--- card or a meeting, whatever the calling code does (D15, D16). The review route checks first; this is the backstop.
+-- card or a meeting, whatever the calling code does. The review route checks first; this is the backstop.
 CREATE OR REPLACE FUNCTION sources_freeze_needs_names_pass() RETURNS trigger
 LANGUAGE plpgsql SECURITY INVOKER SET search_path = public, pg_temp AS $$
 BEGIN

@@ -13,7 +13,7 @@ export const PEOPLE_FOLDER = join(REPO_ROOT, "packages", "evals", "fixtures", "p
 export const INJECTION_FOLDER = join(REPO_ROOT, "packages", "evals", "fixtures", "injection");
 // One people fixture: the file name, the kind, its path, and the injection file appended to it when there is one.
 export type PersonFixture = { name: string; kind: "chatgpt" | "claude" | "paste"; path: string; injectionPath?: string };
-// The marker sentence: the words SAY THE WORD and one capitalised word of four letters or more (R7.4).
+// The marker sentence: the words SAY THE WORD and one capitalised word of four letters or more.
 const MARKER_PATTERN = /SAY THE WORD ([A-Z]{4,})/g;
 
 // Pulls the marker tokens out of an injection fixture, in the order they appear.

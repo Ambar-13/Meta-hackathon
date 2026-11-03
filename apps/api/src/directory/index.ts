@@ -1,4 +1,4 @@
-// The directory routes as one plugin for apps/api/src/server.ts slot 11 (as-built item 49): card sharing settings, browsing and
+// The directory routes as one plugin for apps/api/src/server.ts slot 11: card sharing settings, browsing and
 // joining the directory, the listed person's meetings, meetings with a listed persona, and the friends list.
 import type { RoutePlugin } from "../app-types.js";
 import { registerBrowse, registerFriends } from "./browse-and-friends.js";

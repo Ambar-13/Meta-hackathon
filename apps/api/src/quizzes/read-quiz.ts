@@ -11,7 +11,7 @@ const QuizRouteParams = z.object({ id: Uuid });
 // One item as the read query returns it: the position, the bank question and both answers with the judge's verdict.
 type ItemRow = { position: number; question_id: number; text: string; persona_answer: string | null; human_answer: string | null; agree: boolean | null };
 
-// Shapes one item for the screen. The persona answer is left out until the human answer exists, so nobody can peek (R4.2).
+// Shapes one item for the screen. The persona answer is left out until the human answer exists, so nobody can peek.
 export function toQuizItemView(row: ItemRow): QuizItemView {
   const answers =
     row.human_answer === null || row.persona_answer === null ? {} : { personaAnswer: row.persona_answer, humanAnswer: row.human_answer };
@@ -24,7 +24,7 @@ export function toQuizItemView(row: ItemRow): QuizItemView {
   };
 }
 
-// The copy for the whole quiz: "matched n of 10" once judged (D31), an empty string before that; the screen owns the waiting copy.
+// The copy for the whole quiz: "matched n of 10" once judged, an empty string before that; the screen owns the waiting copy.
 export function quizViewCopy(quiz: { state: string; matched: number | null; reliable: boolean | null }): string {
   return quiz.state === "judged" && quiz.matched !== null ? quizCopy(quiz.matched, quiz.reliable !== false) : "";
 }

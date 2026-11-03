@@ -1,20 +1,20 @@
 // What exists: every claim of a persona answer has a quote, checked inside its named turn (verified) and, for verified claims, by
 // the support check (supported). The problem: a reader must see when a quote did not check out, without colour and without any
 // number about a person. The step: each claim shows its text, its quote and at most one receipt mark as text. What it does not do:
-// show a position, a count or a rank (design section 10).
+// show a position, a count or a rank.
 import type { ReactElement } from "react";
 import { NO_RECEIPT_COPY, WEAK_RECEIPT_COPY, type AnswerClaim, type AskAnswer } from "@meet-first/contracts";
 import { Avatar, Sticker } from "../../look/index.js";
 
-// The line for an answer that carries no claim [confirm].
+// The line for an answer that carries no claim.
 const NO_CLAIMS_LINE = "No quotes from their notes.";
-// The line in place of the meeting button when this phone knows no approved card; the lobby has the same limit [confirm].
+// The line in place of the meeting button when this phone knows no approved card; the lobby has the same limit.
 const NO_CARD_LINE = "Open your approved card on this phone first, then come back here to start a meeting.";
-// The words of the meeting button (design section 7).
+// The words of the meeting button.
 const MEET_LABEL = "Start a meeting";
 
 // The receipt mark of one claim: no receipt when its quote was not found in the named turn, weak receipt when the support check did
-// not back it or did not run, and none otherwise (design section 7). An unverified claim gets only the no receipt mark [confirm].
+// not back it or did not run, and none otherwise. An unverified claim gets only the no receipt mark.
 export function receiptMarkFor(claim: AnswerClaim): string | null {
   if (!claim.verified) return NO_RECEIPT_COPY;
   if (claim.supported !== true) return WEAK_RECEIPT_COPY;

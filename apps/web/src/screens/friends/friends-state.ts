@@ -1,5 +1,5 @@
 // What exists: GET /api/friends lists the caller's friends with their friend-ask switch, GET /api/friend-requests their pending
-// requests both ways (wave 7), and GET /api/asks the answers the caller's persona gave. The problem: the lists load once, a friend ask
+// requests both ways, and GET /api/asks the answers the caller's persona gave. The problem: the lists load once, a friend ask
 // must reach the API only when its text has 5 to 300 characters, and answering a request changes both the requests and the friends.
 // The step: three loads through the shared polling hook, which tries a failed load again every ASK_POLL_MS, the send action, and
 // Accept and Decline, which read the requests and the friends again. What it does not do: poll the lists after they loaded.
@@ -33,7 +33,7 @@ export type FriendsScreenModel = {
 };
 
 // Loads the friends, the friend requests and the caller's asks once each, sends a friend ask and then opens its answers page (go
-// navigates), and answers incoming requests (design section 7, wave 7).
+// navigates), and answers incoming requests.
 export function useFriendsScreen(go: (path: string) => void): FriendsScreenModel {
   const friends = usePolledView(() => apiFetch(routes.directory.friends), { key: "friends", intervalMs: ASK_POLL_MS, keepPolling: () => false });
   const asks = usePolledView(() => apiFetch(routes.asks.listAsks), { key: "asks", intervalMs: ASK_POLL_MS, keepPolling: () => false });

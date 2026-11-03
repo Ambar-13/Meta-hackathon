@@ -69,7 +69,7 @@ export function personCreated(): PersonCreateResponse {
   return PersonCreateResponse.parse({ personId: IDS.personA, recoveryCode: RECOVERY_CODE });
 }
 
-// One page of a SourceView with `total` names, 20 per page (R2.4). The names check has finished.
+// One page of a SourceView with `total` names, 20 per page. The names check has finished.
 export function sourceView(page: number, total: number): SourceView {
   const first = (page - 1) * NAMES_PAGE_SIZE;
   const last = Math.min(total, page * NAMES_PAGE_SIZE);
@@ -181,7 +181,7 @@ export function meetingView(overrides: Partial<MeetingView>): MeetingView {
   });
 }
 
-// A claim of side a; a false argument makes it flagged and unverified (R6.5).
+// A claim of side a; a false argument makes it flagged and unverified.
 export function claimFixture(isVerified: boolean): Claim {
   return {
     id: IDS.claimA,
@@ -252,7 +252,7 @@ export function replayExport(events: CommittedEvent[]): ReplayExport {
   return ReplayExport.parse({ meetingId: IDS.meeting, exportedAt: SERVER_NOW, events });
 }
 
-// The listing ids of Mira (open to dating questions) and Ravi (not), shared by the Explore, profile and Me tests (wave 7).
+// The listing ids of Mira (open to dating questions) and Ravi (not), shared by the Explore, profile and Me tests.
 export const LISTING_IDS = {
   mira: `${UUID_PREFIX}000000000511`,
   ravi: `${UUID_PREFIX}000000000512`,
@@ -260,7 +260,7 @@ export const LISTING_IDS = {
   request: `${UUID_PREFIX}000000000531`,
 } as const;
 
-// A ProfileView of Mira, as a person with no friendship to her sees it; tests replace the fields they need (wave 7).
+// A ProfileView of Mira, as a person with no friendship to her sees it; tests replace the fields they need.
 export function profileView(overrides: Partial<ProfileView>): ProfileView {
   return ProfileView.parse({
     listingId: LISTING_IDS.mira,

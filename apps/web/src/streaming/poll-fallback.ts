@@ -3,10 +3,10 @@ import { PollResponse, routes } from "@meet-first/contracts";
 import { apiFetch } from "../app-shell/index.js";
 import type { PollReply } from "../transcript/event-fold.js";
 
-// The poll reply read leniently: v, the raw events, the running partial and serverNow, so one unreadable event cannot hide the rest (D49).
+// The poll reply read leniently: v, the raw events, the running partial and serverNow, so one unreadable event cannot hide the rest.
 export const PollEnvelope = z.object({ v: z.number(), events: z.array(z.unknown()), partial: PollResponse.shape.partial, serverNow: z.string() });
 
-// One GET /api/meetings/:id/events?after=<seq>, returned in the shape foldPollReply takes (D49).
+// One GET /api/meetings/:id/events?after=<seq>, returned in the shape foldPollReply takes.
 export async function pollEventsOnce(request: { meetingId: string; afterSeq: number; fetchImpl?: typeof fetch; origin?: string }): Promise<PollReply> {
   const options = {
     params: { id: request.meetingId },
@@ -18,7 +18,7 @@ export async function pollEventsOnce(request: { meetingId: string; afterSeq: num
   return apiFetch(routes.meetings.events, options);
 }
 
-// A started loop polls now and every intervalMs; runOnce polls now unless a poll is already out (D49).
+// A started loop polls now and every intervalMs; runOnce polls now unless a poll is already out.
 export type Poller = { start: () => void; stop: () => void; runOnce: () => Promise<void>; isRunning: () => boolean };
 
 // Builds a poll loop around one poll function.

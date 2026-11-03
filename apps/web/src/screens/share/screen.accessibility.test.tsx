@@ -8,7 +8,7 @@ import { unlabelledControls } from "../../testing/render-screen.js";
 import { ConsentScreen } from "./consent-screen.js";
 import { PublicSharePage } from "./public-page.js";
 
-// The explainer, word for word from the copy table (4.7).
+// The explainer, word for word from the copy table.
 const CONSENT_EXPLAINER = "Publishing makes a page anyone with the link can read. It shows your display names, the question, the card items you approved, what the two Meetys said, and the brief lines that passed the support check with their quotes. It never shows your archive, redacted text, quiz answers or anything you did not approve. Either of you can take it down at any time; the page disappears on the next visit.";
 // The slug of the fixture page: 22 URL-safe characters.
 const SLUG = "AAAAAAAAAAAAAAAAAAAAAA";

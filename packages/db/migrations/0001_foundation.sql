@@ -1,7 +1,7 @@
 -- package: db
 -- The whole schema of Meet First: roles, settings, every table with forced row-level security, the triggers that hold the invariants, the lookup functions, and the quiz bank seed.
 
--- Roles (R9.1, D55). app_migrate owns the tables and runs only this command. app_api and app_worker
+-- Roles. app_migrate owns the tables and runs only this command. app_api and app_worker
 -- are the two runtime roles; neither owns anything and neither can bypass row security.
 -- app_definer owns the lookup functions below and nothing else.
 DO $$
@@ -24,7 +24,7 @@ GRANT app_definer TO CURRENT_USER WITH SET TRUE, INHERIT FALSE;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
--- Settings read by every policy (D55). NULL or empty means "no context", and every policy then yields zero rows.
+-- Settings read by every policy. NULL or empty means "no context", and every policy then yields zero rows.
 CREATE OR REPLACE FUNCTION app_person() RETURNS uuid
 LANGUAGE sql STABLE SECURITY INVOKER SET search_path = public, pg_temp AS $$
   SELECT nullif(current_setting('app.person_id', true), '')::uuid
@@ -515,7 +515,7 @@ LANGUAGE sql STABLE SECURITY INVOKER SET search_path = public, pg_temp AS $$
 $$;
 COMMENT ON FUNCTION app_meeting_person(uuid) IS 'True when person p is a member of the current meeting; lets meeting jobs read a member''s turns and cards.';
 
--- Triggers that hold the invariants of ARCHITECTURE.md section 11. Each raises with a stable code in the message.
+-- Triggers that hold the schema's invariants. Each raises with a stable code in the message.
 
 CREATE OR REPLACE FUNCTION turns_text_frozen() RETURNS trigger
 LANGUAGE plpgsql AS $$
@@ -903,7 +903,7 @@ CREATE POLICY meetings_member ON meetings FOR ALL TO app_api, app_worker
 CREATE POLICY meetings_definer ON meetings FOR ALL TO app_definer USING (true) WITH CHECK (true);
 
 -- A member sees the other member of a meeting they are in. The check goes through a lookup function, because a
--- policy that reads its own table inside USING recurses forever (found by the Wave 0 build, request 005).
+-- policy that reads its own table inside USING recurses forever.
 CREATE OR REPLACE FUNCTION app_shares_meeting(m uuid) RETURNS boolean
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, pg_temp AS $$
   SELECT EXISTS (SELECT 1 FROM meeting_members WHERE meeting_id = m AND person_id = app_person())
@@ -960,7 +960,7 @@ CREATE POLICY ledger_self_test_finish ON ledger FOR UPDATE TO app_worker
   USING (call_site = 'self_test' AND person_id IS NULL AND meeting_id IS NULL)
   WITH CHECK (call_site = 'self_test' AND person_id IS NULL AND meeting_id IS NULL);
 
--- security_invoker: the view runs with the reader's row security, not its owner's (ARCHITECTURE.md 3.26; Wave 0 request 005).
+-- security_invoker: the view runs with the reader's row security, not its owner's.
 CREATE VIEW recall_corpus WITH (security_invoker = true) AS
 SELECT t.id AS turn_id, t.person_id, t.source_id, t.text, t.norm_text, c.id AS card_id
 FROM turns t

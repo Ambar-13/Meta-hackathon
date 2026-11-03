@@ -50,7 +50,7 @@ async function seedPerson(name: string): Promise<Person> {
   return { personId: person.personId, sessionToken: person.sessionToken, cardId: card.cardId, name };
 }
 
-// Lists the person in the directory with their first two items public, as the sharing part and the directory switch would (P1, P2),
+// Lists the person in the directory with their first two items public, as the sharing part and the directory switch would,
 // and returns the listing id.
 async function listInDirectory(person: Person): Promise<string> {
   const row = await withPerson(t.db, person.personId, async (trx) => {
@@ -65,7 +65,7 @@ const ASK_TEXT = "Our deploys fail at night and nobody knows why.";
 // The reply to every answer that cannot be met.
 const NOT_MEETABLE = { code: "helper_not_meetable", message: "This person can no longer be met from these results." };
 
-// Writes a help ask of the asker in the given state with one answered row for the helper, and returns both ids (design section 4).
+// Writes a help ask of the asker in the given state with one answered row for the helper, and returns both ids.
 async function seedHelpAnswer(input: { asker: Person; helper: Person; listingId: string | null; position: number | null; askState?: "done" | "ranking"; questionKind?: "help" | "romance" }): Promise<{ askId: string; answerId: string }> {
   return withPerson(t.db, input.asker.personId, async (trx) => {
     const askState = input.askState ?? "done";

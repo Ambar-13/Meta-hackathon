@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Brief, ComicRequest, ComicRequestResponse, ComicView, ConsentResponse, ConsentWithdrawResponse, ShareSnapshot } from "../briefs/index.js";
 
-// Routes for briefs, comics, consent and the share page. Paths come from IMPLEMENTATION.md 2.2.
+// Routes for briefs, comics, consent and the share page.
 // The panel image is a binary webp, so it has no JSON response schema.
 export const briefsRoutes = {
   readBrief: { method: "GET", path: "/api/meetings/:id/brief", request: z.undefined(), response: Brief },

@@ -1,6 +1,6 @@
 import type { TurnDelta } from "@meet-first/contracts";
 
-// The turn being written: its step and attempt, whose side, and the text so far (D47).
+// The turn being written: its step and attempt, whose side, and the text so far.
 export type PartialTurn = { stepSeq: number; attempt: number; side: TurnDelta["side"]; text: string };
 // What to do with one delta: use the new partial, ignore it, or poll once to resync.
 export type DeltaOutcome = { kind: "apply"; partial: PartialTurn } | { kind: "ignore" } | { kind: "resync" };
@@ -19,7 +19,7 @@ function sameAttempt(partial: PartialTurn, delta: TurnDelta): DeltaOutcome {
   return startFrom(delta);
 }
 
-// Appends a delta at the current length, replaces the partial at offset 0 or on a newer attempt, and asks for a resync otherwise (ARCHITECTURE.md 6.3).
+// Appends a delta at the current length, replaces the partial at offset 0 or on a newer attempt, and asks for a resync otherwise.
 export function applyDelta(partial: PartialTurn | null, delta: TurnDelta, lastCommittedStepSeq: number): DeltaOutcome {
   if (delta.stepSeq <= lastCommittedStepSeq) return { kind: "ignore" };
   if (partial === null || delta.stepSeq > partial.stepSeq) return startFrom(delta);

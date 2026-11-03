@@ -19,11 +19,11 @@ export type ChatRequestArgs = {
   tools?: ToolDefinition[];
   promptCacheKey?: string;
   stream: boolean;
-  override?: { effort?: Effort; maxTokens?: number }; // used by the finish_reason length retry only (D63)
+  override?: { effort?: Effort; maxTokens?: number }; // used by the finish_reason length retry only
 };
-// The characters per token the pre-call estimate assumes before a source has been calibrated (R3.3, D20).
+// The characters per token the pre-call estimate assumes before a source has been calibrated.
 export const DEFAULT_CHARS_PER_TOKEN = 1.33;
-// The message list and tool definitions, read to count characters for the estimate (R3.5).
+// The message list and tool definitions, read to count characters for the estimate.
 const CountedBody = z
   .object({
     messages: z.array(z.object({ content: z.string().nullable().optional() }).passthrough()),
@@ -31,7 +31,7 @@ const CountedBody = z
   })
   .passthrough();
 
-// The request body for one call, built from CALL_SITE_CONFIG so effort, max_tokens and temperature cannot drift per caller (D62, D22, D39).
+// The request body for one call, built from CALL_SITE_CONFIG so effort, max_tokens and temperature cannot drift per caller.
 export function buildChatRequest(args: ChatRequestArgs): Record<string, unknown> {
   const config = CALL_SITE_CONFIG[args.callSite];
   const body: Record<string, unknown> = {
@@ -49,14 +49,14 @@ export function buildChatRequest(args: ChatRequestArgs): Record<string, unknown>
   return body;
 }
 
-// Adds the keys that exist only for some calls: tools, the output schema and the cache key (D37, D41).
+// Adds the keys that exist only for some calls: tools, the output schema and the cache key.
 function addOptionalFields(body: Record<string, unknown>, args: ChatRequestArgs): void {
   if (args.tools !== undefined) body.tools = args.tools;
   if (args.schema !== undefined) body.response_format = { type: "json_schema", json_schema: args.schema };
   if (args.promptCacheKey !== undefined) body.prompt_cache_key = args.promptCacheKey;
 }
 
-// Characters of every message content plus tool definitions, for the pre-call estimate (R3.5).
+// Characters of every message content plus tool definitions, for the pre-call estimate.
 export function requestChars(body: Record<string, unknown>): number {
   const parsed = CountedBody.safeParse(body);
   if (!parsed.success) {
@@ -67,7 +67,7 @@ export function requestChars(body: Record<string, unknown>): number {
   return messageChars + toolChars;
 }
 
-// Tokens estimated before the call: chars divided by charsPerToken, default 1.33 because Tamil is three times English (R3.3, D20); never below 1.
+// Tokens estimated before the call: chars divided by charsPerToken, default 1.33 because Tamil is three times English; never below 1.
 export function estimateTokens(chars: number, charsPerToken: number | null): number {
   return Math.max(1, Math.ceil(chars / (charsPerToken ?? DEFAULT_CHARS_PER_TOKEN)));
 }

@@ -1,4 +1,4 @@
-// A human hides a reported share page (R2.7): by its public slug through share_revoke, or every share page of one meeting.
+// A human hides a reported share page: by its public slug through share_revoke, or every share page of one meeting.
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { ContractError, HTTP } from "@meet-first/contracts";
@@ -38,7 +38,7 @@ function readTarget(argv: readonly string[]): Target {
   throw badArguments();
 }
 
-// Hides the share page of one meeting by setting revoked_at to now() on each page not revoked yet; returns how many changed (R2.7).
+// Hides the share page of one meeting by setting revoked_at to now() on each page not revoked yet; returns how many changed.
 export async function revokeShareByMeeting(db: Db, meetingId: string): Promise<number> {
   return withMeeting(db, meetingId, async (trx) => {
     const result = await trx
@@ -51,7 +51,7 @@ export async function revokeShareByMeeting(db: Db, meetingId: string): Promise<n
   });
 }
 
-// Hides the share page with this slug through share_revoke: true the first time, null after (R2.7).
+// Hides the share page with this slug through share_revoke: true the first time, null after.
 async function revokeShareBySlug(db: Db, slug: string): Promise<boolean | null> {
   const row = await db.selectNoFrom((eb) => eb.fn<boolean | null>("share_revoke", [eb.val(slug)]).as("revoked")).executeTakeFirst();
   return row?.revoked ?? null;
@@ -86,7 +86,7 @@ export async function main(argv: readonly string[], env: NodeJS.ProcessEnv, outp
     return await runTakedown(argv, db, output);
   } catch (error: unknown) {
     if (isUndefinedFunction(error)) {
-      output.err("share_revoke_missing: The database does not have share_revoke yet. Use --meeting, or merge requests/build-w2-share-and-consent-002.md.");
+      output.err("share_revoke_missing: The database does not have share_revoke. Use --meeting.");
       return EXIT_REVOKE_MISSING;
     }
     output.err(error instanceof ContractError ? `${error.code}: ${error.message}` : "takedown_failed: The takedown did not finish. Check DATABASE_URL_WORKER and try again.");

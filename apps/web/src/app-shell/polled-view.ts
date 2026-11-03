@@ -16,7 +16,7 @@ function toApiError(thrown: unknown): ApiError {
   return new ApiError({ status: 0, code: "network_failed", message: NETWORK_FAILED_SENTENCE });
 }
 
-// Loads at once, then again intervalMs after each settled request while keepPolling(value) is true; key restarts it (R3.4, D54).
+// Loads at once, then again intervalMs after each settled request while keepPolling(value) is true; key restarts it.
 export function usePolledView<T>(load: () => Promise<T>, options: { key: string; intervalMs: number; keepPolling: (value: T) => boolean }): PolledView<T> {
   const [view, setView] = useState<PollState<T>>({ value: null, error: null, isLoading: true });
   const latest = useRef({ load, options });

@@ -1,6 +1,6 @@
 // A meeting with a listed persona, asked for from the directory. The caller's own daily cap is checked first; then
 // directory_meeting_create makes the meeting with its own pair, both go-aheads given, the listed side public-only and the
-// question's kind set (design sections 5, 6 and 11).
+// question's kind set (6 and 11).
 import type { FastifyInstance } from "fastify";
 import { sql, type Transaction } from "kysely";
 import { z } from "zod";
@@ -11,9 +11,9 @@ import { assertUnderDailyMeetingCap, questionFromBody } from "../meetings/create
 import { makeNotFoundError, makePayloadInvalidError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
 
-// The :id of POST /api/directory/:id/meetings: a listing id. One that is not a uuid is not_found, as on the pairs route [confirm].
+// The :id of POST /api/directory/:id/meetings: a listing id. One that is not a uuid is not_found, as on the pairs route.
 const ListingParams = z.object({ id: Uuid });
-// The five refusals of directory_meeting_create with the status each answers; the sentence is the database's own (design sections 6 and 11).
+// The five refusals of directory_meeting_create with the status each answers; the sentence is the database's own.
 const LISTING_MEETING_REFUSAL_STATUS: ReadonlyMap<string, number> = new Map<string, number>([
   ["listing_not_found", HTTP.notFound],
   ["directory_self", HTTP.conflict],
@@ -33,7 +33,7 @@ export function toListingMeetingError(refusal: DatabaseRefusal | null): Contract
   return new ContractError(refusal.code, refusal.message, status);
 }
 
-// Calls directory_meeting_create as the caller with the listing's daily cap, and returns the meeting id. The function sets question_kind itself (the curated kind, or situation for free text), so nothing here writes it (design section 11).
+// Calls directory_meeting_create as the caller with the listing's daily cap, and returns the meeting id. The function sets question_kind itself (the curated kind, or situation for free text), so nothing here writes it.
 async function createListingMeetingRow(trx: Transaction<Database>, input: ListingMeetingInput): Promise<string> {
   const { question } = input;
   let meetingId: string | null | undefined;
@@ -49,7 +49,7 @@ async function createListingMeetingRow(trx: Transaction<Database>, input: Listin
   return meetingId;
 }
 
-// Registers POST /api/directory/:id/meetings: 201 {meetingId}; 400 payload_invalid; 404 not_found or listing_not_found; 409 directory_self, romance_not_open or card_not_approved; 429 meeting_daily_cap or directory_daily_cap (design sections 5, 6 and 11).
+// Registers POST /api/directory/:id/meetings: 201 {meetingId}; 400 payload_invalid; 404 not_found or listing_not_found; 409 directory_self, romance_not_open or card_not_approved; 429 meeting_daily_cap or directory_daily_cap (6 and 11).
 export function registerCreateListingMeeting(app: FastifyInstance, deps: RouteDeps): void {
   app.post(routes.directory.createListingMeeting.path, async (request, reply) => {
     const personId = requirePerson(request);

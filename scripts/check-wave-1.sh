@@ -66,7 +66,7 @@ s04_forced_rls() {
   echo "$count"
   [ "$count" = "0" ]
 }
-# Command 05: the schema holds 30 tables in public: 25 from 0001 (asks dropped, as-built item 28), 2 from 0002 (item 29) and 3 from 0006 (item 49).
+# Command 05: the schema holds 30 tables in public: 25 from 0001 (asks dropped), 2 from 0002 and 3 from 0006.
 s05_tables() {
   local count
   count=$(psql "$DATABASE_URL_MIGRATE" -Atc "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relkind = 'r'")
@@ -80,7 +80,7 @@ s06_definer_functions() {
   echo "$count"
   [ "$count" = "20" ]
 }
-# Command 07: the quiz bank is seeded with its 30 questions (D28).
+# Command 07: the quiz bank is seeded with its 30 questions.
 s07_quiz_bank() {
   local count
   # Read as app_api, the role that reads the bank; the owner app_migrate sees no rows under forced row security.

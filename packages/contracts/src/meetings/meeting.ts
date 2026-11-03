@@ -1,15 +1,15 @@
 import { z } from "zod";
 import { IsoTime, Side, Uuid } from "../primitives.js";
 
-// Meetings one person may start per day, D60.
+// Meetings one person may start per day.
 export const MEETINGS_PER_PERSON_PER_DAY = 5;
-// How long one meeting runs, in minutes, D34.
+// How long one meeting runs, in minutes.
 export const MEETING_LENGTH_MINUTES = 10;
-// The explore phase stops this many minutes into the meeting, D34 and R5.8.
+// The explore phase stops this many minutes into the meeting.
 export const EXPLORE_CUTOFF_MINUTES = 8;
-// Turns in each phase: open 2, explore up to 6, decide 2, D34.
+// Turns in each phase: open 2, explore up to 6, decide 2.
 export const AGENDA = { open: 2, exploreMax: 6, decide: 2 } as const;
-// A person counts as present when they were seen this many seconds ago, D53.
+// A person counts as present when they were seen this many seconds ago.
 export const PRESENCE_WINDOW_SECONDS = 30;
 // What a meeting question asks the two personas to play out: whether the two people would get along or clash, whether one could help
 // the other, how each would react to a situation or what each thinks of a view, a decision between them, a deal between them, a
@@ -22,14 +22,14 @@ export type QuestionKind = z.infer<typeof QuestionKind>;
 export const MeetingState = z.enum(["ready", "queued", "running", "ended", "deleted"]);
 // The type of MeetingState, read from the schema above.
 export type MeetingState = z.infer<typeof MeetingState>;
-// The phases of a meeting, D34.
+// The phases of a meeting.
 export const Phase = z.enum(["open", "explore", "decide", "close"]);
 // The type of Phase, read from the schema above.
 export type Phase = z.infer<typeof Phase>;
 // How many curated questions there are; their ids run from 1 to this number.
 export const CURATED_QUESTION_COUNT = 20;
 // The reason a directory meeting's question is refused when it is a romance question and the listed person has not switched on dating
-// questions (as-built item 54).
+// questions.
 export const ROMANCE_NOT_OPEN_REASON = "This person has not opened their Meety to dating questions.";
 // The body of POST /api/pairs/:id/meetings: a curated question or free text, plus the card to speak from.
 // This is a route schema, not a model output, so the union is allowed here.
@@ -80,15 +80,15 @@ export const MeetingStartResponse = z.object({
 });
 // The type of MeetingStartResponse, read from the schema above.
 export type MeetingStartResponse = z.infer<typeof MeetingStartResponse>;
-// What the question check model returns: whether the question may be used, why, which kind it is, and whether any part of it is romantic
-// (R10.5). The kind matters only when the question is allowed. romantic is asked apart from the kind, so a mixed question cannot pass a
-// closed dating switch under another kind (as-built item 55).
+// What the question check model returns: whether the question may be used, why, which kind it is, and whether any part of it is romantic.
+//The kind matters only when the question is allowed. romantic is asked apart from the kind, so a mixed question cannot pass a
+// closed dating switch under another kind.
 export const QuestionCheckOutput = z.object({ allowed: z.boolean(), reason: z.string().min(1).max(200), kind: QuestionKind, romantic: z.boolean() });
 // The type of QuestionCheckOutput, read from the schema above.
 export type QuestionCheckOutput = z.infer<typeof QuestionCheckOutput>;
 // The 20 curated meeting questions in five groups of 4 as the lobby shows them: getting along or clashing (1 to 4), help (5 to 8),
 // deals (9 to 12, where 12 is a decision), debates and views (13 to 16, where 15 and 16 are situations), and getting on as a couple
-// (17 to 20). Each is about the two people only (R10.5).
+// (17 to 20). Each is about the two people only.
 export const CURATED_QUESTIONS: ReadonlyArray<{ id: number; text: string; kind: QuestionKind }> = [
   { id: 1, text: "Would we enjoy a 10-day hackathon together?", kind: "get_along" },
   { id: 2, text: "Would we get along on a small team, day to day?", kind: "get_along" },

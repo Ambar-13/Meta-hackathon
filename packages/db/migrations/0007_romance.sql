@@ -1,5 +1,5 @@
 -- package: db
--- Adds romance as a question kind with its own consent switch in the directory, and lets curated question ids run to 20 (as-built item 54).
+-- Adds romance as a question kind with its own consent switch in the directory, and lets curated question ids run to 20.
 
 ALTER TABLE meetings DROP CONSTRAINT meetings_question_kind_check;
 ALTER TABLE meetings ADD CONSTRAINT meetings_question_kind_check

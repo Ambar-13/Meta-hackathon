@@ -9,7 +9,7 @@ import { LINES_PER_SECTION, promptBodyOf, type BriefSections } from "./brief-lin
 export const REASON_MAX_CHARS = 200;
 // The three section names, in the order their indexes run.
 const SECTION_KEYS = ["agree", "clash", "decideFirst"] as const;
-// Decimal places the support rate keeps (ARCHITECTURE.md 3.19).
+// Decimal places the support rate keeps.
 const RATE_SCALE = 1000;
 
 // One line as the judge sees it: its original index, whether its quote comes before its statement, and the line itself.
@@ -53,7 +53,7 @@ function shuffledIndexes(count: number, random: () => number): number[] {
 }
 
 // The judge's text for one line: the statement and its quotes, in the order the flip gives. Both are escaped, as every block text
-// is, so a line or a quote cannot close its item and open another (R7.3).
+// is, so a line or a quote cannot close its item and open another.
 function slotBlock(slot: JudgeSlot): string[] {
   const quotes = slot.point.quotes.map((quote) => `<quote>"${escapeBlockText(quote.text)}"</quote>`);
   const statement = `<statement>${escapeBlockText(slot.point.text)}</statement>`;
@@ -61,13 +61,13 @@ function slotBlock(slot: JudgeSlot): string[] {
   return [`<item index="${String(slot.index)}">`, ...body, "</item>"];
 }
 
-// The seed of one brief's shuffle: its side and the words of its nine lines. No id or clock goes in, so the same lines always give the same request (D74).
+// The seed of one brief's shuffle: its side and the words of its nine lines. No id or clock goes in, so the same lines always give the same request.
 export function judgeSeedOf(side: "a" | "b", points: BriefSections): string {
   const lines = pointsInIndexOrder(points).map((point) => `${point.text}\n${point.quotes.map((quote) => quote.text).join("\n")}`);
   return `${side}\n${lines.join("\n")}`;
 }
 
-// Builds the judge's messages for one brief: nine lines, shuffled and flipped by seeded rules, with no section names (A1).
+// Builds the judge's messages for one brief: nine lines, shuffled and flipped by seeded rules, with no section names.
 export function buildJudgeInput(input: { side: "a" | "b"; points: BriefSections; promptText: string }): { messages: ChatMessage[]; order: number[]; flipped: boolean[] } {
   const points = pointsInIndexOrder(input.points);
   const random = makeSeededRandom(judgeSeedOf(input.side, input.points));
@@ -102,7 +102,7 @@ function setVerdict(sections: BriefSections, verdict: Verdict): BriefSections {
   return { ...sections, [key]: updated };
 }
 
-// The support rate: supported lines over the lines that carry a quote, to three decimals; null when no line has a quote (ARCHITECTURE.md 3.19).
+// The support rate: supported lines over the lines that carry a quote, to three decimals; null when no line has a quote.
 export function computeSupportRate(sections: BriefSections): number | null {
   const withQuote = pointsInIndexOrder(sections).filter((point) => point.quotes.length > 0);
   if (withQuote.length === 0) return null;

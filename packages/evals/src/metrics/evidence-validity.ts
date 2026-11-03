@@ -1,4 +1,4 @@
-// Evidence validity: the share of committed claims whose quote the check accepted. Flagged claims stay in the count (A2, R6.4).
+// Evidence validity: the share of committed claims whose quote the check accepted. Flagged claims stay in the count.
 import type { EvalRows } from "../collect-rows.js";
 import type { MetricResult } from "./index.js";
 

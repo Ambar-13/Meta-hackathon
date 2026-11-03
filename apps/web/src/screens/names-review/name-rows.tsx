@@ -3,7 +3,7 @@ import { NAMES_PAGE_SIZE, type NameRow } from "@meet-first/contracts";
 import { initialOf } from "../../look/index.js";
 import { OFFERED_OPT_INS, OPT_IN_LABELS, type SensitiveOptIn } from "./names-review-state.js";
 
-// The one-tap choice: replace all names (preselected) or choose names to keep (R2.4).
+// The one-tap choice: replace all names (preselected) or choose names to keep.
 export const NamesModeChoice = (props: { mode: "replace_all" | "choose"; onChange: (mode: "replace_all" | "choose") => void }): ReactElement => {
   return (
     <fieldset className="nr-mode">
@@ -31,7 +31,7 @@ function groupRows(rows: NameRow[]): Array<{ roleToken: string; rows: NameRow[] 
   return groups;
 }
 
-// The names of one page, grouped by role token, each with its context and, in choose mode, a keep box (R2.4).
+// The names of one page, grouped by role token, each with its context and, in choose mode, a keep box.
 export const RoleGroups = (props: { rows: NameRow[]; mode: "replace_all" | "choose"; kept: ReadonlySet<string>; onToggle: (text: string) => void }): ReactElement => {
   return (
     <div className="nr-groups">
@@ -64,7 +64,7 @@ export const RoleGroups = (props: { rows: NameRow[]; mode: "replace_all" | "choo
   );
 };
 
-// Previous and next page, 20 names per page (R2.4).
+// Previous and next page, 20 names per page.
 export const NamesPager = (props: { page: number; total: number; onPage: (page: number) => void }): ReactElement => {
   const pages = Math.max(1, Math.ceil(props.total / NAMES_PAGE_SIZE));
   return (
@@ -80,7 +80,7 @@ export const NamesPager = (props: { page: number; total: number; onPage: (page: 
   );
 };
 
-// The three sensitive opt-ins, all off by default (D18).
+// The three sensitive opt-ins, all off by default.
 export const OptInChoices = (props: { optIns: ReadonlySet<SensitiveOptIn>; onToggle: (optIn: SensitiveOptIn) => void }): ReactElement => {
   return (
     <fieldset className="nr-optins">

@@ -14,9 +14,9 @@ const StoredMessage = z.union([
   z.object({ role: z.literal("tool"), tool_call_id: z.string().min(1), content: z.string() }),
 ]);
 
-// The stored messages of a step, checked when read back from meeting_steps.messages (R5.1).
+// The stored messages of a step, checked when read back from meeting_steps.messages.
 export const StoredMessages = z.array(StoredMessage).transform((list): ChatMessage[] => list.map(toChatMessage));
-// The output of a done step: {text, toolCalls, claimsCommitted} (ARCHITECTURE.md 3.15).
+// The output of a done step: {text, toolCalls, claimsCommitted}.
 export const StepOutput = z.object({ text: z.string(), toolCalls: z.array(z.object({ name: z.string(), arguments: z.string() })), claimsCommitted: z.number().int().min(0) });
 // A step row as the jobs use it.
 export type StepRow = { meetingId: string; stepSeq: number; side: "a" | "b"; phase: "open" | "explore" | "decide"; state: "pending" | "running" | "stalled" | "done"; attempt: number; toolRounds: number; messages: ChatMessage[]; partialText: string };
@@ -25,7 +25,7 @@ export type ClaimOutcome = { kind: "claimed"; step: StepRow } | { kind: "done"; 
 // The step this runner holds: the meeting, the step and the attempt it was claimed with.
 export type HeldRef = { meetingId: string; stepSeq: number; attempt: number };
 
-// Claims one step with the conditional UPDATE of D44; one row back means this runner owns the step.
+// Claims one step with a conditional UPDATE; one row back means this runner owns the step.
 export async function claimStep(trx: Transaction<Database>, meetingId: string, stepSeq: number): Promise<ClaimOutcome> {
   const claimed = await trx.updateTable("meeting_steps")
     .set((eb) => ({ state: "running", attempt: eb("attempt", "+", 1), claimed_at: sql<Date>`now()` }))
@@ -37,25 +37,25 @@ export async function claimStep(trx: Transaction<Database>, meetingId: string, s
   return readUnclaimed(trx, meetingId, stepSeq);
 }
 
-// Moves a step this runner holds back to pending or to stalled; false when the runner no longer holds it (D44, D59).
+// Moves a step this runner holds back to pending or to stalled; false when the runner no longer holds it.
 export async function releaseStep(trx: Transaction<Database>, held: HeldRef, to: "pending" | "stalled"): Promise<boolean> {
   const result = await updateHeldStep(trx, held).set({ state: to }).executeTakeFirst();
   return result.numUpdatedRows === 1n;
 }
 
-// Saves the messages and the request count after a tool round, only while this runner holds the step (R5.1).
+// Saves the messages and the request count after a tool round, only while this runner holds the step.
 export async function saveRound(trx: Transaction<Database>, held: HeldRef, round: { messages: ChatMessage[]; toolRounds: number }): Promise<boolean> {
   const result = await updateHeldStep(trx, held).set({ messages: sql<never>`${JSON.stringify(round.messages)}::jsonb`, tool_rounds: round.toolRounds }).executeTakeFirst();
   return result.numUpdatedRows === 1n;
 }
 
-// Writes the attempt's partial text and its UTF-16 length, only while this runner holds the step (D47).
+// Writes the attempt's partial text and its UTF-16 length, only while this runner holds the step.
 export async function savePartialText(trx: Transaction<Database>, held: HeldRef, text: string): Promise<boolean> {
   const result = await updateHeldStep(trx, held).set({ partial_text: text, partial_len: text.length }).executeTakeFirst();
   return result.numUpdatedRows === 1n;
 }
 
-// Saves the partial text in its own short transaction, then sends the d: NOTIFY of seams S9 with the attempt and the UTF-16 length (D47).
+// Saves the partial text in its own short transaction, then sends the d: NOTIFY with the attempt and the UTF-16 length.
 export async function writePartial(db: Kysely<Database>, held: HeldRef, text: string): Promise<void> {
   await withMeeting(db, held.meetingId, async (trx) => {
     const isStillHeld = await savePartialText(trx, held, text);
@@ -64,12 +64,12 @@ export async function writePartial(db: Kysely<Database>, held: HeldRef, text: st
   });
 }
 
-// Stamps first_token_at once per attempt, in its own short transaction, for the first-turn latency metric (ARCHITECTURE.md 3.28).
+// Stamps first_token_at once per attempt, in its own short transaction, for the first-turn latency metric.
 export async function recordFirstToken(db: Kysely<Database>, held: HeldRef, now: Date): Promise<void> {
   await withMeeting(db, held.meetingId, (trx) => updateHeldStep(trx, held).set({ first_token_at: now }).where("first_token_at", "is", null).execute());
 }
 
-// The WHERE of every write after the claim: this step, this attempt, still running (D44).
+// The WHERE of every write after the claim: this step, this attempt, still running.
 function updateHeldStep(trx: Transaction<Database>, held: HeldRef) {
   return trx.updateTable("meeting_steps")
     .where("meeting_id", "=", held.meetingId).where("step_seq", "=", held.stepSeq)

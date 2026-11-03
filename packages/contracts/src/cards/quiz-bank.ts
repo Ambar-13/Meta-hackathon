@@ -1,8 +1,8 @@
 import { seededSample } from "./seeded-sample.js";
 
-// The fixed quiz bank version, R4.7. A new bank is a new version, never an edit.
+// The fixed quiz bank version. A new bank is a new version, never an edit.
 export const QUIZ_BANK_VERSION = 1;
-// The 30 quiz questions, ids 1 to 30, drafted for the Wave 0 review (D28, no input lists them).
+// The 30 quiz questions, ids 1 to 30.
 export const QUIZ_BANK: ReadonlyArray<{ id: number; text: string }> = [
   { id: 1, text: "What do you do when a plan you cared about falls apart?" },
   { id: 2, text: "How do you prefer to get bad news: straight away, or with context first?" },
@@ -35,9 +35,9 @@ export const QUIZ_BANK: ReadonlyArray<{ id: number; text: string }> = [
   { id: 29, text: "What topic do you avoid at work, and why?" },
   { id: 30, text: "If a project could only have one of speed, quality or low cost, which would you give up?" },
 ];
-// How many bank questions one quiz asks, D28.
+// How many bank questions one quiz asks.
 export const QUIZ_SAMPLE_SIZE = 10;
-// Picks 10 distinct bank ids for a card, seeded by the card id so the same card always gets the same 10 (D28).
+// Picks 10 distinct bank ids for a card, seeded by the card id so the same card always gets the same 10.
 // The seed is the card id's text in lower case, as Postgres writes a uuid; seeded-sample.ts has the rule.
 export function sampleQuiz(cardId: string): number[] {
   return seededSample(cardId.toLowerCase(), QUIZ_SAMPLE_SIZE, QUIZ_BANK.length);

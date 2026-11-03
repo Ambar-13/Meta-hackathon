@@ -1,5 +1,5 @@
 -- package: db
--- Lets every person share posts and 24-hour stories with a photo and like posts, as Instagram does, and lets their Meety read them (3 Nov 2026).
+-- Lets every person share posts and 24-hour stories with a photo and like posts, as Instagram does, and lets their Meety read them.
 
 -- A post or a story holds words, a photo the browser drew itself (so it carries no camera or location data), or both. A story shows for
 -- 24 hours from when it went up and never shows on a profile's Posts tab or in the feed.

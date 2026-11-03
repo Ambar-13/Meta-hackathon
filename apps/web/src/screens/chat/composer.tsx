@@ -8,7 +8,7 @@ import { Icon } from "../../look/index.js";
 import type { ComposerModel } from "./chat-state.js";
 import { COUNTER_FROM_CHARS } from "./chat-words.js";
 
-// The words in the empty box, and its name for screen readers (Ambar, 3 Nov: "have like the text ask meety our personal ai").
+// The words in the empty box, and its name for screen readers.
 export const COMPOSER_LABEL = "Ask Meety, your personal AI";
 
 // The most lines the box grows to before it scrolls.

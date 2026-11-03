@@ -14,7 +14,7 @@ export type StreamOutcome = {
 // The hooks a stream calls as it is read: one per piece of text, one at the first token, and the clock.
 export type StreamHooks = { onDelta: (text: string) => Promise<void>; onFirstToken: () => Promise<void>; now: () => Date };
 
-// One tool-call fragment of a stream chunk. Fragments of one call share an index (R10.7).
+// One tool-call fragment of a stream chunk. Fragments of one call share an index.
 const ToolFragment = z.object({
   index: z.number().int().min(0),
   id: z.string().optional(),
@@ -34,7 +34,7 @@ const StreamChunk = z.object({
 });
 type StreamChunkValue = z.infer<typeof StreamChunk>;
 type ToolFragmentValue = z.infer<typeof ToolFragment>;
-// The vendor usage object in the openai-compatible shape. Its field names are unverified on Meta (ARCHITECTURE.md section 12).
+// The vendor usage object in the openai-compatible shape. Its field names are unverified on Meta.
 const VendorUsage = z
   .object({
     prompt_tokens: z.number().int().min(0),
@@ -68,7 +68,7 @@ const ReplayChoice = z
   .strict();
 // The recorded layout of one reply, with exactly one choice.
 export type ReplayReply = { choices: [z.infer<typeof ReplayChoice>] };
-// The fixture response of a streamed reply (seams S6), checked before replay reads it.
+// The fixture response of a streamed reply, checked before replay reads it.
 export const ReplayResponse = z
   .object({ choices: z.tuple([ReplayChoice]) })
   .strict()
@@ -81,14 +81,14 @@ type ToolSlot = { id: string | undefined; name: string; arguments: string };
 // The state of one read: the text so far, the last finish reason, the usage, the first-token time and the call slots.
 type ReadState = { text: string; finish: string | undefined; usage: RecordedCall["usage"] | null; firstTokenAt: Date | null; slots: Map<number, ToolSlot> };
 
-// Calls the first-token hook once, the first time any text or tool call arrives, and stamps the time (R10.3).
+// Calls the first-token hook once, the first time any text or tool call arrives, and stamps the time.
 async function markFirstToken(state: ReadState, hooks: StreamHooks): Promise<void> {
   if (state.firstTokenAt !== null) return;
   state.firstTokenAt = hooks.now();
   await hooks.onFirstToken();
 }
 
-// Adds one tool-call fragment to its slot, joining the parts by index (R10.7).
+// Adds one tool-call fragment to its slot, joining the parts by index.
 function addFragment(state: ReadState, fragment: ToolFragmentValue): void {
   const slot = state.slots.get(fragment.index) ?? { id: undefined, name: "", arguments: "" };
   if (fragment.id !== undefined) slot.id = fragment.id;
@@ -119,14 +119,14 @@ async function takeChunk(state: ReadState, chunk: StreamChunkValue, hooks: Strea
   if (choice !== undefined) await takeChoice(state, choice, hooks);
 }
 
-// Maps the kept finish reason to the outcome's reason. A stream that ended with none was cut (R10.7); content_filter maps to stop [confirm].
+// Maps the kept finish reason to the outcome's reason. A stream that ended with none was cut; content_filter maps to stop.
 function outcomeReason(finish: string | undefined): StreamOutcome["finishReason"] {
   if (finish === undefined) return "cut";
   if (finish === "length" || finish === "tool_calls") return finish;
   return "stop";
 }
 
-// The tool calls in index order, only when the round ended in calls, so fragments of a cut call are dropped (R10.7).
+// The tool calls in index order, only when the round ended in calls, so fragments of a cut call are dropped.
 function completedCalls(state: ReadState, reason: StreamOutcome["finishReason"]): ToolCall[] {
   if (reason !== "tool_calls") return [];
   return [...state.slots.entries()]
@@ -138,7 +138,7 @@ function completedCalls(state: ReadState, reason: StreamOutcome["finishReason"])
     }));
 }
 
-// Reads an SDK stream to the end. Tool call argument fragments are joined by index and only parsed by the caller after finish_reason tool_calls (R10.7).
+// Reads an SDK stream to the end. Tool call argument fragments are joined by index and only parsed by the caller after finish_reason tool_calls.
 export async function readChatStream(stream: AsyncIterable<unknown>, hooks: StreamHooks, signal: AbortSignal): Promise<StreamOutcome> {
   const state: ReadState = { text: "", finish: undefined, usage: null, firstTokenAt: null, slots: new Map() };
   for await (const raw of stream) {
@@ -153,7 +153,7 @@ export async function readChatStream(stream: AsyncIterable<unknown>, hooks: Stre
   return { text: state.text, toolCalls: completedCalls(state, reason), finishReason: reason, usage: state.usage, firstTokenAt: state.firstTokenAt };
 }
 
-// Sends the text in slices of REPLAY_STREAM_SLICE_CHARS code points, a fixed pause apart (D74).
+// Sends the text in slices of REPLAY_STREAM_SLICE_CHARS code points, a fixed pause apart.
 async function sendSlices(text: string, hooks: StreamHooks): Promise<void> {
   const points = Array.from(text);
   const pieces: string[] = [];
@@ -166,7 +166,7 @@ async function sendSlices(text: string, hooks: StreamHooks): Promise<void> {
   }
 }
 
-// Turns a recorded streamed reply into the same deltas a live stream would send, 20 characters every 10 ms, so replay runs the delta path (D74).
+// Turns a recorded streamed reply into the same deltas a live stream would send, 20 characters every 10 ms, so replay runs the delta path.
 export async function replayAsStream(response: Record<string, unknown>, hooks: StreamHooks): Promise<StreamOutcome> {
   const parsed = ReplayResponse.safeParse(response);
   if (!parsed.success) {
@@ -183,7 +183,7 @@ export async function replayAsStream(response: Record<string, unknown>, hooks: S
   return { text, toolCalls: choice.message.tool_calls ?? [], finishReason: choice.finish_reason ?? "cut", usage: null, firstTokenAt };
 }
 
-// The recorded layout of a finished live stream, for record mode and for the live reply (section 4.7).
+// The recorded layout of a finished live stream, for record mode and for the live reply.
 export function replyLayoutFrom(outcome: StreamOutcome): ReplayReply {
   const toolMessage = outcome.finishReason === "tool_calls" ? { tool_calls: outcome.toolCalls } : {};
   return {

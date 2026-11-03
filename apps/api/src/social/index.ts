@@ -1,5 +1,5 @@
-// The social routes as one plugin for apps/api/src/server.ts slot 13 (wave 7): friend requests, a person's profile in Explore, the
-// orchestrator chat, posts, and since 3 Nov 2026 sharing posts and stories and liking posts.
+// The social routes as one plugin for apps/api/src/server.ts slot 13: friend requests, a person's profile in Explore, the
+// orchestrator chat, posts, and sharing posts and stories and liking posts.
 import type { RoutePlugin } from "../app-types.js";
 import { registerAcceptFriendRequest, registerDeclineFriendRequest, registerListFriendRequests, registerSendFriendRequest } from "./friend-requests.js";
 import { registerReadThread, registerRunPlan, registerSendToOrchestrator } from "./orchestrator.js";

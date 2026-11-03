@@ -7,8 +7,7 @@ export const EXPLORE_POSTS_MAX = 30;
 export const PROFILE_POSTS_MAX = 50;
 
 // One post as the feed and a profile show it: the text, when it went up, and its author by their listing, display name and sample
-// mark, never a person id (migration 0009); the author's picture, the post's photo and the words a screen reader reads for it
-// (3 Nov 2026).
+// mark, never a person id (migration 0009); the author's picture, the post's photo and the words a screen reader reads for it.
 export const Post = z.object({
   postId: Uuid,
   listingId: Uuid,
@@ -72,8 +71,7 @@ export const PostKind = z.enum(["post", "story"]);
 // The type of PostKind, read from the schema above.
 export type PostKind = z.infer<typeof PostKind>;
 
-// The body of POST /api/posts: a post or a story, with words, a photo as base64 JPEG bytes, or both (3 Nov 2026, Ambar: "can people
-// share story and post also? like insta?").
+// The body of POST /api/posts: a post or a story, with words, a photo as base64 JPEG bytes, or both.
 export const PostCreate = z.object({
   kind: PostKind,
   text: z.string().trim().max(POST_TEXT_MAX_CHARS),

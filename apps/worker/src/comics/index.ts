@@ -1,4 +1,4 @@
-// The comic job as one task list for apps/worker/src/runner.ts, slot 5 (seams S3): six panels, all or nothing.
+// The comic job as one task list for apps/worker/src/runner.ts, slot 5: six panels, all or nothing.
 import type { TaskList } from "../job-context.js";
 import { renderComicTask } from "./render-comic-job.js";
 

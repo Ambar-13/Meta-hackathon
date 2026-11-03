@@ -6,14 +6,14 @@ import type { RouteDeps } from "../app-types.js";
 import { makeNotFoundError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
 
-// The prompt version a new comic is drawn with; the worker reads the same version from packages/prompts (D64).
+// The prompt version a new comic is drawn with; the worker reads the same version from packages/prompts.
 export const COMIC_PROMPT_VERSION = "v1";
 // Milliseconds in one day, for the purge date of a new comic.
 const DAY_MS = 86_400_000;
 // The :id of POST /api/meetings/:id/comic: a uuid, or the meeting cannot exist.
 const RouteParams = z.object({ id: Uuid });
 
-// The avatar the other side gets: the next descriptor in AVATARS order, wrapping, so two people never share one (D64).
+// The avatar the other side gets: the next descriptor in AVATARS order, wrapping, so two people never share one.
 export function otherAvatarOf(avatar: Avatar): Avatar {
   const index = AVATARS.indexOf(avatar);
   return AVATARS[(index + 1) % AVATARS.length] ?? avatar;
@@ -25,7 +25,7 @@ export function avatarsBySide(side: "a" | "b", avatar: Avatar): { avatarA: Avata
   return side === "a" ? { avatarA: avatar, avatarB: other } : { avatarA: other, avatarB: avatar };
 }
 
-// Inside one person's transaction: checks membership and the brief, then inserts the comic row, or returns the one that exists (R11.2, D64).
+// Inside one person's transaction: checks membership and the brief, then inserts the comic row, or returns the one that exists.
 async function insertComicRequest(trx: DatabaseTransaction, input: { meetingId: string; personId: string; avatar: Avatar; now: Date }): Promise<{ comicId: string; isNew: boolean }> {
   const member = await trx.selectFrom("meeting_members").select(["side"]).where("meeting_id", "=", input.meetingId).where("person_id", "=", input.personId).executeTakeFirst();
   if (member === undefined) throw new ContractError("meeting_not_found", "This meeting does not exist or is not yours.", HTTP.notFound);

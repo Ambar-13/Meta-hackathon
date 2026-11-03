@@ -1,11 +1,9 @@
-// Tests for the forbidden-imports workflow and for scripts/constants-name-rows.ts. The grep steps are read from
-// the workflow file itself and run with bash -c inside a small temporary tree that holds one planted fault.
+// Tests for the forbidden-imports workflow. The grep steps are read from the workflow file itself and run with bash -c inside a small temporary tree that holds one planted fault.
 import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { findConstantsWithoutRows } from "../../scripts/constants-name-rows.js";
 
 const REPO_ROOT = join(import.meta.dirname, "..", "..");
 const WORKFLOW = join(REPO_ROOT, ".github", "workflows", "forbidden-imports.yml");
@@ -42,7 +40,7 @@ function exitCodeOf(command: string, root: string): number {
 }
 
 describe("forbidden imports", () => {
-  it("W2-DEPLOY-T14 (D74): the forbidden-imports job fails on a mock-api import, on META_API_KEY in apps/web, and on an exported constant without a row id", () => {
+  it("W2-DEPLOY-T14 (D74): the forbidden-imports job fails on a mock-api import and on META_API_KEY in apps/web", () => {
     const greps = workflowGreps();
     expect(greps.length).toBeGreaterThanOrEqual(3);
 
@@ -59,33 +57,5 @@ describe("forbidden imports", () => {
     const keyStep = greps.find((command) => command.includes("META_API_KEY")) ?? "";
     expect(keyStep).not.toBe("");
     expect(exitCodeOf(keyStep, keyInWeb)).not.toBe(0);
-
-    const withoutRow = [{ path: "packages/scrub/src/limits.ts", text: "export const LIMIT_BYTES = 10;\n" }];
-    expect(findConstantsWithoutRows(withoutRow).map((miss) => miss.name)).toEqual(["LIMIT_BYTES"]);
-
-    const withRow = [
-      { path: "packages/scrub/src/limits.ts", text: "// D44: one claim per step.\n\nexport const LIMIT_BYTES = 10;\n" },
-    ];
-    expect(findConstantsWithoutRows(withRow)).toEqual([]);
-  });
-
-  it("W2-DEPLOY-T15 (R13.5): constants-name-rows accepts D, A, R and invariant row forms and ignores tests and src/testing", () => {
-    const accepted = [
-      { path: "apps/api/src/limits.ts", text: "// D57: concurrency, 40 meetings.\nexport const MAX_MEETINGS = 40;\n" },
-      { path: "apps/api/src/origin.ts", text: "// A7: one origin.\nexport const ORIGIN_RULE = 'one';\n" },
-      { path: "apps/worker/src/drain.ts", text: "// R12.4: drain on SIGTERM.\nexport const DRAIN_MS = 120000;\n" },
-      { path: "packages/db/src/roles.ts", text: "// invariant 16: a person sees only their rows.\nexport const ROLE_RULE = 'own';\n" },
-    ];
-    expect(findConstantsWithoutRows(accepted)).toEqual([]);
-
-    const ignored = [
-      { path: "apps/api/src/limits.test.ts", text: "export const FIXTURE_LIMIT = 1;\n" },
-      { path: "apps/api/src/testing/fixture.ts", text: "export const FIXTURE_ROW = 1;\n" },
-      { path: "packages/contracts/src/limits.ts", text: "export const CONTRACT_LIMIT = 1;\n" },
-    ];
-    expect(findConstantsWithoutRows(ignored)).toEqual([]);
-
-    const missed = [{ path: "apps/api/src/bad.ts", text: "export const BAD_LIMIT = 1;\n" }];
-    expect(findConstantsWithoutRows(missed)).toEqual([{ path: "apps/api/src/bad.ts", line: 1, name: "BAD_LIMIT" }]);
   });
 });

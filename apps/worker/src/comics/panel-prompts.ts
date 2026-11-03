@@ -1,11 +1,11 @@
 import type { Avatar, BriefPoint } from "@meet-first/contracts";
 import type { ChatMessage } from "@meet-first/llm";
 
-// The most headlines one comic carries: three groups of three lines from each of two briefs (A1).
+// The most headlines one comic carries: three groups of three lines from each of two briefs.
 export const HEADLINES_MAX = 18;
-// The style every panel shares (D64). Changing it changes every comic, so it is a constant with its row.
+// The style every panel shares. Changing it changes every comic, so it is a constant with its row.
 export const STYLE_PREFIX = "Flat colour comic panel, thick clean outlines, soft daylight palette, friendly cartoon style, one scene, no text anywhere in the image";
-// The words that replace each display name inside an image prompt (R11.3).
+// The words that replace each display name inside an image prompt.
 const ONE_PERSON = "one person";
 const THE_OTHER_PERSON = "the other person";
 
@@ -21,7 +21,7 @@ function withoutLeadingComment(text: string): string {
   return text.replace(/^<!--[\s\S]*?-->\s*/, "");
 }
 
-// The supported brief lines from both briefs, texts only, deduplicated, at most 18 (A1). Unsupported or unverified lines never enter the comic.
+// The supported brief lines from both briefs, texts only, deduplicated, at most 18. Unsupported or unverified lines never enter the comic.
 export function pickHeadlines(briefs: { agree: BriefPoint[]; clash: BriefPoint[]; decideFirst: BriefPoint[] }[]): string[] {
   const ordered = (["agree", "clash", "decideFirst"] as const).flatMap((group) => briefs.flatMap((brief) => brief[group]));
   const headlines: string[] = [];
@@ -49,7 +49,7 @@ export function buildPanelsPromptInput(input: { questionText: string; avatarA: A
   ];
 }
 
-// Fills the comic-image template once per panel: the style prefix, both avatar descriptors, the panel number and the panel's image prompt. Display names are replaced first (R11.3).
+// Fills the comic-image template once per panel: the style prefix, both avatar descriptors, the panel number and the panel's image prompt. Display names are replaced first.
 export function buildImagePrompts(input: { panels: { caption: string; image_prompt: string }[]; avatarA: Avatar; avatarB: Avatar; displayNames: { a: string; b: string }; templateText: string }): string[] {
   const template = withoutLeadingComment(input.templateText);
   return input.panels.map((panel, index) => {

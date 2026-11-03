@@ -66,21 +66,21 @@ erDiagram
 
 Notice that most tables hang off people or meetings, so one delete of a person reaches every row that belongs to them. Ledger rows stay, with their person and meeting ids cleared.
 
-The other tables in the database, 27 in all, are listed here with the section of ARCHITECTURE.md that defines them:
+Some of the other tables, with the migration that makes each:
 
 | Table | What it holds | Defined in |
 |---|---|---|
-| redactions | One row per scrubbed span, with its placeholder id | ARCHITECTURE.md 3.6 |
+| redactions | One row per scrubbed span, with its placeholder id | migration 0001 |
 | names_passes | One row per source once its names pass has finished | migration 0002 |
 | source_names | One row per third-party name found, until the names review | migration 0002 |
-| quizzes, quiz_items | One blind quiz per card, with persona and human answers | ARCHITECTURE.md 3.9 and 3.11 |
-| quiz_bank | The fixed bank of 30 quiz questions (reference table) | ARCHITECTURE.md 3.10 |
-| comic_panels | The six panels of a comic, stored as webp | ARCHITECTURE.md 3.21 |
-| sessions, transfer_links | Login sessions, and single-use links to move a session | ARCHITECTURE.md 3.2 and 3.3 |
-| deletions | A record of what a deletion removed, by table | ARCHITECTURE.md 3.24 |
-| service_heartbeats | The last time each service reported in (reference table) | ARCHITECTURE.md 3.25 |
+| quizzes, quiz_items | One blind quiz per card, with persona and human answers | migration 0001 |
+| quiz_bank | The fixed bank of 30 quiz questions (reference table) | migration 0001 |
+| comic_panels | The six panels of a comic, stored as webp | migration 0001 |
+| sessions, transfer_links | Login sessions, and single-use links to move a session | migration 0001 |
+| deletions | A record of what a deletion removed, by table | migration 0001 |
+| service_heartbeats | The last time each service reported in (reference table) | migration 0001 |
 | schema_migrations | Which migrations have run | packages/db |
-| recall_corpus | A view of the turns that meeting recall may search | ARCHITECTURE.md 3.26 |
+| recall_corpus | A view of the turns that meeting recall may search | migration 0001 |
 
 Every table has row security turned on and forced. Two reference tables can be read by anyone; for every other table, a query that sets no person and no meeting returns no rows.
 
@@ -89,6 +89,5 @@ Every table has row security turned on and forced. Two reference tables can be r
 - STATES.md lists the states of a source, card, quiz, meeting, step and comic.
 - SAFETY.md lists who may read which rows, what leaves the device, and how consent and deletion work.
 - ../GLOSSARY.md defines each word the code and the documents use.
-- ../decisions.md is the decision ledger, with a row id for every rule in the code.
 - ../known-limits.md lists what Meety does not do.
 - ../ai-use.md says how AI was used to build the product and what runs in it.

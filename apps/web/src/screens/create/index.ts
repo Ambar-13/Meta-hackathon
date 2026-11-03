@@ -1,2 +1,2 @@
-// /create: share a post or a story, as Instagram's Create (3 Nov 2026).
+// /create: share a post or a story, as Instagram's Create.
 export { CreateScreen } from "./screen.js";

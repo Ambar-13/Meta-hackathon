@@ -10,10 +10,10 @@ const BRIEF_SECTIONS = ["agree", "clash", "decideFirst"] as const;
 const SECTION_COLOUR = { agree: "c-green", clash: "c-yellow", decideFirst: "c-lilac" } as const;
 
 // The style of one panel image: never wider than its column, so the page has no sideways scroll at 375 px. The share test reads
-// this inline max-width (W2-SHARE-T15), so it stays; share.css sets the same rule (request design-share-001).
+// this inline max-width (W2-SHARE-T15), so it stays; share.css sets the same rule.
 const PANEL_IMAGE_STYLE = { maxWidth: "100%" } as const;
 
-// The words of the page that no input gives [confirm] (drafted copy, design pass).
+// The words of the page.
 const SNAPSHOT_COPY = {
   noItems: "No card items were approved for this page.",
   noTurnsTitle: "Nothing said yet",

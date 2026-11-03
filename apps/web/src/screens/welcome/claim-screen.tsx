@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { APP_PATHS, ErrorNotice, ScreenFrame } from "../../app-shell/index.js";
 import { useClaim } from "./welcome-state.js";
 
-// Opens a profile in this browser from a one-time transfer link (R9.2).
+// Opens a profile in this browser from a one-time transfer link.
 export const ClaimScreen = (): ReactElement => {
   const navigate = useNavigate();
   const { state, claim } = useClaim();

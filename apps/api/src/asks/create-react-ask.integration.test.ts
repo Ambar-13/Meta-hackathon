@@ -44,7 +44,7 @@ const REACT_TEXT = "Our demo breaks an hour before judging.";
 // The reply to every pair that is refused.
 const NOT_FOUND = { code: "not_found", message: "This no longer exists or is not yours." };
 
-// Turns one side's friend-ask switch on or off on its approved card, as the card page's sharing part would (P3).
+// Turns one side's friend-ask switch on or off on its approved card, as the card page's sharing part would.
 async function setFriendsCanAsk(input: { side: SeededMeeting["a"]; isOn: boolean }): Promise<void> {
   await withPerson(t.db, input.side.personId, (trx) => trx.updateTable("cards").set({ friends_can_ask: input.isOn }).where("id", "=", input.side.cardId).execute());
 }

@@ -1,7 +1,5 @@
 # @meet-first/parsers
 
-Rows: D1, D5, D6, D7, D9, D10, R1.1, R1.9, R3.8, R7.7.
-
 ## What this does
 
 Turns an export file, a Codex session log or pasted notes into the uploader's own messages, in one canonical text form, ranked and cut to the size limits. It runs in the browser's Web Worker, and in Node for tests and the golden path script.
@@ -28,7 +26,7 @@ Notice that the raw file never leaves the worker; only the kept canonical turns 
 - generic-walker.ts: the fallback for a shape nobody has seen yet.
 - canonicalise.ts: canonical text and the language label.
 - persona-signal.ts: the persona signal and the score each turn is ranked by.
-- rank-and-cut.ts: the ranking and the caps of D5.
+- rank-and-cut.ts: the ranking and the size caps.
 - index.ts: what other packages may import.
 - fixtures/: one synthetic file per export shape.
 
@@ -36,4 +34,4 @@ Notice that the raw file never leaves the worker; only the kept canonical turns 
 
 Run `pnpm test:unit packages/parsers` from the repo root.
 
-Not built yet: a parser release process for a new export shape (R1.9); the user re-uploads after one.
+Not built yet: a parser release process for a new export shape; the user re-uploads after one.

@@ -9,7 +9,7 @@ function numberOrZero(value: unknown): number {
   return value === null || value === undefined ? 0 : numberFromPostgres(value);
 }
 
-// The text of a redaction placeholder, as the scrubber writes it. Its count in a turn is the placeholder count (D14).
+// The text of a redaction placeholder, as the scrubber writes it. Its count in a turn is the placeholder count.
 const REDACTED_OPEN = "[redacted:";
 
 // Opens the worker connection that every read uses.
@@ -26,7 +26,7 @@ export async function checkDatabase(db: GoldenDatabase): Promise<void> {
   }
 }
 
-// The count of this person's sessions that are not revoked (A5, invariant 20).
+// The count of this person's sessions that are not revoked.
 export async function countSessions(db: GoldenDatabase, personId: string): Promise<number> {
   return withPerson(db, personId, async (trx) => {
     const row = await trx.selectFrom("sessions").select((eb) => eb.fn.countAll().as("count")).where("person_id", "=", personId).where("revoked_at", "is", null).executeTakeFirst();
@@ -41,7 +41,7 @@ export async function readSource(db: GoldenDatabase, personId: string, sourceId:
   );
 }
 
-// The number of redaction rows a source has (R2.5).
+// The number of redaction rows a source has.
 export async function countRedactions(db: GoldenDatabase, personId: string, sourceId: string): Promise<number> {
   return withPerson(db, personId, async (trx) => {
     const row = await trx.selectFrom("redactions").select((eb) => eb.fn.countAll().as("count")).where("source_id", "=", sourceId).executeTakeFirst();
@@ -49,7 +49,7 @@ export async function countRedactions(db: GoldenDatabase, personId: string, sour
   });
 }
 
-// How many turns of a source contain the needle text (D15, D17: a replaced name or email must not remain).
+// How many turns of a source contain the needle text (a replaced name or email must not remain).
 export async function countTurnsContaining(db: GoldenDatabase, personId: string, scope: { sourceId: string; needle: string }): Promise<number> {
   return withPerson(db, personId, async (trx) => {
     const row = await trx
@@ -62,7 +62,7 @@ export async function countTurnsContaining(db: GoldenDatabase, personId: string,
   });
 }
 
-// The query that counts placeholders in a source's turns: each turn's length minus its length without the marker, over the marker's length, summed (R2.5, D14).
+// The query that counts placeholders in a source's turns: each turn's length minus its length without the marker, over the marker's length, summed.
 export function placeholderCountQuery(db: GoldenDatabase, sourceId: string) {
   return db
     .selectFrom("turns")
@@ -95,7 +95,7 @@ export async function readCard(db: GoldenDatabase, personId: string, cardId: str
   );
 }
 
-// How many items of a card quote a turn outside its own source (invariant 5, R6.4). It must be zero.
+// How many items of a card quote a turn outside its own source. It must be zero.
 export async function countItemsOutsideSource(db: GoldenDatabase, personId: string, scope: { cardId: string; sourceId: string }): Promise<number> {
   return withPerson(db, personId, async (trx) => {
     const row = await trx
@@ -109,7 +109,7 @@ export async function countItemsOutsideSource(db: GoldenDatabase, personId: stri
   });
 }
 
-// How many items of a card the person approved (R7.1).
+// How many items of a card the person approved.
 export async function countApprovedItems(db: GoldenDatabase, personId: string, cardId: string): Promise<number> {
   return withPerson(db, personId, async (trx) => {
     const row = await trx.selectFrom("card_items").select((eb) => eb.fn.countAll().as("count")).where("card_id", "=", cardId).where("approved", "=", true).executeTakeFirst();
@@ -117,7 +117,7 @@ export async function countApprovedItems(db: GoldenDatabase, personId: string, c
   });
 }
 
-// How many rows of the recall corpus come from a card. Zero when the recall switch is off (invariant 16, R7.1).
+// How many rows of the recall corpus come from a card. Zero when the recall switch is off.
 export async function countRecallCorpus(db: GoldenDatabase, personId: string, cardId: string): Promise<number> {
   return withPerson(db, personId, async (trx) => {
     const row = await trx.selectFrom("recall_corpus").select((eb) => eb.fn.countAll().as("count")).where("card_id", "=", cardId).executeTakeFirst();
@@ -143,7 +143,7 @@ export async function readMeeting(db: GoldenDatabase, meetingId: string) {
   );
 }
 
-// The reason the question check refused a question, or null when it allowed it (R10.5).
+// The reason the question check refused a question, or null when it allowed it.
 export async function readQuestionRejection(db: GoldenDatabase, meetingId: string): Promise<string | null> {
   return withMeeting(db, meetingId, async (trx) => {
     const row = await trx.selectFrom("meetings").select("question_rejected_reason").where("id", "=", meetingId).executeTakeFirstOrThrow();
@@ -151,7 +151,7 @@ export async function readQuestionRejection(db: GoldenDatabase, meetingId: strin
   });
 }
 
-// How many steps a meeting has, and the largest step seq (D34: one step at the start).
+// How many steps a meeting has, and the largest step seq (one step at the start).
 export async function countSteps(db: GoldenDatabase, meetingId: string): Promise<{ count: number; max: number }> {
   return withMeeting(db, meetingId, async (trx) => {
     const row = await trx.selectFrom("meeting_steps").select((eb) => [eb.fn.countAll().as("count"), eb.fn.max("step_seq").as("max")]).where("meeting_id", "=", meetingId).executeTakeFirstOrThrow();
@@ -159,8 +159,8 @@ export async function countSteps(db: GoldenDatabase, meetingId: string): Promise
   });
 }
 
-// The two members of a meeting: their side, their go-ahead and last-seen times, whether a frozen prefix is stored (D41), and whether
-// the member speaks from public items only, as a listed persona met through the directory does (design section 2).
+// The two members of a meeting: their side, their go-ahead and last-seen times, whether a frozen prefix is stored, and whether
+// the member speaks from public items only, as a listed persona met through the directory does.
 export async function readMembers(db: GoldenDatabase, meetingId: string) {
   return withMeeting(db, meetingId, async (trx) => {
     const rows = await trx.selectFrom("meeting_members").select(["side", "ready_at", "last_seen_at", "frozen_prefix_tokens", "public_only"]).where("meeting_id", "=", meetingId).orderBy("side").execute();
@@ -195,7 +195,7 @@ export async function countEventsByType(db: GoldenDatabase, meetingId: string, t
   });
 }
 
-// The claim counts of a meeting: every claim, how many were verified, and how many were flagged (invariant 6).
+// The claim counts of a meeting: every claim, how many were verified, and how many were flagged.
 export async function readClaimsSummary(db: GoldenDatabase, meetingId: string): Promise<{ total: number; verified: number; flagged: number }> {
   return withMeeting(db, meetingId, async (trx) => {
     const total = numberFromPostgres((await trx.selectFrom("claims").select((eb) => eb.fn.countAll().as("count")).where("meeting_id", "=", meetingId).executeTakeFirst())?.count);
@@ -221,7 +221,7 @@ function firstAgreeText(value: unknown): string | null {
   return null;
 }
 
-// Each person's own brief row: who owns it, its support rate and reliability flag, and its first agree line (A1, R6.5).
+// Each person's own brief row: who owns it, its support rate and reliability flag, and its first agree line.
 export async function readBriefOwners(db: GoldenDatabase, meetingId: string) {
   return withMeeting(db, meetingId, async (trx) => {
     const rows = await trx.selectFrom("briefs").select(["person_id", "support_rate", "support_reliable", "agree"]).where("meeting_id", "=", meetingId).execute();
@@ -229,7 +229,7 @@ export async function readBriefOwners(db: GoldenDatabase, meetingId: string) {
   });
 }
 
-// The comic row of a meeting, with the number of its panels, or undefined when none was asked for (R11.1).
+// The comic row of a meeting, with the number of its panels, or undefined when none was asked for.
 export async function readComic(db: GoldenDatabase, meetingId: string): Promise<{ id: string; state: string; panels: number } | undefined> {
   return withMeeting(db, meetingId, async (trx) => {
     const comic = await trx.selectFrom("comics").select(["id", "state"]).where("meeting_id", "=", meetingId).executeTakeFirst();
@@ -239,14 +239,14 @@ export async function readComic(db: GoldenDatabase, meetingId: string): Promise<
   });
 }
 
-// The share page row of a meeting: each side's consent, whether it is published, when it was withdrawn, and its slug (D68).
+// The share page row of a meeting: each side's consent, whether it is published, when it was withdrawn, and its slug.
 export async function readSharePage(db: GoldenDatabase, meetingId: string) {
   return withMeeting(db, meetingId, (trx) =>
     trx.selectFrom("share_pages").select(["consent_a", "consent_b", "published", "revoked_at", "slug"]).where("meeting_id", "=", meetingId).executeTakeFirst(),
   );
 }
 
-// Whether a meeting is visible to one person: 1 when it is, 0 when the person was removed from it (R9.7).
+// Whether a meeting is visible to one person: 1 when it is, 0 when the person was removed from it.
 export async function countMeetingAsMember(db: GoldenDatabase, personId: string, meetingId: string): Promise<number> {
   return withPerson(db, personId, async (trx) => {
     const row = await trx.selectFrom("meetings").select((eb) => eb.fn.countAll().as("count")).where("id", "=", meetingId).executeTakeFirst();
@@ -254,12 +254,12 @@ export async function countMeetingAsMember(db: GoldenDatabase, personId: string,
   });
 }
 
-// Every table of a person and how many rows still point at them (D69, invariant 16). The list comes from the db package.
+// Every table of a person and how many rows still point at them. The list comes from the db package.
 export async function countPerson(db: GoldenDatabase, personId: string): Promise<Record<string, number>> {
   return countRowsForPerson(db, personId);
 }
 
-// The distinct llm modes and call sites of the ledger, read from the meeting and both people's contexts and merged (D74, D69).
+// The distinct llm modes and call sites of the ledger, read from the meeting and both people's contexts and merged.
 export async function readLedgerFacts(db: GoldenDatabase, meetingId: string, personIds: readonly [string, string]): Promise<{ modes: string[]; callSites: string[] }> {
   const parts: Array<{ modes: string[]; callSites: string[] }> = [];
   parts.push(await withMeeting(db, meetingId, distinctLedger));

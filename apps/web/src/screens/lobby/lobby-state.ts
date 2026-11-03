@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { LOBBY_POLL_MS, MeetingCreate, type MeetingState, type MeetingView, type PairMeetingRow, type PairView } from "@meet-first/contracts";
 import { apiFetch, asApiError, ApiError, meetingPathWithSide, readViewerSide, rememberViewerSide, routes, usePolledView, type PolledView } from "../../app-shell/index.js";
 
-// The lobby's label for each meeting state [confirm] (drafted copy, no input gives it).
+// The lobby's label for each meeting state (drafted copy).
 export const MEETING_STATE_LABELS: Record<MeetingState, string> = { ready: "Not started", queued: "In the queue", running: "Running", ended: "Ended", deleted: "Gone" };
 
-// A picked question: one of the 12 curated ids, or free text (R10.5).
+// A picked question: one of the 12 curated ids, or free text.
 export type QuestionPick = { kind: "curated"; questionId: number } | { kind: "free"; text: string };
 
 // The meeting the lobby works on: the newest row of PairView.meetings that is ready, queued or running, or null (the list is newest first).
@@ -13,7 +13,7 @@ export function currentMeetingRow(pair: PairView): PairMeetingRow | null {
   return pair.meetings.find((row) => row.state === "ready" || row.state === "queued" || row.state === "running") ?? null;
 }
 
-// The MeetingCreate body for a pick and a card, or null when free text is not 5 to 300 characters after trimming (R10.5).
+// The MeetingCreate body for a pick and a card, or null when free text is not 5 to 300 characters after trimming.
 export function meetingCreateBody(pick: QuestionPick, cardId: string): MeetingCreate | null {
   if (pick.kind === "curated") return MeetingCreate.parse({ questionId: pick.questionId, cardId });
   const text = pick.text.trim();
@@ -71,7 +71,7 @@ function useLobbyActions(options: { pairId: string; cardId: string | null; curre
   return { actionError, createError, isBusy: isCreating || isMarking, create, markReady };
 }
 
-// The lobby's state and actions; go navigates (D54, R10.5).
+// The lobby's state and actions; go navigates.
 export function useLobby(
   pairId: string,
   cardId: string | null,

@@ -1,5 +1,5 @@
 -- package: db
--- Gives friend_list each friend's sample mark, so a sample friend shows their face and the made-up mark among your friends as in Explore (3 Nov 2026).
+-- Gives friend_list each friend's sample mark, so a sample friend shows their face and the made-up mark among your friends as in Explore.
 
 DROP FUNCTION friend_list();
 CREATE FUNCTION friend_list()

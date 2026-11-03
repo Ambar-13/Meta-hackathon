@@ -22,7 +22,7 @@ import { FeedScreen, SearchScreen } from "../screens/explore/index.js";
 import { MeScreen } from "../screens/me/index.js";
 import { PersonScreen } from "../screens/people/index.js";
 import { CreateScreen } from "../screens/create/index.js";
-import { PrivacyScreen } from "../screens/privacy/index.js";
+import { CookiesScreen, PrivacyScreen, TermsScreen } from "../screens/policies/index.js";
 
 // Every client path the app links to, re-exported for the screens that read the route table.
 export { APP_PATHS } from "./app-paths.js";
@@ -68,6 +68,8 @@ export const APP_ROUTES: RouteObject[] = [
   { path: ROUTE_PATTERNS.search, element: <SearchScreen /> },
   { path: ROUTE_PATTERNS.create, element: <CreateScreen /> },
   { path: ROUTE_PATTERNS.privacy, element: <PrivacyScreen /> },
+  { path: ROUTE_PATTERNS.terms, element: <TermsScreen /> },
+  { path: ROUTE_PATTERNS.cookies, element: <CookiesScreen /> },
   { path: "*", element: <NotFoundScreen /> },
 ];
 

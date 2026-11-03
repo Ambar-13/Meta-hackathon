@@ -2,7 +2,7 @@ import { createElement, type ReactElement } from "react";
 
 // One run of inline text: plain, emphasis or strong.
 export type SafeInline = { kind: "text" | "em" | "strong"; text: string };
-// One block: a paragraph, a quote, or a list (D66).
+// One block: a paragraph, a quote, or a list.
 export type SafeBlock = { kind: "paragraph"; inlines: SafeInline[] } | { kind: "quote"; inlines: SafeInline[] } | { kind: "list"; isOrdered: boolean; items: SafeInline[][] };
 
 // Star emphasis and strong only; everything else is left as typed.
@@ -97,7 +97,7 @@ function readLine(parser: Parser, line: string): void {
   }
 }
 
-// Parses model text into the allowed blocks; anything else, links, images and HTML included, stays literal text (D66, R7.2).
+// Parses model text into the allowed blocks; anything else, links, images and HTML included, stays literal text.
 export function parseSafeMarkdown(text: string): SafeBlock[] {
   const parser: Parser = { blocks: [], open: null };
   for (const line of text.replace(/\r\n?/g, "\n").split("\n")) {
@@ -121,7 +121,7 @@ function renderBlock(block: SafeBlock): ReactElement {
   return createElement(block.isOrdered ? "ol" : "ul", null, ...items);
 }
 
-// Renders model text with p, blockquote, ul, ol, li, em and strong elements only, never as inner HTML (D66, R7.2).
+// Renders model text with p, blockquote, ul, ol, li, em and strong elements only, never as inner HTML.
 export const SafeMarkdown = (props: { text: string }): ReactElement => {
   return createElement("div", { className: "safe-markdown" }, ...parseSafeMarkdown(props.text).map(renderBlock));
 };

@@ -13,12 +13,12 @@ export type UploadReady = {
   ok: true;
   header: SourceHeader; // the first NDJSON line, with attested: true
   foundTurns: number; // own turns found before the cut, for "kept n of m"
-  keptTurns: number; // turns in the body after the D5 cut
-  previewRedactionCount: number; // the browser scrub preview count shown with the consent copy (A3); the server count is the one stored (D11)
+  keptTurns: number; // turns in the body after the size cut
+  previewRedactionCount: number; // the browser scrub preview count shown with the consent copy; the server count is the one stored
   personaSignal: number;
-  isLowSignal: boolean; // personaSignal < PERSONA_SIGNAL_LOW (R3.8)
-  body: Blob; // header line plus turn lines, gzip when CompressionStream exists (D4)
-  contentEncoding: "gzip" | null; // null is the uncompressed fallback when CompressionStream is undefined (ARCHITECTURE.md section 12)
+  isLowSignal: boolean; // personaSignal < PERSONA_SIGNAL_LOW
+  body: Blob; // header line plus turn lines, gzip when CompressionStream exists
+  contentEncoding: "gzip" | null; // null is the uncompressed fallback when CompressionStream is undefined
 };
 
 // A refusal the screen shows as is: a stable code and the sentence to show.

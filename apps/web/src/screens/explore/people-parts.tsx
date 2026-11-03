@@ -1,4 +1,4 @@
-// The parts of people the feed (Home) and Search show (3 Nov 2026): Add friend and where a request stands, a person as a card and as a
+// The parts of people the feed (Home) and Search show: Add friend and where a request stands, a person as a card and as a
 // row, and the photos as Instagram's Explore grid.
 import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
@@ -8,7 +8,7 @@ import { PersonAvatar, photoOf, SampleChip } from "../../look/index.js";
 import type { AddState } from "../chat/index.js";
 import type { ExploreFriends } from "./explore-state.js";
 
-// The words a listing open to dating questions shows, as the directory showed them (design section 11).
+// The words a listing open to dating questions shows, as the directory showed them.
 const OPEN_TO_ROMANCE_COPY = "Open to dating questions";
 
 // The line under a person's name: their own line, or in its place the sentence of a friend request the server refused.

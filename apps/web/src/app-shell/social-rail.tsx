@@ -9,7 +9,7 @@ import { Icon, MeetyMark, Sticker, type IconName } from "../look/index.js";
 type RailPage = { label: string; to: string; icon: IconName; isRailOnly?: boolean; isPhoneHidden?: boolean };
 // The pages, in this order, as Instagram's: Home (the feed), Search, Meety (the chat, where Instagram has messages), Friends, Create,
 // which the phone keeps as the + of its top bar instead, Me, then Settings, which the laptop keeps at the sidebar's foot and the phone
-// keeps in the top bar instead (3 Nov 2026).
+// keeps in the top bar instead.
 const RAIL_PAGES: readonly RailPage[] = [
   { label: "Home", to: APP_PATHS.home, icon: "home" },
   { label: "Search", to: APP_PATHS.search, icon: "search" },
@@ -52,7 +52,7 @@ const PageLink = (props: { page: RailPage; pathname: string; incomingCount: numb
   );
 };
 
-// The signed-in nav. On a laptop a sidebar after the "Other" concept Ambar liked (3 Nov 2026): the Meety mark and words, the
+// The signed-in nav. On a laptop a sidebar: the Meety mark and words, the
 // tagline, the pages with their words, Invite a friend, Settings at the foot, and a line on what your Meety shares. Between laptop and
 // phone a narrow rail of icons; on a phone a bottom bar of icons with their words. It is one Pages nav at every width; the stylesheet
 // moves it. hasSettingsLink is false on Settings itself.

@@ -7,7 +7,7 @@ import type { RouteDeps } from "../app-types.js";
 import { makeNotFoundError, makePayloadInvalidError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
 
-// The refusals meeting_create raises by trigger code, each with the sentence the screen shows (Wave 0 section 4.5.4).
+// The refusals meeting_create raises by trigger code, each with the sentence the screen shows.
 export const MEETING_CREATE_REFUSALS: Readonly<Record<"pair_not_joined" | "card_not_approved" | "other_card_missing", string>> = {
   pair_not_joined: "The other person has not joined this pair yet. Send them the invite link again.",
   card_not_approved: "Approve your card before you create a meeting.",
@@ -17,7 +17,7 @@ export const MEETING_CREATE_REFUSALS: Readonly<Record<"pair_not_joined" | "card_
 const PairParams = z.object({ id: Uuid });
 
 // The question a new meeting discusses. A curated one is checked at insert and brings its kind; free text waits for check_question,
-// which sets both (R10.5).
+// which sets both.
 export function questionFromBody(body: MeetingCreate): MeetingQuestion {
   if ("questionId" in body) {
     const row = CURATED_QUESTIONS.find((candidate) => candidate.id === body.questionId);
@@ -30,12 +30,12 @@ export function questionFromBody(body: MeetingCreate): MeetingQuestion {
 // One meeting's question as the insert takes it; kind is null for free text until the check classifies it.
 type MeetingQuestion = { questionId: number | null; text: string; isChecked: boolean; kind: QuestionKind | null };
 
-// Midnight UTC of the given time, where the per-person meeting count starts again (D60) [confirm] (the same zone as the dollar caps).
+// Midnight UTC of the given time, where the per-person meeting count starts again (the same zone as the dollar caps).
 export function startOfUtcDay(now: Date): Date {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 }
 
-// Refuses a sixth meeting membership in one UTC day for this person (D60: 5 meetings per day). Being met as a listed persona in the
+// Refuses a sixth meeting membership in one UTC day for this person (5 meetings per day). Being met as a listed persona in the
 // directory does not count: those rows have their own cap, and they would otherwise stop the person starting meetings of their own.
 export async function assertUnderDailyMeetingCap(trx: Transaction<Database>, personId: string, now: Date): Promise<void> {
   // The person's own row is locked first, so meeting requests sent at once take turns and the count cannot be passed.

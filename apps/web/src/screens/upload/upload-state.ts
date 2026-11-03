@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { prepareUpload, type UploadInput, type UploadProgress, type UploadReady, type UploadRefused } from "../../extract/index.js";
 import { apiUpload, asApiError, ApiError, readAllowlist } from "../../app-shell/index.js";
 
-// The consent copy, verbatim from ARCHITECTURE.md 7.6 (A3), shown unchanged with the preview count before the upload button.
+// The consent copy, shown unchanged with the preview count before the upload button.
 export const CONSENT_COPY = "Your original archive stays on your device. After you review redactions, we upload and store only the selected excerpts shown here. You can delete them at any time.";
-// Under 640 px the paste tab comes first (R1.3).
+// Under 640 px the paste tab comes first.
 export const NARROW_SCREEN_QUERY = "(max-width: 639px)";
-// The words shown for each stage the extraction worker reports [confirm] (drafted copy, no input gives it).
+// The words shown for each stage the extraction worker reports (drafted copy).
 export const STAGE_WORDS: Record<UploadProgress["stage"], string> = {
   reading: "Reading the file",
   parsing: "Finding your own messages",
@@ -24,7 +24,7 @@ export type UploadFlow =
   | { kind: "uploading"; ready: UploadReady }
   | { kind: "failed"; ready: UploadReady; error: ApiError };
 
-// True when the screen is under 640 px wide: matchMedia now and on every change (R1.3).
+// True when the screen is under 640 px wide: matchMedia now and on every change.
 export function useIsNarrowScreen(): boolean {
   const [query] = useState(() => window.matchMedia(NARROW_SCREEN_QUERY));
   const [isNarrowNow, setIsNarrowNow] = useState(query.matches);
@@ -40,7 +40,7 @@ export function useIsNarrowScreen(): boolean {
   return isNarrowNow;
 }
 
-// Drives the flow: prepareUpload, the attestation, the upload, then onUploaded with the new source id (seams S4, R2.7).
+// Drives the flow: prepareUpload, the attestation, the upload, then onUploaded with the new source id.
 export function useUploadFlow(
   prepare: typeof prepareUpload,
   onUploaded: (sourceId: string) => void,

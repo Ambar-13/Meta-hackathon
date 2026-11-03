@@ -4,17 +4,17 @@ import qrcode from "qrcode-generator";
 import type { PairCreateResponse } from "@meet-first/contracts";
 import { apiFetch, asApiError, ApiError, readFragmentToken, routes } from "../../app-shell/index.js";
 
-// The QR error correction level [confirm: seams S8 picks qrcode-generator 1.4.4; no input gives the level].
+// The QR error correction level.
 export const QR_ERROR_CORRECTION = "M";
-// The quiet margin around the QR code, in modules [confirm] (no input gives it).
+// The quiet margin around the QR code, in modules.
 export const QR_MARGIN_MODULES = 2;
 
-// Making an invite: idle, sending, created, or failed (D32).
+// Making an invite: idle, sending, created, or failed.
 export type CreatePairState = { kind: "idle" } | { kind: "sending" } | { kind: "created"; pair: PairCreateResponse } | { kind: "failed"; error: ApiError };
-// Joining from an invite link: no token, ready, sending, needs a profile first, joined, or failed (D32, R9.3).
+// Joining from an invite link: no token, ready, sending, needs a profile first, joined, or failed.
 export type JoinState = { kind: "missing" } | { kind: "ready"; token: string } | { kind: "sending"; token: string } | { kind: "needs_profile"; token: string } | { kind: "joined"; pairId: string } | { kind: "failed"; error: ApiError };
 
-// The dark modules of a link's QR code as one SVG path, and the side of its square viewBox (D32).
+// The dark modules of a link's QR code as one SVG path, and the side of its square viewBox.
 export function qrPathFor(url: string): { path: string; size: number } {
   const qr = qrcode(0, QR_ERROR_CORRECTION);
   qr.addData(url);
@@ -44,7 +44,7 @@ export function useCreatePair(): { state: CreatePairState; create: () => Promise
   return { state, create };
 }
 
-// Joining from an invite link: reads the token from the fragment once, removes it from the address bar, joins on request, and asks for a profile on a 401 (D32).
+// Joining from an invite link: reads the token from the fragment once, removes it from the address bar, joins on request, and asks for a profile on a 401.
 export function useJoinPair(): { state: JoinState; join: () => Promise<void>; profileCreated: () => void } {
   const location = useLocation();
   const navigate = useNavigate();

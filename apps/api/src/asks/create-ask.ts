@@ -1,4 +1,4 @@
-// What exists: POST /api/asks starts a help search or a friend ask, and the run_ask job does the rest (design sections 4 and 6).
+// What exists: POST /api/asks starts a help search or a friend ask, and the run_ask job does the rest.
 // The problem: a person must stay under the daily caps, and a friend ask must reach only a friend who said yes, through an invite
 // pair. The step: one transaction checks the pair and the friend's switch, takes the caller's people row lock, counts today's asks of
 // that mode and writes the ask; run_ask is enqueued after the commit, because the queue writes through its own connection. What it
@@ -13,10 +13,10 @@ import { makeNotFoundError, makePayloadInvalidError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
 
 // The fewest characters an ask may have. AskCreate counts UTF-16 units and the persona_asks CHECK counts characters, so the route
-// counts characters too, and a short text is payload_invalid, never a database error [confirm].
+// counts characters too, and a short text is payload_invalid, never a database error.
 const ASK_TEXT_MIN_CHARACTERS = 5;
 
-// The daily cap of each kind of ask, with its code and sentence (design section 5: Ambar's defaults, 5 help searches and 20 friend asks).
+// The daily cap of each kind of ask, with its code and sentence.
 const DAILY_ASK_CAPS: Readonly<Record<AskMode, { limit: number; code: string; sentence: string }>> = {
   help: { limit: HELP_SEARCHES_PER_PERSON_PER_DAY, code: "help_daily_cap", sentence: "You have used today's help searches. Try again tomorrow." },
   react: { limit: REACT_ASKS_PER_PERSON_PER_DAY, code: "react_daily_cap", sentence: "You have sent today's friend asks. Try again tomorrow." },
@@ -35,7 +35,7 @@ export function isLongEnoughAskText(text: string): boolean {
 }
 
 // Refuses an ask past the caller's cap for its mode in this UTC day. The caller's people row is locked first, so asks sent at the
-// same moment take turns and none can pass the count (design section 5).
+// same moment take turns and none can pass the count.
 async function assertUnderDailyAskCap(trx: Transaction<Database>, input: { personId: string; mode: AskMode; now: Date }): Promise<void> {
   await trx.selectFrom("people").select("id").where("id", "=", input.personId).forUpdate().execute();
   // In words: how many asks of this mode the caller has made since midnight UTC today.
@@ -45,13 +45,13 @@ async function assertUnderDailyAskCap(trx: Transaction<Database>, input: { perso
   if (Number(row.count) >= cap.limit) throw new ContractError(cap.code, cap.sentence, HTTP.tooMany);
 }
 
-// The friend_list() row of this pair, or undefined when the pair is not the caller's latest invite pair with an active friend [confirm].
+// The friend_list() row of this pair, or undefined when the pair is not the caller's latest invite pair with an active friend.
 async function findFriendRow(trx: Transaction<Database>, pairId: string): Promise<FriendRow | undefined> {
   const result = await sql<FriendRow>`SELECT pair_id, display_name, can_ask FROM friend_list()`.execute(trx);
   return result.rows.find((row) => row.pair_id === pairId);
 }
 
-// The other member's display name, from pair_display_names, which returns no row unless the caller is in the pair (as-built item 1).
+// The other member's display name, from pair_display_names, which returns no row unless the caller is in the pair.
 async function readOtherName(trx: Transaction<Database>, input: { pairId: string; isCreator: boolean }): Promise<string> {
   const result = await sql<{ creator_display_name: string; joiner_display_name: string | null }>`SELECT creator_display_name, joiner_display_name FROM pair_display_names(${input.pairId}::uuid)`.execute(trx);
   const names = result.rows[0];
@@ -60,7 +60,7 @@ async function readOtherName(trx: Transaction<Database>, input: { pairId: string
   return name;
 }
 
-// Writes a help search under the help cap (design section 6).
+// Writes a help search under the help cap.
 async function insertHelpAsk(trx: Transaction<Database>, input: { personId: string; text: string; now: Date }): Promise<string> {
   await assertUnderDailyAskCap(trx, { personId: input.personId, mode: "help", now: input.now });
   const row = await trx.insertInto("persona_asks").values({ person_id: input.personId, mode: "help", text: input.text }).returning("id").executeTakeFirstOrThrow();
@@ -68,7 +68,7 @@ async function insertHelpAsk(trx: Transaction<Database>, input: { personId: stri
 }
 
 // Writes a friend ask: the pair must be the caller's joined invite pair (404), the friend must have turned on friend asks (409), then
-// the react cap (429). about_name keeps the friend's display name as it was when the ask was sent (design section 6, P3).
+// the react cap (429). about_name keeps the friend's display name as it was when the ask was sent.
 async function insertReactAsk(trx: Transaction<Database>, input: { personId: string; pairId: string; text: string; now: Date }): Promise<string> {
   const pair = await trx.selectFrom("pairs").select(["creator_person_id", "joined_at", "via_directory"]).where("id", "=", input.pairId).executeTakeFirst();
   if (pair === undefined || pair.joined_at === null || pair.via_directory) throw makeNotFoundError();
@@ -82,7 +82,7 @@ async function insertReactAsk(trx: Transaction<Database>, input: { personId: str
 }
 
 // Writes the caller's ask in one transaction, then enqueues run_ask after the commit. When the queue refuses, the ask is deleted
-// again and the queue's error goes on, as job-queue.ts says every route does (design section 6).
+// again and the queue's error goes on, as job-queue.ts says every route does.
 export async function createAsk(deps: AskDeps, personId: string, body: AskCreate): Promise<string> {
   if (!isLongEnoughAskText(body.text)) throw makePayloadInvalidError();
   const now = deps.now();
@@ -99,7 +99,7 @@ export async function createAsk(deps: AskDeps, personId: string, body: AskCreate
 }
 
 // Registers POST /api/asks: 201 {askId}; 400 payload_invalid, 404 not_found, 409 friend_asks_off, 429 help_daily_cap or
-// react_daily_cap (design section 6).
+// react_daily_cap.
 export function registerCreateAsk(app: FastifyInstance, deps: RouteDeps): void {
   app.post(routes.asks.createAsk.path, async (request, reply) => {
     const personId = requirePerson(request);

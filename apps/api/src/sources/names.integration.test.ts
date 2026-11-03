@@ -34,7 +34,7 @@ async function newPerson(): Promise<{ personId: string; sessionToken: string }> 
   return createTestPerson(testApp.db, "Asha Rao");
 }
 
-// Writes one source with these turns for the person, as an upload would (D8, D1).
+// Writes one source with these turns for the person, as an upload would.
 async function insertSource(personId: string, texts: string[]): Promise<string> {
   return asPerson(testApp.db, personId, async (trx) => {
     const values = {

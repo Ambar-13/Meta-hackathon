@@ -1,4 +1,4 @@
-// The access code a deployed Meety can ask for at sign-up (R9.5). A link with ?access= fills it in, this browser keeps it
+// The access code a deployed Meety can ask for at sign-up. A link with ?access= fills it in, this browser keeps it
 // once it opened a profile, and the invite link that person shares carries it, so the friend who opens the link never types it.
 
 // The name of the query part that carries the code in a link.

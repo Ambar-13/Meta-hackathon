@@ -1,5 +1,5 @@
 import { APP_PATHS, ROUTE_PATTERNS, routes } from "../../../app-shell/index.js";
-import { PrivacyScreen } from "../../../screens/privacy/index.js";
+import { CookiesScreen, PrivacyScreen, TermsScreen } from "../../../screens/policies/index.js";
 import { ClaimScreen, WelcomeScreen } from "../../../screens/welcome/index.js";
 import { IDS, personCreated, RECOVERY_CODE, TRANSFER_TOKEN } from "../../fixtures.js";
 import { press, typeInto, type GalleryView } from "../gallery-views.js";
@@ -73,4 +73,6 @@ export const views: readonly GalleryView[] = [
     element: <ClaimScreen />,
   },
   { name: "privacy", title: "Privacy, what Meety keeps", pattern: ROUTE_PATTERNS.privacy, url: APP_PATHS.privacy, element: <PrivacyScreen /> },
+  { name: "terms", title: "Terms of using Meety", pattern: ROUTE_PATTERNS.terms, url: APP_PATHS.terms, element: <TermsScreen /> },
+  { name: "cookies", title: "Cookies, what Meety keeps in the browser", pattern: ROUTE_PATTERNS.cookies, url: APP_PATHS.cookies, element: <CookiesScreen /> },
 ];

@@ -1,2 +1,2 @@
-// The comic page placeholder, replaced in Wave 2.
+// /meetings/:id/comic: the comic of a meeting.
 export { ComicScreen } from "./screen.js";

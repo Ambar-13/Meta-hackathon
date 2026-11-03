@@ -11,9 +11,9 @@ import { step13Brief, step14Comic, step15Share, step24Delete } from "./golden-pa
 import { step16Sharing, step17Directory, step18DirectoryDecide, step19DirectoryBrief, step20FriendAsk, step21Help } from "./golden-path/steps-directory-and-asks.js";
 import { step22FriendRequest, step23Orchestrator } from "./golden-path/steps-social.js";
 
-// The steps by number, each a function from the run to its result. Steps 9 and 10 are removed, so they print "removed" (as-built item 28).
-// Steps 16 to 21 are the directory, the friend ask and the help search; 22 and 23 are a friend request and the orchestrator chat (wave 7);
-// the deletion is last (design section 9).
+// The steps by number, each a function from the run to its result. Steps 9 and 10 are removed, so they print "removed".
+// Steps 16 to 21 are the directory, the friend ask and the help search; 22 and 23 are a friend request and the orchestrator chat;
+// the deletion is last.
 const RUNNERS = new Map<number, (run: RunState) => Promise<StepResult>>([
   [1, step01Person], [2, step02Paste], [3, step03CardA], [4, step04UploadB], [5, step05Quiz], [6, step06Approve], [7, step07Pair],
   [8, step08Stream], [9, () => Promise.resolve(removedStep(9, "ask"))], [10, () => Promise.resolve(removedStep(10, "ask-timeout"))],

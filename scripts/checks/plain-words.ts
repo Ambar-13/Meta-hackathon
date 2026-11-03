@@ -1,9 +1,9 @@
 // Flags the words and phrases that the style rules ban, wherever people read our words:
 // - Markdown docs and READMEs (code blocks and `code` spans are skipped)
 // - comments in code, and the text of error messages (anything thrown, anything passed to a class
-//   whose name ends in "Error", and any "message" or "detail" field)
+// whose name ends in "Error", and any "message" or "detail" field)
 // - comments in SQL migrations
-// A line that contains "plain-words: allow" is skipped, so a word can be quoted on purpose.
+// A line that contains "" is skipped, so a word can be quoted on purpose.
 // Instructions written for AI agents (prompt files, CLAUDE.md, AGENTS.md, SKILL.md) are not checked.
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";

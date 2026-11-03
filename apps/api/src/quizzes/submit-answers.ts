@@ -9,7 +9,7 @@ import { requirePerson } from "../sessions/index.js";
 // The :id of POST /api/quizzes/:id/answers: a uuid, or the quiz cannot exist.
 const QuizRouteParams = z.object({ id: Uuid });
 
-// Refuses answers unless the persona has finished answering and the human has not yet answered (R4.2, D29).
+// Refuses answers unless the persona has finished answering and the human has not yet answered.
 export function assertQuizWaitingHuman(quiz: { state: string } | undefined): void {
   if (quiz === undefined) {
     throw new ContractError("not_found", "This no longer exists or is not yours.", 404);
@@ -19,7 +19,7 @@ export function assertQuizWaitingHuman(quiz: { state: string } | undefined): voi
   }
 }
 
-// Writes one human answer to its position. A missing persona answer is refused with its own code (D29, invariant 7).
+// Writes one human answer to its position. A missing persona answer is refused with its own code.
 async function writeOneAnswer(trx: Transaction<Database>, args: { quizId: string; position: number; text: string; now: Date }): Promise<number> {
   try {
     const result = await trx

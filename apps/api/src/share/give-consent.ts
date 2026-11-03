@@ -30,7 +30,7 @@ export async function sideOfMember(trx: DatabaseTransaction, meetingId: string, 
   return row.side;
 }
 
-// Refuses consent until the meeting has ended and its brief.ready event is stored, because the snapshot needs both briefs (A1, 409).
+// Refuses consent until the meeting has ended and its brief.ready event is stored, because the snapshot needs both briefs (409).
 async function assertBriefReady(trx: DatabaseTransaction, meetingId: string): Promise<void> {
   const meeting = await trx.selectFrom("meetings").select("state").where("id", "=", meetingId).executeTakeFirst();
   const ready = await trx.selectFrom("meeting_events").select("seq").where("meeting_id", "=", meetingId).where("type", "=", "brief.ready").executeTakeFirst();
@@ -39,7 +39,7 @@ async function assertBriefReady(trx: DatabaseTransaction, meetingId: string): Pr
   }
 }
 
-// Writes this side's flag and sets published to the other side's flag in the same statement, so published equals consent_a AND consent_b (invariant 13).
+// Writes this side's flag and sets published to the other side's flag in the same statement, so published equals consent_a AND consent_b.
 // A repeated consent by the same person changes nothing.
 async function recordConsent(trx: DatabaseTransaction, input: { meetingId: string; side: "a" | "b"; slug: string }) {
   const isSideA = input.side === "a";
@@ -68,7 +68,7 @@ export async function giveConsent(trx: DatabaseTransaction, input: { meetingId: 
 }
 
 // Builds the snapshot inside the meeting context and stores it once. The UPDATE finds the snapshot already set when the other
-// member's second consent got there first, so the snapshot is filled once (D68).
+// member's second consent got there first, so the snapshot is filled once.
 async function publishSnapshot(deps: RouteDeps, target: { meetingId: string; personId: string }): Promise<void> {
   const snapshot = await withMeeting(deps.db, target.meetingId, (trx) => buildShareSnapshot(trx, target.meetingId));
   await withPerson(deps.db, target.personId, (trx) =>

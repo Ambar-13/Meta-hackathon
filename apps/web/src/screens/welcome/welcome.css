@@ -1,4 +1,4 @@
-/* The welcome page: probe 5 (docs/DESIGN.md). Every class here starts with wl- so nothing collides with the shared ones. */
+/* The welcome page (docs/DESIGN.md). Every class here starts with wl- so nothing collides with the shared ones. */
 
 .wl { display: block; }
 .wl-title { font-size: 42px; line-height: 0.98; text-align: center; max-width: 13ch; margin: 0 auto 30px; text-wrap: balance; }
@@ -157,6 +157,8 @@
 .wl-puff { display: inline-flex; align-items: center; min-height: 56px; padding: 0 22px; border-radius: 999px; background: var(--k); color: var(--ink); text-decoration: none;
   font: 800 22px/1 var(--display); letter-spacing: -0.03em; box-shadow: inset 0 -6px 0 oklch(20% 0.05 266 / 0.14), inset 0 4px 0 oklch(100% 0 0 / 0.35); }
 .wl-foot .wl-foot-small { margin-top: 26px; font-size: 13px; color: oklch(80% 0.02 266); }
+.wl-foot-links { display: flex; justify-content: center; gap: 4px 14px; margin-top: 4px; }
+.wl-foot-links a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 6px; color: var(--paper); font-size: 13px; }
 
 @media (prefers-reduced-motion: reduce) { .wl-hl-tag { animation: none; } }
 

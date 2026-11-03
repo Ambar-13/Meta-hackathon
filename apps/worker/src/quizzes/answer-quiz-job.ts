@@ -11,7 +11,7 @@ type PendingItem = { position: number; text: string };
 // What the job reads before it calls the model: skip the quiz, or answer the pending items from these card items.
 type AnswerPlan = { kind: "skip" } | { kind: "answer"; cardItems: PersonaCardItem[]; pending: PendingItem[] };
 
-// The card items the persona may use: the verified items of a ready card, or the approved and verified items of an approved card, in position order (R4.1).
+// The card items the persona may use: the verified items of a ready card, or the approved and verified items of an approved card, in position order.
 export async function readPersonaCardItems(trx: Transaction<Database>, cardId: string): Promise<PersonaCardItem[]> {
   const card = await trx.selectFrom("cards").select(["state"]).where("id", "=", cardId).executeTakeFirst();
   if (card === undefined) return [];
@@ -78,7 +78,7 @@ async function answerOneItem(
   );
 }
 
-// Opens the quiz for the human once every item has a persona answer. Until then the form stays locked (ARCHITECTURE.md section 5 step 9, R4.2).
+// Opens the quiz for the human once every item has a persona answer. Until then the form stays locked.
 async function openForHuman(trx: Transaction<Database>, quizId: string): Promise<void> {
   const missing = await trx.selectFrom("quiz_items").select(["position"]).where("quiz_id", "=", quizId).where("persona_answer", "is", null).execute();
   if (missing.length === 0) {
@@ -86,7 +86,7 @@ async function openForHuman(trx: Transaction<Database>, quizId: string): Promise
   }
 }
 
-// The answer_quiz job (IMPLEMENTATION.md 2.3): answers every item that has no persona answer yet, then opens the quiz for the human.
+// The answer_quiz job: answers every item that has no persona answer yet, then opens the quiz for the human.
 export const answerQuizTask: JobTask<"answer_quiz"> = async (payload, context) => {
   const { quizId, personId } = payload;
   const plan = await withPerson(context.db, personId, (trx) => readAnswerPlan(trx, quizId));

@@ -3,9 +3,9 @@ import { IsoTime, PhotoKey, Uuid } from "../primitives.js";
 import { CardState, ItemKind } from "../cards/card.js";
 import { MeetingState, QuestionKind } from "../meetings/meeting.js";
 
-// Meetings and pairs the home screen lists, newest first, 10 each [confirm] (the design pass gives no number).
+// Meetings and pairs the home screen lists, newest first, 10 each (the design pass gives no number).
 export const HOME_LIST_MAX = 10;
-// Card items the home screen shows on the person's name tag, 3 [confirm].
+// Card items the home screen shows on the person's name tag, 3.
 export const HOME_CARD_ITEMS_MAX = 3;
 
 // The person's newest upload: its id and whether the names check has written its result.
@@ -56,7 +56,7 @@ export type HomePairRow = z.infer<typeof HomePairRow>;
 // beyond the display names already shown in their pairs and meetings.
 export const HomeView = z.object({
   displayName: z.string(),
-  // The person's own profile photo, when they put one up (3 Nov 2026).
+  // The person's own profile photo, when they put one up.
   photo: PhotoKey.nullable().optional(),
   source: HomeSource.nullable(),
   card: HomeCard.nullable(),

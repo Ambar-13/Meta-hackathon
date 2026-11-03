@@ -1,5 +1,5 @@
 -- package: db
--- Lets a person put up their own profile photo, which shows wherever they show, as Instagram's Edit profile does (3 Nov 2026).
+-- Lets a person put up their own profile photo, which shows wherever they show, as Instagram's Edit profile does.
 
 -- One photo per person: a square JPEG the browser drew itself, so it carries no camera or location data. A new photo is a new row, so
 -- its id, and with it the address the app loads it from, changes and no old copy is shown from a cache.

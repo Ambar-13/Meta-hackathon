@@ -16,24 +16,24 @@ export type ExtractResult = {
   kind: SourceKind;
   personaSignal: number;
   foundTurns: number; // before the cut, for the "kept n of m" line on screen
-  canonicalChars: number; // sum of text lengths after the cut, must be at most CANONICAL_TEXT_MAX_BYTES (D5)
+  canonicalChars: number; // sum of text lengths after the cut, must be at most CANONICAL_TEXT_MAX_BYTES
 };
 
-// The sentence for a file that holds no messages written by the uploader (D9, R1.1).
+// The sentence for a file that holds no messages written by the uploader.
 const NO_OWN_TURNS_SENTENCE =
   "No messages written by you were found in this file. Pick the export file itself (conversations.json inside the zip), or paste some notes instead.";
-// The sentence for a .json file that does not parse (R1.1).
+// The sentence for a .json file that does not parse.
 const NOT_JSON_SENTENCE = "This file is not a JSON export. Pick conversations.json from the zip, or paste text.";
 // A byte order mark at the start of a JSON file, removed before parsing.
 const JSON_BOM = /^﻿/;
-// The start of a structured file: an optional byte order mark, spaces or line breaks, then an opening bracket or brace (R1.1).
+// The start of a structured file: an optional byte order mark, spaces or line breaks, then an opening bracket or brace.
 const STRUCTURED_START = /^﻿?\s*[[{]/;
-// The name of a structured file: a .json export, or a Codex session log in .jsonl (R1.1).
+// The name of a structured file: a .json export, or a Codex session log in .jsonl.
 const STRUCTURED_NAME = /\.jsonl?$/i;
 // The kind a Codex session is stored as. The frozen SourceKind has no codex kind, and Codex is OpenAI's agent, signed in with a
 // ChatGPT account. The kind is stored with the source and shown nowhere on screen.
 const CODEX_KIND: SourceKind = "chatgpt";
-// Splits pasted text into blocks at one or more blank lines (D10).
+// Splits pasted text into blocks at one or more blank lines.
 const BLANK_LINE = /\n\s*\n/;
 
 // Which parser to try for one file, from its name and first bytes. JSON and Codex .jsonl go to the structured parsers; .md to notes;
@@ -73,7 +73,7 @@ function structuredTurns(input: ExtractInput, kindHint: SourceKind | null): { ki
   return { kind: genericKind(input, kindHint), turns: walkGeneric(root) };
 }
 
-// Notes and paste: the whole text split into blocks at blank lines, each block one turn (D10).
+// Notes and paste: the whole text split into blocks at blank lines, each block one turn.
 function blockTurns(text: string): RawTurn[] {
   return canonicalise(text)
     .split(BLANK_LINE)
@@ -111,7 +111,7 @@ function withoutRepeats(turns: RawTurn[], seen: Set<string>): RawTurn[] {
   });
 }
 
-// Pulls the uploader's own turns out of any supported export. Throws source_no_own_turns when nothing is found (D9).
+// Pulls the uploader's own turns out of any supported export. Throws source_no_own_turns when nothing is found.
 // Order of attempts: ChatGPT 2024 mapping, ChatGPT 2026 messages, Claude chat_messages, generic walker, then notes or paste for plain text.
 // A Codex .jsonl session log goes to the Codex reader, and a message repeated in a later session is kept once.
 export function extractOwnTurns(inputs: ExtractInput[], kindHint: SourceKind | null): ExtractResult {

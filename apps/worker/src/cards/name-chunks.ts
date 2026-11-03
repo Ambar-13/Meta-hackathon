@@ -2,19 +2,19 @@ import { NamesPassOutput, toStrictJsonSchema, type CallSite } from "@meet-first/
 import type { ChatMessage } from "@meet-first/llm";
 import { readPrompt } from "@meet-first/prompts";
 
-// The longest text one names-pass call receives: 100,000 characters of whole turns (D15).
+// The longest text one names-pass call receives: 100,000 characters of whole turns.
 export const NAMES_CHUNK_MAX_CHARS = 100_000;
 // Two turn blocks are joined with one blank line.
 export const TURN_BLOCK_SEPARATOR = "\n\n";
-// One model call as a job builds it, before the ledger is added; the fixture test hashes exactly this (section 5.6).
+// One model call as a job builds it, before the ledger is added; the fixture test hashes exactly this.
 export type ModelCall = { callSite: CallSite; promptVersion: string; messages: ChatMessage[]; schema: ReturnType<typeof toStrictJsonSchema> };
 
-// One turn as the names pass and the card build show it: its label, a space, then its text (ARCHITECTURE.md section 5 step 7).
+// One turn as the names pass and the card build show it: its label, a space, then its text.
 export function formatTurnBlock(turn: { turnIndex: number; text: string }): string {
   return `[t:${String(turn.turnIndex)}] ${turn.text}`;
 }
 
-// Splits turns into chunks of whole turns whose joined blocks are at most NAMES_CHUNK_MAX_CHARS; a turn is never split (D15).
+// Splits turns into chunks of whole turns whose joined blocks are at most NAMES_CHUNK_MAX_CHARS; a turn is never split.
 export function chunkTurnsForNames(turns: ReadonlyArray<{ turnIndex: number; text: string }>): Array<{ turnIndexes: number[]; text: string }> {
   const chunks: Array<{ turnIndexes: number[]; text: string }> = [];
   let current: { turnIndexes: number[]; text: string } | null = null;
@@ -33,7 +33,7 @@ export function chunkTurnsForNames(turns: ReadonlyArray<{ turnIndex: number; tex
   return chunks;
 }
 
-// The names-pass call for one chunk: the scrub-names prompt and the untrusted-data rules as the system message, the allowlist and the chunk as the user message (D15, D17).
+// The names-pass call for one chunk: the scrub-names prompt and the untrusted-data rules as the system message, the allowlist and the chunk as the user message.
 export function namesPassCall(input: { allowlist: readonly string[]; chunkText: string }): ModelCall {
   const prompt = readPrompt("scrub-names");
   const rules = readPrompt("untrusted-data-rules");

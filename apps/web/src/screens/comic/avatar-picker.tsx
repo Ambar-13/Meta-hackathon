@@ -12,7 +12,7 @@ function animalOf(avatar: Avatar): string {
   return avatar.split(" ")[0] ?? avatar;
 }
 
-// The six avatars as radio cards in one fieldset, and the button that asks for the comic (R11.3).
+// The six avatars as radio cards in one fieldset, and the button that asks for the comic.
 export const AvatarPicker = (props: AvatarPickerProps): ReactElement => {
   const isDrawDisabled = props.selected === null || props.isSending;
   return (

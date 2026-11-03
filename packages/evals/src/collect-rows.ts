@@ -127,7 +127,7 @@ async function addCardRows(db: Kysely<Database>, personId: string, rows: EvalRow
   rows.ledger.push(...cards.map(toLedgerRow));
 }
 
-// Reads every row the metrics need for the driven pairs. Nothing is read outside withMeeting or withPerson (invariant 15).
+// Reads every row the metrics need for the driven pairs. Nothing is read outside withMeeting or withPerson.
 export async function collectRows(db: Kysely<Database>, pairs: readonly DrivenPair[]): Promise<EvalRows> {
   const rows: EvalRows = {
     claims: [], briefLines: [], turns: new Map(), briefMeta: [], events: [], meetings: [], ledger: [],

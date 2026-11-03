@@ -1,17 +1,17 @@
 import { z } from "zod";
 import { Uuid, IsoTime } from "../primitives.js";
 
-// The cookie that holds the session. The __Host- prefix forces Secure, Path=/ and no Domain, A7.
+// The cookie that holds the session. The __Host- prefix forces Secure, Path=/ and no Domain.
 export const SESSION_COOKIE = "__Host-session";
-// Random bytes in a session token: 256 bits, D33.
+// Random bytes in a session token: 256 bits.
 export const SESSION_TOKEN_BYTES = 32;
-// Days a session stays valid after it is created, D33.
+// Days a session stays valid after it is created.
 export const SESSION_LIFETIME_DAYS = 90;
-// Random bytes in a transfer token: 128 bits, D33 and R9.2.
+// Random bytes in a transfer token: 128 bits.
 export const TRANSFER_TOKEN_BYTES = 16;
-// Minutes a transfer link works before it expires, D33.
+// Minutes a transfer link works before it expires.
 export const TRANSFER_LIFETIME_MINUTES = 10;
-// Attributes of the session cookie, ARCHITECTURE.md 7.2.
+// Attributes of the session cookie.
 export const COOKIE_ATTRIBUTES = { httpOnly: true, secure: true, path: "/", sameSite: "lax" } as const;
 // The body of POST /api/sessions/recover: the 32-character recovery code.
 export const Recover = z.object({ code: z.string().length(32) });

@@ -8,7 +8,7 @@ import { requirePerson } from "../sessions/index.js";
 // The params of GET /api/comics/:id/panels/:position: a comic id and a panel number from 1 to 6.
 const PanelParams = z.object({ id: Uuid, position: z.coerce.number().int().min(1).max(COMIC_PANELS) });
 
-// Registers GET /api/comics/:id/panels/:position: 200 with the webp bytes; 404 panel_not_found (R11.5).
+// Registers GET /api/comics/:id/panels/:position: 200 with the webp bytes; 404 panel_not_found.
 export function registerPanelImage(app: FastifyInstance, deps: RouteDeps): Promise<void> {
   app.get(routes.briefs.panelImage.path, async (request, reply) => {
     const personId = requirePerson(request);

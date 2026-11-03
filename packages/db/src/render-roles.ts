@@ -17,7 +17,7 @@ import { migrateDatabase, type MigrationReport } from "./migrate.js";
 // The repository root, where .env.render is read and the three files are written.
 const REPO_ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 
-// The three roles that log in (R9.1, D55); app_definer never logs in.
+// The three roles that log in; app_definer never logs in.
 const LOGIN_ROLES = ["app_migrate", "app_api", "app_worker"] as const;
 type LoginRole = (typeof LOGIN_ROLES)[number];
 // The new password of each login role, made fresh on every run.
@@ -30,7 +30,7 @@ type Login = { role: LoginRole; password: string };
 // database's Info page connects. plain, chosen with sslmode=disable on the external URL, is for a Postgres on this machine only.
 export type TlsMode = "verify" | "encrypt-only" | "plain";
 
-// What Ambar copies into .env.render: the two URLs on the database's Info page, and the api service's address.
+// What the operator copies into .env.render: the two URLs on the database's Info page, and the api service's address.
 export type RenderInputs = { externalUrl: string; internalUrl: string; appOrigin: string; tls: TlsMode };
 
 // The hosts plain connections may go to.
@@ -65,7 +65,7 @@ const LOGIN_ATTRIBUTES: Record<LoginRole, string> = {
 // app_migrate already the owner, and PostgreSQL then changes nothing.
 // app_definer with ADMIN and SET: 0001 grants app_definer to its own runner, which needs ADMIN, and each handover needs SET. A
 // local rebuild takes this membership back after migrating (fresh.ts); here it stays, because the api's pre-deploy command
-// migrates on every deploy (D71). INHERIT FALSE keeps app_definer's rights out of app_migrate's own queries.
+// migrates on every deploy. INHERIT FALSE keeps app_definer's rights out of app_migrate's own queries.
 const DATABASE_GRANTS = ["GRANT CONNECT, CREATE ON DATABASE %I TO app_migrate", "GRANT CONNECT ON DATABASE %I TO app_api, app_worker"];
 const OTHER_GRANTS = [
   "CREATE EXTENSION IF NOT EXISTS pgcrypto",

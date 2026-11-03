@@ -24,7 +24,7 @@ type ReceiptsOutcome = { claims: StoredClaim[]; droppedCount: number };
 // The citable turns and the lists the receipts request shows, read in one transaction.
 type ReceiptsSource = { cardQuotes: ReceiptsInput["cardQuotes"]; recallTurns: ReceiptsInput["recallTurns"]; turns: Map<number, CitableTurn> };
 
-// The meeting_step job (ARCHITECTURE.md 4.2): claim the step, speak, check receipts, commit; a failure leaves the step pending or stalled for the sweeper (D44, D59).
+// The meeting_step job: claim the step, speak, check receipts, commit; a failure leaves the step pending or stalled for the sweeper.
 export const runMeetingStep: JobTask<"meeting_step"> = async (payload, context) => {
   let held: HeldStep | null = null;
   try {
@@ -42,7 +42,7 @@ export const runMeetingStep: JobTask<"meeting_step"> = async (payload, context) 
   }
 };
 
-// Reads the four prompts through readPrompt (seams S7). readPrompt is synchronous on main, so no await is needed.
+// Reads the four prompts through readPrompt. readPrompt is synchronous on main, so no await is needed.
 export function loadMeetingPrompts(): MeetingPrompts {
   return {
     moderator: loadPrompt("meeting-moderator"),
@@ -93,7 +93,7 @@ async function beginInside(trx: Transaction<Database>, scope: { context: JobCont
   return { kind: "run", plan: { held, prefix: member.frozen_prefix, question: meeting.question_text, base, hasDecision } };
 }
 
-// The first messages of a step: the frozen prefix and the variable part, capped to the request size (D40).
+// The first messages of a step: the frozen prefix and the variable part, capped to the request size.
 async function firstMessages(trx: Transaction<Database>, scope: { context: JobContext; held: HeldStep; prefix: string }): Promise<ChatMessage[]> {
   const { context, held, prefix } = scope;
   const turns = await committedTurns(trx, held.meetingId);
@@ -104,7 +104,7 @@ async function firstMessages(trx: Transaction<Database>, scope: { context: JobCo
   return initialMessages(prefix, buildVariablePart(capped.input));
 }
 
-// Resets the attempt's partial text to the saved base and tells the viewers to replace the old partial (seams S9).
+// Resets the attempt's partial text to the saved base and tells the viewers to replace the old partial.
 async function resetPartialText(trx: Transaction<Database>, ref: HeldRef, base: string): Promise<void> {
   await savePartialText(trx, ref, base);
   await sql`SELECT pg_notify('meeting_events', ${"d:" + ref.meetingId + ":" + String(ref.stepSeq) + ":" + String(ref.attempt) + ":" + String(base.length)})`.execute(trx);
@@ -155,7 +155,7 @@ async function runAndRecord(context: JobContext, held: HeldStep, round: { messag
   return outcome;
 }
 
-// Replaces the estimate of the frozen prefix with the measured prompt tokens of the first request (ARCHITECTURE.md 3.14).
+// Replaces the estimate of the frozen prefix with the measured prompt tokens of the first request.
 async function storeMeasuredTokens(context: JobContext, held: HeldStep, promptTokens: number): Promise<void> {
   await withMeeting(context.db, held.meetingId, (trx) => trx.updateTable("meeting_members").set({ frozen_prefix_tokens: promptTokens })
     .where("meeting_id", "=", held.meetingId).where("side", "=", held.side).execute());
@@ -164,7 +164,7 @@ async function storeMeasuredTokens(context: JobContext, held: HeldStep, promptTo
 // What one speech request needs: the job context, the plan of the step, the prompts and the partial-text writer.
 type SpeechScope = { context: JobContext; plan: StepPlan; prompts: MeetingPrompts; writer: PartialTextWriter };
 
-// The receipts call of one turn. A model refusal, a timeout or a limit skips the receipts and the turn commits with no claims (R6.5).
+// The receipts call of one turn. A model refusal, a timeout or a limit skips the receipts and the turn commits with no claims.
 async function checkReceipts(context: JobContext, request: { plan: StepPlan; prompts: MeetingPrompts; speechText: string }): Promise<ReceiptsOutcome> {
   const { plan, prompts } = request;
   const { held } = plan;
@@ -266,7 +266,7 @@ async function committedTurns(trx: Transaction<Database>, meetingId: string): Pr
   return events.flatMap((event) => (event.type === "turn.committed" && event.phase !== "close" ? [{ stepSeq: event.stepSeq, side: event.side, phase: event.phase, text: event.text }] : []));
 }
 
-// The other side's claims with their labels, for the decide prompt (D42).
+// The other side's claims with their labels, for the decide prompt.
 async function otherSideClaims(trx: Transaction<Database>, held: HeldStep): Promise<PromptClaim[]> {
   return trx.selectFrom("claims").select(["step_seq", "position", "text", "quote"])
     .where("meeting_id", "=", held.meetingId).where("side", "<>", held.side)
@@ -274,18 +274,18 @@ async function otherSideClaims(trx: Transaction<Database>, held: HeldStep): Prom
     .then((rows) => rows.map((row) => ({ stepSeq: row.step_seq, position: row.position, text: row.text, quote: row.quote })));
 }
 
-// True when this step already has a concede or a hold event, so a resumed decide turn keeps its decision (D42).
+// True when this step already has a concede or a hold event, so a resumed decide turn keeps its decision.
 async function hasDecisionEvent(trx: Transaction<Database>, held: HeldStep): Promise<boolean> {
   const events = await readEvents(trx, held.meetingId, ["concede", "hold"]);
   return events.some((event) => (event.type === "concede" || event.type === "hold") && event.stepSeq === held.stepSeq);
 }
 
-// The tool calls of the step's assistant messages, after the first two messages (ARCHITECTURE.md 3.15).
+// The tool calls of the step's assistant messages, after the first two messages.
 function toolCallsOf(messages: readonly ChatMessage[]): Array<{ name: string; arguments: string }> {
   return messages.slice(2).flatMap((message) => (message.role === "assistant" ? (message.tool_calls ?? []) : [])).map((call) => ({ name: call.function.name, arguments: call.function.arguments }));
 }
 
-// The step's reference for the writes that name the attempt they were claimed with (D44).
+// The step's reference for the writes that name the attempt they were claimed with.
 function refOf(held: HeldStep | StepRow): HeldRef {
   return { meetingId: held.meetingId, stepSeq: held.stepSeq, attempt: held.attempt };
 }

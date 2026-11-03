@@ -1,7 +1,7 @@
 import { CANONICAL_TEXT_MAX_BYTES, TURN_TEXT_MAX_CHARS, type Turn } from "@meet-first/contracts";
 import { countPlaceholders, findPlaceholders, makePlaceholderCounter, scrub } from "@meet-first/scrub";
 
-// The turns after the browser's scrub, and the count shown with the consent copy (D11, A3).
+// The turns after the browser's scrub, and the count shown with the consent copy.
 export type ScrubPreview = { turns: Turn[]; previewRedactionCount: number };
 
 // True when a UTF-16 code unit is the first half of a surrogate pair, so cutting after it would split an emoji.
@@ -9,7 +9,7 @@ function isHighSurrogate(code: number): boolean {
   return code >= 0xd800 && code <= 0xdbff;
 }
 
-// Cuts a scrubbed turn to 20,000 characters at the last line break, or else at a point that splits no placeholder and no surrogate pair (D5, D14).
+// Cuts a scrubbed turn to 20,000 characters at the last line break, or else at a point that splits no placeholder and no surrogate pair.
 export function cutScrubbedText(text: string): string {
   const lineBreak = text.lastIndexOf("\n", TURN_TEXT_MAX_CHARS);
   if (lineBreak > 0) return text.slice(0, lineBreak);
@@ -21,7 +21,7 @@ export function cutScrubbedText(text: string): string {
   return text.slice(0, end);
 }
 
-// Drops turns from the end until the texts together fit the 2 MiB cap (D5).
+// Drops turns from the end until the texts together fit the 2 MiB cap.
 function dropOverCap(turns: Turn[]): Turn[] {
   const kept = [...turns];
   let total = kept.reduce((sum, turn) => sum + turn.text.length, 0);
@@ -33,7 +33,7 @@ function dropOverCap(turns: Turn[]): Turn[] {
   return kept;
 }
 
-// Scrubs the kept turns with one placeholder counter for the source and re-applies the 20,000 and 2 MiB caps (D5, D11).
+// Scrubs the kept turns with one placeholder counter for the source and re-applies the 20,000 and 2 MiB caps.
 export function scrubForUpload(turns: readonly Turn[], allowlist: readonly string[]): ScrubPreview {
   const nextId = makePlaceholderCounter();
   const scrubbed = turns.map((turn): Turn => {

@@ -2,11 +2,11 @@ import { z } from "zod";
 import { IsoTime, Uuid } from "../primitives.js";
 import { MeetingState } from "./meeting.js";
 
-// Random bytes in an invite token: 128 bits, D32.
+// Random bytes in an invite token: 128 bits.
 export const PAIR_TOKEN_BYTES = 16;
-// Hours an invite stays open, D32.
+// Hours an invite stays open.
 export const PAIR_LIFETIME_HOURS = 24;
-// How often the lobby polls for changes, in milliseconds, D54.
+// How often the lobby polls for changes, in milliseconds.
 export const LOBBY_POLL_MS = 5_000;
 // What POST /api/pairs returns: the pair, the invite link and when it expires.
 export const PairCreateResponse = z.object({ pairId: Uuid, inviteUrl: z.string().url(), expiresAt: IsoTime });

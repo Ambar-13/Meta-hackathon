@@ -48,7 +48,7 @@ async function seedPerson(name: string): Promise<Person> {
   return { personId: person.personId, sessionToken: person.sessionToken, cardId: card.cardId, name };
 }
 
-// Lists the person in the directory with their first two items public, as the sharing part and the directory switch would (P1, P2),
+// Lists the person in the directory with their first two items public, as the sharing part and the directory switch would,
 // and returns the listing id.
 async function listInDirectory(person: Person): Promise<string> {
   const row = await withPerson(t.db, person.personId, async (trx) => {
@@ -63,7 +63,7 @@ const ASK_TEXT = "Our deploys fail at night and nobody knows why.";
 // The reply to every refused read.
 const NOT_FOUND = { code: "not_found", message: "This no longer exists or is not yours." };
 
-// One stored claim as run_ask writes it: text, quote, the turn's uuid, and both checks (design section 4).
+// One stored claim as run_ask writes it: text, quote, the turn's uuid, and both checks.
 function storedClaim(input: { text: string; verified: boolean; supported: boolean | null }): Record<string, unknown> {
   return { text: input.text, quote: SEED_TURNS_A[0], turnId: randomUUID(), verified: input.verified, supported: input.supported };
 }
@@ -80,7 +80,7 @@ async function seedAsk(input: { askerId: string; state: "checking" | "asking" | 
 // What one seeded answer holds besides its ask and its two people.
 type AnswerSpec = { state: "pending" | "answered" | "failed"; position: number | null; shortlistRank: number; listingId: string | null; mode?: "help" | "react"; line?: string | null; createdAt?: Date };
 
-// Writes one persona_answers row of an ask, as run_ask would, and returns its id (design section 4).
+// Writes one persona_answers row of an ask, as run_ask would, and returns its id.
 async function seedAnswer(input: { askId: string; asker: { personId: string; name: string }; subject: Person; spec: AnswerSpec }): Promise<string> {
   const { spec } = input;
   const isAnswered = spec.state === "answered";

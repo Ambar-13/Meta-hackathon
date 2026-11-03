@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { CardApprove, CardApproveResponse, CardItemSource, CardView, QuizAnswers, QuizAnswersResponse, QuizRequestResponse, QuizView } from "../cards/index.js";
 
-// Routes for cards and quizzes. Paths come from IMPLEMENTATION.md 2.2.
+// Routes for cards and quizzes.
 export const cardsRoutes = {
   readCard: { method: "GET", path: "/api/cards/:id", request: z.undefined(), response: CardView },
   readItemSource: { method: "GET", path: "/api/cards/:id/items/:position/source", request: z.undefined(), response: CardItemSource },

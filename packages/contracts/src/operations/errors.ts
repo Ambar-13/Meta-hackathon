@@ -14,7 +14,7 @@ export class ContractError extends Error {
 }
 // The JSON body every route error sends.
 export const ErrorBody = z.object({ code: z.string(), message: z.string() });
-// The status codes the routes use, keyed by what happened, so no route invents its own (IMPLEMENTATION.md 2.2).
+// The status codes the routes use, keyed by what happened, so no route invents its own.
 export const HTTP = {
   badRequest: 400,
   unauthorized: 401,

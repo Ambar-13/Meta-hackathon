@@ -2,10 +2,10 @@ import type { Transaction } from "kysely";
 import { ContractError, type QuizCalibrationRun, type QuizJudgeOutput } from "@meet-first/contracts";
 import type { Database } from "@meet-first/db";
 
-// One calibration probe: answer A against itself must agree, and answer A against answer B must disagree (D30).
+// One calibration probe: answer A against itself must agree, and answer A against answer B must disagree.
 export type CalibrationEntry = { index: number; questionText: string; answerA: string; answerB: string };
 
-// The eight probes. None is a bank question, so a probe never doubles a real item. Each run uses one, picked from the quiz id (D30, R4.6).
+// The eight probes. None is a bank question, so a probe never doubles a real item. Each run uses one, picked from the quiz id.
 export const CALIBRATION_BANK: readonly CalibrationEntry[] = [
   {
     index: 0,
@@ -57,7 +57,7 @@ export const CALIBRATION_BANK: readonly CalibrationEntry[] = [
   },
 ];
 
-// The probe for one run of one quiz. The first two hex characters of the quiz id pick the entry, and run 2 takes the next one, so a rerun sends different requests (D30).
+// The probe for one run of one quiz. The first two hex characters of the quiz id pick the entry, and run 2 takes the next one, so a rerun sends different requests.
 export function calibrationEntryFor(quizId: string, run: 1 | 2): CalibrationEntry {
   const start = Number.parseInt(quizId.slice(0, 2), 16);
   const entry = CALIBRATION_BANK[(start + run - 1) % CALIBRATION_BANK.length];
@@ -74,7 +74,7 @@ export function calibrationEntryFor(quizId: string, run: 1 | 2): CalibrationEntr
 // One calibration call's result as the judge job hands it over: the parsed output, or null when the reply did not parse.
 export type CalibrationCallResult = { output: QuizJudgeOutput | null; ledgerId: string };
 
-// Checks one run. The identical pair must say agree, and the contradicting pair must not. An unreadable reply fails its pair (D30, R4.4).
+// Checks one run. The identical pair must say agree, and the contradicting pair must not. An unreadable reply fails its pair.
 export function checkCalibrationRun(args: {
   run: 1 | 2;
   entryIndex: number;
@@ -107,7 +107,7 @@ export function checkCalibrationRun(args: {
   };
 }
 
-// The question texts the persona got wrong, from a quiz's state and its items. Only a reliable judged quiz has misses (D31, seams S10).
+// The question texts the persona got wrong, from a quiz's state and its items. Only a reliable judged quiz has misses.
 export function missTexts(
   quiz: { state: string; reliable: boolean | null } | undefined,
   items: ReadonlyArray<{ questionId: number; questionText: string; agree: boolean | null }>,
@@ -121,7 +121,7 @@ export function missTexts(
     .map((item) => item.questionText);
 }
 
-// The question texts the persona got wrong for one card's quiz, for the "ask, do not guess" lines of the meeting prefix (D31).
+// The question texts the persona got wrong for one card's quiz, for the "ask, do not guess" lines of the meeting prefix.
 export async function quizMisses(trx: Transaction<Database>, cardId: string): Promise<string[]> {
   const quiz = await trx
     .selectFrom("quizzes")

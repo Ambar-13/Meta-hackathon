@@ -1,8 +1,8 @@
-// A byte order mark at the start of the text. Write it in code as the escape /^﻿/, never as the invisible character (D6).
+// A byte order mark at the start of the text. Write it in code as the escape /^﻿/, never as the invisible character.
 export const BOM = /^﻿/;
-// A Windows line ending (CR then LF) or a lone CR; both become LF (D6).
+// A Windows line ending (CR then LF) or a lone CR; both become LF.
 export const CRLF = /\r\n?/g;
-// In words: every character in the Unicode categories "format" and "control", except the line feed (U+000A) and the tab (U+0009) (D6, R7.7).
+// In words: every character in the Unicode categories "format" and "control", except the line feed (U+000A) and the tab (U+0009).
 export const FORMAT_AND_CONTROL = /(?![\n\t])[\p{Cf}\p{Cc}]/gu;
 
 // The fewest letters a text needs before guessLang names a script (the language label of a turn).
@@ -26,7 +26,7 @@ const SCRIPT_BUCKETS: ReadonlyArray<{ tag: string; pattern: RegExp }> = [
 ];
 
 // Strips the BOM, turns CRLF into LF, normalises to NFC, and removes every Unicode format (Cf) and control (Cc) character except
-// line feed and tab (D6, R7.7). The result is the text that is hashed, stored, scrubbed and quoted; offsets are UTF-16 code units of it (D7).
+// line feed and tab. The result is the text that is hashed, stored, scrubbed and quoted; offsets are UTF-16 code units of it.
 export function canonicalise(text: string): string {
   return text.replace(BOM, "").replace(CRLF, "\n").normalize("NFC").replace(FORMAT_AND_CONTROL, "");
 }

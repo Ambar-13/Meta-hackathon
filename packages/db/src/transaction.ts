@@ -11,7 +11,7 @@ function assertUuid(id: string, label: "person" | "meeting"): void {
   throw new ContractError("context_id_invalid", `The ${label} id passed to withPerson or withMeeting is not a uuid. Pass the row id, not a token.`, 500);
 }
 
-// Refuses a transaction that would carry both settings or neither; a programming error, caught before any row is read (ARCHITECTURE.md 7.1).
+// Refuses a transaction that would carry both settings or neither; a programming error, caught before any row is read.
 export async function assertOneContext(trx: DatabaseTransaction): Promise<void> {
   const result = await sql<{ person: string | null; meeting: string | null }>`
     SELECT nullif(current_setting('app.person_id', true), '') AS person,
@@ -21,7 +21,7 @@ export async function assertOneContext(trx: DatabaseTransaction): Promise<void> 
   if (row.person === null && row.meeting === null) throw new ContractError("context_missing", "A transaction set neither app.person_id nor app.meeting_id. Wrap the work in withPerson or withMeeting.", 500);
 }
 
-// Runs run inside one transaction as this person: BEGIN; SET LOCAL app.person_id; run; COMMIT (D55). A throw rolls back.
+// Runs run inside one transaction as this person: BEGIN; SET LOCAL app.person_id; run; COMMIT. A throw rolls back.
 export async function withPerson<T>(db: Kysely<Database>, personId: string, run: (trx: DatabaseTransaction) => Promise<T>): Promise<T> {
   assertUuid(personId, "person");
   return db.transaction().execute(async (trx) => {
@@ -31,7 +31,7 @@ export async function withPerson<T>(db: Kysely<Database>, personId: string, run:
   });
 }
 
-// Runs run inside one transaction as this meeting: BEGIN; SET LOCAL app.meeting_id; run; COMMIT (D55). Meeting jobs use this, never withPerson.
+// Runs run inside one transaction as this meeting: BEGIN; SET LOCAL app.meeting_id; run; COMMIT. Meeting jobs use this, never withPerson.
 export async function withMeeting<T>(db: Kysely<Database>, meetingId: string, run: (trx: DatabaseTransaction) => Promise<T>): Promise<T> {
   assertUuid(meetingId, "meeting");
   return db.transaction().execute(async (trx) => {

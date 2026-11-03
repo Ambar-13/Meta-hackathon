@@ -1,10 +1,10 @@
 import { ContractError, QuizJudgeOutput, QuizPersonaAnswerOutput, toStrictJsonSchema } from "@meet-first/contracts";
 import type { ChatMessage } from "@meet-first/llm";
 
-// The prompt text and its version as readPrompt returns them (seams S7).
+// The prompt text and its version as readPrompt returns them.
 export type QuizPrompt = { version: string; text: string };
 
-// One card item as the persona sees it (R4.1).
+// One card item as the persona sees it.
 export type PersonaCardItem = {
   position: number;
   kind: "value" | "preference" | "habit" | "boundary" | "goal";
@@ -13,10 +13,10 @@ export type PersonaCardItem = {
   quote: string;
 };
 
-// What one judge call compares: the question and two answers in the order the judge sees them (D30).
+// What one judge call compares: the question and two answers in the order the judge sees them.
 export type JudgeInput = { questionText: string; answer1: string; answer2: string };
 
-// The arguments of one model call. The same object serves LlmClient.complete and a fixture body (D28, D30).
+// The arguments of one model call. The same object serves LlmClient.complete and a fixture body.
 export type QuizModelCall = {
   callSite: "quiz_answer" | "quiz_judge";
   promptVersion: string;
@@ -24,10 +24,10 @@ export type QuizModelCall = {
   schema: { name: string; strict: true; schema: Record<string, unknown> };
 };
 
-// The strict output schema sent with each persona call. It matches the frozen v1/schema.json (Wave 0 section 4.8, R3.1).
+// The strict output schema sent with each persona call. It matches the frozen v1/schema.json.
 export const PERSONA_ANSWER_SCHEMA = toStrictJsonSchema(QuizPersonaAnswerOutput, "quiz-persona-answer");
 
-// The strict output schema sent with each judge call. It matches the frozen v1/schema.json (Wave 0 section 4.8, R3.1).
+// The strict output schema sent with each judge call. It matches the frozen v1/schema.json.
 export const JUDGE_SCHEMA = toStrictJsonSchema(QuizJudgeOutput, "quiz-judge");
 
 // The sentence a quiz job logs for each stop code, with what to do next (repo rule 3).
@@ -56,12 +56,12 @@ export function requireElement<T>(list: readonly T[], index: number): T {
   return value;
 }
 
-// Escapes &, < and > so that text from a card or an answer cannot close a block of the message (R4.1).
+// Escapes &, < and > so that text from a card or an answer cannot close a block of the message.
 export function escapeBlockText(text: string): string {
   return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 
-// The card block of the persona message, with items numbered from 1 in the order given (R4.1).
+// The card block of the persona message, with items numbered from 1 in the order given.
 export function formatCardItems(items: readonly PersonaCardItem[]): string {
   const itemLines = items.flatMap((item, index) => [
     `<card_item n="${String(index + 1)}" kind="${item.kind}">`,
@@ -73,7 +73,7 @@ export function formatCardItems(items: readonly PersonaCardItem[]): string {
   return ["<card>", ...itemLines, "</card>"].join("\n");
 }
 
-// The call for one persona answer: the system prompt, then the card and one bank question, and nothing from the quiz tables (R4.1, D28).
+// The call for one persona answer: the system prompt, then the card and one bank question, and nothing from the quiz tables.
 export function buildPersonaAnswerCall(prompt: QuizPrompt, items: readonly PersonaCardItem[], questionText: string): QuizModelCall {
   return {
     callSite: "quiz_answer",
@@ -86,7 +86,7 @@ export function buildPersonaAnswerCall(prompt: QuizPrompt, items: readonly Perso
   };
 }
 
-// The call for one judge verdict: the system prompt, then the question and the two answers, with no word about who wrote either (D30).
+// The call for one judge verdict: the system prompt, then the question and the two answers, with no word about who wrote either.
 export function buildJudgeCall(prompt: QuizPrompt, input: JudgeInput): QuizModelCall {
   const question = escapeBlockText(input.questionText);
   const answer1 = escapeBlockText(input.answer1);
@@ -105,7 +105,7 @@ export function buildJudgeCall(prompt: QuizPrompt, input: JudgeInput): QuizModel
   };
 }
 
-// The order of one item for the judge. Run 1 shows the human answer first when flipped is true, and run 2 shows the other order (D30).
+// The order of one item for the judge. Run 1 shows the human answer first when flipped is true, and run 2 shows the other order.
 export function orderForJudge(
   item: { personaAnswer: string; humanAnswer: string; flipped: boolean },
   run: 1 | 2,

@@ -1,4 +1,4 @@
-// The orchestrate job (wave 7): reads one thinking reply with the message it answers, asks the model for one plan, checks the plan in
+// The orchestrate job: reads one thinking reply with the message it answers, asks the model for one plan, checks the plan in
 // code against the friends snapshot, and writes it. It is safe to run again: a reply that is no longer thinking is left as it is.
 import { ContractError, OrchestratorFriends, OrchestratorPlanOutput } from "@meet-first/contracts";
 import { withPerson, type DatabaseTransaction } from "@meet-first/db";
@@ -7,7 +7,7 @@ import { readPrompt } from "@meet-first/prompts";
 import type { JobContext, JobTask } from "../job-context.js";
 import { checkPlan, goneFriendSentence, PLAN_FAILED_SENTENCE, planCallArgs, planMessages, RECENT_MESSAGES_MAX, type CheckedPlan, type PlanInput, type RecentMessage } from "./plan-requests.js";
 
-// The sentence of a reply when a dollar cap stopped the call, by the cap's code (D60).
+// The sentence of a reply when a dollar cap stopped the call, by the cap's code.
 const CAP_SENTENCES: Readonly<Record<string, string>> = {
   daily_cap_reached: "Today's model budget is used up, so I cannot plan this now. Try again tomorrow.",
   total_cap_reached: "The model budget for this event is used up, so I cannot plan this.",

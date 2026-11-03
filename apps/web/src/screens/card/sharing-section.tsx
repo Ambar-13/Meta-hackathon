@@ -7,7 +7,7 @@ import { KIND_LABELS } from "./card-state.js";
 import { PillSwitch } from "./pill-switch.js";
 import { directoryPathWithCard, isListedWith, useSharing, type SavedSharing, type SharingDraft, type SharingHook, type SharingStatus } from "./sharing-state.js";
 
-// The words of the Sharing section that no input gives [confirm] (drafted copy).
+// The words of the Sharing section.
 const SHARING_COPY = {
   loading: "Loading your sharing settings.",
   publicLegend: "Items people in Explore can see",
@@ -20,7 +20,7 @@ const SHARING_COPY = {
   noPublicItems: "No item can be public yet. Only items in your card with a checked quote can.",
 } as const;
 
-// One checkbox per approved item whose quote was found, the only items that may be public (P1).
+// One checkbox per approved item whose quote was found, the only items that may be public.
 const PublicItemBoxes = (props: { items: CardItem[]; draft: SharingDraft; onToggle: (position: number) => void }): ReactElement => {
   const shareable = props.items.filter((item) => item.approved && item.verified);
   return (
@@ -37,7 +37,7 @@ const PublicItemBoxes = (props: { items: CardItem[]; draft: SharingDraft; onTogg
   );
 };
 
-// The directory switch, the line field and the dating switch. The line and the dating switch work only while the directory switch is on (P2, P8).
+// The directory switch, the line field and the dating switch. The line and the dating switch work only while the directory switch is on.
 const DirectoryControls = (props: { draft: SharingDraft; hook: SharingHook }): ReactElement => {
   const { draft, hook } = props;
   return (
@@ -86,7 +86,7 @@ const SharingForm = (props: { cardId: string; items: CardItem[]; saved: SavedSha
 };
 
 // The Sharing section of an approved card: the friends switch, the public items, the directory switch with its line, and the dating
-// switch, each off until the person turns it on (design section 7, P1 to P3, P8).
+// switch, each off until the person turns it on.
 export const SharingSection = (props: { cardId: string; items: CardItem[] }): ReactElement => {
   const hook = useSharing(props.cardId);
   const { load } = hook;

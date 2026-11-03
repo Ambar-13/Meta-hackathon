@@ -32,7 +32,7 @@ function unusableHash(): Buffer {
   return createHash("sha256").update(randomBytes(32)).digest();
 }
 
-// The card item rows of one sample person, each quote checked against its note as the card job checks the model's (D26).
+// The card item rows of one sample person, each quote checked against its note as the card job checks the model's.
 function itemRows(person: SamplePerson, ids: { personId: string; cardId: string }, turns: ReadonlyArray<{ id: string; text: string; norm_text: string }>) {
   return person.items.map((item, index) => {
     const turn = turns[item.note];

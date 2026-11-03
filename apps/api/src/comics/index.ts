@@ -1,4 +1,4 @@
-// The comic routes as one plugin for apps/api/src/server.ts slot 9 (seams S2): request a comic, read it, and read a panel image.
+// The comic routes as one plugin for apps/api/src/server.ts slot 9: request a comic, read it, and read a panel image.
 import type { RoutePlugin } from "../app-types.js";
 import { registerPanelImage } from "./panel-image.js";
 import { registerReadComic } from "./read-comic.js";

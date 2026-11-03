@@ -1,6 +1,5 @@
 // The messages of the thread, as Instagram draws a direct chat: your blue bubbles on the right, Meety's grey bubbles on the left from the
-// edge, with its logo in line with its name over each run of its messages (Ambar, 3 Nov: "the logo can be in line with meety and the
-// message can be more left"), a time line wherever the chat paused, and what each reply does by its state under its words: thinking
+// edge, with its logo in line with its name over each run of its messages, a time line wherever the chat paused, and what each reply does by its state under its words: thinking
 // dots, a plan card with its one button, the ask card, or a way to try again.
 import { Fragment, type ReactElement } from "react";
 import { HELP_SEND_COPY, type OrchestratorMessage } from "@meet-first/contracts";

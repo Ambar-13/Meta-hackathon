@@ -1,4 +1,4 @@
-// Instagram's Edit profile for the signed-in person (3 Nov 2026, Ambar: "i cant change mine own photo and profile dtails"): a new
+// Instagram's Edit profile for the signed-in person: a new
 // display name, and a profile photo put up, replaced or taken down. The browser draws the photo itself as a square JPEG, which drops
 // any camera or location data, and sends the bytes; the api checks they are a JPEG of a sane size and stores them. GET /api/photos/:id
 // serves a photo, a profile's or a post's, to anyone signed in who was shown its id, and a new photo always gets a new id.

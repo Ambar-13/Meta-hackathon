@@ -6,15 +6,15 @@ import { EmptyState, LoadingLine, Sticker } from "../../look/index.js";
 import { PublishPreviewPanel } from "./preview.js";
 import { useConsentState, usePublishPreview, type ConsentState } from "./share-state.js";
 
-// The explainer above the consent button, word for word (4.7).
+// The explainer above the consent button, word for word.
 const CONSENT_EXPLAINER = "Publishing makes a page anyone with the link can read. It shows your display names, the question, the card items you approved, what the two Meetys said, and the brief lines that passed the support check with their quotes. It never shows your archive, redacted text, quiz answers or anything you did not approve. Either of you can take it down at any time; the page disappears on the next visit.";
-// The words shown while the briefs are not written yet (4.7).
+// The words shown while the briefs are not written yet.
 const CLOSED_TEXT = "Consent opens when both briefs are written.";
-// The words shown after this person consented and the other has not yet (4.7).
+// The words shown after this person consented and the other has not yet.
 const WAITING_TEXT = "You have consented. Waiting for the other person.";
-// The words shown once the page is live (4.7).
+// The words shown once the page is live.
 const PUBLISHED_TEXT = "Published. Anyone with the link can read it.";
-// The words of the consent screen that no input gives [confirm] (drafted copy, design pass).
+// The words of the consent screen.
 const CONSENT_COPY = {
   loading: "Reading the meeting.",
   closedTitle: "Not ready to share yet",

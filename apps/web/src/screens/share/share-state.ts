@@ -127,7 +127,7 @@ export type PreviewLines = { kind: "ready"; sections: Record<PreviewSection, Bri
 export type PublishPreview = { kind: "loading" } | { kind: "ready"; meeting: MeetingView; lines: PreviewLines | null } | { kind: "none" };
 
 // True when a brief line would be published: the support check said yes and every quote was found in its turn, the same rule the
-// share page uses on the server (A1).
+// share page uses on the server.
 export function isShareableLine(point: BriefPoint): boolean {
   return point.supported === true && point.quotes.length > 0 && point.quotes.every((quote) => quote.verified);
 }

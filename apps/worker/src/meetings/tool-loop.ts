@@ -3,18 +3,18 @@ import type { ChatMessage, ToolCall } from "@meet-first/llm";
 import type { StepPhase } from "./agenda.js";
 import type { AssistantMessage, ToolMessage } from "./history-validator.js";
 
-// Speech requests one step may make: 4 tool rounds, and the 5th request carries no tools field (D37).
+// Speech requests one step may make: 4 tool rounds, and the 5th request carries no tools field.
 export const SPEECH_REQUESTS_MAX = TOOL_ROUNDS_MAX + 1;
-// The reason recorded when a decide turn made no concede or hold call (D42).
+// The reason recorded when a decide turn made no concede or hold call.
 export const NO_DECISION_REASON = "no explicit decision";
-// The text between two parts of one turn's partial text, such as a resumed attempt's saved text and the new round [confirm].
+// The text between two parts of one turn's partial text, such as a resumed attempt's saved text and the new round.
 export const ROUND_TEXT_SEPARATOR = "\n\n";
 
 // One speech request's result, as the step job's speak function returns it.
 export type SpeakResult = { text: string; toolCalls: ToolCall[]; finishReason: "stop" | "length" | "tool_calls" };
-// Sends one speech request; tools undefined means the request has no tools field at all (D37).
+// Sends one speech request; tools undefined means the request has no tools field at all.
 export type SpeakFn = (request: { messages: ChatMessage[]; tools: ToolDefinition[] | undefined; round: number }) => Promise<SpeakResult>;
-// What the tool calls of one round did, after the round was saved in one transaction (section 4.9).
+// What the tool calls of one round did, after the round was saved in one transaction.
 export type RoundResult = { toolMessages: ToolMessage[]; isDecision: boolean };
 // Runs and saves the tool calls of one round; messages are the step's messages before this round.
 export type RunRoundFn = (round: { messages: ChatMessage[]; assistant: AssistantMessage; round: number }) => Promise<RoundResult>;
@@ -28,7 +28,7 @@ type SpeechDeps = { speak: SpeakFn; runRound: RunRoundFn; discardRound: () => Pr
 // One speech request as the loop sends it.
 type SpeakRequest = { messages: ChatMessage[]; tools: ToolDefinition[] | undefined; round: number };
 
-// Runs speech requests until the model stops with text or the 5th request (with no tools) answers (D37, D43, R10.7).
+// Runs speech requests until the model stops with text or the 5th request (with no tools) answers.
 export async function runSpeechRounds(state: SpeechState, deps: SpeechDeps): Promise<SpeechOutcome> {
   let messages: ChatMessage[] = [...state.messages];
   let requestsMade = state.requestsMade;
@@ -59,12 +59,12 @@ export function joinTurnText(messages: readonly ChatMessage[], currentText: stri
   return texts.join(ROUND_TEXT_SEPARATOR);
 }
 
-// True for the two errors after which the round is discarded and retried once (dossier client: model_stream_cut, model_stream_length; R10.7).
+// True for the two errors after which the round is discarded and retried once (dossier client: model_stream_cut, model_stream_length).
 export function isRoundBreak(error: unknown): boolean {
   return error instanceof ContractError && (error.code === "model_stream_cut" || error.code === "model_stream_length");
 }
 
-// Keeps the text of one attempt and writes it at most every 250 ms and at the end of each round (D47).
+// Keeps the text of one attempt and writes it at most every 250 ms and at the end of each round.
 export class PartialTextWriter {
   private base: string;
   private current = "";
@@ -79,7 +79,7 @@ export class PartialTextWriter {
     this.lastWriteAt = lastWriteAt;
   }
 
-  // Adds one streamed slice and writes when 250 ms or more passed since the last write (D47).
+  // Adds one streamed slice and writes when 250 ms or more passed since the last write.
   async append(slice: string): Promise<void> {
     this.current += slice;
     if (this.deps.now().getTime() - this.lastWriteAt.getTime() >= PARTIAL_FLUSH_MS) await this.flush();
@@ -94,7 +94,7 @@ export class PartialTextWriter {
     this.lastWriteAt = this.deps.now();
   }
 
-  // Drops the current round's slices, for the retry of a cut round (R10.7), and writes the shorter text.
+  // Drops the current round's slices, for the retry of a cut round, and writes the shorter text.
   async discardRound(): Promise<void> {
     this.current = "";
     await this.flush();
@@ -125,7 +125,7 @@ async function attemptSpeak(speak: SpeakFn, request: SpeakRequest): Promise<Spea
   }
 }
 
-// One round: a broken round is discarded and run once more with the same messages (R10.7). A second break that throws is rethrown as it is.
+// One round: a broken round is discarded and run once more with the same messages. A second break that throws is rethrown as it is.
 async function speakRound(deps: SpeechDeps, request: SpeakRequest): Promise<SpeakResult> {
   const first = await attemptSpeak(deps.speak, request);
   if (first !== null) return first;
@@ -137,12 +137,12 @@ async function speakRound(deps: SpeechDeps, request: SpeakRequest): Promise<Spea
   return retry;
 }
 
-// True when the reply holds tool calls and the request offered tools, so the calls must run (D37).
+// True when the reply holds tool calls and the request offered tools, so the calls must run.
 export function isToolRound(result: SpeakResult, tools: ToolDefinition[] | undefined): boolean {
   return result.finishReason === "tool_calls" && tools !== undefined && result.toolCalls.length > 0;
 }
 
-// The outcome of a turn: the joined text, or the fixed refusal sentence when the text is empty (D43).
+// The outcome of a turn: the joined text, or the fixed refusal sentence when the text is empty.
 function finishTurn(messages: readonly ChatMessage[], currentText: string, counts: { requestsMade: number; hasDecision: boolean }): SpeechOutcome {
   const text = joinTurnText(messages, currentText);
   return { text: text === "" ? REFUSAL_TEXT : text, requestsMade: counts.requestsMade, hasDecision: counts.hasDecision };

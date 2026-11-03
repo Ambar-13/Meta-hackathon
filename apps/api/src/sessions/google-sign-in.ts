@@ -1,4 +1,4 @@
-// Sign in with Google (3 Nov 2026, Ambar: "add oauth google and let people just use meety"): OpenID Connect's authorization code flow plain-words: allow (his words, quoted)
+// Sign in with Google: OpenID Connect's authorization code flow
 // with PKCE. GET /api/auth/google sends the browser to Google with a fresh state, nonce and code verifier kept in a 10-minute cookie;
 // Google sends it back to GET /api/auth/google/callback with a one-time code, which the server swaps for an ID token at Google's token
 // endpoint with the client secret and the verifier. The token comes straight from Google over HTTPS to a client that proved itself, so

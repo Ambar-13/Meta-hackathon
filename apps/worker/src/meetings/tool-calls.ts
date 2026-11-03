@@ -22,7 +22,7 @@ type Scope = { trx: Transaction<Database>; held: HeldStep; at: Date };
 // What one tool call did: its tool message, and whether it was a concede or a hold.
 type CallOutcome = { message: ToolMessage; isDecision: boolean };
 
-// Runs one round's tool calls in call order in one transaction and saves the round (R5.1).
+// Runs one round's tool calls in call order in one transaction and saves the round.
 export async function runRoundTransaction(context: JobContext, held: HeldStep, round: { messages: ChatMessage[]; assistant: AssistantMessage; round: number }): Promise<RoundResult> {
   const at = context.now();
   const offered = new Set((toolsForPhase(held.phase, round.round) ?? []).map((tool) => tool.function.name));
@@ -37,7 +37,7 @@ export async function runRoundTransaction(context: JobContext, held: HeldStep, r
   });
 }
 
-// The tool message for a call that could not run, so the model reads why and the history stays valid (R5.1).
+// The tool message for a call that could not run, so the model reads why and the history stays valid.
 export function toolErrorMessage(toolCallId: string, sentence: string): ToolMessage {
   return { role: "tool", tool_call_id: toolCallId, content: "<tool_error>\n" + sentence + "\n</tool_error>" };
 }

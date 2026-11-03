@@ -1,15 +1,15 @@
 import { z } from "zod";
 import { Uuid } from "../primitives.js";
 
-// Panels in one comic, D64.
+// Panels in one comic.
 export const COMIC_PANELS = 6;
-// Largest size of one panel image in bytes: 150 KB, D64.
+// Largest size of one panel image in bytes: 150 KB.
 export const PANEL_MAX_BYTES = 153_600;
-// Seconds all six panel images may take together, D64.
+// Seconds all six panel images may take together.
 export const COMIC_TOTAL_SECONDS = 60;
-// Days a comic is kept unless its share page is published, D64.
+// Days a comic is kept unless its share page is published.
 export const COMIC_PURGE_DAYS = 30;
-// The fixed avatar descriptions. The first is from the inputs; the other five are picked here [confirm].
+// The fixed avatar descriptions. The first is from the inputs; the other five are picked here.
 export const AVATARS = [
   "fox in a hoodie",
   "owl with round glasses",
@@ -18,7 +18,7 @@ export const AVATARS = [
   "penguin with headphones",
   "bear in a cardigan",
 ] as const;
-// One avatar description, checked against the fixed list above (R11.3).
+// One avatar description, checked against the fixed list above.
 export const Avatar = z.enum(AVATARS);
 // The type of Avatar, read from the schema above.
 export type Avatar = z.infer<typeof Avatar>;
@@ -47,7 +47,7 @@ export const ComicView = z.object({
 });
 // The type of ComicView, read from the schema above.
 export type ComicView = z.infer<typeof ComicView>;
-// What the comic model returns: one caption and one image prompt for each panel (D64).
+// What the comic model returns: one caption and one image prompt for each panel.
 export const ComicPanelsOutput = z.object({
   panels: z
     .array(z.object({ caption: z.string().min(1).max(140), image_prompt: z.string().min(1).max(400) }))

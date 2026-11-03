@@ -12,7 +12,7 @@ import { beginRunningMeeting, endMeeting, startIfReady } from "./commit-turn.js"
 // to the attempt on every claim).
 export const MEETING_STEP_MAX_ATTEMPTS = 3;
 // How long past its ends_at a stalled meeting may go on before the sweep ends it with reason budget: 2 minutes, room for the decide
-// turns that begin near the end (D34, R5.8).
+// turns that begin near the end.
 export const MEETING_OVERTIME_GRACE_MS = 120_000;
 // How long a running step belongs to the runner that claimed it: the sweep does not stall a running step claimed less than 6 minutes
 // ago, because a slow but healthy step (a long reasoning call, two receipts calls) would get a second runner that pays again.
@@ -33,7 +33,7 @@ export type StallAction = "skip" | "enqueue" | "end";
 // What the transaction of one silent meeting did: nothing, a new job is due for this step, or it ended the meeting.
 type StalledOutcome = { kind: "skipped" } | { kind: "enqueued"; stepSeq: number } | { kind: "ended" };
 
-// The sweep_stalled job: heartbeat, token stop, stalled steps, queue promotion, ready starts, in that order (D46).
+// The sweep_stalled job: heartbeat, token stop, stalled steps, queue promotion, ready starts, in that order.
 export const runSweepStalled: JobTask<"sweep_stalled"> = async (payload, context) => {
   const now = context.now();
   await writeHeartbeat(context.db, now);
@@ -49,7 +49,7 @@ export const runSweepStalled: JobTask<"sweep_stalled"> = async (payload, context
   await startReadyMeetings(context, candidates.ready);
 };
 
-// Writes the worker heartbeat /api/health reads; the table has no person or meeting column, so no context is set (ARCHITECTURE.md 3.25).
+// Writes the worker heartbeat /api/health reads; the table has no person or meeting column, so no context is set.
 export async function writeHeartbeat(db: Kysely<Database>, now: Date): Promise<void> {
   await db.updateTable("service_heartbeats").set({ seen_at: now, schema_version: SCHEMA_VERSION }).where("service", "=", "worker").execute();
 }
@@ -65,7 +65,7 @@ export async function readSweepCandidates(db: Kysely<Database>): Promise<SweepCa
   return candidates;
 }
 
-// Ends a running meeting whose ledger tokens reached 1,500,000, so one meeting cannot burn the day (D61, R5.10); true when it ended it.
+// Ends a running meeting whose ledger tokens reached 1,500,000, so one meeting cannot burn the day; true when it ended it.
 export async function stopOverBudget(context: JobContext, meetingId: string): Promise<boolean> {
   const isEnded = await withMeeting(context.db, meetingId, async (trx) => {
     const tokens = await readMeetingTokens(trx, meetingId);
@@ -76,7 +76,7 @@ export async function stopOverBudget(context: JobContext, meetingId: string): Pr
   return isEnded;
 }
 
-// Handles the current step of a meeting with no event for 150 s (D46, R5.4): a running step whose claim is stale goes stalled, then
+// Handles the current step of a meeting with no event for 150 s: a running step whose claim is stale goes stalled, then
 // the step gets a new job, or the meeting ends with reason budget; the briefs are queued only when this sweep's end ended the meeting.
 export async function resumeStalledMeeting(context: JobContext, meetingId: string): Promise<"enqueued" | "skipped" | "ended"> {
   const outcome = await withMeeting(context.db, meetingId, (trx) => sweepStalledInside(trx, meetingId, context.now()));
@@ -128,7 +128,7 @@ function isStaleRunning(step: SweptStep | undefined, now: Date): step is SweptSt
   return step !== undefined && step.state === "running" && !isClaimFresh(step.claimedAt, now);
 }
 
-// Promotes queued meetings in queue_position order while claim_meeting_slot finds a free slot (D57, R5.9); returns how many started.
+// Promotes queued meetings in queue_position order while claim_meeting_slot finds a free slot; returns how many started.
 export async function promoteQueuedMeetings(context: JobContext, meetingIds: readonly string[]): Promise<number> {
   let started = 0;
   for (const meetingId of meetingIds) {
@@ -139,7 +139,7 @@ export async function promoteQueuedMeetings(context: JobContext, meetingIds: rea
   return started;
 }
 
-// Starts each meeting that is ready on both sides with its prefixes stored, so nobody has to press start (as-built item 28); returns how many started running.
+// Starts each meeting that is ready on both sides with its prefixes stored, so nobody has to press start; returns how many started running.
 export async function startReadyMeetings(context: JobContext, meetingIds: readonly string[]): Promise<number> {
   let started = 0;
   const now = context.now();

@@ -8,14 +8,14 @@ import { LimiterBusy, makeLlmClient, reenqueueAfterLimiter, type LlmClient } fro
 
 // The worker's variables, read with the contracts schema.
 export type WorkerEnv = z.infer<typeof workerEnv>;
-// Everything a job may touch, built once at boot and handed to every task (docs/contracts.md section 4).
+// Everything a job may touch, built once at boot and handed to every task.
 export type JobContext = { db: Kysely<Database>; env: WorkerEnv; now: () => Date; enqueue: Enqueue; llm: LlmClient; log: Logger };
-// One job: a plain function of its payload and the context, never a factory (seams S3).
+// One job: a plain function of its payload and the context, never a factory.
 export type JobTask<N extends JobName> = (payload: JobPayload<N>, context: JobContext) => Promise<void>;
-// The tasks of one worker feature folder, keyed by job name (seams S3).
+// The tasks of one worker feature folder, keyed by job name.
 export type TaskList = { [N in JobName]?: JobTask<N> };
 
-// Everything a job may touch, built once at boot (docs/contracts.md section 4).
+// Everything a job may touch, built once at boot.
 export function makeJobContext(deps: { db: Kysely<Database>; env: WorkerEnv; workerUtils: WorkerUtils; now?: () => Date; log: Logger }): JobContext {
   const now = deps.now ?? (() => new Date());
   const sleep = (ms: number): Promise<void> => new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -41,7 +41,7 @@ export function definePayloadTask<N extends JobName>(name: N, task: JobTask<N>, 
   };
 }
 
-// The enqueue every job uses; always passes JOB_MAX_ATTEMPTS[name], and never a job key (D45, IMPLEMENTATION.md 2.3).
+// The enqueue every job uses; always passes JOB_MAX_ATTEMPTS[name], and never a job key.
 export function makeEnqueue(workerUtils: WorkerUtils): Enqueue {
   return async (name, payload, options) => {
     const spec = {

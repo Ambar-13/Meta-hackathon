@@ -20,18 +20,18 @@ export type DrivenPair = {
   markers: Record<"a" | "b", string[]>;
 };
 
-// The waits of the golden path: names 120 s, card 300 s, start 75 s, with a 3 s card poll and a 2 s event poll (R3.4, D49).
+// The waits of the golden path: names 120 s, card 300 s, start 75 s, with a 3 s card poll and a 2 s event poll.
 const NAMES_TIMEOUT_MS = 120_000;
 const CARD_TIMEOUT_MS = 300_000;
 const START_TIMEOUT_MS = 75_000;
 const POLL_MS = 2_000;
 const CARD_POLL_MS = 3_000;
-// Names come back in pages of this size (R2.4).
+// Names come back in pages of this size.
 const NAMES_PAGE_SIZE = 20;
 // A plain call may take 30 s; an upload may take 60 s.
 const CALL_TIMEOUT_MS = 30_000;
 const UPLOAD_TIMEOUT_MS = 60_000;
-// The browser's fixed Origin for these calls is the base URL itself (A7).
+// The browser's fixed Origin for these calls is the base URL itself.
 const DISPLAY_NAMES = { a: "A", b: "B" } as const;
 
 
@@ -109,7 +109,7 @@ function parseReply<T>(schema: ZodType<T, ZodTypeDef, unknown>, text: string, pa
   return parsed.data;
 }
 
-// The sign-up body for one display name, with the access code when the site asks for one (ACCESS_CODE in the shell, R9.5).
+// The sign-up body for one display name, with the access code when the site asks for one (ACCESS_CODE in the shell).
 function signUpBody(displayName: string): { displayName: string; accessCode?: string } {
   const accessCode = (process.env.ACCESS_CODE ?? "").trim();
   return accessCode === "" ? { displayName } : { displayName, accessCode };
@@ -129,7 +129,7 @@ async function prepareSide(client: PersonHttp, fixture: PersonFixture, options: 
   return { personId: created.personId, sourceId, cardId };
 }
 
-// Reads every page of names and sends the review that replaces each one (R2.4, every name replaced by default).
+// Reads every page of names and sends the review that replaces each one (every name replaced by default).
 async function reviewNames(client: PersonHttp, sourceId: string, first: SourceView): Promise<void> {
   const pages = Math.max(1, Math.ceil(first.names.total / NAMES_PAGE_SIZE));
   const rows = [...first.names.rows];
@@ -155,14 +155,14 @@ async function buildCard(client: PersonHttp, sourceId: string): Promise<string> 
   return requested.cardId;
 }
 
-// Approves the verified items of a card with the recall switch the pair sets for this side (R7.1).
+// Approves the verified items of a card with the recall switch the pair sets for this side.
 async function approveCard(client: PersonHttp, cardId: string, recallAllowed: boolean): Promise<void> {
   const card = await client.call({ method: "GET", path: pathFor(routes.cards.readCard.path, cardId), expect: 200, schema: CardView });
   const itemIds = card.items.filter((item) => item.verified).map((item) => item.id);
   await client.call({ method: "POST", path: pathFor(routes.cards.approveCard.path, cardId), expect: 200, schema: CardApproveResponse, body: { itemIds, recallAllowed } });
 }
 
-// Reads the invite token from the link. The token sits after "#", so it never reaches a server log (D32).
+// Reads the invite token from the link. The token sits after "#", so it never reaches a server log.
 function tokenOf(inviteUrl: string): string {
   return new URL(inviteUrl).hash.slice(1);
 }

@@ -1,6 +1,4 @@
 # apps/web
-Rows: D49, D51, D52, D66, A3, A8, R1.3, R2.4, R3.4, R5.11, R7.2, R8.1 to R8.4, R12.2.
-
 ## What this does
 
 The browser app of Meety. A person uploads what their AI assistant knows about them, checks the names and the card, takes the quiz, pairs with someone, and watches the two personas meet. The api serves it from the same address, so the session cookie never reaches JavaScript.
@@ -40,4 +38,4 @@ Notice that the meeting screen never reads the stream itself: every event and po
 
 `pnpm test:unit apps/web && pnpm test:accessibility apps/web && pnpm --filter web build`
 
-Not built yet: the brief, comic, share and settings screens (Wave 2: briefs, comic, share-and-consent, deletion); a screen that plays an exported meeting with the replay player.
+Not built yet: a screen that plays an exported meeting with the replay player.

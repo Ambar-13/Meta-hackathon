@@ -20,12 +20,12 @@ type FoundName = { text: string; role: string };
 // The rows a names pass writes: the turn rewrites and the name tokens found for them.
 type NamesPlan = { rewrites: TurnRewrite[]; tokens: NameToken[] };
 
-// When a names pass that the daily cap stopped runs again: one minute after the next UTC midnight (D60).
+// When a names pass that the daily cap stopped runs again: one minute after the next UTC midnight.
 export function namesPassRetryAt(now: Date): Date {
   return new Date(startOfUtcDay(now).getTime() + 86_400_000 + 60_000);
 }
 
-// The names pass for one uploaded source: other people's names become role tokens, and the names review gets one row per name (D15, D17, D18, R2.3).
+// The names pass for one uploaded source: other people's names become role tokens, and the names review gets one row per name.
 export const scrubNamesTask: JobTask<"scrub_names"> = async (payload, context) => {
   const input = await readNamesInput(context.db, payload);
   if (input.source === undefined || input.person === undefined) {
@@ -108,7 +108,7 @@ async function writeNamesPass(context: JobContext, payload: JobPayload<"scrub_na
   });
 }
 
-// The next placeholder id after the source's highest, so new ids continue the source's counter (D14).
+// The next placeholder id after the source's highest, so new ids continue the source's counter.
 async function placeholderCounterFor(trx: DatabaseTransaction, sourceId: string): Promise<() => string> {
   const ids = await trx.selectFrom("redactions").select("placeholder_id").where("source_id", "=", sourceId).execute();
   const highest = ids.reduce((max, row) => Math.max(max, Number.parseInt(row.placeholder_id, 16)), 0);

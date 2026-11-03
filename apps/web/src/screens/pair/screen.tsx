@@ -17,7 +17,7 @@ const PairTags = (props: { otherName: string }): ReactElement => {
   );
 };
 
-// The /pair page: make an invite and show it as a QR code and a link (D32).
+// The /pair page: make an invite and show it as a QR code and a link.
 export const PairScreen = (): ReactElement => {
   const location = useLocation();
   const cardId = readCardQuery(location.search) ?? readApprovedCard();
@@ -52,7 +52,7 @@ export const PairScreen = (): ReactElement => {
 };
 
 // The invite on a white card: the QR code, a read-only link with a copy action, and the way to the lobby. The link carries
-// this browser's access code, so the friend who opens it never types it (R9.5).
+// this browser's access code, so the friend who opens it never types it.
 const InviteView = (props: { inviteUrl: string; pairId: string; cardId: string | null }): ReactElement => {
   const link = withAccessCode(props.inviteUrl, readAccessCode());
   const { path, size } = qrPathFor(link);

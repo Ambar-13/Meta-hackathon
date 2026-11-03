@@ -3,7 +3,7 @@ import { CARD_ITEMS_MAX, ItemKind } from "../cards/card.js";
 import { MeetingState } from "../meetings/meeting.js";
 import { IsoTime, PhotoKey, Uuid } from "../primitives.js";
 
-// Most directory meetings one listed persona takes part in per UTC day. Ambar's default; he can change it.
+// Most directory meetings one listed persona takes part in per UTC day.
 export const DIRECTORY_MEETINGS_PER_LISTING_PER_DAY = 10;
 // Longest line a person writes about themselves for their listing.
 export const LISTING_LINE_MAX_CHARS = 140;
@@ -11,7 +11,7 @@ export const LISTING_LINE_MAX_CHARS = 140;
 export const DIRECTORY_PAGE_SIZE = 20;
 // The words next to the directory switch on the card screen. Off by default; turning it on is the consent to be met.
 export const DIRECTORY_SWITCH_COPY = "List my Meety in Explore. Anyone in Explore can have their Meety meet yours, and your Meety may answer when someone asks for help in Explore, using only the items you mark public. You get every brief and every answer. You can leave at any time.";
-// The words next to the dating switch on the card screen, under the directory switch. Off by default, and on only while listed (as-built item 54).
+// The words next to the dating switch on the card screen, under the directory switch. Off by default, and on only while listed.
 export const ROMANCE_SWITCH_COPY = "Open to dating questions: people in Explore can ask my Meety how I would get on with them romantically. I get every brief.";
 // The words next to the friends switch on the card screen. Off by default.
 export const FRIENDS_ASK_SWITCH_COPY = "Let friends I've met here ask my Meety how I would probably react to something. I get a copy of every answer. I can turn this off at any time.";

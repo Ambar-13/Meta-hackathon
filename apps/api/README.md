@@ -2,7 +2,7 @@
 
 ## What this does
 
-The api is the one web server of Meety. It answers every route under `/api`, serves the built web app at `/`, and streams each meeting to the two people in it. Every request that acts for a person runs as the database role `app_api` inside one transaction that names that person, so row security decides what it can read. Rows D32, D33, D48 to D54, D56, D67, D69, A5, A7, R8.1 to R8.7, R9.2 to R9.5, R12.5.
+The api is the one web server of Meety. It answers every route under `/api`, serves the built web app at `/`, and streams each meeting to the two people in it. Every request that acts for a person runs as the database role `app_api` inside one transaction that names that person, so row security decides what it can read.
 
 ## What this never does
 
@@ -74,4 +74,4 @@ Notice that the reconnect starts at 4, never at 3, and that the delta carries no
 
 The app shell is served as `text/html; charset=utf-8`; error log lines are pino level 50.
 
-Not built yet: the brief, comic and share routes, which arrive with their Wave 2 builders through requests that fill their slots in `server.ts`; the `delete_person` job (deletion, Wave 2).
+Not built yet: nothing.

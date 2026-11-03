@@ -15,7 +15,7 @@ import { retentionTasks } from "./retention/index.js";
 import { askTasks } from "./asks/index.js";
 import { orchestratorTasks } from "./orchestrator/index.js";
 
-// Every task the worker runs, one spread per feature folder, in slot order (seams S3).
+// Every task the worker runs, one spread per feature folder, in slot order.
 export const TASKS: TaskList = {
   ...cardTasks,
   ...quizTasks,
@@ -37,7 +37,7 @@ export function graphileTaskList(tasks: TaskList, context: JobContext): Record<s
   return list;
 }
 
-// The crontab lines of contracts whose task is in the list, so a cron never names a task that is not registered yet (D46).
+// The crontab lines of contracts whose task is in the list, so a cron never names a task that is not registered yet.
 export function crontabForTasks(tasks: TaskList): string {
   return CRONTAB.split("\n")
     .filter((line) => {
@@ -54,7 +54,7 @@ export function describeBootError(error: unknown): string {
   return String(error);
 }
 
-// Boot order (D71, D74, R3.1, D57, D56): parse env, refuse replay in production, check the schema version, run the self-test, then start Graphile.
+// Boot order: parse env, refuse replay in production, check the schema version, run the self-test, then start Graphile.
 export async function startWorker(processEnv: NodeJS.ProcessEnv): Promise<Runner> {
   const env = workerEnv.parse(processEnv);
   assertWorkerModeAllowed(env, processEnv.NODE_ENV);

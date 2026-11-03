@@ -2,13 +2,13 @@ import { z } from "zod";
 import { Uuid } from "../primitives.js";
 import { toStrictJsonSchema } from "../operations/model-calls.js";
 
-// Most rounds of tool calls one turn may use. The 5th request carries no tools, D37.
+// Most rounds of tool calls one turn may use. The 5th request carries no tools.
 export const TOOL_ROUNDS_MAX = 4;
-// Turns a recall call returns at most, D38.
+// Turns a recall call returns at most.
 export const RECALL_TOP_K = 5;
-// Characters of each recalled turn that the model sees, D38.
+// Characters of each recalled turn that the model sees.
 export const RECALL_SNIPPET_CHARS = 600;
-// The tools a persona may call (D42). The meeting runs persona to persona with nobody online, so no tool reaches a person.
+// The tools a persona may call. The meeting runs persona to persona with nobody online, so no tool reaches a person.
 export const ToolName = z.enum(["recall", "concede", "hold"]);
 // The type of ToolName, read from the schema above.
 export type ToolName = z.infer<typeof ToolName>;
@@ -39,7 +39,7 @@ export type ToolDefinition = {
   type: "function";
   function: { name: ToolName; description: string; parameters: Record<string, unknown>; strict: true };
 };
-// The tools for one request, or undefined when none may be offered (D37, D42).
+// The tools for one request, or undefined when none may be offered.
 // Rounds are 1-based, so round 5 is the first request with no tools.
 export function toolsForPhase(phase: "open" | "explore" | "decide", round: number): ToolDefinition[] | undefined {
   if (round >= TOOL_ROUNDS_MAX + 1) return undefined;

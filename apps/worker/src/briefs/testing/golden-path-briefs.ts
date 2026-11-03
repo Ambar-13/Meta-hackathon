@@ -18,7 +18,7 @@ import { readBriefSnapshot, writeBriefsTask, type BriefSnapshot } from "../write
 
 // The folder of the recorded replies, five levels above this file's folder.
 const FIXTURE_DIR = fileURLToPath(new URL("../../../../../packages/evals/fixtures/model-replies", import.meta.url));
-// Lines in each brief, and quotes each side needs for its nine lines (ARCHITECTURE.md 3.19).
+// Lines in each brief, and quotes each side needs for its nine lines.
 const LINE_COUNT = 9;
 // The time the seeded meeting starts, fixed so the seed is the same on every run.
 const SEED_START = new Date("2026-10-26T10:00:00.000Z");
@@ -145,7 +145,7 @@ function replyFor(args: CompleteArgs, plan: ReplyPlan): Record<string, unknown> 
 // What the recording client needs: the replay client that answers, the reply plan, the folder to write to, and the list of paths written.
 type RecordingOptions = { replay: LlmClient; plan: ReplyPlan; fixtureRoot: string; written: string[] };
 
-// A client that writes each request's reply as a fixture, then lets the replay client answer from that fixture (D74).
+// A client that writes each request's reply as a fixture, then lets the replay client answer from that fixture.
 function recordingClient(options: RecordingOptions): LlmClient {
   return {
     complete: async (args) => {

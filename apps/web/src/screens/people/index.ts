@@ -1,4 +1,4 @@
-// One person's profile from Explore, at /people/:listingId (wave 7).
+// One person's profile from Explore, at /people/:listingId.
 export { PersonScreen } from "./screen.js";
 // The profile header, the About and Posts tabs, the card of a Posts tab with no posts, and Delete on your own post, which /me and the feed
 // reuse.

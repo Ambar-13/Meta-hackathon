@@ -1,5 +1,5 @@
 -- package: db
--- Lets a search find people by their name, the start of a name first, as Instagram's search does (3 Nov 2026).
+-- Lets a search find people by their name, the start of a name first, as Instagram's search does.
 
 DROP FUNCTION directory_browse(text, int, int);
 CREATE FUNCTION directory_browse(p_query text, p_limit int, p_offset int)

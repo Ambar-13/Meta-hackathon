@@ -12,7 +12,7 @@ import { makeNotFoundError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
 import { sortAnswersForView, toAboutMeAnswer, toAskAnswer, toAskSummary } from "./ask-rows.js";
 
-// The most asks, and the most copies, that GET /api/asks returns, each newest first (design section 6).
+// The most asks, and the most copies, that GET /api/asks returns, each newest first.
 const ASKS_LIST_MAX = 50;
 // The :id of GET /api/asks/:id. A value that is not a uuid is not_found, so a bad id tells nothing.
 const AskParams = z.object({ id: Uuid });
@@ -31,7 +31,7 @@ async function readAskView(trx: Transaction<Database>, input: { personId: string
   });
 }
 
-// Reads the caller's own asks and the answered copies of their persona, each newest first and at most ASKS_LIST_MAX (P4).
+// Reads the caller's own asks and the answered copies of their persona, each newest first and at most ASKS_LIST_MAX.
 async function readAsksView(trx: Transaction<Database>, personId: string): Promise<AsksView> {
   const asked = await trx.selectFrom("persona_asks").select(["id", "mode", "text", "state", "created_at"]).where("person_id", "=", personId)
     .orderBy("created_at", "desc").orderBy("id", "desc").limit(ASKS_LIST_MAX).execute();
@@ -41,7 +41,7 @@ async function readAsksView(trx: Transaction<Database>, personId: string): Promi
 }
 
 // Registers GET /api/asks/:id: 200 AskView to the asker only; 404 not_found to anyone else, for a missing ask and for a bad id.
-// Never cached, because the ask changes while run_ask works (design section 6).
+// Never cached, because the ask changes while run_ask works.
 export function registerReadAsk(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.asks.readAsk.path, async (request, reply) => {
     const personId = requirePerson(request);
@@ -55,7 +55,7 @@ export function registerReadAsk(app: FastifyInstance, deps: RouteDeps): void {
 }
 
 // Registers GET /api/asks: 200 AsksView with the caller's asks and their persona's copies. Never cached, because both lists change
-// while asks run (design section 6).
+// while asks run.
 export function registerListAsks(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.asks.listAsks.path, async (request, reply) => {
     const personId = requirePerson(request);

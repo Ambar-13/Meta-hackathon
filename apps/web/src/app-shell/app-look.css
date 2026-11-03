@@ -1,11 +1,11 @@
-/* The signed-in app's look since 3 Nov 2026: Instagram's frame and screens, ChatGPT's chat (Ambar: "instagram + chatgpt chat combined").
+/* The signed-in app's look: Instagram's frame and screens, ChatGPT's chat.
    An off-white ground (#fffefd, his pick), warm near-black text, one warm grey for secondary text, hairline lines, Hanken Grotesk with
    large light page titles (after the "Other" concept he liked), round people, blue buttons, curved corners on everything that stays a box. Sections are separated by space and hairlines, not boxes. Every rule sits under :where(.social-frame), so it weighs no more than app.css's own rules: the landing and the
    public pages keep the name-tag look, and a screen's own stylesheet still wins where it sets something. */
 
 .social-frame {
   --ui-font: "Hanken Grotesk Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --ui-bg: oklch(99.75% 0.002 78.3); /* #fffefd, Ambar's 99.75% on 3 Nov (after #fffcf5 and #fffdfa); 0.002 is the most warmth sRGB holds this light */
+  --ui-bg: oklch(99.75% 0.002 78.3); /* #fffefd; 0.002 is the most warmth sRGB holds this light */
   --ui-ink: oklch(20% 0.01 70);
   --ui-ink-2: oklch(50% 0.012 70); /* 5.9:1 on the ground, 5.3:1 on --ui-soft */
   /* The fills and lines take the ground's hue at a low chroma, so on the near-white ground they read as grey, not beige. */
@@ -17,7 +17,7 @@
   --ui-blue: oklch(54% 0.22 268);
   --ui-blue-hover: oklch(47% 0.21 268);
   --ui-red: oklch(56% 0.2 22);
-  /* The made-up mark's orange, as in the "Other" concept's asterisk; Ambar asked for it on 3 Nov 2026. Nothing else is orange. */
+  /* The made-up mark's orange. Nothing else is orange. */
   --ui-orange: oklch(64.5% 0.19 37);
   --ui-radius: 10px;
   /* The kit's tokens, pointed at the new ones, so every older screen that reads them takes the look too. */
@@ -79,7 +79,7 @@
 :where(.social-frame) fieldset { border: 1px solid var(--ui-line); border-radius: 16px; }
 :where(.social-frame) legend { font: 700 16px/1.2 var(--ui-font); letter-spacing: 0; }
 
-/* ---------- surfaces: no boxes but dialogs (Ambar, 3 Nov: "unnecessary curved boxes ... showing ai slop") ----------
+/* ---------- surfaces: no boxes but dialogs ----------
    A panel is a section with space around it, and a soft or colour panel is a plain line or section; screens add a hairline where two
    sections meet. Only a dialog keeps a box. */
 :where(.social-frame) .panel { padding: 0; border: 0; border-radius: 0; background: none; }
@@ -138,8 +138,7 @@
 .person-avatar.size-m { --a-size: 44px; --a-font: 18px; }
 .person-avatar.size-l { --a-size: 86px; --a-font: 34px; }
 .person-avatar.size-xl { --a-size: 150px; --a-font: 56px; }
-/* A post's photo, with square corners where every other surface is round (Ambar, 3 Nov 2026: "instead of curved edges photos and
-   reels use square"): a wide photo at 3:2, a tall one at 4:5 on a phone and square on wider screens, a shared one square, on a soft
+/* A post's photo, with square corners where every other surface is round: a wide photo at 3:2, a tall one at 4:5 on a phone and square on wider screens, a shared one square, on a soft
    ground while it loads. */
 .post-photo { overflow: hidden; background: var(--ui-soft); }
 .post-photo > img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }

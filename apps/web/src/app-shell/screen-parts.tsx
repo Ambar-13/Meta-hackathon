@@ -5,13 +5,13 @@ import { APP_PATHS } from "./app-paths.js";
 import { SocialRail } from "./social-rail.js";
 import { Icon, Sticker } from "../look/index.js";
 
-// How long the copy button says Copied, 2 s [confirm] (no input gives this duration).
+// How long the copy button says Copied, 2 s.
 export const COPIED_MS = 2_000;
 // The pages a visitor may open before they have a session: the start page, the claim page and the join page. The session cookie is
-// HttpOnly, so the browser cannot tell whether a session exists, and the frame goes by the page instead [confirm].
-const NO_SESSION_PATHS: readonly string[] = [APP_PATHS.welcome, APP_PATHS.claim, APP_PATHS.join, APP_PATHS.privacy];
+// HttpOnly, so the browser cannot tell whether a session exists, and the frame goes by the page instead.
+const NO_SESSION_PATHS: readonly string[] = [APP_PATHS.welcome, APP_PATHS.claim, APP_PATHS.join, APP_PATHS.privacy, APP_PATHS.terms, APP_PATHS.cookies];
 
-// True on every page except the four above and the public share pages, which anyone with the link may open (design section 7).
+// True on every page except the ones above and the public share pages, which anyone with the link may open.
 function showsAppLinks(pathname: string): boolean {
   return !NO_SESSION_PATHS.includes(pathname) && !pathname.startsWith(APP_PATHS.sharePage(""));
 }
@@ -19,7 +19,7 @@ function showsAppLinks(pathname: string): boolean {
 // The Settings link, the one link in the Pages nav of a page without a session.
 const SETTINGS_LINK = { label: "Settings", to: APP_PATHS.settings } as const;
 
-// The frame of a page without a session, as it was before wave 7: the top bar with the logo, the content, and Settings as one chip.
+// The frame of a page without a session: the top bar with the logo, the content, and Settings as one chip.
 const OpenFrame = (props: { main: ReactElement; hasSettingsLink: boolean; pathname: string }): ReactElement => {
   return (
     <>
@@ -43,8 +43,7 @@ const OpenFrame = (props: { main: ReactElement; hasSettingsLink: boolean; pathna
 };
 
 // The frame of a signed-in page: the phone's top bar as Instagram's, Create at its left end (the + that shares a post or a story; Create
-// links to Invite a friend), the logo in the middle and Settings at its right end (Ambar, 3 Nov 2026: "like instagram you had the logo
-// centred"), then the rail or tab bar and the content column.
+// links to Invite a friend), the logo in the middle and Settings at its right end, then the rail or tab bar and the content column.
 const SignedInFrame = (props: { main: ReactElement; hasSettingsLink: boolean; pathname: string }): ReactElement => {
   return (
     <div className="social-frame">

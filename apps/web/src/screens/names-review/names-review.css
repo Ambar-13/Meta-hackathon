@@ -68,7 +68,7 @@ label.nr-option:has(input:checked) { border-color: var(--ink); background: var(-
   .nr-save button { width: 100%; }
 }
 
-/* ---------- signed in (3 Nov 2026): the choices as radio rows with hairlines, the role label as quiet words, no outlined boxes ---------- */
+/* ---------- signed in: the choices as radio rows with hairlines, the role label as quiet words, no outlined boxes ---------- */
 .social-frame label.nr-option { min-height: 48px; margin: 0; padding: 10px 2px; border: 0; border-top: 1px solid var(--ui-line); border-radius: 0; background: none; font-weight: 500; }
 .social-frame label.nr-option:has(input:checked) { border-color: var(--ui-line); background: none; font-weight: 600; }
 .social-frame .nr-group h2 { font-size: 18px; }

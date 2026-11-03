@@ -20,7 +20,7 @@ afterEach(async () => {
   await fresh.drop();
 });
 
-// Ledger rows with dollars written straight in, since the prices are not in the tests (section 4.1).
+// Ledger rows with dollars written straight in, since the prices are not in the tests.
 async function insertRows(personId: string, rows: Array<{ usd: number; startedAt: Date }>): Promise<void> {
   await asPerson(workerDb, personId, (trx) =>
     trx.insertInto("ledger").values(rows.map((row) => ({

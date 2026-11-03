@@ -8,7 +8,7 @@ The model never decides what is stored, what is public, or what is deleted. Thos
 
 ## In the build
 
-The code was written by coding agents from specification files kept outside the repository, one agent for each owned path in each wave. The plan calls for a human to review the contracts, the meeting state machine, the row security policies and the scrub rules before they merge (IMPLEMENTATION.md, section 8). The ownership table is in `docs/ownership.md`.
+The code was written with coding agents, working from written specifications; Ambar decided the product and the design. Tests, lint rules and the checks in `scripts/checks` hold every change to the same rules.
 
 ## What we recorded
 
@@ -16,4 +16,4 @@ Replay fixtures are model replies recorded from real calls with `LLM_MODE=record
 
 ## What the numbers mean
 
-The eval table in the README is produced by `pnpm eval` on the deployed system. Each row shows its sample size. The targets in ARCHITECTURE.md are targets, not results; a target that a run misses is reported as missed.
+The eval table in the README is produced by `pnpm eval` on the deployed system. Each row shows its sample size. A target that a run misses is reported as missed.

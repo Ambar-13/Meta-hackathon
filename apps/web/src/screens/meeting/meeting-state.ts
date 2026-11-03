@@ -4,20 +4,20 @@ import { apiFetch, ApiError, routes, usePolledView, type PolledView } from "../.
 import { emptyMeetingState, type MeetingFoldState } from "../../transcript/index.js";
 import type { FeedStatus, MeetingFeed, MeetingFeedOptions } from "../../streaming/index.js";
 
-// The status line while the feed polls (D49, R8.2) [confirm] (drafted copy, no input gives it).
+// The status line while the feed polls (drafted copy).
 export const POLLING_COPY = "Live updates are slow on this network, so this screen checks for new turns every 2 seconds.";
-// The status line while the feed waits to reconnect (D51, R8.4) [confirm] (drafted copy, no input gives it).
+// The status line while the feed waits to reconnect (drafted copy).
 export const RECONNECTING_COPY = "Connection lost. Reconnecting.";
 
 // The meeting screen's model: the meeting view, the folded events, the feed status, when something last arrived, and a stop error.
 export type MeetingScreenModel = { view: PolledView<MeetingView>; fold: MeetingFoldState; status: FeedStatus; lastActivityMs: number; stopped: ApiError | null };
 
-// True when the state moved on: a new seq or a longer partial text (R10.3).
+// True when the state moved on: a new seq or a longer partial text.
 function hasChanged(previous: MeetingFoldState, next: MeetingFoldState): boolean {
   return previous.lastSeq !== next.lastSeq || (previous.partial?.text.length ?? -1) !== (next.partial?.text.length ?? -1);
 }
 
-// Loads the meeting, polls it while it waits to start, then opens the feed and folds it (D49, D51).
+// Loads the meeting, polls it while it waits to start, then opens the feed and folds it.
 export function useMeetingScreen(meetingId: string, openFeed: (options: MeetingFeedOptions) => MeetingFeed): MeetingScreenModel {
   const view = usePolledView(() => apiFetch(routes.meetings.readMeeting, { params: { id: meetingId } }), {
     key: meetingId,

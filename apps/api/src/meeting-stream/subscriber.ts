@@ -3,39 +3,39 @@ import { EVENT_VERSION, HEARTBEAT_MS, SERVER_SAFETY_POLL_MS, SSE_PADDING_BYTES, 
 import type { WakeSignal } from "./listen-fan-out.js";
 import type { RunningPartial, StreamReads } from "./replay-and-poll.js";
 
-// The SSE response headers, exactly as D50 lists them; nothing else is set on the stream.
+// The SSE response headers; nothing else is set on the stream.
 export const SSE_HEADERS = { "content-type": "text/event-stream", "cache-control": "no-cache, no-transform", "x-accel-buffering": "no" } as const;
 // One comment line of exactly SSE_PADDING_BYTES (2,048) bytes, written first so a proxy that holds back the first
-// 2 KB lets the stream through (D50): a colon, 2,045 spaces, and the blank line that ends a frame.
+// 2 KB lets the stream through: a colon, 2,045 spaces, and the blank line that ends a frame.
 export const SSE_PADDING = `:${" ".repeat(SSE_PADDING_BYTES - 3)}\n\n`;
-// The heartbeat comment, written every HEARTBEAT_MS, 15 s (D50, D53).
+// The heartbeat comment, written every HEARTBEAT_MS, 15 s.
 export const HEARTBEAT_LINE = ":hb\n\n";
 // How often a stream writes the heartbeat, how often it re-reads on its own, and how often it re-checks its session.
 export type StreamTiming = { heartbeatMs: number; safetyPollMs: number; sessionCheckMs: number };
-// The timing every real stream uses: the 15 s heartbeat (D50), the 10 s safety poll (D49), and a session re-check
-// at the heartbeat interval by default, so a signed-out session ends its stream within one heartbeat (A7, invariant 21).
+// The timing every real stream uses: the 15 s heartbeat, the 10 s safety poll, and a session re-check
+// at the heartbeat interval by default, so a signed-out session ends its stream within one heartbeat.
 export const STREAM_TIMING: StreamTiming = { heartbeatMs: HEARTBEAT_MS, safetyPollMs: SERVER_SAFETY_POLL_MS, sessionCheckMs: HEARTBEAT_MS };
 // What one stream has sent of a running step's partial text.
 export type SentDelta = { stepSeq: number; attempt: number; sentLen: number };
-// One open stream (D47 to D53).
+// One open stream.
 export type Subscriber = { start: () => void; wake: (signal: WakeSignal) => void; stop: () => void; end: () => void; whenIdle: () => Promise<void> };
 // What a subscriber needs; write and end are the HTTP response's. sessionStillValid answers whether the session and the
 // membership that opened the stream still hold; a false answer, or a failed check, ends the stream.
 export type SubscriberOptions = { personId: string; meetingId: string; lastSeq: number; reads: StreamReads; write: (chunk: string) => void; end: () => void; now: () => Date; log: FastifyBaseLogger; timing: StreamTiming; sessionStillValid: () => Promise<boolean> };
-// The open streams of one process, at most a fixed number per person and meeting (D51).
+// The open streams of one process, at most a fixed number per person and meeting.
 export type ConnectionLimit<T> = { admit: (key: string, stream: T) => void; release: (key: string, stream: T) => void; endAll: () => void; count: (key: string) => number };
 
-// A committed event as one SSE frame: its seq as the id, its type as the event name, the whole event as JSON (ARCHITECTURE.md 6.1, D52).
+// A committed event as one SSE frame: its seq as the id, its type as the event name, the whole event as JSON.
 export function formatCommittedEvent(event: CommittedEvent): string {
   return `id: ${String(event.seq)}\nevent: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`;
 }
 
-// A turn.delta as one SSE frame with no id line, so a reconnect never replays from a delta (D47).
+// A turn.delta as one SSE frame with no id line, so a reconnect never replays from a delta.
 export function formatDelta(delta: TurnDelta): string {
   return `event: turn.delta\ndata: ${JSON.stringify(delta)}\n\n`;
 }
 
-// What to send of a running step's partial text, given what this stream already sent (ARCHITECTURE.md 6.2, 6.3).
+// What to send of a running step's partial text, given what this stream already sent.
 export function nextDelta(sent: SentDelta | null, partial: RunningPartial | null): { offset: number; text: string } | null {
   if (partial === null || partial.text.length === 0) {
     return null;
@@ -54,7 +54,7 @@ export function isDeltaNews(sent: SentDelta | null, payload: { stepSeq: number; 
   return sent === null || sent.stepSeq !== payload.stepSeq || sent.attempt !== payload.attempt || payload.len > sent.sentLen;
 }
 
-// Keeps at most max open streams per key and ends the oldest when one more arrives (D51, R8.4).
+// Keeps at most max open streams per key and ends the oldest when one more arrives.
 export function makeConnectionLimit<T extends { end: () => void }>(max: number): ConnectionLimit<T> {
   const map = new Map<string, T[]>();
   return {
@@ -95,7 +95,7 @@ export function connectionKey(personId: string, meetingId: string): string {
   return `${personId}:${meetingId}`;
 }
 
-// One open stream: its reads run one at a time, in the order they were asked for (D47 to D53, R8.5).
+// One open stream: its reads run one at a time, in the order they were asked for.
 class StreamSubscriber implements Subscriber {
   private lastSentSeq: number;
   private sent: SentDelta | null = null;
@@ -145,7 +145,7 @@ class StreamSubscriber implements Subscriber {
     }
   }
 
-  // Writes the heartbeat comment and stamps presence, so the other member sees this person as watching (D53).
+  // Writes the heartbeat comment and stamps presence, so the other member sees this person as watching.
   private heartbeat(): void {
     if (this.isStopped) {
       return;
@@ -254,7 +254,7 @@ class StreamSubscriber implements Subscriber {
   }
 }
 
-// Builds one stream: replay, partial, heartbeat, safety poll and wakes, each read run one at a time in order (D47 to D53, R8.5).
+// Builds one stream: replay, partial, heartbeat, safety poll and wakes, each read run one at a time in order.
 export function createSubscriber(options: SubscriberOptions): Subscriber {
   return new StreamSubscriber(options);
 }

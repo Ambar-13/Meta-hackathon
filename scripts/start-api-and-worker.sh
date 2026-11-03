@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Starts the api and the worker in one container, for the one Render service (render.yaml, D70 as amended on 2 Nov 2026).
-# It applies the migrations first, the job of Render's pre-deploy command, which a free service lacks (D71), then starts both.
+# Starts the api and the worker in one container, for the one Render service (render.yaml).
+# It applies the migrations first, the job of Render's pre-deploy command, which a free service lacks, then starts both.
 # Each process gets only its own variables: the api never sees META_API_KEY, so the key stays in the worker as it did on two
-# services (ARCHITECTURE.md 8), and neither keeps the app_migrate URL. In the container this script runs as root
+# services, and neither keeps the app_migrate URL. In the container this script runs as root
 # (Dockerfile.render) and starts each process as its own user, so neither can read the other's environment or this script's
 # through /proc. When one process stops, the other is stopped too and the container exits, so Render restarts it. SIGTERM
-# reaches both, and each drains its work before it exits (D39).
+# reaches both, and each drains its work before it exits.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 

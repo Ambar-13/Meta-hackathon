@@ -1,7 +1,7 @@
 import { apiFetch, routes } from "./api-fetch.js";
 import { usePolledView } from "./polled-view.js";
 
-// How often the rail reads the friend requests again while a page is open, in ms (wave 7).
+// How often the rail reads the friend requests again while a page is open, in ms.
 export const RAIL_POLL_MS = 30_000;
 
 // The words for a number of incoming friend requests: "1 request" or "2 requests".

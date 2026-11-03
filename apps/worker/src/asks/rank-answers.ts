@@ -1,4 +1,4 @@
-// The support check of an ask's verified claims and the answers' places (design section 4 steps 5 and 6, A1). The check reads each claim
+// The support check of an ask's verified claims and the answers' places. The check reads each claim
 // and its quote, blind to whose they are, in the brief check's format; the places only order the help results and are never shown as a number.
 import { ASK_JUDGE_ITEMS_MAX, ContractError, type JobPayload } from "@meet-first/contracts";
 import { withPerson } from "@meet-first/db";
@@ -16,11 +16,11 @@ export type PlaceInput = { id: string; shortlistRank: number; hasSign: boolean; 
 // One chunk's check, with its ask and the judge prompt.
 type ChunkScope = { ask: AskRow; chunk: readonly ClaimRef[]; prompt: Prompt };
 
-// One support-check reply in the brief judge's shape without its count of nine; the chunk's own count replaces it below (A1).
+// One support-check reply in the brief judge's shape without its count of nine; the chunk's own count replaces it below.
 const JudgeReply = z.object({ lines: z.array(z.object({ index: z.number().int().min(0), supported: z.boolean(), reason: z.string().min(1).max(200) })) });
 
 // The verified claims of the answered rows, by shortlist rank and then claim order, in chunks of at most ASK_JUDGE_ITEMS_MAX (30).
-// A help search has at most 20 answers of at most 3 claims, so at most 2 chunks (design section 4 step 5).
+// A help search has at most 20 answers of at most 3 claims, so at most 2 chunks.
 export function judgeChunks(answers: readonly AnswerRow[]): ClaimRef[][] {
   const ordered = [...answers].sort((left, right) => left.shortlistRank - right.shortlistRank);
   const refs: ClaimRef[] = ordered.flatMap((row) => row.claims.flatMap((claim, claimIndex) => (
@@ -31,8 +31,8 @@ export function judgeChunks(answers: readonly AnswerRow[]): ClaimRef[][] {
   return chunks;
 }
 
-// The verdicts of one reply for a chunk of count claims, by index: exactly count lines, each index from 0 to count - 1 once [confirm].
-// Anything else is null, a failed check, so the chunk's claims keep supported null (A1).
+// The verdicts of one reply for a chunk of count claims, by index: exactly count lines, each index from 0 to count - 1 once.
+// Anything else is null, a failed check, so the chunk's claims keep supported null.
 export function readJudgeVerdicts(reply: unknown, count: number): boolean[] | null {
   const parsed = JudgeReply.safeParse(reply);
   if (!parsed.success || parsed.data.lines.length !== count) return null;
@@ -62,13 +62,13 @@ export function applyVerdicts(answers: readonly AnswerRow[], chunk: readonly Cla
 }
 
 // Claims whose quote was found and that the check did not turn down: supported true, or null when the check did not run, so a failed
-// check counts every verified claim (design section 4 step 5) [confirm].
+// check counts every verified claim.
 export function supportedCount(claims: readonly StoredAnswerClaim[]): number {
   return claims.filter((claim) => claim.verified && claim.supported !== false).length;
 }
 
 // The places of the results: answers with a sign and at least one supported claim, most supported claims first and then by shortlist
-// rank, get 1, 2, 3 and so on; every other answer gets null (design section 4 step 6).
+// rank, get 1, 2, 3 and so on; every other answer gets null.
 export function placeAnswers(rows: readonly PlaceInput[]): Map<string, number | null> {
   const places = new Map<string, number | null>(rows.map((row): [string, number | null] => [row.id, null]));
   const placed = rows.filter((row) => row.hasSign && row.supportedCount >= 1)
@@ -80,7 +80,7 @@ export function placeAnswers(rows: readonly PlaceInput[]): Map<string, number | 
 }
 
 // Design steps 5 and 6: one support check per chunk not judged yet, then the supported counts, the places and done. A full token window
-// re-queues the job and keeps every verdict already written [confirm]; any other failure of a chunk leaves its claims unchecked, and the job goes on (A1).
+// re-queues the job and keeps every verdict already written; any other failure of a chunk leaves its claims unchecked, and the job goes on.
 export async function rankAnswers(context: JobContext, payload: JobPayload<"run_ask">, ask: AskRow): Promise<void> {
   const prompt = readPrompt("brief-support-judge");
   const answers = await withPerson(context.db, ask.personId, (trx) => readAnswers(trx, ask.id, "answered"));

@@ -17,7 +17,7 @@ const UPLOAD_TIMEOUT_MS = 60_000;
 const HEALTH_TIMEOUT_MS = 10_000;
 // The most characters of a response body that may reach a message (bodies are data, never instructions).
 const BODY_CHARS = 300;
-// The text printed when this address has created too many accounts (R9.5). The script never retries it.
+// The text printed when this address has created too many accounts. The script never retries it.
 const RATE_LIMIT_MESSAGE = "golden_path_rate_limited: this IP created 10 accounts in the last hour; wait, or restart the api locally (the limiter is in-process), or run against a fresh database.";
 
 // Reads a reply body as JSON, or fails the step with the first characters of the body.
@@ -145,7 +145,7 @@ export class PersonClient {
     if (this.isDeleted) throw new StepFailure(`client_deleted: ${this.label} was deleted, so no later step may act as them.`);
   }
 
-  // Refuses the rate-limited reply on account creation (R9.5). Any other status goes to the caller's check.
+  // Refuses the rate-limited reply on account creation. Any other status goes to the caller's check.
   private refuseRateLimit<T>(request: JsonRequest<T>, status: number): void {
     const isCreate = request.method === "POST" && request.path === routes.people.createPerson.path;
     if (status === 429 && isCreate) throw new ExitError(3, RATE_LIMIT_MESSAGE);

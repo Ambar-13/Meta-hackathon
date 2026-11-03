@@ -6,7 +6,7 @@ import { requestHash } from "../modes.js";
 import { SCRIPTED_REPLIES_DIR } from "./replay-folder.js";
 
 // Writes one hand-written fixture into the scripted replies tests replay: the request file names the call, the response file holds
-// the reply and its usage. Hand-written replies never go into model-replies, which holds only recordings (D74, R13.3).
+// the reply and its usage. Hand-written replies never go into model-replies, which holds only recordings.
 export function writeFixture(callSiteArgument: string, requestPath: string, responsePath: string): number {
   const callSite = CallSite.parse(callSiteArgument);
   const request = JSON.parse(readFileSync(requestPath, "utf8")) as { callSite: string; promptVersion: string; body: Record<string, unknown> };

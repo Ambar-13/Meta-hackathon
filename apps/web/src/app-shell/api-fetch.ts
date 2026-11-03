@@ -7,7 +7,7 @@ export { routes };
 
 // The base type of every route schema, as parseReply and apiFetch read it.
 export type AnySchema = z.ZodType<unknown, z.ZodTypeDef, unknown>;
-// The shape of every contracts route entry (Wave 0 4.4.22): method, a path with :id, :slug or :position parts, and the two schemas.
+// The shape of every contracts route entry: method, a path with :id, :slug or :position parts, and the two schemas.
 export type ApiRoute = { method: string; path: string; request: AnySchema; response: AnySchema };
 
 // A failed call: the HTTP status (0 when no reply arrived), a stable code, the sentence a screen shows, and the reply body.
@@ -126,7 +126,7 @@ export async function errorFromResponse(response: Response): Promise<ApiError> {
   return errorFor(response.status, json);
 }
 
-// Checks a 2xx reply against its schema and remembers the server clock from it (R12.2).
+// Checks a 2xx reply against its schema and remembers the server clock from it.
 function parseReply<S extends AnySchema>(schema: S, json: unknown, status: number): S["_output"] {
   const parsed = schema.safeParse(json);
   if (!parsed.success) throw new ApiError({ status, code: "response_invalid", message: sentenceFor("response_invalid"), body: json });
@@ -137,7 +137,7 @@ function parseReply<S extends AnySchema>(schema: S, json: unknown, status: numbe
   return parsed.data;
 }
 
-// Builds the request settings for one call; a body is checked against the route's request schema before any fetch (R13.2).
+// Builds the request settings for one call; a body is checked against the route's request schema before any fetch.
 function requestFor(route: ApiRoute, options: ApiFetchOptions): RequestInit {
   const headers: Record<string, string> = { Accept: "application/json" };
   const init: RequestInit = { method: route.method, credentials: "same-origin", cache: "no-store", headers };
@@ -159,7 +159,7 @@ async function send(url: URL, init: RequestInit, fetchImpl: typeof fetch): Promi
   }
 }
 
-// Calls one route on this origin and returns its parsed reply; throws ApiError for every failure (A7).
+// Calls one route on this origin and returns its parsed reply; throws ApiError for every failure.
 export async function apiFetch<R extends ApiRoute, S extends AnySchema = R["response"]>(route: R, options: ApiFetchOptions<S> = {}): Promise<S["_output"]> {
   const url = new URL(buildApiPath(route.path, options.params ?? {}, options.query ?? {}), options.origin ?? pageOrigin());
   const response = await send(url, requestFor(route, options), options.fetchImpl ?? fetch);
@@ -169,7 +169,7 @@ export async function apiFetch<R extends ApiRoute, S extends AnySchema = R["resp
   return parseReply(schema, json, response.status);
 }
 
-// Posts the prepared NDJSON body to POST /api/sources with the content headers seams S4 names, and parses the reply (D4).
+// Posts the prepared NDJSON body to POST /api/sources with its content headers, and parses the reply.
 export async function apiUpload(upload: { body: Blob; contentEncoding: "gzip" | null }, options: Pick<ApiFetchOptions, "fetchImpl" | "origin"> = {}): Promise<SourceCreateResponse> {
   const url = new URL(routes.sources.createSource.path, options.origin ?? pageOrigin());
   const headers: Record<string, string> = { "Content-Type": "application/x-ndjson", Accept: "application/json" };
@@ -181,7 +181,7 @@ export async function apiUpload(upload: { body: Blob; contentEncoding: "gzip" | 
   return parseReply(routes.sources.createSource.response, json, response.status);
 }
 
-// Puts up a profile photo with PUT /api/people/me/photo: the JPEG bytes the browser drew, sent as image/jpeg (3 Nov 2026).
+// Puts up a profile photo with PUT /api/people/me/photo: the JPEG bytes the browser drew, sent as image/jpeg.
 export async function apiPhotoUpload(photo: Blob, options: Pick<ApiFetchOptions, "fetchImpl" | "origin"> = {}): Promise<MyPhoto> {
   const url = new URL(routes.people.uploadPhoto.path, options.origin ?? pageOrigin());
   const init: RequestInit = { method: "PUT", credentials: "same-origin", cache: "no-store", headers: { "Content-Type": "image/jpeg", Accept: "application/json" }, body: photo };
@@ -191,7 +191,7 @@ export async function apiPhotoUpload(photo: Blob, options: Pick<ApiFetchOptions,
   return parseReply(routes.people.uploadPhoto.response, json, response.status);
 }
 
-// Makes sure a thrown value is an ApiError, so a screen always shows a sentence (4.2.2).
+// Makes sure a thrown value is an ApiError, so a screen always shows a sentence.
 export function asApiError(thrown: unknown): ApiError {
   if (thrown instanceof ApiError) return thrown;
   return networkError(thrown);

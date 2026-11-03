@@ -8,7 +8,7 @@ function twoDigits(position: number): string {
   return String(position).padStart(2, "0");
 }
 
-// The ten one-line answers, locked until every persona answer exists (R4.2, R4.3).
+// The ten one-line answers, locked until every persona answer exists.
 export const QuizForm = (props: { items: QuizItemView[]; answers: readonly string[]; isLocked: boolean; isSending: boolean; onChange: (position: number, text: string) => void; onSend: () => void }): ReactElement => {
   const onSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
@@ -46,7 +46,7 @@ function verdictLine(agree: boolean | undefined): string | null {
   return agree ? "Matched" : "Did not match";
 }
 
-// The judged result: the copy exactly as the server sent it, and each pair of answers (D31, R4.2).
+// The judged result: the copy exactly as the server sent it, and each pair of answers.
 export const QuizResult = (props: { quiz: QuizView }): ReactElement => {
   return (
     <section className="quiz-result">

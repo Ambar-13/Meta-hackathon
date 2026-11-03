@@ -17,7 +17,7 @@ const EVENT_AT = "2026-10-26T12:00:00.000Z";
 const SHOWN_AGREE = ["Both plan before big meetings", "Agree line B"];
 const SHOWN_CLASH = ["Clash line A", "Clash line B"];
 const SHOWN_DECIDE_FIRST = ["Decide first A", "Decide first B"];
-// The texts of the brief lines the snapshot must never show (A1, invariant 19).
+// The texts of the brief lines the snapshot must never show.
 const HIDDEN_LINES = ["Unsupported line A", "Null judged line A", "Unverified quote line A", "Unsupported line B"];
 
 // The shared app kit and the worker connection that writes the seed.

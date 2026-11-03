@@ -1,26 +1,26 @@
 import { ContractError } from "@meet-first/contracts";
 
-// The stable codes the triggers and meeting_create put in front of their messages (Wave 0 sections 4.5.3 and 4.5.4), the names check's code of
-// migration 0002, directory_meeting_create's four of migrations 0006 and 0007 (as-built items 49 and 54), and the friend request functions' six of migration 0008 (wave 7).
+// The stable codes the triggers and meeting_create put in front of their messages, the names check's code of
+// migration 0002, directory_meeting_create's four of migrations 0006 and 0007, and the friend request functions' six of migration 0008.
 export const TRIGGER_CODES = ["turn_text_frozen", "card_source_not_frozen", "card_item_foreign_turn", "claim_foreign_turn", "meeting_bad_transition", "prefix_frozen", "event_seq_gap", "pair_not_joined", "card_not_approved", "other_card_missing", "names_pass_running", "listing_not_found", "directory_self", "directory_daily_cap", "romance_not_open", "friend_request_self", "already_friends", "friend_request_pending", "friend_request_daily_cap", "friend_request_not_found", "friend_request_decided"] as const;
 
 // One of the twenty-one codes above.
 export type TriggerCode = (typeof TRIGGER_CODES)[number];
 
-// A refusal read off a Postgres error: the stable code and the sentence to show (docs/contracts.md section 4).
+// A refusal read off a Postgres error: the stable code and the sentence to show.
 export type DatabaseRefusal = { code: string; message: string };
 
-// Plain CHECK constraints a route can hit, by constraint name, with the refusal to return (D29).
+// Plain CHECK constraints a route can hit, by constraint name, with the refusal to return.
 export const CHECK_REFUSALS: Readonly<Record<string, DatabaseRefusal>> = {
   quiz_items_check: { code: "persona_answer_missing", message: "Your Meety has not answered this question yet. Wait a moment and reload." },
 };
 
-// The sentence returned for any unique violation (docs/contracts.md section 4 gives the code) [confirm].
+// The sentence returned for any unique violation.
 export const DUPLICATE_SENTENCE = "This already exists. Use the one that is there instead of making another.";
 
-// Postgres's code for a unique violation; parseDatabaseError reads it as "duplicate" (docs/contracts.md section 4).
+// Postgres's code for a unique violation; parseDatabaseError reads it as "duplicate".
 const UNIQUE_VIOLATION = "23505";
-// Postgres's code for a check violation, which every RAISE in the migrations uses (Wave 0 section 4.5.3).
+// Postgres's code for a check violation, which every RAISE in the migrations uses.
 const CHECK_VIOLATION = "23514";
 
 // Reads a trigger code and its sentence out of a check violation, or the entry of CHECK_REFUSALS for its constraint.
@@ -33,7 +33,7 @@ function checkRefusal(message: string, constraint: unknown): DatabaseRefusal | n
   return null;
 }
 
-// Reads a refusal off a Postgres error, or returns null for anything that is not one, which the caller throws again (docs/contracts.md section 4).
+// Reads a refusal off a Postgres error, or returns null for anything that is not one, which the caller throws again.
 export function parseDatabaseError(error: unknown): DatabaseRefusal | null {
   if (typeof error !== "object" || error === null) return null;
   const code: unknown = Reflect.get(error, "code");

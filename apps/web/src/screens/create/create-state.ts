@@ -4,7 +4,7 @@ import { apiFetch, asApiError, routes, type ApiError } from "../../app-shell/ind
 import { readListingOrNull } from "../card/index.js";
 import { base64Of, PhotoFileError, postJpeg, storyJpeg } from "../me/index.js";
 
-// The sentences of Create (3 Nov 2026): a file that is not a picture, one too large even when drawn smaller, and a share with nothing in it.
+// The sentences of Create: a file that is not a picture, one too large even when drawn smaller, and a share with nothing in it.
 const CREATE_SENTENCES = {
   notPicture: "That file is not a photo this browser can open. Try a JPEG or PNG.",
   tooLarge: "That photo is too large to share. Try another one.",

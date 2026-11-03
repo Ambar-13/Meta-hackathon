@@ -15,14 +15,14 @@ export type PatternRule = {
   extend?: (text: string, start: number, value: string) => number;
 };
 
-// A private key block in PEM form, up to its END line or the end of the text (R2.2). The key type is at most 40 characters, so the
+// A private key block in PEM form, up to its END line or the end of the text. The key type is at most 40 characters, so the
 // header can never backtrack across a long run of capitals.
 export const PEM_PRIVATE_KEY: PatternRule = {
   category: "secret",
   group: 0,
   pattern: /-----BEGIN [A-Z ]{0,40}PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]{0,40}PRIVATE KEY-----|$)/g,
 };
-// A URL with a user name and a password, such as postgres://user:pass@host/db (R2.2). The password may hold any character but a
+// A URL with a user name and a password, such as postgres://user:pass@host/db. The password may hold any character but a
 // space, including "/", "#" and "?", up to its last "@" (at most 1,024 characters, so a failed try costs a bounded scan). The
 // rule runs only on text that holds "://", and the match ends before the punctuation that ends a sentence.
 export const URL_WITH_CREDENTIALS: PatternRule = {
@@ -31,13 +31,13 @@ export const URL_WITH_CREDENTIALS: PatternRule = {
   pattern: /\b[a-z][a-z0-9+.-]{0,31}:\/\/[^\s@:]{1,128}:\S{0,1024}@\S*[^\s.,;:!?)\]}'"]/gi,
   needs: ["://"],
 };
-// A JSON web token: three base64url parts of at least 8 characters, the first two starting with eyJ (R2.2).
+// A JSON web token: three base64url parts of at least 8 characters, the first two starting with eyJ.
 export const JWT: PatternRule = {
   category: "jwt",
   group: 0,
   pattern: /\beyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g,
 };
-// The value of an upper-case setting whose name contains KEY, SECRET, TOKEN, PASSWORD or PASSWD, as in DB_PASSWORD=hunter2 (R2.1, R2.2).
+// The value of an upper-case setting whose name contains KEY, SECRET, TOKEN, PASSWORD or PASSWD, as in DB_PASSWORD=hunter2.
 // The name is matched once, at most 64 characters, and isSecretName checks its words. The pattern reads at most 1,024 characters
 // of a value; extendSecretValue then runs the value on to its closing quote, to the end of its line when it has none, or to the end of its bare run, so no tail stays
 // visible. A rejected name resumes at its own end, so the characters after it are read again only by names inside the bound.
@@ -51,10 +51,10 @@ export const SECRET_ASSIGNMENT: PatternRule = {
   resumeAt: (whole) => leadingNameLength(whole),
   extend: (text, start, value) => extendSecretValue(text, start, value),
 };
-// The secret rules in the order scrub applies them; they run before the identifier rules (R2.2).
+// The secret rules in the order scrub applies them; they run before the identifier rules.
 export const SECRET_RULES: readonly PatternRule[] = [PEM_PRIVATE_KEY, URL_WITH_CREDENTIALS, JWT, SECRET_ASSIGNMENT];
 
-// The words that make a setting name a secret name (R2.1, R2.2).
+// The words that make a setting name a secret name.
 const SECRET_NAME_WORD = /KEY|SECRET|TOKEN|PASSWORD|PASSWD/;
 // The name at the start of a matched assignment, such as DB_PASSWORD in DB_PASSWORD=hunter2.
 const LEADING_NAME = /^[A-Z][A-Z0-9_]*/;

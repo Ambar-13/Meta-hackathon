@@ -5,7 +5,7 @@ import { SECRET_RULES, applyPatternRule } from "./secret-patterns.js";
 import { IDENTIFIER_RULES } from "./identifier-patterns.js";
 import { applyEntropyRule } from "./entropy.js";
 
-// What a caller passes: the names to leave alone (D17) and, optionally, where placeholder ids come from.
+// What a caller passes: the names to leave alone and, optionally, where placeholder ids come from.
 export type ScrubOptions = { allowlist: readonly string[]; nextId?: () => string };
 
 // Every placeholder kind already in a text: a redacted one, a code one, or a role token, as one pattern with groups in that order.
@@ -41,7 +41,7 @@ export function markExistingPlaceholders(segments: Segment[]): Segment[] {
   return segments.flatMap((segment) => (segment.isProtected ? [segment] : markFree(segment)));
 }
 
-// Joins the segments into the final text, giving each redaction the next id in text order, and lists the redactions (D14).
+// Joins the segments into the final text, giving each redaction the next id in text order, and lists the redactions.
 export function assignPlaceholderIds(segments: Segment[], nextId: () => string): ScrubResult {
   let text = "";
   const redactions: Redaction[] = [];
@@ -57,7 +57,7 @@ export function assignPlaceholderIds(segments: Segment[], nextId: () => string):
   return { text, redactions };
 }
 
-// Replaces every secret, identifier and code fence in one text with a placeholder and lists the replacements in text order (D11 to D14).
+// Replaces every secret, identifier and code fence in one text with a placeholder and lists the replacements in text order.
 // Pass one nextId for a whole source so ids stay unique across its turns.
 export function scrub(text: string, options: ScrubOptions): ScrubResult {
   const nextId = options.nextId ?? makePlaceholderCounter();

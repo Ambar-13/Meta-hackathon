@@ -8,9 +8,9 @@ import type { JobContext, JobTask } from "../job-context.js";
 import { buildBriefPromptInput, verifyBriefQuotes, type ApprovedItem, type BriefSide, type BriefSections, type SourceTurn, type TranscriptTurn } from "./brief-lines.js";
 import { applyJudgeOutput, buildJudgeInput, computeSupportRate } from "./support-judge.js";
 
-// A1 and ARCHITECTURE.md 8: the brief call. Effort medium (D62). The client applies these from CALL_SITE_CONFIG; the values match it. [confirm]
+// The brief call. Effort medium. The client applies these from CALL_SITE_CONFIG; the values match it.
 export const BRIEF_CALL = { effort: "medium", maxTokens: 4000, timeoutMs: 120_000, retries: 1 } as const;
-// A1 and ARCHITECTURE.md 4.8: the support judge. Minimal effort, temperature 0 (D62), 30 s, one retry. The client applies these from CALL_SITE_CONFIG.
+// The support judge. Minimal effort, temperature 0, 30 s, one retry. The client applies these from CALL_SITE_CONFIG.
 export const SUPPORT_JUDGE_CALL = { effort: "minimal", temperature: 0, maxTokens: 2000, timeoutMs: 30_000, retries: 1 } as const;
 
 // The two sides of a meeting, in the order the job writes them.
@@ -31,7 +31,7 @@ type JudgeOutcome = { sections: BriefSections; reliable: boolean; rate: number |
 // One member row with the person's display name.
 type MemberRow = { side: Side; person_id: string; card_id: string; display_name: string; public_only: boolean };
 
-// Writes the briefs of an ended meeting that are not written yet, then the brief.ready event once both exist (R11.2, A1).
+// Writes the briefs of an ended meeting that are not written yet, then the brief.ready event once both exist.
 export const writeBriefsTask: JobTask<"write_briefs"> = async (payload, context) => {
   const read = await readBriefSnapshot(context.db, payload.meetingId);
   if (read.kind === "skipped") {
@@ -48,7 +48,7 @@ export const writeBriefsTask: JobTask<"write_briefs"> = async (payload, context)
   await writeReadyEventIfMissing(context.db, snapshot.meetingId, context.now());
 };
 
-// Reads the meeting, its members, notes, transcript, approved items and written briefs in one meeting context (ARCHITECTURE.md 3.27).
+// Reads the meeting, its members, notes, transcript, approved items and written briefs in one meeting context.
 export async function readBriefSnapshot(db: Kysely<Database>, meetingId: string): Promise<SnapshotRead> {
   return withMeeting(db, meetingId, async (trx) => {
     const meeting = await trx.selectFrom("meetings").select(["id", "state", "question_text", "question_kind"]).where("id", "=", meetingId).executeTakeFirst();
@@ -87,7 +87,7 @@ async function readSourceTurns(trx: DatabaseTransaction, members: MemberRow[]): 
   });
 }
 
-// The approved items of both cards, with the side each belongs to (R7.1, A1). A listed persona met through the directory brings only its public items (as-built item 49).
+// The approved items of both cards, with the side each belongs to. A listed persona met through the directory brings only its public items.
 async function readApprovedItems(trx: DatabaseTransaction, members: MemberRow[]): Promise<ApprovedItem[]> {
   const rows = await trx.selectFrom("card_items").select(["card_id", "position", "kind", "claim", "lang", "quote", "turn_id", "verified", "is_public"]).where("card_id", "in", members.map((member) => member.card_id)).where("approved", "=", true).orderBy("position", "asc").execute();
   return rows.flatMap((row) => {
@@ -106,7 +106,7 @@ function transcriptOf(events: CommittedEvent[]): TranscriptTurn[] {
   });
 }
 
-// Writes one side's brief: the brief call, the quote check, then the support check (D27, A1).
+// Writes one side's brief: the brief call, the quote check, then the support check.
 async function writeSideBrief(context: JobContext, snapshot: BriefSnapshot, side: Side): Promise<SideBrief> {
   const recipient = snapshot.sides[side];
   const other = snapshot.sides[side === "a" ? "b" : "a"];
@@ -121,7 +121,7 @@ async function writeSideBrief(context: JobContext, snapshot: BriefSnapshot, side
   return { side, personId: recipient.personId, sections: judged.sections, reliable: judged.reliable, checkedAt, rate: judged.rate, raw: judged.raw, promptVersion: prompt.version };
 }
 
-// Runs the support judge for one brief, with its one retry (ARCHITECTURE.md 4.8). A failed judge after its retry leaves every line unchecked (fail closed); a full window or a cap is passed up.
+// Runs the support judge for one brief, with its one retry. A failed judge after its retry leaves every line unchecked (fail closed); a full window or a cap is passed up.
 async function checkSupport(context: JobContext, check: { meetingId: string; side: Side; sections: BriefSections }): Promise<JudgeOutcome> {
   const { meetingId, side, sections } = check;
   const prompt = readPrompt("brief-support-judge");
@@ -145,7 +145,7 @@ async function checkSupport(context: JobContext, check: { meetingId: string; sid
   return failedCheck(sections, code);
 }
 
-// The outcome of a support check that did not run: every line stays unchecked, the rate is null, and the code is kept (A1).
+// The outcome of a support check that did not run: every line stays unchecked, the rate is null, and the code is kept.
 function failedCheck(sections: BriefSections, code: string): JudgeOutcome {
   const unchecked = { agree: sections.agree.map((point) => ({ ...point, supported: null })), clash: sections.clash.map((point) => ({ ...point, supported: null })), decideFirst: sections.decideFirst.map((point) => ({ ...point, supported: null })) };
   return { sections: unchecked, reliable: false, rate: null, raw: { error: code } };

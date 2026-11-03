@@ -20,7 +20,7 @@ export const ProfileView = z.object({
   requestId: Uuid.nullable(),
   pairId: Uuid.nullable(),
   canAsk: z.boolean(),
-  // The face of a sample person (3 Nov 2026); null for everyone else.
+  // The face of a sample person; null for everyone else.
   photo: PhotoKey.nullable().optional(),
 });
 // The type of ProfileView, read from the schema above.

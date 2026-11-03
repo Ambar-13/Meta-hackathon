@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { IsoTime, Uuid } from "../primitives.js";
 
-// Friend requests a person may send per UTC day (wave 7). Ambar's default; he can change it.
+// Friend requests a person may send per UTC day.
 export const FRIEND_REQUESTS_PER_DAY = 20;
 
 // The body of POST /api/friend-requests: the listing of the person you want to be friends with. Only people in Explore can be asked.

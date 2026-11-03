@@ -40,7 +40,7 @@
 .quote-sheet blockquote { margin: 12px 0; padding: 14px 16px; border-radius: 16px; background: var(--blue-soft); font: 600 18px/1.45 var(--sans); }
 .quote-sheet-who { display: flex; align-items: center; gap: 8px; color: var(--ink-2); font-size: 15px; }
 
-/* ---------- signed in (3 Nov 2026): the same brief without tilted colour boxes ----------
+/* ---------- signed in: the same brief without tilted colour boxes ----------
    In the app each part is a section under a hairline, the kind is grey words, and a quote chip is a soft pill with dark words. The public
    share page keeps the tilted panels: every rule here sits under .social-frame. */
 .social-frame .brief-lead .pill { padding: 0; border: 0; background: none; color: var(--ui-ink-2); font: 600 14px/1.3 var(--ui-font); }

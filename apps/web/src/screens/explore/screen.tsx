@@ -13,8 +13,7 @@ import { FriendControl, lineFor, PersonCard } from "./people-parts.js";
 import { StoriesRow } from "./stories.js";
 import { useLikes, useStories, type LikesModel } from "./story-state.js";
 
-// The words of Home, the feed (wave 7; Explore until 3 Nov 2026, when Ambar asked for the feed as the default page, named for what it
-// is: "explore should be the like default page... and it shouldnt be called eplroe because has feed + explroe both").
+// The words of Home, the feed.
 const FEED_COPY = {
   title: "Home",
   eyebrow: "People, not just posts.",
@@ -290,7 +289,7 @@ function feedEntries(feed: EndlessFeed): Array<Post | "caught-up"> {
   return [...feed.friends, ...(isPastFriends ? ["caught-up" as const] : []), ...feed.others];
 }
 
-// The feed, endless and honest (Ambar chose "Endless and honest" on 3 Nov 2026): your friends' posts and your own a page at a time, the
+// The feed, endless and honest: your friends' posts and your own a page at a time, the
 // line that you are all caught up, then everyone else's, the next page loading as you near the end, until the end says so. The row of
 // suggested people sits after the second post; each post's line comes from the loaded people.
 const Feed = (props: { browse: BrowseHook; feed: EndlessFeed; friends: ExploreFriends; likes: LikesModel }): ReactElement => {
@@ -385,8 +384,7 @@ function isNothingShown(browse: BrowseHook, feed: EndlessFeed): boolean {
   return isNobody && hasNoPosts;
 }
 
-// Home, the feed, as Instagram's home (Ambar, 3 Nov 2026: "it should have been looking like linkedin or instagram feed", then "explore
-// should be the like default page"), in the look of the "Other" concept: on a laptop a small line over the title with today's date at
+// Home, the feed, as Instagram's home, in the look of the "Other" concept: on a laptop a small line over the title with today's date at
 // the right, which a phone leaves out as Instagram does; your next step while you have no approved card; the row of stories; then the
 // posts with the people Explore suggests. On a laptop the right-hand column sits beside it.
 export const FeedScreen = (): ReactElement => {

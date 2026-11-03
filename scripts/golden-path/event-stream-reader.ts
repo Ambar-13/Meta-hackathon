@@ -9,7 +9,7 @@ export type ReaderOptions = { plannedDisconnectAtSeq?: number };
 const PLANNED_RECONNECT_MS = 500;
 // The most unplanned reconnects one reader makes before it fails (the spec's 5).
 const MAX_UNPLANNED_RECONNECTS = 5;
-// A reconnect may be up to 20% shorter than its base delay, so phones do not reconnect together (D51).
+// A reconnect may be up to 20% shorter than its base delay, so phones do not reconnect together.
 const JITTER_FRACTION = 0.2;
 
 // One connection: its abort controller, its body reader, whether this reader ended it on purpose, and whether it has carried an event.
@@ -232,7 +232,7 @@ export class EventStreamReader {
     }
   }
 
-  // A delta has no id line (D47). It is checked, kept and passed to the waiters.
+  // A delta has no id line. It is checked, kept and passed to the waiters.
   private handleDelta(id: string | undefined, data: string): void {
     if (id !== undefined) {
       this.raise("delta_has_id: a turn.delta frame carried an id line, which D47 forbids.");

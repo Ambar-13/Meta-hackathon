@@ -19,7 +19,7 @@ export type EvalResults = {
   scrubPlantedTotal: number | null;
 };
 
-// The two metrics that gate the exit code (A2): grounding has a floor, and leakage has a ceiling.
+// The two metrics that gate the exit code: grounding has a floor, and leakage has a ceiling.
 const THRESHOLD_KEYS: readonly MetricKey[] = ["grounded_brief_rate", "injection_leakage"];
 // The words that follow the sample size of each metric in the table.
 const SAMPLE_WORDS: Record<MetricKey, string> = {
@@ -31,10 +31,10 @@ const SAMPLE_WORDS: Record<MetricKey, string> = {
   first_turn_latency_ms: "meetings with a value",
   cost_per_complete_pair_usd: "completed meetings",
 };
-// The start marker and end marker of the generated eval block in the root README (R12.8).
+// The start marker and end marker of the generated eval block in the root README.
 const EVAL_START = "<!-- eval:start -->";
 const EVAL_END = "<!-- eval:end -->";
-// The start marker and end marker of the human block in the root README (A6).
+// The start marker and end marker of the human block in the root README.
 const HUMAN_START = "<!-- human-metrics:start -->";
 const HUMAN_END = "<!-- human-metrics:end -->";
 

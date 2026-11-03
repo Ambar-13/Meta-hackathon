@@ -7,12 +7,12 @@ import type { RouteDeps } from "../app-types.js";
 import { hashToken, newHexToken, setSessionCookie } from "./cookie.js";
 import { ACCOUNT_RATE_LIMIT } from "./rate-limit.js";
 
-// A 32-character recovery code from RECOVERY_CODE_ALPHABET; each character is drawn with crypto.randomInt, which gives each of the 31 symbols the same chance (A5).
+// A 32-character recovery code from RECOVERY_CODE_ALPHABET; each character is drawn with crypto.randomInt, which gives each of the 31 symbols the same chance.
 export function makeRecoveryCode(): string {
   return Array.from({ length: RECOVERY_CODE_LENGTH }, () => RECOVERY_CODE_ALPHABET.charAt(randomInt(RECOVERY_CODE_ALPHABET.length))).join("");
 }
 
-// Creates the person and the first session from the two hashes; the tokens themselves never reach the database (A5, D33).
+// Creates the person and the first session from the two hashes; the tokens themselves never reach the database.
 export async function insertPerson(db: Kysely<Database>, input: { displayName: string; affiliations: string[]; recoveryCode: string; sessionToken: string }): Promise<string> {
   const result = await sql<{ person_id: string }>`SELECT auth_create_person(${input.displayName}, ${input.affiliations}, ${hashToken(input.recoveryCode)}, ${hashToken(input.sessionToken)}) AS person_id`.execute(db);
   const personId = result.rows[0]?.person_id;
@@ -22,13 +22,13 @@ export async function insertPerson(db: Kysely<Database>, input: { displayName: s
   return personId;
 }
 
-// The sentence for a sign-up with no access code on a site that sets one (R9.5).
+// The sentence for a sign-up with no access code on a site that sets one.
 export const ACCESS_CODE_NEEDED_SENTENCE = "Meety is invite-only for now. Enter the access code you were given.";
-// The sentence for a sign-up with another access code than the site's (R9.5).
+// The sentence for a sign-up with another access code than the site's.
 export const ACCESS_CODE_WRONG_SENTENCE = "That access code is not right. Check it and try again.";
 
 // Refuses a sign-up without the right access code when the site sets one. Capitals and spaces around the code do not matter,
-// and the two codes are compared as digests, so the time the check takes says nothing about the code (R9.5).
+// and the two codes are compared as digests, so the time the check takes says nothing about the code.
 export function checkAccessCode(expected: string, given: string | undefined): void {
   if (expected === "") return;
   if (given === undefined) throw new ContractError("access_code_needed", ACCESS_CODE_NEEDED_SENTENCE, HTTP.forbidden);
@@ -37,7 +37,7 @@ export function checkAccessCode(expected: string, given: string | undefined): vo
 }
 
 // Registers POST /api/people: 201 {personId, recoveryCode} with the session cookie; 403 access_code_needed or access_code_wrong when
-// the site sets ACCESS_CODE; counted by the account limit, wrong codes included (A5, A7, R9.5).
+// the site sets ACCESS_CODE; counted by the account limit, wrong codes included.
 export function registerCreatePerson(app: FastifyInstance, deps: RouteDeps): void {
   app.post(routes.people.createPerson.path, { config: { rateLimit: ACCOUNT_RATE_LIMIT } }, async (request, reply) => {
     const body = PersonCreate.parse(request.body);

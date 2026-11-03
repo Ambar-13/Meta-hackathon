@@ -1,6 +1,6 @@
-// What exists: a person stuck on a problem can send it to the personas listed in the directory, and run_ask asks up to 20 of them
-// (design section 4). The problem: the person must see where the problem goes before sending it, because sending is their consent
-// (P5). The step: the box, HELP_SEND_COPY under it, and the send button; a sent search opens its answers page. What it does not do:
+// What exists: a person stuck on a problem can send it to the personas listed in the directory, and run_ask asks up to 20 of them.
+//The problem: the person must see where the problem goes before sending it, because sending is their consent.
+//The step: the box, HELP_SEND_COPY under it, and the send button; a sent search opens its answers page. What it does not do:
 // check the question; run_ask does that before any persona sees it.
 import "./help.css";
 import { useState, type FormEvent, type ReactElement } from "react";
@@ -9,19 +9,19 @@ import { HELP_SEND_COPY } from "@meet-first/contracts";
 import { apiFetch, APP_PATHS, asApiError, ErrorNotice, routes, ScreenFrame, type ApiError } from "../../app-shell/index.js";
 import { LoadingLine, Sticker } from "../../look/index.js";
 
-// The label of the problem box; 5 to 300 characters is what AskCreate accepts after trimming [confirm].
+// The label of the problem box; 5 to 300 characters is what AskCreate accepts after trimming.
 const PROBLEM_LABEL = "Your problem";
 // The fewest and the most characters of a problem, the bounds of AskCreate in contracts.
 const PROBLEM_MIN_CHARACTERS = 5;
 const PROBLEM_MAX_CHARACTERS = 300;
-// The line shown when the problem is shorter or longer than that [confirm].
+// The line shown when the problem is shorter or longer than that.
 const PROBLEM_LENGTH_LINE = "Write a problem of 5 to 300 characters.";
-// The words of the send button [confirm].
+// The words of the send button.
 const SEND_LABEL = "Find who could help";
-// The line shown while the problem is on its way [confirm] (drafted copy, design pass).
+// The line shown while the problem is on its way (drafted copy, design pass).
 const SENDING_LINE = "Asking the people in Explore.";
 
-// The help page's send action: the length check, the POST, then the answers page; go navigates (design section 7).
+// The help page's send action: the length check, the POST, then the answers page; go navigates.
 function useHelpSend(go: (path: string) => void): { isSending: boolean; lengthLine: string | null; sendError: ApiError | null; send: (text: string) => Promise<void> } {
   const [isSending, setIsSending] = useState(false);
   const [lengthLine, setLengthLine] = useState<string | null>(null);
@@ -46,7 +46,7 @@ function useHelpSend(go: (path: string) => void): { isSending: boolean; lengthLi
   return { isSending, lengthLine, sendError, send };
 }
 
-// The /help page: the problem box, the words that say where the problem goes, and the send button (design section 7, P5).
+// The /help page: the problem box, the words that say where the problem goes, and the send button.
 export const HelpScreen = (): ReactElement => {
   const navigate = useNavigate();
   const [text, setText] = useState("");

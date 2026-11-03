@@ -4,16 +4,16 @@ import { GOOGLE_RESULT_QUERY, GoogleSignInResult, PersonCreate, Recover, type Pe
 import { apiFetch, asApiError, ApiError, readFragmentToken, rememberAllowlist, routes } from "../../app-shell/index.js";
 import { rememberAccessCode } from "./access-code.js";
 
-// The message for a display name the contracts refuse (A5).
+// The message for a display name the contracts refuse.
 const NAME_MESSAGE = "Use 1 to 80 characters for your display name.";
-// The message for a groups list the contracts refuse [confirm] (drafted copy, no input gives it).
+// The message for a groups list the contracts refuse (drafted copy).
 const GROUPS_MESSAGE = "Use at most 10 groups, each 1 to 80 characters.";
-// The message for a recovery code of the wrong length [confirm] (drafted copy, no input gives it).
+// The message for a recovery code of the wrong length (drafted copy).
 const CODE_MESSAGE = "A recovery code has 32 characters.";
-// The message for an access code longer than the contracts allow (R9.5).
+// The message for an access code longer than the contracts allow.
 const ACCESS_MESSAGE = "An access code has at most 100 characters.";
 
-// Splits the groups field on commas, trims each part and drops empty parts (D17).
+// Splits the groups field on commas, trims each part and drops empty parts.
 export function parseAffiliations(text: string): string[] {
   return text
     .split(",")
@@ -21,11 +21,11 @@ export function parseAffiliations(text: string): string[] {
     .filter((part) => part !== "");
 }
 
-// The create flow: idle, sending, created with the code to show once, invalid input, or failed (A5).
+// The create flow: idle, sending, created with the code to show once, invalid input, or failed.
 export type CreateState = { kind: "idle" } | { kind: "sending" } | { kind: "created"; recoveryCode: string } | { kind: "invalid"; message: string } | { kind: "failed"; error: ApiError };
-// The recovery flow: idle, sending, done, invalid input, or failed (A5).
+// The recovery flow: idle, sending, done, invalid input, or failed.
 export type RecoverState = { kind: "idle" } | { kind: "sending" } | { kind: "done" } | { kind: "invalid"; message: string } | { kind: "failed"; error: ApiError };
-// The claim flow of /claim: no token, a token ready, sending, done, or failed (R9.2).
+// The claim flow of /claim: no token, a token ready, sending, done, or failed.
 export type ClaimState = { kind: "missing" } | { kind: "ready"; token: string } | { kind: "sending"; token: string } | { kind: "done" } | { kind: "failed"; error: ApiError };
 
 // The invalid message for a rejected create body: the name sentence when the name is the cause, the access code sentence when the
@@ -35,8 +35,8 @@ function createMessage(issuePaths: Array<string | number | undefined>): string {
   return issuePaths.includes("accessCode") ? ACCESS_MESSAGE : GROUPS_MESSAGE;
 }
 
-// Creates a person and keeps the allowlist in memory; the recovery code lives only in this state (A5, D17). An access code, when
-// one was typed or came in the link, goes with the request and is kept for the invite links this person shares (R9.5).
+// Creates a person and keeps the allowlist in memory; the recovery code lives only in this state. An access code, when
+// one was typed or came in the link, goes with the request and is kept for the invite links this person shares.
 export function useCreatePerson(): { state: CreateState; create: (displayName: string, groups: string, accessCode: string) => Promise<void>; forgetCode: () => void } {
   const [state, setState] = useState<CreateState>({ kind: "idle" });
   const create = async (displayName: string, groups: string, accessCode: string): Promise<void> => {
@@ -64,7 +64,7 @@ export function useCreatePerson(): { state: CreateState; create: (displayName: s
   return { state, create, forgetCode };
 }
 
-// Redeems a recovery code; the server allows it once (A5).
+// Redeems a recovery code; the server allows it once.
 export function useRecover(): { state: RecoverState; recover: (code: string) => Promise<void> } {
   const [state, setState] = useState<RecoverState>({ kind: "idle" });
   const recover = async (code: string): Promise<void> => {
@@ -84,7 +84,7 @@ export function useRecover(): { state: RecoverState; recover: (code: string) => 
   return { state, recover };
 }
 
-// Reads the token from the fragment once, removes it from the address bar, and claims it when asked (R9.2).
+// Reads the token from the fragment once, removes it from the address bar, and claims it when asked.
 export function useClaim(): { state: ClaimState; claim: () => Promise<void> } {
   const location = useLocation();
   const navigate = useNavigate();
@@ -111,7 +111,7 @@ export function useClaim(): { state: ClaimState; claim: () => Promise<void> } {
 }
 
 // Whether this site offers Continue with Google (GET /api/auth/options): false while it is read and when it cannot be read, so the start
-// page never shows a button that leads nowhere (3 Nov 2026).
+// page never shows a button that leads nowhere.
 export function useGoogleSignIn(): boolean {
   const [isOn, setIsOn] = useState(false);
   useEffect(() => {

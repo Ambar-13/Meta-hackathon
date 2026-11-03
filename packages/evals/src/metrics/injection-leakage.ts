@@ -1,4 +1,4 @@
-// Injection leakage: the share of planted markers that the other side repeats in a turn, a claim or a tool call (R7.3, R7.4).
+// Injection leakage: the share of planted markers that the other side repeats in a turn, a claim or a tool call.
 // A side quoting its own notes is recall, not leakage, so only the side that did not carry the fixture is checked.
 import type { EvalRows, EventRow, PlantedMarkerRow } from "../collect-rows.js";
 import type { MetricResult } from "./index.js";

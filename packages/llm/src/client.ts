@@ -17,7 +17,7 @@ import { assertModeAllowed, FIXTURE_ROOT, requestHash, runInMode, type LiveCalle
 import { withTransportRetries } from "./retries.js";
 import { readChatStream, replayAsStream, replyLayoutFrom, ReplayResponse, usageFromVendor, type StreamHooks, type StreamOutcome } from "./stream-reader.js";
 
-// The worker's variables, read with the contracts schema (R10.2).
+// The worker's variables, read with the contracts schema.
 type WorkerEnv = z.infer<typeof workerEnv>;
 // What one client needs: the database, the env, the clock, the sleep and random sources, and the seams a test replaces.
 export type LlmClientDeps = {
@@ -30,7 +30,7 @@ export type LlmClientDeps = {
   live?: LiveCaller;
   timeoutSignal?: (ms: number) => AbortSignal;
 };
-// The arguments of one non-streamed call, frozen in docs/contracts.md section 4. There is no transaction: the client writes its own ledger rows.
+// The arguments of one non-streamed call. There is no transaction: the client writes its own ledger rows.
 export type CompleteArgs = {
   callSite: CallSite;
   promptVersion: string;
@@ -42,11 +42,11 @@ export type CompleteArgs = {
 };
 // What one call returns: text, the parsed JSON when a schema was sent, tool calls, finish reason, usage and the ledger row id.
 export type CompleteResult = { text: string | null; parsed: unknown; toolCalls: ToolCall[]; finishReason: "stop" | "length" | "tool_calls"; usage: RecordedCall["usage"]; ledgerId: string };
-// A streamed call: the same arguments plus the two hooks the stream calls (meeting speech only, D39).
+// A streamed call: the same arguments plus the two hooks the stream calls (meeting speech only).
 export type StreamArgs = CompleteArgs & { onDelta: (text: string) => Promise<void>; onFirstToken: () => Promise<void> };
-// One image call for the comic (Wave 2).
+// One image call for the comic.
 export type ImageArgs = { callSite: "comic_image"; prompt: string; ledger: { personId: string | null; meetingId: string | null } };
-// The one object every job calls (docs/contracts.md section 4).
+// The one object every job calls.
 export type LlmClient = {
   complete: (args: CompleteArgs) => Promise<CompleteResult>;
   stream: (args: StreamArgs) => Promise<CompleteResult>;
@@ -78,7 +78,7 @@ const ImageReply = z.object({ data: z.array(z.object({ b64_json: z.string().min(
 const RecordResponse = z.record(z.string(), z.unknown());
 const VendorStatus = z.object({ status: z.number().int() }).passthrough();
 
-// The SDK instance, built once with our own retries and the base URL (R10.1, D22).
+// The SDK instance, built once with our own retries and the base URL.
 export function makeSdk(env: Pick<WorkerEnv, "META_API_KEY" | "META_API_BASE_URL">): openai {
   return new openai({ apiKey: env.META_API_KEY, baseURL: env.META_API_BASE_URL, maxRetries: 0 });
 }
@@ -89,7 +89,7 @@ export function worstCaseUsage(body: Record<string, unknown>): RecordedCall["usa
   return { promptTokens: estimateTokens(requestChars(body), null), cachedTokens: 0, completionTokens: typeof body.max_tokens === "number" ? body.max_tokens : 0, reasoningTokens: 0 };
 }
 
-// The non-streamed live caller: one SDK call with the call site's timeout and the attempt's signal (R10.1, D22).
+// The non-streamed live caller: one SDK call with the call site's timeout and the attempt's signal.
 export function makeLiveCaller(sdk: openai): LiveCaller {
   return async (request, signal) => {
     const options = { timeout: CALL_SITE_CONFIG[request.callSite].timeoutMs, signal };
@@ -102,7 +102,7 @@ export function makeLiveCaller(sdk: openai): LiveCaller {
   };
 }
 
-// The streamed live caller: reads the SDK stream so deltas reach the hooks as they arrive, and returns the recorded layout (section 4.3).
+// The streamed live caller: reads the SDK stream so deltas reach the hooks as they arrive, and returns the recorded layout.
 export function makeStreamingLiveCaller(sdk: openai, hooks: StreamHooks): LiveCaller {
   return async (request, signal) => {
     const options = { timeout: CALL_SITE_CONFIG[request.callSite].timeoutMs, signal };
@@ -112,12 +112,12 @@ export function makeStreamingLiveCaller(sdk: openai, hooks: StreamHooks): LiveCa
   };
 }
 
-// Refuses replay in production for this worker env (D74). The mode is read inside packages/llm because CI rejects its variable name in every other folder (as-built item 25).
+// Refuses replay in production for this worker env. The mode is read inside packages/llm because CI rejects its variable name in every other folder.
 export function assertWorkerModeAllowed(env: WorkerEnv, nodeEnv: string | undefined): void {
   assertModeAllowed(env.LLM_MODE, nodeEnv);
 }
 
-// Builds the client. The SDK is constructed once with maxRetries 0 and the base URL; every call sets its own timeout and signal (R10.1, D22).
+// Builds the client. The SDK is constructed once with maxRetries 0 and the base URL; every call sets its own timeout and signal.
 export function makeLlmClient(deps: LlmClientDeps): LlmClient {
   const sdk = makeSdk(deps.env);
   const state: ClientState = {
@@ -144,21 +144,21 @@ function requestIdOf(response: Record<string, unknown>): string | null {
   return typeof response.id === "string" ? response.id : null;
 }
 
-// Refuses a call that names no person and no meeting, before any row is written; only the boot self-test may do so (R3.5).
+// Refuses a call that names no person and no meeting, before any row is written; only the boot self-test may do so.
 function assertLedgerOwner(callSite: CallSite, ledger: CompleteArgs["ledger"]): void {
   if (ledger.personId === null && ledger.meetingId === null && callSite !== "self_test") {
     throw new ContractError("ledger_context_missing", "A model call must name a person or a meeting for its ledger row. Pass ledger.personId or ledger.meetingId.", 500);
   }
 }
 
-// Runs one ledger write in its own short transaction, as the person or the meeting; the self-test runs as nobody (Wave 0 policy).
+// Runs one ledger write in its own short transaction, as the person or the meeting; the self-test runs as nobody.
 async function inLedger<T>(state: ClientState, ledger: CompleteArgs["ledger"], write: (trx: DatabaseTransaction) => Promise<T>): Promise<T> {
   if (ledger.personId !== null) return withPerson(state.db, ledger.personId, write);
   if (ledger.meetingId !== null) return withMeeting(state.db, ledger.meetingId, write);
   return state.db.transaction().execute(write);
 }
 
-// The ledger row a call starts with: its owner, model, effort, estimate and mode (R3.5, D58).
+// The ledger row a call starts with: its owner, model, effort, estimate and mode.
 function startOf(state: ClientState, core: CallCore): LedgerStart {
   return { personId: core.ledger.personId, meetingId: core.ledger.meetingId, callSite: core.callSite, model: core.model, effort: core.effort, estTokens: core.estTokens, llmMode: state.env.LLM_MODE };
 }
@@ -192,13 +192,13 @@ function finishFromReply(status: "ok" | "error", reply: LlmReply): LedgerFinish 
   };
 }
 
-// True when a replay had no recorded reply for this request (D74).
+// True when a replay had no recorded reply for this request.
 function isReplayMiss(error: unknown): boolean {
   return error instanceof ContractError && error.code === "replay_fixture_missing";
 }
 
 // The usage and dollars of an attempt that threw. Meta may have billed a live or recorded chat call that timed out, was aborted, broke mid-stream or
-// failed without an HTTP status, so its row counts the worst case, which the caps and the meeting token stop read (D60, D61). A vendor HTTP error,
+// failed without an HTTP status, so its row counts the worst case, which the caps and the meeting token stop read. A vendor HTTP error,
 // a replay miss, replay mode and comic_image count nothing: replay calls nobody, and Meta bills an image only when it is returned.
 function failureCharge(state: ClientState, core: CallCore, error: unknown): Pick<LedgerFinish, "usage" | "usd"> {
   const canBeBilled = state.env.LLM_MODE === "live" || state.env.LLM_MODE === "record";
@@ -207,14 +207,14 @@ function failureCharge(state: ClientState, core: CallCore, error: unknown): Pick
   return { usage, usd: usdForUsage(usage) };
 }
 
-// Writes the request of a replay miss to the temp folder, so a fixture can be made from the exact body the code sent (D74).
+// Writes the request of a replay miss to the temp folder, so a fixture can be made from the exact body the code sent.
 function writeMissFile(core: CallCore): void {
   const path = join(tmpdir(), "meet-first-replay-misses", core.callSite, `${requestHash(core.body)}.request.json`);
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, `${JSON.stringify({ callSite: core.callSite, promptVersion: core.promptVersion, body: core.body }, null, 2)}\n`);
 }
 
-// The error a failed non-streamed attempt raises: a replay miss stays as it is, a deadline becomes model_call_timeout (R10.3).
+// The error a failed non-streamed attempt raises: a replay miss stays as it is, a deadline becomes model_call_timeout.
 function attemptFailure(core: CallCore, error: unknown, timedOut: boolean): unknown {
   if (isReplayMiss(error)) {
     writeMissFile(core);
@@ -224,7 +224,7 @@ function attemptFailure(core: CallCore, error: unknown, timedOut: boolean): unkn
   return error;
 }
 
-// Writes the ledger row for one attempt, then runs the call in the current mode under its deadline (R3.5, R10.3).
+// Writes the ledger row for one attempt, then runs the call in the current mode under its deadline.
 async function runAttempt(state: ClientState, core: CallCore): Promise<Attempt> {
   const ledgerId = await inLedger(state, core.ledger, (trx) => startLedgerRow(trx, startOf(state, core)));
   const deadline = state.timeoutSignal(CALL_SITE_CONFIG[core.callSite].timeoutMs);
@@ -249,7 +249,7 @@ function requestArgsOf(args: CompleteArgs): Omit<ChatRequestArgs, "stream"> {
   };
 }
 
-// The call a set of arguments makes: its body, its estimate and its effort; an override builds the length retry (D63).
+// The call a set of arguments makes: its body, its estimate and its effort; an override builds the length retry.
 function coreOf(args: CompleteArgs, isStreamed: boolean, override?: { effort: Effort; maxTokens: number }): CallCore {
   const body = buildChatRequest({ ...requestArgsOf(args), stream: isStreamed, ...(override === undefined ? {} : { override }) });
   return {
@@ -280,7 +280,7 @@ function reasonOf(reason: string | null): "stop" | "length" | "tool_calls" {
   return "stop";
 }
 
-// Reads one non-streamed reply: its text, its JSON when a schema was sent, its tool calls, and whether it was cut (R10.5, D63).
+// Reads one non-streamed reply: its text, its JSON when a schema was sent, its tool calls, and whether it was cut.
 function readCompletion(reply: LlmReply, structured: boolean): Reading {
   const parsed = Completion.safeParse(reply.response);
   const choice = parsed.success ? parsed.data.choices[0] : undefined;
@@ -291,7 +291,7 @@ function readCompletion(reply: LlmReply, structured: boolean): Reading {
   return { text, parsed: json.value, toolCalls: choice.message.tool_calls ?? [], finishReason, isCut: finishReason === "length" || !json.ok };
 }
 
-// One non-streamed round: the attempt with its transport retries, then the reading; a cut reply is retried once at minimal effort (D63).
+// One non-streamed round: the attempt with its transport retries, then the reading; a cut reply is retried once at minimal effort.
 async function completeRound(state: ClientState, args: CompleteArgs, lengthRetry: boolean): Promise<CompleteResult> {
   const core = coreOf(args, false, lengthRetry ? lengthRetryFor(args.callSite) : undefined);
   const attempt = await withTransportRetries(() => runAttempt(state, core), { sleep: state.sleep, random: state.random });
@@ -317,7 +317,7 @@ async function completeRound(state: ClientState, args: CompleteArgs, lengthRetry
   return { text: reading.text, parsed: reading.parsed, toolCalls: reading.toolCalls, finishReason: reading.finishReason, usage: attempt.reply.usage, ledgerId: attempt.ledgerId };
 }
 
-// The non-streamed call: caps and the shared window first, then the round (R3.7, D58).
+// The non-streamed call: caps and the shared window first, then the round.
 async function complete(state: ClientState, args: CompleteArgs): Promise<CompleteResult> {
   assertLedgerOwner(args.callSite, args.ledger);
   await assertUnderCaps(state.db, state.env, { callSite: args.callSite, now: state.now });
@@ -325,7 +325,7 @@ async function complete(state: ClientState, args: CompleteArgs): Promise<Complet
   return completeRound(state, args, false);
 }
 
-// The deadline and first-token gate of one streamed attempt: a late first token aborts the call, a late call aborts it too (R10.3).
+// The deadline and first-token gate of one streamed attempt: a late first token aborts the call, a late call aborts it too.
 function openGate(state: ClientState, args: StreamArgs): Gate {
   const config = CALL_SITE_CONFIG[args.callSite];
   const deadline = state.timeoutSignal(config.timeoutMs);
@@ -372,7 +372,7 @@ function outcomeFromLayout(reply: LlmReply): StreamOutcome {
   };
 }
 
-// The error a failed streamed attempt raises, in the order of R10.3 and R10.7: text already shown first, then the timers, then a replay miss.
+// The error a failed streamed attempt raises, in this order: text already shown first, then the timers, then a replay miss.
 function streamFailure(core: CallCore, error: unknown, gate: Gate): unknown {
   if (gate.flags.hasDelivered) return new ContractError("model_stream_cut", "The model stream broke after text was shown. Discard this round's partial text and retry the round once.", 502);
   if (gate.flags.isFirstTokenLate) return new ContractError("model_first_token_timeout", "The model sent nothing within the first-token limit. The call is retried once.", 504);
@@ -401,7 +401,7 @@ async function streamAttempt(state: ClientState, args: StreamArgs, core: CallCor
   }
 }
 
-// One streamed round with its transport retries; a cut or length reply before any text is shown is retried once (D39, R10.7).
+// One streamed round with its transport retries; a cut or length reply before any text is shown is retried once.
 async function streamRound(state: ClientState, args: StreamArgs, lengthRetry: boolean): Promise<CompleteResult> {
   const core = coreOf(args, true, lengthRetry ? lengthRetryFor(args.callSite) : undefined);
   const pass = await withTransportRetries(() => streamAttempt(state, args, core), { sleep: state.sleep, random: state.random });
@@ -419,7 +419,7 @@ async function streamRound(state: ClientState, args: StreamArgs, lengthRetry: bo
   return streamRound(state, args, true);
 }
 
-// The streamed call: refuses a schema, then caps and the window, then the round (D39).
+// The streamed call: refuses a schema, then caps and the window, then the round.
 async function stream(state: ClientState, args: StreamArgs): Promise<CompleteResult> {
   if (args.schema !== undefined) throw new ContractError("stream_schema_refused", "A streamed call cannot carry an output schema (D39). Use complete for structured output.", 500);
   assertLedgerOwner(args.callSite, args.ledger);
@@ -428,7 +428,7 @@ async function stream(state: ClientState, args: StreamArgs): Promise<CompleteRes
   return streamRound(state, args, false);
 }
 
-// One image call for the comic: one attempt, no retries, zero usage and a fixed dollar price (D64, R11.4).
+// One image call for the comic: one attempt, no retries, zero usage and a fixed dollar price.
 async function image(state: ClientState, args: ImageArgs): Promise<{ webp: Uint8Array; ledgerId: string }> {
   assertLedgerOwner(args.callSite, args.ledger);
   await assertUnderCaps(state.db, state.env, { callSite: args.callSite, now: state.now });

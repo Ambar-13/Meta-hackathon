@@ -6,17 +6,17 @@ import { PLANNED_DISCONNECT_SEQ } from "./fixtures.js";
 import { check, finishStep, need, pollUntil, readers, routePath, sleep, type Assertion, type RunState, type StepResult } from "./report.js";
 
 // The first and second turns may take 210 s each: one first-token retry (45 s), a 120 s speech call and 30 s of receipts, rounded up
-// (D39 as measured on the live model on 27 Oct 2026: Muse Spark reasons silently before its first word).
+// (as measured on the live model on 27 Oct 2026: Muse Spark reasons silently before its first word).
 const TURN_TIMEOUT_MS = 210_000;
-// The meeting may run for 14 minutes from its start: the 13-minute worst case plus a minute (design step 12).
+// The meeting may run for 14 minutes from its start: the 13-minute worst case plus a minute.
 const MEETING_WAIT_MS = 840_000;
-// The longest a meeting may last before it must have ended, in seconds (design step 12).
+// The longest a meeting may last before it must have ended, in seconds.
 const DECIDE_LIMIT_SECONDS = 780;
-// The background return: reader A closes for this long while B is writing (design step 11).
+// The background return: reader A closes for this long while B is writing.
 const BACKGROUND_MS = 20_000;
-// The mid-turn wait: B must write a delta within this long (design step 11).
+// The mid-turn wait: B must write a delta within this long.
 const MID_TURN_TIMEOUT_MS = 180_000;
-// After the background return, the replay arrives within this long (R8.1).
+// After the background return, the replay arrives within this long.
 const REPLAY_TIMEOUT_MS = 5_000;
 // The poll interval for arrivals that a helper is waiting on.
 const ARRIVAL_POLL_MS = 100;
@@ -24,7 +24,7 @@ const ARRIVAL_POLL_MS = 100;
 const STRAGGLER_MS = 5_000;
 // The seq the stream reaches once the first reader has resumed after the planned cut (step 8).
 const RESUMED_SEQ = PLANNED_DISCONNECT_SEQ + 1;
-// The number of turns one recall lookup may return for A's persona (D38).
+// The number of turns one recall lookup may return for A's persona.
 const RECALL_MAX_TURNS = 5;
 
 // The turns a reader has committed, in order.
@@ -49,7 +49,7 @@ function turnsIn(result: Record<string, unknown>): number {
   return Array.isArray(turns) ? turns.length : -1;
 }
 
-// Whether the offsets of each turn attempt rise and never fall (D47).
+// Whether the offsets of each turn attempt rise and never fall.
 function offsetsRise(deltas: readonly TurnDelta[]): boolean {
   const last = new Map<string, number>();
   return deltas.every((delta) => {
@@ -71,7 +71,7 @@ async function arrivalAfter(reader: EventStreamReader, search: { mark: number; p
 }
 
 // The checks on the recall switch: A's persona calls recall when it chooses to, and B's lookups return nothing.
-// The recorded model did not call recall, so --mock tolerates a missing call as a live run does (wave 3 section 4.4, R8.2).
+// The recorded model did not call recall, so --mock tolerates a missing call as a live run does.
 function recallChecks(a: EventStreamReader, isMock: boolean, notes: string[]): Assertion[] {
   const isRecallCalled = a.committed.some((event) => event.type === "tool.called" && event.tool === "recall" && event.side === "a");
   const results = a.committed.filter((event): event is ToolResult => event.type === "tool.result" && event.tool === "recall");
@@ -108,7 +108,7 @@ function cutChecks(a: EventStreamReader, isMock: boolean, notes: string[]): Asse
 }
 
 // Step 8: both screens show the same turns, the recall switch works on A's side only, deltas arrive before the commit, and the planned cut resumes with the next seq.
-// Under a live run a missing recall call, missing deltas or a meeting that ends before the cut are noted, not failed (R8.2, model choice).
+// Under a live run a missing recall call, missing deltas or a meeting that ends before the cut are noted, not failed (model choice).
 export async function step08Stream(run: RunState): Promise<StepResult> {
   const { a, b } = readers(run);
   const isMock = run.options.mode === "mock";
@@ -129,7 +129,7 @@ export async function step08Stream(run: RunState): Promise<StepResult> {
   });
 }
 
-// The removed ask step: it keeps its number and never fails (as-built item 28).
+// The removed ask step: it keeps its number and never fails.
 export function removedStep(number: number, name: string): StepResult {
   return { number, name, result: "removed", durationMs: 0, detail: "ask my human was dropped (as-built item 28)", rows: [], assertions: [] };
 }
@@ -171,7 +171,7 @@ export async function step11Background(run: RunState): Promise<StepResult> {
 }
 
 // The concede and hold checks of the decision: a decide phase, and each side concedes or holds.
-// How many sides concede is the model's choice; the recorded meeting had none, so --mock does not count them (wave 3 section 4.4).
+// How many sides concede is the model's choice; the recorded meeting had none, so --mock does not count them.
 function decisionChecks(a: EventStreamReader): Assertion[] {
   const isEachSide = (["a", "b"] as const).every((side) => a.committed.some((event) => (event.type === "concede" || event.type === "hold") && event.side === side));
   return [

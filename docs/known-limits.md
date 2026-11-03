@@ -2,9 +2,9 @@
 
 A simulation of how two people would probably react, not a guarantee; it gives no score.
 
-No age check: the site does not ask anyone's age or say who it is for (Ambar, 2 Nov 2026). Wave 5 added an 18-and-over line with the dating questions, and this file then said the Meta terms and the hackathon require it, which no design input backed. Dating questions still need both people to switch them on.
+No age check: the site does not ask anyone's age.
 
-Invite-only on the deployed site: sign-up with a name needs the access code (ACCESS_CODE on the Render service), so a script cannot make accounts and spend the model budget through them. Continue with Google needs no code, since a script cannot make Google accounts at will; it shows only when GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are set on the service, and allows 60 sign-ins per address per hour. A link with ?access= fills the code in, and the invite link a person shares carries the code they signed up with. Wrong codes count toward the 10 accounts per address per hour. If the code leaks, the spend caps still hold: $15 a day and $111 in all on Render (render.yaml; $60 until 3 Nov 2026).
+Invite-only on the deployed site: sign-up with a name needs the access code (ACCESS_CODE on the Render service), so a script cannot make accounts and spend the model budget through them. Continue with Google needs no code, since a script cannot make Google accounts at will; it shows only when GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are set on the service, and allows 60 sign-ins per address per hour. A link with ?access= fills the code in, and the invite link a person shares carries the code they signed up with. Wrong codes count toward the 10 accounts per address per hour. If the code leaks, the spend caps still hold: $15 a day and $111 in all on Render (render.yaml).
 
 No sexually explicit questions: dating and romance questions are allowed, but the question check refuses anything that asks for sexual content.
 
@@ -28,27 +28,27 @@ An anonymous session cannot be recovered once device and recovery code are both 
 - Help searches reach only people listed in Explore. A friend who is not listed is reached only by a friend ask, because friends switched on "friends can ask how I would react", not "answer people's problems".
 - Two friends with the same display name cannot be told apart in the chat; the Friends page asks each one by their own button.
 - A declined friend request can be sent again at once, inside the 20 requests a day, as on Instagram.
-- Agent posts and reposting Instagram posts are not built. Only the six sample people have posts, written by hand in `packages/db/src/samples/sample-people.ts`; every other profile's Posts tab says what agent posts will be.
+- People share posts, stories and likes, but their Meety does not read them yet, and a Meety does not write posts of its own. The sample people's posts are written by hand in `packages/db/src/samples/sample-people.ts`.
 - The sample people are made up, and every place that shows one marks it Sample. Nobody can sign in as one: each was made with a random session and recovery code that were never kept. Setting `SEED_SAMPLES` to `0` stops adding them but does not remove the ones already there; removing them needs a delete of those people by hand.
 - A sample person accepts every friend request at once, so friending one costs nothing but a slot of the 20 requests a day. Asking their agent costs model calls like any friend ask, inside the same daily caps.
-- The prompt behind Meety (orchestrator v2) is a draft: 4 tests ran once on the live model and passed (packages/prompts/orchestrator/results.md).
+- The prompt behind Meety (orchestrator v3) is a draft: of 49 test inputs run three times each on the live model, 48 passed every run and one passed two of three (packages/prompts/orchestrator/results.md).
 
 ## Things we can only detect, not prevent
 
-- Render body limit (R1.8): a request over the platform's body limit is detected, not prevented.
-- Authorship (R2.7): a report that someone else wrote the chats is detected after the fact; the attestation tick is the person's own word.
-- Marker repetition under injection (R7.4): repeated markers are detected, not stopped.
-- Postgres disk (R12.5): a full disk is detected, not prevented.
-- Backups (R12.7): backups belong to the hosting platform, and this product does not test a restore.
+- Render body limit: a request over the platform's body limit is detected, not prevented.
+- Authorship: a report that someone else wrote the chats is detected after the fact; the attestation tick is the person's own word.
+- Marker repetition under injection: repeated markers are detected, not stopped.
+- Postgres disk: a full disk is detected, not prevented.
+- Backups: backups belong to the hosting platform, and this product does not test a restore.
 
 ## Operational limits
 
 - A job that spends all its attempts leaves its step for the sweeper or leaves the brief unwritten.
 - The daily and total USD caps pause model calls for the rest of the day. Cards show "card generation paused for today" and meetings show "meetings are paused for today" (packages/llm/src/caps.ts).
 - Comics are purged after 30 days unless their share page is published.
-- A meeting may run for about 13 minutes, while the copy says ten (PLAN.md 10.6).
+- A meeting may run for about 13 minutes, while the copy says ten.
 - The upload reads Codex sessions saved as plain .jsonl files. Codex keeps older sessions compressed as .jsonl.zst, and the upload skips those, so a person who zips their sessions folder gets only the plain ones read (`apps/web/src/extract/zip-stream.ts`).
-- One Codex session log can run to tens of megabytes, so even a week of sessions can zip to more than the 150 MB file limit (D2), and a person may need to pick fewer sessions at a time.
+- One Codex session log can run to tens of megabytes, so even a week of sessions can zip to more than the 150 MB file limit, and a person may need to pick fewer sessions at a time.
 
 ## Plain sentences for the code
 
@@ -62,6 +62,6 @@ An anonymous session cannot be recovered once device and recovery code are both 
 - The model still writes a line such as "I'll search my notes" before a tool call in most rounds. The worker leaves that round out of the turn and drops its text from the screen when the round ends, so a live viewer can see the line for a moment before it goes (`apps/worker/src/meetings/step-job.ts`).
 - The Render service's environment holds every secret, because its start script migrates and starts both processes. The script runs as root and starts the api and the worker as two users of their own, each with only its own variables and its own home and temporary folder, so neither can read the other's environment or the script's, or plant a module the other would load (`scripts/start-api-and-worker.sh`, `Dockerfile.render`). The two-user start has not run outside Render's first deploy: this machine has no Docker.
 - On Render's free plan the one service sleeps after 15 minutes with no visits, and the first visit after that waits about a minute on Render's loading page. A pinger that reads /api/health every 10 minutes keeps it awake within the 750 free hours a month. The free database expires 30 days after it is made (render.com/docs/free).
-- On Render's free plan the service cannot set a shutdown delay (Render refuses maxShutdownDelaySeconds there), so a deploy stops it after Render's default wait, and a model call still running then is cut; the stalled-meeting sweep picks the meeting up again. A paid plan takes the 150 s delay (D70, R12.4).
+- On Render's free plan the service cannot set a shutdown delay (Render refuses maxShutdownDelaySeconds there), so a deploy stops it after Render's default wait, and a model call still running then is cut; the stalled-meeting sweep picks the meeting up again. A paid plan takes the 150 s delay.
 - On Render the api and the worker share one container's 512 MB, so MAX_CONCURRENT_MEETINGS is 5 there; one replay meeting took the two to 368 MB together (render.yaml).
 - On Render, app_migrate owns the public schema and keeps its app_definer membership (ADMIN and SET, no INHERIT) between deploys, because the pre-deploy migrate runs on every deploy and migration 0007 drops functions owned by app_definer. A local rebuild takes the membership back after each run (`packages/db/src/render-roles.ts`).

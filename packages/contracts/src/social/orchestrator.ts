@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { IsoTime, Uuid } from "../primitives.js";
 
-// Messages a person may send the orchestrator per UTC day (wave 7). Ambar's default; he can change it.
+// Messages a person may send the orchestrator per UTC day.
 export const ORCHESTRATOR_MESSAGES_PER_DAY = 40;
 // The longest message a person may send the orchestrator.
 export const ORCHESTRATOR_MESSAGE_MAX_CHARS = 500;

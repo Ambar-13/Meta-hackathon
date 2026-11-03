@@ -1,6 +1,5 @@
-/* Home, the feed, and Search (3 Nov 2026). Ambar: "it should have been looking like linkedin or instagram feed"; then "I WANT THE OTHERS
-   AND INSTAGRAM LOOK", the "Other" concept he liked and Instagram's app; then "explore should be the like default page", no tabs on it
-   ("just liek social media"), and a search to find people and send them friend requests "like insta". Photos have square corners and
+/* Home, the feed, and Search, after Instagram's app: one feed with no tabs on it, and a search to find people and send them friend
+   requests. Photos have square corners and
    the sample people faces, each with the orange made-up mark. Left out of the concept: capitals, type under 13px, made-up counts, green.
    Home follows the concept's measures: on a laptop a small grey line over a large light title with today's date at the right (a phone
    leaves the title out, as Instagram does), a row of round faces as Instagram's stories, then the posts with a hairline between them. A
@@ -95,7 +94,7 @@ main.screen.wide:has(.explore), main.screen.wide:has(.search-page) { max-width: 
 .feed-list > li + li { border-top: 1px solid var(--ui-line); }
 .feed-post { padding: 24px 0 20px; }
 
-/* ---------- the feed's honest end (3 Nov 2026): "You're all caught up" between your friends' posts and everyone else's, as Instagram's,
+/* ---------- the feed's honest end: "You're all caught up" between your friends' posts and everyone else's, as Instagram's,
    a check in an ink ring, then Suggested posts; Show more posts while more pages exist; a line at the very end ---------- */
 .feed-caught-up { padding: 28px 0 4px; }
 .caught-up { display: grid; justify-items: center; gap: 6px; padding: 4px 0 28px; text-align: center; }

@@ -8,11 +8,11 @@ import { markQuizFailed } from "./answer-quiz-job.js";
 import { calibrationEntryFor, checkCalibrationRun, type CalibrationCallResult } from "./calibration.js";
 import { buildJudgeCall, orderForJudge, type JudgeInput, type QuizPrompt } from "./quiz-requests.js";
 
-// One quiz item as the judge job reads it (D30).
+// One quiz item as the judge job reads it.
 export type JudgeItem = { position: number; questionText: string; personaAnswer: string; humanAnswer: string; flipped: boolean };
-// One item's verdict with its raw record (R4.5).
+// One item's verdict with its raw record.
 export type JudgeVerdict = { position: number; agree: boolean; reason: string; judgeRaw: QuizJudgeRaw };
-// The result of judging one quiz: verdicts with the calibration record, or a stop because a judge reply could not be read (D30, R4.4).
+// The result of judging one quiz: verdicts with the calibration record, or a stop because a judge reply could not be read.
 export type JudgeOutcome =
   | { kind: "judged"; judgeRuns: 1 | 2; isReliable: boolean; verdicts: JudgeVerdict[]; calibration: QuizCalibrationRun[] }
   | { kind: "unreadable"; calibration: QuizCalibrationRun[] };
@@ -21,14 +21,14 @@ export type JudgeBase = { personId: string; quizId: string; prompt: QuizPrompt }
 // What the job reads before it calls the model: skip the quiz, stop it as broken, or judge these items.
 type JudgePlan = { kind: "skip" } | { kind: "broken" } | { kind: "judge"; items: JudgeItem[] };
 
-// Runs one judge call, holding no transaction open. The output is null when the reply does not parse as QuizJudgeOutput (D30).
+// Runs one judge call, holding no transaction open. The output is null when the reply does not parse as QuizJudgeOutput.
 export async function judgeOnce(context: JobContext, base: JudgeBase, input: JudgeInput): Promise<CalibrationCallResult> {
   const reply = await context.llm.complete({ ...buildJudgeCall(base.prompt, input), ledger: { personId: base.personId, meetingId: null } });
   const parsed = QuizJudgeOutput.safeParse(reply.parsed);
   return { output: parsed.success ? parsed.data : null, ledgerId: reply.ledgerId };
 }
 
-// Runs the two calibration pairs of one run: the identical pair must agree and the contradicting pair must not (D30, R4.6).
+// Runs the two calibration pairs of one run: the identical pair must agree and the contradicting pair must not.
 async function calibrate(context: JobContext, base: JudgeBase, run: 1 | 2): Promise<QuizCalibrationRun> {
   const entry = calibrationEntryFor(base.quizId, run);
   const identical = await judgeOnce(context, base, { questionText: entry.questionText, answer1: entry.answerA, answer2: entry.answerA });
@@ -53,7 +53,7 @@ async function judgeItems(context: JobContext, base: JudgeBase, args: { items: r
   return verdicts;
 }
 
-// Judges the ten items: calibration first, the items when it passes, and one rerun with the other order and the next calibration entry when it does not (D30, R4.4, R4.6).
+// Judges the ten items: calibration first, the items when it passes, and one rerun with the other order and the next calibration entry when it does not.
 export async function runJudge(context: JobContext, base: JudgeBase, items: readonly JudgeItem[]): Promise<JudgeOutcome> {
   const run1 = await calibrate(context, base, 1);
   if (run1.isPassed) {
@@ -122,7 +122,7 @@ async function storeJudgement(trx: Transaction<Database>, args: { quizId: string
   }
 }
 
-// The judge_quiz job (IMPLEMENTATION.md 2.3): judges the ten items blind, then stores the verdicts and the count together.
+// The judge_quiz job: judges the ten items blind, then stores the verdicts and the count together.
 export const judgeQuizTask: JobTask<"judge_quiz"> = async (payload, context) => {
   const { quizId, personId } = payload;
   const plan = await withPerson(context.db, personId, (trx) => readJudgePlan(trx, quizId));

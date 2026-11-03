@@ -19,7 +19,7 @@ function makeBriefNotReadyError(): ContractError {
   return new ContractError("brief_not_ready", "The brief is not written yet. Ask again in a few seconds.", HTTP.notFound);
 }
 
-// Reads the caller's own brief of one meeting: missing membership is brief_not_found; a member with no row yet is brief_not_ready (A1).
+// Reads the caller's own brief of one meeting: missing membership is brief_not_found; a member with no row yet is brief_not_ready.
 async function readOwnBrief(deps: RouteDeps, personId: string, meetingId: string): Promise<Brief> {
   return withPerson(deps.db, personId, async (trx) => {
     const member = await trx.selectFrom("meeting_members").select("person_id").where("meeting_id", "=", meetingId).where("person_id", "=", personId).executeTakeFirst();
@@ -31,7 +31,7 @@ async function readOwnBrief(deps: RouteDeps, personId: string, meetingId: string
   });
 }
 
-// Registers GET /api/meetings/:id/brief: 200 Brief for the caller's own brief; 404 brief_not_ready or brief_not_found. Never cached (A1).
+// Registers GET /api/meetings/:id/brief: 200 Brief for the caller's own brief; 404 brief_not_ready or brief_not_found. Never cached.
 export function registerReadBrief(app: FastifyInstance, deps: RouteDeps): Promise<void> {
   app.get(routes.briefs.readBrief.path, async (request, reply) => {
     const personId = requirePerson(request);

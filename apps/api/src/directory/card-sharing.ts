@@ -1,5 +1,5 @@
 // The sharing settings of one card: which approved items the directory may show, and whether friends may ask the persona
-// how its person would probably react. Only the card's owner reads or changes them (design section 6, P1, P3).
+// how its person would probably react. Only the card's owner reads or changes them.
 import type { FastifyInstance } from "fastify";
 import type { Transaction } from "kysely";
 import { z } from "zod";
@@ -11,25 +11,25 @@ import { requirePerson } from "../sessions/index.js";
 
 // The :id of the two sharing routes: a uuid, or the card cannot exist.
 const CardParams = z.object({ id: Uuid });
-// The sentence for a public position that is not an approved item whose quote was found (design section 6, P1).
+// The sentence for a public position that is not an approved item whose quote was found.
 const POSITION_NOT_SHAREABLE_SENTENCE = "Only approved items with a found quote can be public.";
-// meeting_create's own sentence for card_not_approved, used for the same code here and on PUT /api/directory/me (design section 6) [confirm].
+// meeting_create's own sentence for card_not_approved, used for the same code here and on PUT /api/directory/me.
 const CARD_NOT_APPROVED_SENTENCE = "approve your card before creating a meeting.";
 
 // What one sharing change is checked against: the caller's card, the positions that may be public, the positions asked for, and whether the caller's listing uses this card.
 export type SharingCheck = { card: { state: string } | undefined; shareablePositions: ReadonlySet<number>; requestedPositions: readonly number[]; isListedCard: boolean };
 
-// card_not_approved, 409: the card is not the caller's approved card (design section 6).
+// card_not_approved, 409: the card is not the caller's approved card.
 export function makeCardNotApprovedError(): ContractError {
   return new ContractError("card_not_approved", CARD_NOT_APPROVED_SENTENCE, HTTP.conflict);
 }
 
-// listing_needs_public_item, 409: a listed card keeps at least one public item, because strangers see only public items (design section 6, P2).
+// listing_needs_public_item, 409: a listed card keeps at least one public item, because strangers see only public items.
 export function makeListingNeedsPublicItemError(): ContractError {
   return new ContractError("listing_needs_public_item", "To stay in Explore you need at least one public item. Mark one, or leave Explore first.", HTTP.conflict);
 }
 
-// Locks the caller's people row before any check, so one person's sharing changes and listing changes take turns, and two requests sent at once cannot leave a listed card with no public item [confirm].
+// Locks the caller's people row before any check, so one person's sharing changes and listing changes take turns, and two requests sent at once cannot leave a listed card with no public item.
 export async function lockPersonRow(trx: Transaction<Database>, personId: string): Promise<void> {
   await trx.selectFrom("people").select("id").where("id", "=", personId).forUpdate().execute();
 }
@@ -65,7 +65,7 @@ export async function applySharing(trx: Transaction<Database>, change: { cardId:
   await trx.updateTable("cards").set({ friends_can_ask: change.friendsCanAsk }).where("id", "=", change.cardId).execute();
 }
 
-// Registers GET /api/cards/:id/sharing: 200 CardSharing; 404 not_found when the card is not the caller's or the id is not a uuid (design section 6).
+// Registers GET /api/cards/:id/sharing: 200 CardSharing; 404 not_found when the card is not the caller's or the id is not a uuid.
 export function registerReadSharing(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.directory.readSharing.path, async (request, reply) => {
     const personId = requirePerson(request);
@@ -77,7 +77,7 @@ export function registerReadSharing(app: FastifyInstance, deps: RouteDeps): void
   });
 }
 
-// Registers PUT /api/cards/:id/sharing: 200 CardSharing; 400 payload_invalid; 404 not_found; 409 card_not_approved or listing_needs_public_item (design section 6, P1, P2, P3).
+// Registers PUT /api/cards/:id/sharing: 200 CardSharing; 400 payload_invalid; 404 not_found; 409 card_not_approved or listing_needs_public_item.
 export function registerUpdateSharing(app: FastifyInstance, deps: RouteDeps): void {
   app.put(routes.directory.updateSharing.path, async (request, reply) => {
     const personId = requirePerson(request);

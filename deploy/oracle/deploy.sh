@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploys a tag on the release branch to the Oracle server from this machine (deploy/oracle/README.md, D70). It sets the server
+# Deploys a tag on the release branch to the Oracle server from this machine (deploy/oracle/README.md). It sets the server
 # up (safe to repeat), writes the server's secrets file on the first run, copies the tag's files over SSH, builds the images on
 # the server, starts Postgres, the api, the worker and Caddy, and waits until /api/health reports the database, the worker and
 # the tag's schema version. Then it writes .env.wave3 for scripts/check-wave-3.sh. It prints no password and no key.

@@ -23,7 +23,7 @@ const MessageText = (props: { source: CardItemSource }): ReactElement => {
   );
 };
 
-// The tapped quote in a sheet over the page that holds focus until Close, showing the message it came from with the quote marked (R3.2).
+// The tapped quote in a sheet over the page that holds focus until Close, showing the message it came from with the quote marked.
 export const QuoteSheet = (props: { cardId: string; item: CardItem; onClose: () => void }): ReactElement => {
   const [source, setSource] = useState<SourceState>({ kind: "loading" });
   const closeRef = useRef<HTMLButtonElement | null>(null);
@@ -67,7 +67,7 @@ export const QuoteSheet = (props: { cardId: string; item: CardItem; onClose: () 
 // The colour of each item kind's chip. Coral and blue are the two voices of a meeting, so they go to the kinds seen least.
 const KIND_COLOUR: Record<CardItem["kind"], string> = { value: "c-green", preference: "c-lilac", habit: "c-yellow", boundary: "c-coral", goal: "c-blue" };
 
-// The mark under a quote: checked, weak, or none found (R6.5).
+// The mark under a quote: checked, weak, or none found.
 const QuoteMark = (props: { item: CardItem }): ReactElement => {
   if (!props.item.verified) return <ReceiptFlag isWeak={false} />;
   if (props.item.flagged) return <ReceiptFlag isWeak />;
@@ -109,7 +109,7 @@ const CardItemRow = (props: { item: CardItem; isTicked: boolean; isLocked: boole
   );
 };
 
-// The items, each with its kind, claim, English gloss when needed, quote and approve box (R7.1, R6.5).
+// The items, each with its kind, claim, English gloss when needed, quote and approve box.
 export const CardItemList = (props: { cardId: string; items: CardItem[]; ticked: ReadonlySet<string>; isLocked: boolean; onToggle: (itemId: string) => void }): ReactElement => {
   const [openId, setOpenId] = useState<string | null>(null);
   const openItem = props.items.find((item) => item.id === openId);
@@ -135,7 +135,7 @@ export const CardItemList = (props: { cardId: string; items: CardItem[]; ticked:
   );
 };
 
-// The explicit recall switch with its copy verbatim, off by default (R7.1).
+// The explicit recall switch with its copy verbatim, off by default.
 export const RecallSwitch = (props: { isOn: boolean; isLocked: boolean; onChange: (isOn: boolean) => void }): ReactElement => {
   return (
     <div className="recall">

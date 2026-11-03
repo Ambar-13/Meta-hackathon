@@ -1,4 +1,4 @@
-// Steps 22 and 23 (wave 7): a new person C asks to be B's friend from B's profile and B accepts; then A asks the orchestrator how B
+// Steps 22 and 23: a new person C asks to be B's friend from B's profile and B accepts; then A asks the orchestrator how B
 // would probably react, runs the plan it gives, and gets B's persona's answer through the friend ask it starts.
 import { ErrorBody, routes, type AskView, type OrchestratorMessage } from "@meet-first/contracts";
 import { ORCHESTRATOR_MESSAGE, REACT_ASK_TEXT } from "./fixtures.js";

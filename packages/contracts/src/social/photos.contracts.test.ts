@@ -4,7 +4,7 @@ import { PhotoKey } from "../primitives.js";
 import { Post } from "./posts.js";
 import { ProfileView } from "./profile.js";
 
-// One listing, one friend and one post as the api sent them before photos (3 Nov 2026), so each still reads without them.
+// One listing, one friend and one post as the api sent them before photos, so each still reads without them.
 const LISTING = { listingId: "00000000-0000-4000-8000-000000000611", displayName: "Maya", line: "Angel investor.", openToRomance: false, isSample: true, items: [] };
 const FRIEND = { pairId: "00000000-0000-4000-8000-000000000612", displayName: "Maya", canAsk: true, listingId: LISTING.listingId };
 const POST = { postId: "00000000-0000-4000-8000-000000000613", listingId: LISTING.listingId, displayName: "Maya", isSample: true, text: "A post.", createdAt: "2026-11-03T00:00:00.000Z" };

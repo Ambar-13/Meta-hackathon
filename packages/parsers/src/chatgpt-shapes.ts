@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-// A message before canonicalisation: the text and the position it had in the export, so recency ranking has an order (D5).
+// A message before canonicalisation: the text and the position it had in the export, so recency ranking has an order.
 export type RawTurn = { text: string; exportOrder: number; createTime: number | null };
 
-// One node of the 2024 mapping. Every field is optional because real exports have nodes without a message (R1.1).
+// One node of the 2024 mapping. Every field is optional because real exports have nodes without a message.
 const ChatGptMappingNode = z.object({
   id: z.string().optional(),
   message: z
@@ -18,7 +18,7 @@ const ChatGptMappingNode = z.object({
   children: z.array(z.string()).optional(),
 });
 
-// One message of the 2026 messages list, with the role either at the top or under author (R1.1).
+// One message of the 2026 messages list, with the role either at the top or under author.
 const ChatGptMessage = z.object({
   role: z.string().optional(),
   author: z.object({ role: z.string().optional() }).nullable().optional(),
@@ -56,7 +56,7 @@ function numbered(turns: RawTurn[]): RawTurn[] {
   return turns.map((turn, index) => ({ ...turn, exportOrder: index }));
 }
 
-// Text out of a ChatGPT content object: `parts` string elements joined by "\n"; a non-string part becomes "[image]"; `text` or `content` strings pass through (R1.1).
+// Text out of a ChatGPT content object: `parts` string elements joined by "\n"; a non-string part becomes "[image]"; `text` or `content` strings pass through.
 export function contentText(content: unknown): string | null {
   if (typeof content === "string") return content;
   if (typeof content !== "object" || content === null) return null;
@@ -93,7 +93,7 @@ function pathFrom(nodes: Map<string, NodeFacts>, current: string | undefined): s
   return [...seen];
 }
 
-// Orders branch nodes by create_time ascending, missing times last, then by node key in code-unit order (R1.1).
+// Orders branch nodes by create_time ascending, missing times last, then by node key in code-unit order.
 function compareBranches(a: Branch, b: Branch): number {
   if (a.createTime !== b.createTime) {
     if (a.createTime === null) return 1;
@@ -141,7 +141,7 @@ function turnsOfMapping(mapping: Record<string, unknown>, currentNode: unknown):
 
 // The 2024 export: an array of conversations, each with `mapping` (node id to node) and `current_node`. Walks from current_node
 // through `parent` to the root, keeps nodes whose author.role is "user", reverses to chronological order, then adds any user node
-// not reached by the walk (branches), ordered by create_time (R1.1).
+// not reached by the walk (branches), ordered by create_time.
 export function parseChatGptMapping(root: unknown): RawTurn[] | null {
   const shaped = conversationsOf(root).filter(isMappingConversation);
   if (shaped.length === 0) return null;

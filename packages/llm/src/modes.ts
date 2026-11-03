@@ -14,9 +14,9 @@ export type LlmReply = {
 };
 // The function that calls the live API. The worker passes the real client; tests pass a fake.
 export type LiveCaller = (request: LlmRequest, signal: AbortSignal) => Promise<LlmReply>;
-// Where recorded replies live, relative to the repository root (ARCHITECTURE.md section 8).
+// Where recorded replies live, relative to the repository root.
 export const FIXTURE_ROOT = "packages/evals/fixtures/model-replies";
-// Characters per slice when a replayed streaming reply is sent in pieces. Picked here [confirm].
+// Characters per slice when a replayed streaming reply is sent in pieces. Picked here.
 export const REPLAY_STREAM_SLICE_CHARS = 20;
 // Milliseconds between two replayed slices, so the streaming path runs at a visible pace. The spec gives this value.
 export const REPLAY_STREAM_SLICE_MS = 10;
@@ -36,7 +36,7 @@ function sortedJson(value: unknown): string {
   return text ?? "null";
 }
 
-// sha256 hex of the request body with keys sorted, so the same request always maps to one fixture file (D74).
+// sha256 hex of the request body with keys sorted, so the same request always maps to one fixture file.
 export function requestHash(body: Record<string, unknown>): string {
   return createHash("sha256").update(sortedJson(body)).digest("hex");
 }
@@ -59,7 +59,7 @@ async function replayReply(file: string, request: LlmRequest): Promise<LlmReply>
   return { response: recorded.response, usage: recorded.usage, requestId: null, httpStatus: null };
 }
 
-// Writes the reply of a live call to the fixture folder, so a later replay can read it (R13.3).
+// Writes the reply of a live call to the fixture folder, so a later replay can read it.
 async function recordReply(file: string, request: LlmRequest, reply: LlmReply): Promise<void> {
   const recorded: RecordedCall = {
     callSite: request.callSite,
@@ -74,7 +74,7 @@ async function recordReply(file: string, request: LlmRequest, reply: LlmReply): 
   await writeFile(file, `${JSON.stringify(recorded, null, 2)}\n`);
 }
 
-// Runs one call in the current mode: live calls the API; record calls it and writes the fixture; replay reads the fixture and never calls (D74).
+// Runs one call in the current mode: live calls the API; record calls it and writes the fixture; replay reads the fixture and never calls.
 export async function runInMode(args: {
   mode: LlmMode;
   fixtureRoot: string;
@@ -90,7 +90,7 @@ export async function runInMode(args: {
   return reply;
 }
 
-// Refuses to run replayed replies in production, so a demo never runs on recorded text (D74).
+// Refuses to run replayed replies in production, so a demo never runs on recorded text.
 export function assertModeAllowed(mode: LlmMode, nodeEnv: string | undefined): void {
   if (mode === "replay" && nodeEnv === "production") {
     throw new ContractError("llm_mode_replay_in_production", "Production cannot run on recorded replies. Set LLM_MODE=live.");

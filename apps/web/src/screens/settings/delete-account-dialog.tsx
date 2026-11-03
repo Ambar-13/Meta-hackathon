@@ -2,7 +2,7 @@ import { useEffect, useRef, type KeyboardEvent, type ReactElement } from "react"
 
 // The dialog title, byte for byte as the settings spec gives it.
 export const DIALOG_TITLE = "Delete everything we hold about you?";
-// The dialog body: what the person loses and what the other person keeps (R9.7).
+// The dialog body: what the person loses and what the other person keeps.
 export const DIALOG_BODY = "This removes your uploaded excerpts, your card, your quizzes, your meetings, briefs, comics and any share page from our database. Anyone you met keeps their own excerpts and card, and loses the shared meeting, brief and share page. Your recovery code stops working. This cannot be undone.";
 // The line shown while the request is running.
 export const DELETING_COPY = "Deleting. This takes a few seconds.";

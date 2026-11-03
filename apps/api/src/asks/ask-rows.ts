@@ -22,7 +22,7 @@ export type AskRow = { id: string; mode: AskMode; text: string; state: AskState;
 type PlacedRow = Pick<AnswerRow, "id" | "position" | "shortlist_rank">;
 
 // The claims of one stored answer as the views show them. Claims that no longer parse are answer_row_invalid (500), so a broken
-// row fails on the server, where it is logged, and is never shown half read [confirm].
+// row fails on the server, where it is logged, and is never shown half read.
 export function parseStoredClaims(claims: unknown): AnswerClaim[] {
   const parsed = StoredClaims.safeParse(claims);
   if (!parsed.success) throw new ContractError("answer_row_invalid", "One answer of this ask could not be read. Try again in a minute.", HTTP.internal);
@@ -30,7 +30,7 @@ export function parseStoredClaims(claims: unknown): AnswerClaim[] {
 }
 
 // True when the asker may start a full meeting from this answer: the ask is a help search in state done, and the answer is answered,
-// placed 1 to HELP_MEETABLE_TOP (3), and its listing still exists (design section 6). The read route and the meeting route both use it [confirm].
+// placed 1 to HELP_MEETABLE_TOP (3), and its listing still exists. The read route and the meeting route both use it.
 export function isMeetableAnswer(ask: { mode: AskMode; state: AskState }, answer: { state: AnswerRow["state"]; position: number | null; listing_id: string | null }): boolean {
   if (ask.mode !== "help" || ask.state !== "done" || answer.state !== "answered") return false;
   return answer.position !== null && answer.position <= HELP_MEETABLE_TOP && answer.listing_id !== null;
@@ -46,13 +46,13 @@ function compareAnswers(first: PlacedRow, second: PlacedRow): number {
   return first.id.localeCompare(second.id);
 }
 
-// The answers in the order the view shows them (design section 6); the list passed in is not changed.
+// The answers in the order the view shows them; the list passed in is not changed.
 export function sortAnswersForView<T extends Pick<AnswerRow, "id" | "position" | "shortlist_rank">>(rows: readonly T[]): T[] {
   return [...rows].sort(compareAnswers);
 }
 
 // One answered row as the asker sees it. It never carries the subject's person id, card id or listing id, the support count or the
-// shortlist rank (P6, design section 10).
+// shortlist rank.
 export function toAskAnswer(ask: { mode: AskMode; state: AskState }, row: AnswerRow): AskAnswer {
   return {
     answerId: row.id,
@@ -67,7 +67,7 @@ export function toAskAnswer(ask: { mode: AskMode; state: AskState }, row: Answer
 }
 
 // One answer the caller's persona gave, as the caller's copy: what was asked, the asker's display name, and the answer with its
-// claims (P4). It never carries the asker's person id.
+// claims. It never carries the asker's person id.
 export function toAboutMeAnswer(row: CopyRow): AboutMeAnswer {
   return { answerId: row.id, mode: row.mode, text: row.ask_text, askerName: row.asker_display_name, answer: row.answer ?? "", claims: parseStoredClaims(row.claims), createdAt: row.created_at.toISOString() };
 }

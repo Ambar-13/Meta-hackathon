@@ -18,7 +18,7 @@ import {
   StoriesView,
 } from "../social/index.js";
 
-// Routes for friend requests, a person's profile in Explore, the orchestrator chat (wave 7), and posts (migration 0009); since 3 Nov 2026
+// Routes for friend requests, a person's profile in Explore, the orchestrator chat, and posts (migration 0009);
 // anyone shares posts and stories, likes posts, and reads their own posts and the stories (migration 0013).
 export const socialRoutes = {
   listFriendRequests: { method: "GET", path: "/api/friend-requests", request: z.undefined(), response: FriendRequestsView },

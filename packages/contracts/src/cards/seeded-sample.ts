@@ -1,7 +1,7 @@
-// A small SHA-256 and SplitMix64, so the quiz sample is the same in Node and in the browser (D28).
+// A small SHA-256 and SplitMix64, so the quiz sample is the same in Node and in the browser.
 // Contracts code runs in both, so it cannot use node:crypto, and crypto.subtle is asynchronous.
 
-// The 64 round constants of SHA-256 (FIPS 180-4, section 4.2.2).
+// The 64 round constants of SHA-256 (FIPS 180-4).
 const ROUND_CONSTANTS = [
   0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
   0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
@@ -12,7 +12,7 @@ const ROUND_CONSTANTS = [
   0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
   0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
 ];
-// The eight starting words of the SHA-256 state (FIPS 180-4, section 5.3.3).
+// The eight starting words of the SHA-256 state (FIPS 180-4).
 const START_STATE = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
 // Keeps a BigInt inside 64 bits.
 const MASK_64 = (1n << 64n) - 1n;
@@ -20,7 +20,7 @@ const MASK_64 = (1n << 64n) - 1n;
 const word = (words: ArrayLike<number>, index: number): number => words[index] ?? 0;
 const rotateRight = (value: number, bits: number): number => (value >>> bits) | (value << (32 - bits));
 
-// Pads the message to whole 64-byte blocks, with its length in bits in the last 8 bytes (FIPS 180-4, 5.1.1).
+// Pads the message to whole 64-byte blocks, with its length in bits in the last 8 bytes (FIPS 180-4).
 function padMessage(message: Uint8Array): DataView {
   const padded = new Uint8Array(Math.ceil((message.length + 9) / 64) * 64);
   padded.set(message);

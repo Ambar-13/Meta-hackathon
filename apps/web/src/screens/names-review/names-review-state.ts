@@ -2,20 +2,20 @@ import { useEffect, useState } from "react";
 import { apiFetch, asApiError, ApiError, routes, usePolledView, type PolledView } from "../../app-shell/index.js";
 import { NamesReview, SourceView } from "@meet-first/contracts";
 
-// How often the names screen polls while the source is not frozen [confirm: the 3 s card interval of R3.4].
+// How often the names screen polls while the source is not frozen (the 3 s card interval).
 export const NAMES_POLL_MS = 3_000;
-// The sensitive categories offered as opt-ins; minor is never offered, because a named minor has no toggle (D18, ARCHITECTURE.md 5 step 5) [confirm] (the stricter reading: fewer ways to expose a minor).
+// The sensitive categories offered as opt-ins; minor is never offered, because a named minor has no toggle (the stricter reading: fewer ways to expose a minor).
 export const OFFERED_OPT_INS = ["health", "address", "identifier"] as const;
 // One offered opt-in.
 export type SensitiveOptIn = (typeof OFFERED_OPT_INS)[number];
-// The label of each offered opt-in [confirm] (drafted copy, no input gives it).
+// The label of each offered opt-in (drafted copy).
 export const OPT_IN_LABELS: Record<SensitiveOptIn, string> = { health: "Health", address: "Home and street addresses", identifier: "ID and account numbers" };
 // Where saving stands.
 export type SaveState = { kind: "idle" } | { kind: "saving" } | { kind: "review_failed"; error: ApiError } | { kind: "card_failed"; error: ApiError };
 // The mode of the review and the names the person keeps, with the opt-ins they ticked.
 export type ReviewChoice = { mode: "replace_all" | "choose"; kept: ReadonlySet<string>; optIns: ReadonlySet<SensitiveOptIn> };
 
-// Builds the review body: every name seen so far, keep true only for kept names in choose mode, and the ticked opt-ins (R2.4, D18).
+// Builds the review body: every name seen so far, keep true only for kept names in choose mode, and the ticked opt-ins.
 export function buildNamesReview(seenNames: readonly string[], choice: ReviewChoice): NamesReview {
   const decisions = seenNames.map((text) => ({ text, keep: choice.mode === "choose" && choice.kept.has(text) }));
   const sensitiveOptIn: NamesReview["sensitiveOptIn"] = OFFERED_OPT_INS.filter((optIn) => choice.optIns.has(optIn));
@@ -92,7 +92,7 @@ function useReviewSave(sourceId: string, onCardRequested: (cardId: string) => vo
   return { save, requestCard, saveReview };
 }
 
-// The names review screen's state and actions (R2.4, D16).
+// The names review screen's state and actions.
 export function useNamesReview(
   sourceId: string,
   onCardRequested: (cardId: string) => void,

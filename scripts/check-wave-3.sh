@@ -62,7 +62,7 @@ preconditions() {
     echo "check_wave_3_schema_mismatch: the deployment reports schema version $deployed and the tree has $expected; deploy from release first" >&2
     exit 2
   fi
-  # Each run makes 2 accounts, and the api allows 10 per IP per hour (R9.5), so at most 3 runs in any 60 minutes.
+  # Each run makes 2 accounts, and the api allows 10 per IP per hour, so at most 3 runs in any 60 minutes.
   local recent=0 now line
   now=$(date -u +%s)
   if [ -f "$EVIDENCE/runs-this-hour.txt" ]; then
@@ -82,9 +82,9 @@ s01_health() {
   echo
   jq -e '.ok == true and .db == true' "$EVIDENCE/01-health.json" >/dev/null
 }
-# Command 02: the deployed worker booted: schema version asserted, the live self-test passed, and its heartbeat is fresh (R3.1, R3.9).
+# Command 02: the deployed worker booted: schema version asserted, the live self-test passed, and its heartbeat is fresh.
 s02_worker() { jq -e '.worker == true' "$EVIDENCE/01-health.json"; }
-# Command 03: Postgres disk under 80% (R12.5). Informational: the plan size is unverified.
+# Command 03: Postgres disk under 80%. Informational: the plan size is unverified.
 s03_disk() { jq -r 'if .degraded then "warning: degraded (disk at \(.diskPct)%)" else "disk ok" end' "$EVIDENCE/01-health.json"; }
 # Command 04: real-wire's local live self-test log has one ok line per model output schema (specs/wave-3-real-wire.md 4.2).
 s04_self_test_log() {
@@ -95,14 +95,14 @@ s04_self_test_log() {
   echo "ok lines $ok, schemas $schemas"
   [ "$ok" = "$schemas" ]
 }
-# Command 05: all 22 golden-path steps against the deployment with the real model; every ledger row the run wrote is live (D74).
+# Command 05: all 22 golden-path steps against the deployment with the real model; every ledger row the run wrote is live.
 s05_golden_path() {
   pnpm golden-path --live --base "$APP_ORIGIN" --report "$EVIDENCE/golden-path.json"
   jq -e '.result == "pass"' "$EVIDENCE/golden-path.json" >/dev/null
   jq -e '.ledger.modes == ["live"]' "$EVIDENCE/golden-path.json" >/dev/null
   jq -r '[.steps[] | select(.result == "not-exercised") | "not-exercised: step \(.number) \(.name): \(.detail)"] | .[]' "$EVIDENCE/golden-path.json"
 }
-# Command 06: the ledger has a row for every call site the flow used, comic_image too when the comic came out ready (R3.5, R10.8).
+# Command 06: the ledger has a row for every call site the flow used, comic_image too when the comic came out ready.
 s06_call_sites() {
   local report="$EVIDENCE/golden-path.json"
   jq -e --argjson sites "$FLOW_CALL_SITES" '.ledger.callSites | contains($sites)' "$report" >/dev/null
@@ -111,7 +111,7 @@ s06_call_sites() {
   fi
   jq -c '.ledger.callSites' "$report"
 }
-# Command 07: no hand-written model reply survives Wave 3 (R13.3).
+# Command 07: no hand-written model reply survives Wave 3.
 s07_no_hand_written() {
   local count
   count=$(grep -rl '"handWritten": true' "$ROOT/packages/evals/fixtures/model-replies" | wc -l | tr -d ' ' || true)
@@ -143,7 +143,7 @@ s09_every_call_site_recorded() {
 # The greps of rows 10 to 13 count files; grep exits 1 when it finds nothing, which is their pass case, so these rows run without
 # pipefail. The check scripts hold the searched words themselves, and a README may name them to say a package never uses them.
 code_hits() { grep -rlE --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=dist-gallery --exclude='*.md' --exclude='check-wave-*.sh' "$@" 2>/dev/null | wc -l | tr -d ' '; }
-# Command 10: no mock module survives (D74, R13.3).
+# Command 10: no mock module survives.
 s10_no_mock_module() {
   set +o pipefail
   local hits
@@ -151,7 +151,7 @@ s10_no_mock_module() {
   echo "mock-api $hits"
   [ "$hits" = "0" ]
 }
-# Command 11: LLM_MODE is read only in packages/llm, the env schema, and the worker's boot that hands it over (D74).
+# Command 11: LLM_MODE is read only in packages/llm, the env schema, and the worker's boot that hands it over.
 s11_mode_confined() {
   set +o pipefail
   local hits
@@ -170,7 +170,7 @@ s12_key_and_client_confined() {
   echo "META_API_KEY $key, @meet-first/llm $client, msw $msw, MODEL_MOCK $model_mock"
   [ "$key" = "0" ] && [ "$client" = "0" ] && [ "$msw" = "0" ] && [ "$model_mock" = "0" ]
 }
-# Command 13: no fake model client outside tests and testing folders (D74).
+# Command 13: no fake model client outside tests and testing folders.
 s13_no_fake_client() {
   set +o pipefail
   local hits
@@ -178,11 +178,11 @@ s13_no_fake_client() {
   echo "fake clients $hits"
   [ "$hits" = "0" ]
 }
-# Command 14: the refusal of replay in production exists in code at one of the allowed places (D74).
+# Command 14: the refusal of replay in production exists in code at one of the allowed places.
 s14_refusal_in_code() {
   grep -n "replay" "$ROOT/apps/worker/src/runner.ts" "$ROOT/packages/llm/src/modes.ts" "$ROOT/packages/llm/src/config.ts" | grep -i "production"
 }
-# Command 15: a production worker in replay exits at boot with the refusal code, given a real database URL (D74, R13.3, R10.2).
+# Command 15: a production worker in replay exits at boot with the refusal code, given a real database URL.
 s15_replay_refused() {
   local output code
   set +e
@@ -202,7 +202,7 @@ s16_heartbeat() {
   echo "$fresh"
   [ "$fresh" = "t" ]
 }
-# Command 17: The stream check from a phone hotspot through the Render proxy. Informational: polling is primary on a buffering proxy (R8.2).
+# Command 17: The stream check from a phone hotspot through the Render proxy. Informational: polling is primary on a buffering proxy.
 s17_phone_stream() {
   local log="$ROOT/docs/evidence/wave-3/sse-phone.txt" beats
   if [ ! -s "$log" ]; then echo "warning: no phone stream evidence at docs/evidence/wave-3/sse-phone.txt"; return 0; fi

@@ -5,7 +5,7 @@ import { apiFetch, asApiError, routes, type ApiError } from "../../app-shell/ind
 // Which part of the feed loads next: your friends' posts and your own, then everyone else's, then nothing, at the end.
 export type FeedPart = FeedScope | "end";
 
-// Home's endless, honest feed (3 Nov 2026, Ambar chose "Endless and honest"): your friends' posts and your own as they load, everyone
+// Home's endless, honest feed: your friends' posts and your own as they load, everyone
 // else's after them, which part loads next, whether a page is on its way, the last error, whether the first page has answered, and the
 // two things a reader does to it: ask for the next page, and take away a post they deleted.
 export type EndlessFeed = {

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { Brief, BriefPoint, Quote } from "@meet-first/contracts";
 import { apiFetch, asApiError, routes } from "../../app-shell/index.js";
 
-// How long the screen waits before it asks again while the brief is being written, in milliseconds (R3.4, the card screen's interval) [confirm].
+// How long the screen waits before it asks again while the brief is being written, in milliseconds (the card screen's interval).
 export const BRIEF_POLL_MS = 3_000;
 
 // The quote the sheet shows: the line it was tapped from and the quote itself.
@@ -21,7 +21,7 @@ type LoadState = { kind: "loading" } | { kind: "waiting"; startedAt: number } | 
 // The brief screen's state, with the two actions that show and hide the quote sheet.
 export type BriefScreenHook = BriefScreenState & { showQuote: (lineText: string, quote: Quote) => void; hideQuote: () => void };
 
-// Loads the caller's brief and asks again every BRIEF_POLL_MS while the server says it is not written yet (R3.4).
+// Loads the caller's brief and asks again every BRIEF_POLL_MS while the server says it is not written yet.
 export function useBriefState(meetingId: string): BriefScreenHook {
   const [load, setLoad] = useState<LoadState>({ kind: "loading" });
   const [sheet, setSheet] = useState<OpenQuote | null>(null);
@@ -63,7 +63,7 @@ export function useBriefState(meetingId: string): BriefScreenHook {
   return { ...base, showQuote, hideQuote };
 }
 
-// Whether a line passes into Decide this first: supported is true and every quote is verified (invariant 19).
+// Whether a line passes into Decide this first: supported is true and every quote is verified.
 function isPassing(point: BriefPoint): boolean {
   return point.supported === true && point.quotes.every((quote) => quote.verified);
 }
@@ -78,7 +78,7 @@ export function splitBriefForDisplay(brief: Brief): { agree: BriefPoint[]; clash
   };
 }
 
-// True when a line carries the weak receipt mark: the support check did not support it, or did not run (A1).
+// True when a line carries the weak receipt mark: the support check did not support it, or did not run.
 export function isWeakReceipt(point: BriefPoint): boolean {
   return point.supported !== true;
 }

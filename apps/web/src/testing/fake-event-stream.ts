@@ -57,7 +57,7 @@ export function fakeMeetingServer(streams: FakeStream[], polls: unknown[]): Fake
   return { fetchImpl, streamRequests, pollRequests };
 }
 
-// One SSE frame as the api writes it: id, event and data lines for a committed event; event and data only for turn.delta (seams S9).
+// One SSE frame as the api writes it: id, event and data lines for a committed event; event and data only for turn.delta.
 export function sseFrame(event: MeetingEvent): string {
   if (event.type === "turn.delta") return `event: turn.delta\ndata: ${JSON.stringify(event)}\n\n`;
   return `id: ${String(event.seq)}\nevent: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`;

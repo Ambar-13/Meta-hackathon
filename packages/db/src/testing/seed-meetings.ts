@@ -5,14 +5,14 @@ import { withPerson } from "../transaction.js";
 import type { Database } from "../types.js";
 import { createApprovedCard, createFrozenSource, createTestPerson, sha256Text } from "./seed-people.js";
 
-// The three turns side a uploads in every seeded meeting; each is long enough to be quoted (D25).
+// The three turns side a uploads in every seeded meeting; each is long enough to be quoted.
 export const SEED_TURNS_A = [
   "I always write the plan down before a big meeting so nobody guesses.",
   "Deadlines matter to me; when one slips I tell the team the same day.",
   "On weekends I hike with my sister and leave my phone at home.",
 ] as const;
 
-// The three turns side b uploads in every seeded meeting; each is long enough to be quoted (D25).
+// The three turns side b uploads in every seeded meeting; each is long enough to be quoted.
 export const SEED_TURNS_B = [
   "Deadlines are guides for me; I care more about the work being right.",
   "I like to think out loud with the team before I decide anything.",
@@ -52,7 +52,7 @@ export async function createPairedMeetingWithTurns(db: Kysely<Database>, options
   };
 }
 
-// The same meeting in the shape docs/contracts.md section 4 freezes.
+// The same meeting in its contract shape.
 export async function createPairedMeeting(db: Kysely<Database>, options: { questionId?: number } = {}): Promise<{ meetingId: string; pairId: string; a: { personId: string; cardId: string; sessionToken: string }; b: { personId: string; cardId: string; sessionToken: string } }> {
   const seeded = await createPairedMeetingWithTurns(db, options);
   return {

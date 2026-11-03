@@ -9,7 +9,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { appendMeetingEvent } from "../../meetings/index.js";
 import { writeComicFixtures } from "./golden-path-comic.js";
 
-// The largest stored panel in bytes (D64).
+// The largest stored panel in bytes.
 const PANEL_CAP_BYTES = 153_600;
 // The number of files one golden comic writes: one panels reply and six images.
 const GOLDEN_FILES = 7;

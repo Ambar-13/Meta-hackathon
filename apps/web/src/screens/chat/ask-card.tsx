@@ -10,7 +10,7 @@ import { Icon, PersonAvatar, TypingDots } from "../../look/index.js";
 import { isAskRunning } from "../ask/ask-state.js";
 import { ASK_CARD_ANSWERS_MAX, firstSentence } from "./chat-words.js";
 
-// The words beside each kind's icon at the top of its card (3 Nov 2026: Ambar asked for names that say what happens). A friend ask names
+// The words beside each kind's icon at the top of its card. A friend ask names
 // the friend when it can. Example: "Asking Mira's Meety".
 export function kindLabel(mode: AskMode, friendName: string | null | undefined): string {
   if (mode === "help") return "Finding who could help";

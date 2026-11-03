@@ -1,5 +1,5 @@
 // Steps 16 to 21: B shares three items, turns on friend asks and lists in the directory; A meets B's listed persona on a debate,
-// asks how B would probably react, and asks the directory for help (design section 9).
+// asks how B would probably react, and asks the directory for help.
 import { CURATED_QUESTIONS, DIRECTORY_SWITCH_COPY, ErrorBody, HELP_RESULTS_HEADING, routes, type AskView, type Brief, type CardItem } from "@meet-first/contracts";
 import { readAnswerTurnIds, readBriefOwners, readMeeting, readMembers } from "./database-reads.js";
 import { DIRECTORY_QUESTION_ID, HELP_ASK_TEXT, HELP_ITEM_WORDS, LISTING_LINE, PUBLIC_ITEM_COUNT, REACT_ASK_TEXT, ROMANCE_QUESTION_ID } from "./fixtures.js";
@@ -17,12 +17,12 @@ const MEETING_POLL_MS = 2_000;
 // Both briefs may take 300 s after the meeting ends (step 13).
 const BRIEF_WAIT_MS = 300_000;
 const BRIEF_POLL_MS = 3_000;
-// An ask may take 180 s: the question check, up to 20 persona calls through the limiter, then the support check (design section 4).
+// An ask may take 180 s: the question check, up to 20 persona calls through the limiter, then the support check.
 const ASK_WAIT_MS = 180_000;
 const ASK_POLL_MS = 3_000;
 // The states an ask stops in.
 const ASK_FINAL_STATES = new Set(["done", "refused", "failed"]);
-// The keys a listing and a public item may carry in the directory, and nothing else (P6).
+// The keys a listing and a public item may carry in the directory, and nothing else.
 const LISTING_KEYS = ["displayName", "isSample", "items", "line", "listingId", "openToRomance"];
 const PUBLIC_ITEM_KEYS = ["claim", "kind", "quote"];
 
@@ -81,7 +81,7 @@ export async function step16Sharing(run: RunState): Promise<StepResult> {
   return finishStep(16, "sharing", { rows: ["P1", "P2", "P3"], detail: `B lists with ${String(positions.length)} public items; friend asks on`, assertions });
 }
 
-// The checks on B's listing as A finds it: B's name and line, exactly the public items, and no field beyond the listing's own (P6).
+// The checks on B's listing as A finds it: B's name and line, exactly the public items, and no field beyond the listing's own.
 function listingChecks(run: RunState, listing: { listingId: string; displayName: string; line: string; items: Array<{ quote: string }> } | undefined): Assertion[] {
   return [
     check("A finds B's listing in the directory", true, listing !== undefined),
@@ -151,8 +151,7 @@ export async function step19DirectoryBrief(run: RunState): Promise<StepResult> {
     check("every quote of B comes from a turn behind a public item", true, quotesB.every((quote) => publicTurns.includes(quote.turnId))),
     check("B's listed meetings show the meeting with A", { otherDisplayName: "A", questionText: curatedText(DIRECTORY_QUESTION_ID) }, { otherDisplayName: meeting?.otherDisplayName, questionText: meeting?.questionText }),
   ];
-  // How many lines the support judge backs is the model's choice; the recorded judge left several unsupported, so no run counts them
-  // (wave 3 section 4.4).
+  // How many lines the support judge backs is the model's choice; the recorded judge left several unsupported, so no run counts them.
   run.manual.push("the directory brief reads the debate labels: where you agree, where you split, the strongest point on each side");
   return finishStep(19, "dir-brief", { rows: ["P1", "P4", "P6"], detail: `both briefs ready; B quoted ${String(quotesB.length)} time(s), all from public items`, assertions });
 }
@@ -213,7 +212,7 @@ export async function step21Help(run: RunState): Promise<StepResult> {
     check("B's copies hold both answers, each with A's name", [["help", "A"], ["react", "A"]], copies.map((copy) => [copy.mode, copy.askerName]).sort()),
   ];
   // Whether B's persona signs its answer is the model's choice. The recorded persona said B's public items show nothing on the question,
-  // so --mock tolerates an unsigned answer as a live run does (wave 3 section 4.4); a signed answer must still lead and offer a meeting.
+  // so --mock tolerates an unsigned answer as a live run does; a signed answer must still lead and offer a meeting.
   const notes: string[] = [];
   if (answer?.hasSign === true) {
     assertions.push(

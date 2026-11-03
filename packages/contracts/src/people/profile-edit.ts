@@ -6,7 +6,7 @@ export const DISPLAY_NAME_MAX_CHARS = 80;
 // The largest profile photo the api takes, in bytes: a square JPEG the browser drew, which is well under this at 480 px.
 export const PROFILE_PHOTO_MAX_BYTES = 400_000;
 
-// The body of PUT /api/people/me/name: the person's new display name (3 Nov 2026, Instagram's Edit profile).
+// The body of PUT /api/people/me/name: the person's new display name (Instagram's Edit profile).
 export const NameUpdate = z.object({ displayName: z.string().trim().min(1).max(DISPLAY_NAME_MAX_CHARS) });
 // The type of NameUpdate, read from the schema above.
 export type NameUpdate = z.infer<typeof NameUpdate>;

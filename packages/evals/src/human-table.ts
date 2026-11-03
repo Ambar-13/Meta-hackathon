@@ -1,4 +1,4 @@
-// The human metrics (A6): reads the private response files, one per real pair, and prints the table. Names are never read.
+// The human metrics: reads the private response files, one per real pair, and prints the table. Names are never read.
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { z } from "zod";

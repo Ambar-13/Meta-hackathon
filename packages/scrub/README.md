@@ -1,7 +1,5 @@
 # @meet-first/scrub
 
-Rows: D11, D12, D13, D14, D17, R2.1, R2.2, R2.5, R2.9.
-
 ## What this does
 
 Finds secrets, contact details and identity numbers in a message and replaces each with a placeholder that says what was there, such as [redacted:email:00000001]. A code fence becomes one line such as [code: python, 12 lines]. The browser runs it to show the count before upload, and the API runs it again before anything is stored.
@@ -34,4 +32,4 @@ Notice that code fences go first, so nothing inside a fence is ever matched or k
 
 Run `pnpm test:unit packages/scrub` and `pnpm test:security packages/scrub` from the repo root.
 
-Not built yet: a rule for street addresses written in words, and a re-scrub of old sources when SCRUB_VERSION changes; a new version means a new upload (R2.9).
+Not built yet: a rule for street addresses written in words, and a re-scrub of old sources when SCRUB_VERSION changes; a new version means a new upload.

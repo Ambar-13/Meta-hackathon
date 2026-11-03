@@ -2,7 +2,7 @@ import { z } from "zod";
 import { CardRequestResponse } from "../cards/index.js";
 import { NamesReview, NamesReviewResponse, SourceCreateResponse, SourceView } from "../sources/index.js";
 
-// Routes for uploads, the names review and card requests. Paths come from IMPLEMENTATION.md 2.2.
+// Routes for uploads, the names review and card requests.
 // The body of POST /api/sources is NDJSON, so the zod request is undefined.
 export const sourcesRoutes = {
   createSource: { method: "POST", path: "/api/sources", request: z.undefined(), response: SourceCreateResponse },

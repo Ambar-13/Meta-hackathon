@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { APP_PATHS, chatPathWithDraft, createPath, lobbyPathWithCard, meetingPathWithSide, pairPathWithCard, readCardQuery, readCreateKind, readFragmentToken, readSideQuery, ROUTE_PATTERNS } from "./app-paths.js";
 import { IDS } from "../testing/fixtures.js";
 
-const KEYS = ["welcome", "upload", "pair", "join", "claim", "settings", "namesReview", "card", "quiz", "lobby", "meeting", "brief", "comic", "consent", "sharePage", "directory", "help", "friends", "ask", "home", "explore", "me", "person", "meety", "search", "create", "privacy"];
+const KEYS = ["welcome", "upload", "pair", "join", "claim", "settings", "namesReview", "card", "quiz", "lobby", "meeting", "brief", "comic", "consent", "sharePage", "directory", "help", "friends", "ask", "home", "explore", "me", "person", "meety", "search", "create", "privacy", "terms", "cookies"];
 
 describe("client paths", () => {
   it("D32-T1: readFragmentToken returns the 32-hex token after the # and null for anything else", () => {

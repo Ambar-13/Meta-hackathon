@@ -231,7 +231,7 @@ button.receipt { min-height: 0; border: 0; font: inherit; cursor: pointer; }
 .turn.partial { border-style: dashed; }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  *, *:before, *:after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }
 
 /* ---------- laptop ---------- */
@@ -245,8 +245,16 @@ button.receipt { min-height: 0; border: 0; font: inherit; cursor: pointer; }
   .bubble { font-size: 17.5px; }
 }
 
-/* The privacy page: plain sections at a reading width, a hairline between them. */
-.privacy-date { color: var(--ink-2); }
-.privacy-section { max-width: 66ch; padding: 16px 0; border-top: 1px solid var(--line); }
-.privacy-section h2 { margin: 0 0 8px; font-size: 20px; }
-.privacy-section p { margin: 0 0 10px; }
+/* The policy pages (privacy, terms, cookies): plain sections at a reading width, a hairline between them. */
+.policy-date { color: var(--ink-2); }
+.policy-lead { max-width: 66ch; }
+.policy-section { max-width: 66ch; padding: 16px 0; border-top: 1px solid var(--line); }
+.policy-section h2 { margin: 0 0 8px; font-size: 20px; }
+.policy-section p { margin: 0 0 10px; }
+.policy-list { margin: 0; }
+.policy-list div + div { margin-top: 14px; }
+.policy-list dt { font-weight: 700; overflow-wrap: anywhere; }
+.policy-list dd { margin: 4px 0 0; }
+.policy-list .policy-stays { color: var(--ink-2); }
+.policy-links { display: flex; flex-wrap: wrap; gap: 4px 18px; max-width: 66ch; padding: 8px 0; border-top: 1px solid var(--line); }
+.policy-links a { display: inline-flex; align-items: center; min-height: 44px; }

@@ -1,4 +1,4 @@
-// The version folder each prompt sends today. Only the wave's prompts owner edits this file: dossier in Wave 1, briefs in Wave 2, the orchestrator in wave 7 (IMPLEMENTATION.md section 8).
+// The version folder each prompt sends today.
 export const CURRENT_PROMPTS = {
   dossier: "v1",
   "scrub-names": "v1",
@@ -18,7 +18,7 @@ export const CURRENT_PROMPTS = {
 } as const;
 // The name of one prompt folder under packages/prompts.
 export type PromptName = keyof typeof CURRENT_PROMPTS;
-// Every prompt folder name, in the order of IMPLEMENTATION.md section 2.5.
+// Every prompt folder name.
 export const PROMPT_NAMES = Object.keys(CURRENT_PROMPTS) as PromptName[];
 // The version folder the code reads for one prompt, such as "v1".
 export function currentVersion(name: PromptName): string {

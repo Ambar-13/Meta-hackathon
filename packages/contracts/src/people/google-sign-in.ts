@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // What GET /api/auth/options returns: the ways to sign in this site offers, so the start page shows Continue with Google only when the
-// site has a Google client (3 Nov 2026, Ambar: "add oauth google and let people just use meety"). plain-words: allow (his words, quoted)
+// site has a Google client.
 export const AuthOptions = z.object({ google: z.boolean() });
 // The type of AuthOptions, read from the schema above.
 export type AuthOptions = z.infer<typeof AuthOptions>;

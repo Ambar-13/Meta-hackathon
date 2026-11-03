@@ -1,13 +1,13 @@
 import type { Segment } from "./placeholders.js";
 
-// Tokens shorter than this are never treated as keys (D12).
+// Tokens shorter than this are never treated as keys.
 export const ENTROPY_MIN_LENGTH = 20;
-// The Shannon entropy, in bits per character, that a token must exceed (D12).
+// The Shannon entropy, in bits per character, that a token must exceed.
 export const ENTROPY_MIN_BITS_PER_CHAR = 3.5;
-// Allowlist entries shorter than this protect nothing, so a two-letter name cannot shield a key that happens to contain it (D17) [confirm].
+// Allowlist entries shorter than this protect nothing, so a two-letter name cannot shield a key that happens to contain it.
 export const ALLOWLIST_MIN_LENGTH = 3;
 
-// Every character of a token is printable ASCII, so a long Tamil or Hindi word is never a key [confirm].
+// Every character of a token is printable ASCII, so a long Tamil or Hindi word is never a key.
 const PRINTABLE_ASCII = /^[\x21-\x7e]+$/;
 // Opening punctuation kept outside a token, such as a bracket or a quote.
 const OPENING_PUNCTUATION = "([{<\"'`";
@@ -28,7 +28,7 @@ export function shannonEntropy(token: string): number {
   return bits;
 }
 
-// True when a token looks like a key: long enough, printable ASCII, random enough, and holding no allowlisted name (D12, D17).
+// True when a token looks like a key: long enough, printable ASCII, random enough, and holding no allowlisted name.
 function isKeyLike(token: string, names: readonly string[]): boolean {
   if (token.length < ENTROPY_MIN_LENGTH || !PRINTABLE_ASCII.test(token)) return false;
   if (shannonEntropy(token) <= ENTROPY_MIN_BITS_PER_CHAR) return false;
@@ -63,7 +63,7 @@ function splitTokens(segment: Segment, names: readonly string[]): Segment[] {
   return pieces;
 }
 
-// Replaces each token of 20 or more printable ASCII characters with entropy over 3.5 bits per character, unless it contains an allowlisted name (D12, D17).
+// Replaces each token of 20 or more printable ASCII characters with entropy over 3.5 bits per character, unless it contains an allowlisted name.
 export function applyEntropyRule(segments: Segment[], allowlist: readonly string[]): Segment[] {
   const names = allowlist
     .map((name) => name.trim().toLowerCase())

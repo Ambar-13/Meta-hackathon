@@ -9,7 +9,7 @@ const INTERNAL_SENTENCE = "Something went wrong on our side. Try again in a minu
 // An error turned into the status, code and sentence the client receives.
 export type DescribedError = { status: number; code: string; message: string };
 
-// Status codes that Fastify or a plugin raises without a ContractError, each with the code and sentence the client sees (413 is D4's body limit; the two new codes are [confirm]).
+// Status codes that Fastify or a plugin raises without a ContractError, each with the code and sentence the client sees (413 is the upload body limit).
 export const FRAMEWORK_STATUS_ERRORS: Readonly<Record<number, { code: string; message: string }>> = {
   400: { code: "payload_invalid", message: PAYLOAD_INVALID_SENTENCE },
   404: { code: "not_found", message: "This no longer exists or is not yours." },
@@ -17,22 +17,22 @@ export const FRAMEWORK_STATUS_ERRORS: Readonly<Record<number, { code: string; me
   415: { code: "content_type_unsupported", message: "Send the body as JSON with Content-Type application/json." },
 };
 
-// session_missing, 401 (docs/contracts.md section 5). Contracts HTTP now names 401 as unauthorized, so the constant is read from there.
+// session_missing, 401. Contracts HTTP now names 401 as unauthorized, so the constant is read from there.
 export function makeSessionMissingError(): ContractError {
   return new ContractError("session_missing", "Sign in again from the start page.", HTTP.unauthorized);
 }
 
-// origin_mismatch, 403 (docs/contracts.md section 5, A7).
+// origin_mismatch, 403.
 export function makeOriginMismatchError(): ContractError {
   return new ContractError("origin_mismatch", "Open the app from its own address and try again.", HTTP.forbidden);
 }
 
-// not_found, 404 (docs/contracts.md section 5). It is also the answer for an id that is not a uuid, so a bad id tells nothing [confirm] (no input says what a malformed id gives).
+// not_found, 404. It is also the answer for an id that is not a uuid, so a bad id tells nothing.
 export function makeNotFoundError(): ContractError {
   return new ContractError("not_found", "This no longer exists or is not yours.", HTTP.notFound);
 }
 
-// payload_invalid, 400 (docs/contracts.md section 5).
+// payload_invalid, 400.
 export function makePayloadInvalidError(): ContractError {
   return new ContractError("payload_invalid", PAYLOAD_INVALID_SENTENCE, HTTP.badRequest);
 }

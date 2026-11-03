@@ -1,4 +1,4 @@
-// First-person pronouns, lower case, matched as whole words (Latin scripts) or as substrings (scripts without word spaces) (R3.8).
+// First-person pronouns, lower case, matched as whole words (Latin scripts) or as substrings (scripts without word spaces).
 export const FIRST_PERSON_WORDS: ReadonlyArray<string> = [
   "i", "i'm", "i've", "i'd", "i'll", "me", "my", "mine", "myself", // English
   "je", "j'ai", "moi", "mon", "ma", "mes", // French
@@ -9,7 +9,7 @@ export const FIRST_PERSON_WORDS: ReadonlyArray<string> = [
   "saya", "aku", "gue", // Malay, Indonesian
   "ako", "ko", "akin", // Filipino
 ];
-// Pronouns of scripts written without spaces between words, matched as substrings of the lower-cased text (R3.8).
+// Pronouns of scripts written without spaces between words, matched as substrings of the lower-cased text.
 export const FIRST_PERSON_SUBSTRINGS: ReadonlyArray<string> = [
   "मैं", "मेरा", "मुझे", // Hindi: main, mera, mujhe
   "நான்", "என்", // Tamil: naan, en
@@ -21,7 +21,7 @@ export const FIRST_PERSON_SUBSTRINGS: ReadonlyArray<string> = [
   "আমি", // Bengali: ami
 ];
 
-// A prose turn has at least this many words (R3.8).
+// A prose turn has at least this many words.
 const PROSE_MIN_WORDS = 6;
 // Fenced blocks, from a run of three or more backticks or tildes to the same run or the end of the text.
 const FENCED_BLOCK = /(`{3,}|~{3,})[\s\S]*?(?:\1|$)/g;
@@ -61,7 +61,7 @@ function hasFirstPerson(text: string): boolean {
   return FIRST_PERSON_SUBSTRINGS.some((entry) => folded.includes(entry));
 }
 
-// Share of prose turns that contain a first-person pronoun, 0 to 1 (R3.8). A prose turn has at least 6 words and is not a code-fence-only turn.
+// Share of prose turns that contain a first-person pronoun, 0 to 1. A prose turn has at least 6 words and is not a code-fence-only turn.
 export function computePersonaSignal(texts: string[]): number {
   const prose = texts.filter(isProse);
   if (prose.length === 0) return 0;

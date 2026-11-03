@@ -94,7 +94,7 @@ s04_forced_rls() {
   echo "$count"
   [ "$count" = "0" ]
 }
-# Command 05: the schema holds 30 tables in public: 25 from 0001 (asks dropped, as-built item 28), 2 from 0002 (item 29) and 3 from 0006 (item 49).
+# Command 05: the schema holds 30 tables in public: 25 from 0001 (asks dropped), 2 from 0002 and 3 from 0006.
 s05_tables() {
   local count
   count=$(psql "$DATABASE_URL_MIGRATE" -Atc "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relkind = 'r'")
@@ -108,7 +108,7 @@ s06_definer_functions() {
   echo "$count"
   [ "$count" = "20" ]
 }
-# Command 07: the quiz bank is seeded with its 30 questions (D28).
+# Command 07: the quiz bank is seeded with its 30 questions.
 s07_quiz_bank() {
   local count
   # Read as app_api, the role that reads the bank; the owner app_migrate sees no rows under forced row security.
@@ -182,11 +182,11 @@ s16_golden_path() {
   jq -e '.ledger.modes == ["replay"]' "$report" >/dev/null
   jq -e '[.steps[] | select(.name == "stream") | .assertions[] | select(.name == "planned reconnect") | .pass] == [true]' "$report" >/dev/null
   # Since Wave 3 the replay is a recording of the real model, whose support judge leaves many lines unsupported, so the brief is
-  # checked by its replayed judgments being reliable, not by the scripted count of one unsupported line (wave 3 section 4.4).
+  # checked by its replayed judgments being reliable, not by the scripted count of one unsupported line.
   jq -e '[.steps[] | select(.name == "brief") | .assertions[] | select(.name == "both support judgments are reliable") | .pass] == [true]' "$report" >/dev/null
   jq -e '[.steps[] | select(.name == "comic") | .assertions[] | select(.name == "the comic is written after the brief") | .pass] == [true]' "$report" >/dev/null
   jq -e '[.steps[] | select(.name == "delete") | .assertions[] | select(.name == "every table is empty for A") | .pass] == [true]' "$report" >/dev/null
-  # The directory's privacy checks: B's side of the directory meeting and B's help answer quote only turns behind public items (P1).
+  # The directory's privacy checks: B's side of the directory meeting and B's help answer quote only turns behind public items.
   jq -e '[.steps[] | select(.name == "dir-brief") | .assertions[] | select(.name == "every quote of B comes from a turn behind a public item") | .pass] == [true]' "$report" >/dev/null
   jq -e '[.steps[] | select(.name == "help") | .assertions[] | select(.name == "every quote of the answer comes from a turn behind a public item") | .pass] == [true]' "$report" >/dev/null
 }
@@ -199,22 +199,22 @@ s17_eval() {
     grep -q "$metric" "$EVIDENCE/17-eval.txt"
   done
   jq -e '.commit and .date and .llmMode == "replay" and .model and (.metrics | length == 7) and (.thresholdFailures | length == 0)' "$ROOT/eval/results.json" >/dev/null
-  # The eval's own stack tests (W2-EVAL-T13 and T14) run only when EVAL_BASE_URL names a running stack; here one is running.
+  # The eval's own stack tests (W2-EVAL-T13) run only when EVAL_BASE_URL names a running stack; here one is running.
   EVAL_BASE_URL="$APP_ORIGIN" pnpm exec vitest run --project integration packages/evals/src/run-eval.integration.test.ts
 }
-# Command 18: the api image builds the web app, then the api, on Node 22 (D72).
+# Command 18: the api image builds the web app, then the api, on Node 22.
 s18_docker_api() {
   docker build -f Dockerfile.api -t meet-first-api:check .
   # grep without -q reads the whole output, so docker never writes into a closed pipe, which pipefail would count as a failure.
   docker run --rm meet-first-api:check node --version | grep '^v22\.'
 }
-# Command 19: the worker image builds on Node 22 (D72).
+# Command 19: the worker image builds on Node 22.
 s19_docker_worker() {
   docker build -f Dockerfile.worker -t meet-first-worker:check .
   # grep without -q reads the whole output, so docker never writes into a closed pipe, which pipefail would count as a failure.
   docker run --rm meet-first-worker:check node --version | grep '^v22\.'
 }
-# Command 20: the production image refuses to boot in replay mode (D74, R13.3), before it reads the schema, since the database URL is given.
+# Command 20: the production image refuses to boot in replay mode, before it reads the schema, since the database URL is given.
 s20_production_refuses_replay() {
   local output code
   set +e

@@ -88,8 +88,6 @@ describe("render role setup", () => {
     expect(Object.keys(wave3)).toEqual(["APP_ORIGIN", "DATABASE_URL_WORKER"]);
     expect(wave3.APP_ORIGIN).toBe(ORIGIN);
     expect(partsOf(wave3.DATABASE_URL_WORKER)).toEqual({ user: "app_worker", password: "worker-pw", host: EXTERNAL_HOST, database: "meet_first_db", query: "?sslmode=require" });
-    // check-wave-3.sh reads LLM_MODE from the deployment, so the file never sets it.
-    expect(files[".env.wave3"]).not.toContain("LLM_MODE");
     for (const text of Object.values(files)) {
       expect(text).not.toContain(OWNER_PASSWORD);
       expect(text).not.toContain(OWNER);

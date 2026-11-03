@@ -19,7 +19,7 @@ type CardResult = { itemsTotal: number; final: VerifiedItem[]; isThin: boolean; 
 // The job's own context for one build: the first card call, its checks and the turns it may quote.
 type BuildPlan = { first: ModelCall; sampled: SampledTurn[]; turnsByIndex: Map<number, SampledTurn>; forbidden: string[] };
 
-// Builds one persona card from a frozen source: whole turns in, items with quotes out, each quote checked inside its named turn, one regeneration, thin under 6 (D19 to D23, R3.2).
+// Builds one persona card from a frozen source: whole turns in, items with quotes out, each quote checked inside its named turn, one regeneration, thin under 6.
 export const buildCardTask: JobTask<"build_card"> = async (payload, context) => {
   const input = await readCardInput(context.db, payload);
   if (input === "stop") return;
@@ -44,7 +44,7 @@ function toSampledTurn(turn: TurnRow): SampledTurn {
   return { id: turn.id, turnIndex: turn.turn_index, text: turn.text, normText: turn.norm_text, isSensitive: turn.sensitive_categories.length > 0 };
 }
 
-// The turns a card may use: no sensitive tag, or every tag opted in, the same rule as recall_corpus (D18, R2.8).
+// The turns a card may use: no sensitive tag, or every tag opted in, the same rule as recall_corpus.
 export function eligibleTurns<T extends { sensitive_categories: readonly string[] }>(turns: readonly T[], optIn: readonly string[]): T[] {
   return turns.filter((turn) => turn.sensitive_categories.length === 0 || turn.sensitive_categories.every((category) => optIn.includes(category)));
 }
@@ -81,7 +81,7 @@ async function buildAndWrite(context: JobContext, payload: JobPayload<"build_car
   await writeCard(context, payload, { itemsTotal: parsed1.data.items.length, final, isThin: final.length < CARD_ITEMS_MIN, charsPerToken, sourceId: source.id, promptVersion: first.promptVersion });
 }
 
-// The one regeneration: when a check failed and the card call allows a retry, the failed items go back once; a second failure is dropped (D22, D27).
+// The one regeneration: when a check failed and the card call allows a retry, the failed items go back once; a second failure is dropped.
 // A regeneration that throws is logged and gives nothing, so the card keeps the first reply's verified items instead of failing.
 async function regenerate(context: JobContext, payload: JobPayload<"build_card">, args: { plan: BuildPlan; replyText: string; failures: FailedItem[] }): Promise<ItemCheck[]> {
   if (args.failures.length === 0 || CALL_SITE_CONFIG.card.retries < 1) return [];
@@ -96,7 +96,7 @@ async function regenerate(context: JobContext, payload: JobPayload<"build_card">
   }
 }
 
-// The chars per token of a source from its first card call: request characters over prompt tokens, 3 decimals, at most 999.999; null when the reply reported no prompt tokens (D20).
+// The chars per token of a source from its first card call: request characters over prompt tokens, 3 decimals, at most 999.999; null when the reply reported no prompt tokens.
 export function charsPerTokenFrom(requestCharCount: number, promptTokens: number): number | null {
   if (promptTokens <= 0) return null;
   return Math.min(999.999, Math.round((requestCharCount / promptTokens) * 1000) / 1000);
@@ -112,7 +112,7 @@ async function failCard(db: Kysely<Database>, payload: JobPayload<"build_card">,
   await withPerson(db, payload.personId, (trx) => trx.updateTable("cards").set({ state: "failed", error: failure.code, model: CHAT_MODEL, prompt_version: failure.promptVersion }).where("id", "=", payload.cardId).where("state", "=", "building").execute());
 }
 
-// Writes the card and its items in one transaction, and the calibrated chars per token of the source (D20).
+// Writes the card and its items in one transaction, and the calibrated chars per token of the source.
 async function writeCard(context: JobContext, payload: JobPayload<"build_card">, result: CardResult): Promise<void> {
   await withPerson(context.db, payload.personId, async (trx) => {
     const built = await trx.updateTable("cards").set({ state: result.isThin ? "thin" : "ready", thin: result.isThin, items_total: result.itemsTotal, items_verified: result.final.length, built_at: context.now(), model: CHAT_MODEL, prompt_version: result.promptVersion, error: null }).where("id", "=", payload.cardId).where("state", "=", "building").returning("id").executeTakeFirst();

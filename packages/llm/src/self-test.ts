@@ -8,7 +8,7 @@ import { assertModeAllowed } from "./modes.js";
 
 // One zod schema of a model output, as the strict converter reads it.
 type SchemaOf = z.ZodType<unknown, z.ZodTypeDef, unknown>;
-// The outcome of one schema in the boot self-test: its name, whether the vendor accepted it, its HTTP status and what went wrong (R3.1).
+// The outcome of one schema in the boot self-test: its name, whether the vendor accepted it, its HTTP status and what went wrong.
 export type SelfTestResult = { name: string; ok: boolean; httpStatus: number | null; detail: string | null };
 
 // The failed result of one schema, from the code or the vendor error it raised.
@@ -18,7 +18,7 @@ function failureOf(name: string, error: unknown): SelfTestResult {
   return { name, ok: false, httpStatus: null, detail: String(error) };
 }
 
-// Sends one schema in a one-token strict call and reports the result; a schema that fails to convert is reported with no call (R3.1).
+// Sends one schema in a one-token strict call and reports the result; a schema that fails to convert is reported with no call.
 async function checkSchema(client: LlmClient, name: string, schema: SchemaOf): Promise<SelfTestResult> {
   let strict: ReturnType<typeof toStrictJsonSchema>;
   try {
@@ -34,7 +34,7 @@ async function checkSchema(client: LlmClient, name: string, schema: SchemaOf): P
   }
 }
 
-// The same run over any map of schemas, so a test can plant a bad one (R3.1). Every schema is tried, even after a failure.
+// The same run over any map of schemas, so a test can plant a bad one. Every schema is tried, even after a failure.
 export async function runBootSelfTestOn(client: LlmClient, options: { schemas: Record<string, SchemaOf>; log: (line: string) => void }): Promise<SelfTestResult[]> {
   const results: SelfTestResult[] = [];
   for (const [name, schema] of Object.entries(options.schemas)) {
@@ -45,12 +45,12 @@ export async function runBootSelfTestOn(client: LlmClient, options: { schemas: R
   return results;
 }
 
-// Sends each model output schema in a one-token strict call and reports per schema. Any 400 is a failure (R3.1).
+// Sends each model output schema in a one-token strict call and reports per schema. Any 400 is a failure.
 export function runBootSelfTest(client: LlmClient, log: (line: string) => void): Promise<SelfTestResult[]> {
   return runBootSelfTestOn(client, { schemas: MODEL_OUTPUT_SCHEMAS, log });
 }
 
-// 1 when any schema failed, else 0: the process exit code of the self-test (R3.1).
+// 1 when any schema failed, else 0: the process exit code of the self-test.
 export function selfTestExitCode(results: readonly SelfTestResult[]): number {
   return results.some((result) => !result.ok) ? 1 : 0;
 }

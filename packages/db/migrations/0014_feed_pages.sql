@@ -1,5 +1,5 @@
 -- package: db
--- Gives Home an endless, honest feed: your friends' posts and your own first, newest first and a page at a time, then everyone else's (3 Nov 2026).
+-- Gives Home an endless, honest feed: your friends' posts and your own first, newest first and a page at a time, then everyone else's.
 
 -- One page of the feed. With p_friends true: posts by the caller and by their friends, as friend_list counts friends (a joined pair that
 -- no directory meeting made). With p_friends false: posts by everyone else listed in Explore. Both read only posts of people listed with

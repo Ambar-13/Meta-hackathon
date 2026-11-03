@@ -136,7 +136,7 @@ function checkLines(block: MermaidBlock, kind: string, firstLine: number): Diagr
   return problems;
 }
 
-/** The most boxes one diagram may hold: the style rule of at most 15 boxes (IMPLEMENTATION.md 1). */
+/** The most boxes one diagram may hold: the style rule of at most 15 boxes. */
 export const MAX_BOXES = 15;
 
 // Lines that name no box: block openers and closers, styling, notes and activations.

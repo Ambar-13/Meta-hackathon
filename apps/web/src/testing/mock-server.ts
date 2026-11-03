@@ -4,7 +4,7 @@ import { setupServer } from "msw/node";
 import { delay, http, HttpResponse } from "msw";
 import { ContractError } from "@meet-first/contracts";
 
-// One reply the MSW server gives for a stubbed route (seams S11).
+// One reply the MSW server gives for a stubbed route.
 export type StubReply = { status: number; body: unknown; delayMs?: number };
 // What a test may pass to stubRoute: a full reply, or a body that is answered with status 200.
 export type StubInput = StubReply | object;
@@ -17,13 +17,13 @@ function asStubReply(input: StubInput): StubReply {
 
 // The answers every screen gets for the signed-in rail's two reads unless a test stubs them: no friends and no friend requests; and
 // for the reads of the home page, Explore and profiles: no listings and no posts.
-// server.resetHandlers keeps these, and a test's own stubRoute goes in front of them (wave 7).
+// server.resetHandlers keeps these, and a test's own stubRoute goes in front of them.
 const RAIL_DEFAULTS = [
   http.get(new URL("/api/friends", window.location.origin).href, () => HttpResponse.json({ friends: [] })),
   http.get(new URL("/api/friend-requests", window.location.origin).href, () => HttpResponse.json({ incoming: [], outgoing: [] })),
-  // The home page's suggestions read the first page of Explore (3 Nov 2026); a test that needs listings stubs its own.
+  // The home page's suggestions read the first page of Explore; a test that needs listings stubs its own.
   http.get(new URL("/api/directory", window.location.origin).href, () => HttpResponse.json({ listings: [], page: 0, hasMore: false })),
-  // Explore and profiles read posts (3 Nov 2026); a test that needs posts stubs its own.
+  // Explore and profiles read posts; a test that needs posts stubs its own.
   http.get(new URL("/api/posts", window.location.origin).href, () => HttpResponse.json({ posts: [] })),
   http.get(new URL("/api/directory/:id/posts", window.location.origin).href, () => HttpResponse.json({ posts: [] })),
 ];
@@ -43,7 +43,7 @@ async function readBody(request: Request): Promise<unknown> {
   }
 }
 
-// Answers one contracts route from the MSW server; with a list, the replies are served in order and the last one repeats (seams S11).
+// Answers one contracts route from the MSW server; with a list, the replies are served in order and the last one repeats.
 export function stubRoute(route: { method: string; path: string }, replies: StubInput | StubInput[]): void {
   const list: StubReply[] = (Array.isArray(replies) ? replies : [replies]).map(asStubReply);
   if (list.length === 0) throw new ContractError("stub_replies_empty", "Give stubRoute at least one reply.");
@@ -69,7 +69,7 @@ export function stubRoute(route: { method: string; path: string }, replies: Stub
   );
 }
 
-// Every request the MSW server received for one route, in order, so a test can count them (seams S11).
+// Every request the MSW server received for one route, in order, so a test can count them.
 export function requestsTo(route: { method: string; path: string }): Array<{ url: string; body: unknown }> {
   return [...(recorded.get(`${route.method} ${route.path}`) ?? [])];
 }

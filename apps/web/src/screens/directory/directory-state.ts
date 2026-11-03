@@ -4,7 +4,7 @@ import { apiFetch, ApiError, APP_PATHS, asApiError, readCardQuery, routes } from
 import { readListingOrNull } from "../card/index.js";
 import { meetingCreateBody, type QuestionPick } from "../lobby/index.js";
 
-// The longest search the directory takes: the maximum of the query in DirectoryQuery in contracts, which names no constant [confirm].
+// The longest search the directory takes: the maximum of the query in DirectoryQuery in contracts, which names no constant.
 export const SEARCH_MAX_CHARS = 200;
 // The lobby's sentence for free text outside 5 to 300 characters, in the same words, so both pickers say the same (lobby-state.ts).
 export const FREE_TEXT_REFUSAL = "Write a question of 5 to 300 characters.";
@@ -31,7 +31,7 @@ export type YourListingHook = { load: YourListingLoad; leaveState: LeaveState; l
 // The listings before the first page arrives.
 const FIRST_BROWSE: BrowseState = { query: "", listings: [], nextPage: 0, hasMore: false, hasLoaded: false, isLoading: true, error: null };
 
-// The query values of one directory request: the page always, and the words only when the trimmed search is not empty (design section 6).
+// The query values of one directory request: the page always, and the words only when the trimmed search is not empty.
 export function directoryQueryFor(query: string, page: number): Record<string, string | number> {
   const words = query.trim();
   return words === "" ? { page } : { query: words, page };
@@ -48,7 +48,7 @@ export function cardForMeeting(input: { search: string; approvedCardId: string |
   return readCardQuery(input.search) ?? input.approvedCardId ?? input.listedCardId;
 }
 
-// The question kinds the Meet picker leaves out: romance, unless the listing is open to dating questions (design section 11).
+// The question kinds the Meet picker leaves out: romance, unless the listing is open to dating questions.
 export function leaveOutKindsFor(listing: DirectoryListing): readonly QuestionKind[] {
   return listing.openToRomance ? [] : ["romance"];
 }
@@ -85,7 +85,7 @@ export function useDirectoryBrowse(): BrowseHook {
   };
 }
 
-// The Meet flow of the directory page: one picker open at a time, and a created meeting opens its page (design section 7).
+// The Meet flow of the directory page: one picker open at a time, and a created meeting opens its page.
 export function useListingMeeting(options: { cardId: string | null; go: (path: string) => void }): MeetControls {
   const { cardId, go } = options;
   const [state, setState] = useState<MeetState>({ openListingId: null, isSending: false, error: null });
@@ -110,7 +110,7 @@ export function useListingMeeting(options: { cardId: string | null; go: (path: s
   return { state, toggle, create };
 }
 
-// The person's own listing, the card it was on when the page opened, the meetings their persona was in, and Leave (design section 7, P2, P4).
+// The person's own listing, the card it was on when the page opened, the meetings their persona was in, and Leave.
 export function useYourListing(): YourListingHook {
   const [load, setLoad] = useState<YourListingLoad>({ kind: "loading" });
   const [leaveState, setLeaveState] = useState<LeaveState>({ kind: "idle" });

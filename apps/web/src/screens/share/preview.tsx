@@ -4,7 +4,7 @@ import { ErrorNotice } from "../../app-shell/index.js";
 import { EmptyState, LoadingLine, NameTag, Receipt } from "../../look/index.js";
 import { PREVIEW_SECTIONS, type PreviewLines, type PublishPreview } from "./share-state.js";
 
-// The words of the preview that no input gives [confirm] (drafted copy, design fix 2 of the brief).
+// The words of the preview.
 export const PREVIEW_COPY = {
   heading: "What the page will show",
   loading: "Reading what the page would hold.",

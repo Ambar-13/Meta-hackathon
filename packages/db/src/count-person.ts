@@ -9,7 +9,7 @@ import type { Database } from "./types.js";
 // One table where a person's rows can be found, and the columns there that point at the person.
 export type PersonColumns = { table: string; columns: string[] };
 
-// One connection is enough to count one person's rows [confirm].
+// One connection is enough to count one person's rows.
 const COUNT_POOL_SIZE = 1;
 
 // The foreign keys to people, read from the system catalog: every column that points at people, sorted by byte order.
@@ -20,7 +20,7 @@ JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = ANY (c.conkey)
 WHERE c.contype = 'f' AND c.confrelid = 'public.people'::regclass
 ORDER BY c.conrelid::regclass::text COLLATE "C", a.attname COLLATE "C"`;
 
-// Lists people by id, then every table with a foreign key to people, read from the system catalog so a new table is never missed (D69, invariant 16).
+// Lists people by id, then every table with a foreign key to people, read from the system catalog so a new table is never missed.
 export async function listPersonColumns(trx: DatabaseTransaction): Promise<PersonColumns[]> {
   const rows = await sql<{ table_name: string; column_name: string }>`${sql.raw(PERSON_FOREIGN_KEYS)}`.execute(trx);
   const grouped: PersonColumns[] = [];
@@ -32,7 +32,7 @@ export async function listPersonColumns(trx: DatabaseTransaction): Promise<Perso
   return [{ table: "people", columns: ["id"] }, ...grouped.filter((entry) => entry.table !== "people")];
 }
 
-// Counts, table by table, the rows that still point at this person, inside the person's own context (D69, R9.6, R9.7).
+// Counts, table by table, the rows that still point at this person, inside the person's own context.
 export async function countRowsForPerson(db: Kysely<Database>, personId: string): Promise<Record<string, number>> {
   return withPerson(db, personId, async (trx) => {
     const counts: Record<string, number> = {};

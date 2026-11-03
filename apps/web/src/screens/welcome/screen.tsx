@@ -41,7 +41,7 @@ const WelcomeHero = (props: { onDone: () => void }): ReactElement => {
   );
 };
 
-// The start page: the landing with the name-tag form first, the story of how it works, and the way back in with a recovery code (A5).
+// The start page: the landing with the name-tag form first, the story of how it works, and the way back in with a recovery code.
 export const WelcomeScreen = (): ReactElement => {
   const navigate = useNavigate();
   const goToUpload = (): void => {

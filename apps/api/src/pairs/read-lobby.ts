@@ -7,12 +7,12 @@ import type { RouteDeps } from "../app-types.js";
 import { makeNotFoundError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
 
-// The meeting states in which a lobby poll counts as being present (D53): a meeting that can still start, or runs [confirm] (D53 names the poll, not the states).
+// The meeting states in which a lobby poll counts as being present: a meeting that can still start, or runs.
 export const PRESENCE_STATES = ["ready", "queued", "running"] as const;
-// The :id parameter of the lobby poll (D54). A value that is not a uuid is not_found, so it tells nothing; this schema is local because contracts has no params schemas.
+// The :id parameter of the lobby poll. A value that is not a uuid is not_found, so it tells nothing; this schema is local because contracts has no params schemas.
 export const PairParams = z.object({ id: z.string().uuid() });
 
-// Stamps last_seen_at on the caller's member rows of this pair's meetings that are ready, queued or running (D53).
+// Stamps last_seen_at on the caller's member rows of this pair's meetings that are ready, queued or running.
 export async function touchLobbyPresence(trx: Transaction<Database>, input: { personId: string; pairId: string; now: Date }): Promise<void> {
   await trx
     .updateTable("meeting_members")
@@ -22,7 +22,7 @@ export async function touchLobbyPresence(trx: Transaction<Database>, input: { pe
     .execute();
 }
 
-// Reads the pair as the caller: both display names and its meetings, newest first; null when the caller is not in it (D54, R9.4).
+// Reads the pair as the caller: both display names and its meetings, newest first; null when the caller is not in it.
 // The other person's name comes only from pair_display_names, which returns no row unless the caller is in the pair.
 export async function readPairView(trx: Transaction<Database>, input: { pairId: string; now: Date }): Promise<PairView | null> {
   const pair = await trx.selectFrom("pairs").select(["id", "creator_person_id", "joiner_person_id", "expires_at"]).where("id", "=", input.pairId).executeTakeFirst();
@@ -57,7 +57,7 @@ export async function readPairView(trx: Transaction<Database>, input: { pairId: 
   });
 }
 
-// Registers GET /api/pairs/:id: 200 PairView as JSON, polled every 5 s by the lobby, never a stream (D54, R8.6).
+// Registers GET /api/pairs/:id: 200 PairView as JSON, polled every 5 s by the lobby, never a stream.
 export function registerReadLobby(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.meetings.readPair.path, async (request, reply) => {
     const personId = requirePerson(request);

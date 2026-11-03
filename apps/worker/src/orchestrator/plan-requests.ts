@@ -1,5 +1,5 @@
 // What the orchestrate job sends to the model and the checks it runs on what comes back, built without the database. The model proposes
-// one action; the checks here decide it, so a plan never names a friend the person does not have or one whose switch is off (wave 7).
+// one action; the checks here decide it, so a plan never names a friend the person does not have or one whose switch is off.
 import { AskCreate, OrchestratorPlanOutput, toStrictJsonSchema, type OrchestratorAction, type OrchestratorFriends } from "@meet-first/contracts";
 import type { ChatMessage, CompleteArgs } from "@meet-first/llm";
 import { promptLine } from "../asks/ask-requests.js";
@@ -14,7 +14,7 @@ export const RECENT_MESSAGE_MAX_CHARS = 300;
 // The most characters of all the earlier messages together, each counted after its cut, so 8 messages of the full 300 fit.
 export const RECENT_CHARS_MAX = 2_400;
 
-// The sentence of a reply whose model call failed (wave 7 spec, worker step 4).
+// The sentence of a reply whose model call failed.
 export const PLAN_FAILED_SENTENCE = "I could not work that out just now. Try again in a minute.";
 // The sentence when a help or react plan came without a question that fits an ask.
 export const NO_QUESTION_SENTENCE = "I could not turn that into a question to ask. Tell me in one sentence what you want to know.";
@@ -79,7 +79,7 @@ export function planCallArgs(input: { personId: string; promptVersion: string; m
   };
 }
 
-// A name as the friend match compares it: case and spaces ignored. Example: " Mira  Shah" and "mirashah" are the same key.
+// A name as the friend match compares it: case and spaces ignored. Example: " Mira Shah" and "mirashah" are the same key.
 export function nameKey(name: string): string {
   return name.normalize("NFKC").toLowerCase().replace(/\s+/g, "");
 }

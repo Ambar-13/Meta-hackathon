@@ -61,7 +61,7 @@ const NextMeeting = (props: { current: boolean; hasCard: boolean; isBusy: boolea
   return <QuestionPicker isSending={props.isBusy} error={props.createError} onCreate={props.onCreate} />;
 };
 
-// The /pairs/:pairId page: who is paired, the next meeting, and the question picker; it polls and never streams (D54, R8.6).
+// The /pairs/:pairId page: who is paired, the next meeting, and the question picker; it polls and never streams.
 export const LobbyScreen = (): ReactElement => {
   const navigate = useNavigate();
   const location = useLocation();

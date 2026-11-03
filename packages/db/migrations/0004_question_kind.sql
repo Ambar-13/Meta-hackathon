@@ -1,5 +1,5 @@
 -- package: db
--- Adds the kind of each meeting's question, so the meeting prompts and the brief's section labels follow what the question asks (R10.5).
+-- Adds the kind of each meeting's question, so the meeting prompts and the brief's section labels follow what the question asks.
 
 ALTER TABLE meetings ADD COLUMN question_kind text NOT NULL DEFAULT 'situation'
   CHECK (question_kind IN ('get_along', 'help', 'situation', 'decision'));

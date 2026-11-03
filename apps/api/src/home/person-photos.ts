@@ -1,4 +1,4 @@
-// Which picture a person shows (3 Nov 2026): a sample person's bundled face, or the profile photo a real person put up themselves, read
+// Which picture a person shows: a sample person's bundled face, or the profile photo a real person put up themselves, read
 // by listing or by pair through definer functions (migration 0012), so no person id leaves the database.
 import { sql } from "kysely";
 import { sampleFaceKey, type DatabaseTransaction } from "@meet-first/db";

@@ -1,8 +1,8 @@
-// What exists: friends are the people a person joined a pair with, by an invite link or an accepted friend request (wave 7), and each
-// friend has a switch that lets friends ask their persona how they would probably react (P3). The problem: the page must show the
-// requests to answer first, offer the ask only where the friend said yes, and show the person every answer their own persona gave
-// (P4). The step: incoming requests with Accept and Decline, one row per friend with the ask box and Meet, the requests you sent, then
-// the copies from GET /api/asks. What it does not do: ask how a stranger would react; that is not built (design section 10).
+// What exists: friends are the people a person joined a pair with, by an invite link or an accepted friend request, and each
+// friend has a switch that lets friends ask their persona how they would probably react. The problem: the page must show the
+// requests to answer first, offer the ask only where the friend said yes, and show the person every answer their own persona gave.
+//The step: incoming requests with Accept and Decline, one row per friend with the ask box and Meet, the requests you sent, then
+// the copies from GET /api/asks. What it does not do: ask how a stranger would react; that is not built.
 import "./friends.css";
 import { useState, type FormEvent, type ReactElement } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -12,45 +12,45 @@ import { Avatar, EmptyState, LoadingLine, PersonAvatar } from "../../look/index.
 import { AnswerClaims } from "../ask/index.js";
 import { useFriendsScreen, type FriendsScreenModel } from "./friends-state.js";
 
-// The headings and lines of this page; the ones marked [confirm] are drafted, because design section 7 does not give them.
-const FRIENDS_HEADING = "Your friends"; // [confirm]
+// The headings and lines of this page.
+const FRIENDS_HEADING = "Your friends";
 const REQUESTS_HEADING = "Requests";
 const SENT_REQUESTS_HEADING = "Requests you sent";
 const WAITING_LINE = "Waiting for an answer";
 const COPIES_HEADING = "Answers your Meety gave";
-const SENT_HEADING = "Asks you sent"; // [confirm]
+const SENT_HEADING = "Asks you sent";
 const ASK_BUTTON_LABEL = "Ask their Meety";
 const MEET_LABEL = "Meet";
-const SEND_LABEL = "Send the ask"; // [confirm]
+const SEND_LABEL = "Send the ask";
 const NO_FRIENDS_TITLE = "No friends yet";
 const NO_FRIENDS_LINE = "Find people in Search and add them, or share your invite link.";
 const NO_FRIENDS_ACTION = "Find people";
-const NO_COPIES_TITLE = "No answers yet"; // [confirm]
-const NO_COPIES_LINE = "Your Meety has not answered anyone yet."; // [confirm]
-const NO_SENT_TITLE = "Nothing sent yet"; // [confirm]
-const NO_SENT_LINE = "Ask a friend how they would react, or ask Meety who could help."; // [confirm]
-const LOADING_FRIENDS_LINE = "Loading your friends."; // [confirm]
-const LOADING_COPIES_LINE = "Loading the answers your Meety gave."; // [confirm]
-const COPY_ANSWER_LABEL = "Your Meety's answer"; // [confirm]
-// The name on the caller's own persona bubble, so its initial reads Y [confirm].
-const SELF_NAME = "You"; // [confirm]
-// The words for where each sent ask is, and its kind [confirm].
-const SENT_STATE_LINES: Record<AskSummary["state"], string> = { checking: "Still running", asking: "Still running", ranking: "Still running", done: "Answered", refused: "Not allowed", failed: "Could not finish" }; // [confirm]
+const NO_COPIES_TITLE = "No answers yet";
+const NO_COPIES_LINE = "Your Meety has not answered anyone yet.";
+const NO_SENT_TITLE = "Nothing sent yet";
+const NO_SENT_LINE = "Ask a friend how they would react, or ask Meety who could help.";
+const LOADING_FRIENDS_LINE = "Loading your friends.";
+const LOADING_COPIES_LINE = "Loading the answers your Meety gave.";
+const COPY_ANSWER_LABEL = "Your Meety's answer";
+// The name on the caller's own persona bubble, so its initial reads Y.
+const SELF_NAME = "You";
+// The words for where each sent ask is, and its kind.
+const SENT_STATE_LINES: Record<AskSummary["state"], string> = { checking: "Still running", asking: "Still running", ranking: "Still running", done: "Answered", refused: "Not allowed", failed: "Could not finish" };
 const SENT_MODE_LINES: Record<AskSummary["mode"], string> = { react: "Asked a friend's Meety", help: "Found who could help" };
 // The most characters the ask box takes, the upper bound of AskCreate.
 const ASK_MAX_CHARACTERS = 300;
 
-// The line for a friend who has not turned on friend asks, in the same words as the API's friend_asks_off sentence (design section 6).
+// The line for a friend who has not turned on friend asks, in the same words as the API's friend_asks_off sentence.
 function asksOffLine(friend: Friend): string {
   return `${friend.displayName} has not turned on friend asks.`;
 }
 
-// The label of one friend's ask box; 5 to 300 characters is what AskCreate accepts after trimming [confirm].
+// The label of one friend's ask box; 5 to 300 characters is what AskCreate accepts after trimming.
 function askBoxLabel(friend: Friend): string {
   return `What should ${friend.displayName} react to?`;
 }
 
-// The line that opens one copy: who asked and what, by the kind of ask [confirm].
+// The line that opens one copy: who asked and what, by the kind of ask.
 function askedLine(copy: AboutMeAnswer): string {
   if (copy.mode === "react") return `${copy.askerName} asked how you would probably react to: ${copy.text}`;
   return `${copy.askerName} asked people in Explore for help: ${copy.text}`;
@@ -84,7 +84,7 @@ const ReactAskForm = (props: { friend: Friend; isSending: boolean; onSend: (text
 };
 
 // What one friend's row offers: Ask their agent (or the line that their friend asks are off) and Meet, then the open ask box with
-// its errors under the friend (P3).
+// its errors under the friend.
 const FriendAction = (props: { friend: Friend; model: FriendsScreenModel }): ReactElement => {
   const { friend, model } = props;
   const isChosen = model.chosenPairId === friend.pairId;
@@ -203,7 +203,7 @@ const CopyItem = (props: { copy: AboutMeAnswer }): ReactElement => {
   );
 };
 
-// The copies part: every answer the caller's persona gave, newest first, with who asked, what, the answer and its claims (P4).
+// The copies part: every answer the caller's persona gave, newest first, with who asked, what, the answer and its claims.
 const CopiesBody = (props: { model: FriendsScreenModel }): ReactElement => {
   const { asks } = props.model;
   if (asks.value === null) return asks.error === null ? <LoadingLine text={LOADING_COPIES_LINE} /> : <ErrorNotice error={asks.error} />;
@@ -249,7 +249,7 @@ const SentBody = (props: { model: FriendsScreenModel }): ReactElement | null => 
 };
 
 // The /friends page: requests to answer, your friends with Ask their agent and Meet, the requests you sent, then the answers your
-// persona gave and the asks you sent (wave 7). On a laptop the people sit beside the answers.
+// persona gave and the asks you sent. On a laptop the people sit beside the answers.
 export const FriendsScreen = (): ReactElement => {
   const navigate = useNavigate();
   const model = useFriendsScreen((path) => {

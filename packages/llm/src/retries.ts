@@ -2,11 +2,11 @@ import openai from "openai";
 import { z } from "zod";
 import { ContractError } from "@meet-first/contracts";
 
-// How many times one call is retried after a 429, a 5xx or a silence (D59).
+// How many times one call is retried after a 429, a 5xx or a silence.
 export const TRANSPORT_RETRIES = 2;
-// The random wait between two retries when the server gave no retry-after, in milliseconds (D59).
+// The random wait between two retries when the server gave no retry-after, in milliseconds.
 export const RETRY_JITTER_MS = { min: 200, max: 800 } as const;
-// The longest retry-after the client will honour, in milliseconds (D59).
+// The longest retry-after the client will honour, in milliseconds.
 export const RETRY_AFTER_CAP_MS = 10_000;
 // One attempt at a call, by its zero-based index.
 export type Attempt<T> = () => Promise<T>;
@@ -28,7 +28,7 @@ function jitterWait(random: () => number): number {
   return Math.round(RETRY_JITTER_MS.min + random() * (RETRY_JITTER_MS.max - RETRY_JITTER_MS.min));
 }
 
-// The retry-after header, read without regard to letter case; seconds when digits only, else an HTTP date (D59).
+// The retry-after header, read without regard to letter case; seconds when digits only, else an HTTP date.
 function retryAfterMs(headers: Record<string, string | null | undefined> | undefined): number | null {
   const entry = Object.entries(headers ?? {}).find(([key]) => key.toLowerCase() === "retry-after");
   const value = entry?.[1]?.trim();
@@ -39,7 +39,7 @@ function retryAfterMs(headers: Record<string, string | null | undefined> | undef
   return Math.min(Math.max(0, parsed - Date.now()), RETRY_AFTER_CAP_MS);
 }
 
-// The decision for a vendor error: 429 is rate limited, 500 to 599 is a server error, anything else is not retried (D59).
+// The decision for a vendor error: 429 is rate limited, 500 to 599 is a server error, anything else is not retried.
 function decideVendorError(error: unknown, attemptIndex: number, random: () => number): RetryDecision {
   if (!(error instanceof openai.APIError)) return NO_RETRY;
   const parsed = VendorError.safeParse(error);
@@ -51,12 +51,12 @@ function decideVendorError(error: unknown, attemptIndex: number, random: () => n
   return NO_RETRY;
 }
 
-// Decides whether one failed call may be retried and how long to wait: retry-after wins up to 10 s, else jitter 200 to 800 ms (D59).
+// Decides whether one failed call may be retried and how long to wait: retry-after wins up to 10 s, else jitter 200 to 800 ms.
 // Checks run in order and stop at the first match: the attempt limit, the first-token timeout, the call timeout, a vendor error, anything else.
 export function decideRetry(error: unknown, attemptIndex: number, random: () => number): RetryDecision {
   if (attemptIndex >= TRANSPORT_RETRIES) return NO_RETRY;
   if (error instanceof ContractError && error.code === "model_first_token_timeout") {
-    // Speech is the only streaming call site and retries its first-token timeout once (R10.3).
+    // Speech is the only streaming call site and retries its first-token timeout once.
     if (attemptIndex !== 0) return NO_RETRY;
     return { shouldRetry: true, waitMs: jitterWait(random), reason: "server_error" };
   }
@@ -66,7 +66,7 @@ export function decideRetry(error: unknown, attemptIndex: number, random: () => 
   return decideVendorError(error, attemptIndex, random);
 }
 
-// Runs the call with up to two retries on 429 and 5xx. Each attempt is a separate call, and the client writes one ledger row per attempt (R3.5).
+// Runs the call with up to two retries on 429 and 5xx. Each attempt is a separate call, and the client writes one ledger row per attempt.
 export async function withTransportRetries<T>(
   run: (attemptIndex: number) => Promise<T>,
   hooks: { sleep: (ms: number) => Promise<void>; random: () => number },
@@ -83,7 +83,7 @@ export async function withTransportRetries<T>(
   throw new ContractError("retries_exhausted", "The model call failed after every retry. The job fails closed and the sweeper or the next attempt picks it up.", 503);
 }
 
-// True when a finished reply must be discarded and retried once at effort minimal and max_tokens of at least 8,000 (D63).
+// True when a finished reply must be discarded and retried once at effort minimal and max_tokens of at least 8,000.
 export function needsLengthRetry(finishReason: string, alreadyRetried: boolean): boolean {
   return (finishReason === "length" || finishReason === "cut") && !alreadyRetried;
 }

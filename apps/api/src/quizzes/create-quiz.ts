@@ -7,12 +7,12 @@ import { parseDatabaseError, withPerson, type Database } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { requirePerson } from "../sessions/index.js";
 
-// The card states a quiz may start from: built and not thin, approved or not (ARCHITECTURE.md section 5 steps 8 and 9 run in either order).
+// The card states a quiz may start from: built and not thin, approved or not (approving the card and taking the quiz may come in either order).
 const QUIZ_READY_STATES = ["ready", "approved"] as const;
 // The :id of POST /api/cards/:id/quiz: a uuid, or the card cannot exist.
 const CardRouteParams = z.object({ id: Uuid });
 
-// Refuses the quiz when the card is missing, still building, failed, or thin (D23: a thin card skips the quiz).
+// Refuses the quiz when the card is missing, still building, failed, or thin (a thin card skips the quiz).
 export function assertCardCanQuiz(card: { state: string; thin: boolean } | undefined): asserts card is { state: "ready" | "approved"; thin: false } {
   if (card === undefined) {
     throw new ContractError("not_found", "This no longer exists or is not yours.", 404);
@@ -25,7 +25,7 @@ export function assertCardCanQuiz(card: { state: string; thin: boolean } | undef
   }
 }
 
-// Inserts the quiz row and its ten items in the given transaction and returns the quiz id (D28, D30 for the random order flag).
+// Inserts the quiz row and its ten items in the given transaction and returns the quiz id.
 export async function insertQuiz(trx: Transaction<Database>, card: { id: string; personId: string }): Promise<string> {
   const questionIds = sampleQuiz(card.id);
   const quiz = await trx

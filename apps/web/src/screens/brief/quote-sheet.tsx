@@ -3,7 +3,7 @@ import { Avatar, Sticker } from "../../look/index.js";
 import { sideLetter } from "./brief-sections.js";
 import type { OpenQuote } from "./brief-state.js";
 
-// The sheet that shows one tapped quote in full, with the sentence that says whether it matched its turn (R6.5). It rises from
+// The sheet that shows one tapped quote in full, with the sentence that says whether it matched its turn. It rises from
 // the bottom of a phone and sits in the middle of a laptop, over a dimmed page.
 export const QuoteSheet = (props: { sheet: OpenQuote | null; onClose: () => void }): ReactElement | null => {
   const closeButton = useRef<HTMLButtonElement | null>(null);

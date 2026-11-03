@@ -1,4 +1,4 @@
-// Cost per complete pair: for each completed meeting, the sum of its ledger rows plus the card rows of its two members, averaged (D60).
+// Cost per complete pair: for each completed meeting, the sum of its ledger rows plus the card rows of its two members, averaged.
 import type { EvalRows, LedgerRow } from "../collect-rows.js";
 import type { MetricResult } from "./index.js";
 import { isCompleted } from "./completion-rate.js";

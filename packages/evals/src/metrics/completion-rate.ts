@@ -1,4 +1,4 @@
-// Completion: meetings that ended decided with both briefs, over meetings that started (A2).
+// Completion: meetings that ended decided with both briefs, over meetings that started.
 import type { EvalRows, MeetingRow } from "../collect-rows.js";
 import type { MetricResult } from "./index.js";
 

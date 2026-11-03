@@ -7,7 +7,7 @@ import { migrateDatabase, type MigrationReport } from "./migrate.js";
 // The four connection strings a rebuild needs: a superuser on this machine, and the three app roles on the target database.
 export type RebuildUrls = { adminUrl: string; migrateUrl: string; apiUrl: string; workerUrl: string };
 
-// The hosts a rebuild may touch; any other host is refused before a statement runs [confirm].
+// The hosts a rebuild may touch; any other host is refused before a statement runs.
 export const LOCAL_HOSTS: readonly string[] = ["localhost", "127.0.0.1"];
 
 // The database names a rebuild accepts: lower-case letters, digits and underscores, starting with a letter.

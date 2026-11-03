@@ -108,7 +108,7 @@ export const BackAgain = (props: { onDone: () => void }): ReactElement => {
   );
 };
 
-// The footer on navy: the name, the line, the puffy links and the age line.
+// The footer on navy: the name, the line, the puffy links, the last word, and the three policy pages.
 export const WelcomeFooter = (): ReactElement => {
   return (
     <footer className="wl-foot">
@@ -119,7 +119,12 @@ export const WelcomeFooter = (): ReactElement => {
         <a className="wl-puff c-green" href="#kinds">Questions</a>
         <a className="wl-puff c-coral" href="#code">I have a code</a>
       </nav>
-      <p className="wl-foot-small">Probably, never will. No scores, ever. <Link to={APP_PATHS.privacy}>Privacy</Link></p>
+      <p className="wl-foot-small">Probably, never will. No scores, ever.</p>
+      <nav className="wl-foot-links" aria-label="Policies">
+        <Link to={APP_PATHS.privacy}>Privacy</Link>
+        <Link to={APP_PATHS.terms}>Terms</Link>
+        <Link to={APP_PATHS.cookies}>Cookies</Link>
+      </nav>
     </footer>
   );
 };

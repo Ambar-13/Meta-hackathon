@@ -8,7 +8,7 @@ import {
   listInDirectory, makeAskTestContext, markPublic, readAnswerRows, readAskRow, unapproveItem, userTexts, type AskPerson, type AskReplyScript, type AskTestContext,
 } from "./testing/index.js";
 
-// Any uuid: the shape of a person, card, item or turn id (P6).
+// Any uuid: the shape of a person, card, item or turn id.
 const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
 
 let fresh: TestDatabase;

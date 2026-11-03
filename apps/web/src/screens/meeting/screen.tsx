@@ -9,7 +9,7 @@ import { PHASE_LABELS, TranscriptView, speakerName } from "./transcript-view.js"
 import { POLLING_COPY, RECONNECTING_COPY, useMeetingScreen, useSecondTick } from "./meeting-state.js";
 import "./meeting.css";
 
-// The line under "The meeting has ended." for each end reason [confirm] (drafted copy, no input gives it).
+// The line under "The meeting has ended." for each end reason (drafted copy).
 export const ENDED_LINES: Record<"decided" | "budget" | "deleted", string> = {
   decided: "Both Meetys reached the decide step.",
   budget: "The meeting stopped at its token budget.",
@@ -31,7 +31,7 @@ const WaitingLine = (props: { view: MeetingView }): ReactElement | null => {
   return null;
 };
 
-// The refresh line for a newer event version, and the screen's error and status lines (R5.11, R8.2, R8.4).
+// The refresh line for a newer event version, and the screen's error and status lines.
 const Notices = (props: { fold: MeetingFoldState; status: FeedStatus; stopped: ApiError | null; viewError: ApiError | null }): ReactElement => {
   const refresh = refreshNotice(props.fold);
   const statusCopy = STATUS_COPY[props.status];
@@ -147,7 +147,7 @@ const ReadingNote = (props: { names: { a: string; b: string } }): ReactElement =
   );
 };
 
-// The meeting page: the sky stage, the streamed transcript in two voices, and the way to the brief (D49, D51, R5.11).
+// The meeting page: the sky stage, the streamed transcript in two voices, and the way to the brief.
 export const MeetingScreen = (props: { openFeed?: (options: MeetingFeedOptions) => MeetingFeed }): ReactElement => {
   const meetingId = useParams()["meetingId"] ?? "";
   const model = useMeetingScreen(meetingId, props.openFeed ?? openMeetingFeed);

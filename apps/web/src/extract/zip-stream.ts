@@ -3,17 +3,17 @@ import { ContractError, HTTP } from "@meet-first/contracts";
 import { CODEX_FILE_NAME, type ExtractInput } from "@meet-first/parsers";
 import { collectFile, collectorFor } from "./text-collectors.js";
 
-// A picked file larger than this is refused before any byte is read: 150 MB, read as decimal megabytes (D2) [confirm].
+// A picked file larger than this is refused before any byte is read: 150 MB, read as decimal megabytes.
 export const ZIP_MAX_BYTES = 150_000_000;
-// Reading stops once this many bytes have been inflated across a zip's entries: 1.5 GB, read as decimal gigabytes (D3) [confirm].
+// Reading stops once this many bytes have been inflated across a zip's entries: 1.5 GB, read as decimal gigabytes.
 export const INFLATED_MAX_BYTES = 1_500_000_000;
-// The first four bytes of every zip file: P, K, 3, 4 (R1.3).
+// The first four bytes of every zip file: P, K, 3, 4.
 export const ZIP_SIGNATURE = [0x50, 0x4b, 0x03, 0x04] as const;
-// Compressed bytes handed to the inflater per push; DEFLATE expands at most about 1,032 times, so one push adds at most 4,227,072 bytes before the counter is checked (D3) [confirm].
+// Compressed bytes handed to the inflater per push; DEFLATE expands at most about 1,032 times, so one push adds at most 4,227,072 bytes before the counter is checked.
 export const INFLATE_SLICE_BYTES = 4_096;
-// Names a file that is not a zip may have and still be read as text, .jsonl being a Codex session log (R1.3; ARCHITECTURE.md section 5 step 1).
+// Names a file that is not a zip may have and still be read as text, .jsonl being a Codex session log.
 export const TEXT_FILE_NAME = /\.(json|jsonl|md|txt)$/i;
-// Shown when a file cannot be read; the worker also uses it for any failure it did not expect (seams S4).
+// Shown when a file cannot be read; the worker also uses it for any failure it did not expect.
 export const FILE_UNREADABLE_SENTENCE = "This file could not be read. Pick the .zip, .json, .jsonl, .md or .txt file again, or paste your notes instead.";
 
 // Shown when a zip is over 150 MB; the code is zip_too_large (table of 4.4).
@@ -38,7 +38,7 @@ function unreadable(): ContractError {
   return new ContractError("file_unreadable", FILE_UNREADABLE_SENTENCE, HTTP.unprocessable);
 }
 
-// True when the first four bytes are the zip signature, whatever the file is called (R1.3).
+// True when the first four bytes are the zip signature, whatever the file is called.
 export function isZip(head: Uint8Array): boolean {
   return head.length >= 4 && ZIP_SIGNATURE.every((byte, index) => head[index] === byte);
 }
@@ -102,7 +102,7 @@ async function pumpFile(file: Blob, unzip: Unzip, progress: ZipProgress): Promis
   pushSlice(unzip, new Uint8Array(0), true);
 }
 
-// Streams a zip and returns the entries to parse, counting inflated bytes and stopping past the cap (D3, R1.2).
+// Streams a zip and returns the entries to parse, counting inflated bytes and stopping past the cap.
 export async function readZipEntries(file: Blob, options: ReadOptions): Promise<ExtractInput[]> {
   const lists: ZipLists = { preferred: [], others: [] };
   const progress: ZipProgress = { inflated: 0, failure: null };
@@ -118,7 +118,7 @@ export async function readZipEntries(file: Blob, options: ReadOptions): Promise<
 }
 
 // Reads a picked file into parser inputs: a zip through readZipEntries, a Codex .jsonl session log a chunk at a time keeping only the
-// lines its reader wants, and a .json, .md or .txt file as UTF-8 text (D2, R1.3).
+// lines its reader wants, and a .json, .md or .txt file as UTF-8 text.
 export async function readPickedFile(file: File, options: ReadOptions): Promise<ExtractInput[]> {
   if (file.size > ZIP_MAX_BYTES) throw new ContractError("zip_too_large", ZIP_TOO_LARGE_SENTENCE, HTTP.payloadTooLarge);
   const head = new Uint8Array(await file.slice(0, 4).arrayBuffer());

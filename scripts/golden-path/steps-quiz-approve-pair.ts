@@ -15,11 +15,11 @@ const QUESTION_CHECK_TIMEOUT_MS = 45_000;
 // The meeting may take 75 s to start once both have said ready (the spec's limit).
 const START_TIMEOUT_MS = 75_000;
 const START_POLL_MS = 1_000;
-// The window a start may be off by: 2 s of the ten minutes (D34).
+// The window a start may be off by: 2 s of the ten minutes.
 const LENGTH_TOLERANCE_MS = 2_000;
 // The meeting screen waits this long for the reader to see its first event.
 const FIRST_EVENT_TIMEOUT_MS = 10_000;
-// The words of the quiz count line: a number of matches and "of 10", never a percentage (D31, R4.5).
+// The words of the quiz count line: a number of matches and "of 10", never a percentage.
 const COUNT_LINE = /^matched (10|[0-9]) of 10/;
 
 // Reads one quiz with its ten questions.
@@ -47,7 +47,7 @@ function judgedChecks(view: QuizView): Assertion[] {
 }
 
 // Step 5: A takes the quiz. Under --mock the whole step is not exercised, because a judged quiz cannot be replayed. Under --record it is
-// skipped too: the quiz's misses go into A's meeting prompt, so a recording made with them would not replay under --mock (wave 3 4.4).
+// skipped too: the quiz's misses go into A's meeting prompt, so a recording made with them would not replay under --mock.
 export async function step05Quiz(run: RunState): Promise<StepResult> {
   if (run.options.mode === "mock") {
     return finishStep(5, "quiz", { rows: ["R4.2", "R4.5", "D31"], detail: "not exercised under --mock: a judged quiz cannot be replayed", assertions: [], notExercised: true });
@@ -149,7 +149,7 @@ async function askFreeTextQuestion(run: RunState, call: { createPath: string; ca
   return [check("the free-text question is checked", true, checked.questionChecked), check("the question check allows the free text", true, rejection === null)];
 }
 
-// A start before both go-aheads is refused, and so is a start after only A's go-ahead (R5.3).
+// A start before both go-aheads is refused, and so is a start after only A's go-ahead.
 async function startRefusals(run: RunState, meetingId: string): Promise<void> {
   const startPath = routePath(routes.meetings.start.path, { id: meetingId });
   const readyPath = routePath(routes.meetings.ready.path, { id: meetingId });

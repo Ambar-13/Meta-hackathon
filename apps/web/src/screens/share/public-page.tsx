@@ -6,13 +6,13 @@ import { Cloud, EmptyState, LoadingLine } from "../../look/index.js";
 import { SnapshotTags, SnapshotView } from "./snapshot-view.js";
 import { usePublicSnapshot } from "./share-state.js";
 
-// Where the "Report this page" link goes. The report destination is not chosen yet; Ambar fills it in before merge (request 006).
-export const REPORT_LINK_HREF = "{GAP: the report destination Ambar chooses; the inputs name a report link and no address, and no personal email goes in the repo}";
-// The words shown when no page is there, for an unknown, unpublished or taken-down slug (4.7).
+// Where the "Report this page" link goes: an email to Meety, with the subject filled in.
+export const REPORT_LINK_HREF = "mailto:hey.meety@gmail.com?subject=Report%20a%20shared%20page";
+// The words shown when no page is there, for an unknown, unpublished or taken-down slug.
 const NOT_FOUND_TEXT = "No page here. It may have been taken down.";
 // The heading of the public page while it has no question to show.
 const PAGE_TITLE = "Shared meeting";
-// The words of the page that no input gives [confirm] (drafted copy, design pass).
+// The words of the page.
 const PUBLIC_COPY = {
   loading: "Opening the shared meeting.",
   notFoundTitle: "Nothing to read here",

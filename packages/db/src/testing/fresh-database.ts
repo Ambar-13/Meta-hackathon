@@ -4,7 +4,7 @@ import { makeDatabase, POOL_SIZE } from "../client.js";
 import { dropDatabase, recreateDatabase, type RebuildUrls } from "../fresh.js";
 import type { Database } from "../types.js";
 
-// What freshTestDatabase hands a test: a client as app_api, the three role URLs, and the function that drops the database (docs/contracts.md section 4).
+// What freshTestDatabase hands a test: a client as app_api, the three role URLs, and the function that drops the database.
 export type TestDatabase = { db: Kysely<Database>; migrateUrl: string; apiUrl: string; workerUrl: string; drop: () => Promise<void> };
 
 // Reads DATABASE_URL_ADMIN and DATABASE_URL_TEST and works out the api and worker URLs from the test URL.
@@ -45,7 +45,7 @@ export function setup(): void {
   readTestDatabaseUrls(process.env);
 }
 
-// Rebuilds the test database from nothing, applies every migration, and returns a client as app_api (docs/contracts.md section 4).
+// Rebuilds the test database from nothing, applies every migration, and returns a client as app_api.
 export async function freshTestDatabase(): Promise<TestDatabase> {
   const urls = readTestDatabaseUrls(process.env);
   await recreateDatabase(urls);

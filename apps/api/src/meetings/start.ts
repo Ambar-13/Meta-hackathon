@@ -7,13 +7,13 @@ import type { RouteDeps } from "../app-types.js";
 import { makeNotFoundError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
 
-// The reasons a start is refused, in the order they are checked, each with its sentence (409, R10.5, D41; presence is not one, as-built item 28).
+// The reasons a start is refused, in the order they are checked, each with its sentence (409, presence is not one).
 export const START_REFUSALS = {
   meeting_already_started: "This meeting has already started or ended.",
   question_rejected: "The question was not accepted, so this meeting cannot start. Create a meeting with another question.",
   question_not_checked: "The question is still being checked. Try again in a few seconds.",
   meeting_not_ready: "Both people need to give their go-ahead before the meeting can start.",
-  meeting_preparing: "The meeting is still being prepared. Try again in a few seconds.",   // [confirm]: not in IMPLEMENTATION.md 2.2; the prefixes must exist before running (D41)
+  meeting_preparing: "The meeting is still being prepared. Try again in a few seconds.",
 } as const;
 // One start refusal code.
 export type StartRefusal = keyof typeof START_REFUSALS;
@@ -39,7 +39,7 @@ export function startRefusal(meeting: { state: string; question_checked_at: Date
   return null;
 }
 
-// Locks the meeting row, checks the start rule and, when it holds, claims a slot and begins the meeting (R5.3, D57).
+// Locks the meeting row, checks the start rule and, when it holds, claims a slot and begins the meeting.
 export async function tryStart(trx: Transaction<Database>, attempt: { meetingId: string; now: Date; maxRunning: number }): Promise<StartDecision> {
   const { meetingId, now, maxRunning } = attempt;
   const meeting = await trx.selectFrom("meetings").select(["state", "question_checked_at", "question_rejected_reason"]).where("id", "=", meetingId).forUpdate().executeTakeFirst();
@@ -82,7 +82,7 @@ export async function readMemberNames(trx: Transaction<Database>, meetingId: str
   return { a: sideName("a"), b: sideName("b") };
 }
 
-// Writes one committed event with the next gapless seq after parsing it with CommittedEvent; the api's copy of the worker's appendMeetingEvent (R5.11).
+// Writes one committed event with the next gapless seq after parsing it with CommittedEvent; the api's copy of the worker's appendMeetingEvent.
 export async function appendApiMeetingEvent(trx: Transaction<Database>, write: { meetingId: string; type: CommittedEvent["type"]; fields: Record<string, unknown>; at: Date }): Promise<void> {
   const seq = await nextEventSeq(trx, write.meetingId);
   const event = CommittedEvent.parse({ ...write.fields, v: EVENT_VERSION, type: write.type, meetingId: write.meetingId, seq, at: write.at.toISOString() });

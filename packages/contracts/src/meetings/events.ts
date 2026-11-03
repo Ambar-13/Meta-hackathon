@@ -5,27 +5,27 @@ import { Claim } from "./claims.js";
 import { Phase } from "./meeting.js";
 import { ToolName } from "./tools.js";
 
-// Version of every meeting event. A browser on another version asks the person to refresh, R5.11.
+// Version of every meeting event. A browser on another version asks the person to refresh.
 export const EVENT_VERSION = 1;
-// How often the server sends a heartbeat on the event stream, in milliseconds, D50.
+// How often the server sends a heartbeat on the event stream, in milliseconds.
 export const HEARTBEAT_MS = 15_000;
-// Comment padding sent first on the event stream, so proxies flush early, D50.
+// Comment padding sent first on the event stream, so proxies flush early.
 export const SSE_PADDING_BYTES = 2_048;
-// How long the browser waits for the first byte before it polls, in milliseconds, D49.
+// How long the browser waits for the first byte before it polls, in milliseconds.
 export const SSE_FIRST_BYTE_MS = 5_000;
-// How often the browser polls while the stream is down, in milliseconds, D49.
+// How often the browser polls while the stream is down, in milliseconds.
 export const POLL_MS = 2_000;
-// How often the server re-reads for a lost notification, in milliseconds, D49.
+// How often the server re-reads for a lost notification, in milliseconds.
 export const SERVER_SAFETY_POLL_MS = 10_000;
-// Reconnect delays: start at 1 second, double each time, stop growing at 30 seconds, D51.
+// Reconnect delays: start at 1 second, double each time, stop growing at 30 seconds.
 export const RECONNECT = { firstMs: 1_000, factor: 2, capMs: 30_000 } as const;
-// Connections one person may hold to one meeting; the oldest closes past this, D51.
+// Connections one person may hold to one meeting; the oldest closes past this.
 export const CONNECTIONS_PER_PERSON_PER_MEETING = 3;
-// How often partial text is flushed to the database, in milliseconds, D47.
+// How often partial text is flushed to the database, in milliseconds.
 export const PARTIAL_FLUSH_MS = 250;
 // Fields every event carries.
 const base = { v: z.literal(EVENT_VERSION), meetingId: Uuid, at: IsoTime };
-// Fields only committed events carry: a gapless sequence number, R5.2.
+// Fields only committed events carry: a gapless sequence number.
 const committed = { ...base, seq: z.number().int().min(1) };
 // The meeting has started; the browser shows the question and both names.
 export const MeetingStarted = z.object({
@@ -42,7 +42,7 @@ export type MeetingStarted = z.infer<typeof MeetingStarted>;
 export const PhaseChanged = z.object({ ...committed, type: z.literal("phase.changed"), phase: Phase, stepSeq: z.number().int() });
 // The type of PhaseChanged, read from the schema above.
 export type PhaseChanged = z.infer<typeof PhaseChanged>;
-// A slice of a turn still being written. It is not stored and has no seq, so a reconnect never replays it, D47.
+// A slice of a turn still being written. It is not stored and has no seq, so a reconnect never replays it.
 export const TurnDelta = z.object({
   ...base,
   type: z.literal("turn.delta"),
@@ -103,7 +103,7 @@ export type Concede = z.infer<typeof Concede>;
 export const Hold = z.object({ ...committed, type: z.literal("hold"), stepSeq: z.number().int(), side: Side, reason: z.string() });
 // The type of Hold, read from the schema above.
 export type Hold = z.infer<typeof Hold>;
-// The meeting is over: decided, out of token budget, or deleted, D61.
+// The meeting is over: decided, out of token budget, or deleted.
 export const MeetingEnded = z.object({
   ...committed,
   type: z.literal("meeting.ended"),
@@ -112,7 +112,7 @@ export const MeetingEnded = z.object({
 });
 // The type of MeetingEnded, read from the schema above.
 export type MeetingEnded = z.infer<typeof MeetingEnded>;
-// The two briefs are written. The support rate of each side is null when it could not be judged, A1.
+// The two briefs are written. The support rate of each side is null when it could not be judged.
 export const BriefReady = z.object({
   ...committed,
   type: z.literal("brief.ready"),
@@ -120,11 +120,11 @@ export const BriefReady = z.object({
 });
 // The type of BriefReady, read from the schema above.
 export type BriefReady = z.infer<typeof BriefReady>;
-// The comic is ready to view, D64.
+// The comic is ready to view.
 export const ComicReady = z.object({ ...committed, type: z.literal("comic.ready"), comicId: Uuid });
 // The type of ComicReady, read from the schema above.
 export type ComicReady = z.infer<typeof ComicReady>;
-// The comic was not made, with the reason, D64.
+// The comic was not made, with the reason.
 export const ComicSkipped = z.object({ ...committed, type: z.literal("comic.skipped"), comicId: Uuid, reason: z.string() });
 // The type of ComicSkipped, read from the schema above.
 export type ComicSkipped = z.infer<typeof ComicSkipped>;
@@ -148,7 +148,7 @@ export type CommittedEvent = z.infer<typeof CommittedEvent>;
 export const MeetingEvent = z.union([CommittedEvent, TurnDelta]);
 // The type of MeetingEvent, read from the schema above.
 export type MeetingEvent = z.infer<typeof MeetingEvent>;
-// The 11 committed type names, for the CHECK list in 0001 (R13.2).
+// The 11 committed type names, for the CHECK list in 0001.
 export const COMMITTED_EVENT_TYPES = CommittedEvent.options.map((option) => option.shape.type.value);
 // The keys of a committed event that live in their own meeting_events columns, not in payload.
 const KEYS_STORED_APART = new Set(["v", "type", "meetingId", "seq", "at"]);
@@ -183,7 +183,7 @@ export const PollResponse = z.object({
 });
 // The type of PollResponse, read from the schema above.
 export type PollResponse = z.infer<typeof PollResponse>;
-// The words a person sees when the model refused to answer. The text is fixed by D43.
+// The words a person sees when the model refused to answer. The text is fixed by.
 export const REFUSAL_TEXT = "I'd rather my human speak to this";
-// The words shown when a browser is on an older event version, R5.11.
+// The words shown when a browser is on an older event version.
 export const REFRESH_COPY = "refresh for the new version";

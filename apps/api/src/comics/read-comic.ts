@@ -8,7 +8,7 @@ import { requirePerson } from "../sessions/index.js";
 // The :id of GET /api/meetings/:id/comic: a uuid, or no comic can exist for it.
 const RouteParams = z.object({ id: Uuid });
 
-// Registers GET /api/meetings/:id/comic: 200 ComicView with panels once ready; 404 comic_not_found (R11.2).
+// Registers GET /api/meetings/:id/comic: 200 ComicView with panels once ready; 404 comic_not_found.
 export function registerReadComic(app: FastifyInstance, deps: RouteDeps): Promise<void> {
   app.get(routes.briefs.readComic.path, async (request, reply) => {
     const personId = requirePerson(request);

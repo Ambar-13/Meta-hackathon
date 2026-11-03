@@ -32,7 +32,7 @@ const StateLine = (props: { quiz: QuizView }): ReactElement | null => {
   return null;
 };
 
-// The /quizzes/:quizId page: wait for the persona, answer, read the result (R4.2, D31).
+// The /quizzes/:quizId page: wait for the persona, answer, read the result.
 export const QuizScreen = (): ReactElement => {
   const quizId = useParams()["quizId"] ?? "";
   const { polled, answers, setAnswer, submit, send } = useQuizScreen(quizId);

@@ -7,7 +7,7 @@ import type { YourListingHook } from "../directory/index.js";
 import { meetingLink, meetingStateWords, nextStepOf, shortDay } from "../home/index.js";
 import { useListingSave, type EditState, type ListingSaveState, type ProfileEditHook } from "./me-state.js";
 
-// The words of your listing's controls, your next step and your meetings on /me (wave 7).
+// The words of your listing's controls, your next step and your meetings on /me.
 const ME_COPY = {
   lineLabel: "Your line in Explore",
   save: "Save my listing",
@@ -60,7 +60,7 @@ const ListingForm = (props: { cardId: string; listing: MyListing | null; submitL
   );
 };
 
-// Your listing's controls, opened by Edit my listing: the line, the dating switch, and Leave, which deletes the listing at once (P2).
+// Your listing's controls, opened by Edit my listing: the line, the dating switch, and Leave, which deletes the listing at once.
 export const EditListing = (props: { listing: MyListing; yours: YourListingHook; onSaved: (listing: MyListing) => void }): ReactElement => {
   const { leaveState } = props.yours;
   return (
@@ -84,7 +84,7 @@ const EditLine = (props: { state: EditState }): ReactElement | null => {
   return null;
 };
 
-// Instagram's Edit profile (3 Nov 2026, Ambar: "i cant change mine own photo and profile dtails"): your picture with Change photo, which
+// Instagram's Edit profile: your picture with Change photo, which
 // opens your photos or camera, and Remove photo while you have one; then your name with Save name. The photo is drawn as a square.
 export const EditProfile = (props: { name: string; photo: string | null; edit: ProfileEditHook }): ReactElement => {
   const { edit } = props;

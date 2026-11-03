@@ -1,4 +1,4 @@
-// The meeting routes as one plugin for apps/api/src/server.ts, slot 6 (seams S2): create, read, ready, start.
+// The meeting routes as one plugin for apps/api/src/server.ts, slot 6: create, read, ready, start.
 import type { RoutePlugin } from "../app-types.js";
 import { registerCreateMeeting } from "./create-meeting.js";
 import { registerReady } from "./ready.js";

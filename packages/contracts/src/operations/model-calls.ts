@@ -12,7 +12,7 @@ import { NamesPassOutput } from "../sources/scrub-categories.js";
 import { IsoTime } from "../primitives.js";
 import { ContractError } from "./errors.js";
 
-// The call sites that reach the model, ARCHITECTURE.md 3.23. The ledger CHECK in 0001, widened in 0006, lists the same names.
+// The call sites that reach the model. The ledger CHECK in 0001, widened in 0006, lists the same names.
 export const CALL_SITES = [
   "scrub_names", "question_check", "card", "quiz_answer", "quiz_judge", "speech", "receipts", "brief",
   "brief_support_judge", "comic_panels", "comic_image", "self_test", "persona_answer", "ask_support_judge", "orchestrator",
@@ -21,13 +21,13 @@ export const CALL_SITES = [
 export const CallSite = z.enum(CALL_SITES);
 // The type of CallSite, read from the schema above.
 export type CallSite = z.infer<typeof CallSite>;
-// How hard the model thinks on one call: minimal, low or medium (D62).
+// How hard the model thinks on one call: minimal, low or medium.
 export const Effort = z.enum(["minimal", "low", "medium"]);
 // The type of Effort, read from the schema above.
 export type Effort = z.infer<typeof Effort>;
-// One model call as it is stored in a fixture: the request, the reply and the usage (R3.1 and D74).
+// One model call as it is stored in a fixture: the request, the reply and the usage.
 // request is { callSite, promptVersion, body } as sent; requestHash is the hash of request.body alone.
-// recordedAt is null on a hand-written fixture. handWritten is true on Wave 1 fixtures (IMPLEMENTATION.md 5).
+// recordedAt is null on a hand-written fixture. handWritten is true on fixtures written by hand.
 export const RecordedCall = z.object({
   callSite: CallSite,
   promptVersion: z.string(),
@@ -45,7 +45,7 @@ export const RecordedCall = z.object({
 });
 // The type of RecordedCall, read from the schema above.
 export type RecordedCall = z.infer<typeof RecordedCall>;
-// Deepest nesting the Meta strict mode accepts, counted in container levels (R3.1 and ARCHITECTURE.md 8).
+// Deepest nesting the Meta strict mode accepts, counted in container levels.
 const MAX_SCHEMA_NESTING = 10;
 // Keys the strict mode rejects. The zod schema still enforces them after parsing.
 const DROPPED_KEYS = new Set(["minLength", "maxLength", "minItems", "maxItems", "minimum", "maximum", "format"]);
@@ -95,7 +95,7 @@ function nestingDepth(node: JsonObject): number {
     .reduce((deepest, child) => Math.max(deepest, 1 + nestingDepth(child)), 0);
 }
 
-// Converts a zod object schema to the strict JSON schema the Meta API accepts (R3.1).
+// Converts a zod object schema to the strict JSON schema the Meta API accepts.
 // Refuses any anyOf, oneOf or allOf, and any schema nested deeper than 10 levels.
 export function toStrictJsonSchema(
   schema: z.ZodType<unknown, z.ZodTypeDef, unknown>,
@@ -112,7 +112,7 @@ export function toStrictJsonSchema(
   return { name, strict: true, schema: strict };
 }
 
-// Every model output schema, by prompt folder name, so the boot self-test and the contracts test read one list (R3.1).
+// Every model output schema, by prompt folder name, so the boot self-test and the contracts test read one list.
 export const MODEL_OUTPUT_SCHEMAS = {
   dossier: CardBuildOutput,
   "scrub-names": NamesPassOutput,

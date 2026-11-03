@@ -1,9 +1,9 @@
 import { CODE_FENCE_PLACEHOLDER } from "@meet-first/contracts";
 import type { Segment } from "./placeholders.js";
 
-// A line that opens a fence: up to 3 spaces, 3 or more backticks or tildes, optional spaces, then an optional language word (D13).
+// A line that opens a fence: up to 3 spaces, 3 or more backticks or tildes, optional spaces, then an optional language word.
 export const FENCE_OPEN = /^[ \t]{0,3}(`{3,}|~{3,})[ \t]*([^\s`~]*)/;
-// The language word a placeholder may keep: 1 to 20 of a-z, 0-9 and _ + # . -; anything else becomes "text" (D13).
+// The language word a placeholder may keep: 1 to 20 of a-z, 0-9 and _ + #. -; anything else becomes "text".
 export const FENCE_LANGUAGE = /^[a-z0-9_+#.-]{1,20}$/;
 
 // One output line after the fences are replaced: its text, and whether it is a fence placeholder.
@@ -42,7 +42,7 @@ function toSegments(output: OutputLine[]): Segment[] {
   return segments;
 }
 
-// Replaces every fenced block with one [code: lang, n lines] line and returns the text as segments (D13).
+// Replaces every fenced block with one [code: lang, n lines] line and returns the text as segments.
 export function replaceCodeFences(text: string): Segment[] {
   const lines = text.split("\n");
   const output: OutputLine[] = [];

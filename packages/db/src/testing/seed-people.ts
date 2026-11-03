@@ -47,7 +47,7 @@ async function writeNamesPass(personId: string, sourceId: string): Promise<void>
   }
 }
 
-// Creates a paste source with these turns for the person and freezes it, as the names review would (D10, D16).
+// Creates a paste source with these turns for the person and freezes it, as the names review would.
 export async function createFrozenSource(db: Kysely<Database>, personId: string, turns: string[]): Promise<{ sourceId: string; turnIds: string[] }> {
   if (turns.length === 0) throw new ContractError("seed_turns_empty", "createFrozenSource needs at least one turn.", 500);
   const inserted = await withPerson(db, personId, async (trx) => {
@@ -65,7 +65,7 @@ export async function createFrozenSource(db: Kysely<Database>, personId: string,
   return { sourceId: inserted.sourceId, turnIds: inserted.rows.sort((a, b) => a.turn_index - b.turn_index).map((row) => row.id) };
 }
 
-// Creates an approved card on a source made by createFrozenSource, with items quoting its turns in order (D21, R7.1).
+// Creates an approved card on a source made by createFrozenSource, with items quoting its turns in order.
 export async function createApprovedCard(db: Kysely<Database>, sourceId: string, options: { recallAllowed?: boolean; items?: number } = {}): Promise<{ cardId: string; itemIds: string[] }> {
   const personId = sourceOwners.get(sourceId);
   if (personId === undefined) throw new ContractError("seed_source_unknown", "createApprovedCard only knows sources made by createFrozenSource in this test process.", 500);

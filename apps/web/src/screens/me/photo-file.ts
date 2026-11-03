@@ -1,4 +1,4 @@
-// A picture file drawn as the JPEG the app sends (3 Nov 2026): a profile photo as the middle square of the picture, PHOTO_SIDE pixels a
+// A picture file drawn as the JPEG the app sends: a profile photo as the middle square of the picture, PHOTO_SIDE pixels a
 // side; a post's photo as the middle square, POST_PHOTO_SIDE pixels a side, as Instagram's square post; a story's photo as the whole
 // picture, at most POST_PHOTO_SIDE wide and STORY_MAX_HEIGHT tall. Drawing it in the browser keeps the upload small and leaves behind
 // whatever the file carried besides the picture, such as where and with what camera it was taken.

@@ -2,7 +2,7 @@
 # Runs once, when the Postgres volume is new (docker-entrypoint-initdb.d). It makes the four roles migration 0001 expects and
 # the database, owned by app_migrate as in a local rebuild (packages/db/src/fresh.ts), so the migrations run as they do on a
 # laptop. app_migrate gets no CREATEROLE, since every role exists before 0001 runs, and keeps its app_definer membership,
-# because the api migrates on every start (D71). psql reads the passwords with \getenv, so none sits on a command line.
+# because the api migrates on every start. psql reads the passwords with \getenv, so none sits on a command line.
 set -euo pipefail
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname postgres <<'SQL'
 \getenv migrate_pw APP_MIGRATE_PASSWORD

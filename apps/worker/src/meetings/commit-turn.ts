@@ -19,10 +19,10 @@ export type FinishedTurn = {
 };
 // How a commit ended: the next step exists, the meeting ended, or this runner had lost the step.
 export type CommitResult = { kind: "next"; stepSeq: number } | { kind: "ended" } | { kind: "lost" };
-// A claim after its row was written: the row id, the speaker's side, its position and whether its evidence is valid (D26, R6.4).
+// A claim after its row was written: the row id, the speaker's side, its position and whether its evidence is valid.
 type StoredRow = { id: string; side: "a" | "b"; position: number; claim: StoredClaim; isEvidenceValid: boolean };
 
-// Writes one committed event with the next gapless seq, after parsing the whole event with CommittedEvent (R5.11, invariant 11).
+// Writes one committed event with the next gapless seq, after parsing the whole event with CommittedEvent.
 export async function appendMeetingEvent<T extends CommittedEvent["type"]>(trx: Transaction<Database>, write: EventWrite<T>): Promise<CommittedEvent> {
   const seq = await nextEventSeq(trx, write.meetingId);
   const event = CommittedEvent.parse({ ...write.fields, v: EVENT_VERSION, type: write.type, meetingId: write.meetingId, seq, at: write.at.toISOString() });
@@ -30,7 +30,7 @@ export async function appendMeetingEvent<T extends CommittedEvent["type"]>(trx: 
   return event;
 }
 
-// Starts a meeting that is ready on both sides (both go-aheads, the question checked, both prefixes stored) through claim_meeting_slot, with nobody online (D57).
+// Starts a meeting that is ready on both sides (both go-aheads, the question checked, both prefixes stored) through claim_meeting_slot, with nobody online.
 export async function startIfReady(trx: Transaction<Database>, slot: { meetingId: string; now: Date; maxRunning: number }): Promise<"running" | "queued" | "not_ready"> {
   const meeting = await trx.selectFrom("meetings").select(["state", "question_checked_at", "question_rejected_reason"]).where("id", "=", slot.meetingId).forUpdate().executeTakeFirst();
   if (meeting === undefined || meeting.state !== "ready" || meeting.question_checked_at === null || meeting.question_rejected_reason !== null) return "not_ready";
@@ -44,7 +44,7 @@ export async function startIfReady(trx: Transaction<Database>, slot: { meetingId
   return "running";
 }
 
-// Begins a meeting that has won a running slot: phase open, step 1 pending for side a, meeting.started then phase.changed (ARCHITECTURE.md 4.1).
+// Begins a meeting that has won a running slot: phase open, step 1 pending for side a, meeting.started then phase.changed.
 export async function beginRunningMeeting(trx: Transaction<Database>, meetingId: string, now: Date): Promise<void> {
   const meeting = await trx.selectFrom("meetings").select(["started_at", "ends_at", "question_text"]).where("id", "=", meetingId).executeTakeFirstOrThrow();
   await trx.updateTable("meetings").set({ phase: "open", current_step_seq: 1 }).where("id", "=", meetingId).execute();
@@ -57,7 +57,7 @@ export async function beginRunningMeeting(trx: Transaction<Database>, meetingId:
   await appendMeetingEvent(trx, { meetingId, type: "phase.changed", fields: { phase: "open", stepSeq: 1 }, at: now });
 }
 
-// Ends a running meeting with its reason and writes meeting.ended; false when the meeting was not running (D61, R5.8).
+// Ends a running meeting with its reason and writes meeting.ended; false when the meeting was not running.
 export async function endMeeting(trx: Transaction<Database>, end: { meetingId: string; reason: "decided" | "budget"; now: Date }): Promise<boolean> {
   const result = await trx.updateTable("meetings").set({ state: "ended", end_reason: end.reason, ended_at: end.now, phase: "close" })
     .where("id", "=", end.meetingId).where("state", "=", "running").executeTakeFirst();
@@ -66,7 +66,7 @@ export async function endMeeting(trx: Transaction<Database>, end: { meetingId: s
   return true;
 }
 
-// Commits a finished turn in one transaction, then enqueues the next step or the briefs (D44, R5.2, invariant 11).
+// Commits a finished turn in one transaction, then enqueues the next step or the briefs.
 export async function commitTurn(context: JobContext, turn: FinishedTurn): Promise<CommitResult> {
   const now = context.now();
   let result: CommitResult;
@@ -93,7 +93,7 @@ async function writeTurn(trx: Transaction<Database>, turn: FinishedTurn, now: Da
   return advance(trx, { turn, startedAt, now });
 }
 
-// Locks the meeting row and returns its start, or refuses when the meeting is no longer running (R9.6).
+// Locks the meeting row and returns its start, or refuses when the meeting is no longer running.
 async function lockRunningMeeting(trx: Transaction<Database>, meetingId: string): Promise<Date> {
   const meeting = await trx.selectFrom("meetings").select(["state", "started_at"]).where("id", "=", meetingId).forUpdate().executeTakeFirst();
   if (meeting === undefined || meeting.state !== "running" || meeting.started_at === null) {
@@ -102,7 +102,7 @@ async function lockRunningMeeting(trx: Transaction<Database>, meetingId: string)
   return meeting.started_at;
 }
 
-// Marks the step done with its output, only while this runner still holds it (D44).
+// Marks the step done with its output, only while this runner still holds it.
 async function markStepDone(trx: Transaction<Database>, turn: FinishedTurn, now: Date): Promise<void> {
   const output = StepOutput.parse({ text: turn.text, toolCalls: turn.toolCalls, claimsCommitted: turn.claims.length });
   const done = await trx.updateTable("meeting_steps")
@@ -112,7 +112,7 @@ async function markStepDone(trx: Transaction<Database>, turn: FinishedTurn, now:
   if (done.numUpdatedRows !== 1n) throw new ContractError("step_claim_lost", "Another runner took over this step, so this runner stops without writing.", 409);
 }
 
-// Writes one claim row per claim, in list order, and records whether each claim's turn is behind an approved item or in the recall corpus (D26).
+// Writes one claim row per claim, in list order, and records whether each claim's turn is behind an approved item or in the recall corpus.
 async function insertClaims(trx: Transaction<Database>, turn: FinishedTurn): Promise<StoredRow[]> {
   const evidence = await evidenceTurnIds(trx, turn);
   const rows: StoredRow[] = [];
@@ -128,7 +128,7 @@ async function insertClaims(trx: Transaction<Database>, turn: FinishedTurn): Pro
   return rows;
 }
 
-// The turn ids a claim may rest on: the approved items of the speaker's card and the recall corpus of that card (ARCHITECTURE.md 3.18, 3.28).
+// The turn ids a claim may rest on: the approved items of the speaker's card and the recall corpus of that card.
 async function evidenceTurnIds(trx: Transaction<Database>, turn: FinishedTurn): Promise<Set<string>> {
   const isPublicOnly = await isPublicOnlyCard(trx, turn.meetingId, turn.cardId);
   const approved = await trx.selectFrom("card_items").select("turn_id").where("card_id", "=", turn.cardId).where("approved", "=", true)
@@ -155,7 +155,7 @@ async function advance(trx: Transaction<Database>, scope: { turn: FinishedTurn; 
   return { kind: "next", stepSeq: next.stepSeq };
 }
 
-// The Claim event shape of one stored claim (R5.11).
+// The Claim event shape of one stored claim.
 function toClaim(row: StoredRow): Claim {
   const { claim } = row;
   return Claim.parse({
@@ -176,7 +176,7 @@ function timeOf(value: Date | null): string {
   return value.toISOString();
 }
 
-// Claims the slot through claim_meeting_slot, the one function that counts running meetings (D57).
+// Claims the slot through claim_meeting_slot, the one function that counts running meetings.
 function claimSlot(trx: Transaction<Database>, meetingId: string, maxRunning: number) {
   return sql<{ state: string; queue_position: number | null }>`SELECT state, queue_position FROM claim_meeting_slot(${meetingId}, ${maxRunning})`.execute(trx);
 }

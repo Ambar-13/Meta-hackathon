@@ -5,15 +5,15 @@ import { personaScore } from "./persona-signal.js";
 // One turn as ranking sees it: the raw fields plus the canonical text it is cut from.
 type Ranked = RawTurn & { canonical: string };
 
-// Long turns are cut at a line break rather than mid-line (D5 gives the cap, not the cut point).
-export const isCutAtLineBreak = true; // picked here [confirm]: D5 names the cap, not how a single long turn is cut
+// Long turns are cut at a line break rather than mid-line.
+export const isCutAtLineBreak = true; // a single long turn is cut at a line break where it can be
 
 // True when a UTF-16 code unit is the first half of a surrogate pair, so cutting after it would split an emoji.
 function isHighSurrogate(code: number): boolean {
   return code >= 0xd800 && code <= 0xdbff;
 }
 
-// Cuts one canonical text to 20,000 code units at the last line break, or else mid-text without splitting an emoji (D5).
+// Cuts one canonical text to 20,000 code units at the last line break, or else mid-text without splitting an emoji.
 function cutTurnText(text: string): string {
   if (text.length <= TURN_TEXT_MAX_CHARS) return text;
   const lineBreak = text.lastIndexOf("\n", TURN_TEXT_MAX_CHARS);
@@ -30,7 +30,7 @@ function byRecency(a: Ranked, b: Ranked): number {
   return b.exportOrder - a.exportOrder;
 }
 
-// Keeps turns in rank order while the count and the character total stay within the caps, and stops at the first turn that breaks one (D5).
+// Keeps turns in rank order while the count and the character total stay within the caps, and stops at the first turn that breaks one.
 function takeWithinCaps(ranked: Ranked[]): Ranked[] {
   const kept: Ranked[] = [];
   let totalChars = 0;
@@ -43,7 +43,7 @@ function takeWithinCaps(ranked: Ranked[]): Ranked[] {
   return kept;
 }
 
-// Ranks turns by personaScore then recency and cuts to the caps of D5: at most 10,000 turns, 20,000 characters each, 2 MiB in all.
+// Ranks turns by personaScore then recency and cuts to the size caps: at most 10,000 turns, 20,000 characters each, 2 MiB in all.
 // A turn longer than 20,000 characters is cut at the last line break before 20,000, so a quote never starts mid-line.
 export function rankAndCut(turns: Array<RawTurn & { canonical: string }>): Array<RawTurn & { canonical: string }> {
   const scored = turns.map((turn) => {

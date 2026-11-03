@@ -23,21 +23,21 @@ import { registerAsksRoutes } from "./asks/index.js";
 import { registerSocialRoutes } from "./social/index.js";
 import { addContentSecurityPolicy, registerWebPagesRoutes } from "./web-pages/index.js";
 
-// Connections in the api's Kysely pool (D56: api 10). The LISTEN connection is one more client, owned by meeting-stream.
+// Connections in the api's Kysely pool (10 for the api). The LISTEN connection is one more client, owned by meeting-stream.
 export const API_POOL_SIZE = 10;
-// Fastify's default body limit, written out (D4): 1 MiB for every JSON route. POST /api/sources sets its own route limit of UPLOAD_BODY_LIMIT_BYTES.
+// Fastify's default body limit, written out: 1 MiB for every JSON route. POST /api/sources sets its own route limit of UPLOAD_BODY_LIMIT_BYTES.
 export const JSON_BODY_LIMIT_BYTES = 1_048_576;
-// The address the server listens on: every interface, because Render's proxy reaches the container from outside it [confirm] (unverified, ARCHITECTURE.md section 12).
+// The address the server listens on: every interface, because Render's proxy reaches the container from outside it.
 export const LISTEN_HOST = "0.0.0.0";
-// Log fields that could carry a secret; pino replaces their values before a line is written (A7, invariant 21) [confirm] (no input lists the fields).
+// Log fields that could carry a secret; pino replaces their values before a line is written.
 export const LOG_REDACT_PATHS: string[] = ["req.headers.cookie", "req.headers.authorization", 'res.headers["set-cookie"]', "*.token", "*.sessionToken", "*.recoveryCode"];
-// The text that replaces a hidden log value [confirm] (no input names it).
+// The text that replaces a hidden log value.
 export const LOG_REDACT_CENSOR = "[hidden]";
 
 // What buildApp registers: every slot in order ("all"), or the given route plugins in the given order (tests).
 export type BuildAppOptions = { routes: RoutePlugin[] | "all"; logStream?: NodeJS.WritableStream };
 
-// Parses the api's env with the contracts schema; a missing or bad name stops boot with every bad name listed (R10.2, D73).
+// Parses the api's env with the contracts schema; a missing or bad name stops boot with every bad name listed.
 export function readApiEnv(processEnv: NodeJS.ProcessEnv): ApiEnv {
   const parsed = apiEnv.safeParse(processEnv);
   if (parsed.success) {
@@ -58,7 +58,7 @@ export function loggerOptions(level: ApiEnv["LOG_LEVEL"], logStream?: NodeJS.Wri
 
 // Builds the app: logger, body limit, JSON parser, hooks, error and not-found handlers, then the routes.
 export async function buildApp(deps: RouteDeps, options: BuildAppOptions): Promise<FastifyInstance> {
-  // One trusted hop, Render's proxy: request.ip is then the address that proxy appended, never a value the client sent. Wave 3 checks the hop count on Render.
+  // One trusted hop, Render's proxy: request.ip is then the address that proxy appended, never a value the client sent.
   const app = fastify({ logger: loggerOptions(deps.env.LOG_LEVEL, options.logStream), trustProxy: 1, bodyLimit: JSON_BODY_LIMIT_BYTES });
   replaceJsonParser(app);
   addContentSecurityPolicy(app);
@@ -77,7 +77,7 @@ export async function buildApp(deps: RouteDeps, options: BuildAppOptions): Promi
   return app;
 }
 
-// Registers every feature's routes on the root instance in the fixed slot order; a missing feature keeps its slot comment until its builder's request lands (seams S2).
+// Registers every feature's routes on the root instance in a fixed order.
 export async function registerAllRoutes(app: FastifyInstance, deps: RouteDeps): Promise<void> {
   await registerSessionsRoutes(app, deps);
   await registerHomeRoutes(app, deps);

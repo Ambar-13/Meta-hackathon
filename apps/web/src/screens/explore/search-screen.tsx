@@ -7,7 +7,7 @@ import { SEARCH_MAX_CHARS, useDirectoryBrowse, type BrowseHook } from "../direct
 import { useExploreFriends, useExplorePosts, type ExploreFriends } from "./explore-state.js";
 import { PersonRow, PhotoGrid } from "./people-parts.js";
 
-// The words of Search (3 Nov 2026). Ambar: "there is no search button to find poeple and send then friend requests like insta".
+// The words of Search.
 const SEARCH_COPY = {
   title: "Search",
   label: "Search people",

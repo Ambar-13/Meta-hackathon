@@ -62,7 +62,7 @@
   .start-question { font-size: 30px; }
 }
 
-/* ---------- signed in (3 Nov 2026): the picker as a plain list of choices with hairlines, no colour boxes; the profile's picker is the
+/* ---------- signed in: the picker as a plain list of choices with hairlines, no colour boxes; the profile's picker is the
    same component ---------- */
 .social-frame .lobby-tags { display: none; }
 .social-frame .q-picker legend { font-size: 20px; }

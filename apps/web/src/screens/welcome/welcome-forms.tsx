@@ -5,7 +5,7 @@ import { Sticker } from "../../look/index.js";
 import { accessCodeIn } from "./access-code.js";
 import { googleResultIn, useCreatePerson, useGoogleSignIn, useRecover } from "./welcome-state.js";
 
-// The words of Continue with Google and of a Google sign-in that came back unfinished (3 Nov 2026).
+// The words of Continue with Google and of a Google sign-in that came back unfinished.
 const GOOGLE_COPY = {
   button: "Continue with Google",
   or: "or start with only your name",
@@ -25,7 +25,7 @@ const GoogleMark = (): ReactElement => {
   );
 };
 
-// Continue with Google, when the site offers it (Ambar, 3 Nov 2026: "add oauth google and let people just use meety"): Google's G and plain-words: allow (his words, quoted)
+// Continue with Google, when the site offers it: Google's G and
 // the words on a light pill, a plain link to the api, which sends the browser to Google and back signed in; then the line that leads
 // to the name tag form. A sign-in that came back unfinished says so above it.
 export const GoogleSignIn = (): ReactElement | null => {
@@ -48,10 +48,10 @@ export const GoogleSignIn = (): ReactElement | null => {
   );
 };
 
-// The server's two codes for a sign-up the site's access code stops (R9.5).
+// The server's two codes for a sign-up the site's access code stops.
 const ACCESS_CODE_REFUSALS: readonly string[] = ["access_code_needed", "access_code_wrong"];
 
-// The recovery code, shown once, with a copy action and the save sentence (A5).
+// The recovery code, shown once, with a copy action and the save sentence.
 export const RecoveryCodePanel = (props: { code: string; onContinue: () => void }): ReactElement => {
   return (
     <section className="wl-recovery" aria-labelledby="recovery-heading">
@@ -87,8 +87,8 @@ const GroupsField = (): ReactElement => {
 };
 
 // The create-profile form, drawn as a blank name tag you write your name on; after creating it shows the recovery code once,
-// and onDone runs when the person continues (A5). The access code field appears only when the link carried a code or the server
-// asked for one, so a site without a code shows no extra field (R9.5).
+// and onDone runs when the person continues. The access code field appears only when the link carried a code or the server
+// asked for one, so a site without a code shows no extra field.
 export const WelcomeForm = (props: { onDone: () => void }): ReactElement => {
   const { state, create, forgetCode } = useCreatePerson();
   const linkCode = accessCodeIn(useLocation().search);
@@ -143,7 +143,7 @@ export const WelcomeForm = (props: { onDone: () => void }): ReactElement => {
   );
 };
 
-// The form that redeems a recovery code; onDone runs after the server accepts it (A5).
+// The form that redeems a recovery code; onDone runs after the server accepts it.
 export const RecoverForm = (props: { onDone: () => void }): ReactElement => {
   const { state, recover } = useRecover();
   const { onDone } = props;
