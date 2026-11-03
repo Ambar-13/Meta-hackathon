@@ -14,7 +14,7 @@ const PROFILE_COPY = {
   title: "Profile",
   loading: "Loading this profile.",
   missing: "This person is no longer in Explore.",
-  back: "Back to Explore",
+  back: "Find people",
   retry: "Try again",
   addFriend: "Add friend",
   requested: "Requested",
@@ -129,7 +129,7 @@ const ProfileWaiting = (props: { model: ProfileModel }): ReactElement => {
   const { error } = props.model.profile;
   if (error === null) return <LoadingLine text={PROFILE_COPY.loading} />;
   if (error.status === 404) {
-    return <EmptyState sticker="poof" title={PROFILE_COPY.missing} action={<Link className="btn" to={APP_PATHS.explore}>{PROFILE_COPY.back}</Link>} />;
+    return <EmptyState sticker="poof" title={PROFILE_COPY.missing} action={<Link className="btn" to={APP_PATHS.search}>{PROFILE_COPY.back}</Link>} />;
   }
   return (
     <>

@@ -15,7 +15,7 @@ const SHARING_COPY = {
   otherCard: "Explore lists you from another card. Turning the Explore switch on here lists this card instead.",
   save: "Save sharing",
   saved: "Sharing saved.",
-  openDirectory: "Open Explore",
+  openDirectory: "Find people",
   datingNote: "Dating is your call. Leave this off if you only want teammates and friends.",
   noPublicItems: "No item can be public yet. Only items in your card with a checked quote can.",
 } as const;

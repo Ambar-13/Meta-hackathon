@@ -3,13 +3,14 @@
 // one of four colours that their name picks, so the same person always looks the same, and a sample person is their face with the
 // orange made-up mark. The landing keeps the name tags and stickers.
 import type { ReactElement } from "react";
-import { ArrowRight, ArrowUp, Check, ChevronRight, Compass, Grid3x3, Handshake, LayoutGrid, MessageCircle, Plus, Quote, Rows3, Search, Settings, Sparkles, UserPlus, UserRound, Users } from "lucide-react";
+import { ArrowRight, ArrowUp, Check, ChevronRight, Compass, Grid3x3, Handshake, House, LayoutGrid, MessageCircle, Plus, Quote, Rows3, Search, Settings, Sparkles, SquarePlus, UserPlus, UserRound, Users } from "lucide-react";
 import { initialOf } from "./look-parts.js";
 import { photoOf, photoUrl } from "./sample-photos.js";
 import { Sticker } from "./stickers.js";
 
 // Every icon the app draws, by what it means here.
 const ICONS = {
+  home: House,
   meety: MessageCircle,
   explore: Compass,
   friends: Users,
@@ -28,11 +29,12 @@ const ICONS = {
   list: Rows3,
   plus: Plus,
   arrow: ArrowRight,
+  invite: SquarePlus,
 } as const;
 // The name of one icon.
 export type IconName = keyof typeof ICONS;
 // The icons that are drawn filled when they mark the current page, as Instagram fills its current page's icon; the others go bold.
-const FILLED_WHEN_CURRENT: ReadonlySet<IconName> = new Set(["meety", "friends", "me"]);
+const FILLED_WHEN_CURRENT: ReadonlySet<IconName> = new Set(["home", "meety", "friends", "me"]);
 
 // One line icon, hidden from screen readers because the words next to it say what it is. isBold draws the current page's icon.
 export const Icon = (props: { name: IconName; size?: number; isBold?: boolean; className?: string }): ReactElement => {

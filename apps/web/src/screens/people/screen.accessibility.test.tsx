@@ -92,7 +92,7 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
     const head = await header();
 
     expect(within(head).getByText("Friends")).toBeTruthy();
-    expect(within(head).getByRole("link", { name: "Ask Mira's Meety" }).getAttribute("href")).toBe("/home?draft=How%20would%20Mira%20react%20to%20");
+    expect(within(head).getByRole("link", { name: "Ask Mira's Meety" }).getAttribute("href")).toBe("/meety?draft=How%20would%20Mira%20react%20to%20");
     expect(within(head).getByRole("button", { name: "See how you'd get on with Mira" })).toBeTruthy();
     cleanup();
 
@@ -137,11 +137,12 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
     expect(within(own).getByText(OWN_POSTS.body)).toBeTruthy();
   });
 
-  it("W7-WEB-A-T9: a 404 profile shows This person is no longer in Explore., with the way back to Explore", async () => {
+  it("W7-WEB-A-T9: a 404 profile shows This person is no longer in Explore., with Find people leading to Search", async () => {
     renderProfile({ status: 404, body: { code: "listing_not_found", message: "This listing is gone." } });
 
     expect(await screen.findByRole("heading", { name: "This person is no longer in Explore." })).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Back to Explore" }).getAttribute("href")).toBe("/explore");
+    const gone = screen.getByRole("heading", { name: "This person is no longer in Explore." }).closest("section");
+    expect(gone === null ? null : within(gone).getByRole("link", { name: "Find people" }).getAttribute("href")).toBe("/search");
   });
 
   it("W7-WEB-A-T9b: another error shows the server's sentence with Try again, which reads the profile again", async () => {

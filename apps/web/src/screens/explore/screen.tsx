@@ -1,41 +1,33 @@
 import "./explore.css";
-import { useId, useRef, useState, type FormEvent, type KeyboardEvent, type ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import { Link } from "react-router-dom";
 import type { DirectoryListing, Post, PostsView, PublicItem } from "@meet-first/contracts";
 import { APP_PATHS, chatPathWithDraft, ErrorNotice, personPostsPath, ScreenFrame, type PolledView } from "../../app-shell/index.js";
-import { EmptyState, Icon, LoadingLine, MeetyMark, PersonAvatar, photoOf, PostPhoto, SampleChip } from "../../look/index.js";
-import type { AddState } from "../chat/index.js";
-import { SEARCH_MAX_CHARS, useDirectoryBrowse, type BrowseHook } from "../directory/index.js";
+import { EmptyState, Icon, LoadingLine, MeetyMark, PersonAvatar, photoOf, PostPhoto } from "../../look/index.js";
+import { NextStep } from "../chat/index.js";
+import { useDirectoryBrowse, type BrowseHook } from "../directory/index.js";
 import { postAgeWords } from "../people/index.js";
-import { noteItemFor, peopleRowAt, storyPeople, useExploreFriends, useExplorePosts, type ExploreFriends } from "./explore-state.js";
+import { noteItemFor, peopleRowAt, storyPeople, useExploreFriends, useExplorePosts, useFeedHome, type ExploreFriends } from "./explore-state.js";
+import { FriendControl, lineFor, PersonCard } from "./people-parts.js";
 
-// The words of the Explore page (wave 7; a feed since 3 Nov 2026, in the look of the "Other" concept and Instagram the same day).
-const EXPLORE_COPY = {
-  title: "Explore",
+// The words of Home, the feed (wave 7; Explore until 3 Nov 2026, when Ambar asked for the feed as the default page, named for what it
+// is: "explore should be the like default page... and it shouldnt be called eplroe because has feed + explroe both").
+const FEED_COPY = {
+  title: "Home",
   eyebrow: "People, not just posts.",
-  searchLabel: "Search Explore",
-  search: "Search",
-  stuck: "Stuck on something?",
-  askOrchestrator: "Ask Meety who could help.",
   loading: "Loading people.",
   loadingPosts: "Loading posts.",
-  emptyTitle: "Nobody matches yet",
-  emptyLine: "Try other words, or clear the search.",
-  more: "Show more",
+  emptyTitle: "Nothing here yet",
+  emptyLine: "Nobody has posted yet. Find people in Search.",
   retry: "Try again",
   postsFailed: "Posts did not load.",
-  storiesLabel: "People in Explore",
+  storiesLabel: "People to meet",
   yourMeety: "Your Meety",
-  tabsLabel: "Posts to show",
-  feedLabel: "Posts in Explore",
-  friendsEmpty: "No posts from your friends yet. Add a friend from For you, and their posts show here.",
-  photosEmpty: "No photos yet.",
+  feedLabel: "Posts",
+  more: "Show more",
   sample: "Sample person",
   suggestedTitle: "Suggested for you",
   seeAll: "See all",
-  everyoneTitle: "Everyone in Explore",
-  resultsTitle: "People",
-  backToPosts: "Back to posts",
   railLabel: "Your Meety and people you might click with",
   meetyLabel: "Meet your Meety",
   meetyTitle: "You're more than your posts.",
@@ -44,29 +36,14 @@ const EXPLORE_COPY = {
   clickTitle: "People you might click with",
   seeEveryone: "See everyone",
 } as const;
-// The words a listing open to dating questions shows, as the directory showed them (design section 11).
-const OPEN_TO_ROMANCE_COPY = "Open to dating questions";
 // How many people the right-hand column suggests.
 const RAIL_PEOPLE_MAX = 4;
 // A post of words longer than this shows in the smaller type of its card.
 const LONG_POST_CHARS = 160;
-// The three views of the feed, after the "Other" concept's tabs: every post, your friends' posts, and the photos as Instagram's grid.
-const FEED_TABS = [
-  { key: "all", label: "For you" },
-  { key: "friends", label: "Friends" },
-  { key: "photos", label: "Photos" },
-] as const;
-// One view of the feed.
-type FeedTab = (typeof FEED_TABS)[number]["key"];
 
 // A listing for the Add friend button of a post whose writer is not on the loaded pages of Explore.
 function listingOfPost(post: Post): DirectoryListing {
   return { listingId: post.listingId, displayName: post.displayName, line: "", openToRomance: false, isSample: post.isSample, items: [], photo: post.authorPhoto ?? null };
-}
-
-// The line under a person's name: their own line, or in its place the sentence of a friend request the server refused.
-function lineFor(line: string, state: AddState): string {
-  return state.kind === "refused" ? state.sentence : line;
 }
 
 // Why Ask NAME's Meety cannot ask yet, said under the post: not friends, a request waiting, or friend asks off.
@@ -81,47 +58,12 @@ function todayWords(now: Date): string {
   return now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 }
 
-// The search box: the words go to Explore from page 0, and an empty search goes back to the feed (design section 6).
-const SearchForm = (props: { onSearch: (query: string) => void }): ReactElement => {
-  const [text, setText] = useState("");
-  const onSubmit = (event: FormEvent<HTMLFormElement>): void => {
-    event.preventDefault();
-    props.onSearch(text);
-  };
-  return (
-    <form role="search" className="explore-search" onSubmit={onSubmit}>
-      <label className="explore-field">
-        <span className="hidden-words">{EXPLORE_COPY.searchLabel}</span>
-        <Icon name="search" size={18} className="explore-glass" />
-        <input type="text" placeholder="Search by what people do" maxLength={SEARCH_MAX_CHARS} value={text} onChange={(event) => { setText(event.target.value); }} />
-      </label>
-      <button type="submit" className="quiet">{EXPLORE_COPY.search}</button>
-    </form>
-  );
-};
-
-// Add friend for one person, or where their request stands: blue words in a post or a row, a blue button on a card. A post by someone
-// who was already a friend shows nothing, as a feed shows no Follow on the people you follow; someone added from this page shows Friends.
-const FriendControl = (props: { listing: DirectoryListing; friends: ExploreFriends; look: "post" | "row" | "card" }): ReactElement | null => {
-  const { listing, friends } = props;
-  const state = friends.adds.stateOf(listing.listingId);
-  if (state.kind === "friends") return <span className="friend-state">Friends</span>;
-  if (friends.isFriend(listing.listingId)) return props.look === "post" ? null : <span className="friend-state">Friends</span>;
-  if (state.kind === "requested") return <span className="friend-state">Requested</span>;
-  return (
-    <button type="button" className={props.look === "card" ? "friend-add" : "text-button friend-add"} disabled={state.kind === "sending"}
-      onClick={() => void friends.adds.add(listing)} aria-label={`Add ${listing.displayName} as a friend`}>
-      {state.kind === "sending" ? "Sending" : "Add friend"}
-    </button>
-  );
-};
-
-// The row of round faces under the title, as Instagram's stories and the "Other" concept's people: Your Meety first, which opens what
-// your Meety shares, then the people on the loaded pages of Explore, friends first, each opening their profile.
+// The row of round faces at the top, as Instagram's stories and the "Other" concept's people: Your Meety first, which opens what your
+// Meety shares, then the people on the loaded pages of Explore, friends first, each opening their profile.
 const StoriesRow = (props: { browse: BrowseHook; friends: ExploreFriends }): ReactElement => {
   const people = storyPeople(props.browse.listings, props.friends.isFriend);
   return (
-    <section className="stories" aria-label={EXPLORE_COPY.storiesLabel}>
+    <section className="stories" aria-label={FEED_COPY.storiesLabel}>
       <ul>
         <li>
           <Link className="story is-you" to={APP_PATHS.me}>
@@ -129,7 +71,7 @@ const StoriesRow = (props: { browse: BrowseHook; friends: ExploreFriends }): Rea
               <MeetyMark size="l" />
               <span className="story-plus" aria-hidden="true"><Icon name="plus" size={14} isBold /></span>
             </span>
-            <span className="story-name">{EXPLORE_COPY.yourMeety}</span>
+            <span className="story-name">{FEED_COPY.yourMeety}</span>
           </Link>
         </li>
         {people.map((listing) => (
@@ -144,35 +86,6 @@ const StoriesRow = (props: { browse: BrowseHook; friends: ExploreFriends }): Rea
         ))}
       </ul>
     </section>
-  );
-};
-
-// The tabs over the feed, with the arrow keys moving between them as the profile's tabs do.
-const FeedTabs = (props: { selected: FeedTab; onSelect: (tab: FeedTab) => void; baseId: string }): ReactElement => {
-  const tabRefs = useRef<Partial<Record<FeedTab, HTMLButtonElement | null>>>({});
-  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
-    const index = FEED_TABS.findIndex((tab) => tab.key === props.selected);
-    const step = { ArrowRight: 1, ArrowLeft: -1, Home: -index, End: FEED_TABS.length - 1 - index }[event.key];
-    if (step === undefined) return;
-    event.preventDefault();
-    const next = FEED_TABS[(index + step + FEED_TABS.length) % FEED_TABS.length];
-    if (next === undefined) return;
-    props.onSelect(next.key);
-    tabRefs.current[next.key]?.focus();
-  };
-  return (
-    <div className="feed-tabs" role="tablist" aria-label={EXPLORE_COPY.tabsLabel} onKeyDown={onKeyDown}>
-      {FEED_TABS.map((tab) => {
-        const isSelected = tab.key === props.selected;
-        return (
-          <button key={tab.key} ref={(element) => { tabRefs.current[tab.key] = element; }} type="button" role="tab" className="feed-tab"
-            id={`${props.baseId}-${tab.key}`} aria-selected={isSelected} aria-controls={`${props.baseId}-panel`} tabIndex={isSelected ? 0 : -1}
-            onClick={() => { props.onSelect(tab.key); }}>
-            {tab.label}
-          </button>
-        );
-      })}
-    </div>
   );
 };
 
@@ -214,7 +127,7 @@ const FeedPost = (props: { post: Post; listing: DirectoryListing | undefined; fr
         <div className="feed-who">
           <p className="feed-name-row">
             <Link className="feed-name" to={profile}>{post.displayName}</Link>
-            {post.isSample ? <span className="hidden-words">{EXPLORE_COPY.sample}</span> : null}
+            {post.isSample ? <span className="hidden-words">{FEED_COPY.sample}</span> : null}
             <time className="feed-time" dateTime={post.createdAt}>{postAgeWords(post.createdAt, new Date())}</time>
           </p>
           {line === "" ? null : <p className="feed-line">{line}</p>}
@@ -254,86 +167,24 @@ const FeedPost = (props: { post: Post; listing: DirectoryListing | undefined; fr
   );
 };
 
-// One person Explore suggests, as a card in Instagram's "Suggested for you" row: their picture, name, Sample mark, line, and the dating
-// words when open, as one link to their profile, with the Add friend button under it.
-const PersonCard = (props: { listing: DirectoryListing; friends: ExploreFriends }): ReactElement => {
-  const { listing, friends } = props;
-  return (
-    <li className="person-card">
-      <Link className="person-card-link" to={APP_PATHS.person(listing.listingId)}>
-        <PersonAvatar name={listing.displayName} size="l" photo={listing.photo} isSample={listing.isSample} />
-        <h3 className="person-card-name">{listing.displayName}</h3>
-        {listing.isSample ? <SampleChip /> : null}
-        <p className="person-card-line">{lineFor(listing.line, friends.adds.stateOf(listing.listingId))}</p>
-        {listing.openToRomance ? <span className="listing-open">{OPEN_TO_ROMANCE_COPY}</span> : null}
-      </Link>
-      <FriendControl listing={listing} friends={friends} look="card" />
-    </li>
-  );
-};
-
 // The row of people Explore suggests, inside the feed on a phone and a tablet (the laptop has the right-hand column instead): cards that
-// scroll sideways, See all at the top, and Show more at the end while more pages exist.
-const SuggestedRow = (props: { browse: BrowseHook; friends: ExploreFriends; onSeeAll: () => void }): ReactElement => {
+// scroll sideways, See all at the top opening Search, and Show more at the end while more pages exist.
+const SuggestedRow = (props: { browse: BrowseHook; friends: ExploreFriends }): ReactElement => {
   const { browse, friends } = props;
   return (
     <section className="suggested" aria-labelledby="suggested-title">
       <div className="explore-head">
-        <h2 id="suggested-title">{EXPLORE_COPY.suggestedTitle}</h2>
-        <button type="button" className="text-button" onClick={props.onSeeAll}>{EXPLORE_COPY.seeAll}</button>
+        <h2 id="suggested-title">{FEED_COPY.suggestedTitle}</h2>
+        <Link className="explore-head-link" to={APP_PATHS.search}>{FEED_COPY.seeAll}</Link>
       </div>
       <ul className="person-cards">
         {browse.listings.map((listing) => <PersonCard key={listing.listingId} listing={listing} friends={friends} />)}
         {browse.hasMore ? (
           <li className="person-card is-more">
-            <button type="button" className="quiet" disabled={browse.isLoading} onClick={browse.loadMore}>{EXPLORE_COPY.more}</button>
+            <button type="button" className="quiet" disabled={browse.isLoading} onClick={browse.loadMore}>{FEED_COPY.more}</button>
           </li>
         ) : null}
       </ul>
-    </section>
-  );
-};
-
-// One person in a list: their picture, name, Sample mark, line, first public item's claim, and the dating words when open, as one link
-// to their profile, with Add friend at the end of the row.
-const PersonRow = (props: { listing: DirectoryListing; friends: ExploreFriends }): ReactElement => {
-  const { listing, friends } = props;
-  const first = listing.items[0];
-  return (
-    <li className="person-row">
-      <Link className="person-row-link" to={APP_PATHS.person(listing.listingId)}>
-        <PersonAvatar name={listing.displayName} photo={listing.photo} isSample={listing.isSample} />
-        <div className="person-row-words">
-          <div className="person-row-name">
-            <h3>{listing.displayName}</h3>
-            {listing.isSample ? <SampleChip /> : null}
-          </div>
-          <p className="person-row-line">{lineFor(listing.line, friends.adds.stateOf(listing.listingId))}</p>
-          {first === undefined ? null : <p className="person-row-claim">{first.claim}</p>}
-          {listing.openToRomance ? <span className="listing-open">{OPEN_TO_ROMANCE_COPY}</span> : null}
-        </div>
-      </Link>
-      <FriendControl listing={listing} friends={friends} look="row" />
-    </li>
-  );
-};
-
-// The people a search found, or everyone in Explore after See all, as rows, with Show more while more pages exist; onBack, when
-// given, is Back to posts.
-const PeopleList = (props: { browse: BrowseHook; friends: ExploreFriends; onBack: (() => void) | null }): ReactElement => {
-  const { browse, onBack } = props;
-  return (
-    <section className="people-list" aria-labelledby="people-list-title">
-      <div className="explore-head">
-        <h2 id="people-list-title">{onBack === null ? EXPLORE_COPY.resultsTitle : EXPLORE_COPY.everyoneTitle}</h2>
-        {onBack === null ? null : <button type="button" className="text-button" onClick={onBack}>{EXPLORE_COPY.backToPosts}</button>}
-      </div>
-      <ul className="person-rows">
-        {browse.listings.map((listing) => <PersonRow key={listing.listingId} listing={listing} friends={props.friends} />)}
-      </ul>
-      {browse.hasMore ? (
-        <button type="button" className="quiet explore-more" disabled={browse.isLoading} onClick={browse.loadMore}>{EXPLORE_COPY.more}</button>
-      ) : null}
     </section>
   );
 };
@@ -343,73 +194,35 @@ const PostsFailed = (props: { posts: PolledView<PostsView> }): ReactElement | nu
   if (props.posts.error === null) return null;
   return (
     <p className="explore-posts-failed">
-      {`${EXPLORE_COPY.postsFailed} `}
-      <button type="button" className="text-button" onClick={props.posts.reload}>{EXPLORE_COPY.retry}</button>
+      {`${FEED_COPY.postsFailed} `}
+      <button type="button" className="text-button" onClick={props.posts.reload}>{FEED_COPY.retry}</button>
     </p>
   );
 };
 
-// The posts of For you or Friends, with the row of suggested people after the second post of For you; each post's line comes from the
-// loaded people. Friends with no posts yet says how to get some.
-const Feed = (props: { browse: BrowseHook; posts: readonly Post[]; friends: ExploreFriends; onSeeAll: () => void; isFriendsOnly: boolean }): ReactElement => {
-  const { browse, friends } = props;
-  const list = props.isFriendsOnly ? props.posts.filter((post) => friends.isFriend(post.listingId)) : props.posts;
-  const at = props.isFriendsOnly ? list.length : peopleRowAt(list.length);
+// The feed: the newest posts, with the row of suggested people after the second; each post's line comes from the loaded people.
+const Feed = (props: { browse: BrowseHook; posts: PolledView<PostsView>; friends: ExploreFriends }): ReactElement => {
+  const { browse, posts, friends } = props;
+  const list = posts.value?.posts ?? [];
+  const at = peopleRowAt(list.length);
   const byListing = new Map(browse.listings.map((listing) => [listing.listingId, listing]));
   const postItem = (post: Post): ReactElement => (
     <li key={post.postId}>
       <FeedPost post={post} listing={byListing.get(post.listingId)} friends={friends} />
     </li>
   );
-  if (props.isFriendsOnly && list.length === 0) return <p className="feed-empty">{EXPLORE_COPY.friendsEmpty}</p>;
   return (
-    <ul className="feed-list">
-      {list.slice(0, at).map(postItem)}
-      {props.isFriendsOnly || browse.listings.length === 0 ? null : (
-        <li className="feed-suggested">
-          <SuggestedRow browse={browse} friends={friends} onSeeAll={props.onSeeAll} />
-        </li>
-      )}
-      {list.slice(at).map(postItem)}
-    </ul>
-  );
-};
-
-// The Photos tab, as Instagram's Explore grid: every photo post as a tall tile with square corners, three to a row, newest first, each
-// opening its writer's Posts tab. On a laptop the writer's face and name show over the tile on hover.
-const PhotoGrid = (props: { posts: readonly Post[] }): ReactElement => {
-  const photos = props.posts.filter((post) => photoOf(post.photo) !== null);
-  if (photos.length === 0) return <p className="feed-empty">{EXPLORE_COPY.photosEmpty}</p>;
-  return (
-    <ul className="photo-grid">
-      {photos.map((post) => (
-        <li key={post.postId}>
-          <Link className="photo-cell" to={personPostsPath(post.listingId)} aria-label={`${post.displayName}'s posts: ${post.photoAlt ?? post.text}`}>
-            <img src={photoOf(post.photo)?.src} alt="" loading="lazy" decoding="async" />
-            <span className="photo-cell-who" aria-hidden="true">
-              <PersonAvatar name={post.displayName} size="s" photo={post.authorPhoto} isSample={post.isSample} />
-              <b>{post.displayName}</b>
-            </span>
-          </Link>
-        </li>
-      ))}
-    </ul>
-  );
-};
-
-// What the tabs show: the posts of the chosen tab once they load, the loading line until then, and the line with Try again when they
-// failed.
-const FeedPanel = (props: { tab: FeedTab; baseId: string; browse: BrowseHook; posts: PolledView<PostsView>; friends: ExploreFriends; onSeeAll: () => void }): ReactElement => {
-  const { posts } = props;
-  const list = posts.value?.posts ?? [];
-  return (
-    <section className="feed" id={`${props.baseId}-panel`} role="tabpanel" aria-labelledby={`${props.baseId}-${props.tab}`}>
-      <h2 className="hidden-words">{EXPLORE_COPY.feedLabel}</h2>
-      {props.tab === "photos" && posts.value !== null ? <PhotoGrid posts={list} /> : null}
-      {props.tab === "photos" ? null : (
-        <Feed browse={props.browse} posts={list} friends={props.friends} onSeeAll={props.onSeeAll} isFriendsOnly={props.tab === "friends"} />
-      )}
-      {posts.value === null && posts.error === null ? <LoadingLine text={EXPLORE_COPY.loadingPosts} /> : null}
+    <section className="feed" aria-label={FEED_COPY.feedLabel}>
+      <ul className="feed-list">
+        {list.slice(0, at).map(postItem)}
+        {browse.listings.length === 0 ? null : (
+          <li className="feed-suggested">
+            <SuggestedRow browse={browse} friends={friends} />
+          </li>
+        )}
+        {list.slice(at).map(postItem)}
+      </ul>
+      {posts.value === null && posts.error === null ? <LoadingLine text={FEED_COPY.loadingPosts} /> : null}
       <PostsFailed posts={posts} />
     </section>
   );
@@ -417,27 +230,27 @@ const FeedPanel = (props: { tab: FeedTab; baseId: string; browse: BrowseHook; po
 
 // The right-hand column on a laptop, after the "Other" concept: a warm card on what your Meety does, with slow circles drawn in its
 // corner and a link to what it shares, then a few people you are not friends with yet, each with Add friend, and See everyone beside
-// their heading.
-const ExploreRail = (props: { browse: BrowseHook; friends: ExploreFriends; onSeeAll: () => void }): ReactElement => {
+// their heading, opening Search.
+const FeedRail = (props: { browse: BrowseHook; friends: ExploreFriends }): ReactElement => {
   const { browse, friends } = props;
   const people = browse.listings.filter((listing) => !friends.isFriend(listing.listingId)).slice(0, RAIL_PEOPLE_MAX);
   return (
-    <aside className="explore-rail" aria-label={EXPLORE_COPY.railLabel}>
+    <aside className="explore-rail" aria-label={FEED_COPY.railLabel}>
       <section className="rail-meety" aria-labelledby="rail-meety-title">
         <span className="rail-orbit" aria-hidden="true"><i /><i /><i /></span>
-        <p className="rail-meety-label">{EXPLORE_COPY.meetyLabel}</p>
-        <h2 id="rail-meety-title">{EXPLORE_COPY.meetyTitle}</h2>
-        <p className="rail-meety-line">{EXPLORE_COPY.meetyLine}</p>
+        <p className="rail-meety-label">{FEED_COPY.meetyLabel}</p>
+        <h2 id="rail-meety-title">{FEED_COPY.meetyTitle}</h2>
+        <p className="rail-meety-line">{FEED_COPY.meetyLine}</p>
         <Link className="rail-meety-link" to={APP_PATHS.me}>
-          {EXPLORE_COPY.meetyLink}
+          {FEED_COPY.meetyLink}
           <Icon name="arrow" size={18} />
         </Link>
       </section>
       {people.length === 0 ? null : (
         <section className="rail-people" aria-labelledby="rail-people-title">
           <div className="explore-head">
-            <h2 id="rail-people-title">{EXPLORE_COPY.clickTitle}</h2>
-            <button type="button" className="text-button rail-see-everyone" onClick={props.onSeeAll}>{EXPLORE_COPY.seeEveryone}</button>
+            <h2 id="rail-people-title">{FEED_COPY.clickTitle}</h2>
+            <Link className="explore-head-link" to={APP_PATHS.search}>{FEED_COPY.seeEveryone}</Link>
           </div>
           <ul className="rail-people-list">
             {people.map((listing) => (
@@ -457,77 +270,56 @@ const ExploreRail = (props: { browse: BrowseHook; friends: ExploreFriends; onSee
   );
 };
 
-// The states above the content: an error with Try again, loading, and nobody found.
-const ExploreStatus = (props: { browse: BrowseHook; isEmpty: boolean }): ReactElement => {
+// The states above the feed: an error with Try again, loading, and nothing to show yet.
+const FeedStatus = (props: { browse: BrowseHook; isEmpty: boolean }): ReactElement => {
   const { browse } = props;
   return (
     <>
       {browse.error === null ? null : (
         <div className="explore-error">
           <ErrorNotice error={browse.error} />
-          <button type="button" className="quiet" onClick={() => { browse.search(browse.query); }}>{EXPLORE_COPY.retry}</button>
+          <button type="button" className="quiet" onClick={() => { browse.search(browse.query); }}>{FEED_COPY.retry}</button>
         </div>
       )}
-      {browse.isLoading && !browse.hasLoaded ? <LoadingLine text={EXPLORE_COPY.loading} /> : null}
-      {props.isEmpty ? <EmptyState sticker="lens" title={EXPLORE_COPY.emptyTitle}>{EXPLORE_COPY.emptyLine}</EmptyState> : null}
+      {browse.isLoading && !browse.hasLoaded ? <LoadingLine text={FEED_COPY.loading} /> : null}
+      {props.isEmpty ? <EmptyState sticker="lens" title={FEED_COPY.emptyTitle} action={<Link className="btn" to={APP_PATHS.search}>Search</Link>}>{FEED_COPY.emptyLine}</EmptyState> : null}
     </>
   );
 };
 
-// True when the page has nothing to show: nobody in Explore or the search, and, in the feed, no posts once they have loaded or failed.
-function isNothingShown(browse: BrowseHook, posts: PolledView<PostsView>, isPeople: boolean): boolean {
+// True when the feed has nothing to show: nobody in Explore and no posts, once both have loaded or failed.
+function isNothingShown(browse: BrowseHook, posts: PolledView<PostsView>): boolean {
   const isNobody = browse.hasLoaded && !browse.isLoading && browse.error === null && browse.listings.length === 0;
-  if (!isNobody || isPeople) return isNobody;
+  if (!isNobody) return false;
   return posts.value === null ? posts.error !== null : posts.value.posts.length === 0;
 }
 
-// The /explore page as a feed (Ambar, 3 Nov 2026: "it should have been looking like linkedin or instagram feed"), in the look of the
-// "Other" concept and of Instagram he asked for the same day ("I WANT THE OTHERS AND INSTAGRAM LOOK"): a small line, the large title and
-// today's date, the search box with a way to ask Meety for help, the row of faces, then For you, Friends and Photos; a search, or See
-// all, shows people as rows instead. On a laptop the right-hand column sits beside it.
-export const ExploreScreen = (): ReactElement => {
+// Home, the feed, as Instagram's home (Ambar, 3 Nov 2026: "it should have been looking like linkedin or instagram feed", then "explore
+// should be the like default page"), in the look of the "Other" concept: on a laptop a small line over the title with today's date at
+// the right, which a phone leaves out as Instagram does; your next step while you have no approved card; the row of faces; then the
+// posts with the people Explore suggests. On a laptop the right-hand column sits beside it.
+export const FeedScreen = (): ReactElement => {
   const browse = useDirectoryBrowse();
   const posts = useExplorePosts();
   const friends = useExploreFriends();
-  const baseId = useId();
-  const [tab, setTab] = useState<FeedTab>("all");
-  const [isEveryone, setIsEveryone] = useState(false);
-  const isSearching = browse.query !== "";
-  const isPeople = isSearching || isEveryone;
-  const search = (query: string): void => {
-    setIsEveryone(false);
-    browse.search(query);
-  };
-  const seeAll = (): void => { setIsEveryone(true); };
-  const people = browse.listings.length === 0 ? null : (
-    <PeopleList browse={browse} friends={friends} onBack={isSearching ? null : () => { setIsEveryone(false); }} />
-  );
+  const home = useFeedHome();
   return (
-    <ScreenFrame title={EXPLORE_COPY.title} hasOwnHeading isWide>
+    <ScreenFrame title={FEED_COPY.title} hasOwnHeading isWide>
       <div className="explore">
         <div className="explore-main">
           <div className="explore-title">
             <div>
-              <p className="explore-eyebrow">{EXPLORE_COPY.eyebrow}</p>
-              <h1>{EXPLORE_COPY.title}</h1>
+              <p className="explore-eyebrow">{FEED_COPY.eyebrow}</p>
+              <h1>{FEED_COPY.title}</h1>
             </div>
             <p className="explore-date">{todayWords(new Date())}</p>
           </div>
-          <SearchForm onSearch={search} />
-          <p className="explore-stuck">
-            {`${EXPLORE_COPY.stuck} `}
-            <Link to={APP_PATHS.home}>{EXPLORE_COPY.askOrchestrator}</Link>
-          </p>
-          <ExploreStatus browse={browse} isEmpty={isNothingShown(browse, posts, isPeople)} />
-          {isPeople ? people : (
-            <>
-              {browse.listings.length === 0 ? null : <StoriesRow browse={browse} friends={friends} />}
-              <FeedTabs selected={tab} onSelect={setTab} baseId={baseId} />
-              <FeedPanel tab={tab} baseId={baseId} browse={browse} posts={posts} friends={friends} onSeeAll={seeAll} />
-            </>
-          )}
+          {home.value === null ? null : <NextStep home={home.value} />}
+          <FeedStatus browse={browse} isEmpty={isNothingShown(browse, posts)} />
+          {browse.listings.length === 0 ? null : <StoriesRow browse={browse} friends={friends} />}
+          <Feed browse={browse} posts={posts} friends={friends} />
         </div>
-        <ExploreRail browse={browse} friends={friends} onSeeAll={seeAll} />
+        <FeedRail browse={browse} friends={friends} />
       </div>
     </ScreenFrame>
   );

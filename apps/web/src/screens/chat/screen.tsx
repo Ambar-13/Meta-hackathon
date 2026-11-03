@@ -23,8 +23,8 @@ const LOADING_LINE = "Loading your chat.";
 // The line under Meety's name at the top of the chat, as Instagram shows who you are talking to.
 const INTRO_LINE = "Your personal AI on Meet First";
 
-// Today's next step while the person has no approved card: one line and its button, above the chat.
-const NextStep = (props: { home: HomeView }): ReactElement | null => {
+// Today's next step while the person has no approved card: one line and its button, above the chat and the feed.
+export const NextStep = (props: { home: HomeView }): ReactElement | null => {
   if (props.home.card?.state === "approved") return null;
   const step = nextStepOf(props.home);
   return (

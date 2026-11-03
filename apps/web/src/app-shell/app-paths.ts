@@ -4,7 +4,9 @@ import { z } from "zod";
 // A meeting side letter, "a" or "b", as contracts writes it.
 export type Side = MeetingView["members"][number]["side"];
 
-// Every client path the app links to; screens build links with these, never with string literals (seams S11).
+// Every client path the app links to; screens build links with these, never with string literals (seams S11). Since 3 Nov 2026, as in
+// Instagram, home is the feed and the signed-in start, search finds people and shows the photos, and meety is the chat with Meety;
+// explore and directory lead to search.
 export const APP_PATHS = {
   welcome: "/", upload: "/upload", pair: "/pair", join: "/join", claim: "/claim", settings: "/settings",
   namesReview: (sourceId: string) => `/sources/${sourceId}/names`,
@@ -21,6 +23,7 @@ export const APP_PATHS = {
   home: "/home",
   explore: "/explore", me: "/me",
   person: (listingId: string) => `/people/${listingId}`,
+  meety: "/meety", search: "/search",
 } as const;
 
 // The route patterns, with the keys and parameter names of APP_PATHS, in the same order (seams S11).
@@ -31,6 +34,7 @@ export const ROUTE_PATTERNS = {
   consent: "/meetings/:meetingId/share", sharePage: "/share/:slug",
   directory: "/directory", help: "/help", friends: "/friends", ask: "/asks/:askId", home: "/home",
   explore: "/explore", me: "/me", person: "/people/:listingId",
+  meety: "/meety", search: "/search",
 } as const;
 
 // The query name that carries the approved card a meeting is created with, so a reload keeps it [confirm] (no contract field carries it).
@@ -41,7 +45,7 @@ export const SIDE_QUERY = "side";
 // The query name that carries words for the chat composer, so a link can open the chat with a message started (wave 7).
 export const DRAFT_QUERY = "draft";
 
-// The query name that opens a profile on one of its tabs, so a post in Explore can open its person's Posts tab.
+// The query name that opens a profile on one of its tabs, so a post in the feed can open its person's Posts tab.
 export const PROFILE_TAB_QUERY = "tab";
 
 // A profile opened on its Posts tab.
@@ -54,9 +58,9 @@ export function readProfileTab(search: string): "about" | "posts" {
   return new URLSearchParams(search).get(PROFILE_TAB_QUERY) === "posts" ? "posts" : "about";
 }
 
-// The chat at /home with these words waiting in its composer.
+// The chat with Meety, with these words waiting in its composer.
 export function chatPathWithDraft(text: string): string {
-  return `${APP_PATHS.home}?${DRAFT_QUERY}=${encodeURIComponent(text)}`;
+  return `${APP_PATHS.meety}?${DRAFT_QUERY}=${encodeURIComponent(text)}`;
 }
 
 // The pair screen for an approved card.

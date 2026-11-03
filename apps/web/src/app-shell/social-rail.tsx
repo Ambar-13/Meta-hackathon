@@ -7,11 +7,12 @@ import { Icon, MeetyMark, Sticker, type IconName } from "../look/index.js";
 
 // One page of the signed-in nav: its words, where it goes, its line icon, and whether only the laptop rail shows it.
 type RailPage = { label: string; to: string; icon: IconName; isRailOnly?: boolean };
-// The pages, in this order: Meety (the chat), Explore, Friends, Me, then Settings, which the laptop keeps at the sidebar's foot and the
-// phone keeps in the top bar instead (wave 7).
+// The pages, in this order, as Instagram's: Home (the feed), Search, Meety (the chat, where Instagram has messages), Friends, Me, then
+// Settings, which the laptop keeps at the sidebar's foot and the phone keeps in the top bar instead (3 Nov 2026).
 const RAIL_PAGES: readonly RailPage[] = [
-  { label: "Meety", to: APP_PATHS.home, icon: "meety" },
-  { label: "Explore", to: APP_PATHS.explore, icon: "explore" },
+  { label: "Home", to: APP_PATHS.home, icon: "home" },
+  { label: "Search", to: APP_PATHS.search, icon: "search" },
+  { label: "Meety", to: APP_PATHS.meety, icon: "meety" },
   { label: "Friends", to: APP_PATHS.friends, icon: "friends" },
   { label: "Me", to: APP_PATHS.me, icon: "me" },
   { label: "Settings", to: APP_PATHS.settings, icon: "settings", isRailOnly: true },

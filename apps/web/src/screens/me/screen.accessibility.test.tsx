@@ -79,9 +79,9 @@ describe("/me, against the MSW route stubs (a fake server)", () => {
     expect(within(head).getByRole("button", { name: "Edit profile" }).getAttribute("aria-expanded")).toBe("false");
     expect(requestsTo(routes.social.readProfile)[0]?.url).toContain(`/api/directory/${LISTING_IDS.mine}`);
     expect(within(head).getByRole("link", { name: "Your card" }).getAttribute("href")).toBe(`/cards/${IDS.card}`);
-    const next = await screen.findByRole("heading", { level: 2, name: "Meet someone." });
+    const next = await screen.findByRole("heading", { level: 2, name: "See how you'd get on with someone." });
     expect(next.compareDocumentPosition(screen.getByRole("tablist", { name: "Profile" })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Open Explore" }).getAttribute("href")).toBe(APP_PATHS.explore);
+    expect(screen.getByRole("link", { name: "Find people" }).getAttribute("href")).toBe(APP_PATHS.search);
     expect(within(screen.getByRole("tabpanel", { name: "About" })).getByRole("link", { name: "Add more chats" }).getAttribute("href")).toBe("/upload");
     fireEvent.click(screen.getByRole("tab", { name: "Posts" }));
     expect(screen.getByRole("heading", { name: "Coming soon: your Meety posts." })).toBeTruthy();

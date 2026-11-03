@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, screen, within } from "@testing-library/react";
 import type { HomeView } from "@meet-first/contracts";
 import { APP_PATHS, ROUTE_PATTERNS, routes } from "../../app-shell/index.js";
 import { renderScreen, stubRoute } from "../../testing/index.js";
@@ -24,7 +24,7 @@ function renderHome(view: HomeView | { status: number; body: unknown }): void {
 
 // The main link of the next-step panel.
 async function nextStepLink(name: string): Promise<string | null> {
-  return (await screen.findByRole("link", { name })).getAttribute("href");
+  return (await within(await screen.findByRole("main")).findByRole("link", { name })).getAttribute("href");
 }
 
 const APPROVED_CARD = { id: IDS.card, state: "approved" as const, itemCount: 4, items: [{ kind: "habit" as const, claim: "Plans before building", quote: "I can't start until I know what done looks like." }] };
@@ -51,8 +51,8 @@ describe("home screen", () => {
 
   it("HOME-WEB-T4: an approved card with nothing else offers to meet someone", async () => {
     renderHome(home({ source: { id: IDS.source, namesPassDone: true, namesReviewed: true }, card: APPROVED_CARD }));
-    expect(await nextStepLink("Pair with someone")).toBe(`${APP_PATHS.pair}?card=${IDS.card}`);
-    expect(screen.getByRole("link", { name: "Open Explore" }).getAttribute("href")).toBe(APP_PATHS.explore);
+    expect(await nextStepLink("Invite a friend")).toBe(`${APP_PATHS.pair}?card=${IDS.card}`);
+    expect(screen.getByRole("link", { name: "Find people" }).getAttribute("href")).toBe(APP_PATHS.search);
   });
 
   it("HOME-WEB-T5: a running meeting comes first, and its row says it is talking now", async () => {

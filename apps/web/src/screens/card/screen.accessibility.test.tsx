@@ -77,7 +77,7 @@ describe("card screen", () => {
     expect(await screen.findByText("Card approved.")).toBeTruthy();
     expect(screen.getByText("Your card is short: fewer than 6 items had a quote that checked out. Meetings still work; the quiz is skipped.")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Take the knows-me quiz" })).toBeNull();
-    expect(screen.getByRole("link", { name: "Pair with someone" }).getAttribute("href")).toBe(`/pair?card=${IDS.card}`);
+    expect(within(screen.getByRole("main")).getByRole("link", { name: "Invite a friend" }).getAttribute("href")).toBe(`/pair?card=${IDS.card}`);
   });
 
   it("R3.2-T1: tapping a quote opens a sheet with the full quote that closes again", async () => {

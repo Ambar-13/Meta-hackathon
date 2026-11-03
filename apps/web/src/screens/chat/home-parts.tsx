@@ -22,13 +22,13 @@ export function suggestedPeople(listings: readonly DirectoryListing[], friends: 
   return listings.filter((listing) => !known.has(listing.listingId)).slice(0, SIDE_ROWS_MAX);
 }
 
-// Your friends as circles with their names under them, after a first circle that finds more people in Explore.
+// Your friends as circles with their names under them, after a first circle that finds more people in Search.
 export const FriendsRow = (props: { friends: readonly Friend[] }): ReactElement => {
   return (
     <nav className="home-stories" aria-label="Friends">
       <ul>
         <li>
-          <Link className="story" to={APP_PATHS.explore}>
+          <Link className="story" to={APP_PATHS.search}>
             <span className="story-ring is-add">
               <Icon name="add" size={26} />
             </span>
@@ -80,7 +80,7 @@ const SideFriends = (props: { friends: readonly Friend[]; onAsk: (name: string) 
       <SideHead id="side-friends-title" title="Your friends" to={APP_PATHS.friends} seeAll="See all your friends" />
       {shown.length === 0 ? (
         <p className="side-none">
-          No friends yet. <Link to={APP_PATHS.explore}>Find people in Explore</Link>
+          No friends yet. <Link to={APP_PATHS.search}>Find people</Link>
         </p>
       ) : (
         <ul className="side-list">
@@ -109,7 +109,7 @@ const SideSuggestions = (props: { people: readonly DirectoryListing[]; adds: Add
   if (props.people.length === 0) return null;
   return (
     <section aria-labelledby="side-suggested-title">
-      <SideHead id="side-suggested-title" title="Suggested for you" to={APP_PATHS.explore} seeAll="See everyone in Explore" />
+      <SideHead id="side-suggested-title" title="Suggested for you" to={APP_PATHS.search} seeAll="See everyone" />
       <ul className="side-list">
         {props.people.map((listing) => {
           const state = props.adds.stateOf(listing.listingId);

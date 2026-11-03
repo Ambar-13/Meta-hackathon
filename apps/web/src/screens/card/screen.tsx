@@ -72,7 +72,7 @@ const ApprovedNext = (props: { card: CardView; isSending: boolean; onQuiz: () =>
           </button>
         )}
         <Link className={props.card.thin ? "btn" : "btn quiet"} to={pairPathWithCard(props.card.id)}>
-          Pair with someone
+          Invite a friend
         </Link>
       </div>
     </section>

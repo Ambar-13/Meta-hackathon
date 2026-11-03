@@ -18,7 +18,7 @@ import { HelpScreen } from "../screens/help/index.js";
 import { FriendsScreen } from "../screens/friends/index.js";
 import { AskScreen } from "../screens/ask/index.js";
 import { ChatScreen } from "../screens/chat/index.js";
-import { ExploreScreen } from "../screens/explore/index.js";
+import { FeedScreen, SearchScreen } from "../screens/explore/index.js";
 import { MeScreen } from "../screens/me/index.js";
 import { PersonScreen } from "../screens/people/index.js";
 
@@ -54,14 +54,16 @@ export const APP_ROUTES: RouteObject[] = [
   { path: ROUTE_PATTERNS.comic, element: <ComicScreen /> },
   { path: ROUTE_PATTERNS.consent, element: <ConsentScreen /> },
   { path: ROUTE_PATTERNS.sharePage, element: <PublicSharePage /> },
-  { path: ROUTE_PATTERNS.directory, element: <Navigate to={APP_PATHS.explore} replace /> },
+  { path: ROUTE_PATTERNS.directory, element: <Navigate to={APP_PATHS.search} replace /> },
   { path: ROUTE_PATTERNS.help, element: <HelpScreen /> },
   { path: ROUTE_PATTERNS.friends, element: <FriendsScreen /> },
   { path: ROUTE_PATTERNS.ask, element: <AskScreen /> },
-  { path: ROUTE_PATTERNS.home, element: <ChatScreen /> },
-  { path: ROUTE_PATTERNS.explore, element: <ExploreScreen /> },
+  { path: ROUTE_PATTERNS.home, element: <FeedScreen /> },
+  { path: ROUTE_PATTERNS.explore, element: <Navigate to={APP_PATHS.search} replace /> },
   { path: ROUTE_PATTERNS.me, element: <MeScreen /> },
   { path: ROUTE_PATTERNS.person, element: <PersonScreen /> },
+  { path: ROUTE_PATTERNS.meety, element: <ChatScreen /> },
+  { path: ROUTE_PATTERNS.search, element: <SearchScreen /> },
   { path: "*", element: <NotFoundScreen /> },
 ];
 

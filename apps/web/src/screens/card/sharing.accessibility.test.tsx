@@ -238,7 +238,7 @@ describe("card Sharing section, against the MSW route stubs (a fake server)", ()
 
     await renderSharing();
 
-    expect(screen.getByRole("link", { name: "Open Explore" }).getAttribute("href")).toBe(`/directory?card=${IDS.card}`);
+    expect(screen.getByRole("link", { name: "Find people" }).getAttribute("href")).toBe(`/directory?card=${IDS.card}`);
   });
 
   it("W6-DWEB-T19 (design section 7): every control of the approved card page with its Sharing section has an accessible name at 375 px", async () => {

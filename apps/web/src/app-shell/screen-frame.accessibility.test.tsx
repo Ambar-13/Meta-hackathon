@@ -34,12 +34,13 @@ function pageLinks(): Array<[string | null, string | null, string | null]> {
 }
 
 describe("screen frame links", () => {
-  it("W6-DWEB-T37, updated for wave 7: a page that needs a session shows Chat, Explore, Friends and Me, then Invite a friend (the laptop sidebar's) and Settings, and no Directory or Find help", () => {
+  it("W6-DWEB-T37, updated for 3 Nov: a page that needs a session shows Home, Search, Meety, Friends and Me, as Instagram orders its tabs, then Invite a friend (the laptop sidebar's) and Settings, and no Directory or Find help", () => {
     renderFrame({ pattern: ROUTE_PATTERNS.card, url: APP_PATHS.card(IDS.card) });
 
     expect(pageLinks().map(([words, href]) => [words, href])).toEqual([
-      ["Meety", "/home"],
-      ["Explore", "/explore"],
+      ["Home", "/home"],
+      ["Search", "/search"],
+      ["Meety", "/meety"],
       ["Friends", "/friends"],
       ["Me", "/me"],
       ["Invite a friend", "/pair"],
@@ -59,7 +60,7 @@ describe("screen frame links", () => {
 
     for (const page of pages) {
       renderFrame(page);
-      for (const name of ["Meety", "Explore", "Friends", "Me", "Directory", "Find help"]) {
+      for (const name of ["Home", "Search", "Meety", "Explore", "Friends", "Me", "Directory", "Find help"]) {
         expect(screen.queryByRole("link", { name })).toBeNull();
       }
       cleanup();
@@ -69,18 +70,19 @@ describe("screen frame links", () => {
   it("W6-DWEB-T39, updated for wave 7: the Settings page keeps the four page links and drops only its own Settings links", () => {
     renderFrame({ pattern: ROUTE_PATTERNS.settings, url: APP_PATHS.settings, hideSettingsLink: true });
 
-    expect(screen.getByRole("link", { name: "Explore" }).getAttribute("href")).toBe("/explore");
+    expect(screen.getByRole("link", { name: "Search" }).getAttribute("href")).toBe("/search");
     expect(screen.getByRole("link", { name: "Friends" }).getAttribute("href")).toBe("/friends");
     expect(screen.getByRole("link", { name: "Me" }).getAttribute("href")).toBe("/me");
     expect(screen.queryByRole("link", { name: "Settings" })).toBeNull();
   });
 
-  it("W7-WEB-A-T1, updated for the Instagram rail of 3 Nov: the Pages nav lists Meety, Explore, Friends, Me and Settings in order with aria-current on the current page, and the frame lists no friends, which the home page's right-hand column does", () => {
-    renderFrame({ pattern: ROUTE_PATTERNS.explore, url: APP_PATHS.explore, width: 1024 });
+  it("W7-WEB-A-T1, updated for 3 Nov: the Pages nav lists Home, Search, Meety, Friends, Me and Settings in order with aria-current on the current page, and the frame lists no friends, which the chat's right-hand column does", () => {
+    renderFrame({ pattern: ROUTE_PATTERNS.search, url: APP_PATHS.search, width: 1024 });
 
     expect(pageLinks()).toEqual([
-      ["Meety", "/home", null],
-      ["Explore", "/explore", "page"],
+      ["Home", "/home", null],
+      ["Search", "/search", "page"],
+      ["Meety", "/meety", null],
       ["Friends", "/friends", null],
       ["Me", "/me", null],
       ["Invite a friend", "/pair", null],
@@ -105,7 +107,7 @@ describe("screen frame links", () => {
 
     expect(await screen.findByText("The page body.")).toBeTruthy();
     await new Promise((resolve) => setTimeout(resolve, 50));
-    expect(pageLinks()).toHaveLength(6);
+    expect(pageLinks()).toHaveLength(7);
     expect(screen.queryByRole("navigation", { name: "Friends" })).toBeNull();
     expect(screen.queryByRole("alert")).toBeNull();
   });

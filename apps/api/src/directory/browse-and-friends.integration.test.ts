@@ -133,6 +133,17 @@ describe("directory and friends routes", () => {
     expect(missing.json()).toEqual({ listings: [], page: 0, hasMore: false });
   });
 
+  it("W7-SEARCH-API-T1: a search finds people by the start of their name, those first, then by whole words, and LIKE's own wildcards match only themselves", async () => {
+    const byName = await send(viewer, { method: "GET", url: routes.directory.browse.path + "?query=" + encodeURIComponent("lister 0") });
+    const byFirstLetters = await send(viewer, { method: "GET", url: routes.directory.browse.path + "?query=" + encodeURIComponent("Lister 2") });
+    const wildcard = await send(viewer, { method: "GET", url: routes.directory.browse.path + "?query=" + encodeURIComponent("%") });
+
+    expect(DirectoryPage.parse(byName.json()).listings.map((listing) => listing.displayName)).toEqual(["Lister 09", "Lister 08", "Lister 07", "Lister 06", "Lister 05", "Lister 04", "Lister 03", "Lister 02", "Lister 01"]);
+    // Lister 20 and 21 start with the words; Lister 02 follows because its line, "Line 2", holds both of them as words.
+    expect(DirectoryPage.parse(byFirstLetters.json()).listings.map((listing) => listing.displayName)).toEqual(["Lister 21", "Lister 20", "Lister 02"]);
+    expect(DirectoryPage.parse(wildcard.json()).listings).toEqual([]);
+  });
+
   it("W6-DAPI-T28 (design section 6): a query string DirectoryQuery refuses is 400 payload_invalid, and a page past 100000 answers empty", async () => {
     const negative = await send(viewer, { method: "GET", url: routes.directory.browse.path + "?page=-1" });
     const text = await send(viewer, { method: "GET", url: routes.directory.browse.path + "?page=abc" });

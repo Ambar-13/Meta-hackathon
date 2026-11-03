@@ -81,9 +81,9 @@ describe("friends screen", () => {
 
     stubReads({ friends: [], aboutMe: [] });
     renderFriends();
-    expect(await screen.findByText("Find people in Explore and add them, or share your invite link.")).toBeTruthy();
+    expect(await screen.findByText("Find people in Search and add them, or share your invite link.")).toBeTruthy();
     expect(screen.getByRole("heading", { name: "No friends yet" })).toBeTruthy();
-    expect(within(sectionOf("Your friends")).getByRole("link", { name: "Find people in Explore" }).getAttribute("href")).toBe("/explore");
+    expect(within(sectionOf("Your friends")).getByRole("link", { name: "Find people" }).getAttribute("href")).toBe("/search");
   });
 
   it("W6-ASKA-T41 (design section 7): asking a friend opens the box, a question under 5 characters shows the length line and sends nothing, and a valid question posts mode react with the pair and opens the answers page, with fake api replies", async () => {

@@ -24,7 +24,7 @@ export const PairScreen = (): ReactElement => {
   const { state, create } = useCreatePair();
   const isSending = state.kind === "sending";
   return (
-    <ScreenFrame title="Pair with someone">
+    <ScreenFrame title="Invite a friend">
       {state.kind === "created" ? (
         <>
           <InviteView inviteUrl={state.pair.inviteUrl} pairId={state.pair.pairId} cardId={cardId} />

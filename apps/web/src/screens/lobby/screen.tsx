@@ -54,7 +54,7 @@ const NextMeeting = (props: { current: boolean; hasCard: boolean; isBusy: boolea
   if (!props.hasCard) {
     return (
       <EmptyState sticker="chat" title="No meeting yet">
-        To create a meeting from this phone, open your card and tap Pair with someone.
+        To create a meeting from this phone, open your card and tap Invite a friend.
       </EmptyState>
     );
   }
@@ -72,12 +72,12 @@ export const LobbyScreen = (): ReactElement => {
   });
   const pair = lobby.pair.value;
   if (pair === null) {
-    return <ScreenFrame title="Lobby">{lobby.pair.error === null ? <LoadingLine text="Loading the lobby." /> : <ErrorNotice error={lobby.pair.error} />}</ScreenFrame>;
+    return <ScreenFrame title="Set up the meeting">{lobby.pair.error === null ? <LoadingLine text="Loading the lobby." /> : <ErrorNotice error={lobby.pair.error} />}</ScreenFrame>;
   }
   const meetingView = lobby.meeting.value;
   const meetingReady = meetingView === null ? null : <StartPanel meeting={meetingView} isBusy={lobby.isBusy} error={lobby.actionError} onReady={() => void lobby.markReady()} />;
   return (
-    <ScreenFrame title="Lobby">
+    <ScreenFrame title="Set up the meeting">
       <PairTags names={tagNames(pair, meetingView)} />
       <PairLine pair={pair} cardId={cardId} />
       {isInviteExpired(pair) ? null : <NextMeeting current={lobby.current !== null} hasCard={cardId !== null} isBusy={lobby.isBusy} createError={lobby.createError} onCreate={(pick) => void lobby.create(pick)} meetingReady={meetingReady} />}

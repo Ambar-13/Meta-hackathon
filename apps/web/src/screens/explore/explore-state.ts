@@ -1,4 +1,4 @@
-import type { DirectoryListing, Post, PostsView, PublicItem } from "@meet-first/contracts";
+import type { DirectoryListing, HomeView, Post, PostsView, PublicItem } from "@meet-first/contracts";
 import { apiFetch, routes, usePolledView, type PolledView } from "../../app-shell/index.js";
 import { useAdds, type AddsModel } from "../chat/index.js";
 
@@ -49,6 +49,12 @@ export function noteItemFor(post: Post, listing: DirectoryListing | undefined): 
 // Example: Ravi, Mira and Jun, with Jun a friend, give Jun, Ravi, Mira.
 export function storyPeople(listings: readonly DirectoryListing[], isFriend: (listingId: string) => boolean): DirectoryListing[] {
   return [...listings.filter((listing) => isFriend(listing.listingId)), ...listings.filter((listing) => !isFriend(listing.listingId))];
+}
+
+// The person's home view (GET /api/home), read once when the feed opens, for the next step while they have no approved card; a failed
+// read shows no next step and never blocks the feed.
+export function useFeedHome(): PolledView<HomeView> {
+  return usePolledView(() => apiFetch(routes.people.readHome, {}), { key: "feed-home", intervalMs: 30_000, keepPolling: () => false });
 }
 
 // The newest posts of people in Explore (GET /api/posts), read once when the page opens; a failed read is tried again after 30 s.

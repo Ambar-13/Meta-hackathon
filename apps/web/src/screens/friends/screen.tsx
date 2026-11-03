@@ -23,8 +23,8 @@ const ASK_BUTTON_LABEL = "Ask their Meety";
 const MEET_LABEL = "Meet";
 const SEND_LABEL = "Send the ask"; // [confirm]
 const NO_FRIENDS_TITLE = "No friends yet";
-const NO_FRIENDS_LINE = "Find people in Explore and add them, or share your invite link.";
-const NO_FRIENDS_ACTION = "Find people in Explore";
+const NO_FRIENDS_LINE = "Find people in Search and add them, or share your invite link.";
+const NO_FRIENDS_ACTION = "Find people";
 const NO_COPIES_TITLE = "No answers yet"; // [confirm]
 const NO_COPIES_LINE = "Your Meety has not answered anyone yet."; // [confirm]
 const NO_SENT_TITLE = "Nothing sent yet"; // [confirm]
@@ -117,7 +117,7 @@ const FriendsBody = (props: { model: FriendsScreenModel }): ReactElement => {
   const { friends } = props.model;
   if (friends.value === null) return friends.error === null ? <LoadingLine text={LOADING_FRIENDS_LINE} /> : <ErrorNotice error={friends.error} />;
   if (friends.value.friends.length === 0) {
-    const action = <Link className="btn" to={APP_PATHS.explore}>{NO_FRIENDS_ACTION}</Link>;
+    const action = <Link className="btn" to={APP_PATHS.search}>{NO_FRIENDS_ACTION}</Link>;
     return <EmptyState sticker="smile" title={NO_FRIENDS_TITLE} action={action}>{NO_FRIENDS_LINE}</EmptyState>;
   }
   return (

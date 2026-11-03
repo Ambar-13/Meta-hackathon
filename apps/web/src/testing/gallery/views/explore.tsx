@@ -1,6 +1,6 @@
 import { DirectoryListing, DirectoryPage, FriendRequestsView, FriendsView, PostsView, type Friend, type FriendRequestView, type Post } from "@meet-first/contracts";
 import { ROUTE_PATTERNS, routes } from "../../../app-shell/index.js";
-import { ExploreScreen } from "../../../screens/explore/index.js";
+import { FeedScreen, SearchScreen } from "../../../screens/explore/index.js";
 import { FOREVER_MS, type GalleryReply, type GalleryStub } from "../fetch-stub.js";
 import type { GalleryView } from "../gallery-views.js";
 import { AfterSteps } from "./help.js";
@@ -93,33 +93,37 @@ function reads(pages: GalleryReply | GalleryReply[], others: { posts?: GalleryRe
 // The rail's five friends and Jun, a sample person whose agent can be asked, so the feed shows Ask Meety on Jun's post.
 const FEED_FRIENDS: Friend[] = [...railFriends(5), { pairId: LISTING(60), displayName: JUN.displayName, canAsk: true, listingId: JUN.listingId }];
 
-// One view of Explore on its route.
-function exploreView(head: { name: string; title: string }, stubs: GalleryStub[], element = <ExploreScreen />): GalleryView {
-  return { ...head, pattern: ROUTE_PATTERNS.explore, url: "/explore", element, stubs };
+// One view of Home, the feed, on its route.
+function feedView(head: { name: string; title: string }, stubs: GalleryStub[], element = <FeedScreen />): GalleryView {
+  return { ...head, pattern: ROUTE_PATTERNS.home, url: "/home", element, stubs };
 }
 
-// Explore: the feed as the live site shows it, with one friend in it; its Photos tab; everyone after See all, with more to show; a
-// search that finds nobody; loading; and a failed load.
+// One view of Search on its route.
+function searchView(head: { name: string; title: string }, stubs: GalleryStub[], element = <SearchScreen />): GalleryView {
+  return { ...head, pattern: ROUTE_PATTERNS.search, url: "/search", element, stubs };
+}
+
+// Home: the feed as the live site shows it, with one friend in it, loading, and a failed load. Search: the people it suggests over the
+// photos, everyone after See everyone, and a search that finds nobody.
 export const views: readonly GalleryView[] = [
-  exploreView(
-    { name: "explore-feed", title: "Explore, the feed" },
+  feedView(
+    { name: "home-feed", title: "Home, the feed" },
     reads(page([...EXPLORE_LISTINGS.slice(0, 1), ...SAMPLE_LISTINGS], false), { posts: postsReply(SAMPLE_POSTS), friends: FEED_FRIENDS }),
   ),
-  exploreView(
-    { name: "explore-photos", title: "Explore, the Photos tab" },
+  feedView({ name: "home-loading", title: "Home, loading" }, reads({ ...page(EXPLORE_LISTINGS, false), delayMs: FOREVER_MS })),
+  feedView({ name: "home-error", title: "Home, the people failed to load" }, reads({ status: 500, body: { code: "server_error", message: "Something went wrong on our side. Try again in a minute." } })),
+  searchView(
+    { name: "search", title: "Search, the people it suggests and the photos" },
     reads(page([...EXPLORE_LISTINGS.slice(0, 1), ...SAMPLE_LISTINGS], false), { posts: postsReply(SAMPLE_POSTS), friends: FEED_FRIENDS }),
-    <AfterSteps steps={[{ press: "Photos" }]}><ExploreScreen /></AfterSteps>,
   ),
-  exploreView(
-    { name: "explore-everyone", title: "Explore, everyone after See all" },
-    reads(page(EXPLORE_LISTINGS, true)),
-    <AfterSteps steps={[{ press: "See all" }]}><ExploreScreen /></AfterSteps>,
+  searchView(
+    { name: "search-everyone", title: "Search, everyone after See everyone" },
+    reads(page([...EXPLORE_LISTINGS, ...SAMPLE_LISTINGS], true)),
+    <AfterSteps steps={[{ press: "See everyone" }]}><SearchScreen /></AfterSteps>,
   ),
-  exploreView(
-    { name: "explore-empty", title: "Explore, a search that finds nobody" },
+  searchView(
+    { name: "search-empty", title: "Search, a search that finds nobody" },
     reads([page(EXPLORE_LISTINGS, false), page([], false)]),
-    <AfterSteps steps={[{ type: "underwater robots", into: "Search Explore" }, { press: "Search" }]}><ExploreScreen /></AfterSteps>,
+    <AfterSteps steps={[{ type: "underwater robots", into: "Search people" }, { press: "Search" }]}><SearchScreen /></AfterSteps>,
   ),
-  exploreView({ name: "explore-loading", title: "Explore, loading" }, reads({ ...page(EXPLORE_LISTINGS, false), delayMs: FOREVER_MS })),
-  exploreView({ name: "explore-error", title: "Explore, the people failed to load" }, reads({ status: 500, body: { code: "server_error", message: "Something went wrong on our side. Try again in a minute." } })),
 ];

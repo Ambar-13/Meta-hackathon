@@ -1,6 +1,6 @@
 import { DirectoryPage } from "@meet-first/contracts";
 import { ROUTE_PATTERNS, routes } from "../../../app-shell/index.js";
-import { ExploreScreen } from "../../../screens/explore/index.js";
+import { FeedScreen } from "../../../screens/explore/index.js";
 import type { GalleryView } from "../gallery-views.js";
 import { EXPLORE_LISTINGS, railFriends, railRequests, railStubs } from "./explore.js";
 
@@ -9,9 +9,9 @@ export const views: readonly GalleryView[] = [
   {
     name: "shell-rail-many-friends",
     title: "Signed-in frame, 14 friends and 2 requests",
-    pattern: ROUTE_PATTERNS.explore,
-    url: "/explore",
-    element: <ExploreScreen />,
+    pattern: ROUTE_PATTERNS.home,
+    url: "/home",
+    element: <FeedScreen />,
     stubs: [
       ...railStubs(railFriends(14), railRequests(2)),
       { route: routes.directory.browse, replies: { status: 200, body: DirectoryPage.parse({ listings: EXPLORE_LISTINGS, page: 0, hasMore: false }) } },

@@ -11,7 +11,7 @@ export const ANSWER_LINE_MAX = 140;
 export const ASK_CARD_ANSWERS_MAX = 3;
 
 // How long a pause between two messages starts a new time line over the thread, as Instagram marks a gap in a chat.
-export const TIME_GAP_MS = 30 * 60_000;
+const TIME_GAP_MS = 30 * 60_000;
 // The milliseconds in a day, for telling today, yesterday and this week apart.
 const DAY_MS = 86_400_000;
 

@@ -25,9 +25,9 @@ function stubReads(input: { thread: OrchestratorMessage[][]; hasCard?: boolean; 
   stubRoute(routes.directory.friends, friendsOf(input.friends ?? [MIRA, JONAH]));
 }
 
-// Renders the chat page at /home, with this query.
+// Renders the chat page at /meety, with this query.
 function renderChat(search = ""): void {
-  renderScreen(<ChatScreen />, { pattern: ROUTE_PATTERNS.home, url: `${APP_PATHS.home}${search}` });
+  renderScreen(<ChatScreen />, { pattern: ROUTE_PATTERNS.meety, url: `${APP_PATHS.meety}${search}` });
 }
 
 // The composer's text box.

@@ -72,7 +72,7 @@ function askStub(fields: Parameters<typeof askOf>[0]): GalleryStub {
 
 // One view of the chat page at /home.
 function chatView(head: { name: string; title: string }, stubs: GalleryStub[], steps: readonly GalleryStep[] = []): GalleryView {
-  return { ...head, pattern: ROUTE_PATTERNS.home, url: "/home", element: <ScriptedSteps steps={steps}><ChatScreen /></ScriptedSteps>, stubs };
+  return { ...head, pattern: ROUTE_PATTERNS.meety, url: "/meety", element: <ScriptedSteps steps={steps}><ChatScreen /></ScriptedSteps>, stubs };
 }
 
 // Twelve messages with every kind of reply: words, an answered help search, a planned friend ask, a refusal, a failure and a thinking one.

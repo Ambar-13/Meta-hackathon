@@ -17,10 +17,14 @@
 @media (max-width: 767.98px) {
   .social-frame { --tab-bar: 80px; }
   .social-rail .rail-logo, .social-pages.tab-bar a.rail-only { display: none; }
-  .social-frame .social-top { height: 56px; padding: 0 4px 0 16px; background: color-mix(in oklab, var(--ui-bg) 94%, transparent); box-shadow: 0 1px 0 var(--ui-line); }
-  .social-top .logo { font-size: 24px; }
-  .top-settings { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; color: var(--ui-ink); }
-  .top-settings:hover { background: var(--ui-soft); text-decoration: none; }
+  /* Instagram's top bar: a button at each end and the logo in the middle. */
+  .social-frame .social-top { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; height: 56px; padding: 0 4px;
+    background: color-mix(in oklab, var(--ui-bg) 94%, transparent); box-shadow: 0 1px 0 var(--ui-line); }
+  .social-top .logo { grid-column: 2; justify-self: center; font-size: 24px; }
+  .top-invite { grid-column: 1; }
+  .top-settings { grid-column: 3; }
+  .top-invite, .top-settings { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; color: var(--ui-ink); }
+  .top-invite:hover, .top-settings:hover { background: var(--ui-soft); text-decoration: none; }
   .social-pages.tab-bar { left: 20px; right: 20px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); justify-content: space-around; gap: 0; margin: 0 auto;
     max-width: 360px; padding: 6px; border-radius: 999px; background: color-mix(in oklab, var(--ui-bg) 82%, transparent);
     -webkit-backdrop-filter: blur(20px) saturate(1.6); backdrop-filter: blur(20px) saturate(1.6);

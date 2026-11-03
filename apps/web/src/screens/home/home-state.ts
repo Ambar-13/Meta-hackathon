@@ -52,14 +52,14 @@ function stepAfterApproval(home: HomeView, cardId: string): NextStep {
   }
   const newest = home.meetings[0];
   if (newest?.isBriefReady === true) {
-    return { title: "Your brief is ready.", text: `How you and ${newest.otherDisplayName} would probably get on, every line with its quote.`, action: { label: "Read the brief", to: APP_PATHS.brief(newest.id) }, second: { label: "Meet someone new", to: pairPathWithCard(cardId) }, sticker: "check" };
+    return { title: "Your brief is ready.", text: `How you and ${newest.otherDisplayName} would probably get on, every line with its quote.`, action: { label: "Read the brief", to: APP_PATHS.brief(newest.id) }, second: { label: "Invite someone new", to: pairPathWithCard(cardId) }, sticker: "check" };
   }
   const pair = home.pairs[0];
   if (pair !== undefined) {
     const text = pair.otherDisplayName === null ? "Your invite is open. Send the link to the person you want to meet." : `${pair.otherDisplayName} joined. Pick a question and say you are ready.`;
-    return { title: pair.otherDisplayName === null ? "Waiting for them to join." : "Pick a question.", text, action: { label: "Open the lobby", to: APP_PATHS.lobby(pair.id) }, sticker: "tags" };
+    return { title: pair.otherDisplayName === null ? "Waiting for them to join." : "Pick a question.", text, action: { label: "Set up the meeting", to: APP_PATHS.lobby(pair.id) }, sticker: "tags" };
   }
-  return { title: "Meet someone.", text: "Your card is approved. Share an invite with a friend, or find someone in Explore.", action: { label: "Pair with someone", to: pairPathWithCard(cardId) }, second: { label: "Open Explore", to: APP_PATHS.explore }, sticker: "tags" };
+  return { title: "See how you'd get on with someone.", text: "Your card is approved. Invite a friend, or find someone in Search.", action: { label: "Invite a friend", to: pairPathWithCard(cardId) }, second: { label: "Find people", to: APP_PATHS.search }, sticker: "tags" };
 }
 
 // The one next step for this person, from where they are: notes, names, card, then meetings (design pass fix 4).
