@@ -91,11 +91,11 @@
 /* ---------- small marks ---------- */
 :where(.social-frame) .chip { min-height: 36px; border: 1px solid var(--ui-line); background: var(--ui-bg); font: 600 14px/1 var(--ui-font); }
 :where(.social-frame) .pill { border: 1px solid var(--ui-line); font: 600 13px/1.2 var(--ui-font); }
-/* A sample person's mark: small grey words on a soft pill, white where the pill sits on a coloured tile. */
+/* A sample person's mark: small grey words on a soft pill. */
 .sample-chip { display: inline-flex; align-items: center; flex: none; padding: 2px 8px; border-radius: 999px; background: var(--ui-soft); color: var(--ui-ink-2); font: 600 13px/1.3 var(--ui-font); white-space: nowrap; }
-/* Beside a name in a tile or a row, the mark is grey words after a dot, so twelve of them on Explore are not twelve pills. */
-.tile-who .sample-chip, .side-name-row .sample-chip { padding: 0; background: none; }
-.tile-who .sample-chip::before, .side-name-row .sample-chip::before { content: "\00B7"; margin-right: 6px; }
+/* Beside a name in a row, the mark is grey words after a dot, so a list of sample people is not a list of pills (Explore sets its own). */
+.side-name-row .sample-chip { padding: 0; background: none; }
+.side-name-row .sample-chip::before { content: "\00B7"; margin-right: 6px; }
 :where(.social-frame) .mark, :where(.social-frame) .flag { font: 600 13px/1.2 var(--ui-font); }
 :where(.social-frame) .receipt { transform: none; box-shadow: none; padding: 0; border: 0; border-radius: 0; background: none; }
 /* A quote that opens its message is still just the words; a soft fill shows on hover, with the padding pulled back so it lines up. */

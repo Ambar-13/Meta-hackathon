@@ -99,7 +99,7 @@ function useComposer(draft: string | null, onSent: (messages: OrchestratorMessag
 // The suggestions' Add friend buttons: POST /api/friend-requests with the listing. A request already waiting reads as sent, and an
 // existing friendship as friends, so the button never offers what the api would refuse. A sample person accepts at once (migration
 // 0009), so adding one reads as friends and onFriends reads the friends list again.
-function useAdds(onFriends: () => void): AddsModel {
+export function useAdds(onFriends: () => void): AddsModel {
   const [states, setStates] = useState<Readonly<Record<string, AddState>>>({});
   const set = (listingId: string, state: AddState): void => {
     setStates((previous) => ({ ...previous, [listingId]: state }));

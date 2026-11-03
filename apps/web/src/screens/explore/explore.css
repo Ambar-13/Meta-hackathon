@@ -1,49 +1,87 @@
-/* Explore, after Instagram's (3 Nov 2026): a grey search field with a glass in it, then everyone in Explore and their posts as one grid
-   of tiles. With no photos, a person's tile is their own line on their colour with their picture and name under it, and a post's tile
-   is the warm soft fill, its writer on top and its age at the foot. */
+/* Explore as a feed (3 Nov 2026). Ambar: "it should have been looking like linkedin or instagram feed", not "an ai generated layout of
+   cards". One column, as Threads' and Instagram's feeds: the grey search field, then the posts with a hairline between them, each with
+   its writer's picture in the left column and, on the right, their name, the Sample mark, the post's age and their line, with Add
+   friend in blue words at the end. After the second post, the people Explore suggests as a row of cards that scrolls sideways, as
+   Instagram's "Suggested for you". A search, or See all, shows people as plain rows. Spacing is on a 4px grid. */
+
+/* ---------- one column ---------- */
+main.screen.wide:has(.explore) { max-width: 664px; }
+.explore { width: 100%; }
 
 /* ---------- search ---------- */
-.explore-search { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; max-width: 640px; }
+.explore-search { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }
 .explore-field { position: relative; display: block; margin: 0; }
 .explore-label { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
-.explore-glass { position: absolute; left: 14px; top: 50%; translate: 0 -50%; color: var(--ui-ink-2); pointer-events: none; }
-.explore-search .explore-field input, .explore-search .explore-field input:focus { margin: 0; padding-left: 42px; border-color: transparent; background: var(--ui-soft); }
+.explore-glass { position: absolute; left: 12px; top: 50%; translate: 0 -50%; color: var(--ui-ink-2); pointer-events: none; }
+.explore-search .explore-field input, .explore-search .explore-field input:focus { margin: 0; padding-left: 40px; border-color: transparent; background: var(--ui-soft); }
 .explore-search .explore-field input:focus { border-color: var(--ui-line); background: var(--ui-bg); }
 .explore-search button { min-height: 44px; }
-.explore-stuck { margin: 10px 0 0; font-size: 14px; color: var(--ui-ink-2); }
-.explore-error { margin-top: 14px; }
+.explore-stuck { margin: 8px 0 0; font-size: 14px; line-height: 20px; color: var(--ui-ink-2); }
+.explore-error { margin-top: 16px; }
 .explore-error > button { margin-top: 4px; }
+.explore-posts-failed { margin: 16px 0 0; font-size: 14px; color: var(--ui-ink-2); }
+.explore-more { display: flex; margin: 16px auto 0; }
 
-/* ---------- the grid of people ---------- */
-main.screen.wide:has(.explore-grid) { max-width: 975px; }
-.explore-grid { list-style: none; margin: 20px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-.explore-grid > li { min-width: 0; }
-.explore-tile { display: flex; flex-direction: column; justify-content: space-between; gap: 16px; height: 100%; min-height: 210px; min-width: 0; overflow: hidden; padding: 14px;
-  border-radius: 14px; background: var(--k-soft); color: var(--ui-ink); text-decoration: none; transition: filter 0.15s var(--ease); }
-.explore-tile:hover { filter: brightness(0.97); text-decoration: none; }
-.explore-tile:focus-visible { outline-offset: 2px; border-radius: 14px; }
-.tile-line { margin: 0; font: 600 16px/1.35 var(--ui-font); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
-.tile-foot { display: grid; gap: 8px; min-width: 0; }
-.tile-who { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0; }
-.tile-who .person-avatar { background: var(--ui-bg); }
-.tile-name { margin: 0; font: 600 14px/1.2 var(--ui-font); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tile-claim { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 13px; color: oklch(40% 0.012 70); }
-.explore-tile .listing-open { justify-self: start; font: 600 13px/1.3 var(--ui-font); color: var(--ui-ink); }
-.explore-more { display: flex; margin: 22px auto 0; }
+/* ---------- shared: a heading with its words button, Add friend, where a request stands, the dating words ---------- */
+.explore-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.explore .explore-head h2 { margin: 0; font: 600 15px/20px var(--ui-font); letter-spacing: 0; }
+.explore button.text-button { font-size: 14px; }
+.friend-state { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 4px; color: var(--ui-ink-2); font: 500 14px/20px var(--ui-font); white-space: nowrap; }
+.explore .friend-add { flex: none; white-space: nowrap; }
+.explore .listing-open { color: var(--ui-ink-2); font: 400 13px/16px var(--ui-font); }
 
-/* ---------- posts in the grid: on a phone a post takes the full width under two people, and so does a last person with no one
-   beside them, so no hole is left ---------- */
-.explore-grid > li.is-post, .explore-grid > li.is-alone { grid-column: 1 / -1; }
-.post-tile { justify-content: flex-start; gap: 10px; min-height: 0; background: var(--ui-soft); }
-.post-tile .tile-who .person-avatar { background: var(--k-soft); }
-.post-text { flex: 1; margin: 0; font: 400 16px/1.45 var(--ui-font); overflow-wrap: anywhere; }
-.post-time { font-size: 13px; color: var(--ui-ink-2); }
-.explore-posts-failed { margin: 14px 0 0; font-size: 14px; color: var(--ui-ink-2); }
+/* ---------- the feed: posts with a hairline between them ---------- */
+.feed { margin-top: 8px; }
+.feed-list { list-style: none; margin: 0; padding: 0; }
+.feed-list > li + li { border-top: 1px solid var(--ui-line); }
+.feed-post { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 12px; padding: 16px 0; }
+.feed-avatar { grid-column: 1; grid-row: 1 / span 3; align-self: start; display: block; width: 44px; height: 44px; border-radius: 50%; }
+.feed-head { grid-column: 2; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.feed-who { flex: 1; min-width: 0; }
+.explore .feed-name-row { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 6px; margin: 0; font-size: 15px; line-height: 20px; }
+.explore .feed-name { color: var(--ui-ink); font-weight: 600; }
+.feed-name-row .sample-chip, .feed-time { padding: 0; background: none; color: var(--ui-ink-2); font: 400 14px/20px var(--ui-font); }
+.feed-name-row .sample-chip::before, .feed-time::before { content: "\00B7"; margin-right: 6px; }
+.explore .feed-line { margin: 0; overflow: hidden; color: var(--ui-ink-2); font-size: 14px; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
+.explore .feed-text { grid-column: 2; max-width: 65ch; margin: 4px 0 0; color: var(--ui-ink); font: 400 15px/22px var(--ui-font); white-space: pre-wrap; overflow-wrap: anywhere; }
+.feed-actions { grid-column: 2; display: flex; flex-wrap: wrap; gap: 0 4px; margin: 4px 0 -8px -12px; }
+.explore .feed-action { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; border-radius: 22px; color: var(--ui-ink-2); font: 500 14px/20px var(--ui-font);
+  transition: background-color 0.15s var(--ease), color 0.15s var(--ease); }
+.explore .feed-action:hover { background: var(--ui-soft); color: var(--ui-ink); text-decoration: none; }
 
-@media (min-width: 720px) {
-  .explore-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .explore-grid > li.is-post, .explore-grid > li.is-alone { grid-column: auto; }
-  .explore-tile { aspect-ratio: 1; min-height: 0; padding: 18px; }
-  .tile-line { font-size: 18px; -webkit-line-clamp: 5; }
-  .post-text { display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden; }
+/* ---------- the people Explore suggests: a row of cards that scrolls sideways ---------- */
+.feed-suggested { padding: 16px 0; }
+.person-cards { list-style: none; display: flex; gap: 8px; margin: 8px 0 0; padding: 0 0 8px; overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory; scrollbar-width: thin; }
+/* On a phone the row runs to the screen's edges, so the next card peeks in as the sign that it scrolls. */
+@media (max-width: 719px) {
+  .person-cards { margin-inline: -16px; padding-inline: 16px; scroll-padding-inline: 16px; }
 }
+.person-card { flex: 0 0 160px; display: flex; flex-direction: column; gap: 12px; padding: 16px 12px 12px; border: 1px solid var(--ui-line); border-radius: 12px; scroll-snap-align: start; }
+.explore .person-card-link { flex: 1; display: grid; justify-items: center; align-content: start; gap: 4px; min-width: 0; color: var(--ui-ink); font-weight: 400; text-align: center; }
+.explore .person-card-link:hover { text-decoration: none; }
+.person-card-link:hover .person-card-name { text-decoration: underline; text-underline-offset: 0.18em; }
+.person-card .person-avatar.size-l { --a-size: 64px; --a-font: 26px; margin-bottom: 8px; }
+.explore .person-card-name { max-width: 100%; margin: 0; overflow: hidden; font: 600 15px/20px var(--ui-font); letter-spacing: 0; text-overflow: ellipsis; white-space: nowrap; }
+.person-card .sample-chip { padding: 0; background: none; color: var(--ui-ink-2); font: 400 13px/16px var(--ui-font); }
+.explore .person-card-line { display: -webkit-box; margin: 0; overflow: hidden; color: var(--ui-ink-2); font: 400 13px/16px var(--ui-font); overflow-wrap: anywhere;
+  -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.explore .person-card .friend-add { width: 100%; min-height: 40px; padding: 0 12px; font-size: 14px; }
+.person-card .friend-state { min-height: 40px; }
+.person-card.is-more { justify-content: center; align-items: center; border-color: transparent; }
+
+/* ---------- people as rows: what a search found, and everyone ---------- */
+.people-list { margin-top: 16px; }
+.person-rows { list-style: none; margin: 4px 0 0; padding: 0; }
+.person-row { display: flex; align-items: center; gap: 8px; padding: 12px 0; }
+.person-row + .person-row { border-top: 1px solid var(--ui-line); }
+.explore .person-row-link { flex: 1; display: flex; align-items: flex-start; gap: 12px; min-width: 0; color: var(--ui-ink); font-weight: 400; }
+.explore .person-row-link:hover { text-decoration: none; }
+.person-row-link:hover h3 { text-decoration: underline; text-underline-offset: 0.18em; }
+.person-row-words { display: grid; justify-items: start; gap: 2px; min-width: 0; }
+.person-row-name { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 6px; min-width: 0; }
+.explore .person-row-name h3 { margin: 0; font: 600 15px/20px var(--ui-font); letter-spacing: 0; }
+.person-row-name .sample-chip { padding: 0; background: none; color: var(--ui-ink-2); font: 400 14px/20px var(--ui-font); }
+.person-row-name .sample-chip::before { content: "\00B7"; margin-right: 6px; }
+.explore .person-row-line { margin: 0; color: var(--ui-ink); font-size: 14px; line-height: 20px; }
+.explore .person-row-claim { display: -webkit-box; margin: 0; overflow: hidden; color: var(--ui-ink-2); font-size: 14px; line-height: 20px; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }

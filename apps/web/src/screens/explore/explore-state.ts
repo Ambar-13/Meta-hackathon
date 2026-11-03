@@ -1,28 +1,34 @@
-import type { DirectoryListing, Post, PostsView } from "@meet-first/contracts";
+import type { PostsView } from "@meet-first/contracts";
 import { apiFetch, routes, usePolledView, type PolledView } from "../../app-shell/index.js";
+import { useAdds, type AddsModel } from "../chat/index.js";
 
-// One tile of the Explore grid: a person, alone when no second person sits beside them before the next post, or a post.
-export type ExploreTile = { kind: "person"; listing: DirectoryListing; isAlone: boolean } | { kind: "post"; post: Post };
+// How many posts come before the row of people to meet, as Instagram puts "Suggested for you" a little way into its feed.
+const POSTS_BEFORE_PEOPLE = 2;
 
-// How many people come before each post: a laptop row of three is then two people and a post, and on a phone two people share a row
-// and the post under them takes the full width.
-const PEOPLE_PER_POST = 2;
-
-// The grid's tiles, after Instagram's Explore: two people, then a post, and so on; once either list runs out, the rest of the other.
-// Example: people [Ann, Bo, Cy] and posts [p1, p2, p3] give Ann, Bo, p1, Cy, p2, p3.
-export function mixTiles(people: readonly DirectoryListing[], posts: readonly Post[]): ExploreTile[] {
-  const tiles: ExploreTile[] = [];
-  const rounds = Math.max(Math.ceil(people.length / PEOPLE_PER_POST), posts.length);
-  for (let round = 0; round < rounds; round += 1) {
-    const pair = people.slice(round * PEOPLE_PER_POST, (round + 1) * PEOPLE_PER_POST);
-    const post = posts[round];
-    for (const listing of pair) tiles.push({ kind: "person", listing, isAlone: pair.length === 1 && post !== undefined });
-    if (post !== undefined) tiles.push({ kind: "post", post });
-  }
-  return tiles;
+// Where the row of people goes among the posts: after the second post, or after the last when there are fewer.
+// Example: 5 posts give 2, 1 post gives 1, no posts give 0.
+export function peopleRowAt(postCount: number): number {
+  return Math.min(POSTS_BEFORE_PEOPLE, postCount);
 }
 
 // The newest posts of people in Explore (GET /api/posts), read once when the page opens; a failed read is tried again after 30 s.
 export function useExplorePosts(): PolledView<PostsView> {
   return usePolledView(() => apiFetch(routes.social.listPosts, {}), { key: "explore-posts", intervalMs: 30_000, keepPolling: () => false });
+}
+
+// Who among the people in Explore is already a friend, whose agent can be asked, and the Add friend requests sent from this page.
+export type ExploreFriends = { isFriend: (listingId: string) => boolean; canAsk: (listingId: string) => boolean; adds: AddsModel };
+
+// Reads the friends list once (GET /api/friends) and holds the Add friend buttons; adding a sample person, who accepts at once, reads
+// the friends list again.
+export function useExploreFriends(): ExploreFriends {
+  const friends = usePolledView(() => apiFetch(routes.directory.friends, {}), { key: "explore-friends", intervalMs: 30_000, keepPolling: () => false });
+  const adds = useAdds(friends.reload);
+  const list = friends.value?.friends ?? [];
+  const byListing = new Map(list.flatMap((friend) => (friend.listingId === null ? [] : [[friend.listingId, friend] as const])));
+  return {
+    isFriend: (listingId) => byListing.has(listingId) || adds.stateOf(listingId).kind === "friends",
+    canAsk: (listingId) => byListing.get(listingId)?.canAsk === true,
+    adds,
+  };
 }

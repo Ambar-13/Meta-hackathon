@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
-import { DirectoryListing, DirectoryPage, PostsView } from "@meet-first/contracts";
-import { APP_PATHS, clearClientState, ROUTE_PATTERNS, routes } from "../../app-shell/index.js";
+import { DirectoryListing, DirectoryPage, type FriendsView, type PostsView } from "@meet-first/contracts";
+import { APP_PATHS, chatPathWithDraft, clearClientState, ROUTE_PATTERNS, routes } from "../../app-shell/index.js";
 import { renderScreen, requestsTo, stubRoute, type StubInput } from "../../testing/index.js";
 import { unlabelledControls } from "../../testing/render-screen.js";
 import { LISTING_IDS } from "../../testing/fixtures.js";
@@ -38,9 +38,13 @@ function post(n: number, writer: "Mira" | "Ravi", hoursAgo: number): PostsView["
   return { postId: `00000000-0000-4000-8000-00000000070${String(n)}`, listingId, displayName: writer, isSample: writer === "Ravi", text: `Post number ${String(n)} by ${writer}.`, createdAt: new Date(Date.now() - hoursAgo * 3_600_000).toISOString() };
 }
 
-// Renders Explore with these replies for GET /api/directory, and these posts for GET /api/posts when given.
-function renderExplore(pages: StubInput[], posts?: PostsView): void {
-  if (posts !== undefined) stubRoute(routes.social.listPosts, [posts]);
+// What Explore's other two reads answer in a test: the replies for GET /api/posts, and the friends list.
+type OtherReads = { posts?: StubInput[]; friends?: FriendsView };
+
+// Renders Explore with these replies for GET /api/directory; no posts and no friends unless given.
+function renderExplore(pages: StubInput[], others: OtherReads = {}): void {
+  stubRoute(routes.social.listPosts, others.posts ?? [{ posts: [] }]);
+  stubRoute(routes.directory.friends, others.friends ?? { friends: [] });
   stubRoute(routes.directory.browse, pages);
   renderScreen(<ExploreScreen />, { pattern: ROUTE_PATTERNS.explore, url: APP_PATHS.explore });
 }
@@ -52,22 +56,23 @@ function browseParams(index: number): URLSearchParams {
   return new URL(request.url).searchParams;
 }
 
-// The tile of the person with this name: the link that holds their name heading.
-async function tileOf(name: string): Promise<HTMLElement> {
-  const tile = (await screen.findByRole("heading", { name })).closest("a");
-  if (tile === null) throw new Error(`the tile of ${name} is not a link`);
-  return tile;
+// The link of the person with this name: the link that holds their name heading, a card in the feed or a row in a list.
+async function personLinkOf(name: string): Promise<HTMLElement> {
+  const link = (await screen.findByRole("heading", { name })).closest("a");
+  if (link === null) throw new Error(`the name of ${name} is not in a link`);
+  return link;
 }
 
 const MIRA = listing(LISTING_IDS.mira, "Mira", true);
 const RAVI = listing(LISTING_IDS.ravi, "Ravi", false);
+const SAMPLE_RAVI = { ...RAVI, isSample: true };
 
 describe("Explore page, against the MSW route stubs (a fake server)", () => {
-  it("W7-WEB-A-T4: each tile is one link to /people/:listingId, a search sends the query, and the empty state shows its title", async () => {
+  it("W7-WEB-A-T4: each person is one link to /people/:listingId, a search sends the query, and the empty state shows its title", async () => {
     renderExplore([page(0, [MIRA, RAVI], false), page(0, [], false)]);
 
-    expect((await tileOf("Mira")).getAttribute("href")).toBe(`/people/${LISTING_IDS.mira}`);
-    expect((await tileOf("Ravi")).getAttribute("href")).toBe(`/people/${LISTING_IDS.ravi}`);
+    expect((await personLinkOf("Mira")).getAttribute("href")).toBe(`/people/${LISTING_IDS.mira}`);
+    expect((await personLinkOf("Ravi")).getAttribute("href")).toBe(`/people/${LISTING_IDS.ravi}`);
 
     fireEvent.change(screen.getByRole("textbox", { name: "Search Explore" }), { target: { value: "robots" } });
     fireEvent.click(screen.getByRole("button", { name: "Search" }));
@@ -77,11 +82,18 @@ describe("Explore page, against the MSW route stubs (a fake server)", () => {
     expect(browseParams(1).get("query")).toBe("robots");
   });
 
-  it("W6-DWEB-T24, moved to Explore: each tile shows the name, the line, the first public item's claim, and the dating words only when open, and no id or number", async () => {
+  it("W6-DWEB-T24, moved to Explore: a suggested card shows the name, the line and the dating words only when open; after See all each row also shows the first public item's claim; nothing shows an id or a number", async () => {
     renderExplore([page(0, [MIRA, RAVI], false)]);
-    const mira = await tileOf("Mira");
-    const ravi = await tileOf("Ravi");
+    const miraCard = await personLinkOf("Mira");
 
+    expect(within(miraCard).getByText("Mira builds small tools")).toBeTruthy();
+    expect(within(miraCard).getByText("Open to dating questions")).toBeTruthy();
+    expect(within(await personLinkOf("Ravi")).queryByText("Open to dating questions")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "See all" }));
+
+    expect(await screen.findByRole("heading", { name: "Everyone in Explore" })).toBeTruthy();
+    const mira = await personLinkOf("Mira");
+    const ravi = await personLinkOf("Ravi");
     expect(within(mira).getByText("Mira builds small tools")).toBeTruthy();
     expect(within(mira).getByText("Mira starts work early")).toBeTruthy();
     expect(within(mira).getByText("Open to dating questions")).toBeTruthy();
@@ -89,11 +101,15 @@ describe("Explore page, against the MSW route stubs (a fake server)", () => {
     expect(mira.textContent).not.toMatch(/[0-9]/);
     expect(document.body.textContent).not.toContain(LISTING_IDS.mira);
     expect(document.body.textContent).not.toContain(LISTING_IDS.ravi);
+    fireEvent.click(screen.getByRole("button", { name: "Back to posts" }));
+
+    expect(await screen.findByRole("region", { name: "Suggested for you" })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "Everyone in Explore" })).toBeNull();
   });
 
-  it("W6-DWEB-T25, moved to Explore: Show more loads the next page of the same search below the first, then goes away", async () => {
+  it("W6-DWEB-T25, moved to Explore: Show more loads the next page of the same search after the first, then goes away", async () => {
     renderExplore([page(0, [MIRA], true), page(1, [RAVI], false)]);
-    await tileOf("Mira");
+    await personLinkOf("Mira");
 
     fireEvent.click(screen.getByRole("button", { name: "Show more" }));
 
@@ -103,9 +119,9 @@ describe("Explore page, against the MSW route stubs (a fake server)", () => {
     expect(screen.queryByRole("button", { name: "Show more" })).toBeNull();
   });
 
-  it("W6-DWEB-T26, moved to Explore: a search sends the trimmed words from page 0 and replaces the tiles; the first load sends no words", async () => {
+  it("W6-DWEB-T26, moved to Explore: a search sends the trimmed words from page 0 and replaces the people; the first load sends no words", async () => {
     renderExplore([page(0, [MIRA, RAVI], false), page(0, [RAVI], false)]);
-    await tileOf("Mira");
+    await personLinkOf("Mira");
 
     fireEvent.change(screen.getByRole("textbox", { name: "Search Explore" }), { target: { value: "  starts early  " } });
     fireEvent.click(screen.getByRole("button", { name: "Search" }));
@@ -143,28 +159,34 @@ describe("Explore page, against the MSW route stubs (a fake server)", () => {
   });
 
   it("W6-DWEB-T36, moved to Explore: every control on Explore has an accessible name at 375 px", async () => {
-    renderExplore([page(0, [MIRA, RAVI], true)]);
-    await tileOf("Mira");
+    renderExplore([page(0, [MIRA, RAVI], true)], { posts: [{ posts: [post(1, "Ravi", 1), post(2, "Mira", 2), post(3, "Ravi", 3)] }] });
+    await personLinkOf("Mira");
+    await screen.findByText("Post number 3 by Ravi.");
 
     expect(window.innerWidth).toBe(375);
     expect(unlabelledControls(document.body)).toEqual([]);
   });
 
-  it("W7-SAMPLE-WEB-T1: posts sit in the grid after every two people, each one link to its person's Posts tab with the writer, the Sample mark and its age; a search shows people only", async () => {
-    const third = listing("00000000-0000-4000-8000-000000000513", "Lena", false);
-    const sampleRavi = { ...RAVI, isSample: true };
-    renderExplore([page(0, [MIRA, sampleRavi, third], false), page(0, [sampleRavi], false)], { posts: [post(1, "Ravi", 3), post(2, "Mira", 30)] });
-    const grid = await screen.findByRole("region", { name: "People and posts in Explore" });
-    const first = await screen.findByRole("link", { name: /Post number 1 by Ravi\./ });
+  it("W7-SAMPLE-WEB-T1: the feed shows the posts newest first with the suggested people after the second; each post has its writer's name linking to their profile, the Sample mark, its age, their line and More from them; a search shows people only", async () => {
+    renderExplore([page(0, [MIRA, SAMPLE_RAVI], false), page(0, [SAMPLE_RAVI], false)], { posts: [{ posts: [post(1, "Ravi", 3), post(2, "Mira", 30), post(3, "Mira", 50)] }] });
+    const feed = await screen.findByRole("region", { name: "Posts in Explore" });
+    await within(feed).findByText("Post number 3 by Mira.");
+    const posts = within(feed).getAllByRole("article");
+    const suggested = within(feed).getByRole("region", { name: "Suggested for you" });
+    const [first, second, third] = posts as [HTMLElement, HTMLElement, HTMLElement];
 
-    await screen.findByRole("link", { name: /Post number 2 by Mira\./ });
-    const tiles = within(grid).getAllByRole("link").map((link) => link.textContent ?? "");
-    expect(tiles.map((text) => (text.includes("Post number") ? "post" : "person"))).toEqual(["person", "person", "post", "person", "post"]);
-    expect(first.getAttribute("href")).toBe(`/people/${LISTING_IDS.ravi}?tab=posts`);
+    expect(posts.map((article) => article.getAttribute("aria-label"))).toEqual(["Ravi's post", "Mira's post", "Mira's post"]);
+    expect(second.compareDocumentPosition(suggested) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(suggested.compareDocumentPosition(third) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(within(first).getByText("Post number 1 by Ravi.")).toBeTruthy();
+    expect(within(first).getByRole("link", { name: "Ravi" }).getAttribute("href")).toBe(`/people/${LISTING_IDS.ravi}`);
+    expect(within(first).getByRole("link", { name: "More from Ravi" }).getAttribute("href")).toBe(`/people/${LISTING_IDS.ravi}?tab=posts`);
     expect(within(first).getByText("Sample")).toBeTruthy();
     expect(within(first).getByText("3 hours ago")).toBeTruthy();
-    expect(within(await tileOf("Ravi")).getByText("Sample")).toBeTruthy();
-    expect(within(await tileOf("Mira")).queryByText("Sample")).toBeNull();
+    expect(within(first).getByText("Ravi builds small tools")).toBeTruthy();
+    expect(within(second).queryByText("Sample")).toBeNull();
+    expect(within(await personLinkOf("Ravi")).getByText("Sample")).toBeTruthy();
+    expect(within(await personLinkOf("Mira")).queryByText("Sample")).toBeNull();
 
     fireEvent.change(screen.getByRole("textbox", { name: "Search Explore" }), { target: { value: "ravi" } });
     fireEvent.click(screen.getByRole("button", { name: "Search" }));
@@ -172,18 +194,50 @@ describe("Explore page, against the MSW route stubs (a fake server)", () => {
     await waitFor(() => {
       expect(screen.queryByRole("heading", { name: "Mira" })).toBeNull();
     });
-    expect(screen.queryByRole("link", { name: /Post number/ })).toBeNull();
+    expect(screen.getByRole("heading", { name: "People" })).toBeTruthy();
+    expect(screen.queryByRole("article")).toBeNull();
   });
 
   it("W7-SAMPLE-WEB-T2: when the posts do not load, the people still show, with a line and Try again for the posts", async () => {
-    stubRoute(routes.social.listPosts, [{ status: 500, body: { code: "server_error", message: "Something went wrong on our side." } }, { posts: [post(1, "Ravi", 1)] }]);
-    renderExplore([page(0, [MIRA, RAVI], false)]);
+    renderExplore([page(0, [MIRA, RAVI], false)], {
+      posts: [{ status: 500, body: { code: "server_error", message: "Something went wrong on our side." } }, { posts: [post(1, "Ravi", 1)] }],
+    });
 
     expect(await screen.findByText("Posts did not load.")).toBeTruthy();
-    expect(await tileOf("Mira")).toBeTruthy();
+    expect(await personLinkOf("Mira")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
 
-    expect(await screen.findByRole("link", { name: /Post number 1 by Ravi\./ })).toBeTruthy();
+    expect(await screen.findByRole("article", { name: "Ravi's post" })).toBeTruthy();
     expect(screen.queryByText("Posts did not load.")).toBeNull();
+  });
+
+  it("W7-FEED-T1: Add friend on a sample person's post sends the request for their listing and shows Friends at once; on a real person's card it shows Requested", async () => {
+    stubRoute(routes.social.sendFriendRequest, { status: 201, body: { requestId: LISTING_IDS.request } });
+    renderExplore([page(0, [MIRA, SAMPLE_RAVI], false)], { posts: [{ posts: [post(1, "Ravi", 1)] }] });
+    const ravisPost = await screen.findByRole("article", { name: "Ravi's post" });
+
+    fireEvent.click(within(ravisPost).getByRole("button", { name: "Add Ravi as a friend" }));
+
+    expect(await within(ravisPost).findByText("Friends")).toBeTruthy();
+    expect(requestsTo(routes.social.sendFriendRequest)[0]?.body).toEqual({ listingId: LISTING_IDS.ravi });
+    const suggested = screen.getByRole("region", { name: "Suggested for you" });
+    fireEvent.click(within(suggested).getByRole("button", { name: "Add Mira as a friend" }));
+
+    expect(await within(suggested).findByText("Requested")).toBeTruthy();
+    expect(requestsTo(routes.social.sendFriendRequest)[1]?.body).toEqual({ listingId: LISTING_IDS.mira });
+  });
+
+  it("W7-FEED-T2: a friend's post shows no Add friend, and Ask Meety about them opens the chat with their name in the box when their agent can be asked", async () => {
+    const friends: FriendsView = { friends: [{ pairId: LISTING_IDS.request, displayName: "Mira", canAsk: true, listingId: LISTING_IDS.mira }] };
+    renderExplore([page(0, [MIRA, RAVI], false)], { posts: [{ posts: [post(1, "Mira", 1), post(2, "Ravi", 2)] }], friends });
+    const mirasPost = await screen.findByRole("article", { name: "Mira's post" });
+    const ask = await within(mirasPost).findByRole("link", { name: "Ask Meety about Mira" });
+
+    expect(ask.getAttribute("href")).toBe(chatPathWithDraft("How would Mira react to "));
+    expect(within(mirasPost).queryByRole("button", { name: /as a friend/ })).toBeNull();
+    const ravisPost = screen.getByRole("article", { name: "Ravi's post" });
+    expect(within(ravisPost).queryByRole("link", { name: /Ask Meety/ })).toBeNull();
+    expect(within(ravisPost).getByRole("button", { name: "Add Ravi as a friend" })).toBeTruthy();
+    expect(within(screen.getByRole("region", { name: "Suggested for you" })).getByText("Friends")).toBeTruthy();
   });
 });

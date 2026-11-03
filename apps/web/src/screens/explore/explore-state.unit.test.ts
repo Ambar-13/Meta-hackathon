@@ -1,29 +1,13 @@
 import { describe, expect, it } from "vitest";
-import type { DirectoryListing, Post } from "@meet-first/contracts";
 import { postAgeWords } from "../people/index.js";
-import { mixTiles } from "./explore-state.js";
+import { peopleRowAt } from "./explore-state.js";
 
-// A listing or a post known by one name.
-function person(name: string): DirectoryListing {
-  return { listingId: `00000000-0000-4000-8000-0000000006${name.length.toString().padStart(2, "0")}`, displayName: name, line: "A line", openToRomance: false, isSample: false, items: [] };
-}
-function post(text: string): Post {
-  return { postId: "00000000-0000-4000-8000-000000000601", listingId: "00000000-0000-4000-8000-000000000602", displayName: "Ann", isSample: true, text, createdAt: "2026-11-03T00:00:00.000Z" };
-}
-// The tiles as names and post words, in order.
-function names(people: DirectoryListing[], posts: Post[]): string[] {
-  return mixTiles(people, posts).map((tile) => (tile.kind === "person" ? tile.listing.displayName : tile.post.text));
-}
-
-describe("the Explore grid's order", () => {
-  it("W7-SAMPLE-WEB-T6: two people, then a post, and the rest of either list once the other runs out; a last person before a post is alone", () => {
-    expect(names([person("Ann"), person("Bo"), person("Cy")], [post("p1"), post("p2"), post("p3")])).toEqual(["Ann", "Bo", "p1", "Cy", "p2", "p3"]);
-    expect(names([person("Ann"), person("Bo"), person("Cy"), person("Di"), person("Ed")], [post("p1")])).toEqual(["Ann", "Bo", "p1", "Cy", "Di", "Ed"]);
-    expect(names([], [post("p1"), post("p2")])).toEqual(["p1", "p2"]);
-    expect(names([person("Ann")], [])).toEqual(["Ann"]);
-    const alone = mixTiles([person("Ann"), person("Bo"), person("Cy")], [post("p1"), post("p2")]).flatMap((tile) => (tile.kind === "person" ? [tile.isAlone] : []));
-    expect(alone).toEqual([false, false, true]);
-    expect(mixTiles([person("Ann"), person("Bo"), person("Cy")], []).some((tile) => tile.kind === "person" && tile.isAlone)).toBe(false);
+describe("where the suggested people sit in the feed", () => {
+  it("W7-SAMPLE-WEB-T6: after the second post, after the last when there are fewer, and first when there are none", () => {
+    expect(peopleRowAt(5)).toBe(2);
+    expect(peopleRowAt(2)).toBe(2);
+    expect(peopleRowAt(1)).toBe(1);
+    expect(peopleRowAt(0)).toBe(0);
   });
 });
 

@@ -79,21 +79,31 @@ function postsReply(posts: Post[]): GalleryReply {
   return { status: 200, body: PostsView.parse({ posts }) };
 }
 
-// The page's reads: these Explore replies, these posts and a rail with five friends.
-function reads(pages: GalleryReply | GalleryReply[], posts: GalleryReply = postsReply([])): GalleryStub[] {
-  return [...railStubs(railFriends(5)), { route: routes.directory.browse, replies: pages }, { route: routes.social.listPosts, replies: posts }];
+// The page's reads: these Explore replies, these posts (none unless given), and these friends (the rail's five unless given).
+function reads(pages: GalleryReply | GalleryReply[], others: { posts?: GalleryReply; friends?: Friend[] } = {}): GalleryStub[] {
+  return [...railStubs(others.friends ?? railFriends(5)), { route: routes.directory.browse, replies: pages }, { route: routes.social.listPosts, replies: others.posts ?? postsReply([]) }];
 }
+
+// The rail's five friends and Jun, a sample person whose agent can be asked, so the feed shows Ask Meety on Jun's post.
+const FEED_FRIENDS: Friend[] = [...railFriends(5), { pairId: LISTING(60), displayName: JUN.displayName, canAsk: true, listingId: JUN.listingId }];
 
 // One view of Explore on its route.
 function exploreView(head: { name: string; title: string }, stubs: GalleryStub[], element = <ExploreScreen />): GalleryView {
   return { ...head, pattern: ROUTE_PATTERNS.explore, url: "/explore", element, stubs };
 }
 
-// Explore: people and posts as the live site shows them, the grid of people with more to show, a search that finds nobody, loading,
-// and a failed load.
+// Explore: the feed as the live site shows it, with one friend in it; everyone after See all, with more to show; a search that finds
+// nobody; loading; and a failed load.
 export const views: readonly GalleryView[] = [
-  exploreView({ name: "explore-feed", title: "Explore, people and posts" }, reads(page([...EXPLORE_LISTINGS.slice(0, 1), ...SAMPLE_LISTINGS], false), postsReply(SAMPLE_POSTS))),
-  exploreView({ name: "explore-grid", title: "Explore, the grid of people" }, reads(page(EXPLORE_LISTINGS, true))),
+  exploreView(
+    { name: "explore-feed", title: "Explore, the feed" },
+    reads(page([...EXPLORE_LISTINGS.slice(0, 1), ...SAMPLE_LISTINGS], false), { posts: postsReply(SAMPLE_POSTS), friends: FEED_FRIENDS }),
+  ),
+  exploreView(
+    { name: "explore-everyone", title: "Explore, everyone after See all" },
+    reads(page(EXPLORE_LISTINGS, true)),
+    <AfterSteps steps={[{ press: "See all" }]}><ExploreScreen /></AfterSteps>,
+  ),
   exploreView(
     { name: "explore-empty", title: "Explore, a search that finds nobody" },
     reads([page(EXPLORE_LISTINGS, false), page([], false)]),
