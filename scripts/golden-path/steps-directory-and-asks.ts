@@ -23,7 +23,7 @@ const ASK_POLL_MS = 3_000;
 // The states an ask stops in.
 const ASK_FINAL_STATES = new Set(["done", "refused", "failed"]);
 // The keys a listing and a public item may carry in the directory, and nothing else.
-const LISTING_KEYS = ["displayName", "isSample", "items", "line", "listingId", "openToRomance"];
+const LISTING_KEYS = ["displayName", "isSample", "items", "line", "listingId", "openToRomance", "photo"];
 const PUBLIC_ITEM_KEYS = ["claim", "kind", "quote"];
 
 // The text of a curated question, or a failed step when the bank has no such id.
@@ -179,7 +179,7 @@ export async function step20FriendAsk(run: RunState): Promise<StepResult> {
   const answer = view.answers[0];
   const notes: string[] = [];
   const assertions: Assertion[] = [
-    check("A's friends are B alone, by the invite pair, with B's listing", [{ pairId, displayName: "B", canAsk: true, listingId: run.ids.listingB ?? null }], friends.body.friends),
+    check("A's friends are B alone, by the invite pair, with B's listing", [{ pairId, displayName: "B", canAsk: true, listingId: run.ids.listingB ?? null, isSample: false, photo: null }], friends.body.friends),
     check("the friend ask is done", "done", view.state),
     check("the ask is about B", "B", view.aboutName),
     check("one answer, from B's persona", ["B"], view.answers.map((item) => item.displayName)),
