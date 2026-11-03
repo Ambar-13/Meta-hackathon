@@ -10,20 +10,23 @@ CREATE TABLE person_summaries (
   points jsonb NOT NULL DEFAULT '[]',
   state text NOT NULL DEFAULT 'checking' CHECK (state IN ('checking', 'ready', 'failed')),
   friends_can_ask boolean NOT NULL DEFAULT false,
-  save_day date NOT NULL DEFAULT ((now() AT TIME ZONE 'UTC')::date),
-  saves_today int NOT NULL DEFAULT 1 CHECK (saves_today >= 1),
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 COMMENT ON TABLE person_summaries IS 'The summary a person''s own AI wrote about them, scrubbed, with its points once checked. Only its person reads or writes it.';
 COMMENT ON COLUMN person_summaries.points IS 'The points read after the names check, each with the quote found in the person''s own messages, or none.';
 COMMENT ON COLUMN person_summaries.friends_can_ask IS 'Whether friends'' asks may use the summary; off until the person turns it on.';
-COMMENT ON COLUMN person_summaries.saves_today IS 'How many times the summary was saved on save_day, a UTC day, so the api can cap saves.';
 ALTER TABLE person_summaries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE person_summaries FORCE ROW LEVEL SECURITY;
 CREATE POLICY person_summaries_own ON person_summaries FOR ALL TO app_api, app_worker
   USING (person_id = app_person()) WITH CHECK (person_id = app_person());
 GRANT SELECT, INSERT, UPDATE, DELETE ON person_summaries TO app_api, app_worker;
+
+-- How many times a person saved a summary on summary_save_day, a UTC day, so the api can cap saves; each save runs one names check.
+-- The count lives on the person, so deleting the summary does not reset it.
+ALTER TABLE people ADD COLUMN summary_save_day date;
+ALTER TABLE people ADD COLUMN summary_saves_today int NOT NULL DEFAULT 0 CHECK (summary_saves_today >= 0);
+COMMENT ON COLUMN people.summary_saves_today IS 'Summary saves on summary_save_day, a UTC day; kept on the person so deleting the summary does not reset the cap.';
 
 -- A person may ask their own Meety: mode self, with no pair, whose one answer has the same person as asker and subject.
 ALTER TABLE persona_asks DROP CONSTRAINT persona_asks_mode_check;

@@ -83,6 +83,19 @@ describe("the summary routes", () => {
     expect(summaryJobsFor(person.personId)).toHaveLength(SUMMARY_SAVES_PER_DAY);
   });
 
+  it("W7-SUMMARY-API-T6: deleting the summary does not reset the day's count of saves", async () => {
+    const person = await createTestPerson(t.db, "Summary Deleter");
+
+    for (let save = 0; save < SUMMARY_SAVES_PER_DAY; save += 1) {
+      await send("PUT", person.sessionToken, { text: SUMMARY, friendsCanAsk: false });
+      await send("DELETE", person.sessionToken);
+    }
+    const refused = await send("PUT", person.sessionToken, { text: SUMMARY, friendsCanAsk: false });
+
+    expect(refused.statusCode).toBe(429);
+    expect(summaryJobsFor(person.personId)).toHaveLength(SUMMARY_SAVES_PER_DAY);
+  });
+
   it("W7-SUMMARY-API-T5: DELETE removes the summary, and reading it then answers 404", async () => {
     const person = await createTestPerson(t.db, "Summary Gone");
     await send("PUT", person.sessionToken, { text: SUMMARY, friendsCanAsk: false });

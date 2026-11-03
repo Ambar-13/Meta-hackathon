@@ -31,18 +31,27 @@ function scrubbedText(text: string, allowlist: readonly string[]): string {
   return scrub(canonicalise(text), { allowlist, nextId: makePlaceholderCounter() }).text;
 }
 
-// Saves the summary with its points cleared and state checking, unless the person already saved it SUMMARY_SAVES_PER_DAY times this
-// UTC day; the saved row, or undefined at the cap. One statement, so two saves at once cannot both pass the cap.
-async function upsertSummary(trx: DatabaseTransaction, input: SummaryInput): Promise<SummaryRow | undefined> {
+// Counts one save on the person, unless they already saved SUMMARY_SAVES_PER_DAY times this UTC day; false at the cap. The count
+// lives on the person, so deleting the summary does not reset it, and the row lock makes two saves at once take turns.
+async function countSave(trx: DatabaseTransaction, personId: string): Promise<boolean> {
+  const result = await sql<{ id: string }>`
+    UPDATE people SET
+      summary_saves_today = CASE WHEN summary_save_day = (now() AT TIME ZONE 'UTC')::date THEN summary_saves_today + 1 ELSE 1 END,
+      summary_save_day = (now() AT TIME ZONE 'UTC')::date
+    WHERE id = ${personId} AND (summary_save_day IS DISTINCT FROM (now() AT TIME ZONE 'UTC')::date OR summary_saves_today < ${SUMMARY_SAVES_PER_DAY})
+    RETURNING id`.execute(trx);
+  return result.rows.length > 0;
+}
+
+// Saves the summary with its points cleared and state checking; the saved row.
+async function upsertSummary(trx: DatabaseTransaction, input: SummaryInput): Promise<SummaryRow> {
   const result = await sql<SummaryRow>`
     INSERT INTO person_summaries (person_id, text, friends_can_ask) VALUES (${input.personId}, ${input.text}, ${input.friendsCanAsk})
-    ON CONFLICT (person_id) DO UPDATE SET text = EXCLUDED.text, friends_can_ask = EXCLUDED.friends_can_ask, points = '[]', state = 'checking',
-      updated_at = now(),
-      saves_today = CASE WHEN person_summaries.save_day = (now() AT TIME ZONE 'UTC')::date THEN person_summaries.saves_today + 1 ELSE 1 END,
-      save_day = (now() AT TIME ZONE 'UTC')::date
-    WHERE person_summaries.save_day <> (now() AT TIME ZONE 'UTC')::date OR person_summaries.saves_today < ${SUMMARY_SAVES_PER_DAY}
+    ON CONFLICT (person_id) DO UPDATE SET text = EXCLUDED.text, friends_can_ask = EXCLUDED.friends_can_ask, points = '[]', state = 'checking', updated_at = now()
     RETURNING points, state, friends_can_ask, updated_at`.execute(trx);
-  return result.rows[0];
+  const row = result.rows[0];
+  if (row === undefined) throw new ContractError("summary_not_saved", "The summary was not saved. Try again.", HTTP.internal);
+  return row;
 }
 
 // Registers PUT /api/people/me/summary: 202 SummaryView, checking, and a check_summary job queued after the save commits; 400 for an
@@ -56,6 +65,7 @@ function registerSaveSummary(app: FastifyInstance, deps: RouteDeps): void {
       const person = await trx.selectFrom("people").select(["display_name", "affiliations"]).where("id", "=", personId).executeTakeFirstOrThrow();
       const text = scrubbedText(body.data.text, [person.display_name, ...person.affiliations]);
       if (text.length > SUMMARY_MAX_CHARS) throw makePayloadInvalidError();
+      if (!(await countSave(trx, personId))) return undefined;
       return upsertSummary(trx, { personId, text, friendsCanAsk: body.data.friendsCanAsk });
     });
     if (row === undefined) throw new ContractError("summary_daily_cap", DAILY_CAP_SENTENCE, HTTP.tooMany);

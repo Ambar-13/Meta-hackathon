@@ -10,7 +10,8 @@ type Bytes = ColumnType<Buffer, Buffer, Buffer>;
 export interface PeopleTable {
   id: Generated<string>; display_name: string; affiliations: Generated<string[]>; state: Generated<"active" | "deleted">;
   recovery_code_hash: Bytes | null; recovery_code_used_at: NullableTimestamp; deleted_at: NullableTimestamp; created_at: GeneratedTimestamp;
-  is_sample: Generated<boolean>;
+  is_sample: Generated<boolean>; summary_save_day: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+  summary_saves_today: Generated<number>;
 }
 // One row of the sessions table, as migration 0001 defines it.
 export interface SessionsTable {
@@ -167,8 +168,7 @@ export interface GoogleAccountsTable { google_sub: string; person_id: string; cr
 // One row of the person_summaries table, as migration 0016 defines it: the summary a person's own AI wrote; points is jsonb.
 export interface PersonSummariesTable {
   person_id: string; text: string; points: JSONColumnType<unknown[], string | undefined>;
-  state: Generated<"checking" | "ready" | "failed">; friends_can_ask: Generated<boolean>; save_day: ColumnType<Date, Date | string | undefined, Date | string>;
-  saves_today: Generated<number>; created_at: GeneratedTimestamp; updated_at: GeneratedTimestamp;
+  state: Generated<"checking" | "ready" | "failed">; friends_can_ask: Generated<boolean>; created_at: GeneratedTimestamp; updated_at: GeneratedTimestamp;
 }
 // One row of the post_likes table, as migration 0013 defines it: a post a person liked.
 export interface PostLikesTable { post_id: string; person_id: string; created_at: GeneratedTimestamp; }
