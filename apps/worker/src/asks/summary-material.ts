@@ -6,7 +6,7 @@ import type { CitableTurn } from "../meetings/receipts.js";
 import type { PersonaItem } from "./ask-requests.js";
 
 // One found point, shown like a card item, with the whole turn its quote comes from.
-export type FoundPoint = { item: PersonaItem; turn: CitableTurn };
+export type FoundPoint = { item: PersonaItem; turn: CitableTurn; sourceId: string };
 // What a request takes from the summary: the found points, and the text of every other point.
 export type SummaryMaterial = { found: FoundPoint[]; only: string[] };
 
@@ -24,7 +24,7 @@ export async function readUsablePoints(trx: DatabaseTransaction, personId: strin
 // The found points with their turns, and the rest as their text; a found point whose turn is gone, with its upload, joins the rest.
 export async function readSummaryMaterial(trx: DatabaseTransaction, points: readonly SummaryPointView[]): Promise<SummaryMaterial> {
   const ids = points.flatMap((point) => (point.found === null ? [] : [point.found.turnId]));
-  const turns = ids.length === 0 ? [] : await trx.selectFrom("turns").select(["id", "turn_index", "text", "norm_text"]).where("id", "in", ids).execute();
+  const turns = ids.length === 0 ? [] : await trx.selectFrom("turns").select(["id", "turn_index", "text", "norm_text", "source_id"]).where("id", "in", ids).execute();
   const material: SummaryMaterial = { found: [], only: [] };
   for (const point of points) {
     const found = point.found;
@@ -34,7 +34,7 @@ export async function readSummaryMaterial(trx: DatabaseTransaction, points: read
       continue;
     }
     const item = { turnIndex: turn.turn_index, kind: point.kind, claim: point.point, quote: found.quote };
-    material.found.push({ item, turn: { turnId: turn.id, turnIndex: turn.turn_index, text: turn.text, normText: turn.norm_text } });
+    material.found.push({ item, turn: { turnId: turn.id, turnIndex: turn.turn_index, text: turn.text, normText: turn.norm_text }, sourceId: turn.source_id });
   }
   return material;
 }

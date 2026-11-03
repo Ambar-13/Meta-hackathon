@@ -255,3 +255,23 @@ it("W7-ASK-T27c: a summary-only friend who approves a card with friend asks off 
   expect((await readAnswerRows(fresh.db, ana, askId))[0]?.state).toBe("failed");
   expect(countCalls(test, "persona_answer")).toBe(0);
 });
+
+it("W7-ASK-T29: a later upload's messages get later numbers than an earlier upload's, so the later message wins across uploads", async () => {
+  const uma = await createTestPerson(fresh.db, "Uma");
+  const older = await createFrozenSource(fresh.db, uma.personId, [...ASK_TURNS.lena.slice(0, 3), "I run before work.", "I keep a reading list.", "I hate remote work, I need the office to focus"]);
+  const newer = await createFrozenSource(fresh.db, uma.personId, [...ASK_TURNS.kai.slice(0, 3), "remote work turned out great for me, I get more done at home"]);
+  const card = await createApprovedCard(fresh.db, newer.sourceId, { recallAllowed: true, items: 3 });
+  const person = { personId: uma.personId, displayName: "Uma", cardId: card.cardId, turnIds: newer.turnIds };
+  await allowFriendAsks(fresh.db, person);
+  const quote = "I hate remote work, I need the office";
+  await seedReadySummary(fresh.db, person, { points: [{ kind: "view", topic: "Remote work", point: "Hates remote work.", strength: "strong", quotes: [quote], found: { quote, turnIndex: 5, turnId: older.turnIds[5] ?? "" } }], isFriendsOn: true });
+  const pairId = await joinInvitePair(fresh.db, ana, person);
+  const askId = await insertReactAsk(fresh.db, ana, { pairId, text: "Would Uma want to work from the office again?", aboutName: "Uma" });
+  const test = await openTest({ questionCheck: [ALLOWED_REACT], searchWords: [{ words: ["remote work"] }], personaAnswers: { Uma: NO_SIGN }, judge: [] });
+
+  await runAsk({ askId, personId: ana.personId }, test.context);
+
+  const request = userTexts(test, "persona_answer")[0] ?? "";
+  expect(request).toContain('[t:5] view | Hates remote work. | "' + quote + '"');
+  expect(request).toContain("[t:9] remote work turned out great for me, I get more done at home");
+});
