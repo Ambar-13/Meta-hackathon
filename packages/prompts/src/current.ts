@@ -14,7 +14,7 @@ export const CURRENT_PROMPTS = {
   "comic-image": "v1",
   "untrusted-data-rules": "v1",
   "persona-answer": "v1",
-  orchestrator: "v2",
+  orchestrator: "v3",
 } as const;
 // The name of one prompt folder under packages/prompts.
 export type PromptName = keyof typeof CURRENT_PROMPTS;

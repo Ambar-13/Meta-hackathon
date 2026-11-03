@@ -1,0 +1,33 @@
+{
+  "name": "orchestrator",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": [
+          "help",
+          "react",
+          "reply"
+        ]
+      },
+      "friend": {
+        "type": "string"
+      },
+      "question": {
+        "type": "string"
+      },
+      "reply": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "action",
+      "friend",
+      "question",
+      "reply"
+    ],
+    "additionalProperties": false
+  }
+}
