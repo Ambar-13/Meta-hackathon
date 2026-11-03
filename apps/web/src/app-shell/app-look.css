@@ -1,11 +1,11 @@
 /* The signed-in app's look since 3 Nov 2026: Instagram's frame and screens, ChatGPT's chat (Ambar: "instagram + chatgpt chat combined").
-   An off-white ground (#fffcf5, his pick), warm near-black text, one warm grey for secondary text, hairline lines, the system font, round
+   An off-white ground (#fffdfa, his pick), warm near-black text, one warm grey for secondary text, hairline lines, the system font, round
    people, blue buttons, curved corners on everything that stays a box. Sections are separated by space and hairlines, not boxes. Every rule sits under :where(.social-frame), so it weighs no more than app.css's own rules: the landing and the
    public pages keep the name-tag look, and a screen's own stylesheet still wins where it sets something. */
 
 .social-frame {
   --ui-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --ui-bg: oklch(99.14% 0.0098 87.5); /* #fffcf5, the off-white Ambar asked for on 3 Nov; nothing in the app is pure white */
+  --ui-bg: oklch(99.47% 0.0045 78.3); /* #fffdfa, the off-white Ambar asked for on 3 Nov, lighter than the first pick #fffcf5; nothing is pure white */
   --ui-ink: oklch(20% 0.01 70);
   --ui-ink-2: oklch(50% 0.012 70); /* 5.9:1 on the ground, 5.3:1 on --ui-soft */
   --ui-line: oklch(89.5% 0.012 87);
