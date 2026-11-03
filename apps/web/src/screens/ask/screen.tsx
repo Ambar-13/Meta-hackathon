@@ -22,7 +22,11 @@ const NONE_PLACED_LINE = "No Meety showed a clear sign. Their answers are below.
 const NO_SIGN_HEADING = "No clear sign in their notes";
 const FRIEND_FALLBACK_NAME = "your friend";
 // The way on from a refused or failed ask: back to the box it came from, by its kind.
-const AGAIN_LINKS = { help: { label: "Ask a different question", to: APP_PATHS.help }, react: { label: "Back to your friends", to: APP_PATHS.friends } } as const;
+const AGAIN_LINKS = {
+  help: { label: "Ask a different question", to: APP_PATHS.help },
+  react: { label: "Back to your friends", to: APP_PATHS.friends },
+  self: { label: "Back to your profile", to: APP_PATHS.me },
+} as const;
 // The name on the asker's own bubble, so its initial reads Y.
 const ASKER_NAME = "You";
 
@@ -50,7 +54,7 @@ const WaitingBubble = (props: { view: AskView; line: string }): ReactElement => 
     <>
       <div className="talk ask-waiting">
         <div className="msg b">
-          {view.mode === "react" && view.aboutName !== null ? (
+          {view.mode !== "help" && view.aboutName !== null ? (
             <Avatar name={view.aboutName} side="b" />
           ) : (
             <span className="avatar c-blue ask-face" aria-hidden="true">
@@ -103,7 +107,7 @@ const HelpResults = (props: { view: AskView; cardId: string | null; model: AskSc
   );
 };
 
-// The finished friend ask: how the friend would probably react, as their blue bubble with its quotes under it.
+// The finished friend ask, or self ask: how the person would react, as their blue bubble with its quotes under it.
 const ReactResult = (props: { view: AskView }): ReactElement => {
   const answer = props.view.answers[0];
   const name = props.view.aboutName ?? FRIEND_FALLBACK_NAME;
@@ -137,7 +141,7 @@ const AskBody = (props: { view: AskView; cardId: string | null; model: AskScreen
   if (view.state === "checking" || view.state === "asking" || view.state === "ranking") return <WaitingBubble view={view} line={WAITING_LINES[view.state]} />;
   if (view.state === "refused") return <EndedNotice view={view} line={view.refusedReason ?? REFUSED_FALLBACK_LINE} />;
   if (view.state === "failed") return <EndedNotice view={view} line={FAILED_LINE} />;
-  if (view.mode === "react") return <ReactResult view={view} />;
+  if (view.mode !== "help") return <ReactResult view={view} />;
   return <HelpResults view={view} cardId={props.cardId} model={props.model} />;
 };
 

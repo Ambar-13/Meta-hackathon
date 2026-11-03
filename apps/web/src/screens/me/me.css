@@ -48,3 +48,12 @@
 .me-row small { display: block; margin-top: 2px; color: var(--ui-ink-2); font: 400 13px/20px var(--ui-font); }
 .me-row-icon { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--ui-soft); color: var(--ui-ink-2); }
 .profile-page .me-invites h3 { margin: 24px 0 4px; font: 600 15px/20px var(--ui-font); letter-spacing: 0; }
+
+/* ---------- Try your Meety: one question to your own Meety ---------- */
+.me-try { display: grid; gap: 10px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--ui-line); }
+.me-try h2 { margin: 0; font: 600 17px/1.3 var(--ui-font); color: var(--ui-ink); }
+.me-try-lede, .me-try-note { max-width: 65ch; margin: 0; font: 400 15px/1.5 var(--ui-font); color: var(--ui-ink-2); }
+.me-try form { display: grid; gap: 10px; }
+.me-try label { display: grid; gap: 6px; font: 500 14px/1.4 var(--ui-font); color: var(--ui-ink); }
+.me-try textarea { box-sizing: border-box; width: 100%; padding: 12px 14px; border: 1px solid var(--ui-line); border-radius: 14px; background: var(--ui-bg);
+  color: var(--ui-ink); font: 400 15px/1.5 var(--ui-font); resize: vertical; }

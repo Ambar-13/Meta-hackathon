@@ -9,11 +9,11 @@ import type { StoredAnswerClaim } from "./ask-requests.js";
 export type AskRow = { id: string; personId: string; mode: AskMode; pairId: string | null; text: string; state: AskState; aboutName: string | null; questionKind: QuestionKind | null };
 // One answer row as the job reads it from persona_answers, with its claims checked against the stored shape.
 export type AnswerRow = {
-  id: string; subjectPersonId: string; subjectCardId: string; listingId: string | null; askerDisplayName: string; subjectDisplayName: string;
+  id: string; subjectPersonId: string; subjectCardId: string | null; listingId: string | null; askerDisplayName: string; subjectDisplayName: string;
   shortlistRank: number; state: "pending" | "answered" | "failed"; hasSign: boolean | null; claims: StoredAnswerClaim[];
 };
 // One answer row to insert: who answers, from which card and listing, with the name and line copied at this moment.
-export type NewAnswer = { subjectPersonId: string; subjectCardId: string; listingId: string | null; subjectDisplayName: string; subjectLine: string | null; shortlistRank: number };
+export type NewAnswer = { subjectPersonId: string; subjectCardId: string | null; listingId: string | null; subjectDisplayName: string; subjectLine: string | null; shortlistRank: number };
 // One state change of an ask. It happens only from the state the job read; a finished state stamps finished_at.
 export type AskMove = { askId: string; from: AskState; to: AskState; now: Date; refusedReason?: string; questionKind?: QuestionKind };
 // What one answered row stores.

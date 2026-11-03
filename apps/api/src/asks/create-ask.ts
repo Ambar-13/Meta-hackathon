@@ -1,4 +1,4 @@
-// What exists: POST /api/asks starts a help search or a friend ask, and the run_ask job does the rest.
+// What exists: POST /api/asks starts a help search, a friend ask or a self ask, and the run_ask job does the rest.
 // The problem: a person must stay under the daily caps, and a friend ask must reach only a friend who said yes, through an invite
 // pair. The step: one transaction checks the pair and the friend's switch, takes the caller's people row lock, counts today's asks of
 // that mode and writes the ask; run_ask is enqueued after the commit, because the queue writes through its own connection. What it
@@ -16,8 +16,8 @@ import { requirePerson } from "../sessions/index.js";
 // counts characters too, and a short text is payload_invalid, never a database error.
 const ASK_TEXT_MIN_CHARACTERS = 5;
 
-// The daily cap of each kind of ask, with its code and sentence.
-const DAILY_ASK_CAPS: Readonly<Record<AskMode, { limit: number; code: string; sentence: string }>> = {
+// The daily cap of each kind of ask, with its code and sentence. A self ask counts as a friend ask.
+const DAILY_ASK_CAPS: Readonly<Record<"help" | "react", { limit: number; code: string; sentence: string }>> = {
   help: { limit: HELP_SEARCHES_PER_PERSON_PER_DAY, code: "help_daily_cap", sentence: "You have used today's help searches. Try again tomorrow." },
   react: { limit: REACT_ASKS_PER_PERSON_PER_DAY, code: "react_daily_cap", sentence: "You have sent today's friend asks. Try again tomorrow." },
 };
@@ -34,14 +34,15 @@ export function isLongEnoughAskText(text: string): boolean {
   return Array.from(text).length >= ASK_TEXT_MIN_CHARACTERS;
 }
 
-// Refuses an ask past the caller's cap for its mode in this UTC day. The caller's people row is locked first, so asks sent at the
-// same moment take turns and none can pass the count.
+// Refuses an ask past the caller's cap for its mode in this UTC day: help searches on their own, friend asks and self asks together.
+// The caller's people row is locked first, so asks sent at the same moment take turns and none can pass the count.
 async function assertUnderDailyAskCap(trx: Transaction<Database>, input: { personId: string; mode: AskMode; now: Date }): Promise<void> {
   await trx.selectFrom("people").select("id").where("id", "=", input.personId).forUpdate().execute();
-  // In words: how many asks of this mode the caller has made since midnight UTC today.
+  const modes: AskMode[] = input.mode === "help" ? ["help"] : ["react", "self"];
+  // In words: how many asks under this cap the caller has made since midnight UTC today.
   const row = await trx.selectFrom("persona_asks").select((eb) => eb.fn.countAll<string>().as("count"))
-    .where("person_id", "=", input.personId).where("mode", "=", input.mode).where("created_at", ">=", startOfUtcDay(input.now)).executeTakeFirstOrThrow();
-  const cap = DAILY_ASK_CAPS[input.mode];
+    .where("person_id", "=", input.personId).where("mode", "in", modes).where("created_at", ">=", startOfUtcDay(input.now)).executeTakeFirstOrThrow();
+  const cap = DAILY_ASK_CAPS[input.mode === "help" ? "help" : "react"];
   if (Number(row.count) >= cap.limit) throw new ContractError(cap.code, cap.sentence, HTTP.tooMany);
 }
 
@@ -81,14 +82,28 @@ async function insertReactAsk(trx: Transaction<Database>, input: { personId: str
   return row.id;
 }
 
+// Writes a self ask under the friend-ask cap. about_name keeps the caller's own display name, as a friend ask keeps the friend's.
+async function insertSelfAsk(trx: Transaction<Database>, input: { personId: string; text: string; now: Date }): Promise<string> {
+  await assertUnderDailyAskCap(trx, { personId: input.personId, mode: "self", now: input.now });
+  const person = await trx.selectFrom("people").select("display_name").where("id", "=", input.personId).executeTakeFirstOrThrow();
+  const row = await trx.insertInto("persona_asks").values({ person_id: input.personId, mode: "self", text: input.text, about_name: person.display_name }).returning("id").executeTakeFirstOrThrow();
+  return row.id;
+}
+
+// Writes one ask of the caller by its mode.
+function insertAsk(trx: Transaction<Database>, input: { personId: string; body: AskCreate; now: Date }): Promise<string> {
+  const { personId, body, now } = input;
+  if (body.mode === "help") return insertHelpAsk(trx, { personId, text: body.text, now });
+  if (body.mode === "self") return insertSelfAsk(trx, { personId, text: body.text, now });
+  return insertReactAsk(trx, { personId, pairId: body.pairId, text: body.text, now });
+}
+
 // Writes the caller's ask in one transaction, then enqueues run_ask after the commit. When the queue refuses, the ask is deleted
 // again and the queue's error goes on, as job-queue.ts says every route does.
 export async function createAsk(deps: AskDeps, personId: string, body: AskCreate): Promise<string> {
   if (!isLongEnoughAskText(body.text)) throw makePayloadInvalidError();
   const now = deps.now();
-  const askId = await withPerson(deps.db, personId, (trx) =>
-    body.mode === "help" ? insertHelpAsk(trx, { personId, text: body.text, now }) : insertReactAsk(trx, { personId, pairId: body.pairId, text: body.text, now }),
-  );
+  const askId = await withPerson(deps.db, personId, (trx) => insertAsk(trx, { personId, body, now }));
   try {
     await deps.enqueue("run_ask", { askId, personId });
   } catch (error) {

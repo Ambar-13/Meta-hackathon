@@ -135,15 +135,15 @@ export interface SourceNamesTable {
 export interface DirectoryListingsTable { id: Generated<string>; person_id: string; card_id: string; line: string; open_to_romance: Generated<boolean>; created_at: GeneratedTimestamp; }
 // One row of the persona_asks table, as migration 0006 defines it.
 export interface PersonaAsksTable {
-  id: Generated<string>; person_id: string; mode: "help" | "react"; pair_id: string | null; text: string;
+  id: Generated<string>; person_id: string; mode: "help" | "react" | "self"; pair_id: string | null; text: string;
   state: Generated<"checking" | "asking" | "ranking" | "done" | "refused" | "failed">; refused_reason: string | null; about_name: string | null;
   question_kind: "get_along" | "help" | "situation" | "decision" | "deal" | "debate" | "romance" | null;
   created_at: GeneratedTimestamp; finished_at: NullableTimestamp;
 }
 // One row of the persona_answers table, as migration 0006 defines it; claims is jsonb.
 export interface PersonaAnswersTable {
-  id: Generated<string>; ask_id: string; asker_person_id: string; subject_person_id: string; subject_card_id: string; listing_id: string | null;
-  mode: "help" | "react"; ask_text: string; asker_display_name: string; subject_display_name: string; subject_line: string | null; shortlist_rank: number;
+  id: Generated<string>; ask_id: string; asker_person_id: string; subject_person_id: string; subject_card_id: string | null; listing_id: string | null;
+  mode: "help" | "react" | "self"; ask_text: string; asker_display_name: string; subject_display_name: string; subject_line: string | null; shortlist_rank: number;
   state: Generated<"pending" | "answered" | "failed">; answer: string | null; has_sign: boolean | null; claims: JSONColumnType<unknown[], string | undefined>;
   supported_count: number | null; position: number | null; created_at: GeneratedTimestamp; answered_at: NullableTimestamp;
 }

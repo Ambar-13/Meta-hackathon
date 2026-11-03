@@ -1,5 +1,5 @@
-// Writes an ask's answer rows once: up to 20 listed personas whose public items match a help search, or the
-// one friend of a friend ask. Subjects are read in their own context and only read; the rows are written in the asker's context.
+// Writes an ask's answer rows once: up to 20 listed personas whose public items match a help search, the
+// one friend of a friend ask, or the person of a self ask. Subjects are read in their own context and only read; the rows are written in the asker's context.
 import { sql, type Kysely } from "kysely";
 import { HELP_SHORTLIST_MAX } from "@meet-first/contracts";
 import { withPerson, type Database, type DatabaseTransaction } from "@meet-first/db";
@@ -16,7 +16,7 @@ type ShortlistRow = { listing_id: string; person_id: string; card_id: string; di
 export async function chooseSubjects(context: JobContext, ask: AskRow): Promise<SubjectsOutcome> {
   const existing = await withPerson(context.db, ask.personId, (trx) => countAnswers(trx, ask.id));
   if (existing > 0) return "rows";
-  const subjects = ask.mode === "help" ? await helpSubjects(context.db, ask) : await friendSubject(context.db, ask);
+  const subjects = await subjectsOf(context.db, ask);
   if (subjects === "failed") return "failed";
   if (subjects.length === 0) return "none";
   const isWritten = await withPerson(context.db, ask.personId, (trx) => writeSubjects(trx, ask, subjects));
@@ -57,6 +57,26 @@ async function readListedSubject(db: Kysely<Database>, row: ShortlistRow): Promi
     const listing = await trx.selectFrom("directory_listings").select(["line", "card_id"]).where("id", "=", row.listing_id).executeTakeFirst();
     if (name === null || listing === undefined || listing.card_id !== row.card_id) return null;
     return { subjectPersonId: row.person_id, subjectCardId: row.card_id, listingId: row.listing_id, subjectDisplayName: name, subjectLine: listing.line, shortlistRank: row.match_rank };
+  });
+}
+
+// The subjects of an ask by its mode: the shortlist of a help search, the friend of a friend ask, or the person of a self ask.
+function subjectsOf(db: Kysely<Database>, ask: AskRow): Promise<NewAnswer[] | "failed"> {
+  if (ask.mode === "help") return helpSubjects(db, ask);
+  if (ask.mode === "self") return selfSubject(db, ask);
+  return friendSubject(db, ask);
+}
+
+// The person of a self ask, read in their own context: their display name and most recently approved card, with or without its friends
+// switch, since they are asking about themself; no card when they have none, and the answer then rests on their summary alone.
+// "failed" when the person is gone.
+async function selfSubject(db: Kysely<Database>, ask: AskRow): Promise<NewAnswer[] | "failed"> {
+  return withPerson(db, ask.personId, async (trx) => {
+    const displayName = await readDisplayName(trx, ask.personId);
+    if (displayName === null) return "failed";
+    const card = await trx.selectFrom("cards").select("id").where("person_id", "=", ask.personId).where("state", "=", "approved")
+      .where("approved_at", "is not", null).orderBy("approved_at", "desc").orderBy("id").limit(1).executeTakeFirst();
+    return [{ subjectPersonId: ask.personId, subjectCardId: card?.id ?? null, listingId: null, subjectDisplayName: displayName, subjectLine: null, shortlistRank: 1 }];
   });
 }
 

@@ -225,6 +225,14 @@ describe("ask screen", () => {
     expect(await screen.findByText("This ask could not finish. Try again.")).toBeTruthy();
   });
 
+  it("W7-ASK-T24c: a failed self ask leads back to your profile, with fake api replies", async () => {
+    stubRoute(routes.asks.readAsk, askView({ mode: "self", state: "failed", aboutName: "Ana" }));
+
+    renderAsk();
+
+    expect((await screen.findByRole("link", { name: "Back to your profile" })).getAttribute("href")).toBe(APP_PATHS.me);
+  });
+
   it("W6-ASKA-T39 (design section 7): every control has a label and the page has no overflow at 375 px, with fake api replies", async () => {
     stubRoute(routes.asks.readAsk, askView({ answers: fourAnswers() }));
 

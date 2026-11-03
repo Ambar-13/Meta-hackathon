@@ -1,7 +1,7 @@
 // Asks each pending answer's persona once and stores the checked reply. A request holds only what its subject
-// allowed: public items for a help search; approved, verified items and, when the friend switched recall on, recall results for
-// a friend ask, searched with the words the search-words call gives; for a friend ask, when the subject's summary switch is on, the
-// summary's points; and the subject's quiz misses as do-not-guess topics.
+// allowed: public items for a help search; approved, verified items and, when the subject switched recall on, recall results for
+// a friend or self ask, searched with the words the search-words call gives; the summary's points for a self ask, and for a friend ask
+// when the subject's summary switch is on; and the subject's quiz misses as do-not-guess topics.
 import type { Kysely } from "kysely";
 import { ContractError, PersonaAnswerOutput, RECALL_TOP_K } from "@meet-first/contracts";
 import { searchRecallCorpus, withPerson, type Database, type DatabaseTransaction } from "@meet-first/db";
@@ -74,13 +74,14 @@ async function failAnswer(context: JobContext, scope: AnswerScope, code: string)
   return "failed";
 }
 
-// The recall query of a friend ask whose card allows recall: the words the search-words call gives for the ask and the subject's
+// The recall query of a friend or self ask whose card allows recall: the words the search-words call gives for the ask and the subject's
 // summary topics, or the ask's own text when that call fails. Any other ask searches nothing, so it gets the ask's text without a
 // call. Null when the token window is full, so the answer stays pending for the next run.
 async function recallQueryFor(context: JobContext, ask: AskRow, row: AnswerRow): Promise<string | null> {
   if (ask.mode === "help") return ask.text;
   const scope = await withPerson(context.db, row.subjectPersonId, async (trx) => {
-    const card = await trx.selectFrom("cards").select("recall_allowed").where("id", "=", row.subjectCardId).executeTakeFirst();
+    const cardId = row.subjectCardId;
+    const card = cardId === null ? undefined : await trx.selectFrom("cards").select("recall_allowed").where("id", "=", cardId).executeTakeFirst();
     return { isRecallOn: card?.recall_allowed === true, topics: summaryPriority(await readUsablePoints(trx, row.subjectPersonId, ask.mode)).topics };
   });
   if (!scope.isRecallOn) return ask.text;
@@ -97,20 +98,30 @@ async function recallQueryFor(context: JobContext, ask: AskRow, row: AnswerRow):
 // Reads one subject's material in the subject's own context, and only reads. Null when a help answer's listing is gone, names another
 // card or, for a romance ask, has its dating switch off; when the subject's account deletion has started; when the card
 // is gone or no longer approved; and, for a friend ask, when the friend has turned friend asks off since the answer row was written.
-// A help answer never reads recall or the summary; a friend ask searches recall with the query.
+// A help answer never reads recall or the summary; a friend or self ask searches recall with the query. A self ask by someone with
+// no approved card has no card to read, and its material is their summary alone.
 async function readSubjectMaterial(db: Kysely<Database>, subject: { ask: AskRow; row: AnswerRow; query: string }): Promise<SubjectMaterial | null> {
   const { ask, row } = subject;
   return withPerson(db, row.subjectPersonId, async (trx) => {
     if ((await readDisplayName(trx, row.subjectPersonId)) === null) return null;
     if (ask.mode === "help" && !(await isListingCurrent(trx, ask, row))) return null;
-    const card = await trx.selectFrom("cards").select(["recall_allowed", "state", "friends_can_ask"]).where("id", "=", row.subjectCardId).executeTakeFirst();
-    if (card === undefined || card.state !== "approved" || (ask.mode === "react" && !card.friends_can_ask)) return null;
-    const items = await readItems(trx, row.subjectCardId, ask.mode === "help");
-    const misses = await quizMisses(trx, row.subjectCardId);
-    const recall = ask.mode === "react" && card.recall_allowed ? await readRecall(trx, row.subjectCardId, subject.query) : [];
     const summary = await readSummaryMaterial(trx, await readUsablePoints(trx, row.subjectPersonId, ask.mode));
+    const cardId = row.subjectCardId;
+    if (cardId === null) return ask.mode === "self" ? materialOf({ items: [], recall: [], misses: [], summary }) : null;
+    const card = await readUsableCard(trx, ask, cardId);
+    if (card === null) return null;
+    const items = await readItems(trx, cardId, ask.mode === "help");
+    const misses = await quizMisses(trx, cardId);
+    const recall = ask.mode !== "help" && card.recall_allowed ? await readRecall(trx, cardId, subject.query) : [];
     return materialOf({ items, recall, misses, summary });
   });
+}
+
+// The subject's card as this ask may use it, or null when it is gone, no longer approved, or, for a friend ask, has friend asks off.
+async function readUsableCard(trx: DatabaseTransaction, ask: AskRow, cardId: string): Promise<{ recall_allowed: boolean } | null> {
+  const card = await trx.selectFrom("cards").select(["recall_allowed", "state", "friends_can_ask"]).where("id", "=", cardId).executeTakeFirst();
+  if (card === undefined || card.state !== "approved" || (ask.mode === "react" && !card.friends_can_ask)) return null;
+  return card;
 }
 
 // Whether a help answer's listing still exists with the same card, and is open to dating questions when the ask is a romance one.

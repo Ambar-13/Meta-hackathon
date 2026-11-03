@@ -69,7 +69,7 @@ function storedClaim(input: { text: string; verified: boolean; supported: boolea
 }
 
 // Writes one ask of the asker and returns its id: help, made now and on ASK_TEXT unless the input says otherwise.
-async function seedAsk(input: { askerId: string; state: "checking" | "asking" | "ranking" | "done"; mode?: "help" | "react"; pairId?: string; aboutName?: string; createdAt?: Date; text?: string }): Promise<string> {
+async function seedAsk(input: { askerId: string; state: "checking" | "asking" | "ranking" | "done"; mode?: "help" | "react" | "self"; pairId?: string; aboutName?: string; createdAt?: Date; text?: string }): Promise<string> {
   const row = await withPerson(t.db, input.askerId, (trx) => trx.insertInto("persona_asks").values({
     person_id: input.askerId, mode: input.mode ?? "help", pair_id: input.pairId ?? null, text: input.text ?? ASK_TEXT, state: input.state,
     about_name: input.aboutName ?? null, created_at: input.createdAt ?? new Date(), finished_at: input.state === "done" ? new Date() : null,
@@ -78,7 +78,7 @@ async function seedAsk(input: { askerId: string; state: "checking" | "asking" | 
 }
 
 // What one seeded answer holds besides its ask and its two people.
-type AnswerSpec = { state: "pending" | "answered" | "failed"; position: number | null; shortlistRank: number; listingId: string | null; mode?: "help" | "react"; line?: string | null; createdAt?: Date };
+type AnswerSpec = { state: "pending" | "answered" | "failed"; position: number | null; shortlistRank: number; listingId: string | null; mode?: "help" | "react" | "self"; line?: string | null; createdAt?: Date };
 
 // Writes one persona_answers row of an ask, as run_ask would, and returns its id.
 async function seedAnswer(input: { askId: string; asker: { personId: string; name: string }; subject: Person; spec: AnswerSpec }): Promise<string> {
@@ -273,5 +273,18 @@ describe("GET /api/asks/:id and GET /api/asks", () => {
     const single = await readAsk({ token: many.sessionToken, askId: lastAskId });
     expect(single.statusCode).toBe(200);
     expect(single.headers["cache-control"]).toBe("no-store");
+  });
+});
+
+describe("GET /api/asks with a self ask", () => {
+  it("W7-ASK-T24b: a self ask's answer is listed among the person's asks, never among the asks about them", async () => {
+    const pia = await seedPerson("Pia Self");
+    const askId = await seedAsk({ askerId: pia.personId, state: "done", mode: "self", aboutName: pia.name });
+    await seedAnswer({ askId, asker: { personId: pia.personId, name: pia.name }, subject: pia, spec: { state: "answered", position: 1, shortlistRank: 1, listingId: null, mode: "self", line: null } });
+
+    const view = AsksView.parse((await listAsks(pia.sessionToken)).body);
+
+    expect(view.asked.map((ask) => ask.askId)).toEqual([askId]);
+    expect(view.aboutMe).toEqual([]);
   });
 });

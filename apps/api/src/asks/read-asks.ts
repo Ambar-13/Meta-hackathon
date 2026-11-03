@@ -31,12 +31,13 @@ async function readAskView(trx: Transaction<Database>, input: { personId: string
   });
 }
 
-// Reads the caller's own asks and the answered copies of their persona, each newest first and at most ASKS_LIST_MAX.
+// Reads the caller's own asks and the answered copies of their persona, each newest first and at most ASKS_LIST_MAX. A self ask's answer
+// is the caller's own ask, so it is not a copy.
 async function readAsksView(trx: Transaction<Database>, personId: string): Promise<AsksView> {
   const asked = await trx.selectFrom("persona_asks").select(["id", "mode", "text", "state", "created_at"]).where("person_id", "=", personId)
     .orderBy("created_at", "desc").orderBy("id", "desc").limit(ASKS_LIST_MAX).execute();
   const copies = await trx.selectFrom("persona_answers").select(["id", "mode", "ask_text", "asker_display_name", "answer", "claims", "created_at"])
-    .where("subject_person_id", "=", personId).where("state", "=", "answered").orderBy("created_at", "desc").orderBy("id", "desc").limit(ASKS_LIST_MAX).execute();
+    .where("subject_person_id", "=", personId).where("mode", "!=", "self").where("state", "=", "answered").orderBy("created_at", "desc").orderBy("id", "desc").limit(ASKS_LIST_MAX).execute();
   return AsksView.parse({ asked: asked.map((row) => toAskSummary(row)), aboutMe: copies.map((row) => toAboutMeAnswer(row)) });
 }
 

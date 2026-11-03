@@ -146,6 +146,17 @@ describe("friends screen", () => {
     expect(await screen.findByText("Your Meety has not answered anyone yet.")).toBeTruthy();
   });
 
+  it("W7-ASK-T24d: a sent self ask is listed as Asked your own Meety, and opens its page, with fake api replies", async () => {
+    const askId = "00000000-0000-4000-8000-000000000541";
+    stubRoute(routes.directory.friends, FriendsView.parse({ friends: [] }));
+    stubRoute(routes.asks.listAsks, AsksView.parse({ asked: [{ askId, mode: "self", text: "How would I react to a surprise party?", state: "done", createdAt: SERVER_NOW }], aboutMe: [] }));
+
+    renderFriends();
+
+    const link = (await screen.findByText("Asked your own Meety")).closest("a");
+    expect(link?.getAttribute("href")).toBe(APP_PATHS.ask(askId));
+  });
+
   it("W6-ASKA-T44, updated for wave 7: the page links to no Directory or Find help, every control is labelled, and there is no overflow at 375 px, with fake api replies", async () => {
     stubReads({ friends: [BEA, CAL], aboutMe: [REACT_COPY] });
 

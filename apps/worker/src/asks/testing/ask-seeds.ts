@@ -136,6 +136,13 @@ export async function insertReactAsk(db: Kysely<Database>, asker: AskPerson, ask
   return row.id;
 }
 
+// Writes a self ask of the person, with their own name as about_name, as POST /api/asks does.
+export async function insertSelfAsk(db: Kysely<Database>, person: Pick<AskPerson, "personId" | "displayName">, text: string): Promise<string> {
+  const row = await withPerson(db, person.personId, (trx) => trx.insertInto("persona_asks")
+    .values({ person_id: person.personId, mode: "self", text, about_name: person.displayName }).returning("id").executeTakeFirstOrThrow());
+  return row.id;
+}
+
 // Seeds a judged, reliable quiz on the person's card whose first sampled question was missed, as the meeting test D31-T2 does, and returns
 // that question's text, the one do-not-guess topic. It runs on the worker database, which writes quizzes.
 export async function seedJudgedQuiz(workerDb: Kysely<Database>, person: AskPerson): Promise<string> {
@@ -158,12 +165,12 @@ export async function readAskRow(db: Kysely<Database>, asker: AskPerson, askId: 
 }
 
 // The ask's answer rows, read as the asker, by shortlist rank.
-export async function readAnswerRows(db: Kysely<Database>, asker: AskPerson, askId: string): Promise<Array<Selectable<Database["persona_answers"]>>> {
+export async function readAnswerRows(db: Kysely<Database>, asker: Pick<AskPerson, "personId">, askId: string): Promise<Array<Selectable<Database["persona_answers"]>>> {
   return withPerson(db, asker.personId, (trx) => trx.selectFrom("persona_answers").selectAll().where("ask_id", "=", askId).orderBy("shortlist_rank").execute());
 }
 
 // Stores a checked summary for the person, as the check_summary job leaves it, with friend asks on or off.
-export async function seedReadySummary(db: Kysely<Database>, person: AskPerson, summary: { points: readonly SummaryPointView[]; isFriendsOn: boolean }): Promise<void> {
+export async function seedReadySummary(db: Kysely<Database>, person: Pick<AskPerson, "personId">, summary: { points: readonly SummaryPointView[]; isFriendsOn: boolean }): Promise<void> {
   await withPerson(db, person.personId, (trx) => trx.insertInto("person_summaries")
     .values({ person_id: person.personId, text: "Kind: view\nPoint: Seeded for a test.", points: JSON.stringify(summary.points), state: "ready", friends_can_ask: summary.isFriendsOn })
     .onConflict((conflict) => conflict.column("person_id").doUpdateSet({ points: JSON.stringify(summary.points), state: "ready", friends_can_ask: summary.isFriendsOn }))

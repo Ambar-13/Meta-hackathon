@@ -301,3 +301,21 @@ describe("/me with no chats, against the MSW route stubs (a fake server)", () =>
     expect(screen.getByRole("link", { name: "Add your chats" }).getAttribute("href")).toBe(APP_PATHS.upload);
   });
 });
+
+describe("/me, Try your Meety, against the MSW route stubs (a fake server)", () => {
+  it("W7-ME-T10: Try your Meety sends the question and opens its answer", async () => {
+    const askId = "00000000-0000-4000-8000-000000000531";
+    stubMeReads({});
+    stubRoute(routes.asks.createAsk, { status: 201, body: { askId } });
+    renderMe();
+
+    fireEvent.change(await screen.findByLabelText("Ask your Meety about you"), { target: { value: "  How would I react to a surprise party?  " } });
+    fireEvent.click(screen.getByRole("button", { name: "Ask my Meety" }));
+
+    await waitFor(() => {
+      expect(requestsTo(routes.asks.createAsk)).toHaveLength(1);
+    });
+    expect(requestsTo(routes.asks.createAsk)[0]?.body).toEqual({ mode: "self", text: "How would I react to a surprise party?" });
+    expect((await screen.findByTestId("location")).textContent).toBe("/asks/" + askId);
+  });
+});

@@ -9,6 +9,7 @@ import { useHomeView } from "../home/index.js";
 import { ProfileHeader, ProfileTabs, useProfile } from "../people/index.js";
 import { SummarySection, useSummary, type SummaryHook } from "../summary/index.js";
 import { AddChats, EditListing, EditProfile, JoinExplore, MeMeetings, MeNext } from "./me-parts.js";
+import { TryMeety } from "./try-meety.js";
 import { useMyPosts, useProfileEdit } from "./me-state.js";
 
 // The words of /me.
@@ -92,7 +93,8 @@ const UnlistedMe = (props: { home: HomeView | null; yours: YourListingHook; belo
 };
 
 // The next step, the end of About and the Meetings panel from the home view; while it loads, or when it fails, its loading line or
-// error. The end of About is your AI's summary, with the line that asks for your chats when you have none; Add more chats shows only
+// error. The end of About is Try your Meety once there is a card or a summary, then your AI's summary, with the line that asks for
+// your chats when you have none; Add more chats shows only
 // once there is a card: before that the next step is the way to add your notes.
 function belowFrom(home: PolledView<HomeView>, fromExplore: ReadonlySet<string>, parts: Pick<MeBelow, "posts" | "firstTab"> & { summary: SummaryHook }): MeBelow {
   const { summary, ...tabs } = parts;
@@ -104,6 +106,7 @@ function belowFrom(home: PolledView<HomeView>, fromExplore: ReadonlySet<string>,
     next: <MeNext home={home.value} />,
     aboutEnd: (
       <>
+        {home.value.card !== null || summary.view.value !== null ? <TryMeety /> : null}
         <SummarySection hasChats={home.value.source !== null} summary={summary} />
         {home.value.card === null ? null : <AddChats />}
       </>

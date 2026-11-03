@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { IsoTime, Uuid } from "../primitives.js";
 
-// What an ask is: help sends one stuck problem to many listed personas; react asks one friend's persona how they would probably react.
-export const AskMode = z.enum(["help", "react"]);
+// What an ask is: help sends one stuck problem to many listed personas; react asks one friend's persona how they would probably react;
+// self asks the person's own persona, so they see what a friend would get.
+export const AskMode = z.enum(["help", "react", "self"]);
 // The type of AskMode, read from the schema above.
 export type AskMode = z.infer<typeof AskMode>;
 // Most help searches one person may start per UTC day.
@@ -28,6 +29,7 @@ export const HELP_SEND_COPY = "Your problem goes to the Meetys of up to 20 peopl
 export const AskCreate = z.union([
   z.object({ mode: z.literal("help"), text: z.string().trim().min(5).max(300) }),
   z.object({ mode: z.literal("react"), pairId: Uuid, text: z.string().trim().min(5).max(300) }),
+  z.object({ mode: z.literal("self"), text: z.string().trim().min(5).max(300) }),
 ]);
 // The type of AskCreate, read from the schema above.
 export type AskCreate = z.infer<typeof AskCreate>;
