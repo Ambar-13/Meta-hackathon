@@ -2,7 +2,8 @@ import type { Kysely } from "kysely";
 import { afterAll, afterEach, beforeAll, expect, it } from "vitest";
 import type { SummaryPointView } from "@meet-first/contracts";
 import { makeDatabase, POOL_SIZE, withPerson, type Database } from "@meet-first/db";
-import { createTestPerson, freshTestDatabase, type TestDatabase } from "@meet-first/db/testing";
+import { createApprovedCard, createFrozenSource, createTestPerson, freshTestDatabase, type TestDatabase } from "@meet-first/db/testing";
+import { insertAnswers, readAsk } from "./ask-store.js";
 import { runAsk } from "./run-ask-job.js";
 import {
   ALLOWED_REACT, ASK_TURNS, KAI_REACT, LENA_REACT, ROMANTIC_REACT, allSupported, allowFriendAsks, countCalls, createAskPerson, insertReactAsk, joinInvitePair,
@@ -233,4 +234,24 @@ it("W7-ASK-T27: a friend with only a ready summary and the switch on can be aske
   const request = userTexts(test, "persona_answer")[0] ?? "";
   expect(request).toContain("<your_card>\n(no items)\n</your_card>");
   expect(request).toContain("<summary_only>\n- " + point.point + "\n</summary_only>");
+});
+
+it("W7-ASK-T27c: a summary-only friend who approves a card with friend asks off before the answer is not answered from the summary", async () => {
+  const kim = await createTestPerson(fresh.db, "Kim");
+  const point = { kind: "avoid" as const, topic: "Calls", point: "Avoids phone calls and asks for a message instead.", strength: "moderate" as const, quotes: [], found: null };
+  await seedReadySummary(fresh.db, kim, { points: [point], isFriendsOn: true });
+  const pairId = await joinInvitePair(fresh.db, ana, kim);
+  const askId = await insertReactAsk(fresh.db, ana, { pairId, text: "Would Kim mind a quick call about the move?", aboutName: "Kim" });
+  const ask = await withPerson(workerDb, ana.personId, (trx) => readAsk(trx, askId));
+  if (ask === null) throw new Error("the ask was not written");
+  const subject = { subjectPersonId: kim.personId, subjectCardId: null, listingId: null, subjectDisplayName: "Kim", subjectLine: null, shortlistRank: 1 };
+  await withPerson(workerDb, ana.personId, (trx) => insertAnswers(trx, { ask, askerName: "Ana", subjects: [subject] }));
+  const source = await createFrozenSource(fresh.db, kim.personId, [...ASK_TURNS.lena]);
+  await createApprovedCard(fresh.db, source.sourceId);
+  const test = await openTest({ questionCheck: [ALLOWED_REACT], personaAnswers: { Kim: NO_SIGN }, judge: [] });
+
+  await runAsk({ askId, personId: ana.personId }, test.context);
+
+  expect((await readAnswerRows(fresh.db, ana, askId))[0]?.state).toBe("failed");
+  expect(countCalls(test, "persona_answer")).toBe(0);
 });

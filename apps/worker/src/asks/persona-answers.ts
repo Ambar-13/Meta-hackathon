@@ -107,7 +107,7 @@ async function readSubjectMaterial(db: Kysely<Database>, subject: { ask: AskRow;
     if (ask.mode === "help" && !(await isListingCurrent(trx, ask, row))) return null;
     const summary = await readSummaryMaterial(trx, await readUsablePoints(trx, row.subjectPersonId, ask.mode));
     const cardId = row.subjectCardId;
-    if (cardId === null) return summaryOnlyMaterial(ask, summary);
+    if (cardId === null) return (await hasCardSince(trx, ask, row)) ? null : summaryOnlyMaterial(ask, summary);
     const card = await readUsableCard(trx, ask, cardId);
     if (card === null) return null;
     const items = await readItems(trx, cardId, ask.mode === "help");
@@ -115,6 +115,14 @@ async function readSubjectMaterial(db: Kysely<Database>, subject: { ask: AskRow;
     const recall = ask.mode !== "help" && card.recall_allowed ? await readRecall(trx, cardId, subject.query) : [];
     return materialOf({ items, recall, misses, summary });
   });
+}
+
+// Whether the friend of a friend ask, chosen while they had no approved card, has approved one since. Once there is a card, the card's
+// own switch decides, as in friend_list(), so the summary must not answer. Their own ask never needs this.
+async function hasCardSince(trx: DatabaseTransaction, ask: AskRow, row: AnswerRow): Promise<boolean> {
+  if (ask.mode !== "react") return false;
+  const card = await trx.selectFrom("cards").select("id").where("person_id", "=", row.subjectPersonId).where("state", "=", "approved").executeTakeFirst();
+  return card !== undefined;
 }
 
 // The material of an answer whose subject has no approved card: their summary alone, for their own ask, or for a friend's ask while
