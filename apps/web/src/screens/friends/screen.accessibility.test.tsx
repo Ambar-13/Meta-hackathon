@@ -67,12 +67,12 @@ function sectionOf(name: string): HTMLElement {
 }
 
 describe("friends screen", () => {
-  it("W6-ASKA-T40 (design section 7, P3): a friend who turned on friend asks gets Ask their agent (wave 7 words), the others the line that they have not, and no friend shows the nobody line, with fake api replies", async () => {
+  it("W6-ASKA-T40 (design section 7, P3): a friend who turned on friend asks gets Ask their Meety (Meety for everyone, 3 Nov), the others the line that they have not, and no friend shows the nobody line, with fake api replies", async () => {
     stubReads({ friends: [BEA, CAL], aboutMe: [] });
 
     renderFriends();
 
-    expect(within(await friendRow("Bea")).getAllByRole("button", { name: "Ask their agent" })).toHaveLength(1);
+    expect(within(await friendRow("Bea")).getAllByRole("button", { name: "Ask their Meety" })).toHaveLength(1);
     const calRow = await friendRow("Cal");
     expect(within(calRow).getByText("Cal has not turned on friend asks.")).toBeTruthy();
     expect(within(calRow).queryAllByRole("button")).toHaveLength(0);
@@ -91,7 +91,7 @@ describe("friends screen", () => {
     stubRoute(routes.asks.createAsk, { status: 201, body: { askId: ASK } });
     renderFriends();
 
-    fireEvent.click(within(await friendRow("Bea")).getByRole("button", { name: "Ask their agent" }));
+    fireEvent.click(within(await friendRow("Bea")).getByRole("button", { name: "Ask their Meety" }));
     expect(screen.getByLabelText("What should Bea react to?").tagName).toBe("TEXTAREA");
 
     fireEvent.change(screen.getByLabelText("What should Bea react to?"), { target: { value: "Hm" } });
@@ -114,7 +114,7 @@ describe("friends screen", () => {
     stubRoute(routes.asks.createAsk, { status: 409, body: { code: "friend_asks_off", message: "Bea has not turned on friend asks." } });
     renderFriends();
 
-    fireEvent.click(within(await friendRow("Bea")).getByRole("button", { name: "Ask their agent" }));
+    fireEvent.click(within(await friendRow("Bea")).getByRole("button", { name: "Ask their Meety" }));
     fireEvent.change(screen.getByLabelText("What should Bea react to?"), { target: { value: REACT_TEXT } });
     fireEvent.click(screen.getByRole("button", { name: "Send the ask" }));
 
@@ -128,11 +128,11 @@ describe("friends screen", () => {
     renderFriends();
 
     expect(await screen.findByText("Ola asked how you would probably react to: Being asked to lead the demo at the last minute.")).toBeTruthy();
-    const copies = Array.from(sectionOf("Answers your agent gave").querySelector("ul")?.children ?? []);
+    const copies = Array.from(sectionOf("Answers your Meety gave").querySelector("ul")?.children ?? []);
     expect(copies).toHaveLength(2);
     const first = within(copies[0] as HTMLElement);
     expect(first.getByText("Ola asked how you would probably react to: Being asked to lead the demo at the last minute.")).toBeTruthy();
-    expect(first.getByText("Your agent's answer")).toBeTruthy();
+    expect(first.getByText("Your Meety's answer")).toBeTruthy();
     expect(first.getByText("My person would probably say yes, then ask for notes.")).toBeTruthy();
     expect(first.getAllByText(BACKED.quote, { selector: "blockquote" })).toHaveLength(1);
     expect(first.queryAllByRole("note")).toHaveLength(0);
@@ -143,7 +143,7 @@ describe("friends screen", () => {
 
     stubReads({ friends: [BEA], aboutMe: [] });
     renderFriends();
-    expect(await screen.findByText("Your agent has not answered anyone yet.")).toBeTruthy();
+    expect(await screen.findByText("Your Meety has not answered anyone yet.")).toBeTruthy();
   });
 
   it("W6-ASKA-T44, updated for wave 7: the page links to no Directory or Find help, every control is labelled, and there is no overflow at 375 px, with fake api replies", async () => {

@@ -84,7 +84,7 @@ describe("/me, against the MSW route stubs (a fake server)", () => {
     expect(screen.getByRole("link", { name: "Open Explore" }).getAttribute("href")).toBe(APP_PATHS.explore);
     expect(within(screen.getByRole("tabpanel", { name: "About" })).getByRole("link", { name: "Add more chats" }).getAttribute("href")).toBe("/upload");
     fireEvent.click(screen.getByRole("tab", { name: "Posts" }));
-    expect(screen.getByRole("heading", { name: "Coming soon: your agent posts." })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Coming soon: your Meety posts." })).toBeTruthy();
   });
 
   it("W7-ME-T1: nothing on /me shows twice: one link to your card, no box of your card, no list of links at the foot, and no persona", async () => {

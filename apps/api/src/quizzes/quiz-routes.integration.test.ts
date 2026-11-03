@@ -312,7 +312,7 @@ describe("quiz routes", () => {
     expect(error).toBeDefined();
     expect(parseDatabaseError(error)).toEqual({
       code: "persona_answer_missing",
-      message: "Your agent has not answered this question yet. Wait a moment and reload.",
+      message: "Your Meety has not answered this question yet. Wait a moment and reload.",
     });
     const second = await withPerson(testApp.db, owner.personId, (trx) =>
       trx.updateTable("quiz_items").set({ human_answer: "x" }).where("quiz_id", "=", quizId).where("position", "=", 2).execute(),

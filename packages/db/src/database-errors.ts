@@ -12,7 +12,7 @@ export type DatabaseRefusal = { code: string; message: string };
 
 // Plain CHECK constraints a route can hit, by constraint name, with the refusal to return (D29).
 export const CHECK_REFUSALS: Readonly<Record<string, DatabaseRefusal>> = {
-  quiz_items_check: { code: "persona_answer_missing", message: "Your agent has not answered this question yet. Wait a moment and reload." },
+  quiz_items_check: { code: "persona_answer_missing", message: "Your Meety has not answered this question yet. Wait a moment and reload." },
 };
 
 // The sentence returned for any unique violation (docs/contracts.md section 4 gives the code) [confirm].

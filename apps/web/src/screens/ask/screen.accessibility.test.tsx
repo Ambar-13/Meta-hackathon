@@ -90,7 +90,7 @@ describe("ask screen", () => {
     expect(screen.getByText("Checking your question.")).toBeTruthy();
     await advance(3000);
     expect(requestsTo(routes.asks.readAsk)).toHaveLength(2);
-    expect(screen.getByText("Asking the agents. This takes about a minute.")).toBeTruthy();
+    expect(screen.getByText("Asking their Meetys. This takes about a minute.")).toBeTruthy();
     await advance(3000);
     expect(requestsTo(routes.asks.readAsk)).toHaveLength(3);
     expect(screen.getByText("Checking the quotes in each answer.")).toBeTruthy();
@@ -157,7 +157,7 @@ describe("ask screen", () => {
     stubRoute(routes.asks.readAsk, askView({ answers: fourAnswers().slice(2) }));
     renderAsk();
 
-    expect(await screen.findByText("No agent showed a clear sign. Their answers are below.")).toBeTruthy();
+    expect(await screen.findByText("No Meety showed a clear sign. Their answers are below.")).toBeTruthy();
     const unplaced = within(sectionOf("No clear sign in their notes")).getAllByRole("heading", { level: 3 }).map((heading) => heading.textContent);
     expect(unplaced).toEqual(["Sol", "Ana"]);
   });

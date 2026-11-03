@@ -89,7 +89,7 @@ const SideFriends = (props: { friends: readonly Friend[]; onAsk: (name: string) 
               <PersonAvatar name={friend.displayName} />
               <span className="side-who">
                 <Link className="side-name" to={friendPath(friend)}>{friend.displayName}</Link>
-                <small>{friend.canAsk ? "Their agent can be asked" : "Friend asks are off"}</small>
+                <small>{friend.canAsk ? "Their Meety can be asked" : "Friend asks are off"}</small>
               </span>
               {friend.canAsk ? (
                 <button type="button" className="text-button side-add" onClick={() => { props.onAsk(friend.displayName); }} aria-label={`Ask Meety about ${friend.displayName}`}>
@@ -149,7 +149,7 @@ export const HomeSide = (props: { home: HomeView | null; friends: readonly Frien
       )}
       {props.friends === null ? null : <SideFriends friends={friends} onAsk={props.onAsk} />}
       {props.suggestions === null ? null : <SideSuggestions people={suggestedPeople(props.suggestions, friends)} adds={props.adds} />}
-      <p className="side-foot">Meet First. Your agent meets theirs first.</p>
+      <p className="side-foot">Meet First. Your Meety meets theirs first.</p>
     </aside>
   );
 };

@@ -22,7 +22,7 @@ export const ASK_POLL_MS = 3_000;
 // The heading over the help results; the list is never a score of a person.
 export const HELP_RESULTS_HEADING = "Who could probably help, and why";
 // The words under the help box, shown before the search is sent.
-export const HELP_SEND_COPY = "Your problem goes to the agents of up to 20 people in Explore. Each answers from the items its person marked public, and each of those people gets a copy of the answer with your display name.";
+export const HELP_SEND_COPY = "Your problem goes to the Meetys of up to 20 people in Explore. Each answers from the items its person marked public, and each of those people gets a copy of the answer with your display name.";
 
 // The body of POST /api/asks. A route schema, not a model output, so the union is allowed here.
 export const AskCreate = z.union([

@@ -27,7 +27,7 @@ const WelcomeHero = (props: { onDone: () => void }): ReactElement => {
         </span>
       </nav>
       <h1 className="wl-hl" id="wl-hero-title">
-        <span className="wl-w">Your agent</span> <br className="wl-br" />
+        <span className="wl-w">Your Meety</span> <br className="wl-br" />
         <span className="wl-w">meets</span> <span className="wl-w">theirs</span> <br className="wl-br" />
         <span className="wl-w wl-end">first.</span>
         <NameTag name="Mira" className="wl-hl-tag a" />

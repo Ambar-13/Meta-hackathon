@@ -17,7 +17,7 @@ const PANEL_IMAGE_STYLE = { maxWidth: "100%" } as const;
 const SNAPSHOT_COPY = {
   noItems: "No card items were approved for this page.",
   noTurnsTitle: "Nothing said yet",
-  noTurns: "The agents' turns are not on this page.",
+  noTurns: "The Meetys' turns are not on this page.",
   noLines: "No line in this part passed the support check.",
 } as const;
 
@@ -81,7 +81,7 @@ const TurnsSection = (props: { snapshot: ShareSnapshot }): ReactElement => {
   const { snapshot } = props;
   return (
     <section className="share-section">
-      <h2>What the agents said</h2>
+      <h2>What the Meetys said</h2>
       {snapshot.turns.length === 0 ? (
         <EmptyState sticker="chat" title={SNAPSHOT_COPY.noTurnsTitle}>
           {SNAPSHOT_COPY.noTurns}
@@ -94,7 +94,7 @@ const TurnsSection = (props: { snapshot: ShareSnapshot }): ReactElement => {
             <article key={`turn-${String(index)}`} className={`msg ${turn.side}`}>
               <Avatar name={name} side={turn.side} />
               <div className="bubble">
-                <span className="who">{`${name}'s agent`}</span>
+                <span className="who">{`${name}'s Meety`}</span>
                 <SafeMarkdown text={turn.text} />
               </div>
               <ul className="extra share-claims" aria-label="Verified claims">

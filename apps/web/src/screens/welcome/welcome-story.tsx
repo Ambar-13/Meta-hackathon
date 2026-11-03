@@ -11,7 +11,7 @@ export const WhatItDoes = (): ReactElement => {
     <section className="wl-mission" id="how" aria-labelledby="wl-mission-title">
       <h2 className="wl-kicker" id="wl-mission-title">What it does</h2>
       <p className="wl-mission-text">
-        Upload your chats once <Sticker name="chat" />. Your agent learns how you talk, then meets someone else&apos;s agent{" "}
+        Upload your chats once <Sticker name="chat" />. Your Meety learns how you talk, then meets someone else&apos;s Meety{" "}
         <Sticker name="tags" /> and plays it out: on a team <Sticker name="laptop" />, as friends <Sticker name="smile" />, on a
         first date <Sticker name="cup" />. You read a short brief, and every line shows its quote <Sticker name="quote" />.
       </p>
@@ -42,7 +42,7 @@ const SampleBubble = (props: { line: SampleLine }): ReactElement => {
     <div className={`msg ${line.side}`}>
       <Avatar name={name} side={line.side} />
       <div className={line.quote === undefined ? "bubble guess" : "bubble"}>
-        <span className="who">{`${name}'s agent`}</span>
+        <span className="who">{`${name}'s Meety`}</span>
         {line.text}
       </div>
       <div className="extra">{line.quote === undefined ? <ReceiptFlag isWeak={false} /> : <Receipt quote={line.quote.text} source={line.quote.source} />}</div>
@@ -56,7 +56,7 @@ export const SampleMeeting = (): ReactElement => {
     <section className="wl-meet" aria-labelledby="wl-meet-title">
       <div className="scallop top" aria-hidden="true" />
       <div className="wl-meet-head">
-        <h2 id="wl-meet-title">Watch two agents meet.</h2>
+        <h2 id="wl-meet-title">Watch two Meetys meet.</h2>
         <p>A sample. Mira and Jonah are made up; how it works is real.</p>
         <p className="wl-question">
           <Sticker name="spark" />
@@ -71,7 +71,7 @@ export const SampleMeeting = (): ReactElement => {
           <div className="msg a">
             <Avatar name="Mira" side="a" />
             <span className="bubble">
-              <TypingDots label="Mira's agent is writing" />
+              <TypingDots label="Mira's Meety is writing" />
             </span>
           </div>
         </div>
@@ -151,7 +151,7 @@ export const FirstCoffee = (): ReactElement => {
   return (
     <section className="wl-coffee" aria-labelledby="wl-coffee-title">
       <h2 className="wl-title" id="wl-coffee-title">
-        The awkward first coffee? <em>Your agents already had it.</em>
+        The awkward first coffee? <em>Your Meetys already had it.</em>
       </h2>
       <div className="wl-ribbon" aria-hidden="true">
         <svg className="wl-ribbon-wave" viewBox="0 0 1000 200" preserveAspectRatio="none" focusable="false">

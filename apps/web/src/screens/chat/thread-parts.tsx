@@ -28,7 +28,7 @@ function capitalised(text: string): string {
 // The line on a friend ask's card, and the words of its button, with the friend's name.
 function reactWords(name: string | null): { line: string; button: string } {
   const who = name ?? FRIEND_FALLBACK;
-  return { line: capitalised(`${who}'s agent answers from what ${who} chose to share. ${capitalised(who)} gets a copy of the answer.`), button: `Ask ${who}'s agent` };
+  return { line: capitalised(`${who}'s Meety answers from what ${who} chose to share. ${capitalised(who)} gets a copy of the answer.`), button: `Ask ${who}'s Meety` };
 }
 
 // The person's own message: a blue bubble on the right, with no avatar.

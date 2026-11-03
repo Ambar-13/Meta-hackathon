@@ -122,7 +122,7 @@ describe("chat screen", () => {
     expect(requestsTo(routes.social.sendToOrchestrator)[0]?.body).toEqual({ text: "First line" });
   });
 
-  it("W7-WEB-B-T5: a planned react reply shows its text and Ask Mira's agent, and pressing it posts to the reply's run route", async () => {
+  it("W7-WEB-B-T5: a planned react reply shows its text and Ask Mira's Meety, and pressing it posts to the reply's run route", async () => {
     const plan = plannedReact(CHAT_IDS.reply);
     stubReads({ thread: [[youSaid(CHAT_IDS.sent, "How would Mira react if I moved our trip to March?"), plan]] });
     stubRoute(routes.social.runPlan, { ...plan, state: "running", askId: CHAT_IDS.ask });
@@ -131,25 +131,25 @@ describe("chat screen", () => {
 
     expect(await screen.findByText(plan.text)).toBeTruthy();
     expect(screen.getByText(`“${TRIP_QUESTION}”`)).toBeTruthy();
-    expect(screen.getByText("Mira's agent answers from what Mira chose to share. Mira gets a copy of the answer.")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Ask Mira's agent" }));
+    expect(screen.getByText("Mira's Meety answers from what Mira chose to share. Mira gets a copy of the answer.")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Ask Mira's Meety" }));
 
     await waitFor(() => {
       expect(requestsTo(routes.social.runPlan)).toHaveLength(1);
     });
     expect(new URL(requestsTo(routes.social.runPlan)[0]?.url ?? "").pathname).toBe(`/api/orchestrator/${CHAT_IDS.reply}/run`);
-    expect(await screen.findByText("Agents are answering")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Ask Mira's agent" })).toBeNull();
+    expect(await screen.findByText("Their Meetys are answering")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Ask Mira's Meety" })).toBeNull();
   });
 
-  it("W7-WEB-B-T6: a running reply's card shows Agents are answering, then the answers' first sentences and See the answers", async () => {
+  it("W7-WEB-B-T6: a running reply's card shows Their Meetys are answering, then the answers' first sentences and See the answers", async () => {
     const running = replied(CHAT_IDS.reply, { state: "running", action: "help", text: "I started a help search.", actionQuestion: "Who could help me get my first ten users?", askId: CHAT_IDS.ask });
     stubReads({ thread: [[youSaid(CHAT_IDS.sent, "Who could help me get my first ten users?"), running]] });
     const answers = [answerFrom(1, "Bea", "Bea would probably start with a waitlist. She did that twice."), answerFrom(2, "Cal", "Cal would probably post in student groups first.")];
     stubRoute(routes.asks.readAsk, [askOf({ mode: "help", state: "asking" }), askOf({ mode: "help", state: "done", answers })]);
     renderChat();
 
-    expect(await screen.findByText("Agents are answering")).toBeTruthy();
+    expect(await screen.findByText("Their Meetys are answering")).toBeTruthy();
     expect(await screen.findByText("Bea would probably start with a waitlist.", {}, { timeout: 6_000 })).toBeTruthy();
     expect(screen.getByText("Cal would probably post in student groups first.")).toBeTruthy();
     expect(screen.queryByText("She did that twice.", { exact: false })).toBeNull();

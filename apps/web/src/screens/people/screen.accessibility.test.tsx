@@ -19,8 +19,8 @@ afterEach(() => {
 const PAIR = "00000000-0000-4000-8000-000000000141";
 // The own-profile words of the Posts tab, word for word (wave 7).
 const OWN_POSTS = {
-  heading: "Coming soon: your agent posts.",
-  body: "Your agent will draft posts from your chats or on a topic you give, and nothing goes up until you say yes. You will also be able to repost your Instagram posts here.",
+  heading: "Coming soon: your Meety posts.",
+  body: "Your Meety will draft posts from your chats or on a topic you give, and nothing goes up until you say yes. You will also be able to repost your Instagram posts here.",
 } as const;
 
 // Renders the profile of one listing with these replies for GET /api/directory/:id; search is added to the address.
@@ -87,20 +87,20 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
     expect(requestsTo(routes.social.declineFriendRequest)[0]?.url).toContain(`/api/friend-requests/${LISTING_IDS.request}/decline`);
   });
 
-  it("W7-WEB-A-T5d: a friend shows the Friends chip, Ask their agent linking to the chat with a draft, and Meet their agent; with asks off, the line instead", async () => {
+  it("W7-WEB-A-T5d: a friend shows the Friends chip, Ask Mira's Meety linking to the chat with a draft, and Meet Mira's Meety; with asks off, the line instead", async () => {
     renderProfile(friendMira(true), { search: `?card=${IDS.card}` });
     const head = await header();
 
     expect(within(head).getByText("Friends")).toBeTruthy();
-    expect(within(head).getByRole("link", { name: "Ask their agent" }).getAttribute("href")).toBe("/home?draft=How%20would%20Mira%20react%20to%20");
-    expect(within(head).getByRole("button", { name: "Meet their agent" })).toBeTruthy();
+    expect(within(head).getByRole("link", { name: "Ask Mira's Meety" }).getAttribute("href")).toBe("/home?draft=How%20would%20Mira%20react%20to%20");
+    expect(within(head).getByRole("button", { name: "Meet Mira's Meety" })).toBeTruthy();
     cleanup();
 
     renderProfile(friendMira(false), { search: `?card=${IDS.card}` });
     const offHead = await header();
-    expect(within(offHead).queryByRole("link", { name: "Ask their agent" })).toBeNull();
+    expect(within(offHead).queryByRole("link", { name: "Ask Mira's Meety" })).toBeNull();
     expect(within(offHead).getByText("Mira has not turned on friend asks yet.")).toBeTruthy();
-    expect(within(offHead).getByRole("button", { name: "Meet their agent" })).toBeTruthy();
+    expect(within(offHead).getByRole("button", { name: "Meet Mira's Meety" })).toBeTruthy();
   });
 
   it("W7-WEB-A-T5e: your own profile shows Edit my listing, a link to /me, and no friend buttons", async () => {
@@ -123,8 +123,8 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
     expect(posts.getAttribute("aria-selected")).toBe("true");
     expect(document.activeElement).toBe(posts);
     const panel = screen.getByRole("tabpanel", { name: "Posts" });
-    expect(within(panel).getByRole("heading", { name: "Coming soon: posts by Mira's agent." })).toBeTruthy();
-    expect(within(panel).getByText("Mira's agent will draft posts from Mira's chats or on a topic Mira gives, and nothing goes up until Mira says yes.")).toBeTruthy();
+    expect(within(panel).getByRole("heading", { name: "Coming soon: posts by Mira's Meety." })).toBeTruthy();
+    expect(within(panel).getByText("Mira's Meety will draft posts from Mira's chats or on a topic Mira gives, and nothing goes up until Mira says yes.")).toBeTruthy();
     fireEvent.keyDown(posts, { key: "ArrowLeft" });
     expect(screen.getByRole("tab", { name: "About" }).getAttribute("aria-selected")).toBe("true");
     cleanup();
@@ -152,16 +152,16 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
     expect(await header()).toBeTruthy();
   });
 
-  it("W6-DWEB-T28, moved to the profile: Meet their agent opens the picker without the couple group for a friend closed to dating questions, and with it for an open one", async () => {
+  it("W6-DWEB-T28, moved to the profile: Meet Mira's Meety opens the picker without the couple group for a friend closed to dating questions, and with it for an open one", async () => {
     renderProfile(friendMira(true, { openToRomance: false }), { search: `?card=${IDS.card}` });
-    fireEvent.click(within(await header()).getByRole("button", { name: "Meet their agent" }));
+    fireEvent.click(within(await header()).getByRole("button", { name: "Meet Mira's Meety" }));
     const closedPicker = screen.getByRole("group", { name: "Pick a question for the meeting" });
     expect(screen.queryByRole("group", { name: "Would you get on as a couple?" })).toBeNull();
     expect(closedPicker.querySelectorAll('input[type="radio"]')).toHaveLength(17);
     cleanup();
 
     renderProfile(friendMira(true), { search: `?card=${IDS.card}` });
-    fireEvent.click(within(await header()).getByRole("button", { name: "Meet their agent" }));
+    fireEvent.click(within(await header()).getByRole("button", { name: "Meet Mira's Meety" }));
     const openPicker = screen.getByRole("group", { name: "Pick a question for the meeting" });
     expect(screen.getByRole("group", { name: "Would you get on as a couple?" }).querySelectorAll('input[type="radio"]')).toHaveLength(4);
     expect(openPicker.querySelectorAll('input[type="radio"]')).toHaveLength(21);
@@ -173,7 +173,7 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
     renderProfile(friendMira(true), { search: `?card=${IDS.card}` });
     stubRoute(routes.directory.createListingMeeting, { status: 201, body: { meetingId: IDS.meeting } });
 
-    fireEvent.click(within(await header()).getByRole("button", { name: "Meet their agent" }));
+    fireEvent.click(within(await header()).getByRole("button", { name: "Meet Mira's Meety" }));
     fireEvent.click(screen.getByRole("radio", { name: debate.text }));
     fireEvent.click(screen.getByRole("button", { name: "Create the meeting" }));
 
@@ -188,7 +188,7 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
     renderProfile(friendMira(true), { search: `?card=${IDS.card}` });
     stubRoute(routes.directory.createListingMeeting, { status: 429, body: { code: "directory_daily_cap", message: sentence } });
 
-    fireEvent.click(within(await header()).getByRole("button", { name: "Meet their agent" }));
+    fireEvent.click(within(await header()).getByRole("button", { name: "Meet Mira's Meety" }));
     fireEvent.click(screen.getByRole("radio", { name: "Would we enjoy a 10-day hackathon together?" }));
     fireEvent.click(screen.getByRole("button", { name: "Create the meeting" }));
 
@@ -201,7 +201,7 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
     renderProfile(friendMira(true), { search: `?card=${IDS.card}` });
     stubRoute(routes.directory.createListingMeeting, { status: 201, body: { meetingId: IDS.meeting } });
 
-    fireEvent.click(within(await header()).getByRole("button", { name: "Meet their agent" }));
+    fireEvent.click(within(await header()).getByRole("button", { name: "Meet Mira's Meety" }));
     fireEvent.click(screen.getByRole("radio", { name: "Write your own question" }));
     fireEvent.change(screen.getByLabelText("Your question"), { target: { value: "Hm?" } });
     fireEvent.click(screen.getByRole("button", { name: "Create the meeting" }));
@@ -218,13 +218,13 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
     await waitFor(() => {
       expect(requestsTo(routes.directory.readMyListing)).toHaveLength(1);
     });
-    expect(within(head).getByText("To meet their agent, open your approved card first.")).toBeTruthy();
-    expect(within(head).queryByRole("button", { name: "Meet their agent" })).toBeNull();
+    expect(within(head).getByText("To meet their Meety, open your approved card first.")).toBeTruthy();
+    expect(within(head).queryByRole("button", { name: "Meet Mira's Meety" })).toBeNull();
   });
 
   it("W6-DWEB-T36, moved to the profile: every control on a friend's profile has an accessible name at 375 px, with the picker open", async () => {
     renderProfile(friendMira(true), { search: `?card=${IDS.card}` });
-    fireEvent.click(within(await header()).getByRole("button", { name: "Meet their agent" }));
+    fireEvent.click(within(await header()).getByRole("button", { name: "Meet Mira's Meety" }));
 
     expect(window.innerWidth).toBe(375);
     expect(unlabelledControls(document.body)).toEqual([]);
@@ -249,7 +249,7 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
 
     fireEvent.click(within(head).getByRole("button", { name: "Add friend" }));
 
-    expect(await within(head).findByRole("link", { name: "Ask their agent" })).toBeTruthy();
+    expect(await within(head).findByRole("link", { name: "Ask Mira's Meety" })).toBeTruthy();
     expect(within(head).getByText("Friends")).toBeTruthy();
   });
 
@@ -258,7 +258,7 @@ describe("profile page, against the MSW route stubs (a fake server)", () => {
     renderProfile(profileView({}), { search: "?tab=posts" });
     const head = await header();
 
-    expect(await screen.findByRole("heading", { name: "Coming soon: posts by Mira's agent." })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "Coming soon: posts by Mira's Meety." })).toBeTruthy();
     expect(within(head).queryByText("Sample")).toBeNull();
     expect(requestsTo(routes.social.listListingPosts)).toHaveLength(1);
   });

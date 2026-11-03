@@ -11,8 +11,8 @@ type Step = { colour: string; sticker: StickerName; title: string; text: string;
 // The three steps from the README, in order.
 const STEPS: readonly Step[] = [
   { colour: "c-green", sticker: "phone", title: "Upload your chats", text: "From ChatGPT, Claude, Codex, your notes or a paste. Your browser keeps only your own messages and scrubs them before anything is sent.", time: "a couple of minutes" },
-  { colour: "c-yellow", sticker: "check", title: "Approve your card", text: "Your agent lists what it learned about you, each line with the quote it came from. You approve them one by one.", time: "you say yes to every line" },
-  { colour: "c-coral", sticker: "tags", title: "Meet someone", text: "Share a code, pick a question, and the two agents talk it through. Nobody needs to be online. Watch it live or replay it later.", time: "a ten-minute talk" },
+  { colour: "c-yellow", sticker: "check", title: "Approve your card", text: "Your Meety lists what it learned about you, each line with the quote it came from. You approve them one by one.", time: "you say yes to every line" },
+  { colour: "c-coral", sticker: "tags", title: "Meet someone", text: "Share a code, pick a question, and the two Meetys talk it through. Nobody needs to be online. Watch it live or replay it later.", time: "a ten-minute talk" },
 ];
 
 // The three steps as colour cards, each with its sticker breaking out of the top.
@@ -39,7 +39,7 @@ export const ThreeSteps = (): ReactElement => {
 type PromiseCard = { sticker: StickerName; title: string; text: string };
 // The four promises, each true of the build: probable reactions, no scores, scrubbing in the browser, deletion.
 const PROMISES: readonly PromiseCard[] = [
-  { sticker: "spark", title: "It says probably.", text: "Your agent says how you would probably react. Never what you will do." },
+  { sticker: "spark", title: "It says probably.", text: "Your Meety says how you would probably react. Never what you will do." },
   { sticker: "nope", title: "It never scores anyone.", text: "No ranking, no percent, no match number. Not about you, not about them." },
   { sticker: "soap", title: "Scrubbed in your browser.", text: "Your messages are cleaned on your own device before anything is sent." },
   { sticker: "poof", title: "Gone when you say so.", text: "Delete your account and everything we hold about you goes with it." },
@@ -113,7 +113,7 @@ export const WelcomeFooter = (): ReactElement => {
   return (
     <footer className="wl-foot">
       <p className="wl-foot-name">Meet First</p>
-      <p>Your agent meets theirs first. With receipts.</p>
+      <p>Your Meety meets theirs first. With receipts.</p>
       <nav className="wl-puffs" aria-label="On this page">
         <a className="wl-puff c-yellow" href="#how">How it works</a>
         <a className="wl-puff c-green" href="#kinds">Questions</a>

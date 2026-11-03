@@ -18,13 +18,13 @@ export type ProfileModel = {
 export function postsSoonCopy(name: string | null): { heading: string; body: string } {
   if (name === null) {
     return {
-      heading: "Coming soon: your agent posts.",
-      body: "Your agent will draft posts from your chats or on a topic you give, and nothing goes up until you say yes. You will also be able to repost your Instagram posts here.",
+      heading: "Coming soon: your Meety posts.",
+      body: "Your Meety will draft posts from your chats or on a topic you give, and nothing goes up until you say yes. You will also be able to repost your Instagram posts here.",
     };
   }
   return {
-    heading: `Coming soon: posts by ${name}'s agent.`,
-    body: `${name}'s agent will draft posts from ${name}'s chats or on a topic ${name} gives, and nothing goes up until ${name} says yes.`,
+    heading: `Coming soon: posts by ${name}'s Meety.`,
+    body: `${name}'s Meety will draft posts from ${name}'s chats or on a topic ${name} gives, and nothing goes up until ${name} says yes.`,
   };
 }
 

@@ -73,7 +73,7 @@ async function insertExchange(trx: Transaction<Database>, input: { personId: str
 // The ask a planned reply starts, as POST /api/asks would read it, or the sentence that says why it cannot start.
 export function askBodyOf(row: MessageRow): { body: AskCreate } | { refusal: string } {
   const friendName = row.action_friend_name ?? "this friend";
-  if (row.action === "react" && row.action_pair_id === null) return { refusal: `You are no longer friends with ${friendName}, so I could not ask their agent.` };
+  if (row.action === "react" && row.action_pair_id === null) return { refusal: `You are no longer friends with ${friendName}, so I could not ask their Meety.` };
   const draft = row.action === "react" ? { mode: "react", pairId: row.action_pair_id, text: row.action_question } : { mode: "help", text: row.action_question };
   const parsed = AskCreate.safeParse(draft);
   return parsed.success ? { body: parsed.data } : { refusal: "That question does not fit an ask. Say it in a sentence of 5 to 300 characters." };
@@ -85,7 +85,7 @@ const REFUSAL_CODES: ReadonlySet<string> = new Set(["help_daily_cap", "react_dai
 
 // The sentence a refused ask adds to the reply: createAsk's own sentence, except not_found, which here means the friendship is gone.
 export function refusalSentence(error: ContractError, row: MessageRow): string {
-  if (error.code === "not_found") return `You are no longer friends with ${row.action_friend_name ?? "this friend"}, so I could not ask their agent.`;
+  if (error.code === "not_found") return `You are no longer friends with ${row.action_friend_name ?? "this friend"}, so I could not ask their Meety.`;
   if (error.code === "payload_invalid") return "That question does not fit an ask. Say it in a sentence of 5 to 300 characters.";
   return error.message;
 }

@@ -53,7 +53,7 @@ export const QuizResult = (props: { quiz: QuizView }): ReactElement => {
       <div className={props.quiz.reliable === false ? "colour-panel c-yellow quiz-score is-rough" : "colour-panel c-yellow quiz-score"}>
         <Sticker name="spark" />
         <h2>{props.quiz.copy}</h2>
-        <p>How close your agent came to your own answers.</p>
+        <p>How close your Meety came to your own answers.</p>
       </div>
       <ol className="quiz-pairs">
         {props.quiz.items.map((item) => (
@@ -61,7 +61,7 @@ export const QuizResult = (props: { quiz: QuizView }): ReactElement => {
             <b aria-hidden="true">{twoDigits(item.position)}</b>
             <div>
               <p className="quiz-pair-question">{item.questionText}</p>
-              {item.personaAnswer === undefined ? null : <p className="quiz-answer is-persona">{`Your agent: ${item.personaAnswer}`}</p>}
+              {item.personaAnswer === undefined ? null : <p className="quiz-answer is-persona">{`Your Meety: ${item.personaAnswer}`}</p>}
               {item.humanAnswer === undefined ? null : <p className="quiz-answer">{`You: ${item.humanAnswer}`}</p>}
               {verdictLine(item.agree) === null ? null : <p className={item.agree === true ? "verdict is-match" : "verdict"}>{verdictLine(item.agree)}</p>}
             </div>

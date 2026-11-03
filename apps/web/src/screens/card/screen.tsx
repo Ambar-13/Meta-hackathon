@@ -23,7 +23,7 @@ const CardHello = (props: { children: ReactNode }): ReactElement => {
 const BuildingBody = (props: { seconds: number }): ReactElement => {
   return (
     <>
-      <CardHello>Your agent is reading your notes and picking a quote for every line.</CardHello>
+      <CardHello>Your Meety is reading your notes and picking a quote for every line.</CardHello>
       <LoadingLine text={`Building your card. ${String(props.seconds)} s so far.`} />
     </>
   );
@@ -64,7 +64,7 @@ const ApprovedNext = (props: { card: CardView; isSending: boolean; onQuiz: () =>
     <section className="card-next" aria-labelledby="card-next-title">
       <Sticker name="check" />
       <h2 id="card-next-title">Card approved.</h2>
-      <p>Your agent may now say these things about you, each with its quote.</p>
+      <p>Your Meety may now say these things about you, each with its quote.</p>
       <div className="actions">
         {props.card.thin ? null : (
           <button type="button" disabled={props.isSending} onClick={props.onQuiz}>
@@ -95,7 +95,7 @@ const CardBody = (props: { card: CardView; screen: ReturnType<typeof useCardScre
       {isApproved ? (
         <ApprovedNext card={card} isSending={action.kind === "sending"} onQuiz={() => void screen.startQuiz()} />
       ) : (
-        <CardHello>What your agent learned about you. Keep the lines it may say in meetings.</CardHello>
+        <CardHello>What your Meety learned about you. Keep the lines it may say in meetings.</CardHello>
       )}
       <ThinNote isThin={card.thin} />
       <CardItemList cardId={card.id} items={card.items} ticked={ticked} isLocked={isApproved} onToggle={screen.toggleItem} />

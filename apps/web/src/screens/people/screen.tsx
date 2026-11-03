@@ -21,9 +21,9 @@ const PROFILE_COPY = {
   accept: "Accept",
   decline: "Decline",
   friends: "Friends",
-  askAgent: "Ask their agent",
-  meetAgent: "Meet their agent",
-  noCard: "To meet their agent, open your approved card first.",
+  askAgent: (name: string) => `Ask ${name}'s Meety`,
+  meetAgent: (name: string) => `Meet ${name}'s Meety`,
+  noCard: "To meet their Meety, open your approved card first.",
   editListing: "Edit my listing",
 } as const;
 
@@ -32,7 +32,7 @@ function sourceFor(name: string): string {
   return `${name}, in their own words`;
 }
 
-// Meet their agent: the button that opens today's directory meeting picker for this listing, or the line that a card is needed.
+// Meet their Meety: the button that opens today's directory meeting picker for this listing, or the line that a card is needed.
 const MeetAgent = (props: { profile: ProfileView; meet: MeetControls | null }): ReactElement => {
   const { profile, meet } = props;
   if (meet === null) return <p className="profile-note">{PROFILE_COPY.noCard}</p>;
@@ -40,7 +40,7 @@ const MeetAgent = (props: { profile: ProfileView; meet: MeetControls | null }): 
   return (
     <>
       <button type="button" className="quiet" aria-expanded={isOpen} onClick={() => { meet.toggle(profile.listingId); }}>
-        {PROFILE_COPY.meetAgent}
+        {PROFILE_COPY.meetAgent(profile.displayName)}
       </button>
       {isOpen ? (
         <div className="profile-meet">
@@ -51,7 +51,7 @@ const MeetAgent = (props: { profile: ProfileView; meet: MeetControls | null }): 
   );
 };
 
-// The buttons of a friend's profile: the Friends chip, Ask their agent (or why not), and Meet their agent.
+// The buttons of a friend's profile: the Friends chip, Ask their Meety (or why not), and Meet their Meety.
 const FriendButtons = (props: { profile: ProfileView; meet: MeetControls | null }): ReactElement => {
   const { profile } = props;
   return (
@@ -61,7 +61,7 @@ const FriendButtons = (props: { profile: ProfileView; meet: MeetControls | null 
         {PROFILE_COPY.friends}
       </span>
       {profile.canAsk ? (
-        <Link className="btn" to={chatPathWithDraft(`How would ${profile.displayName} react to `)}>{PROFILE_COPY.askAgent}</Link>
+        <Link className="btn" to={chatPathWithDraft(`How would ${profile.displayName} react to `)}>{PROFILE_COPY.askAgent(profile.displayName)}</Link>
       ) : (
         <p className="profile-note">{`${profile.displayName} has not turned on friend asks yet.`}</p>
       )}

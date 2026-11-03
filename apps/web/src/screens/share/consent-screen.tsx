@@ -7,7 +7,7 @@ import { PublishPreviewPanel } from "./preview.js";
 import { useConsentState, usePublishPreview, type ConsentState } from "./share-state.js";
 
 // The explainer above the consent button, word for word (4.7).
-const CONSENT_EXPLAINER = "Publishing makes a page anyone with the link can read. It shows your display names, the question, the card items you approved, what the two agents said, and the brief lines that passed the support check with their quotes. It never shows your archive, redacted text, quiz answers or anything you did not approve. Either of you can take it down at any time; the page disappears on the next visit.";
+const CONSENT_EXPLAINER = "Publishing makes a page anyone with the link can read. It shows your display names, the question, the card items you approved, what the two Meetys said, and the brief lines that passed the support check with their quotes. It never shows your archive, redacted text, quiz answers or anything you did not approve. Either of you can take it down at any time; the page disappears on the next visit.";
 // The words shown while the briefs are not written yet (4.7).
 const CLOSED_TEXT = "Consent opens when both briefs are written.";
 // The words shown after this person consented and the other has not yet (4.7).

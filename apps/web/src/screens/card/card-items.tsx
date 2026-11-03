@@ -114,7 +114,7 @@ export const CardItemList = (props: { cardId: string; items: CardItem[]; ticked:
   const [openId, setOpenId] = useState<string | null>(null);
   const openItem = props.items.find((item) => item.id === openId);
   if (props.items.length === 0) {
-    return <EmptyState sticker="lens" title="Nothing on this card">Your agent found nothing it could back with a quote. Try a longer chat.</EmptyState>;
+    return <EmptyState sticker="lens" title="Nothing on this card">Your Meety found nothing it could back with a quote. Try a longer chat.</EmptyState>;
   }
   return (
     <>

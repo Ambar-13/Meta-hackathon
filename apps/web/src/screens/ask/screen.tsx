@@ -14,11 +14,11 @@ import { splitHelpAnswers, useAskScreen, type AskScreenModel } from "./ask-state
 // The lines of this page; the ones marked [confirm] are drafted, because design section 7 does not give them.
 const LOADING_LINE = "Loading the answers."; // [confirm]
 const ASKED_PREFIX = "You asked: "; // [confirm]
-const WAITING_LINES = { checking: "Checking your question.", asking: "Asking the agents. This takes about a minute.", ranking: "Checking the quotes in each answer." } as const; // [confirm]
+const WAITING_LINES = { checking: "Checking your question.", asking: "Asking their Meetys. This takes about a minute.", ranking: "Checking the quotes in each answer." } as const; // [confirm]
 const FAILED_LINE = "This ask could not finish. Try again.";
 const REFUSED_FALLBACK_LINE = "The question check did not allow this question."; // [confirm]
 const NO_MATCH_LINE = "Nobody in Explore matches this yet.";
-const NONE_PLACED_LINE = "No agent showed a clear sign. Their answers are below."; // [confirm]
+const NONE_PLACED_LINE = "No Meety showed a clear sign. Their answers are below."; // [confirm]
 const NO_SIGN_HEADING = "No clear sign in their notes";
 const FRIEND_FALLBACK_NAME = "your friend"; // [confirm]
 // The way on from a refused or failed ask: back to the box it came from, by its kind [confirm].

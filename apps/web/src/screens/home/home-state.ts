@@ -31,24 +31,24 @@ export function isUnderWay(state: MeetingState): boolean {
 function stepBeforeApproval(home: HomeView): NextStep | null {
   const { source, card } = home;
   if (source === null) {
-    return { title: "Add your notes.", text: "Upload a chat export or paste some of your own messages. Your agent learns how you talk from them.", action: { label: "Add your notes", to: APP_PATHS.upload }, sticker: "phone" };
+    return { title: "Add your notes.", text: "Upload a chat export or paste some of your own messages. Your Meety learns how you talk from them.", action: { label: "Add your notes", to: APP_PATHS.upload }, sticker: "phone" };
   }
   if (!source.namesReviewed) {
     const text = source.namesPassDone ? "We found other people's names in your notes. Choose how to hide them before anything is used." : "We are looking for other people's names in your notes. It takes a few seconds.";
     return { title: "Check the names.", text, action: { label: "Check the names", to: APP_PATHS.namesReview(source.id) }, sticker: "lens" };
   }
-  if (card === null) return { title: "Your card is next.", text: "Your agent writes your card from your notes once the names are checked.", action: { label: "Check the names", to: APP_PATHS.namesReview(source.id) }, sticker: "lens" };
+  if (card === null) return { title: "Your card is next.", text: "Your Meety writes your card from your notes once the names are checked.", action: { label: "Check the names", to: APP_PATHS.namesReview(source.id) }, sticker: "lens" };
   if (card.state === "building") return { title: "Your card is being written.", text: "It takes about a minute. Every line comes with the quote it rests on.", action: { label: "Watch it fill in", to: APP_PATHS.card(card.id) }, sticker: "pencil" };
   if (card.state === "failed") return { title: "Your card needs another try.", text: "Writing it failed this time. Your notes are still here.", action: { label: "Open my card", to: APP_PATHS.card(card.id) }, sticker: "pencil" };
   if (card.state === "approved") return null;
-  return { title: "Approve your card.", text: "Read what your agent learned and say yes to the lines it may use in a meeting.", action: { label: "Review my card", to: APP_PATHS.card(card.id) }, sticker: "check" };
+  return { title: "Approve your card.", text: "Read what your Meety learned and say yes to the lines it may use in a meeting.", action: { label: "Review my card", to: APP_PATHS.card(card.id) }, sticker: "check" };
 }
 
 // The step after the card is approved: watch a meeting, read a brief, go back to a waiting pair, or meet someone.
 function stepAfterApproval(home: HomeView, cardId: string): NextStep {
   const live = home.meetings.find((meeting) => isUnderWay(meeting.state));
   if (live !== undefined) {
-    return { title: "Your meeting is on.", text: `Your agent and ${live.otherDisplayName}'s are talking it through. Watch, or come back for the brief.`, action: { label: "Watch it", to: APP_PATHS.meeting(live.id) }, sticker: "chat" };
+    return { title: "Your meeting is on.", text: `Your Meety and ${live.otherDisplayName}'s are talking it through. Watch, or come back for the brief.`, action: { label: "Watch it", to: APP_PATHS.meeting(live.id) }, sticker: "chat" };
   }
   const newest = home.meetings[0];
   if (newest?.isBriefReady === true) {

@@ -15,10 +15,10 @@ export const ASK_KIND_CHIP: Record<AskMode, { label: string }> = {
 };
 
 // The waiting line of each running state of an ask.
-const WAITING_LINES = { checking: "Checking the question", asking: "Agents are answering", ranking: "Putting the answers in order" } as const;
+const WAITING_LINES = { checking: "Checking the question", asking: "Their Meetys are answering", ranking: "Putting the answers in order" } as const;
 // The other lines of the card.
 const LOADING_LINE = "Loading the ask";
-const NO_ANSWERS_LINE = "Nobody's agent had an answer this time.";
+const NO_ANSWERS_LINE = "No Meety had an answer this time.";
 const FAILED_LINE = "This ask could not finish. Try asking again in a minute.";
 const READ_ERROR_LINE = "Could not load this ask.";
 const SEE_ANSWERS = "See the answers";
@@ -64,7 +64,7 @@ const AskAnswers = (props: { view: AskView }): ReactElement => {
             <li key={answer.answerId}>
               <PersonAvatar name={answer.displayName} size="s" />
               <span>
-                <strong>{`${answer.displayName}'s agent`}</strong>
+                <strong>{`${answer.displayName}'s Meety`}</strong>
                 <span className="chat-answer-line">{firstSentence(answer.answer)}</span>
               </span>
             </li>
