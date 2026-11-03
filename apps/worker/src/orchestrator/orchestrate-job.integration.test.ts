@@ -39,13 +39,35 @@ function fakeModel(content: string | (() => never)): { live: LiveCaller; seen: L
 }
 
 // Writes A's message and a thinking reply that holds B as A's only friend, as POST /api/orchestrator does, and returns the reply's id.
-async function sendAsA(text: string, canAsk = true): Promise<string> {
+// Both rows get the transaction's time, or the given time.
+async function sendAsA(text: string, canAsk = true, at?: Date): Promise<string> {
+  const time = at === undefined ? {} : { created_at: at };
   return withPerson(fresh.db, m.a.personId, async (trx) => {
-    const message = await trx.insertInto("orchestrator_messages").values({ person_id: m.a.personId, role: "you", text, state: "done" }).returning("id").executeTakeFirstOrThrow();
+    const message = await trx.insertInto("orchestrator_messages").values({ person_id: m.a.personId, role: "you", text, state: "done", ...time }).returning("id").executeTakeFirstOrThrow();
     const snapshot = JSON.stringify([{ pairId: m.pairId, displayName: "Test B", canAsk }]);
-    const reply = await trx.insertInto("orchestrator_messages").values({ person_id: m.a.personId, role: "agent", text: "", state: "thinking", reply_to: message.id, friends_snapshot: snapshot }).returning("id").executeTakeFirstOrThrow();
+    const reply = await trx.insertInto("orchestrator_messages").values({ person_id: m.a.personId, role: "agent", text: "", state: "thinking", reply_to: message.id, friends_snapshot: snapshot, ...time }).returning("id").executeTakeFirstOrThrow();
     return reply.id;
   });
+}
+
+// Writes one earlier exchange of A's thread at one time, A's message and Meety's reply, as one transaction of the api would: a reply in
+// words, or the friend ask about B that A ran.
+async function seedExchange(text: string, replyText: string, options: { at: Date; ranAsk?: { question: string } }): Promise<void> {
+  const { at, ranAsk } = options;
+  await withPerson(fresh.db, m.a.personId, async (trx) => {
+    const message = await trx.insertInto("orchestrator_messages").values({ person_id: m.a.personId, role: "you", text, state: "done", created_at: at }).returning("id").executeTakeFirstOrThrow();
+    const reply = ranAsk === undefined
+      ? { state: "done" as const, action: "reply" as const }
+      : { state: "running" as const, action: "react" as const, action_question: ranAsk.question, action_friend_name: "Test B", action_pair_id: m.pairId };
+    await trx.insertInto("orchestrator_messages").values({ person_id: m.a.personId, role: "agent", text: replyText, reply_to: message.id, created_at: at, ...reply }).execute();
+  });
+}
+
+// The user message of the one model call a fake model saw.
+function userTextSeen(seen: readonly LlmRequest[]): string {
+  const messages = seen[0]?.body.messages;
+  const user = Array.isArray(messages) ? (messages[1] as { content?: unknown } | undefined) : undefined;
+  return typeof user?.content === "string" ? user.content : "";
 }
 
 // Reads one of A's replies as A.
@@ -141,5 +163,28 @@ describe("the orchestrate job", () => {
 
     expect(await readReply(replyId)).toMatchObject({ state: "done", action: "reply", text: "You are no longer friends with Gone, so I cannot ask their agent.", action_pair_id: null });
     expect(model.seen).toHaveLength(1);
+  });
+
+  it("W7-ORCH-T7: the 3 Nov chat: after a friend ask and four corrections, each answered with a question back, the next message still shows the first question", async () => {
+    const exchanges: [string, string][] = [
+      ["How would Test B react if I told them the integral of sin x from 0 to pi is 0?", "I can ask Test B's agent how they would probably react if you told them the integral of sin x from 0 to pi is 0. Press the button when you are ready; Test B will get a copy."],
+      ["no not the integral but sum of", "What would you like me to ask Test B about the sum?"],
+      ["sum of sines", "What would you like me to ask Test B about the sum of sines?"],
+      ["0 to pi", "What would you like me to ask Test B about the sum of sines from 0 to pi?"],
+      ["iit being 1 not 0", "What would you like me to ask Test B about the sum being 1?"],
+    ];
+    const ranAsk = { question: "How would you probably react if I told you the integral of sin x from 0 to pi is 0?" };
+    // One second apart and an hour after the earlier tests' rows, so the order never rests on the clock moving between two transactions.
+    const start = Date.now() + 3_600_000;
+    for (const [index, [text, replyText]] of exchanges.entries()) {
+      await seedExchange(text, replyText, { at: new Date(start + index * 1000), ...(index === 0 ? { ranAsk } : {}) });
+    }
+    const replyId = await sendAsA("the sum", true, new Date(start + exchanges.length * 1000));
+    const model = fakeModel(JSON.stringify({ action: "reply", friend: "", question: "", reply: "Tell me more." }));
+
+    await runFor(replyId, model.live);
+
+    const lines = userTextSeen(model.seen).split("\n");
+    expect(lines.slice(lines.indexOf("<recent>") + 1, lines.indexOf("</recent>"))).toEqual(exchanges.flatMap(([text, replyText]) => [`you: ${text}`, `meety: ${replyText}`]));
   });
 });

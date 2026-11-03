@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { OrchestratorFriends, OrchestratorPlanOutput } from "@meet-first/contracts";
-import { checkPlan, NO_FRIENDS_SENTENCE, NO_QUESTION_SENTENCE, planUserText, RECENT_MESSAGE_MAX_CHARS } from "./plan-requests.js";
+import { readPrompt } from "@meet-first/prompts";
+import { checkPlan, NO_FRIENDS_SENTENCE, NO_QUESTION_SENTENCE, planUserText, RECENT_CHARS_MAX, RECENT_MESSAGE_MAX_CHARS, RECENT_MESSAGES_MAX, type RecentMessage } from "./plan-requests.js";
 
 // Two friends: Mira Shah, who lets friends ask, and Jonah, who does not.
 const FRIENDS: OrchestratorFriends = [
@@ -78,6 +79,56 @@ describe("planUserText", () => {
     expect(text).toContain("<friends>\nAna /friends Lee | can be asked: yes\n</friends>");
     expect(text).toContain(`you: ${"a".repeat(RECENT_MESSAGE_MAX_CHARS)}\n</recent>`);
     expect(planUserText({ text: "hi", friends: [], recent: [] })).toBe("<recent>\n(none)\n</recent>\n<friends>\n(none)\n</friends>\n<message>hi</message>");
+  });
+});
+
+// Earlier messages of a thread, oldest first, the person and Meety in turn.
+function thread(texts: readonly string[]): RecentMessage[] {
+  return texts.map((text, index) => ({ role: index % 2 === 0 ? "you" : "agent", text }));
+}
+
+// The lines of a request's <recent> block, without the tags.
+function recentLines(input: { recent: readonly RecentMessage[] }): string[] {
+  const lines = planUserText({ text: "the sum", friends: FRIENDS, recent: input.recent }).split("\n");
+  return lines.slice(lines.indexOf("<recent>") + 1, lines.indexOf("</recent>"));
+}
+
+// One earlier message as its <recent> line.
+function lineOf(message: RecentMessage): string {
+  return (message.role === "you" ? "you: " : "meety: ") + message.text;
+}
+
+describe("the earlier messages a request shows", () => {
+  it("W7-PLAN-T12: at most the 10 newest earlier messages, oldest first", () => {
+    const messages = thread(Array.from({ length: 12 }, (unused, index) => `message ${String(index + 1)}`));
+
+    expect(recentLines({ recent: messages })).toEqual(messages.slice(2).map(lineOf));
+  });
+
+  it("W7-PLAN-T13: the earlier messages together stay within 2,400 characters, and the oldest are left out first", () => {
+    const messages = thread("ABCDEFGHIJ".split("").map((letter) => letter.repeat(RECENT_MESSAGE_MAX_CHARS)));
+
+    expect(recentLines({ recent: messages })).toEqual(messages.slice(2).map(lineOf));
+    expect(messages.slice(2).reduce((sum, message) => sum + message.text.length, 0)).toBe(RECENT_CHARS_MAX);
+  });
+
+  it("W7-PLAN-T14: a message that does not fit is left out with every older one, so no message in the middle is skipped", () => {
+    const messages = thread(["Q".repeat(20), "K".repeat(100), ...Array.from({ length: 7 }, () => "Z".repeat(300)), "W".repeat(250)]);
+
+    expect(recentLines({ recent: messages })).toEqual(messages.slice(2).map(lineOf));
+  });
+
+  it("W7-PLAN-T15: each message is cut to 300 characters before the 2,400 are counted", () => {
+    const messages = thread("ABCDEFGHI".split("").map((letter) => letter.repeat(400)));
+
+    expect(recentLines({ recent: messages })).toEqual(messages.slice(1).map((message) => lineOf({ ...message, text: message.text.slice(0, RECENT_MESSAGE_MAX_CHARS) })));
+  });
+
+  it("W7-PLAN-T16: the current orchestrator prompt describes <recent> with the numbers the request uses", () => {
+    const text = readPrompt("orchestrator").text;
+
+    expect(text).toContain(`<recent>: up to ${String(RECENT_MESSAGES_MAX)} earlier messages`);
+    expect(text).toContain(`Each is cut to ${String(RECENT_MESSAGE_MAX_CHARS)} characters, and they hold ${RECENT_CHARS_MAX.toLocaleString("en-US")} characters in all`);
   });
 });
 

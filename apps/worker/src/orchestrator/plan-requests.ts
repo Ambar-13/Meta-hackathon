@@ -5,10 +5,14 @@ import type { ChatMessage, CompleteArgs } from "@meet-first/llm";
 import { promptLine } from "../asks/ask-requests.js";
 import { escapeBlockText } from "../meetings/prompt-builder.js";
 
-// The most earlier messages of the thread the request shows, so a follow-up such as "and Jonah?" can be read.
-export const RECENT_MESSAGES_MAX = 4;
+// The most earlier messages of the thread the request shows, so a follow-up such as "and Jonah?" can be read, and a question corrected
+// in pieces ("no not the integral but sum of", "0 to pi") is still read with the message it corrects; at 4, a chat on 3 Nov lost it
+// by the third piece.
+export const RECENT_MESSAGES_MAX = 10;
 // The most characters of one earlier message the request shows.
 export const RECENT_MESSAGE_MAX_CHARS = 300;
+// The most characters of all the earlier messages together, each counted after its cut, so 8 messages of the full 300 fit.
+export const RECENT_CHARS_MAX = 2_400;
 
 // The sentence of a reply whose model call failed (wave 7 spec, worker step 4).
 export const PLAN_FAILED_SENTENCE = "I could not work that out just now. Try again in a minute.";
@@ -26,18 +30,32 @@ export type CheckedPlan = {
   state: "planned" | "done"; action: OrchestratorAction; text: string; question: string | null; friendName: string | null; pairId: string | null;
 };
 
-// One earlier message on one line: who wrote it, then its text with line breaks as spaces, escaped and cut to RECENT_MESSAGE_MAX_CHARS.
-function recentLine(message: RecentMessage): string {
-  const flat = message.text.replace(/\s+/g, " ").trim();
-  const cut = Array.from(flat).slice(0, RECENT_MESSAGE_MAX_CHARS).join("");
-  return (message.role === "you" ? "you: " : "meety: ") + escapeBlockText(cut);
+// The earlier messages the request shows, oldest first: the newest RECENT_MESSAGES_MAX, each with line breaks as spaces and cut to
+// RECENT_MESSAGE_MAX_CHARS, while their characters together fit RECENT_CHARS_MAX. The first one that does not fit is left out with
+// every older one, so the request never skips a message in the middle of the thread.
+export function recentWindow(messages: readonly RecentMessage[]): RecentMessage[] {
+  const kept: RecentMessage[] = [];
+  let chars = 0;
+  for (const message of messages.slice(-RECENT_MESSAGES_MAX).reverse()) {
+    const cut = Array.from(message.text.replace(/\s+/g, " ").trim()).slice(0, RECENT_MESSAGE_MAX_CHARS);
+    chars += cut.length;
+    if (chars > RECENT_CHARS_MAX) break;
+    kept.push({ role: message.role, text: cut.join("") });
+  }
+  return kept.reverse();
 }
 
-// The user message of one plan call: the earlier messages, the friend list and the new message, each in its own block. Names go on one
-// line with no tag characters, as promptLine makes them; the messages are escaped.
+// One earlier message on one line: who wrote it, then its text, escaped.
+function recentLine(message: RecentMessage): string {
+  return (message.role === "you" ? "you: " : "meety: ") + escapeBlockText(message.text);
+}
+
+// The user message of one plan call: the earlier messages recentWindow keeps, the friend list and the new message, each in its own
+// block. Names go on one line with no tag characters, as promptLine makes them; the messages are escaped.
 export function planUserText(input: PlanInput): string {
   const friends = input.friends.length === 0 ? ["(none)"] : input.friends.map((friend) => `${promptLine(friend.displayName)} | can be asked: ${friend.canAsk ? "yes" : "no"}`);
-  const lines = ["<recent>", ...(input.recent.length === 0 ? ["(none)"] : input.recent.map(recentLine)), "</recent>", "<friends>", ...friends, "</friends>"];
+  const recent = recentWindow(input.recent);
+  const lines = ["<recent>", ...(recent.length === 0 ? ["(none)"] : recent.map(recentLine)), "</recent>", "<friends>", ...friends, "</friends>"];
   lines.push("<message>" + escapeBlockText(input.text) + "</message>");
   return lines.join("\n");
 }

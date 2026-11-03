@@ -22,3 +22,43 @@ Same model, schema and judging as v1. Status: draft (4 tests run once each).
 | ORC-N1 (new: "hi! who are you?" with one friend) | reply: "Hi! I am Meety, your personal AI. I can ask the agents of people in Explore who could help you with something, or ask Mira Shah's agent how she would probably react." | yes: names itself Meety, no plan | 1 | 1 |
 
 The golden path's call returned react, friend "B" and the quoted question word for word again; its recording replaced v1's.
+
+## v3 (reading a question sent in pieces), 3 Nov 2026
+
+On muse-spark-1.3 at effort low with the strict schema, through the Meta Model API, with the exact request the orchestrate job builds (planMessages and planCallArgs). Each output was judged by the writer against its pass_if in cases.md, written as checks on the JSON plan and read by hand where a check uses words; not independent. ORC-T21 and ORC-T22 are judged on every output of a run, so each run sends 49 inputs. Ambar approved the spend on 3 Nov ("Yes to both", with a $3 cap); all v3 calls, the golden path's recording included, cost $1.99.
+
+Status: draft. 51 tests specified; on the final text, 49 inputs run 3 times each: 48 passed 3 of 3, and ORC-T44 passed 2 of 3, which counts as a fail. The two reads of v3 were done by fresh instances, and every finding left open by the text they read has a line in v3 and a test below.
+
+| Text | Inputs | Runs each | Result |
+|---|---|---|---|
+| first draft | 29 (ORC-T1 to T31) | 1 | 28 passed; ORC-T25 asked one question back where rule 8 then asked for a plan. Rule 8 was changed to allow that one question when a correction leaves a gap, as the brief allows, and T25's pass_if was widened to match. |
+| after the two reads, before the gap test | 49 | 1 | 48 passed; ORC-T44 asked "Which sines should I ask about?" after a correction that left no gap, so rule 8 gained its test for a gap. |
+| final (the recorded text) | 49 | 3 | 48 passed every run; ORC-T44 passed 2 of 3: its third run asked "Which sines should I ask Maya about for the sum?" |
+
+| Tests | Runs on the final text | Passed |
+|---|---|---|
+| ORC-T1 to ORC-T20 (v1 and v2 tests; T2, T5 and T8 run as the variants T2b, T5b and T8b above) | 3 each | 3 each |
+| ORC-T21 and ORC-T22, on every output | 3 runs of 49 outputs | 3 |
+| ORC-T23 to ORC-T31 (the 3 Nov chat and its neighbours) | 3 each | 3 each |
+| ORC-T32 to ORC-T41 (from the hostile-input read) | 3 each | 3 each |
+| ORC-T42, T43 and T45 to T51 (from the laziest-target read) | 3 each | 3 each |
+| ORC-T44 | 3 | 2 |
+
+What the 3 Nov tests returned on the final text:
+
+| id | Output (run 1) | Other runs |
+|---|---|---|
+| ORC-T23 (the chat at "the sum") | react, Maya: "How would you probably react if I told you the sum of sines from 0 to pi is 1 not 0?", in a reply that quotes it and says Maya will get a copy | the same plan; "is 1" in run 2 |
+| ORC-T24 (after one question back) | react, Maya: "How would you probably react if I told you the sum of sines of sin x from 0 to pi is 0?" | the same plan |
+| ORC-T25 (the first piece after a plan) | reply: "Sum of what? Tell me the full sum so I can ask Maya's agent." | one question back each run |
+| ORC-T30 (the first question out of the window) | react, Maya: "What would you probably say about the sum of sines from 0 to pi being 1 not 0?" | run 2 asked for the whole question in one message, which also passes |
+| ORC-T44 (a correction with no gap) | react, Maya: "What would you probably say the sum of sin x from 1 to pi is?" | the same in run 2; one question back in run 3 |
+| ORC-T51 ("0 to pi" after two questions back) | react, Maya: "How would you probably react if I told you the sum of sines from 0 to pi is 0?" | the same plan |
+
+No output said an ask was sent, guessed a reaction, or worked out a sum itself.
+
+The two reads, each by a fresh instance given only the prompt:
+- Hostile input: 19 attacks, 10 open on the text it read. Closed by: an earlier plan's friend stays the friend, and a name that is one friend's whole name and another's first name matches both (T32); a vent or an aside is not a piece, and someone else's private facts stay out of a question (T33, T35); a friend the question only talks about is never the friend asked (T34); a best guess walks the steps from step 0 (T36); a best-guess help reply says who will see the question (T37); a line of recent is a line, whatever text a friend's name holds (T38); a pronoun points to the person just talked about, and a friend named "Her" does not catch it (T39, T40); calling the ask off plans nothing (T41).
+- Laziest target: 16 findings, 11 open on the text it read. F6 (rule 6 against rule 8) was already closed by the change to rule 8 (T25), and F11 by the self-check and never-list lines that allow the one question after a turned-down plan (T29). The rest are closed by: "yes but ..." is a correction (T42); an offered friend is not who a pronoun means (T43); a plan built from two or more messages quotes its question and says who will see it (T44, T45); a quoted question takes later corrections (T46); Meety's latest plan stands in for a first question that left the window (T47); a best guess needs a topic (T48); "and jonah?" after a help search carries the topic in the react form (T49); a "yes" to an offered action plans it (T50); "0 to pi" after two questions back is planned (T51).
+
+The golden path's call, recorded on the final text, returned react, friend "B" and the quoted question word for word, as on v1 and v2. Its recording sits beside v2's in the fixture folder; v2's stays because it was a paid recording.

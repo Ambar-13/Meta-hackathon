@@ -43,7 +43,7 @@ export const ROMANCE_QUESTION_ID = 17;
 // The friend ask A sends about B in step 20. apps/worker/src/asks/testing/golden-path-asks.ts writes its replies for the same text.
 export const REACT_ASK_TEXT = "How would you probably react if the team moved the demo day to a Saturday?";
 // What A types to the orchestrator in step 23: the question of step 20, quoted, so the plan carries it word for word and its ask
-// replays step 20's recorded replies. Meety's own reply (prompt orchestrator v2) was recorded live on 3 Nov 2026.
+// replays step 20's recorded replies. Meety's own reply (prompt orchestrator v3) was recorded live on 3 Nov 2026.
 export const ORCHESTRATOR_MESSAGE = `Can you ask B: "${REACT_ASK_TEXT}"`;
 // The help search A sends in step 21; its words meet B's public item about getting stuck. golden-path-asks.ts uses the same text.
 export const HELP_ASK_TEXT = "I keep getting stuck on one hard problem and go round in circles. Who could help me think it through?";
