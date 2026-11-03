@@ -99,6 +99,15 @@ describe("/me, against the MSW route stubs (a fake server)", () => {
     expect(document.body.textContent).not.toMatch(/persona|directory/i);
   });
 
+  it("W7-ME-T2: with no notes yet the next step is Add your notes, and About offers no second way to add chats", async () => {
+    stubMeReads({ home: home({ source: null, card: null }) });
+    renderMe();
+
+    expect(await screen.findByRole("heading", { level: 2, name: "Add your notes." })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Add your notes" }).getAttribute("href")).toBe("/upload");
+    expect(screen.queryByRole("link", { name: "Add more chats" })).toBeNull();
+  });
+
   it("W7-WEB-A-T8b: not listed, /me shows your name, the line that you are not in Explore, and Join, which sends your card, line and dating switch", async () => {
     stubMeReads({});
     stubRoute(routes.directory.upsertMyListing, myListing(false));

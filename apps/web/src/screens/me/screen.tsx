@@ -20,8 +20,8 @@ const ME_SCREEN_COPY = {
   source: "In your own words",
 } as const;
 
-// What /me shows under your profile from GET /api/home: the next step, and the Meetings tab's panel.
-type MeBelow = { next: ReactNode; meetings: ReactNode };
+// What /me shows under your profile from GET /api/home: the next step, the end of the About tab, and the Meetings tab's panel.
+type MeBelow = { next: ReactNode; aboutEnd: ReactNode; meetings: ReactNode };
 
 // Your profile when you are in Explore: the header as others see it (GET /api/directory/:id, friendship self) with Edit my listing
 // and Your card, your listing controls under it while open, the next step, then the tabs.
@@ -42,7 +42,7 @@ const ListedMe = (props: { listing: MyListing; home: HomeView | null; yours: You
       </ProfileHeader>
       {isEditing ? <EditListing listing={listing} yours={props.yours} onSaved={onSaved} /> : null}
       {props.below.next}
-      <ProfileTabs items={profile?.items ?? listing.items} source={ME_SCREEN_COPY.source} postsName={null} aboutEnd={<AddChats />} meetings={props.below.meetings} />
+      <ProfileTabs items={profile?.items ?? listing.items} source={ME_SCREEN_COPY.source} postsName={null} aboutEnd={props.below.aboutEnd} meetings={props.below.meetings} />
     </>
   );
 };
@@ -57,18 +57,23 @@ const UnlistedMe = (props: { home: HomeView | null; yours: YourListingHook; belo
       </ProfileHeader>
       <JoinExplore home={props.home} yours={props.yours} />
       {props.below.next}
-      <ProfileTabs items={[]} source={ME_SCREEN_COPY.source} postsName={null} aboutEnd={<AddChats />} meetings={props.below.meetings} />
+      <ProfileTabs items={[]} source={ME_SCREEN_COPY.source} postsName={null} aboutEnd={props.below.aboutEnd} meetings={props.below.meetings} />
     </>
   );
 };
 
-// The next step and the Meetings panel from the home view; while it loads, or when it fails, its loading line or error in both places.
+// The next step, the end of About and the Meetings panel from the home view; while it loads, or when it fails, its loading line or
+// error. Add more chats shows only once there is a card: before that the next step is the way to add your notes.
 function belowFrom(home: PolledView<HomeView>, fromExplore: ReadonlySet<string>): MeBelow {
   if (home.value === null) {
     const state = home.error === null ? <LoadingLine text={ME_SCREEN_COPY.loadingHome} /> : <ErrorNotice error={home.error} />;
-    return { next: state, meetings: state };
+    return { next: state, aboutEnd: null, meetings: state };
   }
-  return { next: <MeNext home={home.value} />, meetings: <MeMeetings home={home.value} fromExplore={fromExplore} /> };
+  return {
+    next: <MeNext home={home.value} />,
+    aboutEnd: home.value.card === null ? null : <AddChats />,
+    meetings: <MeMeetings home={home.value} fromExplore={fromExplore} />,
+  };
 }
 
 // /me, after Instagram's own profile: your profile as others see it with Edit my listing and Your card, the one next step, then the
