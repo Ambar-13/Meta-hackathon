@@ -6,7 +6,7 @@ import { NamesPassOutput, SUMMARY_MAX_CHARS, type SummaryPointView } from "@meet
 import { withPerson, type Database } from "@meet-first/db";
 import { CapReached } from "@meet-first/llm";
 import { parseSummary } from "@meet-first/parsers";
-import { applyRoleTokens, assignTokens, isAllowlisted, namesPassCall, namesPassRetryAt } from "../cards/index.js";
+import { applyRoleTokens, assignTokens, isAllowlisted, namesPassCall, namesPassRetryAt, PROTECTED_TOKEN } from "../cards/index.js";
 import type { JobContext, JobTask } from "../job-context.js";
 import { findQuoteTurns } from "./find-quotes.js";
 
@@ -40,6 +40,20 @@ async function findSummaryNames(context: JobContext, personId: string, input: Su
     context.log.warn({ personId, error: error instanceof Error ? error.message : String(error) }, "check_summary: names call failed");
     return "failed";
   }
+}
+
+// The rewritten summary cut back to SUMMARY_MAX_CHARS, since role tokens are longer than the names they replace: at the last blank line
+// between blocks when there is one, else before any token the limit would split, and never inside a character.
+export function fitSummaryLength(text: string): string {
+  if (text.length <= SUMMARY_MAX_CHARS) return text;
+  const blank = text.slice(0, SUMMARY_MAX_CHARS).lastIndexOf("\n\n");
+  if (blank > 0) return text.slice(0, blank).trimEnd();
+  let end = SUMMARY_MAX_CHARS;
+  const straddling = [...text.matchAll(PROTECTED_TOKEN)].find((match) => match.index < end && match.index + match[0].length > end);
+  if (straddling !== undefined) end = straddling.index;
+  const lastUnit = text.charCodeAt(end - 1);
+  if (lastUnit >= 0xd800 && lastUnit <= 0xdbff) end -= 1;
+  return text.slice(0, end).trimEnd();
 }
 
 // The checked points: each point with the first of its quotes found in the person's own messages, or null.
@@ -81,7 +95,7 @@ export const checkSummaryTask: JobTask<"check_summary"> = async (payload, contex
   }
   const person = { displayName: input.displayName, affiliations: input.affiliations };
   const tokens = assignTokens(outcome.names.filter((name) => !isAllowlisted(name.text, person)));
-  const text = Array.from(applyRoleTokens(input.text, tokens)).slice(0, SUMMARY_MAX_CHARS).join("");
+  const text = fitSummaryLength(applyRoleTokens(input.text, tokens));
   const points = await checkedPoints(context.db, payload.personId, text);
   await storeResult(context.db, payload.personId, { readText: input.text, text, points });
 };

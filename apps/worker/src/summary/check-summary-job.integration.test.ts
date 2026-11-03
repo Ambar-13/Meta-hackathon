@@ -99,6 +99,17 @@ describe("the check_summary job", () => {
     expect((await summaryOf(personId)).points.map((point) => point.found)).toEqual([null, null]);
   });
 
+  it("W7-SUMMARY-JOB-T5: a summary that grows past 20,000 characters when names become role tokens is cut without splitting a token", async () => {
+    const personId = await seedPerson("Summary Grows", { messages: [], summary: `Kind: view\nPoint: abc ${"Al and ".repeat(2_500)}` });
+
+    await check(personId, namesModel([{ text: "Al", role: "cofounder" }]));
+    const after = await summaryOf(personId);
+
+    expect(after.state).toBe("ready");
+    expect(after.text.length).toBeLessThanOrEqual(20_000);
+    expect(after.text).not.toMatch(/\[person:[^\]]*$/);
+  });
+
   it("W7-SUMMARY-JOB-T4: a names call that fails every attempt leaves the summary failed and stores no points", async () => {
     const personId = await seedPerson("Summary Failed", { messages: [], summary: ["Kind: view", "Point: Rentably was never a bad idea."].join("\n") });
 

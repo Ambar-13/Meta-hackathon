@@ -96,6 +96,17 @@ describe("the summary routes", () => {
     expect(summaryJobsFor(person.personId)).toHaveLength(SUMMARY_SAVES_PER_DAY);
   });
 
+  it("W7-SUMMARY-API-T7: placeholder-shaped text the person typed is stored with round brackets, so it cannot hide a name from the names check", async () => {
+    const person = await createTestPerson(t.db, "Summary Brackets");
+
+    await send("PUT", person.sessionToken, { text: `${SUMMARY}\nQuote: built it with [person:Leon Hartley] and [code: Leon Hartley] and [redacted:Leon]`, friendsCanAsk: false });
+    const row = await withPerson(t.db, person.personId, (trx) => trx.selectFrom("person_summaries").select("text").where("person_id", "=", person.personId).executeTakeFirstOrThrow());
+
+    expect(row.text).toContain("(person:Leon Hartley]");
+    expect(row.text).toContain("(code: Leon Hartley]");
+    expect(row.text).not.toMatch(/\[(?:person|code|redacted)\s*:/);
+  });
+
   it("W7-SUMMARY-API-T5: DELETE removes the summary, and reading it then answers 404", async () => {
     const person = await createTestPerson(t.db, "Summary Gone");
     await send("PUT", person.sessionToken, { text: SUMMARY, friendsCanAsk: false });

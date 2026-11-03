@@ -26,9 +26,13 @@ function viewOf(row: SummaryRow): SummaryView {
   return SummaryView.parse({ state: row.state, points: points.success ? points.data : [], friendsCanAsk: row.friends_can_ask, updatedAt: row.updated_at.toISOString() });
 }
 
-// The text as it is stored: canonical, then scrubbed by code with the person's own names left alone.
+// An opening square bracket that would make typed text look like a placeholder or a role token, which the names check leaves alone.
+const TOKEN_SHAPED = /\[(?=\s*(?:person|code|redacted)\s*:)/giu;
+
+// The text as it is stored: token-shaped brackets the person typed turned round, so no name can hide inside one; then canonical, then
+// scrubbed by code with the person's own names left alone. Only the scrub writes placeholders.
 function scrubbedText(text: string, allowlist: readonly string[]): string {
-  return scrub(canonicalise(text), { allowlist, nextId: makePlaceholderCounter() }).text;
+  return scrub(canonicalise(text.replace(TOKEN_SHAPED, "(")), { allowlist, nextId: makePlaceholderCounter() }).text;
 }
 
 // Counts one save on the person, unless they already saved SUMMARY_SAVES_PER_DAY times this UTC day; false at the cap. The count
