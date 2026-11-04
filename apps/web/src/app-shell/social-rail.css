@@ -1,9 +1,4 @@
-/* The signed-in frame. On a laptop (1200px and wider) a sidebar: the Meety mark
-   and words with the tagline under them, the pages with their words, Invite a friend, Settings at the foot, and a line on what your
-   Meety shares. Between 768px and 1200px the narrow Instagram rail of icons, each icon's words on hover. On a phone, as Instagram's app
-   since 2025, a top bar with the logo and Settings, and a frosted pill of icons floating over the foot of the page, the current page's
-   icon bold on a round grey patch and the request count as a small red badge; each icon keeps its words for screen readers (Ambar, 3
-   Nov: "also study instagrams tab (the navigation pane down)"). Pages without a session keep app.css's frame. Spacing is on a 4px grid. */
+/* Familiar social navigation: a labelled bottom bar on phones, an icon rail on tablets, and a sidebar on desktop. */
 
 .social-pages .page-word { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 .social-pages .page-icon { position: relative; display: inline-grid; place-items: center; }
@@ -13,30 +8,28 @@
 /* The sidebar's words, Invite and foot show only on a laptop. Invite is a link in the nav, so it needs the nav links' weight to stay hidden. */
 .rail-wordmark, .rail-tagline, .rail-foot, .social-pages.tab-bar a.rail-invite { display: none; }
 
-/* ---------- phone: the top bar with Settings, and the floating pill of icons ---------- */
+/* A stable bottom bar keeps the feed visible and every destination within a thumb's reach. */
 @media (max-width: 767.98px) {
-  .social-frame { --tab-bar: 80px; }
+  .social-frame { --tab-bar: 62px; }
   .social-rail .rail-logo, .social-pages.tab-bar a.rail-only, .social-pages.tab-bar a.phone-hidden { display: none; }
-  /* Instagram's top bar: a button at each end and the logo in the middle. */
-  .social-frame .social-top { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; height: 56px; padding: 0 4px;
-    background: color-mix(in oklab, var(--ui-bg) 94%, transparent); box-shadow: 0 1px 0 var(--ui-line); }
-  .social-top .logo { grid-column: 2; justify-self: center; font-size: 24px; }
+  .social-frame .social-top { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; height: 56px; padding: 0 8px;
+    background: var(--ui-bg); box-shadow: 0 1px 0 var(--ui-line); }
+  .social-top .logo { grid-column: 2; justify-self: center; font-size: 25px; }
   .top-invite { grid-column: 1; }
   .top-settings { grid-column: 3; }
-  .top-invite, .top-settings { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; color: var(--ui-ink); }
-  .top-invite:hover, .top-settings:hover { background: var(--ui-soft); text-decoration: none; }
-  .social-pages.tab-bar { left: 20px; right: 20px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); justify-content: space-around; gap: 0; margin: 0 auto;
-    max-width: 360px; padding: 6px; border-radius: 999px; background: color-mix(in oklab, var(--ui-bg) 82%, transparent);
-    -webkit-backdrop-filter: blur(20px) saturate(1.6); backdrop-filter: blur(20px) saturate(1.6);
-    box-shadow: 0 0 0 1px oklch(20% 0.01 70 / 0.06), 0 12px 32px -12px oklch(20% 0.01 70 / 0.34); }
-  .social-pages.tab-bar a { flex: 1; display: grid; place-items: center; min-height: 52px; padding: 0; border-radius: 999px; background: none; color: var(--ui-ink); }
-  .social-pages.tab-bar a:hover { background: none; text-decoration: none; }
-  .social-pages.tab-bar a[aria-current="page"] { background: none; box-shadow: none; }
-  /* The icon's round patch: grey under the current page, a lighter grey on hover. */
-  .social-pages.tab-bar .page-icon { width: 60px; height: 44px; border-radius: 22px; transition: background-color 0.15s var(--ease); }
-  .social-pages.tab-bar a:hover .page-icon { background: color-mix(in oklab, var(--ui-ink) 5%, transparent); }
-  .social-pages.tab-bar a[aria-current="page"] .page-icon { background: color-mix(in oklab, var(--ui-ink) 9%, transparent); }
-  .social-pages.tab-bar .count-pill { top: 4px; right: 10px; min-width: 18px; height: 18px; padding: 0 5px; font-size: 12px; }
+  .top-invite, .top-settings { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: var(--ui-ink); }
+  .top-invite { color: var(--ui-blue); }
+  .social-pages.tab-bar { left: 0; right: 0; bottom: 0; justify-content: space-around; gap: 0; margin: 0;
+    max-width: none; padding: 4px 8px calc(4px + env(safe-area-inset-bottom, 0px)); border-radius: 0; background: var(--ui-bg);
+    box-shadow: 0 -1px 0 var(--ui-line); }
+  .social-pages.tab-bar a { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 2px; min-height: 54px; padding: 2px 0; border-radius: 10px;
+    background: none; color: var(--ui-ink-2); }
+  .social-pages.tab-bar a:hover { text-decoration: none; }
+  .social-pages.tab-bar a[aria-current="page"] { background: none; box-shadow: none; color: var(--ui-blue); }
+  .social-pages.tab-bar .page-icon { width: 44px; height: 29px; border-radius: 14px; }
+  .social-pages.tab-bar a[aria-current="page"] .page-icon { background: var(--ui-blue-soft); }
+  .social-pages .page-word { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; clip-path: none; font-size: 11px; line-height: 14px; font-weight: 600; }
+  .social-pages.tab-bar .count-pill { top: -3px; right: 0; min-width: 17px; height: 17px; padding: 0 4px; font-size: 11px; }
 }
 
 /* ---------- 768px and wider: the rail on the left ---------- */
@@ -59,7 +52,7 @@
   .social-pages.tab-bar a:first-child { margin-top: auto; }
   .social-pages.tab-bar a.rail-only { margin-top: auto; }
   .social-pages.tab-bar a:hover { background: var(--ui-soft); text-decoration: none; }
-  .social-pages.tab-bar a[aria-current="page"] { background: none; box-shadow: none; }
+  .social-pages.tab-bar a[aria-current="page"] { background: var(--ui-blue-soft); color: var(--ui-blue); box-shadow: none; }
 }
 
 /* ---------- 768px to 1200px: each icon's words beside it on hover and on keyboard focus, as a small dark label ---------- */
@@ -76,13 +69,13 @@
   .rail-logo { display: flex; align-items: center; gap: 12px; width: auto; height: auto; padding: 4px 8px; font-size: 32px; }
   .rail-wordmark { display: inline; font-size: 26px; line-height: 1; }
   .rail-tagline { display: block; margin: 8px 8px 28px; color: var(--ui-ink-2); font-size: 13px; line-height: 20px; }
-  .social-pages.tab-bar { align-items: stretch; gap: 4px; }
+  .social-pages.tab-bar { align-items: stretch; gap: 8px; }
   /* Row, not app.css's column: the icon beside its words. */
   .social-pages.tab-bar a { display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 16px; width: auto; min-height: 48px; padding: 0 14px;
-    color: var(--ui-ink-2); font: 500 15px/20px var(--ui-font); }
+    color: var(--ui-ink-2); font: 500 16px/20px var(--ui-font); }
   .social-pages.tab-bar a:first-child { margin-top: 0; }
   .social-pages.tab-bar a:hover { color: var(--ui-ink); }
-  .social-pages.tab-bar a[aria-current="page"] { background: var(--ui-soft); color: var(--ui-ink); font-weight: 600; }
+  .social-pages.tab-bar a[aria-current="page"] { background: var(--ui-blue-soft); color: var(--ui-blue); font-weight: 700; }
   .social-pages .page-word { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; clip-path: none; }
   .social-pages .page-icon { position: static; }
   .social-pages .count-pill { top: 50%; right: 14px; translate: 0 -50%; box-shadow: none; }

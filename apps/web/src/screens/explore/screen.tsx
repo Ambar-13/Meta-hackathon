@@ -153,8 +153,7 @@ const FeedHead = (props: {
   );
 };
 
-// A post's body: its words over its photo, or, with no photo, its words large on a warm card. A
-// photo with no words shows alone.
+// Photos lead the post; their captions sit below the actions. Text-only posts keep their own space.
 const FeedBody = (props: { post: Post }): ReactElement => {
   const { post } = props;
   if (photoOf(post.photo) === null) {
@@ -168,7 +167,6 @@ const FeedBody = (props: { post: Post }): ReactElement => {
   }
   return (
     <>
-      {post.text === "" ? null : <p className="feed-text">{post.text}</p>}
       <PostPhoto
         photo={post.photo}
         alt={post.photoAlt ?? `${post.displayName}'s photo`}
@@ -273,13 +271,18 @@ const FeedPost = (props: {
     >
       <FeedHead post={post} listing={props.listing} friends={props.friends} />
       <FeedBody post={post} />
-      {item === null ? null : <FeedNote post={post} item={item} />}
       <FeedFoot
         post={post}
         friends={props.friends}
         likes={props.likes}
         onDeleted={props.onDeleted}
       />
+      {photoOf(post.photo) === null || post.text === "" ? null : (
+        <p className="feed-text">
+          <strong>{post.displayName}</strong> {post.text}
+        </p>
+      )}
+      {item === null ? null : <FeedNote post={post} item={item} />}
     </article>
   );
 };
