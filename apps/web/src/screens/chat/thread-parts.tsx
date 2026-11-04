@@ -44,7 +44,7 @@ function reactWords(name: string | null): { line: string; button: string } {
   const who = name ?? FRIEND_FALLBACK;
   return {
     line: capitalised(
-      `${who}'s Meety answers from what ${who} chose to share. ${capitalised(who)} gets a copy of the answer.`,
+      `${who}'s Meety answers from what ${who} chose to share. ${capitalised(who)} gets a copy of your question and the answer.`,
     ),
     button: `Ask ${who}'s Meety`,
   };

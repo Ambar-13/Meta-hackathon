@@ -106,7 +106,14 @@ describe("prompt texts", () => {
     expect(text).toContain("<do_not_guess> beats a summary line and a guess");
   });
 
-  it("R3.9-T2: current.ts names every prompt folder, the question-kind prompts at v5, v4 or v2, persona-answer at v4 and the rest at v1, and readPrompt reads that version", () => {
+  it('R3.9-T5: a persona\'s answer names its human, because "my human" and "material" are the prompt\'s words and not a person\'s', () => {
+    const { text } = readPrompt("persona-answer");
+    expect(text).toContain('say "NAME has not shared anything on this."');
+    expect(text).toContain('never "my human", "your human" or "material"');
+    expect(text).not.toContain('"my human has not said"');
+  });
+
+  it("R3.9-T2: current.ts names every prompt folder, the question-kind prompts at v5, v4 or v2, persona-answer at v5 and the rest at v1, and readPrompt reads that version", () => {
     expect(PROMPT_NAMES).toEqual([
       "dossier",
       "scrub-names",
@@ -133,7 +140,7 @@ describe("prompt texts", () => {
       brief: "v5",
       "brief-support-judge": "v2",
       orchestrator: "v5",
-      "persona-answer": "v4",
+      "persona-answer": "v5",
     };
     for (const name of PROMPT_NAMES) expect(currentVersion(name)).toBe(changed[name] ?? "v1");
     for (const name of [

@@ -189,7 +189,7 @@ describe("chat screen", () => {
     expect(screen.getByText(`“${TRIP_QUESTION}”`)).toBeTruthy();
     expect(
       screen.getByText(
-        "Mira's Meety answers from what Mira chose to share. Mira gets a copy of the answer.",
+        "Mira's Meety answers from what Mira chose to share. Mira gets a copy of your question and the answer.",
       ),
     ).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Ask Mira's Meety" }));
