@@ -239,7 +239,7 @@ describe("chat screen", () => {
 
   it("W7-WEB-B-T7: a done reply with a refusal shows its text and no button", async () => {
     const text =
-      "I can ask Mira's agent how she would probably take a March trip.\n\nMira has not turned on friend asks yet.";
+      "I can ask Mira's Meety how she would probably take a March trip.\n\nMira has not turned on friend asks yet.";
     stubReads({
       thread: [
         [
@@ -325,7 +325,7 @@ describe("chat screen", () => {
             actionQuestion: "How would you react?",
             actionFriendName: "Jonah",
             askId: null,
-            text: "I can ask Jonah's agent.",
+            text: "I can ask Jonah's Meety.",
           }),
         ],
       ],

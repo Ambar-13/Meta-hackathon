@@ -138,7 +138,7 @@ export function plannedReact(id: string): OrchestratorMessage {
   return replied(id, {
     state: "planned",
     action: "react",
-    text: "I can ask Mira's agent how she would probably take a March trip.",
+    text: "I can ask Mira's Meety how she would probably take a March trip.",
     actionQuestion: TRIP_QUESTION,
     actionFriendName: "Mira",
   });
@@ -149,7 +149,7 @@ export function plannedHelp(id: string): OrchestratorMessage {
   return replied(id, {
     state: "planned",
     action: "help",
-    text: "I can ask the agents of people in Explore who could probably help.",
+    text: "I can ask the Meetys of people in Explore who could probably help.",
     actionQuestion: USERS_QUESTION,
   });
 }

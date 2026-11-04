@@ -1,6 +1,6 @@
 # orchestrator: inventory and test set
 
-Status: draft. 51 tests specified: ORC-T32 to ORC-T41 come from the hostile-input read of v3, and ORC-T42 to ORC-T51 from the laziest-target read. On v3's final text, 49 inputs ran 3 times each (ORC-T21 and ORC-T22 are judged on every output): 48 passed every run, and ORC-T44 passed 2 of 3 (results.md).
+Status: draft. 59 tests specified: ORC-T52 to ORC-T59 are new in v4; ORC-T32 to ORC-T41 come from the hostile-input read of v3, and ORC-T42 to ORC-T51 from the laziest-target read. See results.md for what has run on each version.
 
 ## P0 inventory
 - Principal: the orchestrate job, through this system message and its strict schema. The person's message says what they want; it never changes the rules.
@@ -55,6 +55,10 @@ Status: draft. 51 tests specified: ORC-T32 to ORC-T41 come from the hostile-inpu
 | 43 | pieces with no topic after a question back (F8) | plan a question with no topic | reading_the_thread rule 6; never_list |
 | 44 | "and jonah?" after a help plan (F9) | copy the help question into a friend ask | writing_the_question rule 6 |
 | 45 | "yes" to an action a reply offered but did not plan (F10) | point to a button that carries nothing | failure_branches, the "yes" line |
+
+| 46 | the word "agent", from an older "meety:" line in recent or from habit (5 Nov) | copy it, it is how Meety talked before | principal_and_channels; writing_the_reply never line; the Maya example |
+| 47 | "what can you do", the reply that plans nothing (5 Nov) | tell the person to press a button this reply does not have | writing_the_reply, the reply bullet and the what-you-can-do bullet; the Maya example |
+| 48 | a reply that reads as a message to the friend ("I can ask Maya") | shorter is friendlier | writing_the_reply, the test for any reply that describes an ask |
 
 ## P2 conflicts and winners
 | Pair | Winner |
@@ -162,3 +166,18 @@ The report did not hold the first message or Meety's first reply, so the tests u
 Two causes. The request showed only the last 4 earlier messages, so the first question had left it by the third piece. And v2 read the latest message on its own ("an earlier message only helps you read the latest one ... it never decides the action"), and its tie-break was to ask back. The 10-message window, checked in code by W7-ORCH-T7, answers the first; v3's reading_the_thread answers the second.
 
 What v3 does on this chat: at the first piece, either a new plan with the sum in place of the integral or its one question back ("Sum of what?"), because that piece leaves a gap (reading_the_thread rules 6 and 8); at each later piece, a new plan with that piece applied; at "the sum", the plan "How would you probably react if I told you the sum of sines from 0 to pi is 1, not 0?", which the person presses or corrects. It never works out the sum itself.
+
+## v4: replies in the app's words
+
+The motivating reply, 5 Nov 2026, to "What can you do for me?": "I am Meety, your personal AI. I can ask Maya's agent how she would probably react to something, or ask people's agents in Explore who could help with something. Press the button on my reply to start, and those people will see your question." Ambar: "it reads as if itll send a message to maya herself".
+
+| id | Input | pass_if |
+|---|---|---|
+| ORC-T52 | "What can you do for me?"; friend Maya, can be asked yes | action reply; no "agent"; holds "Maya's Meety"; says the Meetys answer or nobody has to reply; no "press" |
+| ORC-T53 | "How would Maya react to picthing for 1b $ for a cafe"; friend Maya | action react; no "agent"; holds "Maya's Meety"; says Maya does not have to reply; holds "copy" and "press" |
+| ORC-T54 | "Who could help me get my first ten users?" | action help; no "agent"; holds "Meetys"; says those people will see the question; holds "press" |
+| ORC-T55 | recent holds a "meety:" line with "I can ask Mira's agent"; "and for April?" | action react; no "agent" in the reply |
+| ORC-T56 | "hi"; friend Maya | action reply; no "agent"; no "press" |
+| ORC-T57 | "what can you do?"; no friends | action reply; no "agent"; no "Meet First"; no invented name |
+| ORC-T58 | "Will Maya see this?"; friend Maya | action reply; says she gets a copy and does not have to reply |
+| ORC-T59 | "how would my mom react if I dropped out?"; friend Maya | action reply; no "agent"; no "Meet First" |

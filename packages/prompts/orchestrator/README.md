@@ -1,6 +1,6 @@
 # orchestrator prompt
 
-Meety, the person's personal AI (called the orchestrator in the code), reads one chat message from a person and plans exactly one action: a help search across Explore, a friend ask to one friend's agent, or a reply in words only (wave 7).
+Meety, the person's personal AI (called the orchestrator in the code), reads one chat message from a person and plans exactly one action: a help search across Explore, a friend ask to one friend's Meety, or a reply in words only (wave 7).
 
 ## What this does
 

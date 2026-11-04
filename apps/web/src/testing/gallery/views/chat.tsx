@@ -55,7 +55,7 @@ const REFUSED = replied(chatId(21), {
   action: "react",
   actionFriendName: "Jonah",
   actionQuestion: "How would you feel about a later demo slot?",
-  text: "I can ask Jonah's agent how he would probably take a later demo slot.\n\nJonah has not turned on friend asks yet.",
+  text: "I can ask Jonah's Meety how he would probably take a later demo slot.\n\nJonah has not turned on friend asks yet.",
 });
 // A failed reply, in the api's words.
 const FAILED = replied(chatId(22), {
@@ -192,7 +192,7 @@ export const views: readonly GalleryView[] = [
           action: "react",
           actionFriendName: "Mira",
           actionQuestion: TRIP_QUESTION,
-          text: "I asked Mira's agent. Its answer fills in below.",
+          text: "I asked Mira's Meety. Its answer fills in below.",
           askId: CHAT_IDS.ask,
         }),
       ],
