@@ -2,7 +2,7 @@ import { useEffect, useMemo, type ReactElement } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 import { ContractError } from "@meet-first/contracts";
-import { recordPageViews, startAnalytics } from "./analytics.js";
+import { recordPageViews } from "./analytics.js";
 import { AppTree } from "./app-tree.js";
 import { createAppRouter } from "./routes.js";
 import "@fontsource-variable/bricolage-grotesque/opsz.css";
@@ -29,7 +29,6 @@ if (rootElement === null) {
     "The page has no root element. Rebuild the web app with pnpm --filter web build.",
   );
 }
-startAnalytics();
 // A public page arrives with its words already in the root (apps/web/prerender.ts), so the app
 // takes over that markup; every other page arrives as the empty shell and is rendered from nothing.
 if (rootElement.hasChildNodes()) {

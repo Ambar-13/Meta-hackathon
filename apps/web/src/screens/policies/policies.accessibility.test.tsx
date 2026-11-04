@@ -40,7 +40,7 @@ describe("the policy pages", () => {
     expect(screen.getByText(/^Meety counts visits with Google Analytics/)).toBeTruthy();
     expect(
       screen.getByText(
-        "If your browser sends Global Privacy Control or Do Not Track, Google Analytics never loads.",
+        "If your browser sends Global Privacy Control or Do Not Track, Meety sends nothing to Google Analytics.",
       ),
     ).toBeTruthy();
     expect(screen.queryByText(/no trackers/)).toBeNull();
@@ -80,14 +80,13 @@ describe("the policy pages", () => {
     expect(screen.queryByRole("link", { name: "Home" })).toBeNull();
   });
 
-  it("W7-COOKIES-T1: /cookies lists the two sign-in cookies, the two notes and the two analytics cookies with what each is for and how long it stays, and how to keep analytics off", () => {
+  it("W7-COOKIES-T1: /cookies lists the two cookies and the three notes with what each is for and how long it stays, and how to keep analytics off", () => {
     renderScreen(<CookiesScreen />, { pattern: ROUTE_PATTERNS.cookies, url: APP_PATHS.cookies });
 
     expect(screen.getByRole("heading", { level: 1, name: "Cookies" })).toBeTruthy();
     expect(sectionHeadings()).toEqual([
       "The two cookies",
-      "The two notes",
-      "The two analytics cookies",
+      "The three notes",
       "Google's own page",
       "Removing them",
       "Questions",
@@ -97,13 +96,12 @@ describe("the policy pages", () => {
       "__Host-google",
       "meet-first-stories-seen",
       "meet-first.access-code",
-      "_ga",
-      "_ga_0DLJPMZJV4",
+      "meet-first.visitor",
     ]);
     expect(screen.getByText("Lasts 90 days. Deleting your account removes it.")).toBeTruthy();
     expect(
       screen.getByText(
-        /If your browser sends Global Privacy Control or Do Not Track, Google Analytics never loads and sets nothing\./,
+        /If your browser sends Global Privacy Control or Do Not Track, Meety keeps no such note and sends nothing to Google\./,
       ),
     ).toBeTruthy();
     expect(screen.queryByText(/nothing to accept/)).toBeNull();

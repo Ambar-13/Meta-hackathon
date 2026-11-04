@@ -43,9 +43,9 @@ export type PublicPage = { path: string; file: string; changed: string };
 // change, never otherwise: search engines treat a moving date with unchanged words as a warning sign.
 export const PUBLIC_PAGES: readonly PublicPage[] = [
   { path: "/", file: "index.html", changed: "2026-11-05" },
-  { path: "/privacy", file: "privacy.html", changed: "2026-11-03" },
+  { path: "/privacy", file: "privacy.html", changed: "2026-11-05" },
   { path: "/terms", file: "terms.html", changed: "2026-11-03" },
-  { path: "/cookies", file: "cookies.html", changed: "2026-11-03" },
+  { path: "/cookies", file: "cookies.html", changed: "2026-11-05" },
 ];
 
 // The start of every public share page's path. Anyone with the link may read one, so they are

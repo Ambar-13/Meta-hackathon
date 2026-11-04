@@ -13,13 +13,12 @@ export const IMMUTABLE_CACHE = "public, max-age=31536000, immutable";
 // The Content-Security-Policy: everything from this site only, and images also from data: URLs.
 export const CONTENT_SECURITY_POLICY =
   "default-src 'self'; img-src 'self' data:; connect-src 'self'";
-// The one host whose pages load Google Analytics, as LIVE_HOST in apps/web/src/app-shell/analytics.ts.
+// The one host whose pages count visits, as LIVE_HOST in apps/web/src/app-shell/analytics.ts.
 export const ANALYTICS_HOST = "heymeety.com";
-// The policy on that host: the same, plus the hosts Google Analytics' page views go to. Its tag
-// script comes from this site (analytics-tag.ts), so no other site's script is ever allowed.
+// The policy on that host: the same, plus the one host Meety's page views go to. Meety sends them
+// itself and loads no Google script, so no other site's script is ever allowed.
 export const ANALYTICS_CONTENT_SECURITY_POLICY =
-  "default-src 'self'; img-src 'self' data:; " +
-  "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com";
+  "default-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com";
 
 // The policy for a request's Host header: the analytics one on ANALYTICS_HOST, the strict one on
 // every other host, a laptop and Render's own address included.
@@ -56,8 +55,8 @@ export async function registerStaticFiles(app: FastifyInstance, distDir: string)
 // text ever reached the page as HTML, an image tag could send card data to another site. The step:
 // every script, image and fetch we need comes from our own origin, so each response allows only our
 // origin, plus data: images for the QR code and the shared comic panels; on heymeety.com it also
-// allows Google Analytics' page views, which go by fetch, so an image tag still reaches no other
-// site there. What it does not do: it does not change model text, which apps/web renders through
+// allows the page views Meety sends to Google Analytics by fetch, so an image tag still reaches no
+// other site there. What it does not do: it does not change model text, which apps/web renders through
 // its allow-list, and it is not on the meeting stream, whose headers events-route.ts writes itself.
 // Adds the Content-Security-Policy header to every response that goes through Fastify's reply, JSON
 // and HTML alike.

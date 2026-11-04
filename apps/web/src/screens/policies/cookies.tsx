@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { MEASUREMENT_ID } from "../../app-shell/index.js";
+import { VISITOR_KEY } from "../../app-shell/index.js";
 import { PolicyPage, PolicySections, type PolicySection } from "./policy-page.js";
 
 // One thing Meety keeps in the browser: its name as the browser shows it, what it is for, and how
@@ -22,7 +22,8 @@ const COOKIES: readonly BrowserItem[] = [
   },
 ];
 
-// The two notes the app keeps in the browser's own storage, which no request carries to the server.
+// The three notes the app keeps in the browser's own storage, which no request carries to Meety's
+// server.
 const NOTES: readonly BrowserItem[] = [
   {
     name: "meet-first-stories-seen",
@@ -36,25 +37,16 @@ const NOTES: readonly BrowserItem[] = [
     stays:
       "Stays until you clear this site's data. It leaves your browser only inside the invite links you share.",
   },
-];
-
-// The two cookies Google Analytics sets on heymeety.com when the browser allows it
-// (apps/web/src/app-shell/analytics.ts).
-const ANALYTICS_COOKIES: readonly BrowserItem[] = [
   {
-    name: "_ga",
+    name: VISITOR_KEY,
     purpose:
-      "A random number Google Analytics gives this browser, so a second visit counts as the same visitor. It carries no name and nothing you wrote.",
-    stays: "Lasts 2 years. Clearing this site's data removes it.",
-  },
-  {
-    name: `_ga_${MEASUREMENT_ID.slice(2)}`,
-    purpose: "Google Analytics' note of this visit, so the pages you open count as one visit.",
-    stays: "Lasts 2 years. Clearing this site's data removes it.",
+      "A random number and a count of your visits, so Google Analytics can tell a second visit from a new visitor. It carries no name and nothing you wrote.",
+    stays:
+      "Stays until you clear this site's data. The number and the counts go to Google with each page you open.",
   },
 ];
 
-// Google's own cookies, and how to remove all six.
+// Google's own cookies, and how to remove all five.
 const COOKIE_SECTIONS: readonly PolicySection[] = [
   {
     title: "Google's own page",
@@ -65,7 +57,7 @@ const COOKIE_SECTIONS: readonly PolicySection[] = [
   {
     title: "Removing them",
     lines: [
-      "Deleting your account in Settings removes the sign-in cookie. Clearing this site's data in your browser removes all six.",
+      "Deleting your account in Settings removes the sign-in cookie. Clearing this site's data in your browser removes all five.",
     ],
   },
 ];
@@ -88,20 +80,19 @@ const ItemList = (props: { title: string; items: readonly BrowserItem[] }): Reac
   );
 };
 
-// /cookies: the two sign-in cookies, the two notes and the two analytics cookies, how to keep
-// analytics off, and how to remove them all.
+// /cookies: the two cookies and the three notes, how to keep analytics off, and how to remove them
+// all.
 export const CookiesScreen = (): ReactElement => {
   return (
     <PolicyPage title="Cookies" changed="5 November 2026">
       <p className="policy-lead">
-        Meety keeps six small things in your browser: two cookies that sign you in, two notes for
-        the app, and two cookies from Google Analytics that count visits. There are no ads. If your
-        browser sends Global Privacy Control or Do Not Track, Google Analytics never loads and sets
-        nothing.
+        Meety keeps five small things in your browser: two cookies that sign you in, and three notes
+        for the app, one of which counts visits with Google Analytics. There are no ads, and no
+        other company sets a cookie here. If your browser sends Global Privacy Control or Do Not
+        Track, Meety keeps no such note and sends nothing to Google.
       </p>
       <ItemList title="The two cookies" items={COOKIES} />
-      <ItemList title="The two notes" items={NOTES} />
-      <ItemList title="The two analytics cookies" items={ANALYTICS_COOKIES} />
+      <ItemList title="The three notes" items={NOTES} />
       <PolicySections sections={COOKIE_SECTIONS} />
     </PolicyPage>
   );

@@ -19,7 +19,7 @@ const PRIVACY_SECTIONS: readonly PolicySection[] = [
       "Your Meety uses what you approved to answer your friends' questions and to talk with other people's Meetys. To do that, your words go to Meta's AI models through the Meta Model API.",
       "Meety shows no ads and sells nothing.",
       "Meety counts visits with Google Analytics: which kinds of page are opened, on what kind of device, and from roughly where. It sends the kind of page, such as a profile or a brief, never whose it is or what it says, and never your name.",
-      "If your browser sends Global Privacy Control or Do Not Track, Google Analytics never loads.",
+      "If your browser sends Global Privacy Control or Do Not Track, Meety sends nothing to Google Analytics.",
     ],
   },
   {
@@ -32,7 +32,7 @@ const PRIVACY_SECTIONS: readonly PolicySection[] = [
   {
     title: "Cookies and your browser",
     lines: [
-      "One cookie keeps you signed in for 90 days, and signing in with Google uses a second one for 10 minutes. Your browser also keeps two notes for the app, and Google Analytics keeps two cookies of its own. The Cookies page lists all six.",
+      "One cookie keeps you signed in for 90 days, and signing in with Google uses a second one for 10 minutes. Your browser also keeps three notes for the app, one of which counts visits. The Cookies page lists all five.",
     ],
   },
   {

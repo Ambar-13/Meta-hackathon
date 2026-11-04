@@ -93,11 +93,11 @@ The session cookie is named `__Host-session`. It is HttpOnly, Secure, has Path=/
 
 > default-src 'self'; img-src 'self' data:; connect-src 'self'
 
-On heymeety.com, the one host that loads Google Analytics, it is instead:
+On heymeety.com, the one host that counts visits, it is instead:
 
-> default-src 'self'; img-src 'self' data:; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com
+> default-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com
 
-Scripts and images still come only from Meety's own address and data: URLs, so a stray tag can run nothing and reach no other site by image. The server fetches Google's tag for Meety's one measurement id, at most once an hour, and serves it at /gtag.js. Google Analytics never loads when the browser sends Global Privacy Control or Do Not Track. It sends each page as its route pattern, such as /people/:listingId, so no id, token, draft or access code leaves the browser.
+Meety loads no Google script. It sends each page view itself (apps/web/src/app-shell/analytics.ts): the page's route pattern, such as /people/:listingId, its route name, the site a visitor came from, and a random visitor number from a browser note. The request carries no cookies and no referrer, so no id, token, draft or access code leaves the browser, and the address in the bar never goes. Nothing is sent or kept when the browser sends Global Privacy Control or Do Not Track.
 
 Markdown from the model renders only text, emphasis, lists and blockquotes. Links, images and HTML are not rendered. Before any text is stored, canonicalisation removes the Unicode format and control characters (Cf and Cc), except the newline and the tab, so hidden characters cannot carry an instruction past the scrubber.
 

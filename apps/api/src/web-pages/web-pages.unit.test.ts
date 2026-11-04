@@ -79,7 +79,7 @@ it("D67-T3: only the live host gets the Google Analytics policy, whatever the ca
   expect(policyForHost("localhost:3000")).toBe(CONTENT_SECURITY_POLICY);
   expect(policyForHost("heymeety.com.evil.example")).toBe(CONTENT_SECURITY_POLICY);
   expect(policyForHost(undefined)).toBe(CONTENT_SECURITY_POLICY);
-  expect(ANALYTICS_CONTENT_SECURITY_POLICY).not.toContain("script-src");
-  expect(ANALYTICS_CONTENT_SECURITY_POLICY).not.toContain("googletagmanager");
-  expect(ANALYTICS_CONTENT_SECURITY_POLICY).toContain("default-src 'self'; img-src 'self' data:;");
+  expect(ANALYTICS_CONTENT_SECURITY_POLICY).toBe(
+    "default-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com",
+  );
 });

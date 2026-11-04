@@ -9,8 +9,7 @@ import { registerWebPages } from "./index.js";
 
 const POLICY = "default-src 'self'; img-src 'self' data:; connect-src 'self'";
 const LIVE_POLICY =
-  "default-src 'self'; img-src 'self' data:; " +
-  "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com";
+  "default-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com";
 const INDEX_HTML =
   '<!doctype html><html><head><title>Meet First</title></head><body><div id="root"></div></body></html>';
 
