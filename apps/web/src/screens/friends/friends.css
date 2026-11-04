@@ -55,3 +55,10 @@
 @media (min-width: 1100px) {
   .friends-columns { grid-template-columns: minmax(0, 460px) minmax(0, 1fr); gap: 56px; align-items: start; }
 }
+
+/* Invite a friend at the title's end: the soft button, so the page's one blue stays the next step. */
+.friends-invite { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-left: auto; padding: 0 16px; }
+/* From 1200px the sidebar's own Invite a friend is always in view, so the title's steps aside. */
+@media (min-width: 1200px) {
+  .friends-invite { display: none; }
+}

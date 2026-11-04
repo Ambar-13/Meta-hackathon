@@ -142,9 +142,9 @@ describe("friends screen", () => {
     const calRow = await friendRow("Cal");
     expect(within(calRow).getByText("Cal has not turned on friend asks.")).toBeTruthy();
     expect(within(calRow).queryAllByRole("button")).toHaveLength(0);
-    expect(within(calRow).getByRole("link", { name: "Meet Cal" }).getAttribute("href")).toBe(
-      `/pairs/${PAIRS.cal}`,
-    );
+    const meetCal = within(calRow).getByRole("link", { name: "See how you'd get on with Cal" });
+    expect(meetCal.getAttribute("href")).toBe(`/pairs/${PAIRS.cal}`);
+    expect(meetCal.textContent).toBe("See how you'd get on");
     cleanup();
 
     stubReads({ friends: [], aboutMe: [] });
@@ -290,6 +290,19 @@ describe("friends screen", () => {
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(375);
   });
 
+  it("W7-FRIENDS-T1: Invite a friend sits beside the page title and opens the invite page, with no friends yet", async () => {
+    stubReads({ friends: [], aboutMe: [] });
+
+    renderFriends();
+
+    const title = (
+      await screen.findByRole("heading", { level: 1, name: "Friends" })
+    ).closest<HTMLElement>(".screen-title");
+    expect(title).not.toBeNull();
+    const invite = within(title as HTMLElement).getByRole("link", { name: "Invite a friend" });
+    expect(invite.getAttribute("href")).toBe(APP_PATHS.pair);
+  });
+
   it("W7-WEB-A-T7: Friends shows incoming requests first with Accept and Decline, then the friends, then the requests you sent; Accept and Decline post to their routes and read the lists again", async () => {
     stubReads({ friends: [{ ...BEA, listingId: LISTED }], aboutMe: [] });
     stubRoute(routes.social.listFriendRequests, REQUESTS);
@@ -301,18 +314,25 @@ describe("friends screen", () => {
     const headings = screen
       .getAllByRole("heading", { level: 2 })
       .map((heading) => heading.textContent);
-    expect(headings.slice(0, 3)).toEqual(["Requests", "Your friends", "Requests you sent"]);
+    expect(headings.slice(0, 3)).toEqual([
+      "Friend requests",
+      "Your friends",
+      "Friend requests you sent",
+    ]);
+    expect(headings).toContain("Questions you asked");
     expect(within(ola).getByRole("button", { name: "Accept" })).toBeTruthy();
     expect(within(ola).getByRole("link", { name: "Ola" }).getAttribute("href")).toBe(
       `/people/${LISTED}`,
     );
     expect(
       within(await friendRow("Bea"))
-        .getByRole("link", { name: "Meet Bea" })
+        .getByRole("link", { name: "See how you'd get on with Bea" })
         .getAttribute("href"),
     ).toBe(`/people/${LISTED}`);
-    expect(within(sectionOf("Requests you sent")).getByText("Zed")).toBeTruthy();
-    expect(within(sectionOf("Requests you sent")).getByText("Waiting for an answer")).toBeTruthy();
+    expect(within(sectionOf("Friend requests you sent")).getByText("Zed")).toBeTruthy();
+    expect(
+      within(sectionOf("Friend requests you sent")).getByText("Waiting for an answer"),
+    ).toBeTruthy();
 
     stubRoute(routes.social.listFriendRequests, {
       incoming: REQUESTS.incoming.slice(1),

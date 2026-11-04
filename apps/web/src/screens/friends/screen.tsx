@@ -10,26 +10,30 @@ import { useState, type FormEvent, type ReactElement } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { AboutMeAnswer, AskSummary, Friend, FriendRequestView } from "@meet-first/contracts";
 import { APP_PATHS, ErrorNotice, ScreenFrame } from "../../app-shell/index.js";
-import { Avatar, EmptyState, LoadingLine, PersonAvatar } from "../../look/index.js";
+import { Avatar, EmptyState, Icon, LoadingLine, PersonAvatar } from "../../look/index.js";
 import { AnswerClaims } from "../ask/index.js";
 import { useFriendsScreen, type FriendsScreenModel } from "./friends-state.js";
 
 // The headings and lines of this page.
 const FRIENDS_HEADING = "Your friends";
-const REQUESTS_HEADING = "Requests";
-const SENT_REQUESTS_HEADING = "Requests you sent";
+// The invite beside the page title, where a phone has no other way to it.
+const INVITE_LABEL = "Invite a friend";
+const REQUESTS_HEADING = "Friend requests";
+const SENT_REQUESTS_HEADING = "Friend requests you sent";
 const WAITING_LINE = "Waiting for an answer";
 const COPIES_HEADING = "Answers your Meety gave";
-const SENT_HEADING = "Asks you sent";
+const SENT_HEADING = "Questions you asked";
 const ASK_BUTTON_LABEL = "Ask their Meety";
-const MEET_LABEL = "Meet";
+// The button that opens the meeting set-up, where your Meety and theirs talk a question through; the
+// same words as the button on a profile.
+const MEET_LABEL = "See how you'd get on";
 const SEND_LABEL = "Send the ask";
 const NO_FRIENDS_TITLE = "No friends yet";
 const NO_FRIENDS_LINE = "Find people in Search and add them, or share your invite link.";
 const NO_FRIENDS_ACTION = "Find people";
 const NO_COPIES_TITLE = "No answers yet";
 const NO_COPIES_LINE = "Your Meety has not answered anyone yet.";
-const NO_SENT_TITLE = "Nothing sent yet";
+const NO_SENT_TITLE = "No questions yet";
 const NO_SENT_LINE = "Ask a friend how they would react, or ask Meety who could help.";
 const LOADING_FRIENDS_LINE = "Loading your friends.";
 const LOADING_COPIES_LINE = "Loading the answers your Meety gave.";
@@ -112,8 +116,8 @@ const ReactAskForm = (props: {
   );
 };
 
-// What one friend's row offers: Ask their agent (or the line that their friend asks are off) and
-// Meet, then the open ask box with its errors under the friend.
+// What one friend's row offers: Ask their Meety (or the line that their friend asks are off) and See
+// how you'd get on, then the open ask box with its errors under the friend.
 const FriendAction = (props: { friend: Friend; model: FriendsScreenModel }): ReactElement => {
   const { friend, model } = props;
   const isChosen = model.chosenPairId === friend.pairId;
@@ -136,7 +140,11 @@ const FriendAction = (props: { friend: Friend; model: FriendsScreenModel }): Rea
         ) : (
           <p className="muted friends-off">{asksOffLine(friend)}</p>
         )}
-        <Link className="btn quiet" to={meetTo} aria-label={`${MEET_LABEL} ${friend.displayName}`}>
+        <Link
+          className="btn quiet"
+          to={meetTo}
+          aria-label={`${MEET_LABEL} with ${friend.displayName}`}
+        >
           {MEET_LABEL}
         </Link>
       </div>
@@ -351,9 +359,9 @@ const SentBody = (props: { model: FriendsScreenModel }): ReactElement | null => 
   );
 };
 
-// The /friends page: requests to answer, your friends with Ask their agent and Meet, the requests
-// you sent, then the answers your persona gave and the asks you sent. On a laptop the people sit
-// beside the answers.
+// The /friends page: Invite a friend beside the title, friend requests to answer, your friends with
+// Ask their Meety and See how you'd get on, the friend requests you sent, then the answers your
+// Meety gave and the questions you asked. On a laptop the people sit beside the answers.
 export const FriendsScreen = (): ReactElement => {
   const navigate = useNavigate();
   const model = useFriendsScreen((path) => {
@@ -361,7 +369,16 @@ export const FriendsScreen = (): ReactElement => {
   });
   const requests = model.requests.value;
   return (
-    <ScreenFrame title="Friends" isWide>
+    <ScreenFrame
+      title="Friends"
+      isWide
+      titleAside={
+        <Link className="btn quiet friends-invite" to={APP_PATHS.pair}>
+          <Icon name="add" size={18} />
+          {INVITE_LABEL}
+        </Link>
+      }
+    >
       <div className="friends-columns">
         <div className="friends-side">
           <RequestsSection model={model} incoming={requests?.incoming ?? []} />
