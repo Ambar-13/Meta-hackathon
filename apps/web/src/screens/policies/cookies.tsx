@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { MEASUREMENT_ID } from "../../app-shell/index.js";
 import { PolicyPage, PolicySections, type PolicySection } from "./policy-page.js";
 
 // One thing Meety keeps in the browser: its name as the browser shows it, what it is for, and how
@@ -37,7 +38,23 @@ const NOTES: readonly BrowserItem[] = [
   },
 ];
 
-// Google's own cookies, and how to remove all four.
+// The two cookies Google Analytics sets on heymeety.com when the browser allows it
+// (apps/web/src/app-shell/analytics.ts).
+const ANALYTICS_COOKIES: readonly BrowserItem[] = [
+  {
+    name: "_ga",
+    purpose:
+      "A random number Google Analytics gives this browser, so a second visit counts as the same visitor. It carries no name and nothing you wrote.",
+    stays: "Lasts 2 years. Clearing this site's data removes it.",
+  },
+  {
+    name: `_ga_${MEASUREMENT_ID.slice(2)}`,
+    purpose: "Google Analytics' note of this visit, so the pages you open count as one visit.",
+    stays: "Lasts 2 years. Clearing this site's data removes it.",
+  },
+];
+
+// Google's own cookies, and how to remove all six.
 const COOKIE_SECTIONS: readonly PolicySection[] = [
   {
     title: "Google's own page",
@@ -48,7 +65,7 @@ const COOKIE_SECTIONS: readonly PolicySection[] = [
   {
     title: "Removing them",
     lines: [
-      "Deleting your account in Settings removes the sign-in cookie. Clearing this site's data in your browser removes all four.",
+      "Deleting your account in Settings removes the sign-in cookie. Clearing this site's data in your browser removes all six.",
     ],
   },
 ];
@@ -71,18 +88,20 @@ const ItemList = (props: { title: string; items: readonly BrowserItem[] }): Reac
   );
 };
 
-// /cookies: the two cookies and the two notes, why there is nothing to accept, and how to remove
-// them.
+// /cookies: the two sign-in cookies, the two notes and the two analytics cookies, how to keep
+// analytics off, and how to remove them all.
 export const CookiesScreen = (): ReactElement => {
   return (
-    <PolicyPage title="Cookies" changed="3 November 2026">
+    <PolicyPage title="Cookies" changed="5 November 2026">
       <p className="policy-lead">
-        Meety keeps four small things in your browser: two cookies that sign you in, and two notes
-        for the app. There are no ads, no trackers and no analytics, so there is nothing to accept
-        or refuse.
+        Meety keeps six small things in your browser: two cookies that sign you in, two notes for
+        the app, and two cookies from Google Analytics that count visits. There are no ads. If your
+        browser sends Global Privacy Control or Do Not Track, Google Analytics never loads and sets
+        nothing.
       </p>
       <ItemList title="The two cookies" items={COOKIES} />
       <ItemList title="The two notes" items={NOTES} />
+      <ItemList title="The two analytics cookies" items={ANALYTICS_COOKIES} />
       <PolicySections sections={COOKIE_SECTIONS} />
     </PolicyPage>
   );

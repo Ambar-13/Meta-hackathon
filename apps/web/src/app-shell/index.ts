@@ -55,5 +55,7 @@ export {
 export { usePolledView, type PolledView } from "./polled-view.js";
 // The shared frame, error notice and copy button.
 export { ScreenFrame, ErrorNotice, CopyButton, COPIED_MS } from "./screen-parts.js";
+// Google Analytics' measurement id, which the cookies page names its cookie by.
+export { MEASUREMENT_ID } from "./analytics.js";
 // The words of the rail's request count, which the friends page reuses.
 export { requestCountWords, friendsLinkName } from "./social-rail-state.js";

@@ -1,7 +1,8 @@
-import { Component, useMemo, type ReactElement, type ReactNode } from "react";
+import { Component, useEffect, useMemo, type ReactElement, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 import { ContractError } from "@meet-first/contracts";
+import { recordPageViews, startAnalytics } from "./analytics.js";
 import { createAppRouter } from "./routes.js";
 import "@fontsource-variable/bricolage-grotesque/opsz.css";
 import "@fontsource-variable/hanken-grotesk";
@@ -38,9 +39,10 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { hasFailed: b
   }
 }
 
-// The whole app: an error boundary around the frame and the router.
+// The whole app: an error boundary around the frame and the router, with a page view for each page.
 export const AppRoot = (): ReactElement => {
   const router = useMemo(() => createAppRouter(), []);
+  useEffect(() => recordPageViews(router), [router]);
   return (
     <AppErrorBoundary>
       <StickerSheet />
@@ -58,4 +60,5 @@ if (rootElement === null) {
     "The page has no root element. Rebuild the web app with pnpm --filter web build.",
   );
 }
+startAnalytics();
 createRoot(rootElement).render(<AppRoot />);

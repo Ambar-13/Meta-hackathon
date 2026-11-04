@@ -23,7 +23,7 @@ function footLinks(): [string | null, string | null][] {
 }
 
 describe("the policy pages", () => {
-  it("W7-PRIVACY-T1: /privacy says what Meety keeps, never the email, who sees what, how to delete it, and who to write to, with no app pages around it", () => {
+  it("W7-PRIVACY-T1: /privacy says what Meety keeps, never the email, that it counts visits with Google Analytics and how to stop it, who sees what, how to delete it, and who to write to, with no app pages around it", () => {
     renderScreen(<PrivacyScreen />, { pattern: ROUTE_PATTERNS.privacy, url: APP_PATHS.privacy });
 
     expect(screen.getByRole("heading", { level: 1, name: "Privacy" })).toBeTruthy();
@@ -36,6 +36,14 @@ describe("the policy pages", () => {
       "Questions",
     ]);
     expect(screen.getByText(/Never your email\./)).toBeTruthy();
+    expect(screen.getByText("Meety shows no ads and sells nothing.")).toBeTruthy();
+    expect(screen.getByText(/^Meety counts visits with Google Analytics/)).toBeTruthy();
+    expect(
+      screen.getByText(
+        "If your browser sends Global Privacy Control or Do Not Track, Google Analytics never loads.",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText(/no trackers/)).toBeNull();
     expect(screen.getByRole("link", { name: "hey.meety@gmail.com" }).getAttribute("href")).toBe(
       "mailto:hey.meety@gmail.com",
     );
@@ -72,13 +80,14 @@ describe("the policy pages", () => {
     expect(screen.queryByRole("link", { name: "Home" })).toBeNull();
   });
 
-  it("W7-COOKIES-T1: /cookies lists the two cookies and the two notes with what each is for and how long it stays, and says there is nothing to accept", () => {
+  it("W7-COOKIES-T1: /cookies lists the two sign-in cookies, the two notes and the two analytics cookies with what each is for and how long it stays, and how to keep analytics off", () => {
     renderScreen(<CookiesScreen />, { pattern: ROUTE_PATTERNS.cookies, url: APP_PATHS.cookies });
 
     expect(screen.getByRole("heading", { level: 1, name: "Cookies" })).toBeTruthy();
     expect(sectionHeadings()).toEqual([
       "The two cookies",
       "The two notes",
+      "The two analytics cookies",
       "Google's own page",
       "Removing them",
       "Questions",
@@ -88,9 +97,16 @@ describe("the policy pages", () => {
       "__Host-google",
       "meet-first-stories-seen",
       "meet-first.access-code",
+      "_ga",
+      "_ga_0DLJPMZJV4",
     ]);
     expect(screen.getByText("Lasts 90 days. Deleting your account removes it.")).toBeTruthy();
-    expect(screen.getByText(/nothing to accept or refuse/)).toBeTruthy();
+    expect(
+      screen.getByText(
+        /If your browser sends Global Privacy Control or Do Not Track, Google Analytics never loads and sets nothing\./,
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText(/nothing to accept/)).toBeNull();
     expect(footLinks()).toEqual([
       ["Privacy", "/privacy"],
       ["Terms", "/terms"],

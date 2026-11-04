@@ -1,6 +1,11 @@
 import { expect, it } from "vitest";
 import { diskPercent, isDiskDegraded, isWorkerFresh, toHealth } from "./health.js";
 import { isApiPath } from "./spa-fallback.js";
+import {
+  ANALYTICS_CONTENT_SECURITY_POLICY,
+  CONTENT_SECURITY_POLICY,
+  policyForHost,
+} from "./static-files.js";
 
 it("R12.5-T4: diskPercent rounds to one decimal and caps at 100, and 80 is degraded while 79.9 is not", () => {
   expect(diskPercent(8_000_000_000, 10_000_000_000)).toBe(80);
@@ -65,4 +70,16 @@ it("R9.4-T2: isApiPath is true for /api, /api/... and /api?... and false for cli
   expect(isApiPath("/share/x")).toBe(false);
   expect(isApiPath("/")).toBe(false);
   expect(isApiPath("/assets/app.js")).toBe(false);
+});
+
+it("D67-T3: only the live host gets the Google Analytics policy, whatever the case or port, and it lets in no other site's script or image", () => {
+  expect(policyForHost("heymeety.com")).toBe(ANALYTICS_CONTENT_SECURITY_POLICY);
+  expect(policyForHost("HeyMeety.com:443")).toBe(ANALYTICS_CONTENT_SECURITY_POLICY);
+  expect(policyForHost("meet-first.onrender.com")).toBe(CONTENT_SECURITY_POLICY);
+  expect(policyForHost("localhost:3000")).toBe(CONTENT_SECURITY_POLICY);
+  expect(policyForHost("heymeety.com.evil.example")).toBe(CONTENT_SECURITY_POLICY);
+  expect(policyForHost(undefined)).toBe(CONTENT_SECURITY_POLICY);
+  expect(ANALYTICS_CONTENT_SECURITY_POLICY).not.toContain("script-src");
+  expect(ANALYTICS_CONTENT_SECURITY_POLICY).not.toContain("googletagmanager");
+  expect(ANALYTICS_CONTENT_SECURITY_POLICY).toContain("default-src 'self'; img-src 'self' data:;");
 });

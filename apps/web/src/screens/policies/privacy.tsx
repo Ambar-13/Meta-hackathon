@@ -17,7 +17,9 @@ const PRIVACY_SECTIONS: readonly PolicySection[] = [
     title: "What Meety does with it",
     lines: [
       "Your Meety uses what you approved to answer your friends' questions and to talk with other people's Meetys. To do that, your words go to Meta's AI models through the Meta Model API.",
-      "Meety shows no ads, uses no trackers, and sells nothing.",
+      "Meety shows no ads and sells nothing.",
+      "Meety counts visits with Google Analytics: which kinds of page are opened, on what kind of device, and from roughly where. It sends the kind of page, such as a profile or a brief, never whose it is or what it says, and never your name.",
+      "If your browser sends Global Privacy Control or Do Not Track, Google Analytics never loads.",
     ],
   },
   {
@@ -30,7 +32,7 @@ const PRIVACY_SECTIONS: readonly PolicySection[] = [
   {
     title: "Cookies and your browser",
     lines: [
-      "One cookie keeps you signed in for 90 days, and signing in with Google uses a second one for 10 minutes. Your browser also keeps two notes for the app. The Cookies page lists all four.",
+      "One cookie keeps you signed in for 90 days, and signing in with Google uses a second one for 10 minutes. Your browser also keeps two notes for the app, and Google Analytics keeps two cookies of its own. The Cookies page lists all six.",
     ],
   },
   {
@@ -44,7 +46,7 @@ const PRIVACY_SECTIONS: readonly PolicySection[] = [
 // /privacy, which Google's sign-in screen links to.
 export const PrivacyScreen = (): ReactElement => {
   return (
-    <PolicyPage title="Privacy" changed="3 November 2026">
+    <PolicyPage title="Privacy" changed="5 November 2026">
       <PolicySections sections={PRIVACY_SECTIONS} />
     </PolicyPage>
   );

@@ -8,6 +8,9 @@ import { registerSessionsRoutes } from "../sessions/index.js";
 import { registerWebPages } from "./index.js";
 
 const POLICY = "default-src 'self'; img-src 'self' data:; connect-src 'self'";
+const LIVE_POLICY =
+  "default-src 'self'; img-src 'self' data:; " +
+  "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com";
 const INDEX_HTML =
   '<!doctype html><html><head><title>Meet First</title></head><body><div id="root"></div></body></html>';
 
@@ -47,4 +50,18 @@ it("D67-T1: every response through Fastify carries exactly the D67 Content-Secur
   for (const response of responses) {
     expect(response.headers["content-security-policy"]).toBe(POLICY);
   }
+});
+
+it("D67-T2: on heymeety.com the policy also lets Google Analytics' page views out, and scripts and images stay our own", async () => {
+  const live = await t.app.inject({ method: "GET", url: "/", headers: { host: "heymeety.com" } });
+  const api = await t.app.inject({
+    method: "GET",
+    url: "/api/health",
+    headers: { host: "heymeety.com" },
+  });
+  const local = await t.app.inject({ method: "GET", url: "/" });
+
+  expect(live.headers["content-security-policy"]).toBe(LIVE_POLICY);
+  expect(api.headers["content-security-policy"]).toBe(LIVE_POLICY);
+  expect(local.headers["content-security-policy"]).toBe(POLICY);
 });

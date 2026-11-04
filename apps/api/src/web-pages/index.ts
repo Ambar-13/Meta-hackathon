@@ -2,6 +2,7 @@
 // and /api/health.
 import type { FastifyInstance } from "fastify";
 import type { RouteDeps, RoutePlugin } from "../app-types.js";
+import { fetchTagFromGoogle, registerAnalyticsTag } from "./analytics-tag.js";
 import { registerHealthRoute } from "./health.js";
 import { registerSpaFallback } from "./spa-fallback.js";
 import { registerStaticFiles, WEB_DIST_DIR } from "./static-files.js";
@@ -10,13 +11,15 @@ import { registerStaticFiles, WEB_DIST_DIR } from "./static-files.js";
 // the env's DATABASE_DISK_BYTES, and tests pass their own.
 export type WebPagesOptions = { distDir: string; diskPlanBytes: number };
 
-// Registers health, the hashed files, then the fallback, in that order, with the options given.
+// Registers health, Google Analytics' tag, the hashed files, then the fallback, in that order, with
+// the options given.
 export async function registerWebPages(
   app: FastifyInstance,
   deps: RouteDeps,
   options: WebPagesOptions,
 ): Promise<void> {
   registerHealthRoute(app, deps, options.diskPlanBytes);
+  registerAnalyticsTag(app, fetchTagFromGoogle, Date.now);
   const hasBuild = await registerStaticFiles(app, options.distDir);
   await registerSpaFallback(app, options.distDir, hasBuild);
 }
