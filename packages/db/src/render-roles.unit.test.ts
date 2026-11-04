@@ -164,7 +164,7 @@ describe("render role setup", () => {
     expect(readRenderInputs({ ...GOOD_ENV, ...local }).tls).toBe("plain");
   });
 
-  it("W3-DEPLOY-T6: the files hold each role's URL on the internal host for Render, the worker's on the external host for check-wave-3, and never the owner", () => {
+  it("W3-DEPLOY-T6: the files hold each role's URL on the internal host for Render, the worker's on the external host for a check from outside Render, and never the owner", () => {
     const files = renderFiles(readRenderInputs(GOOD_ENV), PASSWORDS);
 
     expect(Object.keys(files)).toEqual([".env.render-api", ".env.render-worker", ".env.wave3"]);

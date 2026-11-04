@@ -5,7 +5,7 @@ import fastifyStatic from "@fastify/static";
 import type { FastifyInstance } from "fastify";
 
 // Where the web build lives: apps/web/dist, beside this app in the repo and in the api image (one
-// origin serves both; Dockerfile.api must keep this relative path).
+// origin serves both; Dockerfile.render must keep this relative path).
 export const WEB_DIST_DIR = fileURLToPath(new URL("../../../web/dist/", import.meta.url));
 // The cache header of a hashed build file: one year, never revalidated, because its name changes
 // when its content does.

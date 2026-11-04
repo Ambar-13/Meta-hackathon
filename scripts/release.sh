@@ -41,7 +41,7 @@ if [ -z "${APP_ORIGIN:-}" ]; then
   exit 2
 fi
 
-# The schema version the worker of this tag expects: the highest migration number in the tag's tree, read as check-wave-3.sh reads it.
+# The schema version the worker of this tag expects: the highest migration number in the tag's tree.
 EXPECTED="$(git ls-tree --name-only --full-tree "$COMMIT" packages/db/migrations/ | sed -nE 's#^packages/db/migrations/([0-9]{4})_.*\.sql$#\1#p' | sort | tail -1 | sed 's/^0*//')"
 if [ -z "$EXPECTED" ]; then
   echo "release_schema_unknown: $TAG has no migration files in packages/db/migrations, so the script cannot tell when the worker may start." >&2

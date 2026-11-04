@@ -1,5 +1,5 @@
 // Integration tests for pnpm eval. T13 and T14 drive a running replay stack, so they run only when
-// EVAL_BASE_URL names one: scripts/check-wave-2.sh sets it to the api and worker of its row 09. A
+// EVAL_BASE_URL names one, set to a running api and worker. A
 // plain vitest run has no api or worker, and CI starts none. T15 always runs.
 import { execSync, spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";

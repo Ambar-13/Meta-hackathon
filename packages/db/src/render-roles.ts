@@ -258,8 +258,9 @@ function roleUrl(base: string, login: Login, query: string): string {
 }
 
 // The three git-ignored files the setup writes: each service's variables for Render, on the
-// internal host (Render's private network), and .env.wave3 for scripts/check-wave-3.sh, on the
-// external host, where psql encrypts with sslmode=require.
+// internal host (Render's private network), and .env.wave3 for a check run from outside Render
+// (check-wave-3.sh, on the archive/oracle-deploy-and-wave-checks branch), on the external host,
+// where psql encrypts with sslmode=require.
 export function renderFiles(
   inputs: RenderInputs,
   passwords: RolePasswords,

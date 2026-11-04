@@ -1,8 +1,0 @@
-# The server's one public door: HTTPS for its sslip.io name, in front of the api, which also serves the web app (A7).
-# Caddy gets and renews the certificate itself, through ports 80 and 443.
-{$SITE_ADDRESS} {
-	reverse_proxy api:3000 {
-		# The meeting stream goes to the browser as it is written (R8.2), so nothing is held back to fill a buffer.
-		flush_interval -1
-	}
-}
