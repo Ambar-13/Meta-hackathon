@@ -1,0 +1,5 @@
+dist
+dist-gallery
+coverage
+packages/evals/fixtures
+docs
