@@ -1,7 +1,13 @@
 import type { Kysely } from "kysely";
 import { afterAll, afterEach, beforeAll, expect, it } from "vitest";
 import type { SummaryPointView } from "@meet-first/contracts";
-import { makeDatabase, POOL_SIZE, withPerson, type Database } from "@meet-first/db";
+import {
+  makeDatabase,
+  POOL_SIZE,
+  RECALL_WHOLE_MAX,
+  withPerson,
+  type Database,
+} from "@meet-first/db";
 import {
   createApprovedCard,
   createFrozenSource,
@@ -332,7 +338,7 @@ it('W7-ASK-T21: a react ask about "your startup" finds the Rentably message thro
   const ren = await createAskPerson(fresh.db, {
     name: "Ren",
     turns: [
-      ...ASK_TURNS.kai.slice(0, 3),
+      ...[...Array(RECALL_WHOLE_MAX).keys()].map((index) => `gym note ${String(index)}`),
       "rentably was never a bad idea, the timing was just early",
     ],
     isRecallAllowed: true,
@@ -370,8 +376,61 @@ it('W7-ASK-T21: a react ask about "your startup" finds the Rentably message thro
     "<ask>What does Ren think about their startup now?</ask>\n<topics>\n- Rentably\n</topics>",
   ]);
   expect(userTexts(test, "persona_answer")[0] ?? "").toContain(
-    "<recall_result>\n[t:3] rentably was never a bad idea, the timing was just early\n</recall_result>",
+    `<recall_result>\n[t:${String(RECALL_WHOLE_MAX)}] rentably was never a bad idea, the timing was just early\n</recall_result>`,
   );
+});
+
+it("W7-ASK-T30: a friend's small corpus reaches the request whole, so a message no search word matches still counts", async () => {
+  const mia = await createAskPerson(fresh.db, {
+    name: "Mia",
+    turns: [
+      "I decide within a week. If I need longer than that, the answer is probably no.",
+      "I don't need a big market slide. I want to know who paid you last month and why.",
+    ],
+    isRecallAllowed: true,
+  });
+  await allowFriendAsks(fresh.db, mia);
+  const pairId = await joinInvitePair(fresh.db, ana, mia);
+  const askId = await insertReactAsk(fresh.db, ana, {
+    pairId,
+    text: "How would Mia react to a pitch for 1b dollars for a cafe?",
+    aboutName: "Mia",
+  });
+  const test = await openTest({
+    questionCheck: [ALLOWED_REACT],
+    searchWords: [{ words: ["cafe", "pitch"] }],
+    personaAnswers: { Mia: NO_SIGN },
+    judge: [],
+  });
+
+  await runAsk({ askId, personId: ana.personId }, test.context);
+
+  expect(userTexts(test, "persona_answer")[0] ?? "").toContain(
+    "<recall_result>\n[t:0] I decide within a week. If I need longer than that, the answer is probably no.\n[t:1] I don't need a big market slide. I want to know who paid you last month and why.\n</recall_result>",
+  );
+});
+
+it("W7-ASK-T31: a friend with recall off gets no recall lines, however small the corpus", async () => {
+  const noa = await createAskPerson(fresh.db, {
+    name: "Noa",
+    turns: ["I don't need a big market slide. I want to know who paid you last month and why."],
+  });
+  await allowFriendAsks(fresh.db, noa);
+  const pairId = await joinInvitePair(fresh.db, ana, noa);
+  const askId = await insertReactAsk(fresh.db, ana, {
+    pairId,
+    text: "How would Noa react to a pitch for 1b dollars for a cafe?",
+    aboutName: "Noa",
+  });
+  const test = await openTest({
+    questionCheck: [ALLOWED_REACT],
+    personaAnswers: { Noa: NO_SIGN },
+    judge: [],
+  });
+
+  await runAsk({ askId, personId: ana.personId }, test.context);
+
+  expect(userTexts(test, "persona_answer")[0] ?? "").not.toContain("<recall_result>");
 });
 
 it("W7-ASK-T22: the persona request shows found summary points as quotable and summary-only points apart, and none of the summary once its switch is off", async () => {

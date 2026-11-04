@@ -44,8 +44,13 @@ export {
   type DatabaseRefusal,
   type TriggerCode,
 } from "./database-errors.js";
-// The recall lookup.
-export { queryWords, searchRecallCorpus } from "./recall-search.js";
+// The recall lookup, and the read of a small corpus whole.
+export {
+  queryWords,
+  RECALL_WHOLE_MAX,
+  searchRecallCorpus,
+  wholeRecallCorpus,
+} from "./recall-search.js";
 // The event log seq and the event append.
 export { nextEventSeq, appendMeetingEvent } from "./event-seq.js";
 // Counts, table by table, the rows that still point at one person. The golden path reads it after a

@@ -5,6 +5,9 @@ import type { Database } from "./types.js";
 // Most words of one query that reach the search; later words are dropped.
 export const RECALL_QUERY_WORDS_MAX = 20;
 
+// Most turns a recall corpus may hold for an ask to read all of it instead of searching it.
+export const RECALL_WHOLE_MAX = 40;
+
 // Smallest trigram word similarity the fallback accepts, from 0 to 1.
 export const RECALL_TRIGRAM_MIN = 0.3;
 
@@ -60,6 +63,24 @@ async function trigramRows(
     trx,
   );
   return result.rows;
+}
+
+// All of one card's recall corpus in file order, or null when it holds more than RECALL_WHOLE_MAX
+// turns. A search only finds words the question shares, so an ask reads a small corpus whole: "a
+// pitch for a cafe" shares no word with "I don't need a big market slide", which is the message
+// that answers it.
+export async function wholeRecallCorpus(
+  trx: Transaction<Database>,
+  cardId: string,
+): Promise<Array<{ turnId: string; text: string }> | null> {
+  const result = await sql<{
+    turn_id: string;
+    text: string;
+  }>`SELECT r.turn_id, r.text FROM recall_corpus r JOIN turns t ON t.id = r.turn_id WHERE r.card_id = ${cardId} ORDER BY t.turn_index LIMIT ${RECALL_WHOLE_MAX + 1}`.execute(
+    trx,
+  );
+  if (result.rows.length > RECALL_WHOLE_MAX) return null;
+  return result.rows.map((row) => ({ turnId: row.turn_id, text: snippetOf(row.text) }));
 }
 
 // Finds up to five turns of one card's recall corpus: full text first, trigram second.

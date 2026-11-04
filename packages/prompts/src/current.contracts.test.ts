@@ -88,7 +88,24 @@ describe("prompt texts", () => {
     expect(text).toContain("Never invent a quote to reach 6.");
   });
 
-  it("R3.9-T2: current.ts names every prompt folder, the question-kind prompts at v5, v4 or v2, persona-answer at v2 and the rest at v1, and readPrompt reads that version", () => {
+  it("R3.9-T3: no good reply in Meety's examples says agent, because the app's buttons say NAME's Meety and agent read as a message to the person", () => {
+    const replies = [
+      ...readPrompt("orchestrator").text.matchAll(/<good_response>.*<\/good_response>/g),
+    ];
+    expect(replies.length).toBeGreaterThan(10);
+    for (const [reply] of replies) expect(reply).not.toMatch(/\bagents?\b/);
+  });
+
+  it("R3.9-T4: a persona's guess is a tier of its own that keeps its mark, its quote and what it never reaches", () => {
+    const { text } = readPrompt("persona-answer");
+    expect(text).toContain("<guesses>");
+    expect(text).toContain("so this is a guess:");
+    expect(text).toContain("The claim states the trait, never the prediction");
+    expect(text).toContain("In help a guess is never given");
+    expect(text).toContain("<do_not_guess> beats a summary line and a guess");
+  });
+
+  it("R3.9-T2: current.ts names every prompt folder, the question-kind prompts at v5, v4 or v2, persona-answer at v3 and the rest at v1, and readPrompt reads that version", () => {
     expect(PROMPT_NAMES).toEqual([
       "dossier",
       "scrub-names",
@@ -114,8 +131,8 @@ describe("prompt texts", () => {
       "meeting-speech": "v2",
       brief: "v5",
       "brief-support-judge": "v2",
-      orchestrator: "v3",
-      "persona-answer": "v2",
+      orchestrator: "v4",
+      "persona-answer": "v3",
     };
     for (const name of PROMPT_NAMES) expect(currentVersion(name)).toBe(changed[name] ?? "v1");
     for (const name of [

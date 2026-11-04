@@ -1,12 +1,14 @@
 // Asks each pending answer's persona once and stores the checked reply. A request holds only what
 // its subject allowed: public items for a help search; approved, verified items and, when the
-// subject switched recall on, recall results for a friend or self ask, searched with the words the
-// search-words call gives; the summary's points for a self ask, and for a friend ask when the
-// subject's summary switch is on; and the subject's quiz misses as do-not-guess topics.
+// subject switched recall on, recall results for a friend or self ask: all of a small corpus, or a
+// search of a larger one with the words the search-words call gives; the summary's points for a
+// self ask, and for a friend ask when the subject's summary switch is on; and the subject's quiz
+// misses as do-not-guess topics.
 import type { Kysely } from "kysely";
 import { ContractError, PersonaAnswerOutput, RECALL_TOP_K } from "@meet-first/contracts";
 import {
   searchRecallCorpus,
+  wholeRecallCorpus,
   withPerson,
   type Database,
   type DatabaseTransaction,
@@ -211,9 +213,9 @@ async function recallQueryFor(
 // answer's listing is gone, names another card or, for a romance ask, has its dating switch off;
 // when the subject's account deletion has started; when the card is gone or no longer approved;
 // and, for a friend ask, when the friend has turned friend asks off since the answer row was
-// written. A help answer never reads recall or the summary; a friend or self ask searches recall
-// with the query. A subject with no approved card has no card to read, and the material is their
-// summary alone.
+// written. A help answer never reads recall or the summary; a friend or self ask reads recall,
+// searching a larger corpus with the query. A subject with no approved card has no card to read,
+// and the material is their summary alone.
 async function readSubjectMaterial(
   db: Kysely<Database>,
   subject: { ask: AskRow; row: AnswerRow; query: string },
@@ -374,14 +376,17 @@ async function readItems(
   }));
 }
 
-// A friend's recall results for the ask's text, each turn once, in the search's order: the snippet
-// the request shows, and the whole turn the quote check reads.
+// A friend's recall results, each turn once: all of a small corpus in file order, or the search's
+// hits for the ask's text in its order. Each is the snippet the request shows and the whole turn the
+// quote check reads.
 async function readRecall(
   trx: DatabaseTransaction,
   cardId: string,
   askText: string,
 ): Promise<RecallWithTurn[]> {
-  const hits = await searchRecallCorpus(trx, { cardId, query: askText, limit: RECALL_TOP_K });
+  const hits =
+    (await wholeRecallCorpus(trx, cardId)) ??
+    (await searchRecallCorpus(trx, { cardId, query: askText, limit: RECALL_TOP_K }));
   if (hits.length === 0) return [];
   const turns = await trx
     .selectFrom("turns")

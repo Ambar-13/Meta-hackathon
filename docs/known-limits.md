@@ -35,10 +35,11 @@ An anonymous session cannot be recovered once device and recovery code are both 
 - A friend's ask uses your summary only while its "Friends' asks can use my summary" switch is on; Try your Meety always uses it. A friend with no approved card can be asked once their summary is checked and that switch is on; once there is an approved card, the card's own switch decides.
 - An upload keeps the order of your messages, not the time each was written, so when two of your messages disagree, the later one in the upload wins.
 - Message numbers repeat across uploads, so a summary point or a search result whose number another upload already uses is left out of that answer.
-- A friend ask turns the question into the words you would have used (packages/prompts/search-words) only when your card lets friends search your messages; when that call fails, the search uses the question's own words.
-- The persona answer prompt (persona-answer v2) is a draft: its 8 new tests passed every run, but the 14 tests carried from v1 have not run on v2 (packages/prompts/persona-answer/results.md).
+- A friend ask turns the question into the words you would have used (packages/prompts/search-words) only when your card lets friends search your messages; when that call fails, the search uses the question's own words. A card with at most 40 messages skips the search result and shows them all, though the search-words call still runs. Past 40, a message that shares no word with the question stays out of the answer.
+- When nothing speaks to a friend's question, the answer can be a guess from a trait, and it says so in its first sentence. A guess can be wrong; its quote shows the trait, not the prediction.
+- The persona answer prompt (persona-answer v3) is a draft (packages/prompts/persona-answer/results.md).
 - Text typed into your own uploaded messages in a placeholder's shape, such as [person:...], is not turned round before the names check as it is in a pasted summary, so a name written inside one is not replaced.
-- The prompt behind Meety (orchestrator v3) is a draft: of 49 test inputs run three times each on the live model, 48 passed every run and one passed two of three (packages/prompts/orchestrator/results.md).
+- The prompt behind Meety (orchestrator v4) is a draft (packages/prompts/orchestrator/results.md).
 
 ## Things we can only detect, not prevent
 

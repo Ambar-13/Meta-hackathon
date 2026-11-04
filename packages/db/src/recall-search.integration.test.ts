@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { searchRecallCorpus } from "./recall-search.js";
+import { RECALL_WHOLE_MAX, searchRecallCorpus, wholeRecallCorpus } from "./recall-search.js";
 import {
   asMeeting,
   asPerson,
@@ -140,6 +140,36 @@ describe("recall search", () => {
     expect(trigram.map((row) => row.turnId)).toEqual(source.turnIds.slice(0, 5));
   });
 
+  it("D38-T8: a corpus of at most the limit comes back whole, in file order, each turn cut to 600 units", async () => {
+    const f = await createTestPerson(t.db, "Test F");
+    const texts = [
+      `budget ${"x".repeat(693)}`,
+      ...[...Array(RECALL_WHOLE_MAX - 1).keys()].map((index) => `note ${String(index)}`),
+    ];
+    const source = await createFrozenSource(t.db, f.personId, texts);
+    const card = await createApprovedCard(t.db, source.sourceId, { recallAllowed: true });
+
+    const rows = await asPerson(t.db, f.personId, (trx) => wholeRecallCorpus(trx, card.cardId));
+
+    expect(rows?.map((row) => row.turnId)).toEqual(source.turnIds);
+    expect(rows?.[0]?.text).toHaveLength(600);
+    expect(rows?.[1]?.text).toBe("note 0");
+  });
+
+  it("D38-T9: a corpus over the limit gives null, so the ask searches instead", async () => {
+    const g = await createTestPerson(t.db, "Test G");
+    const source = await createFrozenSource(
+      t.db,
+      g.personId,
+      [...Array(RECALL_WHOLE_MAX + 1).keys()].map((index) => `note ${String(index)}`),
+    );
+    const card = await createApprovedCard(t.db, source.sourceId, { recallAllowed: true });
+
+    const rows = await asPerson(t.db, g.personId, (trx) => wholeRecallCorpus(trx, card.cardId));
+
+    expect(rows).toBeNull();
+  });
+
   it("INV16-T1: a card with recall off yields nothing", async () => {
     const result = await asPerson(t.db, m.b.personId, async (trx) => ({
       rows: await searchRecallCorpus(trx, { cardId: m.b.cardId, query: "deadlines", limit: 5 }),
@@ -189,6 +219,32 @@ describe("recall search", () => {
         text: "My doctor said the migraines come from stress at work.",
       },
     ]);
+  });
+
+  it("INV16-T2b: the whole corpus holds no turn that recall could not reach", async () => {
+    const h = await createTestPerson(t.db, "Test H");
+    const source = await createFrozenSource(t.db, h.personId, [
+      "My doctor said the migraines come from stress at work.",
+      "I keep a calendar for every family visit.",
+    ]);
+    const card = await createApprovedCard(t.db, source.sourceId, { recallAllowed: true });
+    await asPerson(t.db, h.personId, (trx) =>
+      trx
+        .updateTable("turns")
+        .set({ sensitive_categories: ["health"] })
+        .where("id", "=", at(source.turnIds, 0))
+        .execute(),
+    );
+
+    const open = await asPerson(t.db, h.personId, (trx) => wholeRecallCorpus(trx, card.cardId));
+    const off = await asPerson(t.db, m.b.personId, (trx) => wholeRecallCorpus(trx, m.b.cardId));
+    const other = await asPerson(t.db, h.personId, (trx) => wholeRecallCorpus(trx, m.a.cardId));
+
+    expect(open).toEqual([
+      { turnId: at(source.turnIds, 1), text: "I keep a calendar for every family visit." },
+    ]);
+    expect(off).toEqual([]);
+    expect(other).toEqual([]);
   });
 
   it("INV16-T3: a meeting job reads the speaking side's corpus and no other", async () => {
