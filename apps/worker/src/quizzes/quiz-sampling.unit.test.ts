@@ -121,7 +121,11 @@ describe("quiz sampling and the shape of the persona and judge calls", () => {
 
   it("D30-T1: run 1 follows flipped and run 2 reverses it", () => {
     const base = { personaAnswer: "P", humanAnswer: "H" };
-    const rows: { flipped: boolean; run: 1 | 2; expected: { answer1: string; answer2: string; isHumanFirst: boolean } }[] = [
+    const rows: {
+      flipped: boolean;
+      run: 1 | 2;
+      expected: { answer1: string; answer2: string; isHumanFirst: boolean };
+    }[] = [
       { flipped: false, run: 1, expected: { answer1: "P", answer2: "H", isHumanFirst: false } },
       { flipped: true, run: 1, expected: { answer1: "H", answer2: "P", isHumanFirst: true } },
       { flipped: false, run: 2, expected: { answer1: "H", answer2: "P", isHumanFirst: true } },
@@ -142,7 +146,9 @@ describe("quiz sampling and the shape of the persona and judge calls", () => {
 
     expect(call.callSite).toBe("quiz_judge");
     expect(call.schema).toBe(JUDGE_SCHEMA);
-    expect(content).toBe("<question>Q &amp; A?</question>\n<answer_1>one &lt;b&gt;</answer_1>\n<answer_2>two</answer_2>");
+    expect(content).toBe(
+      "<question>Q &amp; A?</question>\n<answer_1>one &lt;b&gt;</answer_1>\n<answer_2>two</answer_2>",
+    );
     const lowered = content.toLowerCase();
     for (const word of ["human", "persona", "card"]) {
       expect(lowered).not.toContain(word);

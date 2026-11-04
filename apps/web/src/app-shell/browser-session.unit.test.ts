@@ -1,5 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { clearClientState, readAllowlist, readApprovedCard, readViewerSide, rememberAllowlist, rememberApprovedCard, rememberViewerSide } from "./browser-session.js";
+import {
+  clearClientState,
+  readAllowlist,
+  readApprovedCard,
+  readViewerSide,
+  rememberAllowlist,
+  rememberApprovedCard,
+  rememberViewerSide,
+} from "./browser-session.js";
 import { serverOffsetMs, setServerOffsetOnce, resetServerClock } from "./server-clock.js";
 import { IDS } from "../testing/fixtures.js";
 

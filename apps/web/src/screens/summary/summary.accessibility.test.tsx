@@ -32,7 +32,10 @@ const PASTED = [
   "Strength: mild",
 ].join("\n");
 // GET /api/people/me/summary for a person with no summary.
-const NO_SUMMARY = { status: 404, body: { code: "not_found", message: "This no longer exists or is not yours." } };
+const NO_SUMMARY = {
+  status: 404,
+  body: { code: "not_found", message: "This no longer exists or is not yours." },
+};
 
 // A summary as GET /api/people/me/summary reads it.
 function savedView(overrides: Partial<SummaryView> = {}): SummaryView {
@@ -41,8 +44,19 @@ function savedView(overrides: Partial<SummaryView> = {}): SummaryView {
 
 // One checked point, its quote found in the person's chats or not.
 function checkedPoint(point: string, isFound: boolean): SummaryPointView {
-  const found = { quote: "rentably was never a bad idea", turnIndex: 3, turnId: "00000000-0000-4000-8000-000000000701" };
-  return { kind: "view", topic: "Rentably", point, strength: "strong", quotes: ["rentably was never a bad idea"], found: isFound ? found : null };
+  const found = {
+    quote: "rentably was never a bad idea",
+    turnIndex: 3,
+    turnId: "00000000-0000-4000-8000-000000000701",
+  };
+  return {
+    kind: "view",
+    topic: "Rentably",
+    point,
+    strength: "strong",
+    quotes: ["rentably was never a bad idea"],
+    found: isFound ? found : null,
+  };
 }
 
 // The section with its own summary hook, as a page holds it.
@@ -73,15 +87,29 @@ describe("your AI's summary, against the MSW route stubs (a fake server)", () =>
   });
 
   it("W7-SUMMARY-UI-T2: pasted text shows its points, Remove takes one out, and Save sends the rest with the switch", async () => {
-    stubRoute(routes.people.readSummary, [NO_SUMMARY, savedView({ state: "checking", friendsCanAsk: true })]);
-    stubRoute(routes.people.saveSummary, { status: 202, body: savedView({ state: "checking", friendsCanAsk: true }) });
+    stubRoute(routes.people.readSummary, [
+      NO_SUMMARY,
+      savedView({ state: "checking", friendsCanAsk: true }),
+    ]);
+    stubRoute(routes.people.saveSummary, {
+      status: 202,
+      body: savedView({ state: "checking", friendsCanAsk: true }),
+    });
     renderSection();
 
-    fireEvent.change(await screen.findByRole("textbox", { name: "Your AI's answer" }), { target: { value: PASTED } });
+    fireEvent.change(await screen.findByRole("textbox", { name: "Your AI's answer" }), {
+      target: { value: PASTED },
+    });
     const list = screen.getByRole("list", { name: "2 points to save" });
     expect(within(list).getAllByRole("listitem")).toHaveLength(2);
-    fireEvent.click(within(list).getByRole("button", { name: "Remove this point: Believes Rentably was never a bad idea." }));
-    expect(within(screen.getByRole("list", { name: "1 point to save" })).getAllByRole("listitem")).toHaveLength(1);
+    fireEvent.click(
+      within(list).getByRole("button", {
+        name: "Remove this point: Believes Rentably was never a bad idea.",
+      }),
+    );
+    expect(
+      within(screen.getByRole("list", { name: "1 point to save" })).getAllByRole("listitem"),
+    ).toHaveLength(1);
     const toggle = screen.getByRole("switch", { name: "Friends' asks can use my summary" });
     expect((toggle as HTMLInputElement).checked).toBe(false);
     fireEvent.click(toggle);
@@ -90,7 +118,10 @@ describe("your AI's summary, against the MSW route stubs (a fake server)", () =>
 
     expect(await screen.findByText("Checking your summary against your chats.")).toBeTruthy();
     expect(requestsTo(routes.people.saveSummary).map((request) => request.body)).toEqual([
-      { text: "Kind: habit\nTopic: Mornings\nPoint: Writes for an hour before checking messages.\nStrength: mild", friendsCanAsk: true },
+      {
+        text: "Kind: habit\nTopic: Mornings\nPoint: Writes for an hour before checking messages.\nStrength: mild",
+        friendsCanAsk: true,
+      },
     ]);
   });
 
@@ -98,15 +129,30 @@ describe("your AI's summary, against the MSW route stubs (a fake server)", () =>
     stubRoute(routes.people.readSummary, NO_SUMMARY);
     renderSection();
 
-    fireEvent.change(await screen.findByRole("textbox", { name: "Your AI's answer" }), { target: { value: "I am a builder who likes quiet mornings." } });
+    fireEvent.change(await screen.findByRole("textbox", { name: "Your AI's answer" }), {
+      target: { value: "I am a builder who likes quiet mornings." },
+    });
 
-    expect(screen.getByText("No points found in this text. Paste the whole answer, from its first Kind line to the end.")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "No points found in this text. Paste the whole answer, from its first Kind line to the end.",
+      ),
+    ).toBeTruthy();
     expect(screen.getByRole("button", { name: "Save summary" })).toHaveProperty("disabled", true);
     expect(requestsTo(routes.people.saveSummary)).toHaveLength(0);
   });
 
   it("W7-SUMMARY-UI-T5: a ready summary says how many points were found in the chats", async () => {
-    stubRoute(routes.people.readSummary, savedView({ points: [checkedPoint("One.", true), checkedPoint("Two.", false), checkedPoint("Three.", true)] }));
+    stubRoute(
+      routes.people.readSummary,
+      savedView({
+        points: [
+          checkedPoint("One.", true),
+          checkedPoint("Two.", false),
+          checkedPoint("Three.", true),
+        ],
+      }),
+    );
     renderSection();
 
     expect(await screen.findByText("2 of 3 points found in your chats.")).toBeTruthy();
@@ -114,7 +160,10 @@ describe("your AI's summary, against the MSW route stubs (a fake server)", () =>
   });
 
   it("W7-SUMMARY-UI-T7: Delete summary removes it, and the paste box comes back", async () => {
-    stubRoute(routes.people.readSummary, [savedView({ points: [checkedPoint("One.", true)] }), NO_SUMMARY]);
+    stubRoute(routes.people.readSummary, [
+      savedView({ points: [checkedPoint("One.", true)] }),
+      NO_SUMMARY,
+    ]);
     stubRoute(routes.people.deleteSummary, { status: 204, body: null });
     renderSection();
 

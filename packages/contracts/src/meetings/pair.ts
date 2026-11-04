@@ -9,7 +9,11 @@ export const PAIR_LIFETIME_HOURS = 24;
 // How often the lobby polls for changes, in milliseconds.
 export const LOBBY_POLL_MS = 5_000;
 // What POST /api/pairs returns: the pair, the invite link and when it expires.
-export const PairCreateResponse = z.object({ pairId: Uuid, inviteUrl: z.string().url(), expiresAt: IsoTime });
+export const PairCreateResponse = z.object({
+  pairId: Uuid,
+  inviteUrl: z.string().url(),
+  expiresAt: IsoTime,
+});
 // The type of PairCreateResponse, read from the schema above.
 export type PairCreateResponse = z.infer<typeof PairCreateResponse>;
 // The body of POST /api/pairs/join: the invite token as 32 lower-case hex characters.

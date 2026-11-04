@@ -32,7 +32,8 @@ const exportCommentPlugin = {
 };
 
 const sizeRules = {
-  "max-lines-per-function": ["error", { max: 60, skipBlankLines: true, skipComments: true }],
+  // Counted after Prettier wraps lines at 100 columns; it was 60 while lines ran on to 500 characters, about the same amount of code.
+  "max-lines-per-function": ["error", { max: 100, skipBlankLines: true, skipComments: true }],
   complexity: ["error", 10],
   "max-depth": ["error", 3],
   "max-params": ["error", 3],

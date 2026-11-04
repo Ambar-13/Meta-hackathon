@@ -37,7 +37,7 @@ export function makeSeededRandom(seed: string): () => number {
 export function isFlippedLine(point: BriefPoint): boolean {
   const quoteText = point.quotes.map((quote) => quote.text).join("\n");
   const digest = createHash("sha256").update(`${point.text}\n${quoteText}`).digest();
-  return ((digest[0] ?? 0) % 2) === 1;
+  return (digest[0] ?? 0) % 2 === 1;
 }
 
 // The indexes 0 to count minus 1 in a seeded shuffled order (Fisher-Yates from the end).
@@ -55,7 +55,9 @@ function shuffledIndexes(count: number, random: () => number): number[] {
 // The judge's text for one line: the statement and its quotes, in the order the flip gives. Both are escaped, as every block text
 // is, so a line or a quote cannot close its item and open another.
 function slotBlock(slot: JudgeSlot): string[] {
-  const quotes = slot.point.quotes.map((quote) => `<quote>"${escapeBlockText(quote.text)}"</quote>`);
+  const quotes = slot.point.quotes.map(
+    (quote) => `<quote>"${escapeBlockText(quote.text)}"</quote>`,
+  );
   const statement = `<statement>${escapeBlockText(slot.point.text)}</statement>`;
   const body = slot.isFlipped ? [...quotes, statement] : [statement, ...quotes];
   return [`<item index="${String(slot.index)}">`, ...body, "</item>"];
@@ -63,27 +65,53 @@ function slotBlock(slot: JudgeSlot): string[] {
 
 // The seed of one brief's shuffle: its side and the words of its nine lines. No id or clock goes in, so the same lines always give the same request.
 export function judgeSeedOf(side: "a" | "b", points: BriefSections): string {
-  const lines = pointsInIndexOrder(points).map((point) => `${point.text}\n${point.quotes.map((quote) => quote.text).join("\n")}`);
+  const lines = pointsInIndexOrder(points).map(
+    (point) => `${point.text}\n${point.quotes.map((quote) => quote.text).join("\n")}`,
+  );
   return `${side}\n${lines.join("\n")}`;
 }
 
 // Builds the judge's messages for one brief: nine lines, shuffled and flipped by seeded rules, with no section names.
-export function buildJudgeInput(input: { side: "a" | "b"; points: BriefSections; promptText: string }): { messages: ChatMessage[]; order: number[]; flipped: boolean[] } {
+export function buildJudgeInput(input: {
+  side: "a" | "b";
+  points: BriefSections;
+  promptText: string;
+}): { messages: ChatMessage[]; order: number[]; flipped: boolean[] } {
   const points = pointsInIndexOrder(input.points);
   const random = makeSeededRandom(judgeSeedOf(input.side, input.points));
   const order = shuffledIndexes(points.length, random);
   const flipped = points.map((point) => isFlippedLine(point));
-  const slots: JudgeSlot[] = points.map((point, index) => ({ index, isFlipped: flipped[index] === true, point }));
-  const shown = order.map((index) => slots[index]).filter((slot): slot is JudgeSlot => slot !== undefined);
+  const slots: JudgeSlot[] = points.map((point, index) => ({
+    index,
+    isFlipped: flipped[index] === true,
+    point,
+  }));
+  const shown = order
+    .map((index) => slots[index])
+    .filter((slot): slot is JudgeSlot => slot !== undefined);
   const user = ["<items>", ...shown.flatMap(slotBlock), "</items>"].join("\n");
-  return { messages: [{ role: "system", content: promptBodyOf(input.promptText) }, { role: "user", content: user }], order, flipped };
+  return {
+    messages: [
+      { role: "system", content: promptBodyOf(input.promptText) },
+      { role: "user", content: user },
+    ],
+    order,
+    flipped,
+  };
 }
 
 // Writes the judge's verdicts onto the points by their original index. Unknown indexes are dropped; for a repeated index the last verdict wins.
-export function applyJudgeOutput(sections: BriefSections, output: BriefSupportJudgeOutput): BriefSections {
+export function applyJudgeOutput(
+  sections: BriefSections,
+  output: BriefSupportJudgeOutput,
+): BriefSections {
   let next = sections;
   for (const line of output.lines) {
-    next = setVerdict(next, { index: line.index, supported: line.supported, reason: line.reason.slice(0, REASON_MAX_CHARS) });
+    next = setVerdict(next, {
+      index: line.index,
+      supported: line.supported,
+      reason: line.reason.slice(0, REASON_MAX_CHARS),
+    });
   }
   return next;
 }
@@ -98,7 +126,11 @@ function setVerdict(sections: BriefSections, verdict: Verdict): BriefSections {
   if (key === undefined || verdict.index < 0) return sections;
   const list = sections[key];
   if (list[position] === undefined) return sections;
-  const updated = list.map((point, at) => (at === position ? { ...point, supported: verdict.supported, supportReason: verdict.reason } : point));
+  const updated = list.map((point, at) =>
+    at === position
+      ? { ...point, supported: verdict.supported, supportReason: verdict.reason }
+      : point,
+  );
   return { ...sections, [key]: updated };
 }
 

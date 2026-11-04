@@ -3,7 +3,10 @@ import { createElement, type ReactElement } from "react";
 // One run of inline text: plain, emphasis or strong.
 export type SafeInline = { kind: "text" | "em" | "strong"; text: string };
 // One block: a paragraph, a quote, or a list.
-export type SafeBlock = { kind: "paragraph"; inlines: SafeInline[] } | { kind: "quote"; inlines: SafeInline[] } | { kind: "list"; isOrdered: boolean; items: SafeInline[][] };
+export type SafeBlock =
+  | { kind: "paragraph"; inlines: SafeInline[] }
+  | { kind: "quote"; inlines: SafeInline[] }
+  | { kind: "list"; isOrdered: boolean; items: SafeInline[][] };
 
 // Star emphasis and strong only; everything else is left as typed.
 const INLINE_PATTERN = /\*\*([^*]+)\*\*|\*([^*]+)\*/g;
@@ -13,7 +16,10 @@ const UNORDERED_LINE = /^ {0,3}[-*+] +(.*)$/;
 const ORDERED_LINE = /^ {0,3}\d{1,9}[.)] +(.*)$/;
 
 // The block being built while the lines are read, or null between blocks.
-type OpenBlock = { kind: "paragraph" | "quote"; lines: string[] } | { kind: "list"; isOrdered: boolean; items: string[] } | null;
+type OpenBlock =
+  | { kind: "paragraph" | "quote"; lines: string[] }
+  | { kind: "list"; isOrdered: boolean; items: string[] }
+  | null;
 // The finished blocks and the open block, as the line reader fills them.
 type Parser = { blocks: SafeBlock[]; open: OpenBlock };
 
@@ -49,7 +55,11 @@ function closeBlock(parser: Parser): void {
   parser.open = null;
   if (open === null) return;
   if (open.kind === "list") {
-    parser.blocks.push({ kind: "list", isOrdered: open.isOrdered, items: open.items.map(inlinesOf) });
+    parser.blocks.push({
+      kind: "list",
+      isOrdered: open.isOrdered,
+      items: open.items.map(inlinesOf),
+    });
     return;
   }
   parser.blocks.push({ kind: open.kind, inlines: inlinesOf(open.lines.join(" ")) });
@@ -115,13 +125,23 @@ function renderInline(inline: SafeInline): string | ReactElement {
 
 // Builds the element for one block.
 function renderBlock(block: SafeBlock): ReactElement {
-  if (block.kind === "paragraph") return createElement("p", null, ...block.inlines.map(renderInline));
-  if (block.kind === "quote") return createElement("blockquote", null, createElement("p", null, ...block.inlines.map(renderInline)));
+  if (block.kind === "paragraph")
+    return createElement("p", null, ...block.inlines.map(renderInline));
+  if (block.kind === "quote")
+    return createElement(
+      "blockquote",
+      null,
+      createElement("p", null, ...block.inlines.map(renderInline)),
+    );
   const items = block.items.map((item) => createElement("li", null, ...item.map(renderInline)));
   return createElement(block.isOrdered ? "ol" : "ul", null, ...items);
 }
 
 // Renders model text with p, blockquote, ul, ol, li, em and strong elements only, never as inner HTML.
 export const SafeMarkdown = (props: { text: string }): ReactElement => {
-  return createElement("div", { className: "safe-markdown" }, ...parseSafeMarkdown(props.text).map(renderBlock));
+  return createElement(
+    "div",
+    { className: "safe-markdown" },
+    ...parseSafeMarkdown(props.text).map(renderBlock),
+  );
 };

@@ -13,7 +13,12 @@ afterEach(() => {
 const ID = (n: number): string => `00000000-0000-4000-8000-${String(700 + n).padStart(12, "0")}`;
 
 // Renders a bare screen frame at one page of the app.
-function renderFrame(options: { pattern: string; url: string; hideSettingsLink?: boolean; width?: 375 | 1024 }): void {
+function renderFrame(options: {
+  pattern: string;
+  url: string;
+  hideSettingsLink?: boolean;
+  width?: 375 | 1024;
+}): void {
   renderScreen(
     <ScreenFrame title="A page" hideSettingsLink={options.hideSettingsLink === true}>
       <p>The page body.</p>
@@ -24,13 +29,23 @@ function renderFrame(options: { pattern: string; url: string; hideSettingsLink?:
 
 // One incoming request from a person with this name.
 function incoming(n: number, name: string): FriendRequestsView["incoming"][number] {
-  return { requestId: ID(20 + n), direction: "incoming", otherName: name, otherListingId: null, createdAt: SERVER_NOW };
+  return {
+    requestId: ID(20 + n),
+    direction: "incoming",
+    otherName: name,
+    otherListingId: null,
+    createdAt: SERVER_NOW,
+  };
 }
 
 // The links of the Pages nav as [words, href, aria-current].
 function pageLinks(): Array<[string | null, string | null, string | null]> {
   const links = within(screen.getByRole("navigation", { name: "Pages" })).getAllByRole("link");
-  return links.map((link) => [link.textContent, link.getAttribute("href"), link.getAttribute("aria-current")]);
+  return links.map((link) => [
+    link.textContent,
+    link.getAttribute("href"),
+    link.getAttribute("aria-current"),
+  ]);
 }
 
 describe("screen frame links", () => {
@@ -49,8 +64,12 @@ describe("screen frame links", () => {
     ]);
     expect(screen.queryByRole("link", { name: "Directory" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Find help" })).toBeNull();
-    expect(screen.getByRole("link", { name: "Create a post or story" }).getAttribute("href")).toBe("/create");
-    expect(screen.getAllByRole("link", { name: "Meety home" }).map((link) => link.getAttribute("href"))).toEqual(["/home", "/home"]);
+    expect(screen.getByRole("link", { name: "Create a post or story" }).getAttribute("href")).toBe(
+      "/create",
+    );
+    expect(
+      screen.getAllByRole("link", { name: "Meety home" }).map((link) => link.getAttribute("href")),
+    ).toEqual(["/home", "/home"]);
     expect(screen.getByRole("link", { name: "Meety" }).getAttribute("href")).toBe("/meety");
   });
 
@@ -64,7 +83,16 @@ describe("screen frame links", () => {
 
     for (const page of pages) {
       renderFrame(page);
-      for (const name of ["Home", "Search", "Meety", "Explore", "Friends", "Me", "Directory", "Find help"]) {
+      for (const name of [
+        "Home",
+        "Search",
+        "Meety",
+        "Explore",
+        "Friends",
+        "Me",
+        "Directory",
+        "Find help",
+      ]) {
         expect(screen.queryByRole("link", { name })).toBeNull();
       }
       cleanup();
@@ -72,7 +100,11 @@ describe("screen frame links", () => {
   });
 
   it("W6-DWEB-T39, updated for wave 7: the Settings page keeps the four page links and drops only its own Settings links", () => {
-    renderFrame({ pattern: ROUTE_PATTERNS.settings, url: APP_PATHS.settings, hideSettingsLink: true });
+    renderFrame({
+      pattern: ROUTE_PATTERNS.settings,
+      url: APP_PATHS.settings,
+      hideSettingsLink: true,
+    });
 
     expect(screen.getByRole("link", { name: "Search" }).getAttribute("href")).toBe("/search");
     expect(screen.getByRole("link", { name: "Friends" }).getAttribute("href")).toBe("/friends");
@@ -97,7 +129,13 @@ describe("screen frame links", () => {
   });
 
   it("W7-WEB-A-T2: with 2 incoming requests the Friends link's accessible name is Friends, 2 requests", async () => {
-    stubRoute(routes.social.listFriendRequests, FriendRequestsView.parse({ incoming: [incoming(1, "Ola"), incoming(2, "Pim")], outgoing: [] }));
+    stubRoute(
+      routes.social.listFriendRequests,
+      FriendRequestsView.parse({
+        incoming: [incoming(1, "Ola"), incoming(2, "Pim")],
+        outgoing: [],
+      }),
+    );
     renderFrame({ pattern: ROUTE_PATTERNS.card, url: APP_PATHS.card(IDS.card) });
 
     const link = await screen.findByRole("link", { name: "Friends, 2 requests" });
@@ -106,8 +144,14 @@ describe("screen frame links", () => {
   });
 
   it("W7-WEB-A-T2b: a failed rail read shows the pages and no friend list or error", async () => {
-    stubRoute(routes.directory.friends, { status: 500, body: { code: "server_error", message: "Something went wrong on our side." } });
-    stubRoute(routes.social.listFriendRequests, { status: 500, body: { code: "server_error", message: "Something went wrong on our side." } });
+    stubRoute(routes.directory.friends, {
+      status: 500,
+      body: { code: "server_error", message: "Something went wrong on our side." },
+    });
+    stubRoute(routes.social.listFriendRequests, {
+      status: 500,
+      body: { code: "server_error", message: "Something went wrong on our side." },
+    });
     renderFrame({ pattern: ROUTE_PATTERNS.card, url: APP_PATHS.card(IDS.card), width: 1024 });
 
     expect(await screen.findByText("The page body.")).toBeTruthy();

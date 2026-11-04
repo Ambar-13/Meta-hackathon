@@ -11,7 +11,8 @@ import type { FastifyInstance } from "fastify";
 import { PERSON_CREATE_RATE_LIMIT } from "@meet-first/contracts";
 
 // The sentence for the 11th account from one address in an hour.
-export const TOO_MANY_ACCOUNTS_SENTENCE = "This network made 10 accounts in the last hour. Wait an hour, then try again.";
+export const TOO_MANY_ACCOUNTS_SENTENCE =
+  "This network made 10 accounts in the last hour. Wait an hour, then try again.";
 
 // The limiter's refusal. It carries statusCode, code and message, so it ends as a 429 with this code and sentence
 // whether the plugin throws it (then handleRouteError rule 3 reads it) or sends it as the body.

@@ -3,7 +3,15 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { sql, type Kysely } from "kysely";
 import { makeDatabase, POOL_SIZE } from "./client.js";
 import { parseDatabaseError } from "./database-errors.js";
-import { asPerson, createPairedMeetingWithTurns, createTestPerson, freshTestDatabase, withNoContext, type SeededMeeting, type TestDatabase } from "./testing/index.js";
+import {
+  asPerson,
+  createPairedMeetingWithTurns,
+  createTestPerson,
+  freshTestDatabase,
+  withNoContext,
+  type SeededMeeting,
+  type TestDatabase,
+} from "./testing/index.js";
 import type { Database } from "./types.js";
 
 let t: TestDatabase;
@@ -16,7 +24,13 @@ let listingYa: string;
 
 // Lists one person in Explore with their card, as that person; returns the listing id.
 async function list(personId: string, cardId: string, line: string): Promise<string> {
-  const row = await asPerson(t.db, personId, (trx) => trx.insertInto("directory_listings").values({ person_id: personId, card_id: cardId, line }).returning("id").executeTakeFirstOrThrow());
+  const row = await asPerson(t.db, personId, (trx) =>
+    trx
+      .insertInto("directory_listings")
+      .values({ person_id: personId, card_id: cardId, line })
+      .returning("id")
+      .executeTakeFirstOrThrow(),
+  );
   return row.id;
 }
 
@@ -31,8 +45,21 @@ async function caught(run: () => Promise<unknown>): Promise<unknown> {
 }
 
 // Sends a friend request to a listing as one person with this daily cap; returns the request id.
-async function sendRequest(personId: string, listingId: string, cap = 20): Promise<string | undefined> {
-  return asPerson(t.db, personId, async (trx) => (await sql<{ id: string }>`SELECT friend_request_send(${listingId}::uuid, ${cap}::int) AS id`.execute(trx)).rows[0]?.id);
+async function sendRequest(
+  personId: string,
+  listingId: string,
+  cap = 20,
+): Promise<string | undefined> {
+  return asPerson(
+    t.db,
+    personId,
+    async (trx) =>
+      (
+        await sql<{
+          id: string;
+        }>`SELECT friend_request_send(${listingId}::uuid, ${cap}::int) AS id`.execute(trx)
+      ).rows[0]?.id,
+  );
 }
 
 beforeAll(async () => {
@@ -52,14 +79,34 @@ afterAll(async () => {
 describe("friend requests in the database", () => {
   it("W7-DB-T1: a request is visible to its two people only, and app_api cannot write the table itself", async () => {
     const requestId = await sendRequest(x.a.personId, listingYb);
-    const seenBy = async (personId: string) => (await asPerson(t.db, personId, (trx) => trx.selectFrom("friend_requests").select("id").execute())).map((row) => row.id);
+    const seenBy = async (personId: string) =>
+      (
+        await asPerson(t.db, personId, (trx) =>
+          trx.selectFrom("friend_requests").select("id").execute(),
+        )
+      ).map((row) => row.id);
 
     expect(await seenBy(x.a.personId)).toEqual([requestId]);
     expect(await seenBy(y.b.personId)).toEqual([requestId]);
     expect(await seenBy(x.b.personId)).toEqual([]);
-    const direct = await caught(() => asPerson(t.db, x.b.personId, (trx) => trx.insertInto("friend_requests").values({ from_person_id: x.b.personId, to_person_id: y.b.personId }).execute()));
+    const direct = await caught(() =>
+      asPerson(t.db, x.b.personId, (trx) =>
+        trx
+          .insertInto("friend_requests")
+          .values({ from_person_id: x.b.personId, to_person_id: y.b.personId })
+          .execute(),
+      ),
+    );
     expect(Reflect.get(direct ?? {}, "code")).toBe("42501");
-    const forged = await caught(() => asPerson(t.db, y.b.personId, (trx) => trx.updateTable("friend_requests").set({ state: "accepted" }).where("id", "=", requestId ?? "").execute()));
+    const forged = await caught(() =>
+      asPerson(t.db, y.b.personId, (trx) =>
+        trx
+          .updateTable("friend_requests")
+          .set({ state: "accepted" })
+          .where("id", "=", requestId ?? "")
+          .execute(),
+      ),
+    );
     expect(Reflect.get(forged ?? {}, "code")).toBe("42501");
   });
 
@@ -70,59 +117,176 @@ describe("friend requests in the database", () => {
 
     expect(parseDatabaseError(twice)?.code).toBe("friend_request_pending");
     expect(parseDatabaseError(self)?.code).toBe("friend_request_self");
-    expect(parseDatabaseError(capped)).toEqual({ code: "friend_request_daily_cap", message: "You have sent today's friend requests. Try again tomorrow." });
+    expect(parseDatabaseError(capped)).toEqual({
+      code: "friend_request_daily_cap",
+      message: "You have sent today's friend requests. Try again tomorrow.",
+    });
   });
 
   it("W7-DB-T3: only the receiver accepts, once; accepting makes friend_list show each to the other, with the listing on the listed side", async () => {
-    const requestId = (await asPerson(t.db, y.b.personId, (trx) => trx.selectFrom("friend_requests").select("id").where("state", "=", "pending").executeTakeFirstOrThrow())).id;
-    const bySender = await caught(() => asPerson(t.db, x.a.personId, (trx) => sql`SELECT friend_request_accept(${requestId}::uuid)`.execute(trx)));
-    const pairId = await asPerson(t.db, y.b.personId, async (trx) => (await sql<{ id: string }>`SELECT friend_request_accept(${requestId}::uuid) AS id`.execute(trx)).rows[0]?.id);
-    const again = await caught(() => asPerson(t.db, y.b.personId, (trx) => sql`SELECT friend_request_accept(${requestId}::uuid)`.execute(trx)));
-    const friendsOf = (personId: string) => asPerson(t.db, personId, async (trx) => (await sql<{ pair_id: string; display_name: string; listing_id: string | null }>`SELECT pair_id, display_name, listing_id FROM friend_list()`.execute(trx)).rows);
+    const requestId = (
+      await asPerson(t.db, y.b.personId, (trx) =>
+        trx
+          .selectFrom("friend_requests")
+          .select("id")
+          .where("state", "=", "pending")
+          .executeTakeFirstOrThrow(),
+      )
+    ).id;
+    const bySender = await caught(() =>
+      asPerson(t.db, x.a.personId, (trx) =>
+        sql`SELECT friend_request_accept(${requestId}::uuid)`.execute(trx),
+      ),
+    );
+    const pairId = await asPerson(
+      t.db,
+      y.b.personId,
+      async (trx) =>
+        (
+          await sql<{ id: string }>`SELECT friend_request_accept(${requestId}::uuid) AS id`.execute(
+            trx,
+          )
+        ).rows[0]?.id,
+    );
+    const again = await caught(() =>
+      asPerson(t.db, y.b.personId, (trx) =>
+        sql`SELECT friend_request_accept(${requestId}::uuid)`.execute(trx),
+      ),
+    );
+    const friendsOf = (personId: string) =>
+      asPerson(
+        t.db,
+        personId,
+        async (trx) =>
+          (
+            await sql<{
+              pair_id: string;
+              display_name: string;
+              listing_id: string | null;
+            }>`SELECT pair_id, display_name, listing_id FROM friend_list()`.execute(trx)
+          ).rows,
+      );
 
     expect(parseDatabaseError(bySender)?.code).toBe("friend_request_not_found");
     expect(parseDatabaseError(again)?.code).toBe("friend_request_decided");
-    expect(await friendsOf(x.a.personId)).toContainEqual({ pair_id: pairId, display_name: "Test B", listing_id: listingYb });
-    expect(await friendsOf(y.b.personId)).toContainEqual({ pair_id: pairId, display_name: "Test A", listing_id: null });
-    const pair = await asPerson(t.db, y.b.personId, (trx) => trx.selectFrom("pairs").select(["creator_person_id", "joiner_person_id", "via_directory"]).where("id", "=", pairId ?? "").executeTakeFirstOrThrow());
-    expect(pair).toEqual({ creator_person_id: x.a.personId, joiner_person_id: y.b.personId, via_directory: false });
+    expect(await friendsOf(x.a.personId)).toContainEqual({
+      pair_id: pairId,
+      display_name: "Test B",
+      listing_id: listingYb,
+    });
+    expect(await friendsOf(y.b.personId)).toContainEqual({
+      pair_id: pairId,
+      display_name: "Test A",
+      listing_id: null,
+    });
+    const pair = await asPerson(t.db, y.b.personId, (trx) =>
+      trx
+        .selectFrom("pairs")
+        .select(["creator_person_id", "joiner_person_id", "via_directory"])
+        .where("id", "=", pairId ?? "")
+        .executeTakeFirstOrThrow(),
+    );
+    expect(pair).toEqual({
+      creator_person_id: x.a.personId,
+      joiner_person_id: y.b.personId,
+      via_directory: false,
+    });
     const already = await caught(() => sendRequest(x.a.personId, listingYb));
     expect(parseDatabaseError(already)?.code).toBe("already_friends");
   });
 
   it("W7-PHOTO-DB-T1: friend_list (migration 0010) carries each friend's sample mark, so the app can show a sample friend's face", async () => {
     const markOf = async (personId: string, displayName: string): Promise<boolean | undefined> => {
-      const rows = await asPerson(t.db, personId, async (trx) => (await sql<{ display_name: string; is_sample: boolean }>`SELECT display_name, is_sample FROM friend_list()`.execute(trx)).rows);
+      const rows = await asPerson(
+        t.db,
+        personId,
+        async (trx) =>
+          (
+            await sql<{
+              display_name: string;
+              is_sample: boolean;
+            }>`SELECT display_name, is_sample FROM friend_list()`.execute(trx)
+          ).rows,
+      );
       return rows.find((row) => row.display_name === displayName)?.is_sample;
     };
     expect(await markOf(y.a.personId, "Test B")).toBe(false);
-    await asPerson(t.db, y.b.personId, (trx) => trx.updateTable("people").set({ is_sample: true }).where("id", "=", y.b.personId).execute());
+    await asPerson(t.db, y.b.personId, (trx) =>
+      trx.updateTable("people").set({ is_sample: true }).where("id", "=", y.b.personId).execute(),
+    );
     try {
       expect(await markOf(y.a.personId, "Test B")).toBe(true);
     } finally {
-      await asPerson(t.db, y.b.personId, (trx) => trx.updateTable("people").set({ is_sample: false }).where("id", "=", y.b.personId).execute());
+      await asPerson(t.db, y.b.personId, (trx) =>
+        trx
+          .updateTable("people")
+          .set({ is_sample: false })
+          .where("id", "=", y.b.personId)
+          .execute(),
+      );
     }
   });
 
   it("W7-DB-T4: directory_profile answers nothing with no person set, and friend_requests_mine never names a person id", async () => {
-    const none = await withNoContext(t.db, async (trx) => (await sql`SELECT * FROM directory_profile(${listingYb}::uuid)`.execute(trx)).rows);
+    const none = await withNoContext(
+      t.db,
+      async (trx) =>
+        (await sql`SELECT * FROM directory_profile(${listingYb}::uuid)`.execute(trx)).rows,
+    );
     expect(none).toEqual([]);
     const stranger = await createTestPerson(t.db, "Test C");
     await sendRequest(stranger.personId, listingYa);
-    const rows = await asPerson(t.db, y.a.personId, async (trx) => (await sql<Record<string, unknown>>`SELECT * FROM friend_requests_mine()`.execute(trx)).rows);
-    expect(rows.map((row) => Object.keys(row).sort())).toEqual([["created_at", "direction", "other_display_name", "other_listing_id", "request_id"]]);
-    expect(rows[0]).toMatchObject({ direction: "incoming", other_display_name: "Test C", other_listing_id: null });
+    const rows = await asPerson(
+      t.db,
+      y.a.personId,
+      async (trx) =>
+        (await sql<Record<string, unknown>>`SELECT * FROM friend_requests_mine()`.execute(trx))
+          .rows,
+    );
+    expect(rows.map((row) => Object.keys(row).sort())).toEqual([
+      ["created_at", "direction", "other_display_name", "other_listing_id", "request_id"],
+    ]);
+    expect(rows[0]).toMatchObject({
+      direction: "incoming",
+      other_display_name: "Test C",
+      other_listing_id: null,
+    });
   });
 });
 
 describe("the orchestrator chat in the database", () => {
   it("W7-DB-T5: a person sees only their own messages, and the worker may read and update them in that person's context but never insert", async () => {
-    await asPerson(t.db, x.a.personId, (trx) => trx.insertInto("orchestrator_messages").values({ person_id: x.a.personId, role: "you", text: "hello", state: "done" }).execute());
-    const own = await asPerson(t.db, x.a.personId, (trx) => trx.selectFrom("orchestrator_messages").select("text").execute());
-    const other = await asPerson(t.db, x.b.personId, (trx) => trx.selectFrom("orchestrator_messages").select("text").execute());
-    const forged = await caught(() => asPerson(t.db, x.b.personId, (trx) => trx.insertInto("orchestrator_messages").values({ person_id: x.a.personId, role: "you", text: "not mine", state: "done" }).execute()));
-    const workerInsert = await caught(() => asPerson(worker, x.a.personId, (trx) => trx.insertInto("orchestrator_messages").values({ person_id: x.a.personId, role: "you", text: "from the worker", state: "done" }).execute()));
-    const workerRead = await asPerson(worker, x.a.personId, (trx) => trx.selectFrom("orchestrator_messages").select("text").execute());
+    await asPerson(t.db, x.a.personId, (trx) =>
+      trx
+        .insertInto("orchestrator_messages")
+        .values({ person_id: x.a.personId, role: "you", text: "hello", state: "done" })
+        .execute(),
+    );
+    const own = await asPerson(t.db, x.a.personId, (trx) =>
+      trx.selectFrom("orchestrator_messages").select("text").execute(),
+    );
+    const other = await asPerson(t.db, x.b.personId, (trx) =>
+      trx.selectFrom("orchestrator_messages").select("text").execute(),
+    );
+    const forged = await caught(() =>
+      asPerson(t.db, x.b.personId, (trx) =>
+        trx
+          .insertInto("orchestrator_messages")
+          .values({ person_id: x.a.personId, role: "you", text: "not mine", state: "done" })
+          .execute(),
+      ),
+    );
+    const workerInsert = await caught(() =>
+      asPerson(worker, x.a.personId, (trx) =>
+        trx
+          .insertInto("orchestrator_messages")
+          .values({ person_id: x.a.personId, role: "you", text: "from the worker", state: "done" })
+          .execute(),
+      ),
+    );
+    const workerRead = await asPerson(worker, x.a.personId, (trx) =>
+      trx.selectFrom("orchestrator_messages").select("text").execute(),
+    );
 
     expect(own.map((row) => row.text)).toEqual(["hello"]);
     expect(other).toEqual([]);
@@ -141,7 +305,17 @@ describe("the request lists", () => {
       await sendRequest(sender.personId, listing);
     }
 
-    const rows = await asPerson(t.db, listed.b.personId, async (trx) => (await sql<{ direction: string; other_display_name: string }>`SELECT direction, other_display_name FROM friend_requests_mine()`.execute(trx)).rows);
+    const rows = await asPerson(
+      t.db,
+      listed.b.personId,
+      async (trx) =>
+        (
+          await sql<{
+            direction: string;
+            other_display_name: string;
+          }>`SELECT direction, other_display_name FROM friend_requests_mine()`.execute(trx)
+        ).rows,
+    );
 
     expect(rows).toHaveLength(100);
     expect(rows.every((row) => row.direction === "incoming")).toBe(true);
@@ -151,150 +325,427 @@ describe("the request lists", () => {
 
 describe("profile photos in the database", () => {
   // A stand-in for a JPEG: the start and end marks around some bytes, which is all the table checks.
-  const jpeg = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(120, 7), Buffer.from([0xff, 0xd9])]);
+  const jpeg = Buffer.concat([
+    Buffer.from([0xff, 0xd8, 0xff, 0xe0]),
+    Buffer.alloc(120, 7),
+    Buffer.from([0xff, 0xd9]),
+  ]);
 
   it("W7-PHOTO-DB-T2: a person reads and changes only their own photo row; anyone signed in reads the image by its id, nobody without a person set, and nobody once the owner is deleted", async () => {
-    const photoId = (await asPerson(t.db, y.b.personId, (trx) => trx.insertInto("profile_photos").values({ person_id: y.b.personId, image: jpeg }).returning("id").executeTakeFirstOrThrow())).id;
-    const readAs = async (personId: string) => (await asPerson(t.db, personId, async (trx) => (await sql<{ image: Buffer | null }>`SELECT profile_photo_read(${photoId}::uuid) AS image`.execute(trx)).rows[0]?.image)) ?? null;
+    const photoId = (
+      await asPerson(t.db, y.b.personId, (trx) =>
+        trx
+          .insertInto("profile_photos")
+          .values({ person_id: y.b.personId, image: jpeg })
+          .returning("id")
+          .executeTakeFirstOrThrow(),
+      )
+    ).id;
+    const readAs = async (personId: string) =>
+      (await asPerson(
+        t.db,
+        personId,
+        async (trx) =>
+          (
+            await sql<{
+              image: Buffer | null;
+            }>`SELECT profile_photo_read(${photoId}::uuid) AS image`.execute(trx)
+          ).rows[0]?.image,
+      )) ?? null;
 
-    expect(await asPerson(t.db, x.a.personId, (trx) => trx.selectFrom("profile_photos").select("id").execute())).toEqual([]);
-    const forged = await caught(() => asPerson(t.db, x.a.personId, (trx) => trx.insertInto("profile_photos").values({ person_id: y.b.personId, image: jpeg }).execute()));
+    expect(
+      await asPerson(t.db, x.a.personId, (trx) =>
+        trx.selectFrom("profile_photos").select("id").execute(),
+      ),
+    ).toEqual([]);
+    const forged = await caught(() =>
+      asPerson(t.db, x.a.personId, (trx) =>
+        trx.insertInto("profile_photos").values({ person_id: y.b.personId, image: jpeg }).execute(),
+      ),
+    );
     expect(Reflect.get(forged ?? {}, "code")).toBe("42501");
-    const removedByOther = await asPerson(t.db, x.a.personId, (trx) => trx.deleteFrom("profile_photos").where("id", "=", photoId).executeTakeFirst());
+    const removedByOther = await asPerson(t.db, x.a.personId, (trx) =>
+      trx.deleteFrom("profile_photos").where("id", "=", photoId).executeTakeFirst(),
+    );
     expect(Number(removedByOther.numDeletedRows)).toBe(0);
     expect((await readAs(x.a.personId))?.equals(jpeg)).toBe(true);
-    const anonymous = await withNoContext(t.db, async (trx) => (await sql<{ image: Buffer | null }>`SELECT profile_photo_read(${photoId}::uuid) AS image`.execute(trx)).rows[0]?.image);
+    const anonymous = await withNoContext(
+      t.db,
+      async (trx) =>
+        (
+          await sql<{
+            image: Buffer | null;
+          }>`SELECT profile_photo_read(${photoId}::uuid) AS image`.execute(trx)
+        ).rows[0]?.image,
+    );
     expect(anonymous ?? null).toBeNull();
-    await asPerson(t.db, y.b.personId, (trx) => trx.updateTable("people").set({ state: "deleted" }).where("id", "=", y.b.personId).execute());
+    await asPerson(t.db, y.b.personId, (trx) =>
+      trx.updateTable("people").set({ state: "deleted" }).where("id", "=", y.b.personId).execute(),
+    );
     try {
       expect(await readAs(x.a.personId)).toBeNull();
     } finally {
-      await asPerson(t.db, y.b.personId, (trx) => trx.updateTable("people").set({ state: "active" }).where("id", "=", y.b.personId).execute());
-      await asPerson(t.db, y.b.personId, (trx) => trx.deleteFrom("profile_photos").where("person_id", "=", y.b.personId).execute());
+      await asPerson(t.db, y.b.personId, (trx) =>
+        trx.updateTable("people").set({ state: "active" }).where("id", "=", y.b.personId).execute(),
+      );
+      await asPerson(t.db, y.b.personId, (trx) =>
+        trx.deleteFrom("profile_photos").where("person_id", "=", y.b.personId).execute(),
+      );
     }
   });
 
   it("W7-PHOTO-DB-T3: listing_photo_ids gives a listed person's photo id by listing, and pair_photo_ids gives it only for the caller's own pairs", async () => {
-    const photoId = (await asPerson(t.db, y.a.personId, (trx) => trx.insertInto("profile_photos").values({ person_id: y.a.personId, image: jpeg }).returning("id").executeTakeFirstOrThrow())).id;
+    const photoId = (
+      await asPerson(t.db, y.a.personId, (trx) =>
+        trx
+          .insertInto("profile_photos")
+          .values({ person_id: y.a.personId, image: jpeg })
+          .returning("id")
+          .executeTakeFirstOrThrow(),
+      )
+    ).id;
     try {
-      const byListing = await asPerson(t.db, x.a.personId, async (trx) => (await sql<{ listing_id: string; photo_id: string }>`SELECT listing_id, photo_id FROM listing_photo_ids(${[listingYa, listingYb]}::uuid[])`.execute(trx)).rows);
-      const byOwnPair = await asPerson(t.db, y.b.personId, async (trx) => (await sql<{ pair_id: string; photo_id: string }>`SELECT pair_id, photo_id FROM pair_photo_ids(${[y.pairId]}::uuid[])`.execute(trx)).rows);
-      const byOtherPair = await asPerson(t.db, x.a.personId, async (trx) => (await sql<{ pair_id: string }>`SELECT pair_id FROM pair_photo_ids(${[y.pairId]}::uuid[])`.execute(trx)).rows);
+      const byListing = await asPerson(
+        t.db,
+        x.a.personId,
+        async (trx) =>
+          (
+            await sql<{
+              listing_id: string;
+              photo_id: string;
+            }>`SELECT listing_id, photo_id FROM listing_photo_ids(${[listingYa, listingYb]}::uuid[])`.execute(
+              trx,
+            )
+          ).rows,
+      );
+      const byOwnPair = await asPerson(
+        t.db,
+        y.b.personId,
+        async (trx) =>
+          (
+            await sql<{
+              pair_id: string;
+              photo_id: string;
+            }>`SELECT pair_id, photo_id FROM pair_photo_ids(${[y.pairId]}::uuid[])`.execute(trx)
+          ).rows,
+      );
+      const byOtherPair = await asPerson(
+        t.db,
+        x.a.personId,
+        async (trx) =>
+          (
+            await sql<{
+              pair_id: string;
+            }>`SELECT pair_id FROM pair_photo_ids(${[y.pairId]}::uuid[])`.execute(trx)
+          ).rows,
+      );
 
       expect(byListing).toEqual([{ listing_id: listingYa, photo_id: photoId }]);
       expect(byOwnPair).toEqual([{ pair_id: y.pairId, photo_id: photoId }]);
       expect(byOtherPair).toEqual([]);
     } finally {
-      await asPerson(t.db, y.a.personId, (trx) => trx.deleteFrom("profile_photos").where("person_id", "=", y.a.personId).execute());
+      await asPerson(t.db, y.a.personId, (trx) =>
+        trx.deleteFrom("profile_photos").where("person_id", "=", y.a.personId).execute(),
+      );
     }
   });
 });
 
-
 describe("posts, stories and likes in the database", () => {
   // A stand-in for a JPEG: the start and end marks around some bytes, which is all the table checks.
-  const jpeg = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(120, 5), Buffer.from([0xff, 0xd9])]);
+  const jpeg = Buffer.concat([
+    Buffer.from([0xff, 0xd8, 0xff, 0xe0]),
+    Buffer.alloc(120, 5),
+    Buffer.from([0xff, 0xd9]),
+  ]);
   // One hour in milliseconds.
   const hour = 3_600_000;
 
   it("W7-POST-DB-T1: a person reads only their own posts and likes rows, cannot like as someone else, and liked_posts gives the worker, and only the worker, that person's likes", async () => {
-    const postId = (await asPerson(t.db, y.b.personId, (trx) => trx.insertInto("posts").values({ person_id: y.b.personId, text: "Sundays are for planning." }).returning("id").executeTakeFirstOrThrow())).id;
+    const postId = (
+      await asPerson(t.db, y.b.personId, (trx) =>
+        trx
+          .insertInto("posts")
+          .values({ person_id: y.b.personId, text: "Sundays are for planning." })
+          .returning("id")
+          .executeTakeFirstOrThrow(),
+      )
+    ).id;
     try {
-      expect(await asPerson(t.db, x.a.personId, (trx) => trx.selectFrom("posts").select("id").where("id", "=", postId).execute())).toEqual([]);
-      await asPerson(t.db, x.a.personId, (trx) => trx.insertInto("post_likes").values({ post_id: postId, person_id: x.a.personId }).execute());
-      const forged = await caught(() => asPerson(t.db, x.a.personId, (trx) => trx.insertInto("post_likes").values({ post_id: postId, person_id: y.a.personId }).execute()));
-      const seenByWriter = await asPerson(t.db, y.b.personId, (trx) => trx.selectFrom("post_likes").select("person_id").execute());
-      const likedByA = await asPerson(worker, x.a.personId, async (trx) => (await sql<{ display_name: string; text: string; has_photo: boolean }>`SELECT display_name, text, has_photo FROM liked_posts(10)`.execute(trx)).rows);
-      const likedByB = await asPerson(worker, y.b.personId, async (trx) => (await sql`SELECT * FROM liked_posts(10)`.execute(trx)).rows);
-      const apiCall = await caught(() => asPerson(t.db, x.a.personId, (trx) => sql`SELECT * FROM liked_posts(10)`.execute(trx)));
+      expect(
+        await asPerson(t.db, x.a.personId, (trx) =>
+          trx.selectFrom("posts").select("id").where("id", "=", postId).execute(),
+        ),
+      ).toEqual([]);
+      await asPerson(t.db, x.a.personId, (trx) =>
+        trx.insertInto("post_likes").values({ post_id: postId, person_id: x.a.personId }).execute(),
+      );
+      const forged = await caught(() =>
+        asPerson(t.db, x.a.personId, (trx) =>
+          trx
+            .insertInto("post_likes")
+            .values({ post_id: postId, person_id: y.a.personId })
+            .execute(),
+        ),
+      );
+      const seenByWriter = await asPerson(t.db, y.b.personId, (trx) =>
+        trx.selectFrom("post_likes").select("person_id").execute(),
+      );
+      const likedByA = await asPerson(
+        worker,
+        x.a.personId,
+        async (trx) =>
+          (
+            await sql<{
+              display_name: string;
+              text: string;
+              has_photo: boolean;
+            }>`SELECT display_name, text, has_photo FROM liked_posts(10)`.execute(trx)
+          ).rows,
+      );
+      const likedByB = await asPerson(
+        worker,
+        y.b.personId,
+        async (trx) => (await sql`SELECT * FROM liked_posts(10)`.execute(trx)).rows,
+      );
+      const apiCall = await caught(() =>
+        asPerson(t.db, x.a.personId, (trx) => sql`SELECT * FROM liked_posts(10)`.execute(trx)),
+      );
       const anonymous = await withNoContext(t.db, async (trx) => ({
-        liked: await withNoContext(worker, async (workerTrx) => (await sql`SELECT * FROM liked_posts(10)`.execute(workerTrx)).rows),
+        liked: await withNoContext(
+          worker,
+          async (workerTrx) => (await sql`SELECT * FROM liked_posts(10)`.execute(workerTrx)).rows,
+        ),
         stories: (await sql`SELECT * FROM story_feed(10)`.execute(trx)).rows,
         feed: (await sql`SELECT * FROM feed_posts(false, null, null, 10)`.execute(trx)).rows,
-        visible: (await sql<{ visible: boolean }>`SELECT post_is_visible(${postId}::uuid) AS visible`.execute(trx)).rows[0]?.visible,
+        visible: (
+          await sql<{
+            visible: boolean;
+          }>`SELECT post_is_visible(${postId}::uuid) AS visible`.execute(trx)
+        ).rows[0]?.visible,
       }));
 
       expect(Reflect.get(forged ?? {}, "code")).toBe("42501");
       expect(Reflect.get(apiCall ?? {}, "code")).toBe("42501");
       expect(seenByWriter).toEqual([]);
-      expect(likedByA).toEqual([{ display_name: "Test B", text: "Sundays are for planning.", has_photo: false }]);
+      expect(likedByA).toEqual([
+        { display_name: "Test B", text: "Sundays are for planning.", has_photo: false },
+      ]);
       expect(likedByB).toEqual([]);
       expect(anonymous).toEqual({ liked: [], stories: [], feed: [], visible: false });
     } finally {
-      await asPerson(t.db, y.b.personId, (trx) => trx.deleteFrom("posts").where("id", "=", postId).execute());
+      await asPerson(t.db, y.b.personId, (trx) =>
+        trx.deleteFrom("posts").where("id", "=", postId).execute(),
+      );
     }
   });
 
   it("W7-POST-DB-T2: story_feed shows a listed person's unexpired story to anyone signed in and an unlisted person's only to them, and a story's photo ends with it", async () => {
-    const listedStory = (await asPerson(t.db, y.b.personId, (trx) => trx.insertInto("posts").values({ person_id: y.b.personId, kind: "story", text: "", photo: jpeg, expires_at: new Date(Date.now() + hour) }).returning("id").executeTakeFirstOrThrow())).id;
-    const unlistedStory = (await asPerson(t.db, x.a.personId, (trx) => trx.insertInto("posts").values({ person_id: x.a.personId, kind: "story", text: "Mine alone.", expires_at: new Date(Date.now() + hour) }).returning("id").executeTakeFirstOrThrow())).id;
-    const storiesOf = async (personId: string) => (await asPerson(t.db, personId, async (trx) => (await sql<{ story_id: string; listing_id: string | null; is_mine: boolean; has_photo: boolean }>`SELECT story_id, listing_id, is_mine, has_photo FROM story_feed(10)`.execute(trx)).rows));
-    const photoAs = async (personId: string) => (await asPerson(t.db, personId, async (trx) => (await sql<{ photo: Buffer | null }>`SELECT post_photo_read(${listedStory}::uuid) AS photo`.execute(trx)).rows[0]?.photo)) ?? null;
+    const listedStory = (
+      await asPerson(t.db, y.b.personId, (trx) =>
+        trx
+          .insertInto("posts")
+          .values({
+            person_id: y.b.personId,
+            kind: "story",
+            text: "",
+            photo: jpeg,
+            expires_at: new Date(Date.now() + hour),
+          })
+          .returning("id")
+          .executeTakeFirstOrThrow(),
+      )
+    ).id;
+    const unlistedStory = (
+      await asPerson(t.db, x.a.personId, (trx) =>
+        trx
+          .insertInto("posts")
+          .values({
+            person_id: x.a.personId,
+            kind: "story",
+            text: "Mine alone.",
+            expires_at: new Date(Date.now() + hour),
+          })
+          .returning("id")
+          .executeTakeFirstOrThrow(),
+      )
+    ).id;
+    const storiesOf = async (personId: string) =>
+      await asPerson(
+        t.db,
+        personId,
+        async (trx) =>
+          (
+            await sql<{
+              story_id: string;
+              listing_id: string | null;
+              is_mine: boolean;
+              has_photo: boolean;
+            }>`SELECT story_id, listing_id, is_mine, has_photo FROM story_feed(10)`.execute(trx)
+          ).rows,
+      );
+    const photoAs = async (personId: string) =>
+      (await asPerson(
+        t.db,
+        personId,
+        async (trx) =>
+          (
+            await sql<{
+              photo: Buffer | null;
+            }>`SELECT post_photo_read(${listedStory}::uuid) AS photo`.execute(trx)
+          ).rows[0]?.photo,
+      )) ?? null;
     try {
       expect(await storiesOf(x.a.personId)).toEqual([
         { story_id: unlistedStory, listing_id: null, is_mine: true, has_photo: false },
         { story_id: listedStory, listing_id: listingYb, is_mine: false, has_photo: true },
       ]);
-      expect(await storiesOf(y.a.personId)).toEqual([{ story_id: listedStory, listing_id: listingYb, is_mine: false, has_photo: true }]);
+      expect(await storiesOf(y.a.personId)).toEqual([
+        { story_id: listedStory, listing_id: listingYb, is_mine: false, has_photo: true },
+      ]);
       expect((await photoAs(x.a.personId))?.equals(jpeg)).toBe(true);
-      const isStoryVisible = await asPerson(t.db, x.a.personId, async (trx) => (await sql<{ visible: boolean }>`SELECT post_is_visible(${listedStory}::uuid) AS visible`.execute(trx)).rows[0]?.visible);
+      const isStoryVisible = await asPerson(
+        t.db,
+        x.a.personId,
+        async (trx) =>
+          (
+            await sql<{
+              visible: boolean;
+            }>`SELECT post_is_visible(${listedStory}::uuid) AS visible`.execute(trx)
+          ).rows[0]?.visible,
+      );
       expect(isStoryVisible).toBe(false);
 
-      await asPerson(t.db, y.b.personId, (trx) => trx.updateTable("posts").set({ expires_at: new Date(Date.now() - 1000) }).where("id", "=", listedStory).execute());
+      await asPerson(t.db, y.b.personId, (trx) =>
+        trx
+          .updateTable("posts")
+          .set({ expires_at: new Date(Date.now() - 1000) })
+          .where("id", "=", listedStory)
+          .execute(),
+      );
       expect(await storiesOf(y.a.personId)).toEqual([]);
       expect(await photoAs(x.a.personId)).toBeNull();
     } finally {
-      await asPerson(t.db, y.b.personId, (trx) => trx.deleteFrom("posts").where("id", "=", listedStory).execute());
-      await asPerson(t.db, x.a.personId, (trx) => trx.deleteFrom("posts").where("id", "=", unlistedStory).execute());
+      await asPerson(t.db, y.b.personId, (trx) =>
+        trx.deleteFrom("posts").where("id", "=", listedStory).execute(),
+      );
+      await asPerson(t.db, x.a.personId, (trx) =>
+        trx.deleteFrom("posts").where("id", "=", unlistedStory).execute(),
+      );
     }
   });
 
   it("W7-POST-DB-T4: a post's photo reads for its writer, and for others only while the writer is listed in Explore", async () => {
-    const postId = (await asPerson(t.db, x.a.personId, (trx) => trx.insertInto("posts").values({ person_id: x.a.personId, text: "", photo: jpeg }).returning("id").executeTakeFirstOrThrow())).id;
-    const photoAs = async (personId: string) => (await asPerson(t.db, personId, async (trx) => (await sql<{ photo: Buffer | null }>`SELECT post_photo_read(${postId}::uuid) AS photo`.execute(trx)).rows[0]?.photo)) ?? null;
+    const postId = (
+      await asPerson(t.db, x.a.personId, (trx) =>
+        trx
+          .insertInto("posts")
+          .values({ person_id: x.a.personId, text: "", photo: jpeg })
+          .returning("id")
+          .executeTakeFirstOrThrow(),
+      )
+    ).id;
+    const photoAs = async (personId: string) =>
+      (await asPerson(
+        t.db,
+        personId,
+        async (trx) =>
+          (
+            await sql<{
+              photo: Buffer | null;
+            }>`SELECT post_photo_read(${postId}::uuid) AS photo`.execute(trx)
+          ).rows[0]?.photo,
+      )) ?? null;
     try {
       expect((await photoAs(x.a.personId))?.equals(jpeg)).toBe(true);
       expect(await photoAs(y.b.personId)).toBeNull();
       const listingXa = await list(x.a.personId, x.a.cardId, "Lists for a moment.");
       expect((await photoAs(y.b.personId))?.equals(jpeg)).toBe(true);
-      await asPerson(t.db, x.a.personId, (trx) => trx.deleteFrom("directory_listings").where("id", "=", listingXa).execute());
+      await asPerson(t.db, x.a.personId, (trx) =>
+        trx.deleteFrom("directory_listings").where("id", "=", listingXa).execute(),
+      );
       expect(await photoAs(y.b.personId)).toBeNull();
     } finally {
-      await asPerson(t.db, x.a.personId, (trx) => trx.deleteFrom("posts").where("id", "=", postId).execute());
+      await asPerson(t.db, x.a.personId, (trx) =>
+        trx.deleteFrom("posts").where("id", "=", postId).execute(),
+      );
     }
   });
 
   it("W7-POST-DB-T3: a story needs an end and a post none, and every share needs words or a photo", async () => {
-    const insertAsB = (values: { kind?: "post" | "story"; text: string; photo?: Buffer; expires_at?: Date }): Promise<unknown> => caught(() => asPerson(t.db, y.b.personId, (trx) => trx.insertInto("posts").values({ person_id: y.b.personId, ...values }).execute()));
+    const insertAsB = (values: {
+      kind?: "post" | "story";
+      text: string;
+      photo?: Buffer;
+      expires_at?: Date;
+    }): Promise<unknown> =>
+      caught(() =>
+        asPerson(t.db, y.b.personId, (trx) =>
+          trx
+            .insertInto("posts")
+            .values({ person_id: y.b.personId, ...values })
+            .execute(),
+        ),
+      );
     const codes = await Promise.all([
       insertAsB({ kind: "story", text: "No end." }),
       insertAsB({ kind: "post", text: "An end.", expires_at: new Date(Date.now() + hour) }),
       insertAsB({ kind: "post", text: "" }),
     ]);
 
-    expect(codes.map((error): unknown => Reflect.get(error ?? {}, "code"))).toEqual(["23514", "23514", "23514"]);
+    expect(codes.map((error): unknown => Reflect.get(error ?? {}, "code"))).toEqual([
+      "23514",
+      "23514",
+      "23514",
+    ]);
   });
 });
 
 describe("Google accounts in the database", () => {
   // Signs in with a Google subject through the definer function, as the api does after checking Google's token; the person, or null.
   const signIn = async (sub: string, name: string): Promise<string | null> =>
-    (await sql<{ person_id: string | null }>`SELECT auth_google_person(${sub}, ${name}, ${randomBytes(32)}) AS person_id`.execute(t.db)).rows[0]?.person_id ?? null;
+    (
+      await sql<{
+        person_id: string | null;
+      }>`SELECT auth_google_person(${sub}, ${name}, ${randomBytes(32)}) AS person_id`.execute(t.db)
+    ).rows[0]?.person_id ?? null;
 
   it("W7-GOOGLE-DB-T1: a Google subject makes one person and comes back to them; the person reads only their own link, nobody writes one directly, and a person being deleted cannot sign in", async () => {
     const first = await signIn("google-sub-db-1", "Asha Rao");
     const again = await signIn("google-sub-db-1", "Asha R.");
     const other = await signIn("google-sub-db-2", "Ben Okafor");
     if (first === null || other === null) throw new Error("auth_google_person made no person");
-    const ownRows = await asPerson(t.db, first, (trx) => trx.selectFrom("google_accounts").select(["google_sub", "person_id"]).execute());
-    const forged = await caught(() => asPerson(t.db, other, (trx) => trx.insertInto("google_accounts").values({ google_sub: "google-sub-forged", person_id: other }).execute()));
-    const name = await asPerson(t.db, first, async (trx) => (await trx.selectFrom("people").select("display_name").where("id", "=", first).executeTakeFirst())?.display_name);
+    const ownRows = await asPerson(t.db, first, (trx) =>
+      trx.selectFrom("google_accounts").select(["google_sub", "person_id"]).execute(),
+    );
+    const forged = await caught(() =>
+      asPerson(t.db, other, (trx) =>
+        trx
+          .insertInto("google_accounts")
+          .values({ google_sub: "google-sub-forged", person_id: other })
+          .execute(),
+      ),
+    );
+    const name = await asPerson(
+      t.db,
+      first,
+      async (trx) =>
+        (
+          await trx
+            .selectFrom("people")
+            .select("display_name")
+            .where("id", "=", first)
+            .executeTakeFirst()
+        )?.display_name,
+    );
 
     expect(again).toBe(first);
     expect(ownRows).toEqual([{ google_sub: "google-sub-db-1", person_id: first }]);
     expect(Reflect.get(forged ?? {}, "code")).toBe("42501");
     expect(name).toBe("Asha Rao");
-    await asPerson(t.db, other, (trx) => trx.updateTable("people").set({ state: "deleted" }).where("id", "=", other).execute());
+    await asPerson(t.db, other, (trx) =>
+      trx.updateTable("people").set({ state: "deleted" }).where("id", "=", other).execute(),
+    );
     expect(await signIn("google-sub-db-2", "Ben Okafor")).toBeNull();
   });
 });
@@ -303,12 +754,34 @@ describe("summaries in the database", () => {
   it("W7-SUMMARY-DB-T1: a person reads and writes only their own summary; another person's session sees no row and cannot write one for them", async () => {
     const owner = (await createTestPerson(t.db, "Summary Owner")).personId;
     const other = (await createTestPerson(t.db, "Summary Other")).personId;
-    await asPerson(t.db, owner, (trx) => trx.insertInto("person_summaries").values({ person_id: owner, text: "Kind: view\nPoint: Rentably was never a bad idea." }).execute());
+    await asPerson(t.db, owner, (trx) =>
+      trx
+        .insertInto("person_summaries")
+        .values({ person_id: owner, text: "Kind: view\nPoint: Rentably was never a bad idea." })
+        .execute(),
+    );
 
-    const ownRows = await asPerson(t.db, owner, (trx) => trx.selectFrom("person_summaries").select(["person_id", "state", "friends_can_ask"]).execute());
-    const seenByOther = await asPerson(t.db, other, (trx) => trx.selectFrom("person_summaries").select("person_id").execute());
-    const changedByOther = await asPerson(t.db, other, (trx) => trx.updateTable("person_summaries").set({ text: "changed" }).where("person_id", "=", owner).executeTakeFirst());
-    const forged = await caught(() => asPerson(t.db, other, (trx) => trx.insertInto("person_summaries").values({ person_id: owner, text: "forged" }).execute()));
+    const ownRows = await asPerson(t.db, owner, (trx) =>
+      trx
+        .selectFrom("person_summaries")
+        .select(["person_id", "state", "friends_can_ask"])
+        .execute(),
+    );
+    const seenByOther = await asPerson(t.db, other, (trx) =>
+      trx.selectFrom("person_summaries").select("person_id").execute(),
+    );
+    const changedByOther = await asPerson(t.db, other, (trx) =>
+      trx
+        .updateTable("person_summaries")
+        .set({ text: "changed" })
+        .where("person_id", "=", owner)
+        .executeTakeFirst(),
+    );
+    const forged = await caught(() =>
+      asPerson(t.db, other, (trx) =>
+        trx.insertInto("person_summaries").values({ person_id: owner, text: "forged" }).execute(),
+      ),
+    );
 
     expect(ownRows).toEqual([{ person_id: owner, state: "checking", friends_can_ask: false }]);
     expect(seenByOther).toEqual([]);

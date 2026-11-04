@@ -6,7 +6,11 @@ import { scrub } from "./scrub.js";
 const TIMED_RUNS = 3;
 
 // One scrub of a text: the scrubbed text, its redactions, and the fastest of TIMED_RUNS scrubs in milliseconds.
-function scrubTimed(text: string): { text: string; redactions: Array<{ category: string; placeholderId: string }>; ms: number } {
+function scrubTimed(text: string): {
+  text: string;
+  redactions: Array<{ category: string; placeholderId: string }>;
+  ms: number;
+} {
   let fastest = Number.POSITIVE_INFINITY;
   let result = scrub(text, { allowlist: [] });
   for (let run = 0; run < TIMED_RUNS; run += 1) {
@@ -35,11 +39,15 @@ describe("URL passwords with punctuation", () => {
   });
 
   it("R2.2-T19: a password holding a hash is replaced whole, as url_credentials", () => {
-    expect(scrub("postgres://user:pa#ss@host/db now.", { allowlist: [] }).text).toBe("[redacted:url_credentials:00000001] now.");
+    expect(scrub("postgres://user:pa#ss@host/db now.", { allowlist: [] }).text).toBe(
+      "[redacted:url_credentials:00000001] now.",
+    );
   });
 
   it("R2.2-T20: a password holding a question mark is replaced whole, as url_credentials", () => {
-    expect(scrub("postgres://user:pa?ss@host/db now.", { allowlist: [] }).text).toBe("[redacted:url_credentials:00000001] now.");
+    expect(scrub("postgres://user:pa?ss@host/db now.", { allowlist: [] }).text).toBe(
+      "[redacted:url_credentials:00000001] now.",
+    );
   });
 
   it("R2.2-T21: a short URL with a slash in the password is caught by the URL rule, not left to the entropy rule", () => {
@@ -104,7 +112,7 @@ describe("slow inputs stay fast", () => {
     expect(result.text).toBe("PASSWORD=[redacted:secret:00000001]");
   });
 
-  it('R2.2-T35: a quoted secret value over 1,024 characters is redacted whole, through its closing quote', () => {
+  it("R2.2-T35: a quoted secret value over 1,024 characters is redacted whole, through its closing quote", () => {
     const value = "x".repeat(20_000 - 'PASSWORD="'.length - 1);
     const result = scrubTimed('PASSWORD="' + value + '"');
     expect(result.ms).toBeLessThan(50);
@@ -112,7 +120,7 @@ describe("slow inputs stay fast", () => {
     expect(result.text).toBe("PASSWORD=[redacted:secret:00000001]");
   });
 
-  it('R2.2-T36: a quoted value with no closing quote is redacted to the end of its line, and the line break and the next line are kept', () => {
+  it("R2.2-T36: a quoted value with no closing quote is redacted to the end of its line, and the line break and the next line are kept", () => {
     const text = 'PASSWORD="' + "x".repeat(20_000 - 'PASSWORD="'.length) + "\nnext line here";
     const result = scrubTimed(text);
     expect(result.ms).toBeLessThan(50);
@@ -126,13 +134,15 @@ describe("slow inputs stay fast", () => {
     expect(result.text).toBe("PASSWORD=[redacted:secret:00000001]");
   });
 
-  it('R2.2-T40: a run of unclosed quoted values, one per line, scrubs in under 50 ms and keeps every line break', () => {
+  it("R2.2-T40: a run of unclosed quoted values, one per line, scrubs in under 50 ms and keeps every line break", () => {
     const text = ('PASSWORD="' + "x".repeat(89) + "\n").repeat(200);
     const result = scrubTimed(text);
     expect(result.ms).toBeLessThan(50);
     const lines = result.text.split("\n");
     expect(lines.length).toBe(text.split("\n").length);
-    expect(lines.every((piece) => /^PASSWORD=\[redacted:secret:[0-9a-f]{8}\]$|^$/.test(piece))).toBe(true);
+    expect(
+      lines.every((piece) => /^PASSWORD=\[redacted:secret:[0-9a-f]{8}\]$|^$/.test(piece)),
+    ).toBe(true);
   });
 
   it('R2.2-T37: PASSWORD=" repeated scrubs in under 50 ms, with each quoted value redacted through its closing quote', () => {
@@ -150,10 +160,14 @@ describe("slow inputs stay fast", () => {
 
   it("R2.2-T33: a secret value of exactly 1,024 characters is redacted whole", () => {
     const value = "q".repeat(1_024);
-    expect(scrub("PASSWORD=" + value, { allowlist: [] }).text).toBe("PASSWORD=[redacted:secret:00000001]");
+    expect(scrub("PASSWORD=" + value, { allowlist: [] }).text).toBe(
+      "PASSWORD=[redacted:secret:00000001]",
+    );
   });
 
   it("R2.2-T34: a rejected name resumes at its own end, so a secret setting after it is still redacted", () => {
-    expect(scrub("A=A=A=PASSWORD=abcdefgh", { allowlist: [] }).text).toBe("A=A=A=PASSWORD=[redacted:secret:00000001]");
+    expect(scrub("A=A=A=PASSWORD=abcdefgh", { allowlist: [] }).text).toBe(
+      "A=A=A=PASSWORD=[redacted:secret:00000001]",
+    );
   });
 });

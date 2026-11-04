@@ -10,7 +10,8 @@ export const PREVIEW_COPY = {
   loading: "Reading what the page would hold.",
   noLinesTitle: "No brief lines to publish",
   noLines: "None of your brief lines passed the support check, so the page shows none of them.",
-  alsoShown: "The card items you both approved, what the two Meetys said, and the other person's checked brief lines will appear too.",
+  alsoShown:
+    "The card items you both approved, what the two Meetys said, and the other person's checked brief lines will appear too.",
 } as const;
 
 // The display name of one side of the meeting, or an empty string when the view does not hold it.
@@ -25,7 +26,11 @@ const PreviewLine = (props: { point: BriefPoint; meeting: MeetingView }): ReactE
       <p>{props.point.text}</p>
       <div className="share-receipts">
         {props.point.quotes.map((quote, index) => (
-          <Receipt key={`${String(index)}-${quote.turnId}`} quote={quote.text} source={`From ${nameOf(props.meeting, quote.side)}'s side`} />
+          <Receipt
+            key={`${String(index)}-${quote.turnId}`}
+            quote={quote.text}
+            source={`From ${nameOf(props.meeting, quote.side)}'s side`}
+          />
         ))}
       </div>
     </li>
@@ -52,7 +57,11 @@ const PreviewBrief = (props: { lines: PreviewLines; meeting: MeetingView }): Rea
           <h3>{labels[section]}</h3>
           <ul className="share-lines">
             {sections[section].map((point, index) => (
-              <PreviewLine key={`${section}-${String(index)}`} point={point} meeting={props.meeting} />
+              <PreviewLine
+                key={`${section}-${String(index)}`}
+                point={point}
+                meeting={props.meeting}
+              />
             ))}
           </ul>
         </div>

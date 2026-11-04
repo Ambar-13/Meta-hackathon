@@ -12,7 +12,9 @@ export function percentile(values: number[], p: number): number | null {
 
 // Groups the thousands of a whole number with commas, for the display text.
 function withCommas(value: number): string {
-  return Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return Math.round(value)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 // Reads the meetings with both times and returns the p50 in detail as the value and the p90 in detail.
@@ -27,7 +29,10 @@ export function measureFirstTurnLatency(rows: EvalRows): MetricResult {
     key: "first_turn_latency_ms",
     label: "first-turn latency",
     value: p50,
-    display: p50 === null || p90 === null ? "no data" : `p50 ${withCommas(p50)} ms / p90 ${withCommas(p90)} ms`,
+    display:
+      p50 === null || p90 === null
+        ? "no data"
+        : `p50 ${withCommas(p50)} ms / p90 ${withCommas(p90)} ms`,
     n: latencies.length,
     target: null,
     direction: null,

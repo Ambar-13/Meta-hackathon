@@ -4,7 +4,15 @@
 // What it does not do: show anything; screen.tsx and answer-parts.tsx do.
 import { useState } from "react";
 import { ASK_POLL_MS, type AskView } from "@meet-first/contracts";
-import { apiFetch, APP_PATHS, asApiError, routes, usePolledView, type ApiError, type PolledView } from "../../app-shell/index.js";
+import {
+  apiFetch,
+  APP_PATHS,
+  asApiError,
+  routes,
+  usePolledView,
+  type ApiError,
+  type PolledView,
+} from "../../app-shell/index.js";
 
 // The states after which the page stops reading the ask.
 const FINISHED_STATES: ReadonlySet<AskView["state"]> = new Set(["done", "refused", "failed"]);
@@ -23,21 +31,34 @@ export function isAskRunning(view: AskView): boolean {
 }
 
 // The answers of a help search as the page shows them: the placed answers, then the answers with no position, each in the server's order.
-export function splitHelpAnswers(answers: AskView["answers"]): { placed: AskView["answers"]; unplaced: AskView["answers"] } {
-  return { placed: answers.filter((answer) => answer.position !== null), unplaced: answers.filter((answer) => answer.position === null) };
+export function splitHelpAnswers(answers: AskView["answers"]): {
+  placed: AskView["answers"];
+  unplaced: AskView["answers"];
+} {
+  return {
+    placed: answers.filter((answer) => answer.position !== null),
+    unplaced: answers.filter((answer) => answer.position === null),
+  };
 }
 
 // Reads the ask every ASK_POLL_MS until it is done, refused or failed, and starts a meeting with a helper, then opens the meeting; go
 // navigates.
 export function useAskScreen(askId: string, go: (path: string) => void): AskScreenModel {
-  const ask = usePolledView(() => apiFetch(routes.asks.readAsk, { params: { id: askId } }), { key: askId, intervalMs: ASK_POLL_MS, keepPolling: isAskRunning });
+  const ask = usePolledView(() => apiFetch(routes.asks.readAsk, { params: { id: askId } }), {
+    key: askId,
+    intervalMs: ASK_POLL_MS,
+    keepPolling: isAskRunning,
+  });
   const [isMeeting, setIsMeeting] = useState(false);
   const [meetError, setMeetError] = useState<ApiError | null>(null);
   const startMeeting = async (answerId: string, cardId: string): Promise<void> => {
     setMeetError(null);
     setIsMeeting(true);
     try {
-      const reply = await apiFetch(routes.asks.meetHelper, { params: { id: askId, answerId }, body: { cardId } });
+      const reply = await apiFetch(routes.asks.meetHelper, {
+        params: { id: askId, answerId },
+        body: { cardId },
+      });
       go(APP_PATHS.meeting(reply.meetingId));
     } catch (thrown: unknown) {
       setMeetError(asApiError(thrown));

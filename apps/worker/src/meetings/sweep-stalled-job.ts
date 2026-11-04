@@ -27,11 +27,18 @@ export type SweepCandidates = Record<Kind, string[]>;
 // The outcome of one promotion attempt: it started the meeting, or every slot is taken.
 type PromoteOutcome = "started" | "full";
 // What the sweep reads of a silent meeting's current step: its state, how many times it was claimed, and when it was last claimed.
-export type SweptStep = { state: "pending" | "running" | "stalled" | "done"; attempt: number; claimedAt: Date | null };
+export type SweptStep = {
+  state: "pending" | "running" | "stalled" | "done";
+  attempt: number;
+  claimedAt: Date | null;
+};
 // What the sweep does with a silent meeting: leave its step alone, give the step a new job, or end the meeting with reason budget.
 export type StallAction = "skip" | "enqueue" | "end";
 // What the transaction of one silent meeting did: nothing, a new job is due for this step, or it ended the meeting.
-type StalledOutcome = { kind: "skipped" } | { kind: "enqueued"; stepSeq: number } | { kind: "ended" };
+type StalledOutcome =
+  | { kind: "skipped" }
+  | { kind: "enqueued"; stepSeq: number }
+  | { kind: "ended" };
 
 // The sweep_stalled job: heartbeat, token stop, stalled steps, queue promotion, ready starts, in that order.
 export const runSweepStalled: JobTask<"sweep_stalled"> = async (payload, context) => {
@@ -40,10 +47,12 @@ export const runSweepStalled: JobTask<"sweep_stalled"> = async (payload, context
   const candidates = await readSweepCandidates(context.db);
   const ended = new Set<string>();
   for (const meetingId of candidates.running) {
-    if (await guarded(context, meetingId, () => stopOverBudget(context, meetingId))) ended.add(meetingId);
+    if (await guarded(context, meetingId, () => stopOverBudget(context, meetingId)))
+      ended.add(meetingId);
   }
   for (const meetingId of candidates.stalled) {
-    if (!ended.has(meetingId)) await guarded(context, meetingId, () => resumeStalledMeeting(context, meetingId));
+    if (!ended.has(meetingId))
+      await guarded(context, meetingId, () => resumeStalledMeeting(context, meetingId));
   }
   await promoteQueuedMeetings(context, candidates.queued);
   await startReadyMeetings(context, candidates.ready);
@@ -51,12 +60,24 @@ export const runSweepStalled: JobTask<"sweep_stalled"> = async (payload, context
 
 // Writes the worker heartbeat /api/health reads; the table has no person or meeting column, so no context is set.
 export async function writeHeartbeat(db: Kysely<Database>, now: Date): Promise<void> {
-  await db.updateTable("service_heartbeats").set({ seen_at: now, schema_version: SCHEMA_VERSION }).where("service", "=", "worker").execute();
+  await db
+    .updateTable("service_heartbeats")
+    .set({ seen_at: now, schema_version: SCHEMA_VERSION })
+    .where("service", "=", "worker")
+    .execute();
 }
 
 // The meetings sweep_candidates returns, by kind, each id once, in the order returned: queued ones lowest queue position first (docs/contracts.md section 6a).
 export async function readSweepCandidates(db: Kysely<Database>): Promise<SweepCandidates> {
-  const rows = (await sql<{ meeting_id: string; kind: string; queue_position: number | null }>`SELECT meeting_id, kind, queue_position FROM sweep_candidates(${SWEEP_STALLED_SECONDS})`.execute(db)).rows;
+  const rows = (
+    await sql<{
+      meeting_id: string;
+      kind: string;
+      queue_position: number | null;
+    }>`SELECT meeting_id, kind, queue_position FROM sweep_candidates(${SWEEP_STALLED_SECONDS})`.execute(
+      db,
+    )
+  ).rows;
   const candidates: SweepCandidates = { stalled: [], queued: [], running: [], ready: [] };
   for (const row of rows) {
     if (!isKind(row.kind)) continue;
@@ -78,9 +99,15 @@ export async function stopOverBudget(context: JobContext, meetingId: string): Pr
 
 // Handles the current step of a meeting with no event for 150 s: a running step whose claim is stale goes stalled, then
 // the step gets a new job, or the meeting ends with reason budget; the briefs are queued only when this sweep's end ended the meeting.
-export async function resumeStalledMeeting(context: JobContext, meetingId: string): Promise<"enqueued" | "skipped" | "ended"> {
-  const outcome = await withMeeting(context.db, meetingId, (trx) => sweepStalledInside(trx, meetingId, context.now()));
-  if (outcome.kind === "enqueued") await context.enqueue("meeting_step", { meetingId, stepSeq: outcome.stepSeq });
+export async function resumeStalledMeeting(
+  context: JobContext,
+  meetingId: string,
+): Promise<"enqueued" | "skipped" | "ended"> {
+  const outcome = await withMeeting(context.db, meetingId, (trx) =>
+    sweepStalledInside(trx, meetingId, context.now()),
+  );
+  if (outcome.kind === "enqueued")
+    await context.enqueue("meeting_step", { meetingId, stepSeq: outcome.stepSeq });
   if (outcome.kind === "ended") await context.enqueue("write_briefs", { meetingId });
   return outcome.kind;
 }
@@ -88,7 +115,10 @@ export async function resumeStalledMeeting(context: JobContext, meetingId: strin
 // What the sweep does with a silent running meeting, in this order: more than MEETING_OVERTIME_GRACE_MS past ends_at, it ends; a
 // done or missing step is left alone; a running step claimed less than STEP_CLAIM_FRESH_MS ago is left to its runner; a stalled or
 // stale running step at MEETING_STEP_MAX_ATTEMPTS ends the meeting; anything else, a pending step among them, gets a new job.
-export function stallAction(seen: { endsAt: Date | null; step: SweptStep | undefined }, now: Date): StallAction {
+export function stallAction(
+  seen: { endsAt: Date | null; step: SweptStep | undefined },
+  now: Date,
+): StallAction {
   const { endsAt, step } = seen;
   if (endsAt !== null && now.getTime() - endsAt.getTime() > MEETING_OVERTIME_GRACE_MS) return "end";
   if (step === undefined || step.state === "done") return "skip";
@@ -99,23 +129,43 @@ export function stallAction(seen: { endsAt: Date | null; step: SweptStep | undef
 
 // The writes for one silent meeting, inside its transaction: read the meeting and its current step, mark a stale running step
 // stalled, then end the meeting through endMeeting or hand the step on, as stallAction decides.
-async function sweepStalledInside(trx: Transaction<Database>, meetingId: string, now: Date): Promise<StalledOutcome> {
-  const meeting = await trx.selectFrom("meetings").select(["state", "current_step_seq", "ends_at"]).where("id", "=", meetingId).executeTakeFirst();
+async function sweepStalledInside(
+  trx: Transaction<Database>,
+  meetingId: string,
+  now: Date,
+): Promise<StalledOutcome> {
+  const meeting = await trx
+    .selectFrom("meetings")
+    .select(["state", "current_step_seq", "ends_at"])
+    .where("id", "=", meetingId)
+    .executeTakeFirst();
   if (meeting === undefined || meeting.state !== "running") return { kind: "skipped" };
   const stepSeq = meeting.current_step_seq;
   const step = await readSweptStep(trx, meetingId, stepSeq);
   const action = stallAction({ endsAt: meeting.ends_at, step }, now);
   if (action === "skip") return { kind: "skipped" };
-  if (isStaleRunning(step, now)) await releaseStep(trx, { meetingId, stepSeq, attempt: step.attempt }, "stalled");
+  if (isStaleRunning(step, now))
+    await releaseStep(trx, { meetingId, stepSeq, attempt: step.attempt }, "stalled");
   if (action === "enqueue") return { kind: "enqueued", stepSeq };
   const isEnded = await endMeeting(trx, { meetingId, reason: "budget", now });
   return isEnded ? { kind: "ended" } : { kind: "skipped" };
 }
 
 // The current step of a meeting as the sweep reads it, or undefined when the row is missing.
-async function readSweptStep(trx: Transaction<Database>, meetingId: string, stepSeq: number): Promise<SweptStep | undefined> {
-  const row = await trx.selectFrom("meeting_steps").select(["state", "attempt", "claimed_at"]).where("meeting_id", "=", meetingId).where("step_seq", "=", stepSeq).executeTakeFirst();
-  return row === undefined ? undefined : { state: row.state, attempt: row.attempt, claimedAt: row.claimed_at };
+async function readSweptStep(
+  trx: Transaction<Database>,
+  meetingId: string,
+  stepSeq: number,
+): Promise<SweptStep | undefined> {
+  const row = await trx
+    .selectFrom("meeting_steps")
+    .select(["state", "attempt", "claimed_at"])
+    .where("meeting_id", "=", meetingId)
+    .where("step_seq", "=", stepSeq)
+    .executeTakeFirst();
+  return row === undefined
+    ? undefined
+    : { state: row.state, attempt: row.attempt, claimedAt: row.claimed_at };
 }
 
 // True when a step was claimed less than STEP_CLAIM_FRESH_MS before now, so its runner may still be working.
@@ -129,7 +179,10 @@ function isStaleRunning(step: SweptStep | undefined, now: Date): step is SweptSt
 }
 
 // Promotes queued meetings in queue_position order while claim_meeting_slot finds a free slot; returns how many started.
-export async function promoteQueuedMeetings(context: JobContext, meetingIds: readonly string[]): Promise<number> {
+export async function promoteQueuedMeetings(
+  context: JobContext,
+  meetingIds: readonly string[],
+): Promise<number> {
   let started = 0;
   for (const meetingId of meetingIds) {
     const outcome = await guarded(context, meetingId, () => promoteOne(context, meetingId));
@@ -140,7 +193,10 @@ export async function promoteQueuedMeetings(context: JobContext, meetingIds: rea
 }
 
 // Starts each meeting that is ready on both sides with its prefixes stored, so nobody has to press start; returns how many started running.
-export async function startReadyMeetings(context: JobContext, meetingIds: readonly string[]): Promise<number> {
+export async function startReadyMeetings(
+  context: JobContext,
+  meetingIds: readonly string[],
+): Promise<number> {
   let started = 0;
   const now = context.now();
   for (const meetingId of meetingIds) {
@@ -154,7 +210,14 @@ export async function startReadyMeetings(context: JobContext, meetingIds: readon
 async function promoteOne(context: JobContext, meetingId: string): Promise<PromoteOutcome> {
   const now = context.now();
   const isWon = await withMeeting(context.db, meetingId, async (trx) => {
-    const rows = (await sql<{ state: string; queue_position: number | null }>`SELECT state, queue_position FROM claim_meeting_slot(${meetingId}, ${context.env.MAX_CONCURRENT_MEETINGS})`.execute(trx)).rows;
+    const rows = (
+      await sql<{
+        state: string;
+        queue_position: number | null;
+      }>`SELECT state, queue_position FROM claim_meeting_slot(${meetingId}, ${context.env.MAX_CONCURRENT_MEETINGS})`.execute(
+        trx,
+      )
+    ).rows;
     if (rows[0]?.state !== "running") return false;
     await beginRunningMeeting(trx, meetingId, now);
     return true;
@@ -165,19 +228,32 @@ async function promoteOne(context: JobContext, meetingId: string): Promise<Promo
 }
 
 // Starts one ready meeting through startIfReady, in its own transaction.
-async function startOne(context: JobContext, meetingId: string, now: Date): Promise<"started" | "not_started"> {
-  const result = await withMeeting(context.db, meetingId, (trx) => startIfReady(trx, { meetingId, now, maxRunning: context.env.MAX_CONCURRENT_MEETINGS }));
+async function startOne(
+  context: JobContext,
+  meetingId: string,
+  now: Date,
+): Promise<"started" | "not_started"> {
+  const result = await withMeeting(context.db, meetingId, (trx) =>
+    startIfReady(trx, { meetingId, now, maxRunning: context.env.MAX_CONCURRENT_MEETINGS }),
+  );
   if (result !== "running") return "not_started";
   await context.enqueue("meeting_step", { meetingId, stepSeq: 1 });
   return "started";
 }
 
 // Runs one meeting's sweep step; a failure is logged with the meeting id and the sweep goes on (undefined).
-async function guarded<T>(context: JobContext, meetingId: string, run: () => Promise<T>): Promise<T | undefined> {
+async function guarded<T>(
+  context: JobContext,
+  meetingId: string,
+  run: () => Promise<T>,
+): Promise<T | undefined> {
   try {
     return await run();
   } catch {
-    context.log.warn({ code: "sweep_meeting_failed", meetingId }, "One meeting failed in the sweep, and the sweep goes on.");
+    context.log.warn(
+      { code: "sweep_meeting_failed", meetingId },
+      "One meeting failed in the sweep, and the sweep goes on.",
+    );
     return undefined;
   }
 }

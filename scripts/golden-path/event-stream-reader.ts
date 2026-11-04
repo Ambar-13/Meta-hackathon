@@ -1,5 +1,11 @@
 // Reads one meeting's event stream the way the browser does, records every event in arrival order, and reports any replay or schema problem.
-import { CommittedEvent, EVENT_VERSION, MeetingEvent, RECONNECT, TurnDelta } from "@meet-first/contracts";
+import {
+  CommittedEvent,
+  EVENT_VERSION,
+  MeetingEvent,
+  RECONNECT,
+  TurnDelta,
+} from "@meet-first/contracts";
 import type { PersonClient } from "./person-client.js";
 import { StepFailure } from "./report.js";
 
@@ -13,11 +19,25 @@ const MAX_UNPLANNED_RECONNECTS = 5;
 const JITTER_FRACTION = 0.2;
 
 // One connection: its abort controller, its body reader, whether this reader ended it on purpose, and whether it has carried an event.
-type Connection = { controller: AbortController; body: ReadableStreamDefaultReader<Uint8Array> | undefined; isIntentional: boolean; hasSeenEvent: boolean };
+type Connection = {
+  controller: AbortController;
+  body: ReadableStreamDefaultReader<Uint8Array> | undefined;
+  isIntentional: boolean;
+  hasSeenEvent: boolean;
+};
 // A caller waiting for an event that matches its predicate.
-type Waiter = { predicate: (event: MeetingEvent) => boolean; resolve: (event: MeetingEvent) => void; reject: (error: Error) => void };
+type Waiter = {
+  predicate: (event: MeetingEvent) => boolean;
+  resolve: (event: MeetingEvent) => void;
+  reject: (error: Error) => void;
+};
 // One parsed SSE frame: its id line, its event name, its data text and whether it carried the heartbeat comment.
-type Frame = { id: string | undefined; event: string | undefined; data: string; isHeartbeat: boolean };
+type Frame = {
+  id: string | undefined;
+  event: string | undefined;
+  data: string;
+  isHeartbeat: boolean;
+};
 
 // Reads one SSE frame: the id, event and data lines, and the heartbeat comment. Other comment lines are padding.
 function parseFrame(text: string): Frame {
@@ -42,7 +62,9 @@ function parseFrame(text: string): Frame {
 function parseObject(text: string): Record<string, unknown> | undefined {
   try {
     const value: unknown = JSON.parse(text);
-    return typeof value === "object" && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : undefined;
+    return typeof value === "object" && value !== null && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : undefined;
   } catch {
     return undefined;
   }
@@ -50,7 +72,9 @@ function parseObject(text: string): Record<string, unknown> | undefined {
 
 // Shows a primitive value in a message, and only its type for anything else.
 function show(value: unknown): string {
-  return typeof value === "number" || typeof value === "string" || typeof value === "boolean" ? String(value) : typeof value;
+  return typeof value === "number" || typeof value === "string" || typeof value === "boolean"
+    ? String(value)
+    : typeof value;
 }
 
 // The text of an error, for a problem message.
@@ -142,7 +166,10 @@ export class EventStreamReader {
   }
 
   // Resolves with the first matching event that arrives from now on; events seen earlier do not count. Rejects like waitFor.
-  waitForNext(predicate: (event: MeetingEvent) => boolean, timeoutMs: number): Promise<MeetingEvent> {
+  waitForNext(
+    predicate: (event: MeetingEvent) => boolean,
+    timeoutMs: number,
+  ): Promise<MeetingEvent> {
     const [problem] = this.problems;
     if (problem !== undefined) return Promise.reject(new StepFailure(problem));
     return new Promise<MeetingEvent>((resolve, reject) => {
@@ -170,17 +197,24 @@ export class EventStreamReader {
     const [problem] = this.problems;
     if (problem !== undefined) throw new StepFailure(problem);
     for (const [index, event] of this.seen.entries()) {
-      if (event.seq !== index + 1) throw new StepFailure(`replay_gap expected=${String(index + 1)} got=${String(event.seq)}`);
+      if (event.seq !== index + 1)
+        throw new StepFailure(`replay_gap expected=${String(index + 1)} got=${String(event.seq)}`);
     }
   }
 
   // Starts one connection and its background reader. It resolves once the server has answered with the stream.
   private async connect(): Promise<void> {
-    const connection: Connection = { controller: new AbortController(), body: undefined, isIntentional: false, hasSeenEvent: false };
+    const connection: Connection = {
+      controller: new AbortController(),
+      body: undefined,
+      isIntentional: false,
+      hasSeenEvent: false,
+    };
     this.current = connection;
     const path = `/api/meetings/${this.meetingId}/events`;
     const response = await this.client.openStream(path, this.maxSeq, connection.controller.signal);
-    if (response.status !== 200 || response.body === null) throw new StepFailure(`stream_status ${String(response.status)} on GET ${path}`);
+    if (response.status !== 200 || response.body === null)
+      throw new StepFailure(`stream_status ${String(response.status)} on GET ${path}`);
     connection.body = response.body.getReader();
     void this.pump(connection);
   }
@@ -198,7 +232,10 @@ export class EventStreamReader {
   }
 
   // Reads chunks until the body ends or this reader ends the connection, and hands every complete frame to handleFrame.
-  private async readBody(connection: Connection, reader: ReadableStreamDefaultReader<Uint8Array>): Promise<void> {
+  private async readBody(
+    connection: Connection,
+    reader: ReadableStreamDefaultReader<Uint8Array>,
+  ): Promise<void> {
     const decoder = new TextDecoder();
     let pending = "";
     while (!connection.isIntentional) {
@@ -269,7 +306,9 @@ export class EventStreamReader {
     }
     const parsed = CommittedEvent.safeParse(raw);
     if (!parsed.success) {
-      this.raise(`event_schema_mismatch seq=${show(raw.seq)} type=${show(raw.type)}: ${parsed.error.message.slice(0, 200)}`);
+      this.raise(
+        `event_schema_mismatch seq=${show(raw.seq)} type=${show(raw.type)}: ${parsed.error.message.slice(0, 200)}`,
+      );
       return;
     }
     this.acceptCommitted(parsed.data, connection);
@@ -287,7 +326,8 @@ export class EventStreamReader {
     this.seen.push(event);
     this.maxSeq = Math.max(this.maxSeq, event.seq);
     this.accept(event);
-    if (this.options.plannedDisconnectAtSeq === event.seq && !this.isPlannedDone) this.plannedDisconnect(connection);
+    if (this.options.plannedDisconnectAtSeq === event.seq && !this.isPlannedDone)
+      this.plannedDisconnect(connection);
   }
 
   // Records an event in arrival order and hands it to every waiter whose predicate it matches.
@@ -327,7 +367,9 @@ export class EventStreamReader {
     if (this.isStopped) return;
     this.unplannedCount += 1;
     if (this.unplannedCount > MAX_UNPLANNED_RECONNECTS) {
-      this.raise(`stream_dropped_5_times: the event stream dropped more than ${String(MAX_UNPLANNED_RECONNECTS)} times.`);
+      this.raise(
+        `stream_dropped_5_times: the event stream dropped more than ${String(MAX_UNPLANNED_RECONNECTS)} times.`,
+      );
       return;
     }
     const delay = reconnectDelayMs(this.unplannedCount - 1, () => Math.random());

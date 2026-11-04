@@ -16,7 +16,11 @@ function signUp(n: number, body: Record<string, unknown>): Promise<LightMyReques
   return appUnderTest.inject({
     method: "POST",
     url: "/api/people",
-    headers: { origin: ORIGIN, "content-type": "application/json", "x-forwarded-for": "198.51.100." + String(n) },
+    headers: {
+      origin: ORIGIN,
+      "content-type": "application/json",
+      "x-forwarded-for": "198.51.100." + String(n),
+    },
     payload: JSON.stringify(body),
   });
 }

@@ -48,7 +48,9 @@ describe("rankAndCut", () => {
     const kept = rankAndCut(repeatedTurns("y".repeat(20_000), 105));
     expect(kept.length).toBe(104);
     expect(kept.reduce((sum, item) => sum + item.canonical.length, 0)).toBe(2_080_000);
-    expect(kept.map((item) => item.exportOrder)).toEqual(Array.from({ length: 104 }, (entry, index) => index + 1));
+    expect(kept.map((item) => item.exportOrder)).toEqual(
+      Array.from({ length: 104 }, (entry, index) => index + 1),
+    );
   });
 
   it("D5-T4: a first-person turn outranks newer turns", () => {
@@ -80,30 +82,55 @@ describe("rankAndCut", () => {
 describe("rankAndCut with a summary", () => {
   it("W7-SUMMARY-T6: with 10,001 turns, the oldest turn that holds a summary quote is kept and the lowest-ranked plain turn is cut", () => {
     const prose = "I think the weather is nice today and tomorrow";
-    const turns = [turn("rentably was never a bad idea, the timing was just early", 0), ...Array.from({ length: 10_000 }, (entry, index) => turn(prose, index + 1))];
-    const priority = { quotes: ["Rentably was NEVER a bad idea, the timing was just early", "weather"], topics: [] };
+    const turns = [
+      turn("rentably was never a bad idea, the timing was just early", 0),
+      ...Array.from({ length: 10_000 }, (entry, index) => turn(prose, index + 1)),
+    ];
+    const priority = {
+      quotes: ["Rentably was NEVER a bad idea, the timing was just early", "weather"],
+      topics: [],
+    };
 
     const kept = rankAndCut(turns, priority).map((entry) => entry.exportOrder);
 
     expect(kept.length).toBe(10_000);
     expect(kept[0]).toBe(0);
     expect(kept.includes(1)).toBe(false);
-    expect(rankAndCut(turns).map((entry) => entry.exportOrder).includes(0)).toBe(false);
+    expect(
+      rankAndCut(turns)
+        .map((entry) => entry.exportOrder)
+        .includes(0),
+    ).toBe(false);
   });
 
   it("W7-SUMMARY-T7: a turn naming a summary topic is kept before turns that only score higher today", () => {
     const prose = "I think the weather is nice today and tomorrow";
-    const turns = [turn("Rentably shipped the agent marketplace", 0), turn("rentablyish thing here", 1), ...Array.from({ length: 10_000 }, (entry, index) => turn(prose, index + 2))];
+    const turns = [
+      turn("Rentably shipped the agent marketplace", 0),
+      turn("rentablyish thing here", 1),
+      ...Array.from({ length: 10_000 }, (entry, index) => turn(prose, index + 2)),
+    ];
 
-    const kept = rankAndCut(turns, { quotes: [], topics: ["rentably"] }).map((entry) => entry.exportOrder);
+    const kept = rankAndCut(turns, { quotes: [], topics: ["rentably"] }).map(
+      (entry) => entry.exportOrder,
+    );
 
     expect(kept.includes(0)).toBe(true);
     expect(kept.includes(1)).toBe(false);
-    expect(rankAndCut(turns).map((entry) => entry.exportOrder).includes(0)).toBe(false);
+    expect(
+      rankAndCut(turns)
+        .map((entry) => entry.exportOrder)
+        .includes(0),
+    ).toBe(false);
   });
 
   it("W7-SUMMARY-T8: with no priority, the kept turns are exactly today's", () => {
-    const turns = [turn("I keep my notes short", 0, 30), turn("note", 1, 50), turn("we shipped it", 2, null), turn("I would build it again tomorrow for sure", 3, 10)];
+    const turns = [
+      turn("I keep my notes short", 0, 30),
+      turn("note", 1, 50),
+      turn("we shipped it", 2, null),
+      turn("I would build it again tomorrow for sure", 3, 10),
+    ];
 
     expect(rankAndCut(turns, { quotes: [], topics: [] })).toEqual(rankAndCut(turns));
     expect(rankAndCut(turns, undefined)).toEqual(rankAndCut(turns));

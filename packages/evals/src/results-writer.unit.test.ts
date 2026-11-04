@@ -4,7 +4,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { MetricKey, MetricResult } from "./metrics/index.js";
-import { decideExitCode, formatResultsTable, generatedByLine, writeReadmeBlock, writeResultsFile, type EvalResults } from "./results-writer.js";
+import {
+  decideExitCode,
+  formatResultsTable,
+  generatedByLine,
+  writeReadmeBlock,
+  writeResultsFile,
+  type EvalResults,
+} from "./results-writer.js";
 
 let folder = "";
 beforeEach(() => {
@@ -15,9 +22,24 @@ afterEach(() => {
 });
 
 // A metric result with only the fields the writer reads.
-function metric(input: { key: MetricKey; value: number | null; target: number | null; direction: "at_least" | "at_most" | null }): MetricResult {
+function metric(input: {
+  key: MetricKey;
+  value: number | null;
+  target: number | null;
+  direction: "at_least" | "at_most" | null;
+}): MetricResult {
   const { key, value, target, direction } = input;
-  return { key, label: key.replace(/_/g, " "), value, display: value === null ? "no data" : value.toFixed(3), n: value === null ? 0 : 4, target, direction, rows: ["A2"], detail: {} };
+  return {
+    key,
+    label: key.replace(/_/g, " "),
+    value,
+    display: value === null ? "no data" : value.toFixed(3),
+    n: value === null ? 0 : 4,
+    target,
+    direction,
+    rows: ["A2"],
+    detail: {},
+  };
 }
 
 // The seven metrics with the values the test gives the two thresholded ones.
@@ -71,16 +93,28 @@ describe("results writer", () => {
     const readmePath = join(folder, "README.md");
     const before = "# Title\n\nIntro text that stays.\n\n";
     const after = "\n\nOutro that stays.\n";
-    writeFileSync(readmePath, `${before}<!-- eval:start -->\nold table\n<!-- eval:end -->\n<!-- human-metrics:start -->\nold human\n<!-- human-metrics:end -->${after}`);
+    writeFileSync(
+      readmePath,
+      `${before}<!-- eval:start -->\nold table\n<!-- eval:end -->\n<!-- human-metrics:start -->\nold human\n<!-- human-metrics:end -->${after}`,
+    );
     await writeReadmeBlock(readmePath, results, null);
     const updated = readFileSync(readmePath, "utf8");
     expect(updated.startsWith(`${before}<!-- eval:start -->\n`)).toBe(true);
-    expect(updated.endsWith(`<!-- eval:end -->\n<!-- human-metrics:start -->\nold human\n<!-- human-metrics:end -->${after}`)).toBe(true);
-    const inner = updated.slice(updated.indexOf("<!-- eval:start -->\n") + "<!-- eval:start -->\n".length, updated.indexOf("<!-- eval:end -->"));
+    expect(
+      updated.endsWith(
+        `<!-- eval:end -->\n<!-- human-metrics:start -->\nold human\n<!-- human-metrics:end -->${after}`,
+      ),
+    ).toBe(true);
+    const inner = updated.slice(
+      updated.indexOf("<!-- eval:start -->\n") + "<!-- eval:start -->\n".length,
+      updated.indexOf("<!-- eval:end -->"),
+    );
     expect(inner).toBe(`${formatResultsTable(results)}\n${generatedByLine(results)}\n`);
 
     writeFileSync(readmePath, "# No markers here\n");
-    await expect(writeReadmeBlock(readmePath, results, null)).rejects.toThrow("readme_markers_missing");
+    await expect(writeReadmeBlock(readmePath, results, null)).rejects.toThrow(
+      "readme_markers_missing",
+    );
   });
 
   it("W2-EVAL-T10 (A2): the table prints the seven rows in order with sample sizes and no data for null", () => {

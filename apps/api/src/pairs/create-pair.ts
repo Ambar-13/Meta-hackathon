@@ -2,7 +2,12 @@
 // sha256 is stored, it works once, and it expires 24 hours after it is made. The link carries the token after "#",
 // so it never reaches a server log; the web app shows the link as a QR code.
 import type { FastifyInstance } from "fastify";
-import { PAIR_LIFETIME_HOURS, PAIR_TOKEN_BYTES, PairCreateResponse, routes } from "@meet-first/contracts";
+import {
+  PAIR_LIFETIME_HOURS,
+  PAIR_TOKEN_BYTES,
+  PairCreateResponse,
+  routes,
+} from "@meet-first/contracts";
 import { withPerson } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { appOrigin, hashToken, newHexToken, requirePerson } from "../sessions/index.js";
@@ -23,8 +28,22 @@ export function registerCreatePair(app: FastifyInstance, deps: RouteDeps): void 
     const token = newHexToken(PAIR_TOKEN_BYTES);
     const expiresAt = new Date(deps.now().getTime() + PAIR_LIFETIME_HOURS * 3_600_000);
     const row = await withPerson(deps.db, personId, (trx) =>
-      trx.insertInto("pairs").values({ creator_person_id: personId, token_hash: hashToken(token), expires_at: expiresAt }).returning("id").executeTakeFirstOrThrow(),
+      trx
+        .insertInto("pairs")
+        .values({
+          creator_person_id: personId,
+          token_hash: hashToken(token),
+          expires_at: expiresAt,
+        })
+        .returning("id")
+        .executeTakeFirstOrThrow(),
     );
-    return reply.code(201).send(PairCreateResponse.parse({ pairId: row.id, inviteUrl: inviteUrl(deps.env.APP_ORIGIN, token), expiresAt: expiresAt.toISOString() }));
+    return reply.code(201).send(
+      PairCreateResponse.parse({
+        pairId: row.id,
+        inviteUrl: inviteUrl(deps.env.APP_ORIGIN, token),
+        expiresAt: expiresAt.toISOString(),
+      }),
+    );
   });
 }

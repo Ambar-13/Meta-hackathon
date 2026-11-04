@@ -16,7 +16,10 @@ function sectionHeadings(): (string | null)[] {
 // The links at the page's foot, by name and address.
 function footLinks(): [string | null, string | null][] {
   const nav = screen.getByRole("navigation", { name: "Meety's policies" });
-  return Array.from(nav.querySelectorAll("a")).map((link) => [link.textContent, link.getAttribute("href")]);
+  return Array.from(nav.querySelectorAll("a")).map((link) => [
+    link.textContent,
+    link.getAttribute("href"),
+  ]);
 }
 
 describe("the policy pages", () => {
@@ -24,10 +27,23 @@ describe("the policy pages", () => {
     renderScreen(<PrivacyScreen />, { pattern: ROUTE_PATTERNS.privacy, url: APP_PATHS.privacy });
 
     expect(screen.getByRole("heading", { level: 1, name: "Privacy" })).toBeTruthy();
-    expect(sectionHeadings()).toEqual(["What Meety keeps", "What Meety does with it", "Who sees what", "Cookies and your browser", "Deleting it", "Questions"]);
+    expect(sectionHeadings()).toEqual([
+      "What Meety keeps",
+      "What Meety does with it",
+      "Who sees what",
+      "Cookies and your browser",
+      "Deleting it",
+      "Questions",
+    ]);
     expect(screen.getByText(/Never your email\./)).toBeTruthy();
-    expect(screen.getByRole("link", { name: "hey.meety@gmail.com" }).getAttribute("href")).toBe("mailto:hey.meety@gmail.com");
-    expect(footLinks()).toEqual([["Terms", "/terms"], ["Cookies", "/cookies"], ["Back to Meety", "/"]]);
+    expect(screen.getByRole("link", { name: "hey.meety@gmail.com" }).getAttribute("href")).toBe(
+      "mailto:hey.meety@gmail.com",
+    );
+    expect(footLinks()).toEqual([
+      ["Terms", "/terms"],
+      ["Cookies", "/cookies"],
+      ["Back to Meety", "/"],
+    ]);
     expect(screen.queryByRole("link", { name: "Home" })).toBeNull();
   });
 
@@ -36,12 +52,23 @@ describe("the policy pages", () => {
 
     expect(screen.getByRole("heading", { level: 1, name: "Terms" })).toBeTruthy();
     expect(sectionHeadings()).toEqual([
-      "What Meety is", "Your account", "What you upload and post", "What is not allowed", "When the rules are broken", "What Meety promises", "Leaving",
-      "Changes to these terms", "Questions",
+      "What Meety is",
+      "Your account",
+      "What you upload and post",
+      "What is not allowed",
+      "When the rules are broken",
+      "What Meety promises",
+      "Leaving",
+      "Changes to these terms",
+      "Questions",
     ]);
     expect(screen.getByText(/Its answers are guesses made by an AI\./)).toBeTruthy();
     expect(screen.getByText("Last changed 3 November 2026.")).toBeTruthy();
-    expect(footLinks()).toEqual([["Privacy", "/privacy"], ["Cookies", "/cookies"], ["Back to Meety", "/"]]);
+    expect(footLinks()).toEqual([
+      ["Privacy", "/privacy"],
+      ["Cookies", "/cookies"],
+      ["Back to Meety", "/"],
+    ]);
     expect(screen.queryByRole("link", { name: "Home" })).toBeNull();
   });
 
@@ -49,12 +76,25 @@ describe("the policy pages", () => {
     renderScreen(<CookiesScreen />, { pattern: ROUTE_PATTERNS.cookies, url: APP_PATHS.cookies });
 
     expect(screen.getByRole("heading", { level: 1, name: "Cookies" })).toBeTruthy();
-    expect(sectionHeadings()).toEqual(["The two cookies", "The two notes", "Google's own page", "Removing them", "Questions"]);
+    expect(sectionHeadings()).toEqual([
+      "The two cookies",
+      "The two notes",
+      "Google's own page",
+      "Removing them",
+      "Questions",
+    ]);
     expect(Array.from(document.querySelectorAll("dt")).map((term) => term.textContent)).toEqual([
-      "__Host-session", "__Host-google", "meet-first-stories-seen", "meet-first.access-code",
+      "__Host-session",
+      "__Host-google",
+      "meet-first-stories-seen",
+      "meet-first.access-code",
     ]);
     expect(screen.getByText("Lasts 90 days. Deleting your account removes it.")).toBeTruthy();
     expect(screen.getByText(/nothing to accept or refuse/)).toBeTruthy();
-    expect(footLinks()).toEqual([["Privacy", "/privacy"], ["Terms", "/terms"], ["Back to Meety", "/"]]);
+    expect(footLinks()).toEqual([
+      ["Privacy", "/privacy"],
+      ["Terms", "/terms"],
+      ["Back to Meety", "/"],
+    ]);
   });
 });

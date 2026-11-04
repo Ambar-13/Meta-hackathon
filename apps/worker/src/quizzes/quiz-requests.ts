@@ -1,4 +1,9 @@
-import { ContractError, QuizJudgeOutput, QuizPersonaAnswerOutput, toStrictJsonSchema } from "@meet-first/contracts";
+import {
+  ContractError,
+  QuizJudgeOutput,
+  QuizPersonaAnswerOutput,
+  toStrictJsonSchema,
+} from "@meet-first/contracts";
 import type { ChatMessage } from "@meet-first/llm";
 
 // The prompt text and its version as readPrompt returns them.
@@ -25,7 +30,10 @@ export type QuizModelCall = {
 };
 
 // The strict output schema sent with each persona call. It matches the frozen v1/schema.json.
-export const PERSONA_ANSWER_SCHEMA = toStrictJsonSchema(QuizPersonaAnswerOutput, "quiz-persona-answer");
+export const PERSONA_ANSWER_SCHEMA = toStrictJsonSchema(
+  QuizPersonaAnswerOutput,
+  "quiz-persona-answer",
+);
 
 // The strict output schema sent with each judge call. It matches the frozen v1/schema.json.
 export const JUDGE_SCHEMA = toStrictJsonSchema(QuizJudgeOutput, "quiz-judge");
@@ -51,7 +59,11 @@ export type QuizStopCode = keyof typeof QUIZ_STOP_SENTENCES;
 export function requireElement<T>(list: readonly T[], index: number): T {
   const value = list[index];
   if (value === undefined) {
-    throw new ContractError("list_element_missing", "No element at place " + String(index) + ". Check the list and the index.", 500);
+    throw new ContractError(
+      "list_element_missing",
+      "No element at place " + String(index) + ". Check the list and the index.",
+      500,
+    );
   }
   return value;
 }
@@ -74,13 +86,20 @@ export function formatCardItems(items: readonly PersonaCardItem[]): string {
 }
 
 // The call for one persona answer: the system prompt, then the card and one bank question, and nothing from the quiz tables.
-export function buildPersonaAnswerCall(prompt: QuizPrompt, items: readonly PersonaCardItem[], questionText: string): QuizModelCall {
+export function buildPersonaAnswerCall(
+  prompt: QuizPrompt,
+  items: readonly PersonaCardItem[],
+  questionText: string,
+): QuizModelCall {
   return {
     callSite: "quiz_answer",
     promptVersion: prompt.version,
     messages: [
       { role: "system", content: prompt.text },
-      { role: "user", content: `${formatCardItems(items)}\n<question>${escapeBlockText(questionText)}</question>` },
+      {
+        role: "user",
+        content: `${formatCardItems(items)}\n<question>${escapeBlockText(questionText)}</question>`,
+      },
     ],
     schema: PERSONA_ANSWER_SCHEMA,
   };

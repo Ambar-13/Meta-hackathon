@@ -20,7 +20,9 @@ const HumanResponse = z
     outcomeDefinition: z.string(),
     knownCollaborators: z.boolean(),
     sides: z.object({ a: SideAnswers, b: SideAnswers }).strict(),
-    frictionPoints: z.array(z.object({ text: z.string(), knownBeforeReveal: z.boolean() }).strict()),
+    frictionPoints: z.array(
+      z.object({ text: z.string(), knownBeforeReveal: z.boolean() }).strict(),
+    ),
   })
   .strict();
 // The type of one response file, read from the schema above.
@@ -30,7 +32,9 @@ const EXAMPLE_PAIR_ID = "example";
 
 // The mean of a list of numbers, or zero for an empty list.
 function mean(values: number[]): number {
-  return values.length === 0 ? 0 : values.reduce((total, value) => total + value, 0) / values.length;
+  return values.length === 0
+    ? 0
+    : values.reduce((total, value) => total + value, 0) / values.length;
 }
 
 // Reads every response file in the folder. A file that does not match the schema is named in a warning and skipped.
@@ -38,9 +42,13 @@ async function readResponses(folder: string): Promise<HumanResponse[]> {
   const names = await readdir(folder).catch(() => []);
   const responses: HumanResponse[] = [];
   for (const name of names.filter((item) => item.endsWith(".json")).sort()) {
-    const parsed = HumanResponse.safeParse(JSON.parse(await readFile(join(folder, name), "utf8")) as unknown);
+    const parsed = HumanResponse.safeParse(
+      JSON.parse(await readFile(join(folder, name), "utf8")) as unknown,
+    );
     if (!parsed.success) {
-      console.warn(`human_response_invalid: ${name} does not match the form and is skipped. Remove any name or extra field from it.`);
+      console.warn(
+        `human_response_invalid: ${name} does not match the form and is skipped. Remove any name or extra field from it.`,
+      );
       continue;
     }
     if (parsed.data.pairId !== EXAMPLE_PAIR_ID) responses.push(parsed.data);
@@ -69,7 +77,9 @@ function tableOf(responses: HumanResponse[]): string {
 }
 
 // Builds the human table from the response folder. Zero real responses prints the sentence and nothing else.
-export async function buildHumanTable(responsesDir: string): Promise<{ table: string; count: number }> {
+export async function buildHumanTable(
+  responsesDir: string,
+): Promise<{ table: string; count: number }> {
   const responses = await readResponses(responsesDir);
   if (responses.length === 0) return { table: "No real pairs yet.", count: 0 };
   return { table: tableOf(responses), count: responses.length };

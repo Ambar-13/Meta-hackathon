@@ -6,12 +6,18 @@ import { decideRetry, needsLengthRetry, withTransportRetries } from "./retries.j
 const half = (): number => 0.5;
 
 // Builds an error that passes instanceof openai.APIError and carries status and headers, as the SDK does.
-function apiError(status: number, headers: Record<string, string>): InstanceType<typeof openai.APIError> {
-  return Object.assign(Object.create(openai.APIError.prototype) as InstanceType<typeof openai.APIError>, {
-    status,
-    headers,
-    message: `fake status ${String(status)}`,
-  });
+function apiError(
+  status: number,
+  headers: Record<string, string>,
+): InstanceType<typeof openai.APIError> {
+  return Object.assign(
+    Object.create(openai.APIError.prototype) as InstanceType<typeof openai.APIError>,
+    {
+      status,
+      headers,
+      message: `fake status ${String(status)}`,
+    },
+  );
 }
 
 // A fake sleep that returns at once and records each wait.
@@ -38,7 +44,11 @@ function fakeRandom(values: readonly number[]): () => number {
 
 describe("decideRetry", () => {
   it("D59-T1: a 429 with retry-after 2 waits 2,000 ms", () => {
-    expect(decideRetry(apiError(429, { "retry-after": "2" }), 0, half)).toEqual({ shouldRetry: true, waitMs: 2000, reason: "rate_limited" });
+    expect(decideRetry(apiError(429, { "retry-after": "2" }), 0, half)).toEqual({
+      shouldRetry: true,
+      waitMs: 2000,
+      reason: "rate_limited",
+    });
   });
 
   it("D59-T2: retry-after is capped at 10,000 ms", () => {
@@ -57,13 +67,21 @@ describe("decideRetry", () => {
   });
 
   it("D59-T5: without a header the wait is 200 plus random times 600 (fake random)", () => {
-    expect(decideRetry(apiError(503, {}), 0, half)).toEqual({ shouldRetry: true, waitMs: 500, reason: "server_error" });
+    expect(decideRetry(apiError(503, {}), 0, half)).toEqual({
+      shouldRetry: true,
+      waitMs: 500,
+      reason: "server_error",
+    });
     expect(decideRetry(apiError(503, {}), 0, () => 0).waitMs).toBe(200);
     expect(decideRetry(apiError(503, {}), 0, () => 1).waitMs).toBe(800);
   });
 
   it("D59-T6: a 400 is never retried", () => {
-    expect(decideRetry(apiError(400, {}), 0, half)).toEqual({ shouldRetry: false, waitMs: 0, reason: "none" });
+    expect(decideRetry(apiError(400, {}), 0, half)).toEqual({
+      shouldRetry: false,
+      waitMs: 0,
+      reason: "none",
+    });
   });
 
   it("D59-T7: the third failure is not retried", () => {
@@ -76,7 +94,10 @@ describe("decideRetry", () => {
 
   it("R10.3-T2: a first-token timeout is retried once", () => {
     const timeout = new ContractError("model_first_token_timeout", "s", 504);
-    expect(decideRetry(timeout, 0, half)).toMatchObject({ shouldRetry: true, reason: "server_error" });
+    expect(decideRetry(timeout, 0, half)).toMatchObject({
+      shouldRetry: true,
+      reason: "server_error",
+    });
     expect(decideRetry(timeout, 1, half).shouldRetry).toBe(false);
   });
 

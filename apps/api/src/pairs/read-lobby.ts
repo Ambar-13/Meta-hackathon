@@ -13,23 +13,46 @@ export const PRESENCE_STATES = ["ready", "queued", "running"] as const;
 export const PairParams = z.object({ id: z.string().uuid() });
 
 // Stamps last_seen_at on the caller's member rows of this pair's meetings that are ready, queued or running.
-export async function touchLobbyPresence(trx: Transaction<Database>, input: { personId: string; pairId: string; now: Date }): Promise<void> {
+export async function touchLobbyPresence(
+  trx: Transaction<Database>,
+  input: { personId: string; pairId: string; now: Date },
+): Promise<void> {
   await trx
     .updateTable("meeting_members")
     .set({ last_seen_at: input.now })
     .where("person_id", "=", input.personId)
-    .where("meeting_id", "in", trx.selectFrom("meetings").select("meetings.id").where("meetings.pair_id", "=", input.pairId).where("meetings.state", "in", [...PRESENCE_STATES]))
+    .where(
+      "meeting_id",
+      "in",
+      trx
+        .selectFrom("meetings")
+        .select("meetings.id")
+        .where("meetings.pair_id", "=", input.pairId)
+        .where("meetings.state", "in", [...PRESENCE_STATES]),
+    )
     .execute();
 }
 
 // Reads the pair as the caller: both display names and its meetings, newest first; null when the caller is not in it.
 // The other person's name comes only from pair_display_names, which returns no row unless the caller is in the pair.
-export async function readPairView(trx: Transaction<Database>, input: { pairId: string; now: Date }): Promise<PairView | null> {
-  const pair = await trx.selectFrom("pairs").select(["id", "creator_person_id", "joiner_person_id", "expires_at"]).where("id", "=", input.pairId).executeTakeFirst();
+export async function readPairView(
+  trx: Transaction<Database>,
+  input: { pairId: string; now: Date },
+): Promise<PairView | null> {
+  const pair = await trx
+    .selectFrom("pairs")
+    .select(["id", "creator_person_id", "joiner_person_id", "expires_at"])
+    .where("id", "=", input.pairId)
+    .executeTakeFirst();
   if (pair === undefined) {
     return null;
   }
-  const names = await sql<{ creator_display_name: string; joiner_display_name: string | null }>`SELECT creator_display_name, joiner_display_name FROM pair_display_names(${input.pairId}::uuid)`.execute(trx);
+  const names = await sql<{
+    creator_display_name: string;
+    joiner_display_name: string | null;
+  }>`SELECT creator_display_name, joiner_display_name FROM pair_display_names(${input.pairId}::uuid)`.execute(
+    trx,
+  );
   const nameRow = names.rows[0];
   if (nameRow === undefined) {
     return null;
@@ -44,7 +67,9 @@ export async function readPairView(trx: Transaction<Database>, input: { pairId: 
   return PairView.parse({
     id: pair.id,
     creator: { displayName: nameRow.creator_display_name },
-    ...(pair.joiner_person_id === null ? {} : { joiner: { displayName: nameRow.joiner_display_name ?? "" } }),
+    ...(pair.joiner_person_id === null
+      ? {}
+      : { joiner: { displayName: nameRow.joiner_display_name ?? "" } }),
     meetings: meetings.map((meeting) => ({
       id: meeting.id,
       state: meeting.state,

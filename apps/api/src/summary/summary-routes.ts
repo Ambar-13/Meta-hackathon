@@ -4,7 +4,16 @@
 import type { FastifyInstance } from "fastify";
 import { sql } from "kysely";
 import { z } from "zod";
-import { ContractError, HTTP, routes, SUMMARY_MAX_CHARS, SUMMARY_SAVES_PER_DAY, SummaryPointView, SummarySave, SummaryView } from "@meet-first/contracts";
+import {
+  ContractError,
+  HTTP,
+  routes,
+  SUMMARY_MAX_CHARS,
+  SUMMARY_SAVES_PER_DAY,
+  SummaryPointView,
+  SummarySave,
+  SummaryView,
+} from "@meet-first/contracts";
 import { withPerson, type DatabaseTransaction } from "@meet-first/db";
 import { canonicalise } from "@meet-first/parsers";
 import { makePlaceholderCounter, scrub } from "@meet-first/scrub";
@@ -16,14 +25,24 @@ import { requirePerson } from "../sessions/index.js";
 const DAILY_CAP_SENTENCE = `You saved your summary ${String(SUMMARY_SAVES_PER_DAY)} times today. Try again tomorrow.`;
 
 // One person_summaries row as these routes read it.
-type SummaryRow = { points: unknown; state: "checking" | "ready" | "failed"; friends_can_ask: boolean; updated_at: Date };
+type SummaryRow = {
+  points: unknown;
+  state: "checking" | "ready" | "failed";
+  friends_can_ask: boolean;
+  updated_at: Date;
+};
 // What one save stores: the scrubbed text and the switch.
 type SummaryInput = { personId: string; text: string; friendsCanAsk: boolean };
 
 // The view of one stored summary; points stored in another shape are left out rather than shown wrong.
 function viewOf(row: SummaryRow): SummaryView {
   const points = z.array(SummaryPointView).safeParse(row.points);
-  return SummaryView.parse({ state: row.state, points: points.success ? points.data : [], friendsCanAsk: row.friends_can_ask, updatedAt: row.updated_at.toISOString() });
+  return SummaryView.parse({
+    state: row.state,
+    points: points.success ? points.data : [],
+    friendsCanAsk: row.friends_can_ask,
+    updatedAt: row.updated_at.toISOString(),
+  });
 }
 
 // An opening square bracket that would make typed text look like a placeholder or a role token, which the names check leaves alone.
@@ -33,7 +52,10 @@ const TOKEN_SHAPED = /\[(?=\s*(?:person|code|redacted)\s*:)/giu;
 // brackets the person typed turned round, so no name can hide inside one; then scrubbed by code with the person's own names left alone.
 // Only the scrub writes placeholders.
 function scrubbedText(text: string, allowlist: readonly string[]): string {
-  return scrub(canonicalise(text).replace(TOKEN_SHAPED, "("), { allowlist, nextId: makePlaceholderCounter() }).text;
+  return scrub(canonicalise(text).replace(TOKEN_SHAPED, "("), {
+    allowlist,
+    nextId: makePlaceholderCounter(),
+  }).text;
 }
 
 // Counts one save on the person, unless they already saved SUMMARY_SAVES_PER_DAY times this UTC day; false at the cap. The count
@@ -55,16 +77,29 @@ async function upsertSummary(trx: DatabaseTransaction, input: SummaryInput): Pro
     ON CONFLICT (person_id) DO UPDATE SET text = EXCLUDED.text, friends_can_ask = EXCLUDED.friends_can_ask, points = '[]', state = 'checking', updated_at = now()
     RETURNING points, state, friends_can_ask, updated_at`.execute(trx);
   const row = result.rows[0];
-  if (row === undefined) throw new ContractError("summary_not_saved", "The summary was not saved. Try again.", HTTP.internal);
+  if (row === undefined)
+    throw new ContractError(
+      "summary_not_saved",
+      "The summary was not saved. Try again.",
+      HTTP.internal,
+    );
   return row;
 }
 
 // Saves the person's summary, then queues its check after the commit; undefined past the day's saves. When the queue refuses, the
 // summary is marked failed, so it never waits for a check that will not come, and the queue's error goes on, as job-queue.ts says
 // every route does.
-export async function saveSummary(deps: Pick<RouteDeps, "db" | "enqueue">, personId: string, body: SummarySave): Promise<Awaited<ReturnType<typeof upsertSummary>> | undefined> {
+export async function saveSummary(
+  deps: Pick<RouteDeps, "db" | "enqueue">,
+  personId: string,
+  body: SummarySave,
+): Promise<Awaited<ReturnType<typeof upsertSummary>> | undefined> {
   const row = await withPerson(deps.db, personId, async (trx) => {
-    const person = await trx.selectFrom("people").select(["display_name", "affiliations"]).where("id", "=", personId).executeTakeFirstOrThrow();
+    const person = await trx
+      .selectFrom("people")
+      .select(["display_name", "affiliations"])
+      .where("id", "=", personId)
+      .executeTakeFirstOrThrow();
     const text = scrubbedText(body.text, [person.display_name, ...person.affiliations]);
     if (text.length > SUMMARY_MAX_CHARS) throw makePayloadInvalidError();
     if (!(await countSave(trx, personId))) return undefined;
@@ -74,7 +109,14 @@ export async function saveSummary(deps: Pick<RouteDeps, "db" | "enqueue">, perso
   try {
     await deps.enqueue("check_summary", { personId });
   } catch (error) {
-    await withPerson(deps.db, personId, (trx) => trx.updateTable("person_summaries").set({ state: "failed" }).where("person_id", "=", personId).where("state", "=", "checking").execute());
+    await withPerson(deps.db, personId, (trx) =>
+      trx
+        .updateTable("person_summaries")
+        .set({ state: "failed" })
+        .where("person_id", "=", personId)
+        .where("state", "=", "checking")
+        .execute(),
+    );
     throw error;
   }
   return row;
@@ -88,7 +130,8 @@ function registerSaveSummary(app: FastifyInstance, deps: RouteDeps): void {
     const body = SummarySave.safeParse(request.body);
     if (!body.success) throw makePayloadInvalidError();
     const row = await saveSummary(deps, personId, body.data);
-    if (row === undefined) throw new ContractError("summary_daily_cap", DAILY_CAP_SENTENCE, HTTP.tooMany);
+    if (row === undefined)
+      throw new ContractError("summary_daily_cap", DAILY_CAP_SENTENCE, HTTP.tooMany);
     return reply.code(202).send(viewOf(row));
   });
 }
@@ -98,14 +141,20 @@ function registerReadAndDelete(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.people.readSummary.path, async (request, reply) => {
     const personId = requirePerson(request);
     const row = await withPerson(deps.db, personId, (trx) =>
-      trx.selectFrom("person_summaries").select(["points", "state", "friends_can_ask", "updated_at"]).where("person_id", "=", personId).executeTakeFirst(),
+      trx
+        .selectFrom("person_summaries")
+        .select(["points", "state", "friends_can_ask", "updated_at"])
+        .where("person_id", "=", personId)
+        .executeTakeFirst(),
     );
     if (row === undefined) throw makeNotFoundError();
     return reply.code(200).send(viewOf(row));
   });
   app.delete(routes.people.deleteSummary.path, async (request, reply) => {
     const personId = requirePerson(request);
-    await withPerson(deps.db, personId, (trx) => trx.deleteFrom("person_summaries").where("person_id", "=", personId).execute());
+    await withPerson(deps.db, personId, (trx) =>
+      trx.deleteFrom("person_summaries").where("person_id", "=", personId).execute(),
+    );
     return reply.code(204).send();
   });
 }

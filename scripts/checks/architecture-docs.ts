@@ -14,7 +14,10 @@ export type RequiredDocument = { path: string; diagrams: Readonly<Record<string,
 
 /** The architecture docs and their pictures, from the style rules. */
 export const REQUIRED_DOCUMENTS: readonly RequiredDocument[] = [
-  { path: "docs/architecture/OVERVIEW.md", diagrams: { flowchart: 1, sequenceDiagram: 1, erDiagram: 1 } },
+  {
+    path: "docs/architecture/OVERVIEW.md",
+    diagrams: { flowchart: 1, sequenceDiagram: 1, erDiagram: 1 },
+  },
   { path: "docs/architecture/STATES.md", diagrams: { stateDiagram: 6 } },
   { path: "docs/architecture/SAFETY.md", diagrams: { flowchart: 2 } },
   { path: "docs/GLOSSARY.md", diagrams: {} },
@@ -32,11 +35,23 @@ export function countDiagramKinds(markdown: string): Map<string, number> {
   return counts;
 }
 
-function checkRequiredDocument(root: string, document: RequiredDocument, passedPaths: readonly string[]): Finding[] {
+function checkRequiredDocument(
+  root: string,
+  document: RequiredDocument,
+  passedPaths: readonly string[],
+): Finding[] {
   const file = join(root, document.path);
   const level = levelFor(root, file, passedPaths);
   if (!existsSync(file)) {
-    return [{ check: "architecture-docs", file, line: 1, message: "is missing; the architecture docs need it", level }];
+    return [
+      {
+        check: "architecture-docs",
+        file,
+        line: 1,
+        message: "is missing; the architecture docs need it",
+        level,
+      },
+    ];
   }
   const counts = countDiagramKinds(readFileSync(file, "utf8"));
   const findings: Finding[] = [];
@@ -72,10 +87,14 @@ export function checkArchitectureDocs(root: string): Finding[] {
   const passedPaths = readPassedPaths(root);
   const markdownFiles = [
     join(root, "README.md"),
-    ...MARKDOWN_FOLDERS.flatMap((folder) => walkFiles(root, folder, (name) => name.endsWith(".md"))),
+    ...MARKDOWN_FOLDERS.flatMap((folder) =>
+      walkFiles(root, folder, (name) => name.endsWith(".md")),
+    ),
   ];
   return [
     ...REQUIRED_DOCUMENTS.flatMap((document) => checkRequiredDocument(root, document, passedPaths)),
-    ...markdownFiles.filter((file) => existsSync(file)).flatMap((file) => checkDiagramsIn(root, file, passedPaths)),
+    ...markdownFiles
+      .filter((file) => existsSync(file))
+      .flatMap((file) => checkDiagramsIn(root, file, passedPaths)),
   ];
 }

@@ -9,9 +9,15 @@ export type VoiceSide = "a" | "b";
 
 // The "Hello, my name is" sticker with one name written on it. Size and tilt come from a class the screen sets on it. The band's
 // words come from the stylesheet, so the tag adds no text a test or a screen reader could trip on.
-export const NameTag = (props: { name: string; colour?: TagColour; className?: string }): ReactElement => {
+export const NameTag = (props: {
+  name: string;
+  colour?: TagColour;
+  className?: string;
+}): ReactElement => {
   const colour = props.colour ?? "coral";
-  const classes = ["tag", colour === "coral" ? "" : colour, props.className ?? ""].filter((part) => part !== "").join(" ");
+  const classes = ["tag", colour === "coral" ? "" : colour, props.className ?? ""]
+    .filter((part) => part !== "")
+    .join(" ");
   return (
     <span className={classes} aria-hidden="true">
       <span className="tag-band">
@@ -24,7 +30,10 @@ export const NameTag = (props: { name: string; colour?: TagColour; className?: s
 };
 
 // How each kind of question looks wherever it is named: its words, its colour class and its sticker (docs/DESIGN.md "Colour").
-export const KIND_LOOK: Record<QuestionKind, { label: string; colour: string; sticker: StickerName }> = {
+export const KIND_LOOK: Record<
+  QuestionKind,
+  { label: string; colour: string; sticker: StickerName }
+> = {
   get_along: { label: "Getting along", colour: "c-green", sticker: "smile" },
   help: { label: "Help", colour: "c-yellow", sticker: "buoy" },
   situation: { label: "A situation", colour: "c-lilac", sticker: "spark" },
@@ -44,7 +53,11 @@ export function initialOf(name: string): string {
 }
 
 // A person as a round initial in their side's colour, as the meeting screens show both people.
-export const Avatar = (props: { name: string; side: VoiceSide; isSmall?: boolean }): ReactElement => {
+export const Avatar = (props: {
+  name: string;
+  side: VoiceSide;
+  isSmall?: boolean;
+}): ReactElement => {
   const size = props.isSmall === true ? " small" : "";
   return (
     <span className={`avatar ${SIDE_COLOUR_CLASS[props.side]}${size}`} aria-hidden="true">
@@ -54,7 +67,11 @@ export const Avatar = (props: { name: string; side: VoiceSide; isSmall?: boolean
 };
 
 // One quote a line rests on, with where it came from. With onOpen it is a button that opens the source; without, plain text.
-export const Receipt = (props: { quote: string; source: string; onOpen?: () => void }): ReactElement => {
+export const Receipt = (props: {
+  quote: string;
+  source: string;
+  onOpen?: () => void;
+}): ReactElement => {
   const body = (
     <>
       <Sticker name="quote" />
@@ -102,7 +119,12 @@ export const TypingDots = (props: { label: string }): ReactElement => {
 };
 
 // A screen or list with nothing in it yet: one sticker, one heading, one or two lines, and the next step.
-export const EmptyState = (props: { sticker: StickerName; title: string; children?: ReactNode; action?: ReactNode }): ReactElement => {
+export const EmptyState = (props: {
+  sticker: StickerName;
+  title: string;
+  children?: ReactNode;
+  action?: ReactNode;
+}): ReactElement => {
   return (
     <section className="empty">
       <Sticker name={props.sticker} />

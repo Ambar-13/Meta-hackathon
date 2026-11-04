@@ -15,7 +15,15 @@ export const PRESENCE_WINDOW_SECONDS = 30;
 // the other, how each would react to a situation or what each thinks of a view, a decision between them, a deal between them, a
 // debate on a topic, or how they would get on as a couple. It sets the meeting's decide turns and the brief's three section labels;
 // no kind ever yields a score or a verdict.
-export const QuestionKind = z.enum(["get_along", "help", "situation", "decision", "deal", "debate", "romance"]);
+export const QuestionKind = z.enum([
+  "get_along",
+  "help",
+  "situation",
+  "decision",
+  "deal",
+  "debate",
+  "romance",
+]);
 // The type of QuestionKind, read from the schema above.
 export type QuestionKind = z.infer<typeof QuestionKind>;
 // Where a meeting is in its life, from ready to ended or deleted.
@@ -30,11 +38,15 @@ export type Phase = z.infer<typeof Phase>;
 export const CURATED_QUESTION_COUNT = 20;
 // The reason a directory meeting's question is refused when it is a romance question and the listed person has not switched on dating
 // questions.
-export const ROMANCE_NOT_OPEN_REASON = "This person has not opened their Meety to dating questions.";
+export const ROMANCE_NOT_OPEN_REASON =
+  "This person has not opened their Meety to dating questions.";
 // The body of POST /api/pairs/:id/meetings: a curated question or free text, plus the card to speak from.
 // This is a route schema, not a model output, so the union is allowed here.
 export const MeetingCreate = z.intersection(
-  z.union([z.object({ questionId: z.number().int().min(1).max(CURATED_QUESTION_COUNT) }), z.object({ freeText: z.string().trim().min(5).max(300) })]),
+  z.union([
+    z.object({ questionId: z.number().int().min(1).max(CURATED_QUESTION_COUNT) }),
+    z.object({ freeText: z.string().trim().min(5).max(300) }),
+  ]),
   z.object({ cardId: Uuid }),
 );
 // The type of MeetingCreate, read from the schema above.
@@ -83,7 +95,12 @@ export type MeetingStartResponse = z.infer<typeof MeetingStartResponse>;
 // What the question check model returns: whether the question may be used, why, which kind it is, and whether any part of it is romantic.
 //The kind matters only when the question is allowed. romantic is asked apart from the kind, so a mixed question cannot pass a
 // closed dating switch under another kind.
-export const QuestionCheckOutput = z.object({ allowed: z.boolean(), reason: z.string().min(1).max(200), kind: QuestionKind, romantic: z.boolean() });
+export const QuestionCheckOutput = z.object({
+  allowed: z.boolean(),
+  reason: z.string().min(1).max(200),
+  kind: QuestionKind,
+  romantic: z.boolean(),
+});
 // The type of QuestionCheckOutput, read from the schema above.
 export type QuestionCheckOutput = z.infer<typeof QuestionCheckOutput>;
 // The 20 curated meeting questions in five groups of 4 as the lobby shows them: getting along or clashing (1 to 4), help (5 to 8),
@@ -92,7 +109,11 @@ export type QuestionCheckOutput = z.infer<typeof QuestionCheckOutput>;
 export const CURATED_QUESTIONS: ReadonlyArray<{ id: number; text: string; kind: QuestionKind }> = [
   { id: 1, text: "Would we enjoy a 10-day hackathon together?", kind: "get_along" },
   { id: 2, text: "Would we get along on a small team, day to day?", kind: "get_along" },
-  { id: 3, text: "What would each of us find hard about working with the other?", kind: "get_along" },
+  {
+    id: 3,
+    text: "What would each of us find hard about working with the other?",
+    kind: "get_along",
+  },
   { id: 4, text: "Would we clash, and over what?", kind: "get_along" },
   { id: 5, text: "Where could each of us help the other most?", kind: "help" },
   { id: 6, text: "What could each of us teach the other?", kind: "help" },
@@ -100,11 +121,31 @@ export const CURATED_QUESTIONS: ReadonlyArray<{ id: number; text: string; kind: 
   { id: 8, text: "If one of us got stuck, how would the other probably help?", kind: "help" },
   { id: 9, text: "Would we make a deal on how to split a hackathon prize?", kind: "deal" },
   { id: 10, text: "If I build and you sell, would we close that deal tomorrow?", kind: "deal" },
-  { id: 11, text: "Would we agree on who owns what if we started a company together?", kind: "deal" },
-  { id: 12, text: "What do we do when one of us wants to ship and the other wants to polish?", kind: "decision" },
-  { id: 13, text: "Debate: should students start companies before they graduate? Where do our views split?", kind: "debate" },
-  { id: 14, text: "Debate: will AI replace most junior engineers? Where do our views split?", kind: "debate" },
-  { id: 15, text: "How would we each react if our demo broke an hour before judging?", kind: "situation" },
+  {
+    id: 11,
+    text: "Would we agree on who owns what if we started a company together?",
+    kind: "deal",
+  },
+  {
+    id: 12,
+    text: "What do we do when one of us wants to ship and the other wants to polish?",
+    kind: "decision",
+  },
+  {
+    id: 13,
+    text: "Debate: should students start companies before they graduate? Where do our views split?",
+    kind: "debate",
+  },
+  {
+    id: 14,
+    text: "Debate: will AI replace most junior engineers? Where do our views split?",
+    kind: "debate",
+  },
+  {
+    id: 15,
+    text: "How would we each react if our demo broke an hour before judging?",
+    kind: "situation",
+  },
   { id: 16, text: "Do we see the future of AI the same way?", kind: "situation" },
   { id: 17, text: "Would we enjoy a first date, and what would we talk about?", kind: "romance" },
   { id: 18, text: "Where would we click, and where would we rub, as a couple?", kind: "romance" },

@@ -16,10 +16,18 @@ export type BriefScreenState =
   | { kind: "error"; code: string };
 
 // What the fetch loop has loaded so far, before the quote sheet is added.
-type LoadState = { kind: "loading" } | { kind: "waiting"; startedAt: number } | { kind: "ready"; brief: Brief } | { kind: "gone" } | { kind: "error"; code: string };
+type LoadState =
+  | { kind: "loading" }
+  | { kind: "waiting"; startedAt: number }
+  | { kind: "ready"; brief: Brief }
+  | { kind: "gone" }
+  | { kind: "error"; code: string };
 
 // The brief screen's state, with the two actions that show and hide the quote sheet.
-export type BriefScreenHook = BriefScreenState & { showQuote: (lineText: string, quote: Quote) => void; hideQuote: () => void };
+export type BriefScreenHook = BriefScreenState & {
+  showQuote: (lineText: string, quote: Quote) => void;
+  hideQuote: () => void;
+};
 
 // Loads the caller's brief and asks again every BRIEF_POLL_MS while the server says it is not written yet.
 export function useBriefState(meetingId: string): BriefScreenHook {
@@ -59,7 +67,8 @@ export function useBriefState(meetingId: string): BriefScreenHook {
   const hideQuote = (): void => {
     setSheet(null);
   };
-  const base: BriefScreenState = load.kind === "ready" ? { kind: "ready", brief: load.brief, openQuote: sheet } : load;
+  const base: BriefScreenState =
+    load.kind === "ready" ? { kind: "ready", brief: load.brief, openQuote: sheet } : load;
   return { ...base, showQuote, hideQuote };
 }
 
@@ -69,7 +78,12 @@ function isPassing(point: BriefPoint): boolean {
 }
 
 // Splits a brief into what each section shows. Decide-first lines that do not pass move to Set aside.
-export function splitBriefForDisplay(brief: Brief): { agree: BriefPoint[]; clash: BriefPoint[]; decideFirst: BriefPoint[]; setAside: BriefPoint[] } {
+export function splitBriefForDisplay(brief: Brief): {
+  agree: BriefPoint[];
+  clash: BriefPoint[];
+  decideFirst: BriefPoint[];
+  setAside: BriefPoint[];
+} {
   return {
     agree: brief.agree,
     clash: brief.clash,

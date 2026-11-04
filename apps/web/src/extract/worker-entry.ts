@@ -1,7 +1,18 @@
 import { ContractError, PERSONA_SIGNAL_LOW, type SourceHeader } from "@meet-first/contracts";
-import { extractOwnTurns, PARSER_VERSION, type ExtractInput, type SummaryPriority } from "@meet-first/parsers";
+import {
+  extractOwnTurns,
+  PARSER_VERSION,
+  type ExtractInput,
+  type SummaryPriority,
+} from "@meet-first/parsers";
 import { SCRUB_VERSION } from "@meet-first/scrub";
-import type { UploadInput, UploadProgress, UploadReady, UploadRefused, UploadRefusalCode } from "./index.js";
+import type {
+  UploadInput,
+  UploadProgress,
+  UploadReady,
+  UploadRefused,
+  UploadRefusalCode,
+} from "./index.js";
 import { scrubForUpload } from "./scrub-preview.js";
 import { buildNdjson, encodeUploadBody } from "./upload-body.js";
 import { FILE_UNREADABLE_SENTENCE, INFLATED_MAX_BYTES, readPickedFile } from "./zip-stream.js";
@@ -9,7 +20,9 @@ import { FILE_UNREADABLE_SENTENCE, INFLATED_MAX_BYTES, readPickedFile } from "./
 // What the page sends the worker: one input, the allowlist, and the summary's quotes and topics to keep first when there is one.
 export type WorkerRequest = { input: UploadInput; allowlist: string[]; priority?: SummaryPriority };
 // What the worker sends back: any number of progress messages, then exactly one done message.
-export type WorkerMessage = { type: "progress"; progress: UploadProgress } | { type: "done"; result: UploadReady | UploadRefused };
+export type WorkerMessage =
+  | { type: "progress"; progress: UploadProgress }
+  | { type: "done"; result: UploadReady | UploadRefused };
 // The refusal codes the worker itself can produce; upload_cancelled is produced on the page.
 export const WORKER_REFUSAL_CODES: readonly UploadRefusalCode[] = [
   "source_no_own_turns",
@@ -36,7 +49,11 @@ export function toRefusal(error: unknown): UploadRefused {
 }
 
 // Reads the picked input into parser inputs, reporting each step of inflation as it passes another 16 MiB.
-async function readInputs(input: UploadInput, onProgress: (progress: UploadProgress) => void, reading: { inflatedBytes: number }): Promise<ExtractInput[]> {
+async function readInputs(
+  input: UploadInput,
+  onProgress: (progress: UploadProgress) => void,
+  reading: { inflatedBytes: number },
+): Promise<ExtractInput[]> {
   if (input.kind === "paste") return [{ name: "paste.txt", text: input.text }];
   return readPickedFile(input.file, {
     inflatedCapBytes: INFLATED_MAX_BYTES,
@@ -51,14 +68,21 @@ async function readInputs(input: UploadInput, onProgress: (progress: UploadProgr
 }
 
 // The whole preparation in order: read, extract, scrub for the preview, compress. Throws on a refusal, and the caller turns it into one.
-async function prepare(request: WorkerRequest, onProgress: (progress: UploadProgress) => void): Promise<UploadReady> {
+async function prepare(
+  request: WorkerRequest,
+  onProgress: (progress: UploadProgress) => void,
+): Promise<UploadReady> {
   const reading = { inflatedBytes: 0 };
   onProgress({ stage: "reading", inflatedBytes: 0, keptTurns: 0 });
   const inputs = await readInputs(request.input, onProgress, reading);
   const kindHint = request.input.kind === "paste" ? "paste" : null;
   onProgress({ stage: "parsing", inflatedBytes: reading.inflatedBytes, keptTurns: 0 });
   const extracted = extractOwnTurns(inputs, kindHint, request.priority);
-  onProgress({ stage: "scrubbing", inflatedBytes: reading.inflatedBytes, keptTurns: extracted.turns.length });
+  onProgress({
+    stage: "scrubbing",
+    inflatedBytes: reading.inflatedBytes,
+    keptTurns: extracted.turns.length,
+  });
   const preview = scrubForUpload(extracted.turns, request.allowlist);
   const header: SourceHeader = {
     kind: extracted.kind,
@@ -68,7 +92,11 @@ async function prepare(request: WorkerRequest, onProgress: (progress: UploadProg
     attested: true,
     turnCount: preview.turns.length,
   };
-  onProgress({ stage: "compressing", inflatedBytes: reading.inflatedBytes, keptTurns: preview.turns.length });
+  onProgress({
+    stage: "compressing",
+    inflatedBytes: reading.inflatedBytes,
+    keptTurns: preview.turns.length,
+  });
   const encoded = await encodeUploadBody(buildNdjson(header, preview.turns));
   return {
     ok: true,
@@ -84,7 +112,10 @@ async function prepare(request: WorkerRequest, onProgress: (progress: UploadProg
 }
 
 // Read, extract, scrub for the preview, and compress, in that order; resolves once with the prepared upload or a refusal, never rejects.
-export async function prepareInWorker(request: WorkerRequest, onProgress: (progress: UploadProgress) => void): Promise<UploadReady | UploadRefused> {
+export async function prepareInWorker(
+  request: WorkerRequest,
+  onProgress: (progress: UploadProgress) => void,
+): Promise<UploadReady | UploadRefused> {
   try {
     return await prepare(request, onProgress);
   } catch (error) {

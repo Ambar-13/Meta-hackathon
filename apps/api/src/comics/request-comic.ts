@@ -1,6 +1,16 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { AVATARS, COMIC_PURGE_DAYS, ComicRequest, ComicRequestResponse, ContractError, HTTP, routes, Uuid, type Avatar } from "@meet-first/contracts";
+import {
+  AVATARS,
+  COMIC_PURGE_DAYS,
+  ComicRequest,
+  ComicRequestResponse,
+  ContractError,
+  HTTP,
+  routes,
+  Uuid,
+  type Avatar,
+} from "@meet-first/contracts";
 import { withPerson, type DatabaseTransaction } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { makeNotFoundError } from "../route-errors.js";
@@ -20,18 +30,48 @@ export function otherAvatarOf(avatar: Avatar): Avatar {
 }
 
 // The two avatars of a new comic, by side: the requester's side keeps the chosen one.
-export function avatarsBySide(side: "a" | "b", avatar: Avatar): { avatarA: Avatar; avatarB: Avatar } {
+export function avatarsBySide(
+  side: "a" | "b",
+  avatar: Avatar,
+): { avatarA: Avatar; avatarB: Avatar } {
   const other = otherAvatarOf(avatar);
   return side === "a" ? { avatarA: avatar, avatarB: other } : { avatarA: other, avatarB: avatar };
 }
 
 // Inside one person's transaction: checks membership and the brief, then inserts the comic row, or returns the one that exists.
-async function insertComicRequest(trx: DatabaseTransaction, input: { meetingId: string; personId: string; avatar: Avatar; now: Date }): Promise<{ comicId: string; isNew: boolean }> {
-  const member = await trx.selectFrom("meeting_members").select(["side"]).where("meeting_id", "=", input.meetingId).where("person_id", "=", input.personId).executeTakeFirst();
-  if (member === undefined) throw new ContractError("meeting_not_found", "This meeting does not exist or is not yours.", HTTP.notFound);
-  const brief = await trx.selectFrom("meeting_events").select("seq").where("meeting_id", "=", input.meetingId).where("type", "=", "brief.ready").executeTakeFirst();
-  if (brief === undefined) throw new ContractError("brief_not_ready", "The brief is not written yet. The comic comes after the brief.", HTTP.conflict);
-  const existing = await trx.selectFrom("comics").select(["id"]).where("meeting_id", "=", input.meetingId).executeTakeFirst();
+async function insertComicRequest(
+  trx: DatabaseTransaction,
+  input: { meetingId: string; personId: string; avatar: Avatar; now: Date },
+): Promise<{ comicId: string; isNew: boolean }> {
+  const member = await trx
+    .selectFrom("meeting_members")
+    .select(["side"])
+    .where("meeting_id", "=", input.meetingId)
+    .where("person_id", "=", input.personId)
+    .executeTakeFirst();
+  if (member === undefined)
+    throw new ContractError(
+      "meeting_not_found",
+      "This meeting does not exist or is not yours.",
+      HTTP.notFound,
+    );
+  const brief = await trx
+    .selectFrom("meeting_events")
+    .select("seq")
+    .where("meeting_id", "=", input.meetingId)
+    .where("type", "=", "brief.ready")
+    .executeTakeFirst();
+  if (brief === undefined)
+    throw new ContractError(
+      "brief_not_ready",
+      "The brief is not written yet. The comic comes after the brief.",
+      HTTP.conflict,
+    );
+  const existing = await trx
+    .selectFrom("comics")
+    .select(["id"])
+    .where("meeting_id", "=", input.meetingId)
+    .executeTakeFirst();
   if (existing !== undefined) return { comicId: existing.id, isNew: false };
   const avatars = avatarsBySide(member.side, input.avatar);
   const inserted = await trx
@@ -49,7 +89,11 @@ async function insertComicRequest(trx: DatabaseTransaction, input: { meetingId: 
     .returning("id")
     .executeTakeFirst();
   if (inserted !== undefined) return { comicId: inserted.id, isNew: true };
-  const raced = await trx.selectFrom("comics").select(["id"]).where("meeting_id", "=", input.meetingId).executeTakeFirstOrThrow();
+  const raced = await trx
+    .selectFrom("comics")
+    .select(["id"])
+    .where("meeting_id", "=", input.meetingId)
+    .executeTakeFirstOrThrow();
   return { comicId: raced.id, isNew: false };
 }
 
@@ -60,14 +104,19 @@ export function registerRequestComic(app: FastifyInstance, deps: RouteDeps): Pro
     const params = RouteParams.safeParse(request.params);
     if (!params.success) throw makeNotFoundError();
     const body = ComicRequest.safeParse(request.body);
-    if (!body.success) throw new ContractError("comic_bad_avatar", "Pick one of the six avatars.", HTTP.badRequest);
+    if (!body.success)
+      throw new ContractError("comic_bad_avatar", "Pick one of the six avatars.", HTTP.badRequest);
     const meetingId = params.data.id;
-    const outcome = await withPerson(deps.db, personId, (trx) => insertComicRequest(trx, { meetingId, personId, avatar: body.data.avatar, now: deps.now() }));
+    const outcome = await withPerson(deps.db, personId, (trx) =>
+      insertComicRequest(trx, { meetingId, personId, avatar: body.data.avatar, now: deps.now() }),
+    );
     if (outcome.isNew) {
       try {
         await deps.enqueue("render_comic", { comicId: outcome.comicId, meetingId });
       } catch (error) {
-        await withPerson(deps.db, personId, (trx) => trx.deleteFrom("comics").where("id", "=", outcome.comicId).execute());
+        await withPerson(deps.db, personId, (trx) =>
+          trx.deleteFrom("comics").where("id", "=", outcome.comicId).execute(),
+        );
         throw error;
       }
     }

@@ -4,19 +4,49 @@ import { LoadingLine, Sticker } from "../../look/index.js";
 import { CONSENT_COPY, STAGE_WORDS } from "./upload-state.js";
 
 // The words for a low persona signal (drafted copy).
-const LOW_SIGNAL_NOTE = "Most of these messages look like tasks or code, not about you, so the card may come out thin. Pasting a few notes about yourself works better.";
+const LOW_SIGNAL_NOTE =
+  "Most of these messages look like tasks or code, not about you, so the card may come out thin. Pasting a few notes about yourself works better.";
 // The worker's stages in the order it reports them, for the step list under the progress line.
-const STAGE_ORDER: readonly UploadProgress["stage"][] = ["reading", "parsing", "scrubbing", "compressing"];
+const STAGE_ORDER: readonly UploadProgress["stage"][] = [
+  "reading",
+  "parsing",
+  "scrubbing",
+  "compressing",
+];
 
 // The two tabs; under 640 px paste is first, otherwise the file tab is first.
-export const UploadTabs = (props: { isNarrow: boolean; selected: "paste" | "file"; onSelect: (tab: "paste" | "file") => void }): ReactElement => {
+export const UploadTabs = (props: {
+  isNarrow: boolean;
+  selected: "paste" | "file";
+  onSelect: (tab: "paste" | "file") => void;
+}): ReactElement => {
   const paste = (
-    <button key="paste" type="button" role="tab" id="tab-paste" aria-controls="panel-paste" aria-selected={props.selected === "paste"} onClick={() => { props.onSelect("paste"); }}>
+    <button
+      key="paste"
+      type="button"
+      role="tab"
+      id="tab-paste"
+      aria-controls="panel-paste"
+      aria-selected={props.selected === "paste"}
+      onClick={() => {
+        props.onSelect("paste");
+      }}
+    >
       Paste notes
     </button>
   );
   const file = (
-    <button key="file" type="button" role="tab" id="tab-file" aria-controls="panel-file" aria-selected={props.selected === "file"} onClick={() => { props.onSelect("file"); }}>
+    <button
+      key="file"
+      type="button"
+      role="tab"
+      id="tab-file"
+      aria-controls="panel-file"
+      aria-selected={props.selected === "file"}
+      onClick={() => {
+        props.onSelect("file");
+      }}
+    >
       Pick a file
     </button>
   );
@@ -28,20 +58,39 @@ export const UploadTabs = (props: { isNarrow: boolean; selected: "paste" | "file
 };
 
 // The paste box and its check button; the button stays shut while the box is empty.
-export const PasteTab = (props: { isBusy: boolean; onSubmit: (text: string) => void }): ReactElement => {
+export const PasteTab = (props: {
+  isBusy: boolean;
+  onSubmit: (text: string) => void;
+}): ReactElement => {
   const [text, setText] = useState("");
   const isEmpty = text.trim() === "";
   return (
     <div role="tabpanel" id="panel-paste" aria-labelledby="tab-paste" className="up-pane">
       <label className="up-paste-label">
         Paste notes about yourself
-        <textarea rows={10} value={text} aria-describedby="paste-hint" onChange={(event) => { setText(event.target.value); }} />
+        <textarea
+          rows={10}
+          value={text}
+          aria-describedby="paste-hint"
+          onChange={(event) => {
+            setText(event.target.value);
+          }}
+        />
       </label>
       <p className="hint" id="paste-hint">
-        {isEmpty ? "The box is empty. Paste a few lines about how you work and what you care about." : "Nothing leaves this device until you see what will be sent."}
+        {isEmpty
+          ? "The box is empty. Paste a few lines about how you work and what you care about."
+          : "Nothing leaves this device until you see what will be sent."}
       </p>
       <div className="actions">
-        <button type="button" className="big" disabled={isEmpty || props.isBusy} onClick={() => { props.onSubmit(text); }}>
+        <button
+          type="button"
+          className="big"
+          disabled={isEmpty || props.isBusy}
+          onClick={() => {
+            props.onSubmit(text);
+          }}
+        >
           Check what will be sent
         </button>
       </div>
@@ -77,7 +126,10 @@ export const FileTab = (props: { isBusy: boolean; onPick: (file: File) => void }
 };
 
 // Where one stage stands against the stage the worker is on now.
-function stageState(stage: UploadProgress["stage"], progress: UploadProgress | null): "done" | "now" | "next" {
+function stageState(
+  stage: UploadProgress["stage"],
+  progress: UploadProgress | null,
+): "done" | "now" | "next" {
   if (progress === null) return "next";
   const now = STAGE_ORDER.indexOf(progress.stage);
   const index = STAGE_ORDER.indexOf(stage);
@@ -86,8 +138,14 @@ function stageState(stage: UploadProgress["stage"], progress: UploadProgress | n
 }
 
 // The worker's progress line, the four steps it goes through, and the stop button.
-export const PreparingLine = (props: { progress: UploadProgress | null; onCancel: () => void }): ReactElement => {
-  const words = props.progress === null ? "Getting ready." : `${STAGE_WORDS[props.progress.stage]}. ${String(props.progress.keptTurns)} messages kept so far.`;
+export const PreparingLine = (props: {
+  progress: UploadProgress | null;
+  onCancel: () => void;
+}): ReactElement => {
+  const words =
+    props.progress === null
+      ? "Getting ready."
+      : `${STAGE_WORDS[props.progress.stage]}. ${String(props.progress.keptTurns)} messages kept so far.`;
   return (
     <section className="up-working">
       <LoadingLine text={words} />
@@ -115,7 +173,14 @@ function redactionLine(count: number): string {
 }
 
 // What will be sent: the counts, the consent copy, the low-signal note, the attestation box and the upload button.
-export const PreviewPanel = (props: { ready: UploadReady; isAttested: boolean; isUploading: boolean; onAttest: (isAttested: boolean) => void; onUpload: () => void; onPasteInstead: () => void }): ReactElement => {
+export const PreviewPanel = (props: {
+  ready: UploadReady;
+  isAttested: boolean;
+  isUploading: boolean;
+  onAttest: (isAttested: boolean) => void;
+  onUpload: () => void;
+  onPasteInstead: () => void;
+}): ReactElement => {
   const { ready } = props;
   return (
     <section className="up-preview" aria-labelledby="preview-title">
@@ -135,11 +200,22 @@ export const PreviewPanel = (props: { ready: UploadReady; isAttested: boolean; i
         </div>
       ) : null}
       <label className="inline up-attest">
-        <input type="checkbox" checked={props.isAttested} onChange={(event) => { props.onAttest(event.target.checked); }} />
+        <input
+          type="checkbox"
+          checked={props.isAttested}
+          onChange={(event) => {
+            props.onAttest(event.target.checked);
+          }}
+        />
         These are my own chats.
       </label>
       <div className="actions">
-        <button type="button" className="big" disabled={!props.isAttested || props.isUploading} onClick={props.onUpload}>
+        <button
+          type="button"
+          className="big"
+          disabled={!props.isAttested || props.isUploading}
+          onClick={props.onUpload}
+        >
           Upload these excerpts
         </button>
       </div>

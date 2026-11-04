@@ -17,7 +17,8 @@ const SUMMARY_COPY = {
   refused: "This browser did not let us copy. Select the prompt below and copy it.",
   promptLabel: "The prompt",
   answerLabel: "Your AI's answer",
-  noPoints: "No points found in this text. Paste the whole answer, from its first Kind line to the end.",
+  noPoints:
+    "No points found in this text. Paste the whole answer, from its first Kind line to the end.",
   tooLong: `These points come to more than ${SUMMARY_MAX_CHARS.toLocaleString("en-US")} characters. Remove some, then save.`,
   friends: "Friends' asks can use my summary",
   save: "Save summary",
@@ -46,7 +47,10 @@ function checkLine(view: SummaryView): string {
 }
 
 // The points a paste gives, each with its first quote and a Remove button; the count names the list.
-const PointList = (props: { points: SummaryPoint[]; onRemove: (index: number) => void }): ReactElement => {
+const PointList = (props: {
+  points: SummaryPoint[];
+  onRemove: (index: number) => void;
+}): ReactElement => {
   const countId = useId();
   return (
     <>
@@ -56,9 +60,20 @@ const PointList = (props: { points: SummaryPoint[]; onRemove: (index: number) =>
           <li key={`${String(index)}:${point.point}`}>
             <div>
               <p className="summary-point">{point.point}</p>
-              {point.quotes[0] === undefined ? null : <p className="summary-quote">{`“${point.quotes[0]}”`}</p>}
+              {point.quotes[0] === undefined ? null : (
+                <p className="summary-quote">{`“${point.quotes[0]}”`}</p>
+              )}
             </div>
-            <button type="button" className="quiet" aria-label={`Remove this point: ${point.point}`} onClick={() => { props.onRemove(index); }}>Remove</button>
+            <button
+              type="button"
+              className="quiet"
+              aria-label={`Remove this point: ${point.point}`}
+              onClick={() => {
+                props.onRemove(index);
+              }}
+            >
+              Remove
+            </button>
           </li>
         ))}
       </ul>
@@ -71,12 +86,24 @@ const CopyPrompt = (props: { summary: SummaryHook }): ReactElement => {
   const { copy } = props.summary;
   return (
     <div className="summary-copy">
-      <button type="button" onClick={() => void props.summary.copyPrompt()}>{SUMMARY_COPY.copy}</button>
-      <p role="status" className="summary-status">{copy === "copied" ? SUMMARY_COPY.copied : null}{copy === "refused" ? SUMMARY_COPY.refused : null}</p>
+      <button type="button" onClick={() => void props.summary.copyPrompt()}>
+        {SUMMARY_COPY.copy}
+      </button>
+      <p role="status" className="summary-status">
+        {copy === "copied" ? SUMMARY_COPY.copied : null}
+        {copy === "refused" ? SUMMARY_COPY.refused : null}
+      </p>
       {copy === "refused" ? (
         <label className="summary-field">
           <span>{SUMMARY_COPY.promptLabel}</span>
-          <textarea readOnly rows={8} value={SUMMARY_PROMPT} onFocus={(event) => { event.target.select(); }} />
+          <textarea
+            readOnly
+            rows={8}
+            value={SUMMARY_PROMPT}
+            onFocus={(event) => {
+              event.target.select();
+            }}
+          />
         </label>
       ) : null}
     </div>
@@ -107,12 +134,25 @@ const SummaryForm = (props: { summary: SummaryHook }): ReactElement => {
       <CopyPrompt summary={summary} />
       <label className="summary-field">
         <span>{SUMMARY_COPY.answerLabel}</span>
-        <textarea rows={6} value={summary.draft} onChange={(event) => { summary.setDraft(event.target.value); }} />
+        <textarea
+          rows={6}
+          value={summary.draft}
+          onChange={(event) => {
+            summary.setDraft(event.target.value);
+          }}
+        />
       </label>
       <PasteResult summary={summary} />
-      <PillSwitch label={SUMMARY_COPY.friends} isOn={summary.isFriendsOn} isDisabled={isSending} onChange={summary.setFriendsOn} />
+      <PillSwitch
+        label={SUMMARY_COPY.friends}
+        isOn={summary.isFriendsOn}
+        isDisabled={isSending}
+        onChange={summary.setFriendsOn}
+      />
       <div className="actions">
-        <button type="button" disabled={!canSave} onClick={() => void summary.save()}>{isSending ? SUMMARY_COPY.saving : SUMMARY_COPY.save}</button>
+        <button type="button" disabled={!canSave} onClick={() => void summary.save()}>
+          {isSending ? SUMMARY_COPY.saving : SUMMARY_COPY.save}
+        </button>
       </div>
     </>
   );
@@ -122,11 +162,24 @@ const SummaryForm = (props: { summary: SummaryHook }): ReactElement => {
 const SavedSummary = (props: { view: SummaryView; summary: SummaryHook }): ReactElement => {
   return (
     <>
-      <p role="status" className="summary-check">{checkLine(props.view)}</p>
-      <p className="summary-note">{props.view.friendsCanAsk ? SUMMARY_COPY.friendsOn : SUMMARY_COPY.friendsOff}</p>
+      <p role="status" className="summary-check">
+        {checkLine(props.view)}
+      </p>
+      <p className="summary-note">
+        {props.view.friendsCanAsk ? SUMMARY_COPY.friendsOn : SUMMARY_COPY.friendsOff}
+      </p>
       <div className="actions">
-        <button type="button" className="quiet" onClick={props.summary.startReplacing}>{SUMMARY_COPY.replace}</button>
-        <button type="button" className="quiet" disabled={props.summary.send.kind === "sending"} onClick={() => void props.summary.remove()}>{SUMMARY_COPY.delete}</button>
+        <button type="button" className="quiet" onClick={props.summary.startReplacing}>
+          {SUMMARY_COPY.replace}
+        </button>
+        <button
+          type="button"
+          className="quiet"
+          disabled={props.summary.send.kind === "sending"}
+          onClick={() => void props.summary.remove()}
+        >
+          {SUMMARY_COPY.delete}
+        </button>
       </div>
     </>
   );
@@ -143,7 +196,10 @@ function sectionBody(summary: SummaryHook): ReactElement {
 
 // Your AI's summary of you, on Me and first on the upload page. hasChats is false when you have no chats yet, which adds the line
 // that asks for them; null on the upload page, whose next part is adding them.
-export const SummarySection = (props: { hasChats: boolean | null; summary: SummaryHook }): ReactElement => {
+export const SummarySection = (props: {
+  hasChats: boolean | null;
+  summary: SummaryHook;
+}): ReactElement => {
   const titleId = useId();
   const { send } = props.summary;
   return (

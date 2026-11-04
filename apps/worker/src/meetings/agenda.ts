@@ -15,7 +15,9 @@ export type StepPhase = "open" | "explore" | "decide";
 export type AgendaProgress = { lastStepSeq: number; phases: readonly StepPhase[]; startedAt: Date };
 
 // The step to create next, or the end of the meeting.
-export type NextStep = { kind: "step"; stepSeq: number; side: "a" | "b"; phase: StepPhase } | { kind: "end" };
+export type NextStep =
+  | { kind: "step"; stepSeq: number; side: "a" | "b"; phase: StepPhase }
+  | { kind: "end" };
 
 // Odd steps are side a and even steps side b, so turns strictly alternate.
 export function sideForStep(stepSeq: number): "a" | "b" {
@@ -24,12 +26,14 @@ export function sideForStep(stepSeq: number): "a" | "b" {
 
 // Places the step after the last committed one, from the phases so far and the clock at commit time.
 export function nextStep(progress: AgendaProgress, now: Date): NextStep {
-  const count = (phase: StepPhase): number => progress.phases.filter((done) => done === phase).length;
+  const count = (phase: StepPhase): number =>
+    progress.phases.filter((done) => done === phase).length;
   const stepSeq = progress.lastStepSeq + 1;
   const side = sideForStep(stepSeq);
   const cutoffMs = progress.startedAt.getTime() + EXPLORE_CUTOFF_MINUTES * 60_000;
   if (count("open") < AGENDA.open) return { kind: "step", stepSeq, side, phase: "open" };
-  const isExploreOpen = count("decide") === 0 && count("explore") < AGENDA.exploreMax && now.getTime() < cutoffMs;
+  const isExploreOpen =
+    count("decide") === 0 && count("explore") < AGENDA.exploreMax && now.getTime() < cutoffMs;
   if (isExploreOpen) return { kind: "step", stepSeq, side, phase: "explore" };
   if (count("decide") < AGENDA.decide) return { kind: "step", stepSeq, side, phase: "decide" };
   return { kind: "end" };

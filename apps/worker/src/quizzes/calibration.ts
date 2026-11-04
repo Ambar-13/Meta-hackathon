@@ -1,9 +1,18 @@
 import type { Transaction } from "kysely";
-import { ContractError, type QuizCalibrationRun, type QuizJudgeOutput } from "@meet-first/contracts";
+import {
+  ContractError,
+  type QuizCalibrationRun,
+  type QuizJudgeOutput,
+} from "@meet-first/contracts";
 import type { Database } from "@meet-first/db";
 
 // One calibration probe: answer A against itself must agree, and answer A against answer B must disagree.
-export type CalibrationEntry = { index: number; questionText: string; answerA: string; answerB: string };
+export type CalibrationEntry = {
+  index: number;
+  questionText: string;
+  answerA: string;
+  answerB: string;
+};
 
 // The eight probes. None is a bank question, so a probe never doubles a real item. Each run uses one, picked from the quiz id.
 export const CALIBRATION_BANK: readonly CalibrationEntry[] = [

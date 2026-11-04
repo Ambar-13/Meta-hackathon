@@ -3,7 +3,8 @@ import { useEffect, useRef, type KeyboardEvent, type ReactElement } from "react"
 // The dialog title, byte for byte as the settings spec gives it.
 export const DIALOG_TITLE = "Delete everything we hold about you?";
 // The dialog body: what the person loses and what the other person keeps.
-export const DIALOG_BODY = "This removes your uploaded excerpts, your card, your quizzes, your meetings, briefs, comics and any share page from our database. Anyone you met keeps their own excerpts and card, and loses the shared meeting, brief and share page. Your recovery code stops working. This cannot be undone.";
+export const DIALOG_BODY =
+  "This removes your uploaded excerpts, your card, your quizzes, your meetings, briefs, comics and any share page from our database. Anyone you met keeps their own excerpts and card, and loses the shared meeting, brief and share page. Your recovery code stops working. This cannot be undone.";
 // The line shown while the request is running.
 export const DELETING_COPY = "Deleting. This takes a few seconds.";
 
@@ -11,7 +12,12 @@ export const DELETING_COPY = "Deleting. This takes a few seconds.";
 const TITLE_ID = "delete-account-dialog-title";
 
 // The props of the dialog: whether a delete is running, the failure sentence if any, and the two actions.
-type DeleteAccountDialogProps = { isBusy: boolean; errorText: string | null; onCancel: () => void; onConfirm: () => void };
+type DeleteAccountDialogProps = {
+  isBusy: boolean;
+  errorText: string | null;
+  onCancel: () => void;
+  onConfirm: () => void;
+};
 
 // The modal dialog that asks before a delete, over a dimmed page. Focus starts on Keep my account, Tab stays inside the dialog, and
 // Escape keeps the account. Both buttons are full width; the delete one is the coral danger button.
@@ -37,16 +43,42 @@ export const DeleteAccountDialog = (props: DeleteAccountDialogProps): ReactEleme
   };
   return (
     <div className="settings-backdrop">
-      <div role="dialog" aria-modal="true" aria-labelledby={TITLE_ID} className="panel settings-dialog" onKeyDown={onKeyDown}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={TITLE_ID}
+        className="panel settings-dialog"
+        onKeyDown={onKeyDown}
+      >
         <h3 id={TITLE_ID}>{DIALOG_TITLE}</h3>
         <p>{DIALOG_BODY}</p>
-        {props.isBusy ? <p className="settings-dialog-line" role="status">{DELETING_COPY}</p> : null}
-        {props.errorText === null ? null : <p className="settings-dialog-line is-error" role="alert">{props.errorText}</p>}
+        {props.isBusy ? (
+          <p className="settings-dialog-line" role="status">
+            {DELETING_COPY}
+          </p>
+        ) : null}
+        {props.errorText === null ? null : (
+          <p className="settings-dialog-line is-error" role="alert">
+            {props.errorText}
+          </p>
+        )}
         <div className="settings-dialog-actions">
-          <button ref={keepRef} type="button" className="quiet" disabled={props.isBusy} onClick={props.onCancel}>
+          <button
+            ref={keepRef}
+            type="button"
+            className="quiet"
+            disabled={props.isBusy}
+            onClick={props.onCancel}
+          >
             Keep my account
           </button>
-          <button ref={confirmRef} type="button" className="danger" disabled={props.isBusy} onClick={props.onConfirm}>
+          <button
+            ref={confirmRef}
+            type="button"
+            className="danger"
+            disabled={props.isBusy}
+            onClick={props.onConfirm}
+          >
             Delete my account
           </button>
         </div>

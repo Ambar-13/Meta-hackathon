@@ -27,7 +27,12 @@ const ChatGptMessage = z.object({
 });
 
 // What the mapping walk needs from one node, read once so the walk never reads a raw field twice.
-type NodeFacts = { role: string | undefined; text: string | null; createTime: number | null; parent: string | null };
+type NodeFacts = {
+  role: string | undefined;
+  text: string | null;
+  createTime: number | null;
+  parent: string | null;
+};
 
 // A user node the walk did not reach, with what the branch sort needs.
 type Branch = { key: string; text: string; createTime: number | null };
@@ -48,7 +53,11 @@ function isMappingConversation(value: unknown): value is { mapping: Record<strin
 
 // True when a value is an object with a messages array, the test for the 2026 shape.
 function isMessagesConversation(value: unknown): value is { messages: unknown[] } {
-  return typeof value === "object" && value !== null && Array.isArray((value as { messages?: unknown }).messages);
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    Array.isArray((value as { messages?: unknown }).messages)
+  );
 }
 
 // Renumbers turns from 0 in the order they were added, so exportOrder counts across the whole file.
@@ -62,7 +71,9 @@ export function contentText(content: unknown): string | null {
   if (typeof content !== "object" || content === null) return null;
   const record = content as Record<string, unknown>;
   if (Array.isArray(record.parts)) {
-    return (record.parts as unknown[]).map((part) => (typeof part === "string" ? part : "[image]")).join("\n");
+    return (record.parts as unknown[])
+      .map((part) => (typeof part === "string" ? part : "[image]"))
+      .join("\n");
   }
   if (typeof record.text === "string") return record.text;
   if (typeof record.content === "string") return record.content;
@@ -132,11 +143,19 @@ function turnsOfMapping(mapping: Record<string, unknown>, currentNode: unknown):
   const visited = new Set(path);
   const branches: Branch[] = [];
   for (const [key, facts] of nodes) {
-    if (!visited.has(key) && isUserText(facts)) branches.push({ key, text: facts.text, createTime: facts.createTime });
+    if (!visited.has(key) && isUserText(facts))
+      branches.push({ key, text: facts.text, createTime: facts.createTime });
   }
   branches.sort(compareBranches);
   const onPath = path.flatMap((key) => turnOf(nodes.get(key)));
-  return [...onPath, ...branches.map((branch) => ({ text: branch.text, exportOrder: 0, createTime: branch.createTime }))];
+  return [
+    ...onPath,
+    ...branches.map((branch) => ({
+      text: branch.text,
+      exportOrder: 0,
+      createTime: branch.createTime,
+    })),
+  ];
 }
 
 // The 2024 export: an array of conversations, each with `mapping` (node id to node) and `current_node`. Walks from current_node

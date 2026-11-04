@@ -7,7 +7,15 @@ import { findPersonForSessionHash } from "../sessions/cookie.js";
 import { requirePerson } from "../sessions/index.js";
 import { MAX_INT_COLUMN, type FanOut } from "./listen-fan-out.js";
 import { readPollResponse, type StreamReads } from "./replay-and-poll.js";
-import { connectionKey, createSubscriber, SSE_HEADERS, SSE_PADDING, type ConnectionLimit, type StreamTiming, type Subscriber } from "./subscriber.js";
+import {
+  connectionKey,
+  createSubscriber,
+  SSE_HEADERS,
+  SSE_PADDING,
+  type ConnectionLimit,
+  type StreamTiming,
+  type Subscriber,
+} from "./subscriber.js";
 
 // A seq as text: 0, or a whole number with no leading zero, at most ten digits.
 export const SEQ_TEXT_PATTERN = /^(0|[1-9][0-9]{0,9})$/;
@@ -16,7 +24,12 @@ export const MeetingParams = z.object({ id: z.string().uuid() });
 // The query: ?after=n switches the route to the JSON poll. A repeated after is an array, which fails this schema.
 export const EventsQuery = z.object({ after: z.string().optional() });
 // The parts one process shares across its streams.
-export type StreamParts = { fanOut: FanOut; connections: ConnectionLimit<Subscriber>; reads: StreamReads; timing: StreamTiming };
+export type StreamParts = {
+  fanOut: FanOut;
+  connections: ConnectionLimit<Subscriber>;
+  reads: StreamReads;
+  timing: StreamTiming;
+};
 
 // Reads a seq from text; null when it is not a whole number between 0 and MAX_INT_COLUMN.
 export function readSeqText(text: string): number | null {
@@ -30,23 +43,46 @@ export function readLastEventId(header: string | string[] | undefined): number {
   }
   const seq = typeof header === "string" ? readSeqText(header) : null;
   if (seq === null) {
-    throw new ContractError("last_event_id_invalid", "The Last-Event-ID header must be a whole number. Reconnect without it to replay from the start.", HTTP.badRequest);
+    throw new ContractError(
+      "last_event_id_invalid",
+      "The Last-Event-ID header must be a whole number. Reconnect without it to replay from the start.",
+      HTTP.badRequest,
+    );
   }
   return seq;
 }
 
 // The error for an after value that is not a whole number.
 function makePollAfterInvalidError(): ContractError {
-  return new ContractError("poll_after_invalid", "The after value must be a whole number. Poll with the last seq you received.", HTTP.badRequest);
+  return new ContractError(
+    "poll_after_invalid",
+    "The after value must be a whole number. Poll with the last seq you received.",
+    HTTP.badRequest,
+  );
 }
 
 // What one stream needs from its request, to open, to re-check and to close.
-type StreamInput = { request: FastifyRequest; reply: FastifyReply; parts: StreamParts; deps: RouteDeps; meetingId: string; personId: string; lastSeq: number; sessionHash: Buffer };
+type StreamInput = {
+  request: FastifyRequest;
+  reply: FastifyReply;
+  parts: StreamParts;
+  deps: RouteDeps;
+  meetingId: string;
+  personId: string;
+  lastSeq: number;
+  sessionHash: Buffer;
+};
 
 // True while the session that opened the stream still belongs to this person, and the person is still in a meeting
 // that is not deleted. Two reads: the session hash through auth_person_for_session, and the
 // membership and the meeting's state in withPerson.
-async function stillAllowed(input: { deps: RouteDeps; parts: StreamParts; sessionHash: Buffer; personId: string; meetingId: string }): Promise<boolean> {
+async function stillAllowed(input: {
+  deps: RouteDeps;
+  parts: StreamParts;
+  sessionHash: Buffer;
+  personId: string;
+  meetingId: string;
+}): Promise<boolean> {
   const holder = await findPersonForSessionHash(input.deps.db, input.sessionHash);
   if (holder !== input.personId) {
     return false;
@@ -100,7 +136,11 @@ function openStream(input: StreamInput): void {
 }
 
 // Registers GET /api/meetings/:id/events: the SSE stream, or the JSON poll when ?after= is present.
-export function registerEventsRoute(app: FastifyInstance, deps: RouteDeps, parts: StreamParts): void {
+export function registerEventsRoute(
+  app: FastifyInstance,
+  deps: RouteDeps,
+  parts: StreamParts,
+): void {
   app.get(routes.meetings.events.path, async (request, reply) => {
     const personId = requirePerson(request);
     const sessionHash = request.sessionTokenHash;
@@ -125,7 +165,12 @@ export function registerEventsRoute(app: FastifyInstance, deps: RouteDeps, parts
       if (afterSeq === null) {
         throw makePollAfterInvalidError();
       }
-      const body = await readPollResponse(parts.reads, { personId, meetingId, afterSeq, now: deps.now() });
+      const body = await readPollResponse(parts.reads, {
+        personId,
+        meetingId,
+        afterSeq,
+        now: deps.now(),
+      });
       await parts.reads.touchPresence(personId, meetingId);
       return reply.code(200).send(body);
     }

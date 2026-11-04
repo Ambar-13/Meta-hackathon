@@ -7,7 +7,12 @@ export const NAMES_CHUNK_MAX_CHARS = 100_000;
 // Two turn blocks are joined with one blank line.
 export const TURN_BLOCK_SEPARATOR = "\n\n";
 // One model call as a job builds it, before the ledger is added; the fixture test hashes exactly this.
-export type ModelCall = { callSite: CallSite; promptVersion: string; messages: ChatMessage[]; schema: ReturnType<typeof toStrictJsonSchema> };
+export type ModelCall = {
+  callSite: CallSite;
+  promptVersion: string;
+  messages: ChatMessage[];
+  schema: ReturnType<typeof toStrictJsonSchema>;
+};
 
 // One turn as the names pass and the card build show it: its label, a space, then its text.
 export function formatTurnBlock(turn: { turnIndex: number; text: string }): string {
@@ -15,13 +20,18 @@ export function formatTurnBlock(turn: { turnIndex: number; text: string }): stri
 }
 
 // Splits turns into chunks of whole turns whose joined blocks are at most NAMES_CHUNK_MAX_CHARS; a turn is never split.
-export function chunkTurnsForNames(turns: ReadonlyArray<{ turnIndex: number; text: string }>): Array<{ turnIndexes: number[]; text: string }> {
+export function chunkTurnsForNames(
+  turns: ReadonlyArray<{ turnIndex: number; text: string }>,
+): Array<{ turnIndexes: number[]; text: string }> {
   const chunks: Array<{ turnIndexes: number[]; text: string }> = [];
   let current: { turnIndexes: number[]; text: string } | null = null;
   const ordered = [...turns].sort((a, b) => a.turnIndex - b.turnIndex);
   for (const turn of ordered) {
     const block = formatTurnBlock(turn);
-    if (current !== null && current.text.length + TURN_BLOCK_SEPARATOR.length + block.length <= NAMES_CHUNK_MAX_CHARS) {
+    if (
+      current !== null &&
+      current.text.length + TURN_BLOCK_SEPARATOR.length + block.length <= NAMES_CHUNK_MAX_CHARS
+    ) {
       current.text += TURN_BLOCK_SEPARATOR + block;
       current.turnIndexes.push(turn.turnIndex);
     } else {
@@ -34,7 +44,10 @@ export function chunkTurnsForNames(turns: ReadonlyArray<{ turnIndex: number; tex
 }
 
 // The names-pass call for one chunk: the scrub-names prompt and the untrusted-data rules as the system message, the allowlist and the chunk as the user message.
-export function namesPassCall(input: { allowlist: readonly string[]; chunkText: string }): ModelCall {
+export function namesPassCall(input: {
+  allowlist: readonly string[];
+  chunkText: string;
+}): ModelCall {
   const prompt = readPrompt("scrub-names");
   const rules = readPrompt("untrusted-data-rules");
   return {
@@ -42,7 +55,10 @@ export function namesPassCall(input: { allowlist: readonly string[]; chunkText: 
     promptVersion: prompt.version,
     messages: [
       { role: "system", content: `${prompt.text}\n\n${rules.text}` },
-      { role: "user", content: `<allowlist>\n${input.allowlist.join("\n")}\n</allowlist>\n<source_turns>\n${input.chunkText}\n</source_turns>` },
+      {
+        role: "user",
+        content: `<allowlist>\n${input.allowlist.join("\n")}\n</allowlist>\n<source_turns>\n${input.chunkText}\n</source_turns>`,
+      },
     ],
     schema: toStrictJsonSchema(NamesPassOutput, "scrub-names"),
   };

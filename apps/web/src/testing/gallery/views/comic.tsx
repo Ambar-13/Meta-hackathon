@@ -9,7 +9,10 @@ import { Press } from "./pair.js";
 // The comic page's address for the fixture meeting.
 const COMIC_URL = APP_PATHS.comic(IDS.meeting);
 // The reply of the comic view when no comic was asked for yet.
-const NOT_REQUESTED = { status: 404, body: { code: "comic_not_found", message: "No comic has been requested for this meeting." } };
+const NOT_REQUESTED = {
+  status: 404,
+  body: { code: "comic_not_found", message: "No comic has been requested for this meeting." },
+};
 // The first avatar's words, which the picked views tap.
 const FIRST_AVATAR = AVATARS[0];
 // Six captions in reading order.
@@ -52,13 +55,30 @@ function readComic(reply: { status: number; body: unknown; delayMs?: number }): 
 
 // One comic view on the comic route.
 function comic(name: string, title: string, stubs: readonly GalleryStub[]): GalleryView {
-  return { name, title, pattern: ROUTE_PATTERNS.comic, url: COMIC_URL, element: <ComicScreen />, stubs };
+  return {
+    name,
+    title,
+    pattern: ROUTE_PATTERNS.comic,
+    url: COMIC_URL,
+    element: <ComicScreen />,
+    stubs,
+  };
 }
 
 // The comic page: loading, error, the avatar picker, waiting for the brief, drawing, the finished strip, a broken panel, and not drawn.
 export const views: readonly GalleryView[] = [
-  comic("comic-loading", "Comic, loading", [readComic({ status: 200, body: comicIn("rendering"), delayMs: FOREVER_MS })]),
-  comic("comic-error", "Comic, the comic could not be read", [readComic({ status: 500, body: { code: "server_error", message: "Something went wrong on our side. Try again in a minute." } })]),
+  comic("comic-loading", "Comic, loading", [
+    readComic({ status: 200, body: comicIn("rendering"), delayMs: FOREVER_MS }),
+  ]),
+  comic("comic-error", "Comic, the comic could not be read", [
+    readComic({
+      status: 500,
+      body: {
+        code: "server_error",
+        message: "Something went wrong on our side. Try again in a minute.",
+      },
+    }),
+  ]),
   comic("comic-pick", "Comic, the avatar picker", [readComic(NOT_REQUESTED)]),
   {
     name: "comic-picked",
@@ -84,12 +104,31 @@ export const views: readonly GalleryView[] = [
     ),
     stubs: [
       readComic(NOT_REQUESTED),
-      { route: routes.briefs.requestComic, replies: { status: 409, body: { code: "brief_not_ready", message: "The brief is not written yet. The comic comes after the brief." } } },
+      {
+        route: routes.briefs.requestComic,
+        replies: {
+          status: 409,
+          body: {
+            code: "brief_not_ready",
+            message: "The brief is not written yet. The comic comes after the brief.",
+          },
+        },
+      },
     ],
   },
-  comic("comic-drawing", "Comic, drawing", [readComic({ status: 200, body: comicIn("rendering") })]),
-  comic("comic-ready", "Comic, the finished strip", [readComic({ status: 200, body: comicIn("ready") })]),
-  comic("comic-broken-panel", "Comic, one panel did not load", [readComic({ status: 200, body: comicIn("ready", true) })]),
-  comic("comic-failed", "Comic, the drawing failed", [readComic({ status: 200, body: comicIn("failed") })]),
-  comic("comic-skipped", "Comic, not drawn", [readComic({ status: 200, body: comicIn("skipped") })]),
+  comic("comic-drawing", "Comic, drawing", [
+    readComic({ status: 200, body: comicIn("rendering") }),
+  ]),
+  comic("comic-ready", "Comic, the finished strip", [
+    readComic({ status: 200, body: comicIn("ready") }),
+  ]),
+  comic("comic-broken-panel", "Comic, one panel did not load", [
+    readComic({ status: 200, body: comicIn("ready", true) }),
+  ]),
+  comic("comic-failed", "Comic, the drawing failed", [
+    readComic({ status: 200, body: comicIn("failed") }),
+  ]),
+  comic("comic-skipped", "Comic, not drawn", [
+    readComic({ status: 200, body: comicIn("skipped") }),
+  ]),
 ];

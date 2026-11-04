@@ -89,12 +89,27 @@ export async function listMigrationFiles(folder: string): Promise<MigrationFile[
   const files: MigrationFile[] = [];
   for (const entry of entries) {
     const match = /^([0-9]{4})_([a-z0-9_]+)\.sql$/.exec(entry);
-    if (match === null) throw new ContractError("migration_name_invalid", `${entry} is not named like 0002_short_words.sql. Rename it with a four-digit number from ranges.txt.`, 500);
+    if (match === null)
+      throw new ContractError(
+        "migration_name_invalid",
+        `${entry} is not named like 0002_short_words.sql. Rename it with a four-digit number from ranges.txt.`,
+        500,
+      );
     const number = Number(match[1]);
-    if (seen.has(number)) throw new ContractError("migration_number_repeated", `Two migration files use number ${match[1] ?? ""}. Give the newer one the next free number from ranges.txt.`, 500);
+    if (seen.has(number))
+      throw new ContractError(
+        "migration_number_repeated",
+        `Two migration files use number ${match[1] ?? ""}. Give the newer one the next free number from ranges.txt.`,
+        500,
+      );
     const path = join(folder, entry);
     const firstLine = (await readFile(path, "utf8")).split("\n")[0]?.replace(/\r$/, "");
-    if (firstLine !== "-- package: db") throw new ContractError("migration_package_missing", `${entry} does not start with the line "-- package: db". Add it as the first line.`, 500);
+    if (firstLine !== "-- package: db")
+      throw new ContractError(
+        "migration_package_missing",
+        `${entry} does not start with the line "-- package: db". Add it as the first line.`,
+        500,
+      );
     seen.add(number);
     files.push({ number, name: entry.slice(0, -4), path });
   }
@@ -106,12 +121,20 @@ async function assertSchemaSafety(client: pg.Client): Promise<void> {
   const tables = await client.query<{ name: string }>(RLS_MISSING_QUERY);
   if (tables.rows.length > 0) {
     const names = tables.rows.map((row) => row.name).join(", ");
-    throw new ContractError("migration_rls_missing", `The migration would leave ${names} without forced row security and a policy, so it was rolled back. Add ENABLE and FORCE ROW LEVEL SECURITY and a CREATE POLICY for each.`, 500);
+    throw new ContractError(
+      "migration_rls_missing",
+      `The migration would leave ${names} without forced row security and a policy, so it was rolled back. Add ENABLE and FORCE ROW LEVEL SECURITY and a CREATE POLICY for each.`,
+      500,
+    );
   }
   const functions = await client.query<{ name: string }>(DEFINER_UNSAFE_QUERY);
   if (functions.rows.length > 0) {
     const names = functions.rows.map((row) => row.name).join(", ");
-    throw new ContractError("migration_definer_unsafe", `The migration would leave ${names} running as its owner without belonging to app_definer, or callable by anyone, so it was rolled back. Check its ALTER FUNCTION and REVOKE lines.`, 500);
+    throw new ContractError(
+      "migration_definer_unsafe",
+      `The migration would leave ${names} running as its owner without belonging to app_definer, or callable by anyone, so it was rolled back. Check its ALTER FUNCTION and REVOKE lines.`,
+      500,
+    );
   }
 }
 
@@ -121,7 +144,11 @@ async function applyFile(client: pg.Client, file: MigrationFile): Promise<void> 
   await client.query("BEGIN");
   try {
     await client.query(text);
-    if (file.number > 1) await client.query("INSERT INTO schema_migrations (number, name) VALUES ($1, $2)", [file.number, file.name]);
+    if (file.number > 1)
+      await client.query("INSERT INTO schema_migrations (number, name) VALUES ($1, $2)", [
+        file.number,
+        file.name,
+      ]);
     await assertSchemaSafety(client);
     await client.query("COMMIT");
   } catch (error: unknown) {
@@ -132,7 +159,9 @@ async function applyFile(client: pg.Client, file: MigrationFile): Promise<void> 
 
 // The numbers already recorded in schema_migrations, or none when the table does not exist yet (a database before 0001).
 async function appliedNumbers(client: pg.Client): Promise<Set<number>> {
-  const present = await client.query<{ present: boolean }>("SELECT to_regclass('public.schema_migrations') IS NOT NULL AS present");
+  const present = await client.query<{ present: boolean }>(
+    "SELECT to_regclass('public.schema_migrations') IS NOT NULL AS present",
+  );
   if (present.rows[0]?.present !== true) return new Set();
   const rows = await client.query<{ number: number }>("SELECT number FROM schema_migrations");
   return new Set(rows.rows.map((row) => row.number));
@@ -142,7 +171,11 @@ async function appliedNumbers(client: pg.Client): Promise<Set<number>> {
 async function applyDueFiles(client: pg.Client, files: MigrationFile[]): Promise<string[]> {
   const done = await appliedNumbers(client);
   if (done.size === 0 && files[0]?.number !== 1) {
-    throw new ContractError("migration_foundation_missing", "The first migration to run must be 0001_foundation.sql. Check the migrations folder.", 500);
+    throw new ContractError(
+      "migration_foundation_missing",
+      "The first migration to run must be 0001_foundation.sql. Check the migrations folder.",
+      500,
+    );
   }
   const applied: string[] = [];
   for (const file of files) {
@@ -154,7 +187,10 @@ async function applyDueFiles(client: pg.Client, files: MigrationFile[]): Promise
 }
 
 // Runs the SQL files, then Graphile Worker's own migrations, then the Graphile grants, all under one advisory lock.
-export async function migrateDatabase(databaseUrl: string, folder: string = MIGRATIONS_FOLDER): Promise<MigrationReport> {
+export async function migrateDatabase(
+  databaseUrl: string,
+  folder: string = MIGRATIONS_FOLDER,
+): Promise<MigrationReport> {
   const client = new pg.Client({ connectionString: databaseUrl });
   await client.connect();
   try {
@@ -165,7 +201,9 @@ export async function migrateDatabase(databaseUrl: string, folder: string = MIGR
     await runGraphileMigrations({ connectionString: databaseUrl });
     await client.query(GRAPHILE_GRANTS);
     await client.query(GRAPHILE_POLICIES);
-    const version = await client.query<{ version: number | null }>("SELECT max(number) AS version FROM schema_migrations");
+    const version = await client.query<{ version: number | null }>(
+      "SELECT max(number) AS version FROM schema_migrations",
+    );
     return { applied, schemaVersion: numberFromPostgres(version.rows[0]?.version ?? 0) };
   } finally {
     await client.end();
@@ -174,7 +212,10 @@ export async function migrateDatabase(databaseUrl: string, folder: string = MIGR
 
 // Reads the highest migration number recorded in schema_migrations, or 0 when none is.
 export async function readSchemaVersion(db: Kysely<Database>): Promise<number> {
-  const row = await db.selectFrom("schema_migrations").select((eb) => eb.fn.max("number").as("version")).executeTakeFirst();
+  const row = await db
+    .selectFrom("schema_migrations")
+    .select((eb) => eb.fn.max("number").as("version"))
+    .executeTakeFirst();
   return numberFromPostgres(row?.version ?? 0);
 }
 
@@ -182,7 +223,11 @@ export async function readSchemaVersion(db: Kysely<Database>): Promise<number> {
 export async function assertSchemaVersion(db: Kysely<Database>, expected: number): Promise<void> {
   const found = await readSchemaVersion(db);
   if (found !== expected) {
-    throw new ContractError("schema_version_mismatch", `The database is at schema version ${String(found)} and this build expects ${String(expected)}. Run pnpm db:migrate from the api service, then start again.`, 500);
+    throw new ContractError(
+      "schema_version_mismatch",
+      `The database is at schema version ${String(found)} and this build expects ${String(expected)}. Run pnpm db:migrate from the api service, then start again.`,
+      500,
+    );
   }
 }
 
@@ -194,7 +239,10 @@ async function main(): Promise<void> {
     throw new ContractError("env_missing", `Set ${names} before running this command.`, 500);
   }
   const report = await migrateDatabase(env.data.DATABASE_URL_MIGRATE);
-  if (report.applied.length > 0) console.log(`migrate: applied ${report.applied.join(", ")}; schema version ${String(report.schemaVersion)}`);
+  if (report.applied.length > 0)
+    console.log(
+      `migrate: applied ${report.applied.join(", ")}; schema version ${String(report.schemaVersion)}`,
+    );
   else console.log(`migrate: nothing to apply; schema version ${String(report.schemaVersion)}`);
 }
 

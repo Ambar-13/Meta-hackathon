@@ -9,14 +9,19 @@ import { registerStaticFiles, WEB_DIST_DIR } from "./static-files.js";
 export type WebPagesOptions = { distDir: string; diskPlanBytes: number };
 
 // Registers health, the hashed files, then the fallback, in that order, with the options given.
-export async function registerWebPages(app: FastifyInstance, deps: RouteDeps, options: WebPagesOptions): Promise<void> {
+export async function registerWebPages(
+  app: FastifyInstance,
+  deps: RouteDeps,
+  options: WebPagesOptions,
+): Promise<void> {
   registerHealthRoute(app, deps, options.diskPlanBytes);
   const hasBuild = await registerStaticFiles(app, options.distDir);
   await registerSpaFallback(app, options.distDir, hasBuild);
 }
 
 // The web pages as one plugin for server.ts slot 11, always last, because its fallback answers every GET path no route above claimed.
-export const registerWebPagesRoutes: RoutePlugin = (app, deps) => registerWebPages(app, deps, { distDir: WEB_DIST_DIR, diskPlanBytes: DISK_PLAN_BYTES });
+export const registerWebPagesRoutes: RoutePlugin = (app, deps) =>
+  registerWebPages(app, deps, { distDir: WEB_DIST_DIR, diskPlanBytes: DISK_PLAN_BYTES });
 
 // The policy header, which server.ts adds before any route.
 export { addContentSecurityPolicy, CONTENT_SECURITY_POLICY } from "./static-files.js";

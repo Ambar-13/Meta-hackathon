@@ -10,15 +10,21 @@ function html(text: string): string {
 
 describe("safe markdown", () => {
   it("D66-T1: markdown renders no link, image or HTML", () => {
-    const markup = html("Read [this](http://evil.test) and ![x](http://evil.test/a.png) <img src=x>");
-    expect(markup).toBe('<div class="safe-markdown"><p>Read [this](http://evil.test) and ![x](http://evil.test/a.png) &lt;img src=x&gt;</p></div>');
-    for (const banned of ["<a", "<img", " href=\"", " src=\""]) {
+    const markup = html(
+      "Read [this](http://evil.test) and ![x](http://evil.test/a.png) <img src=x>",
+    );
+    expect(markup).toBe(
+      '<div class="safe-markdown"><p>Read [this](http://evil.test) and ![x](http://evil.test/a.png) &lt;img src=x&gt;</p></div>',
+    );
+    for (const banned of ["<a", "<img", ' href="', ' src="']) {
       expect(markup).not.toContain(banned);
     }
   });
 
   it("R7.2-T1: an image link in model text never becomes an element that loads a URL", () => {
-    expect(html("![a](https://evil.test/x.png?q=card)")).toBe('<div class="safe-markdown"><p>![a](https://evil.test/x.png?q=card)</p></div>');
+    expect(html("![a](https://evil.test/x.png?q=card)")).toBe(
+      '<div class="safe-markdown"><p>![a](https://evil.test/x.png?q=card)</p></div>',
+    );
   });
 
   it("D66-T2: emphasis, strong, lists and quotes render as em, strong, ul, ol, li and blockquote", () => {
@@ -28,7 +34,9 @@ describe("safe markdown", () => {
   });
 
   it("D66-T3: headings, code and underscores stay as typed", () => {
-    expect(html("# Title\n\n`code` and _soft_")).toBe('<div class="safe-markdown"><p># Title</p><p>`code` and _soft_</p></div>');
+    expect(html("# Title\n\n`code` and _soft_")).toBe(
+      '<div class="safe-markdown"><p># Title</p><p>`code` and _soft_</p></div>',
+    );
   });
 
   it("D66-T4: parseSafeMarkdown joins paragraph and quote lines with one space", () => {

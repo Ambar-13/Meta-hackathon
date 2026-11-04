@@ -21,7 +21,11 @@ export const ASK_GONE_LINE = "This ask is no longer here. Send your message agai
 const FRIEND_FALLBACK = "your friend";
 
 // What a reply needs from the page: whether its plan is being started, and the actions of its buttons.
-export type ReplyActions = { runStatus: (replyId: string) => RunStatus; runPlan: (replyId: string) => void; tryAgain: (replyId: string) => void };
+export type ReplyActions = {
+  runStatus: (replyId: string) => RunStatus;
+  runPlan: (replyId: string) => void;
+  tryAgain: (replyId: string) => void;
+};
 // Where a bubble sits in its group: whether it joins the bubble before it and the one after it, so its joined corners tuck in.
 type GroupPlace = { joinsPrev: boolean; joinsNext: boolean };
 
@@ -33,12 +37,19 @@ function capitalised(text: string): string {
 // The line on a friend ask's card, and the words of its button, with the friend's name.
 function reactWords(name: string | null): { line: string; button: string } {
   const who = name ?? FRIEND_FALLBACK;
-  return { line: capitalised(`${who}'s Meety answers from what ${who} chose to share. ${capitalised(who)} gets a copy of the answer.`), button: `Ask ${who}'s Meety` };
+  return {
+    line: capitalised(
+      `${who}'s Meety answers from what ${who} chose to share. ${capitalised(who)} gets a copy of the answer.`,
+    ),
+    button: `Ask ${who}'s Meety`,
+  };
 }
 
 // The classes of a bubble by its place in its group.
 function placeClass(base: string, place: GroupPlace): string {
-  return [base, place.joinsPrev ? "joins-prev" : "", place.joinsNext ? "joins-next" : ""].filter((part) => part !== "").join(" ");
+  return [base, place.joinsPrev ? "joins-prev" : "", place.joinsNext ? "joins-next" : ""]
+    .filter((part) => part !== "")
+    .join(" ");
 }
 
 // Meety's logo in line with its name, over the first message of each run of its messages.
@@ -61,16 +72,31 @@ const YouBubble = (props: { message: OrchestratorMessage; place: GroupPlace }): 
 };
 
 // A planned reply's card: the kind with its icon, the question in quotation marks, who it goes to, and the one button that starts it.
-const PlanCard = (props: { message: OrchestratorMessage; status: RunStatus; onRun: () => void }): ReactElement => {
+const PlanCard = (props: {
+  message: OrchestratorMessage;
+  status: RunStatus;
+  onRun: () => void;
+}): ReactElement => {
   const { message, status } = props;
   const isHelp = message.action === "help";
-  const words = isHelp ? { line: HELP_LINE, button: HELP_BUTTON } : reactWords(message.actionFriendName);
+  const words = isHelp
+    ? { line: HELP_LINE, button: HELP_BUTTON }
+    : reactWords(message.actionFriendName);
   return (
     <>
       <section className="chat-card" aria-label="The plan">
-        <KindHead mode={isHelp ? "help" : "react"} question={message.actionQuestion ?? ""} friendName={message.actionFriendName} />
+        <KindHead
+          mode={isHelp ? "help" : "react"}
+          question={message.actionQuestion ?? ""}
+          friendName={message.actionFriendName}
+        />
         <p className="chat-card-line">{words.line}</p>
-        <button type="button" className="chat-card-go" disabled={status.isRunning} onClick={props.onRun}>
+        <button
+          type="button"
+          className="chat-card-go"
+          disabled={status.isRunning}
+          onClick={props.onRun}
+        >
           {status.isRunning ? "Starting" : words.button}
         </button>
       </section>
@@ -90,23 +116,49 @@ type ReplyStage = "plan" | "ask" | "gone" | "failed" | "none";
 function replyStage(message: OrchestratorMessage): ReplyStage {
   const isAsk = message.action === "help" || message.action === "react";
   if (message.state === "planned" && isAsk) return "plan";
-  if (message.askId !== null && (message.state === "running" || message.state === "done")) return "ask";
+  if (message.askId !== null && (message.state === "running" || message.state === "done"))
+    return "ask";
   if (message.state === "running" && isAsk) return "gone";
   return message.state === "failed" ? "failed" : "none";
 }
 
 // What follows a reply's words, by its stage: the plan card, the ask card, the line for an ask that is gone, or "Ask again".
-const ReplyExtra = (props: { message: OrchestratorMessage; actions: ReplyActions }): ReactElement | null => {
+const ReplyExtra = (props: {
+  message: OrchestratorMessage;
+  actions: ReplyActions;
+}): ReactElement | null => {
   const { message, actions } = props;
   const stage = replyStage(message);
-  if (stage === "plan") return <PlanCard message={message} status={actions.runStatus(message.id)} onRun={() => { actions.runPlan(message.id); }} />;
+  if (stage === "plan")
+    return (
+      <PlanCard
+        message={message}
+        status={actions.runStatus(message.id)}
+        onRun={() => {
+          actions.runPlan(message.id);
+        }}
+      />
+    );
   if (stage === "ask") {
-    return <AskCard askId={message.askId ?? ""} mode={message.action === "react" ? "react" : "help"} question={message.actionQuestion ?? ""} friendName={message.actionFriendName} />;
+    return (
+      <AskCard
+        askId={message.askId ?? ""}
+        mode={message.action === "react" ? "react" : "help"}
+        question={message.actionQuestion ?? ""}
+        friendName={message.actionFriendName}
+      />
+    );
   }
   if (stage === "gone") return <p className="chat-ask-line">{ASK_GONE_LINE}</p>;
   if (stage === "failed") {
     return (
-      <button type="button" className="quiet chat-again" onClick={() => { actions.tryAgain(message.id); }}>
+      <button
+        type="button"
+        className="quiet chat-again"
+        onClick={() => {
+          actions.tryAgain(message.id);
+        }}
+      >
         Ask again
       </button>
     );
@@ -116,7 +168,11 @@ const ReplyExtra = (props: { message: OrchestratorMessage; actions: ReplyActions
 
 // Meety's reply: its logo and name when the reply starts a run of its messages, its words in a grey bubble from the left edge (or the
 // thinking dots in one), then what the reply does.
-const AgentReply = (props: { message: OrchestratorMessage; actions: ReplyActions; place: GroupPlace }): ReactElement => {
+const AgentReply = (props: {
+  message: OrchestratorMessage;
+  actions: ReplyActions;
+  place: GroupPlace;
+}): ReactElement => {
   const { message, place } = props;
   return (
     <article className={placeClass("chat-agent", place)} aria-label="Meety replied">
@@ -125,24 +181,38 @@ const AgentReply = (props: { message: OrchestratorMessage; actions: ReplyActions
         <div className="chat-bubble">
           <WaitLine text={THINKING_LINE} />
         </div>
-      ) : <p className="chat-bubble chat-text">{message.text}</p>}
+      ) : (
+        <p className="chat-bubble chat-text">{message.text}</p>
+      )}
       <ReplyExtra message={message} actions={props.actions} />
     </article>
   );
 };
 
 // The thread: every message in order, a time line wherever the chat paused, in a log that screen readers follow politely.
-export const Thread = (props: { messages: readonly OrchestratorMessage[]; actions: ReplyActions }): ReactElement => {
+export const Thread = (props: {
+  messages: readonly OrchestratorMessage[];
+  actions: ReplyActions;
+}): ReactElement => {
   const { messages } = props;
   const now = new Date();
   return (
     <div className="chat-log" role="log" aria-live="polite" aria-label="Your chat with Meety">
       {messages.map((message, index) => {
-        const place = { joinsPrev: joinsPrevious(messages, index), joinsNext: joinsPrevious(messages, index + 1) };
+        const place = {
+          joinsPrev: joinsPrevious(messages, index),
+          joinsNext: joinsPrevious(messages, index + 1),
+        };
         return (
           <Fragment key={message.id}>
-            {startsTimeLine(messages, index) ? <p className="chat-time">{timeLineOf(message.createdAt, now)}</p> : null}
-            {message.role === "you" ? <YouBubble message={message} place={place} /> : <AgentReply message={message} actions={props.actions} place={place} />}
+            {startsTimeLine(messages, index) ? (
+              <p className="chat-time">{timeLineOf(message.createdAt, now)}</p>
+            ) : null}
+            {message.role === "you" ? (
+              <YouBubble message={message} place={place} />
+            ) : (
+              <AgentReply message={message} actions={props.actions} place={place} />
+            )}
           </Fragment>
         );
       })}

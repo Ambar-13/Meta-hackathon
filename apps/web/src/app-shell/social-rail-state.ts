@@ -20,7 +20,11 @@ export type RailData = { incomingCount: number };
 // Reads GET /api/friend-requests when the page opens and every RAIL_POLL_MS; a failed read shows no count and never blocks the page.
 // The friends themselves are listed on the home page, in its right-hand column, as Instagram lists suggestions there.
 export function useRailData(): RailData {
-  const requests = usePolledView(() => apiFetch(routes.social.listFriendRequests), { key: "rail-requests", intervalMs: RAIL_POLL_MS, keepPolling: () => true });
+  const requests = usePolledView(() => apiFetch(routes.social.listFriendRequests), {
+    key: "rail-requests",
+    intervalMs: RAIL_POLL_MS,
+    keepPolling: () => true,
+  });
   const incomingCount = requests.error === null ? (requests.value?.incoming.length ?? 0) : 0;
   return { incomingCount };
 }

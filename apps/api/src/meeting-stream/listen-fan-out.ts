@@ -13,11 +13,16 @@ export const MAX_INT_COLUMN = 2_147_483_647;
 export const LISTEN_CONNECT_TIMEOUT_MS = 5_000;
 
 // One parsed NOTIFY payload: a committed event, or a flush of a running step's partial text.
-export type ListenPayload = { kind: "event"; meetingId: string; seq: number } | { kind: "delta"; meetingId: string; stepSeq: number; attempt: number; len: number };
+export type ListenPayload =
+  | { kind: "event"; meetingId: string; seq: number }
+  | { kind: "delta"; meetingId: string; stepSeq: number; attempt: number; len: number };
 // What wakes one stream: a payload for its meeting, or a poll (the 10 s safety poll, or a LISTEN reconnect).
 export type WakeSignal = ListenPayload | { kind: "poll" };
 // This process's LISTEN connection, as the streams see it.
-export type FanOut = { subscribe: (meetingId: string, wake: (signal: WakeSignal) => void) => () => void; stop: () => Promise<void> };
+export type FanOut = {
+  subscribe: (meetingId: string, wake: (signal: WakeSignal) => void) => () => void;
+  stop: () => Promise<void>;
+};
 
 // A seq as text: a whole number with no leading zero, at most ten digits.
 const SEQ_TEXT = /^[1-9][0-9]{0,9}$/;
@@ -105,7 +110,11 @@ export class ListenFanOut implements FanOut {
 
   // Opens the connection and listens on the channel. Never throws: a failure is logged and a retry is scheduled.
   async connect(): Promise<void> {
-    const client = new pg.Client({ connectionString: this.options.connectionString, application_name: LISTEN_APPLICATION_NAME, connectionTimeoutMillis: LISTEN_CONNECT_TIMEOUT_MS });
+    const client = new pg.Client({
+      connectionString: this.options.connectionString,
+      application_name: LISTEN_APPLICATION_NAME,
+      connectionTimeoutMillis: LISTEN_CONNECT_TIMEOUT_MS,
+    });
     client.on("notification", (message) => {
       this.deliver(message.channel, message.payload);
     });
@@ -202,7 +211,10 @@ export class ListenFanOut implements FanOut {
 }
 
 // Opens the LISTEN connection, then returns the fan-out; a failed first attempt is retried in the background, so the api still boots.
-export async function startListenFanOut(options: { connectionString: string; log: FastifyBaseLogger }): Promise<FanOut> {
+export async function startListenFanOut(options: {
+  connectionString: string;
+  log: FastifyBaseLogger;
+}): Promise<FanOut> {
   const fanOut = new ListenFanOut(options);
   await fanOut.connect();
   return fanOut;

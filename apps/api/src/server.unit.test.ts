@@ -13,9 +13,16 @@ it("R10.2-T1: readApiEnv names every missing variable and stops boot with api_en
   }
 
   expect(thrown).toBeInstanceOf(ContractError);
-  expect(thrown).toMatchObject({ code: "api_env_invalid", httpStatus: 500, message: "Set APP_ORIGIN, DATABASE_URL_API in the environment, then start the api again." });
+  expect(thrown).toMatchObject({
+    code: "api_env_invalid",
+    httpStatus: 500,
+    message: "Set APP_ORIGIN, DATABASE_URL_API in the environment, then start the api again.",
+  });
 
-  const env = readApiEnv({ DATABASE_URL_API: "postgres://app_api:x@localhost:5432/meet_first", APP_ORIGIN: "http://localhost:3000" });
+  const env = readApiEnv({
+    DATABASE_URL_API: "postgres://app_api:x@localhost:5432/meet_first",
+    APP_ORIGIN: "http://localhost:3000",
+  });
 
   expect(env.PORT).toBe(3000);
   expect(env.MAX_CONCURRENT_MEETINGS).toBe(40);

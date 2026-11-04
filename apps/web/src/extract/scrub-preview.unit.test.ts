@@ -6,7 +6,13 @@ import { cutScrubbedText, scrubForUpload } from "./scrub-preview.js";
 
 // Builds the turns a source holds from plain texts, numbered in order.
 function turnsOf(texts: string[]): Turn[] {
-  return texts.map((text, index) => ({ turnIndex: index, role: "user", text, lang: "en", sensitiveCategories: [] }));
+  return texts.map((text, index) => ({
+    turnIndex: index,
+    role: "user",
+    text,
+    lang: "en",
+    sensitiveCategories: [],
+  }));
 }
 
 // Returns the item at an index and throws when there is none, so a test never reads undefined.
@@ -29,7 +35,10 @@ describe("scrubForUpload", () => {
 
   it("D11-T3: one counter runs across the turns of a source", () => {
     const preview = scrubForUpload(turnsOf(["a@example.com", "b@example.com"]), []);
-    expect(preview.turns.map((turn) => turn.text)).toEqual(["[redacted:email:00000001]", "[redacted:email:00000002]"]);
+    expect(preview.turns.map((turn) => turn.text)).toEqual([
+      "[redacted:email:00000001]",
+      "[redacted:email:00000002]",
+    ]);
     expect(preview.previewRedactionCount).toBe(2);
   });
 

@@ -1,10 +1,23 @@
-import { ContractError, HTTP, UPLOAD_COMPRESSED_MAX_BYTES, UPLOAD_DECODED_MAX_BYTES, type SourceHeader, type Turn } from "@meet-first/contracts";
+import {
+  ContractError,
+  HTTP,
+  UPLOAD_COMPRESSED_MAX_BYTES,
+  UPLOAD_DECODED_MAX_BYTES,
+  type SourceHeader,
+  type Turn,
+} from "@meet-first/contracts";
 
 // Shown when the body is over a cap; the API uses the same code and sentence.
-export const UPLOAD_TOO_LARGE_SENTENCE = "The upload is over the size limit. Export a shorter date range, or paste fewer notes.";
+export const UPLOAD_TOO_LARGE_SENTENCE =
+  "The upload is over the size limit. Export a shorter date range, or paste fewer notes.";
 
 // The request body and the sizes checked against the upload caps.
-export type EncodedBody = { body: Blob; contentEncoding: "gzip" | null; decodedBytes: number; encodedBytes: number };
+export type EncodedBody = {
+  body: Blob;
+  contentEncoding: "gzip" | null;
+  decodedBytes: number;
+  encodedBytes: number;
+};
 
 // The refusal for a body over one of the two caps.
 function tooLarge(): ContractError {
@@ -41,7 +54,9 @@ export async function encodeUploadBody(ndjson: string): Promise<EncodedBody> {
   const decodedBytes = new TextEncoder().encode(ndjson).length;
   checkDecodedSize(decodedBytes);
   const isCompressed = hasCompressionStream();
-  const body = isCompressed ? await gzipText(ndjson) : new Blob([ndjson], { type: "application/x-ndjson" });
+  const body = isCompressed
+    ? await gzipText(ndjson)
+    : new Blob([ndjson], { type: "application/x-ndjson" });
   const encodedBytes = body.size;
   checkEncodedSize(encodedBytes);
   return { body, contentEncoding: isCompressed ? "gzip" : null, decodedBytes, encodedBytes };

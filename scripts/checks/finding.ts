@@ -5,7 +5,13 @@ import { relative } from "node:path";
  * One problem a check found. A finding with level "warning" is printed but does not fail `pnpm checks`.
  * Every other finding is an error. Only the style checks give warnings.
  */
-export type Finding = { check: string; file: string; line: number; message: string; level?: "error" | "warning" };
+export type Finding = {
+  check: string;
+  file: string;
+  line: number;
+  message: string;
+  level?: "error" | "warning";
+};
 
 /**
  * Prints every finding and returns the exit code: 1 if any finding is an error, 0 if there are only warnings or none.

@@ -26,7 +26,8 @@ function workflowGreps(): string[] {
 function makeTree(files: Record<string, string>): string {
   const root = mkdtempSync(join(tmpdir(), "w2-forbidden-"));
   folders.push(root);
-  for (const folder of ["apps/web", "apps/api", "packages"]) mkdirSync(join(root, folder), { recursive: true });
+  for (const folder of ["apps/web", "apps/api", "packages"])
+    mkdirSync(join(root, folder), { recursive: true });
   for (const [path, text] of Object.entries(files)) {
     mkdirSync(dirname(join(root, path)), { recursive: true });
     writeFileSync(join(root, path), text);
@@ -53,7 +54,9 @@ describe("forbidden imports", () => {
     expect(mockStep).not.toBe("");
     expect(exitCodeOf(mockStep, mockImport)).not.toBe(0);
 
-    const keyInWeb = makeTree({ "apps/web/src/env.ts": 'export const KEY_NAME = "META_API_KEY";\n' });
+    const keyInWeb = makeTree({
+      "apps/web/src/env.ts": 'export const KEY_NAME = "META_API_KEY";\n',
+    });
     const keyStep = greps.find((command) => command.includes("META_API_KEY")) ?? "";
     expect(keyStep).not.toBe("");
     expect(exitCodeOf(keyStep, keyInWeb)).not.toBe(0);

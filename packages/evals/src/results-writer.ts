@@ -53,7 +53,12 @@ export function thresholdFailuresOf(metrics: readonly MetricResult[]): MetricKey
 
 // One line per failed threshold, naming the metric, its value and its target, for the console.
 export function thresholdLinesOf(results: EvalResults): string[] {
-  return results.metrics.filter(isFailing).map((metric) => `Threshold failed: ${metric.key} is ${metric.display}; target ${metric.direction === "at_least" ? "at or above" : "at or below"} ${String(metric.target)}.`);
+  return results.metrics
+    .filter(isFailing)
+    .map(
+      (metric) =>
+        `Threshold failed: ${metric.key} is ${metric.display}; target ${metric.direction === "at_least" ? "at or above" : "at or below"} ${String(metric.target)}.`,
+    );
 }
 
 // The target column text: the threshold in words, or print only when the metric has none.
@@ -69,9 +74,15 @@ function rowLine(metric: MetricResult): string {
 
 // The table of the seven metrics, then the planted-secret line when the count ran. It is the same text the README block holds.
 export function formatResultsTable(results: EvalResults): string {
-  const lines = ["| Metric | Value | n | Target | Rows |", "|---|---|---|---|---|", ...results.metrics.map(rowLine)];
+  const lines = [
+    "| Metric | Value | n | Target | Rows |",
+    "|---|---|---|---|---|",
+    ...results.metrics.map(rowLine),
+  ];
   if (results.scrubPlantedSurvivors !== null && results.scrubPlantedTotal !== null) {
-    lines.push(`Planted secrets surviving the scrub: ${String(results.scrubPlantedSurvivors)} of ${String(results.scrubPlantedTotal)}`);
+    lines.push(
+      `Planted secrets surviving the scrub: ${String(results.scrubPlantedSurvivors)} of ${String(results.scrubPlantedTotal)}`,
+    );
   }
   return lines.join("\n");
 }
@@ -93,19 +104,39 @@ export async function writeResultsFile(results: EvalResults, path: string): Prom
 }
 
 // Replaces the text between a start marker and an end marker with the block. A missing marker is refused with its name.
-function replaceBlock(text: string, markers: { start: string; end: string }, block: string): string {
+function replaceBlock(
+  text: string,
+  markers: { start: string; end: string },
+  block: string,
+): string {
   const startAt = text.indexOf(markers.start);
   const endAt = text.indexOf(markers.end, startAt + markers.start.length);
-  if (startAt === -1 || endAt === -1) throw new EvalFailure("readme_markers_missing", `The README has no ${markers.start} and ${markers.end} pair. Add the markers under the Eval table heading.`);
+  if (startAt === -1 || endAt === -1)
+    throw new EvalFailure(
+      "readme_markers_missing",
+      `The README has no ${markers.start} and ${markers.end} pair. Add the markers under the Eval table heading.`,
+    );
   return `${text.slice(0, startAt + markers.start.length)}\n${block}${text.slice(endAt)}`;
 }
 
 // Writes the eval block and, when a human table is given, the human block into the README. Nothing outside the markers changes.
-export async function writeReadmeBlock(readmePath: string, results: EvalResults, humanTable: string | null): Promise<void> {
+export async function writeReadmeBlock(
+  readmePath: string,
+  results: EvalResults,
+  humanTable: string | null,
+): Promise<void> {
   const original = await readFile(readmePath, "utf8").catch(() => {
-    throw new EvalFailure("readme_missing", `No README at ${readmePath}. Add it with the eval markers, then run pnpm eval --write-readme again.`);
+    throw new EvalFailure(
+      "readme_missing",
+      `No README at ${readmePath}. Add it with the eval markers, then run pnpm eval --write-readme again.`,
+    );
   });
-  let text = replaceBlock(original, { start: EVAL_START, end: EVAL_END }, `${formatResultsTable(results)}\n${generatedByLine(results)}\n`);
-  if (humanTable !== null) text = replaceBlock(text, { start: HUMAN_START, end: HUMAN_END }, `${humanTable}\n`);
+  let text = replaceBlock(
+    original,
+    { start: EVAL_START, end: EVAL_END },
+    `${formatResultsTable(results)}\n${generatedByLine(results)}\n`,
+  );
+  if (humanTable !== null)
+    text = replaceBlock(text, { start: HUMAN_START, end: HUMAN_END }, `${humanTable}\n`);
   await writeFile(readmePath, text);
 }

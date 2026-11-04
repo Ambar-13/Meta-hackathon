@@ -6,7 +6,17 @@
 import type { FastifyInstance } from "fastify";
 import { sql, type Transaction } from "kysely";
 import { z } from "zod";
-import { ContractError, FRIEND_REQUESTS_PER_DAY, FriendRequestAcceptResponse, FriendRequestCreate, FriendRequestCreateResponse, FriendRequestsView, HTTP, routes, Uuid } from "@meet-first/contracts";
+import {
+  ContractError,
+  FRIEND_REQUESTS_PER_DAY,
+  FriendRequestAcceptResponse,
+  FriendRequestCreate,
+  FriendRequestCreateResponse,
+  FriendRequestsView,
+  HTTP,
+  routes,
+  Uuid,
+} from "@meet-first/contracts";
 import { parseDatabaseError, withPerson, type Database } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { makeNotFoundError, makePayloadInvalidError } from "../route-errors.js";
@@ -26,7 +36,13 @@ const FRIEND_REQUEST_REFUSAL_STATUS: ReadonlyMap<string, number> = new Map<strin
 ]);
 
 // One row of friend_requests_mine by its SQL names (migration 0008).
-type RequestRow = { request_id: string; direction: "incoming" | "outgoing"; other_display_name: string; other_listing_id: string | null; created_at: Date };
+type RequestRow = {
+  request_id: string;
+  direction: "incoming" | "outgoing";
+  other_display_name: string;
+  other_listing_id: string | null;
+  created_at: Date;
+};
 
 // The error to send for a refusal of a friend request function, with the database's sentence, or null for any other error.
 export function toFriendRequestError(error: unknown): ContractError | null {
@@ -47,9 +63,21 @@ async function callRefusing<T>(run: () => Promise<T>): Promise<T> {
 
 // The caller's pending requests both ways, newest first, as friend_requests_mine returns them.
 export async function readFriendRequests(trx: Transaction<Database>): Promise<FriendRequestsView> {
-  const result = await sql<RequestRow>`SELECT request_id, direction, other_display_name, other_listing_id, created_at FROM friend_requests_mine()`.execute(trx);
-  const views = result.rows.map((row) => ({ requestId: row.request_id, direction: row.direction, otherName: row.other_display_name, otherListingId: row.other_listing_id, createdAt: row.created_at.toISOString() }));
-  return FriendRequestsView.parse({ incoming: views.filter((view) => view.direction === "incoming"), outgoing: views.filter((view) => view.direction === "outgoing") });
+  const result =
+    await sql<RequestRow>`SELECT request_id, direction, other_display_name, other_listing_id, created_at FROM friend_requests_mine()`.execute(
+      trx,
+    );
+  const views = result.rows.map((row) => ({
+    requestId: row.request_id,
+    direction: row.direction,
+    otherName: row.other_display_name,
+    otherListingId: row.other_listing_id,
+    createdAt: row.created_at.toISOString(),
+  }));
+  return FriendRequestsView.parse({
+    incoming: views.filter((view) => view.direction === "incoming"),
+    outgoing: views.filter((view) => view.direction === "outgoing"),
+  });
 }
 
 // Registers GET /api/friend-requests: 200 FriendRequestsView, the caller's pending requests, received and sent. Never cached, because a request can be answered at any moment.
@@ -68,11 +96,22 @@ export function registerSendFriendRequest(app: FastifyInstance, deps: RouteDeps)
     const personId = requirePerson(request);
     const body = FriendRequestCreate.safeParse(request.body);
     if (!body.success) throw makePayloadInvalidError();
-    const requestId = await withPerson(deps.db, personId, (trx) => callRefusing(async () => {
-      const result = await sql<{ request_id: string }>`SELECT friend_request_send(${body.data.listingId}::uuid, ${FRIEND_REQUESTS_PER_DAY}::int) AS request_id`.execute(trx);
-      return result.rows[0]?.request_id;
-    }));
-    if (requestId === undefined) throw new ContractError("friend_request_failed", "The request could not be sent. Try again.", HTTP.internal);
+    const requestId = await withPerson(deps.db, personId, (trx) =>
+      callRefusing(async () => {
+        const result = await sql<{
+          request_id: string;
+        }>`SELECT friend_request_send(${body.data.listingId}::uuid, ${FRIEND_REQUESTS_PER_DAY}::int) AS request_id`.execute(
+          trx,
+        );
+        return result.rows[0]?.request_id;
+      }),
+    );
+    if (requestId === undefined)
+      throw new ContractError(
+        "friend_request_failed",
+        "The request could not be sent. Try again.",
+        HTTP.internal,
+      );
     return reply.code(201).send(FriendRequestCreateResponse.parse({ requestId }));
   });
 }
@@ -83,11 +122,20 @@ export function registerAcceptFriendRequest(app: FastifyInstance, deps: RouteDep
     const personId = requirePerson(request);
     const params = RequestParams.safeParse(request.params);
     if (!params.success) throw makeNotFoundError();
-    const pairId = await withPerson(deps.db, personId, (trx) => callRefusing(async () => {
-      const result = await sql<{ pair_id: string }>`SELECT friend_request_accept(${params.data.id}::uuid) AS pair_id`.execute(trx);
-      return result.rows[0]?.pair_id;
-    }));
-    if (pairId === undefined) throw new ContractError("friend_request_failed", "The request could not be accepted. Try again.", HTTP.internal);
+    const pairId = await withPerson(deps.db, personId, (trx) =>
+      callRefusing(async () => {
+        const result = await sql<{
+          pair_id: string;
+        }>`SELECT friend_request_accept(${params.data.id}::uuid) AS pair_id`.execute(trx);
+        return result.rows[0]?.pair_id;
+      }),
+    );
+    if (pairId === undefined)
+      throw new ContractError(
+        "friend_request_failed",
+        "The request could not be accepted. Try again.",
+        HTTP.internal,
+      );
     return reply.code(200).send(FriendRequestAcceptResponse.parse({ pairId }));
   });
 }
@@ -98,7 +146,9 @@ export function registerDeclineFriendRequest(app: FastifyInstance, deps: RouteDe
     const personId = requirePerson(request);
     const params = RequestParams.safeParse(request.params);
     if (!params.success) throw makeNotFoundError();
-    await withPerson(deps.db, personId, (trx) => callRefusing(() => sql`SELECT friend_request_decline(${params.data.id}::uuid)`.execute(trx)));
+    await withPerson(deps.db, personId, (trx) =>
+      callRefusing(() => sql`SELECT friend_request_decline(${params.data.id}::uuid)`.execute(trx)),
+    );
     return reply.code(204).send();
   });
 }

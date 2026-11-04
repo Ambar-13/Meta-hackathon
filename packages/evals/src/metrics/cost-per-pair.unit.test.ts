@@ -6,21 +6,47 @@ import { measureCostPerPair } from "./cost-per-pair.js";
 // A rows object with the meetings, ledger and sides the test sets.
 function rowsWith(partial: Pick<EvalRows, "meetings" | "ledger">): EvalRows {
   return {
-    claims: [], briefLines: [], turns: new Map(), briefMeta: [], events: [],
-    questionByMeeting: new Map(), plantedMarkers: [],
-    personBySide: new Map([["m1", { a: "pa", b: "pb" }], ["m2", { a: "pc", b: "pd" }]]),
+    claims: [],
+    briefLines: [],
+    turns: new Map(),
+    briefMeta: [],
+    events: [],
+    questionByMeeting: new Map(),
+    plantedMarkers: [],
+    personBySide: new Map([
+      ["m1", { a: "pa", b: "pb" }],
+      ["m2", { a: "pc", b: "pd" }],
+    ]),
     ...partial,
   };
 }
 
 // A meeting row with the fields the metric reads.
 function meeting(meetingId: string, endReason: string, briefCount: number): MeetingRow {
-  return { meetingId, state: "ended", endReason, startedAt: new Date("2026-10-27T10:00:00Z"), firstTokenAt: null, briefCount };
+  return {
+    meetingId,
+    state: "ended",
+    endReason,
+    startedAt: new Date("2026-10-27T10:00:00Z"),
+    firstTokenAt: null,
+    briefCount,
+  };
 }
 
 // A ledger row for a meeting call, or for a person's card build (meetingId null).
-function ledgerRow(input: { meetingId: string | null; personId: string | null; callSite: string; usd: number | null }): LedgerRow {
-  return { meetingId: input.meetingId, personId: input.personId, callSite: input.callSite, usd: input.usd, model: "muse-spark-1.3" };
+function ledgerRow(input: {
+  meetingId: string | null;
+  personId: string | null;
+  callSite: string;
+  usd: number | null;
+}): LedgerRow {
+  return {
+    meetingId: input.meetingId,
+    personId: input.personId,
+    callSite: input.callSite,
+    usd: input.usd,
+    model: "muse-spark-1.3",
+  };
 }
 
 describe("cost per complete pair", () => {

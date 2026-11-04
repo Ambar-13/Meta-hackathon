@@ -1,4 +1,11 @@
-import { ContractError, PARTIAL_FLUSH_MS, REFUSAL_TEXT, TOOL_ROUNDS_MAX, toolsForPhase, type ToolDefinition } from "@meet-first/contracts";
+import {
+  ContractError,
+  PARTIAL_FLUSH_MS,
+  REFUSAL_TEXT,
+  TOOL_ROUNDS_MAX,
+  toolsForPhase,
+  type ToolDefinition,
+} from "@meet-first/contracts";
 import type { ChatMessage, ToolCall } from "@meet-first/llm";
 import type { StepPhase } from "./agenda.js";
 import type { AssistantMessage, ToolMessage } from "./history-validator.js";
@@ -11,15 +18,32 @@ export const NO_DECISION_REASON = "no explicit decision";
 export const ROUND_TEXT_SEPARATOR = "\n\n";
 
 // One speech request's result, as the step job's speak function returns it.
-export type SpeakResult = { text: string; toolCalls: ToolCall[]; finishReason: "stop" | "length" | "tool_calls" };
+export type SpeakResult = {
+  text: string;
+  toolCalls: ToolCall[];
+  finishReason: "stop" | "length" | "tool_calls";
+};
 // Sends one speech request; tools undefined means the request has no tools field at all.
-export type SpeakFn = (request: { messages: ChatMessage[]; tools: ToolDefinition[] | undefined; round: number }) => Promise<SpeakResult>;
+export type SpeakFn = (request: {
+  messages: ChatMessage[];
+  tools: ToolDefinition[] | undefined;
+  round: number;
+}) => Promise<SpeakResult>;
 // What the tool calls of one round did, after the round was saved in one transaction.
 export type RoundResult = { toolMessages: ToolMessage[]; isDecision: boolean };
 // Runs and saves the tool calls of one round; messages are the step's messages before this round.
-export type RunRoundFn = (round: { messages: ChatMessage[]; assistant: AssistantMessage; round: number }) => Promise<RoundResult>;
+export type RunRoundFn = (round: {
+  messages: ChatMessage[];
+  assistant: AssistantMessage;
+  round: number;
+}) => Promise<RoundResult>;
 // Where a step's speech stands when the loop starts.
-export type SpeechState = { phase: StepPhase; messages: ChatMessage[]; requestsMade: number; hasDecision: boolean };
+export type SpeechState = {
+  phase: StepPhase;
+  messages: ChatMessage[];
+  requestsMade: number;
+  hasDecision: boolean;
+};
 // How the loop ended: the final turn text, the requests made, and whether a concede or hold was recorded.
 export type SpeechOutcome = { text: string; requestsMade: number; hasDecision: boolean };
 
@@ -29,7 +53,10 @@ type SpeechDeps = { speak: SpeakFn; runRound: RunRoundFn; discardRound: () => Pr
 type SpeakRequest = { messages: ChatMessage[]; tools: ToolDefinition[] | undefined; round: number };
 
 // Runs speech requests until the model stops with text or the 5th request (with no tools) answers.
-export async function runSpeechRounds(state: SpeechState, deps: SpeechDeps): Promise<SpeechOutcome> {
+export async function runSpeechRounds(
+  state: SpeechState,
+  deps: SpeechDeps,
+): Promise<SpeechOutcome> {
   let messages: ChatMessage[] = [...state.messages];
   let requestsMade = state.requestsMade;
   let hasDecision = state.hasDecision;
@@ -38,8 +65,13 @@ export async function runSpeechRounds(state: SpeechState, deps: SpeechDeps): Pro
     const tools = toolsForPhase(state.phase, round);
     const result = await speakRound(deps, { messages, tools, round });
     requestsMade = round;
-    if (!isToolRound(result, tools)) return finishTurn(messages, result.text, { requestsMade, hasDecision });
-    const assistant: AssistantMessage = { role: "assistant", content: result.text === "" ? null : result.text, tool_calls: result.toolCalls };
+    if (!isToolRound(result, tools))
+      return finishTurn(messages, result.text, { requestsMade, hasDecision });
+    const assistant: AssistantMessage = {
+      role: "assistant",
+      content: result.text === "" ? null : result.text,
+      tool_calls: result.toolCalls,
+    };
     const outcome = await deps.runRound({ messages, assistant, round });
     messages = [...messages, assistant, ...outcome.toolMessages];
     hasDecision = hasDecision || outcome.isDecision;
@@ -53,7 +85,13 @@ export function joinTurnText(messages: readonly ChatMessage[], currentText: stri
   const texts: string[] = [];
   for (const message of messages.slice(2)) {
     const isCall = message.role === "assistant" && (message.tool_calls?.length ?? 0) > 0;
-    if (message.role === "assistant" && !isCall && typeof message.content === "string" && message.content.trim() !== "") texts.push(message.content.trim());
+    if (
+      message.role === "assistant" &&
+      !isCall &&
+      typeof message.content === "string" &&
+      message.content.trim() !== ""
+    )
+      texts.push(message.content.trim());
   }
   if (currentText.trim() !== "") texts.push(currentText.trim());
   return texts.join(ROUND_TEXT_SEPARATOR);
@@ -61,7 +99,10 @@ export function joinTurnText(messages: readonly ChatMessage[], currentText: stri
 
 // True for the two errors after which the round is discarded and retried once (dossier client: model_stream_cut, model_stream_length).
 export function isRoundBreak(error: unknown): boolean {
-  return error instanceof ContractError && (error.code === "model_stream_cut" || error.code === "model_stream_length");
+  return (
+    error instanceof ContractError &&
+    (error.code === "model_stream_cut" || error.code === "model_stream_length")
+  );
 }
 
 // Keeps the text of one attempt and writes it at most every 250 ms and at the end of each round.
@@ -72,7 +113,11 @@ export class PartialTextWriter {
   private lastWriteAt: Date;
   private readonly deps: { write: (text: string) => Promise<void>; now: () => Date };
 
-  constructor(deps: { write: (text: string) => Promise<void>; now: () => Date }, baseText: string, lastWriteAt: Date) {
+  constructor(
+    deps: { write: (text: string) => Promise<void>; now: () => Date },
+    baseText: string,
+    lastWriteAt: Date,
+  ) {
     this.deps = deps;
     this.base = baseText;
     this.lastWritten = baseText;
@@ -82,7 +127,8 @@ export class PartialTextWriter {
   // Adds one streamed slice and writes when 250 ms or more passed since the last write.
   async append(slice: string): Promise<void> {
     this.current += slice;
-    if (this.deps.now().getTime() - this.lastWriteAt.getTime() >= PARTIAL_FLUSH_MS) await this.flush();
+    if (this.deps.now().getTime() - this.lastWriteAt.getTime() >= PARTIAL_FLUSH_MS)
+      await this.flush();
   }
 
   // Writes when the text differs from the last text written.
@@ -132,7 +178,11 @@ async function speakRound(deps: SpeechDeps, request: SpeakRequest): Promise<Spea
   await deps.discardRound();
   const retry = await deps.speak(request);
   if (retry.finishReason === "length") {
-    throw new ContractError("speech_cut", "The speech round was cut twice. The step stops and the sweeper retries it.", 502);
+    throw new ContractError(
+      "speech_cut",
+      "The speech round was cut twice. The step stops and the sweeper retries it.",
+      502,
+    );
   }
   return retry;
 }
@@ -143,7 +193,15 @@ export function isToolRound(result: SpeakResult, tools: ToolDefinition[] | undef
 }
 
 // The outcome of a turn: the joined text, or the fixed refusal sentence when the text is empty.
-function finishTurn(messages: readonly ChatMessage[], currentText: string, counts: { requestsMade: number; hasDecision: boolean }): SpeechOutcome {
+function finishTurn(
+  messages: readonly ChatMessage[],
+  currentText: string,
+  counts: { requestsMade: number; hasDecision: boolean },
+): SpeechOutcome {
   const text = joinTurnText(messages, currentText);
-  return { text: text === "" ? REFUSAL_TEXT : text, requestsMade: counts.requestsMade, hasDecision: counts.hasDecision };
+  return {
+    text: text === "" ? REFUSAL_TEXT : text,
+    requestsMade: counts.requestsMade,
+    hasDecision: counts.hasDecision,
+  };
 }

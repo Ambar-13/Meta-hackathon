@@ -3,17 +3,33 @@
 // nothing. No fresh code is issued.
 import type { FastifyInstance } from "fastify";
 import { sql, type Kysely } from "kysely";
-import { ContractError, HTTP, Recover, RecoverResponse, routes, SESSION_TOKEN_BYTES } from "@meet-first/contracts";
+import {
+  ContractError,
+  HTTP,
+  Recover,
+  RecoverResponse,
+  routes,
+  SESSION_TOKEN_BYTES,
+} from "@meet-first/contracts";
 import type { Database } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { hashToken, newHexToken, setSessionCookie } from "./cookie.js";
 
 // The sentence for a wrong or spent recovery code.
-export const RECOVERY_CODE_UNKNOWN_SENTENCE = "This code is wrong or was already used. Each code works once.";
+export const RECOVERY_CODE_UNKNOWN_SENTENCE =
+  "This code is wrong or was already used. Each code works once.";
 
 // Spends the code and opens a session for its owner; null when the code is unknown, spent, or its person was deleted.
-export async function redeemRecoveryCode(db: Kysely<Database>, code: string, sessionToken: string): Promise<string | null> {
-  const result = await sql<{ person_id: string | null }>`SELECT auth_redeem_recovery(${hashToken(code)}, ${hashToken(sessionToken)}) AS person_id`.execute(db);
+export async function redeemRecoveryCode(
+  db: Kysely<Database>,
+  code: string,
+  sessionToken: string,
+): Promise<string | null> {
+  const result = await sql<{
+    person_id: string | null;
+  }>`SELECT auth_redeem_recovery(${hashToken(code)}, ${hashToken(sessionToken)}) AS person_id`.execute(
+    db,
+  );
   return result.rows[0]?.person_id ?? null;
 }
 
@@ -26,7 +42,11 @@ export function registerRecover(app: FastifyInstance, deps: RouteDeps): void {
     const sessionToken = newHexToken(SESSION_TOKEN_BYTES);
     const personId = await redeemRecoveryCode(deps.db, code, sessionToken);
     if (personId === null) {
-      throw new ContractError("recovery_code_unknown", RECOVERY_CODE_UNKNOWN_SENTENCE, HTTP.notFound);
+      throw new ContractError(
+        "recovery_code_unknown",
+        RECOVERY_CODE_UNKNOWN_SENTENCE,
+        HTTP.notFound,
+      );
     }
     setSessionCookie(reply, sessionToken);
     return reply.code(200).send(RecoverResponse.parse({ personId }));

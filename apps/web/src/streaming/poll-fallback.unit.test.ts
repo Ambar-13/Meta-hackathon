@@ -5,17 +5,31 @@ import { IDS, SERVER_NOW, turnCommitted } from "../testing/fixtures.js";
 
 describe("poll fallback using a fake fetch", () => {
   beforeEach(() => {
-    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] });
+    vi.useFakeTimers({
+      toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"],
+    });
   });
   afterEach(() => {
     vi.useRealTimers();
   });
 
   it("D49-T2: pollEventsOnce asks for the events after a seq and returns the lenient reply, using a fake fetch", async () => {
-    const reply = { v: 1, events: [turnCommitted({ seq: 8, stepSeq: 4, side: "b", text: "Hi" })], partial: null, serverNow: SERVER_NOW };
+    const reply = {
+      v: 1,
+      events: [turnCommitted({ seq: 8, stepSeq: 4, side: "b", text: "Hi" })],
+      partial: null,
+      serverNow: SERVER_NOW,
+    };
     const server = fakeMeetingServer([], [reply]);
-    const result = await pollEventsOnce({ meetingId: IDS.meeting, afterSeq: 7, fetchImpl: server.fetchImpl, origin: "http://app.test" });
-    expect(server.pollRequests[0]?.url).toBe(`http://app.test/api/meetings/${IDS.meeting}/events?after=7`);
+    const result = await pollEventsOnce({
+      meetingId: IDS.meeting,
+      afterSeq: 7,
+      fetchImpl: server.fetchImpl,
+      origin: "http://app.test",
+    });
+    expect(server.pollRequests[0]?.url).toBe(
+      `http://app.test/api/meetings/${IDS.meeting}/events?after=7`,
+    );
     expect(result.events).toHaveLength(1);
     expect(result.partial).toBeNull();
     expect(result.v).toBe(1);
@@ -23,9 +37,19 @@ describe("poll fallback using a fake fetch", () => {
 
   it("D49-T3: a reply holding an unknown event type still returns every event, using a fake fetch", async () => {
     const future = { v: 1, type: "future.event", meetingId: IDS.meeting, at: SERVER_NOW, seq: 8 };
-    const reply = { v: 1, events: [future, turnCommitted({ seq: 9, stepSeq: 4, side: "b", text: "Hi" })], partial: null, serverNow: SERVER_NOW };
+    const reply = {
+      v: 1,
+      events: [future, turnCommitted({ seq: 9, stepSeq: 4, side: "b", text: "Hi" })],
+      partial: null,
+      serverNow: SERVER_NOW,
+    };
     const server = fakeMeetingServer([], [reply]);
-    const result = await pollEventsOnce({ meetingId: IDS.meeting, afterSeq: 7, fetchImpl: server.fetchImpl, origin: "http://app.test" });
+    const result = await pollEventsOnce({
+      meetingId: IDS.meeting,
+      afterSeq: 7,
+      fetchImpl: server.fetchImpl,
+      origin: "http://app.test",
+    });
     expect(result.events).toHaveLength(2);
   });
 

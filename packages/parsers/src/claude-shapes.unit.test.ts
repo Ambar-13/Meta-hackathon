@@ -30,20 +30,26 @@ describe("Claude shape", () => {
   });
 
   it("R1.1-T17: createTime is in seconds", () => {
-    const dated = parseClaudeChatMessages([{ chat_messages: [{ sender: "human", text: "a", created_at: "2025-03-01T09:00:00Z" }] }]);
-    const undated = parseClaudeChatMessages([{ chat_messages: [{ sender: "human", text: "b", created_at: "not a date" }] }]);
+    const dated = parseClaudeChatMessages([
+      { chat_messages: [{ sender: "human", text: "a", created_at: "2025-03-01T09:00:00Z" }] },
+    ]);
+    const undated = parseClaudeChatMessages([
+      { chat_messages: [{ sender: "human", text: "b", created_at: "not a date" }] },
+    ]);
     expect(itemAt(dated ?? [], 0).createTime).toBe(1740819600);
     expect(itemAt(undated ?? [], 0).createTime).toBeNull();
   });
 
   it("R1.1-T18: one conversation object is read like a one-element array, and no chat_messages gives null", () => {
-    expect(parseClaudeChatMessages({ chat_messages: [{ sender: "human", text: "solo" }] })).toEqual([
-      { text: "solo", exportOrder: 0, createTime: null },
-    ]);
+    expect(parseClaudeChatMessages({ chat_messages: [{ sender: "human", text: "solo" }] })).toEqual(
+      [{ text: "solo", exportOrder: 0, createTime: null }],
+    );
     expect(parseClaudeChatMessages([{ messages: [] }])).toBeNull();
   });
 
   it("R1.1-T19: an assistant-only conversation gives an empty list", () => {
-    expect(parseClaudeChatMessages([{ chat_messages: [{ sender: "assistant", text: "x" }] }])).toEqual([]);
+    expect(
+      parseClaudeChatMessages([{ chat_messages: [{ sender: "assistant", text: "x" }] }]),
+    ).toEqual([]);
   });
 });

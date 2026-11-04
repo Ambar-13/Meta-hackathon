@@ -1,6 +1,18 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import { LISTING_LINE_MAX_CHARS, type CardSharing, type ListingUpsert, type MyListing } from "@meet-first/contracts";
-import { apiFetch, ApiError, APP_PATHS, asApiError, CARD_QUERY, routes } from "../../app-shell/index.js";
+import {
+  LISTING_LINE_MAX_CHARS,
+  type CardSharing,
+  type ListingUpsert,
+  type MyListing,
+} from "@meet-first/contracts";
+import {
+  apiFetch,
+  ApiError,
+  APP_PATHS,
+  asApiError,
+  CARD_QUERY,
+  routes,
+} from "../../app-shell/index.js";
 
 // The code GET /api/directory/me answers with when the person has no listing. It means not listed, not a failure.
 export const NOT_LISTED_CODE = "not_listed";
@@ -12,15 +24,34 @@ export const NO_PUBLIC_ITEM_REFUSAL = "Mark at least one item public to join Exp
 // What the server holds: this card's sharing settings, and the person's listing, which may be on another card, or null.
 export type SavedSharing = { sharing: CardSharing; listing: MyListing | null };
 // What the person has set on the screen and not saved yet.
-export type SharingDraft = { friendsCanAsk: boolean; publicPositions: ReadonlySet<number>; isListed: boolean; line: string; openToRomance: boolean };
+export type SharingDraft = {
+  friendsCanAsk: boolean;
+  publicPositions: ReadonlySet<number>;
+  isListed: boolean;
+  line: string;
+  openToRomance: boolean;
+};
 // The calls of one save, in this order: leave the directory when asked, the card's sharing, then the listing when it changed.
-export type SharingSendPlan = { kind: "send"; isLeavingFirst: boolean; sharing: CardSharing; listing: ListingUpsert | null };
+export type SharingSendPlan = {
+  kind: "send";
+  isLeavingFirst: boolean;
+  sharing: CardSharing;
+  listing: ListingUpsert | null;
+};
 // One save, decided before any request: sent as planned, or refused with a sentence and nothing sent.
 export type SharingSavePlan = SharingSendPlan | { kind: "refused"; sentence: string };
 // The section's data: loading, failed with the error to show, or ready with what the server holds and the draft.
-export type SharingLoad = { kind: "loading" } | { kind: "failed"; error: ApiError } | { kind: "ready"; saved: SavedSharing; draft: SharingDraft };
+export type SharingLoad =
+  | { kind: "loading" }
+  | { kind: "failed"; error: ApiError }
+  | { kind: "ready"; saved: SavedSharing; draft: SharingDraft };
 // Where the last save stands.
-export type SharingStatus = { kind: "idle" } | { kind: "sending" } | { kind: "saved" } | { kind: "refused"; sentence: string } | { kind: "failed"; error: ApiError };
+export type SharingStatus =
+  | { kind: "idle" }
+  | { kind: "sending" }
+  | { kind: "saved" }
+  | { kind: "refused"; sentence: string }
+  | { kind: "failed"; error: ApiError };
 // What the Sharing section reads and calls.
 export type SharingHook = {
   load: SharingLoad;
@@ -76,32 +107,56 @@ function draftRefusal(draft: SharingDraft): string | null {
 }
 
 // The listing body to send, or null when the switch is off or the listing on this card already has this line and dating switch.
-function listingToSend(input: { cardId: string; listedHere: MyListing | null; draft: SharingDraft }): ListingUpsert | null {
+function listingToSend(input: {
+  cardId: string;
+  listedHere: MyListing | null;
+  draft: SharingDraft;
+}): ListingUpsert | null {
   const { cardId, listedHere, draft } = input;
   if (!draft.isListed) return null;
   const line = draft.line.trim();
-  const isUnchanged = listedHere !== null && listedHere.line === line && listedHere.openToRomance === draft.openToRomance;
+  const isUnchanged =
+    listedHere !== null &&
+    listedHere.line === line &&
+    listedHere.openToRomance === draft.openToRomance;
   return isUnchanged ? null : { cardId, line, openToRomance: draft.openToRomance };
 }
 
 // Decides what one save sends before any request, so a refused draft sends nothing.
-export function planSharingSave(input: { cardId: string; saved: SavedSharing; draft: SharingDraft }): SharingSavePlan {
+export function planSharingSave(input: {
+  cardId: string;
+  saved: SavedSharing;
+  draft: SharingDraft;
+}): SharingSavePlan {
   const { cardId, saved, draft } = input;
   const refusal = draftRefusal(draft);
   if (refusal !== null) return { kind: "refused", sentence: refusal };
   const isListedHere = isListedWith(saved.listing, cardId);
   const publicPositions = [...draft.publicPositions].sort((first, second) => first - second);
   const listing = listingToSend({ cardId, listedHere: isListedHere ? saved.listing : null, draft });
-  return { kind: "send", isLeavingFirst: isListedHere && !draft.isListed, sharing: { friendsCanAsk: draft.friendsCanAsk, publicPositions }, listing };
+  return {
+    kind: "send",
+    isLeavingFirst: isListedHere && !draft.isListed,
+    sharing: { friendsCanAsk: draft.friendsCanAsk, publicPositions },
+    listing,
+  };
 }
 
 // Sends one planned save in order and returns what the server now holds. A failed call throws, so the calls after it are not sent.
-export async function sendSharingSave(input: { cardId: string; saved: SavedSharing; plan: SharingSendPlan }): Promise<SavedSharing> {
+export async function sendSharingSave(input: {
+  cardId: string;
+  saved: SavedSharing;
+  plan: SharingSendPlan;
+}): Promise<SavedSharing> {
   const { cardId, saved, plan } = input;
   if (plan.isLeavingFirst) await apiFetch(routes.directory.leave);
-  const sharing = await apiFetch(routes.directory.updateSharing, { params: { id: cardId }, body: plan.sharing });
+  const sharing = await apiFetch(routes.directory.updateSharing, {
+    params: { id: cardId },
+    body: plan.sharing,
+  });
   let listing = plan.isLeavingFirst ? null : saved.listing;
-  if (plan.listing !== null) listing = await apiFetch(routes.directory.upsertMyListing, { body: plan.listing });
+  if (plan.listing !== null)
+    listing = await apiFetch(routes.directory.upsertMyListing, { body: plan.listing });
   return { sharing, listing };
 }
 
@@ -114,11 +169,17 @@ function toggled(positions: ReadonlySet<number>, position: number): ReadonlySet<
 }
 
 // Loads this card's sharing settings and the person's listing once per card.
-function useSavedSharing(cardId: string): { load: SharingLoad; setLoad: Dispatch<SetStateAction<SharingLoad>> } {
+function useSavedSharing(cardId: string): {
+  load: SharingLoad;
+  setLoad: Dispatch<SetStateAction<SharingLoad>>;
+} {
   const [load, setLoad] = useState<SharingLoad>({ kind: "loading" });
   useEffect(() => {
     let isActive = true;
-    Promise.all([apiFetch(routes.directory.readSharing, { params: { id: cardId } }), readListingOrNull()]).then(
+    Promise.all([
+      apiFetch(routes.directory.readSharing, { params: { id: cardId } }),
+      readListingOrNull(),
+    ]).then(
       ([sharing, listing]) => {
         const saved = { sharing, listing };
         if (isActive) setLoad({ kind: "ready", saved, draft: draftFromSaved(saved, cardId) });
@@ -141,7 +202,9 @@ export function useSharing(cardId: string): SharingHook {
 
   // A change clears the last saved or refused line, but never the sending state, so Save stays off while a save is out.
   const change = (update: (draft: SharingDraft) => SharingDraft): void => {
-    setLoad((previous) => (previous.kind === "ready" ? { ...previous, draft: update(previous.draft) } : previous));
+    setLoad((previous) =>
+      previous.kind === "ready" ? { ...previous, draft: update(previous.draft) } : previous,
+    );
     setStatus((previous) => (previous.kind === "sending" ? previous : { kind: "idle" }));
   };
 

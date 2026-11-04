@@ -23,7 +23,8 @@ export const ASK_POLL_MS = 3_000;
 // The heading over the help results; the list is never a score of a person.
 export const HELP_RESULTS_HEADING = "Who could probably help, and why";
 // The words under the help box, shown before the search is sent.
-export const HELP_SEND_COPY = "Your problem goes to the Meetys of up to 20 people in Explore. Each answers from the items its person marked public, and each of those people gets a copy of the answer with your display name.";
+export const HELP_SEND_COPY =
+  "Your problem goes to the Meetys of up to 20 people in Explore. Each answers from the items its person marked public, and each of those people gets a copy of the answer with your display name.";
 
 // The body of POST /api/asks. A route schema, not a model output, so the union is allowed here.
 export const AskCreate = z.union([
@@ -42,7 +43,12 @@ export const AskState = z.enum(["checking", "asking", "ranking", "done", "refuse
 // The type of AskState, read from the schema above.
 export type AskState = z.infer<typeof AskState>;
 // One claim of an answer with its quote: verified when the quote was found in the named turn, supported when the support check backed it.
-export const AnswerClaim = z.object({ text: z.string(), quote: z.string(), verified: z.boolean(), supported: z.boolean().nullable() });
+export const AnswerClaim = z.object({
+  text: z.string(),
+  quote: z.string(),
+  verified: z.boolean(),
+  supported: z.boolean().nullable(),
+});
 // The type of AnswerClaim, read from the schema above.
 export type AnswerClaim = z.infer<typeof AnswerClaim>;
 // One persona's answer as the asker sees it. position is its place in the help results, null when it showed no sign; canMeet is true for the
@@ -73,11 +79,25 @@ export const AskView = z.object({
 // The type of AskView, read from the schema above.
 export type AskView = z.infer<typeof AskView>;
 // One ask in the asker's list.
-export const AskSummary = z.object({ askId: Uuid, mode: AskMode, text: z.string(), state: AskState, createdAt: IsoTime });
+export const AskSummary = z.object({
+  askId: Uuid,
+  mode: AskMode,
+  text: z.string(),
+  state: AskState,
+  createdAt: IsoTime,
+});
 // The type of AskSummary, read from the schema above.
 export type AskSummary = z.infer<typeof AskSummary>;
 // One answer the caller's persona gave, as the caller's copy: what was asked, who asked, and the answer with its quotes.
-export const AboutMeAnswer = z.object({ answerId: Uuid, mode: AskMode, text: z.string(), askerName: z.string(), answer: z.string(), claims: z.array(AnswerClaim), createdAt: IsoTime });
+export const AboutMeAnswer = z.object({
+  answerId: Uuid,
+  mode: AskMode,
+  text: z.string(),
+  askerName: z.string(),
+  answer: z.string(),
+  claims: z.array(AnswerClaim),
+  createdAt: IsoTime,
+});
 // The type of AboutMeAnswer, read from the schema above.
 export type AboutMeAnswer = z.infer<typeof AboutMeAnswer>;
 // What GET /api/asks returns: the caller's own asks, newest first, and every answer their persona gave, newest first.
@@ -109,6 +129,8 @@ export const PersonaAnswerOutput = z.object({
 export type PersonaAnswerOutput = z.infer<typeof PersonaAnswerOutput>;
 // What the search-words model returns: 1 to 8 words or short phrases, each 1 to 40 characters, that the person would likely have used
 // in their own messages about what an ask is about (search-words prompt).
-export const SearchWordsOutput = z.object({ words: z.array(z.string().min(1).max(40)).min(1).max(8) });
+export const SearchWordsOutput = z.object({
+  words: z.array(z.string().min(1).max(40)).min(1).max(8),
+});
 // The type of SearchWordsOutput, read from the schema above.
 export type SearchWordsOutput = z.infer<typeof SearchWordsOutput>;

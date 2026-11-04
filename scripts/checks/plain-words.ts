@@ -75,7 +75,10 @@ function escapeForPattern(phrase: string): string {
 // "Overall" is banned as an empty opener, written with a comma after it, and not as a plain adjective ("the overall
 // budget").
 const PATTERNS: readonly { phrase: string; pattern: RegExp }[] = [
-  ...BANNED_PHRASES.map((phrase) => ({ phrase, pattern: new RegExp(`\\b${escapeForPattern(phrase)}\\b`, "i") })),
+  ...BANNED_PHRASES.map((phrase) => ({
+    phrase,
+    pattern: new RegExp(`\\b${escapeForPattern(phrase)}\\b`, "i"),
+  })),
   { phrase: "overall,", pattern: /\boverall,/i },
   // Emphasis words are banned as sentence openers (followed by a comma); say why the thing matters instead.
   ...["importantly", "crucially", "notably", "interestingly"].map((word) => ({
@@ -100,7 +103,10 @@ export function markdownProse(markdown: string): ProseLine[] {
       return;
     }
     if (isInCodeBlock) return;
-    prose.push({ line: index + 1, text: text.replace(/`[^`]*`/g, "").replace(/\]\([^)]*\)/g, "]") });
+    prose.push({
+      line: index + 1,
+      text: text.replace(/`[^`]*`/g, "").replace(/\]\([^)]*\)/g, "]"),
+    });
   });
   return prose;
 }
@@ -113,8 +119,10 @@ function commentLines(sourceFile: ts.SourceFile): ProseLine[] {
   const text = sourceFile.getFullText();
   const ranges = new Map<number, ts.CommentRange>();
   const visit = (node: ts.Node): void => {
-    for (const range of ts.getLeadingCommentRanges(text, node.getFullStart()) ?? []) ranges.set(range.pos, range);
-    for (const range of ts.getTrailingCommentRanges(text, node.getEnd()) ?? []) ranges.set(range.pos, range);
+    for (const range of ts.getLeadingCommentRanges(text, node.getFullStart()) ?? [])
+      ranges.set(range.pos, range);
+    for (const range of ts.getTrailingCommentRanges(text, node.getEnd()) ?? [])
+      ranges.set(range.pos, range);
     ts.forEachChild(node, visit);
   };
   visit(sourceFile);
@@ -135,7 +143,9 @@ function nameOf(expression: ts.Expression): string {
 
 function extendsAnError(node: ts.Node): boolean {
   const owner = ts.findAncestor(node, ts.isClassLike);
-  const heritage = owner?.heritageClauses?.find((clause) => clause.token === ts.SyntaxKind.ExtendsKeyword);
+  const heritage = owner?.heritageClauses?.find(
+    (clause) => clause.token === ts.SyntaxKind.ExtendsKeyword,
+  );
   return heritage?.types.some((type) => nameOf(type.expression).endsWith("Error")) ?? false;
 }
 
@@ -152,7 +162,8 @@ function isMessageField(node: ts.Node): boolean {
 function holdsErrorMessage(node: ts.Node): boolean {
   if (ts.isThrowStatement(node) || isMessageField(node)) return true;
   if (ts.isNewExpression(node)) return nameOf(node.expression).endsWith("Error");
-  if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.SuperKeyword) return extendsAnError(node);
+  if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.SuperKeyword)
+    return extendsAnError(node);
   return false;
 }
 
@@ -193,7 +204,11 @@ export function sqlProse(source: string): ProseLine[] {
 /** True for instructions written for AI agents, which follow their own standard. */
 export function isAgentInstructions(path: string): boolean {
   const fileName = path.split("/").pop() ?? "";
-  return ["CLAUDE.md", "AGENTS.md", "SKILL.md", "prompt.md", "cases.md"].includes(fileName) || /(^|\/)prompts\/.*\.md$/.test(path) || /^packages\/prompts\/[^/]+\/v1\//.test(path);
+  return (
+    ["CLAUDE.md", "AGENTS.md", "SKILL.md", "prompt.md", "cases.md"].includes(fileName) ||
+    /(^|\/)prompts\/.*\.md$/.test(path) ||
+    /^packages\/prompts\/[^/]+\/v1\//.test(path)
+  );
 }
 
 function proseOf(path: string, source: string): ProseLine[] {
@@ -233,7 +248,10 @@ export function checkPlainWords(root: string): Finding[] {
   const findings: Finding[] = [];
   for (const file of checkedFiles(root)) {
     const level = levelFor(root, file, passedPaths);
-    for (const [line, phrases] of bannedPhrasesByLine(repositoryPath(root, file), readFileSync(file, "utf8"))) {
+    for (const [line, phrases] of bannedPhrasesByLine(
+      repositoryPath(root, file),
+      readFileSync(file, "utf8"),
+    )) {
       const quoted = [...phrases].map((phrase) => `"${phrase}"`).join(", ");
       findings.push({
         check: "plain-words",

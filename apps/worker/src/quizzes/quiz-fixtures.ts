@@ -4,7 +4,15 @@ import { ContractError, QUIZ_BANK } from "@meet-first/contracts";
 import { buildChatRequest } from "@meet-first/llm";
 import { readPrompt } from "@meet-first/prompts";
 import { CALIBRATION_BANK } from "./calibration.js";
-import { buildJudgeCall, buildPersonaAnswerCall, orderForJudge, requireElement, type PersonaCardItem, type QuizModelCall, type QuizPrompt } from "./quiz-requests.js";
+import {
+  buildJudgeCall,
+  buildPersonaAnswerCall,
+  orderForJudge,
+  requireElement,
+  type PersonaCardItem,
+  type QuizModelCall,
+  type QuizPrompt,
+} from "./quiz-requests.js";
 
 // The six turns of the fixture source. Each fixture card item quotes one of them, in the same order.
 export const FIXTURE_TURNS: readonly string[] = [
@@ -18,12 +26,48 @@ export const FIXTURE_TURNS: readonly string[] = [
 
 // The six card items the job tests write over the items createApprovedCard made, positions 1 to 6.
 export const FIXTURE_CARD_ITEMS: readonly PersonaCardItem[] = [
-  { position: 1, kind: "value", claim: "Wants problems raised early and plainly", gloss: "Wants problems raised early and plainly", quote: "tell me the bad news straight away, I can handle it" },
-  { position: 2, kind: "habit", claim: "Writes a fresh plan the same day a plan fails", gloss: "Writes a fresh plan the same day a plan fails", quote: "when a plan dies I sit down that evening and write a new one" },
-  { position: 3, kind: "boundary", claim: "Does not answer work messages after dinner", gloss: "Does not answer work messages after dinner", quote: "after dinner my phone is off for work, full stop" },
-  { position: 4, kind: "preference", claim: "Loses track of time building small tools", gloss: "Loses track of time building small tools", quote: "I can spend a whole Saturday building a little tool and not notice the time" },
-  { position: 5, kind: "goal", claim: "Wants to be known for work that lasts", gloss: "Wants to be known for work that lasts", quote: "I want people to say my stuff still works years later" },
-  { position: 6, kind: "preference", claim: "Prefers a loose weekly plan with room to move", gloss: "Prefers a loose weekly plan with room to move", quote: "I like a rough plan for the week but I hate when every hour is booked" },
+  {
+    position: 1,
+    kind: "value",
+    claim: "Wants problems raised early and plainly",
+    gloss: "Wants problems raised early and plainly",
+    quote: "tell me the bad news straight away, I can handle it",
+  },
+  {
+    position: 2,
+    kind: "habit",
+    claim: "Writes a fresh plan the same day a plan fails",
+    gloss: "Writes a fresh plan the same day a plan fails",
+    quote: "when a plan dies I sit down that evening and write a new one",
+  },
+  {
+    position: 3,
+    kind: "boundary",
+    claim: "Does not answer work messages after dinner",
+    gloss: "Does not answer work messages after dinner",
+    quote: "after dinner my phone is off for work, full stop",
+  },
+  {
+    position: 4,
+    kind: "preference",
+    claim: "Loses track of time building small tools",
+    gloss: "Loses track of time building small tools",
+    quote: "I can spend a whole Saturday building a little tool and not notice the time",
+  },
+  {
+    position: 5,
+    kind: "goal",
+    claim: "Wants to be known for work that lasts",
+    gloss: "Wants to be known for work that lasts",
+    quote: "I want people to say my stuff still works years later",
+  },
+  {
+    position: 6,
+    kind: "preference",
+    claim: "Prefers a loose weekly plan with room to move",
+    gloss: "Prefers a loose weekly plan with room to move",
+    quote: "I like a rough plan for the week but I hate when every hour is booked",
+  },
 ];
 
 // The bank question ids of every fixture quiz, positions 1 to 10 (fixed here so fixtures can match).
@@ -64,9 +108,31 @@ export const FIXTURE_HUMAN_ANSWER_6_VARIANT = "Nothing after dinner, ever.";
 export const FIXTURE_FLIPPED_POSITIONS: ReadonlySet<number> = new Set([2, 4, 6, 8, 10]);
 
 // The verdicts the item fixtures return in run 1 (7 agree), positions 1 to 10.
-export const RUN_1_VERDICTS: readonly boolean[] = [true, true, true, false, true, true, true, false, true, false];
+export const RUN_1_VERDICTS: readonly boolean[] = [
+  true,
+  true,
+  true,
+  false,
+  true,
+  true,
+  true,
+  false,
+  true,
+  false,
+];
 // The verdicts the item fixtures return in run 2 (6 agree), positions 1 to 10.
-export const RUN_2_VERDICTS: readonly boolean[] = [true, true, true, false, true, true, true, false, false, false];
+export const RUN_2_VERDICTS: readonly boolean[] = [
+  true,
+  true,
+  true,
+  false,
+  true,
+  true,
+  true,
+  false,
+  false,
+  false,
+];
 
 // The reasons every judge fixture returns, by verdict.
 export const AGREE_REASON = "Both answers give the same main point.";
@@ -83,14 +149,23 @@ export const FIXTURE_QUIZ_IDS = {
 } as const;
 
 // One fixture: its id, the call site, the call it answers, and the JSON content of the model's reply.
-export type FixtureCase = { id: string; callSite: "quiz_answer" | "quiz_judge"; call: (prompt: QuizPrompt) => QuizModelCall; content: Record<string, unknown> };
+export type FixtureCase = {
+  id: string;
+  callSite: "quiz_answer" | "quiz_judge";
+  call: (prompt: QuizPrompt) => QuizModelCall;
+  content: Record<string, unknown>;
+};
 
 // The answer and the judge fixture data shared by the cases below.
 const AGREE = { agree: true, reason: AGREE_REASON };
 const DISAGREE = { agree: false, reason: DISAGREE_REASON };
 
 // The item of table B at one position, as the judge sees it.
-function itemAt(position: number): { personaAnswer: string; humanAnswer: string; flipped: boolean } {
+function itemAt(position: number): {
+  personaAnswer: string;
+  humanAnswer: string;
+  flipped: boolean;
+} {
   return {
     personaAnswer: requireElement(FIXTURE_PERSONA_ANSWERS, position - 1),
     humanAnswer: requireElement(FIXTURE_HUMAN_ANSWERS, position - 1),
@@ -106,20 +181,31 @@ function personaCases(): FixtureCase[] {
     cases.push({
       id: `pa-${String(question).padStart(2, "0")}`,
       callSite: "quiz_answer",
-      call: (prompt) => buildPersonaAnswerCall(prompt, FIXTURE_CARD_ITEMS, requireElement(QUIZ_BANK, question - 1).text),
+      call: (prompt) =>
+        buildPersonaAnswerCall(
+          prompt,
+          FIXTURE_CARD_ITEMS,
+          requireElement(QUIZ_BANK, question - 1).text,
+        ),
       content: { answer: requireElement(FIXTURE_PERSONA_ANSWERS, position - 1) },
     });
   }
   cases.push({
     id: "pa-11",
     callSite: "quiz_answer",
-    call: (prompt) => buildPersonaAnswerCall(prompt, FIXTURE_CARD_ITEMS.slice(0, 5), requireElement(QUIZ_BANK, 6).text),
+    call: (prompt) =>
+      buildPersonaAnswerCall(
+        prompt,
+        FIXTURE_CARD_ITEMS.slice(0, 5),
+        requireElement(QUIZ_BANK, 6).text,
+      ),
     content: { answer: "My card does not say." },
   });
   cases.push({
     id: "pa-12",
     callSite: "quiz_answer",
-    call: (prompt) => buildPersonaAnswerCall(prompt, FIXTURE_CARD_ITEMS, requireElement(QUIZ_BANK, 10).text),
+    call: (prompt) =>
+      buildPersonaAnswerCall(prompt, FIXTURE_CARD_ITEMS, requireElement(QUIZ_BANK, 10).text),
     content: { answer: "x".repeat(201) },
   });
   return cases;
@@ -140,13 +226,23 @@ function calibrationCases(): FixtureCase[] {
     cases.push({
       id: `jc-${String(row.entry)}-identical`,
       callSite: "quiz_judge",
-      call: (prompt) => buildJudgeCall(prompt, { questionText: probe.questionText, answer1: probe.answerA, answer2: probe.answerA }),
+      call: (prompt) =>
+        buildJudgeCall(prompt, {
+          questionText: probe.questionText,
+          answer1: probe.answerA,
+          answer2: probe.answerA,
+        }),
       content: row.identical ? AGREE : DISAGREE,
     });
     cases.push({
       id: `jc-${String(row.entry)}-contradicting`,
       callSite: "quiz_judge",
-      call: (prompt) => buildJudgeCall(prompt, { questionText: probe.questionText, answer1: probe.answerA, answer2: probe.answerB }),
+      call: (prompt) =>
+        buildJudgeCall(prompt, {
+          questionText: probe.questionText,
+          answer1: probe.answerA,
+          answer2: probe.answerB,
+        }),
       content: row.contradicting ? AGREE : DISAGREE,
     });
   }
@@ -164,16 +260,29 @@ function itemCases(): FixtureCase[] {
       cases.push({
         id: `j${String(run)}-${String(position).padStart(2, "0")}`,
         callSite: "quiz_judge",
-        call: (prompt) => buildJudgeCall(prompt, { questionText: question, answer1: order.answer1, answer2: order.answer2 }),
+        call: (prompt) =>
+          buildJudgeCall(prompt, {
+            questionText: question,
+            answer1: order.answer1,
+            answer2: order.answer2,
+          }),
         content: requireElement(verdicts, position - 1) ? AGREE : DISAGREE,
       });
     }
   }
-  const variantOrder = orderForJudge({ ...itemAt(6), humanAnswer: FIXTURE_HUMAN_ANSWER_6_VARIANT }, 2);
+  const variantOrder = orderForJudge(
+    { ...itemAt(6), humanAnswer: FIXTURE_HUMAN_ANSWER_6_VARIANT },
+    2,
+  );
   cases.push({
     id: "j2-06-variant",
     callSite: "quiz_judge",
-    call: (prompt) => buildJudgeCall(prompt, { questionText: requireElement(QUIZ_BANK, 5).text, answer1: variantOrder.answer1, answer2: variantOrder.answer2 }),
+    call: (prompt) =>
+      buildJudgeCall(prompt, {
+        questionText: requireElement(QUIZ_BANK, 5).text,
+        answer1: variantOrder.answer1,
+        answer2: variantOrder.answer2,
+      }),
     content: { agree: true, reason: "" },
   });
   return cases;
@@ -186,22 +295,45 @@ export function fixtureCases(): FixtureCase[] {
 
 // The exact body the model client sends for a call: buildChatRequest with stream false, as LlmClient.complete builds it (dossier spec 4.7 step 2).
 export function requestBodyFor(call: QuizModelCall): Record<string, unknown> {
-  return buildChatRequest({ callSite: call.callSite, messages: call.messages, schema: call.schema, stream: false });
+  return buildChatRequest({
+    callSite: call.callSite,
+    messages: call.messages,
+    schema: call.schema,
+    stream: false,
+  });
 }
 
 // Writes <outDir>/<id>.request.json and <outDir>/<id>.response.json for one case, for the write-fixture command of llm.
 export async function writeFixtureCaseFiles(caseId: string, outDir: string): Promise<void> {
   const fixture = fixtureCases().find((candidate) => candidate.id === caseId);
   if (fixture === undefined) {
-    throw new ContractError("fixture_case_unknown", "No quiz fixture case has this id. Pass all, or an id from sections 4.19 and 4.20 of the quiz spec.", 400);
+    throw new ContractError(
+      "fixture_case_unknown",
+      "No quiz fixture case has this id. Pass all, or an id from sections 4.19 and 4.20 of the quiz spec.",
+      400,
+    );
   }
-  const prompt = readPrompt(fixture.callSite === "quiz_answer" ? "quiz-persona-answer" : "quiz-judge");
+  const prompt = readPrompt(
+    fixture.callSite === "quiz_answer" ? "quiz-persona-answer" : "quiz-judge",
+  );
   const call = fixture.call(prompt);
   await mkdir(outDir, { recursive: true });
-  const request = JSON.stringify({ callSite: call.callSite, promptVersion: call.promptVersion, body: requestBodyFor(call) }, null, 2);
+  const request = JSON.stringify(
+    { callSite: call.callSite, promptVersion: call.promptVersion, body: requestBodyFor(call) },
+    null,
+    2,
+  );
   const response = JSON.stringify(
     {
-      response: { choices: [{ index: 0, message: { role: "assistant", content: JSON.stringify(fixture.content) }, finish_reason: "stop" }] },
+      response: {
+        choices: [
+          {
+            index: 0,
+            message: { role: "assistant", content: JSON.stringify(fixture.content) },
+            finish_reason: "stop",
+          },
+        ],
+      },
       usage: { promptTokens: 0, cachedTokens: 0, completionTokens: 0, reasoningTokens: 0 },
     },
     null,
@@ -215,7 +347,11 @@ export async function writeFixtureCaseFiles(caseId: string, outDir: string): Pro
 export async function main(args: readonly string[]): Promise<void> {
   const [target, outDir] = args;
   if (target === undefined || outDir === undefined) {
-    throw new ContractError("fixture_out_dir_missing", "Pass the folder to write into as the second argument.", 400);
+    throw new ContractError(
+      "fixture_out_dir_missing",
+      "Pass the folder to write into as the second argument.",
+      400,
+    );
   }
   if (target === "all") {
     for (const fixture of fixtureCases()) {

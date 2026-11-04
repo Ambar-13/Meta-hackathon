@@ -63,7 +63,10 @@ export const CardView = z.object({
 // The type of CardView, read from the schema above.
 export type CardView = z.infer<typeof CardView>;
 // The body of POST /api/cards/:id/approve: the items the person keeps and the recall switch.
-export const CardApprove = z.object({ itemIds: z.array(Uuid).max(CARD_ITEMS_MAX), recallAllowed: z.boolean() });
+export const CardApprove = z.object({
+  itemIds: z.array(Uuid).max(CARD_ITEMS_MAX),
+  recallAllowed: z.boolean(),
+});
 // The type of CardApprove, read from the schema above.
 export type CardApprove = z.infer<typeof CardApprove>;
 // What approving a card returns.
@@ -75,7 +78,8 @@ export const CardRequestResponse = z.object({ cardId: Uuid });
 // The type of CardRequestResponse, read from the schema above.
 export type CardRequestResponse = z.infer<typeof CardRequestResponse>;
 // The words shown next to the recall switch, kept word for word.
-export const RECALL_SWITCH_COPY = "Let my Meety search my notes during meetings, with names hidden and secrets removed. The other person may see quotes from them.";
+export const RECALL_SWITCH_COPY =
+  "Let my Meety search my notes during meetings, with names hidden and secrets removed. The other person may see quotes from them.";
 // What the card model returns: items with a kind, a claim, a language, a gloss, a turn label and a quote.
 // The per-field maximums bound parsing and are picked here.
 export const CardBuildOutput = z.object({

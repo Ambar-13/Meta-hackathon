@@ -3,7 +3,12 @@ import { QuestionKind } from "../meetings/meeting.js";
 import { Side, Uuid } from "../primitives.js";
 
 // A quote a brief line rests on, with the side it came from and whether it was found in the turn.
-export const Quote = z.object({ text: z.string(), side: Side, turnId: Uuid, verified: z.boolean() });
+export const Quote = z.object({
+  text: z.string(),
+  side: Side,
+  turnId: Uuid,
+  verified: z.boolean(),
+});
 // The type of Quote, read from the schema above.
 export type Quote = z.infer<typeof Quote>;
 // One line of a brief, with up to three quotes. supported is null when the support judge could not decide.
@@ -27,9 +32,16 @@ export const Brief = z.object({
 // The type of Brief, read from the schema above.
 export type Brief = z.infer<typeof Brief>;
 // A quote as the brief model writes it, with its turn label.
-const outputQuote = z.object({ text: z.string().min(1).max(600), side: Side, turn_id: z.string().min(1) });
+const outputQuote = z.object({
+  text: z.string().min(1).max(600),
+  side: Side,
+  turn_id: z.string().min(1),
+});
 // A brief line as the brief model writes it.
-const outputPoint = z.object({ text: z.string().min(1).max(300), quotes: z.array(outputQuote).min(1).max(3) });
+const outputPoint = z.object({
+  text: z.string().min(1).max(300),
+  quotes: z.array(outputQuote).min(1).max(3),
+});
 // What the brief model returns: three lines in each of the three groups (brief prompt).
 export const BriefOutput = z.object({
   agree: z.array(outputPoint).length(3),
@@ -58,12 +70,43 @@ export const WEAK_RECEIPT_COPY = "weak quote";
 export const NO_RECEIPT_COPY = "no quote";
 // The three section headings of a brief for each kind of question. The data stays agree, clash and decideFirst; only the words
 // change, so a get-along brief reads "where you'd click" and a deal reads "where you agree". The brief screen and the share page read it.
-export const BRIEF_SECTION_LABELS: Record<QuestionKind, { agree: string; clash: string; decideFirst: string }> = {
-  get_along: { agree: "Where you'd click", clash: "Where you'd rub", decideFirst: "What to talk about first" },
-  help: { agree: "Where help would work", clash: "Where it wouldn't", decideFirst: "What to ask first" },
-  situation: { agree: "How you'd each probably react", clash: "Where you'd differ", decideFirst: "What to settle first" },
-  decision: { agree: "Where you agree", clash: "Where you clash", decideFirst: "Decide this first" },
-  deal: { agree: "Where a deal is likely", clash: "What blocks it", decideFirst: "What to offer first" },
-  debate: { agree: "Where you agree", clash: "Where you split", decideFirst: "The strongest point on each side" },
-  romance: { agree: "Where you'd click", clash: "Where you'd rub", decideFirst: "What to talk about first" },
+export const BRIEF_SECTION_LABELS: Record<
+  QuestionKind,
+  { agree: string; clash: string; decideFirst: string }
+> = {
+  get_along: {
+    agree: "Where you'd click",
+    clash: "Where you'd rub",
+    decideFirst: "What to talk about first",
+  },
+  help: {
+    agree: "Where help would work",
+    clash: "Where it wouldn't",
+    decideFirst: "What to ask first",
+  },
+  situation: {
+    agree: "How you'd each probably react",
+    clash: "Where you'd differ",
+    decideFirst: "What to settle first",
+  },
+  decision: {
+    agree: "Where you agree",
+    clash: "Where you clash",
+    decideFirst: "Decide this first",
+  },
+  deal: {
+    agree: "Where a deal is likely",
+    clash: "What blocks it",
+    decideFirst: "What to offer first",
+  },
+  debate: {
+    agree: "Where you agree",
+    clash: "Where you split",
+    decideFirst: "The strongest point on each side",
+  },
+  romance: {
+    agree: "Where you'd click",
+    clash: "Where you'd rub",
+    decideFirst: "What to talk about first",
+  },
 };

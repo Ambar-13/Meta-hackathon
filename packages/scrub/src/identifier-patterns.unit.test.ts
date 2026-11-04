@@ -9,7 +9,9 @@ function scrubbed(text: string): string {
 
 describe("identifier patterns", () => {
   it("R2.2-T7: a 16-digit number failing Luhn is no card, and its first 12 digits are caught as aadhaar", () => {
-    expect(scrubbed("Card 4111 1111 1111 1112 here")).toBe("Card [redacted:aadhaar:00000001] 1112 here");
+    expect(scrubbed("Card 4111 1111 1111 1112 here")).toBe(
+      "Card [redacted:aadhaar:00000001] 1112 here",
+    );
   });
 
   it("R2.2-T8: an IBAN failing mod 97 is left alone", () => {
@@ -22,7 +24,9 @@ describe("identifier patterns", () => {
   });
 
   it("R2.2-T10: a 12-digit number starting with 1 is a phone, not an Aadhaar", () => {
-    expect(scrubbed("Number 1234 5678 9012 is not Aadhaar.")).toBe("Number [redacted:phone:00000001] is not Aadhaar.");
+    expect(scrubbed("Number 1234 5678 9012 is not Aadhaar.")).toBe(
+      "Number [redacted:phone:00000001] is not Aadhaar.",
+    );
   });
 
   it("R2.2-T11: the postal rules replace only the code", () => {

@@ -40,8 +40,17 @@ async function newPerson(): Promise<{ personId: string; sessionToken: string }> 
 
 // The body of an upload: a header line, then one turn line per text.
 function makeBody(texts: string[]): string {
-  const headerLine = JSON.stringify({ kind: "paste", parserVersion: "1", scrubVersion: "1", personaSignal: 0.5, attested: true, turnCount: texts.length });
-  const turnLines = texts.map((text, index) => JSON.stringify({ turnIndex: index, role: "user", text, lang: "en", sensitiveCategories: [] }));
+  const headerLine = JSON.stringify({
+    kind: "paste",
+    parserVersion: "1",
+    scrubVersion: "1",
+    personaSignal: 0.5,
+    attested: true,
+    turnCount: texts.length,
+  });
+  const turnLines = texts.map((text, index) =>
+    JSON.stringify({ turnIndex: index, role: "user", text, lang: "en", sensitiveCategories: [] }),
+  );
   return [headerLine, ...turnLines].join("\n");
 }
 
@@ -50,7 +59,12 @@ function post(token: string, texts: string[]) {
   return testApp.app.inject({
     method: "POST",
     url: routes.sources.createSource.path,
-    headers: { cookie: `${SESSION_COOKIE}=${token}`, origin: ORIGIN, "content-type": "application/x-ndjson", "content-encoding": "gzip" },
+    headers: {
+      cookie: `${SESSION_COOKIE}=${token}`,
+      origin: ORIGIN,
+      "content-type": "application/x-ndjson",
+      "content-encoding": "gzip",
+    },
     payload: gzipSync(Buffer.from(makeBody(texts), "utf8")),
   });
 }
@@ -58,7 +72,11 @@ function post(token: string, texts: string[]) {
 // How many sources one person holds, read as that person.
 async function countSources(personId: string): Promise<number> {
   return asPerson(testApp.db, personId, async (trx) => {
-    const counted = await trx.selectFrom("sources").select((eb) => eb.fn.countAll().as("count")).where("person_id", "=", personId).executeTakeFirstOrThrow();
+    const counted = await trx
+      .selectFrom("sources")
+      .select((eb) => eb.fn.countAll().as("count"))
+      .where("person_id", "=", personId)
+      .executeTakeFirstOrThrow();
     return Number(counted.count);
   });
 }
@@ -85,7 +103,13 @@ describe("upload size limits run before any scrub work", () => {
   });
 
   it("R1.7-T4: more turns than one source may hold are refused before any turn is scrubbed", () => {
-    const turns = Array.from({ length: 10_001 }, (entry, index) => ({ turnIndex: index, role: "user" as const, text: "note", lang: "en", sensitiveCategories: [] }));
+    const turns = Array.from({ length: 10_001 }, (entry, index) => ({
+      turnIndex: index,
+      role: "user" as const,
+      text: "note",
+      lang: "en",
+      sensitiveCategories: [],
+    }));
     scrubCalls.count = 0;
     let thrown: unknown;
     try {

@@ -9,7 +9,10 @@ const PlantedLine = z.object({ category: Category, text: z.string(), secret: z.s
 
 // Reads and parses the 40 planted secrets, one JSON object per line.
 async function plantedLines(): Promise<z.infer<typeof PlantedLine>[]> {
-  const raw = await readFile(new URL("../fixtures/planted-secrets.ndjson", import.meta.url), "utf8");
+  const raw = await readFile(
+    new URL("../fixtures/planted-secrets.ndjson", import.meta.url),
+    "utf8",
+  );
   const lines = raw.split("\n");
   if (lines[lines.length - 1] === "") lines.pop();
   return lines.map((line) => PlantedLine.parse(JSON.parse(line)));
@@ -18,7 +21,9 @@ async function plantedLines(): Promise<z.infer<typeof PlantedLine>[]> {
 describe("scrub against the planted secrets", () => {
   it("R2.2-T15: none of the 40 planted secrets survives", async () => {
     const lines = await plantedLines();
-    const survivors = lines.filter((line) => scrub(line.text, { allowlist: [] }).text.includes(line.secret)).length;
+    const survivors = lines.filter((line) =>
+      scrub(line.text, { allowlist: [] }).text.includes(line.secret),
+    ).length;
     expect(lines.length).toBe(40);
     expect(survivors).toBe(0);
     console.log(`planted ${String(lines.length)}, survived ${String(survivors)}`);
@@ -26,7 +31,9 @@ describe("scrub against the planted secrets", () => {
 
   it("R2.2-T16: each planted secret gives exactly one redaction of its category", async () => {
     for (const line of await plantedLines()) {
-      const categories = scrub(line.text, { allowlist: [] }).redactions.map((redaction) => redaction.category);
+      const categories = scrub(line.text, { allowlist: [] }).redactions.map(
+        (redaction) => redaction.category,
+      );
       expect(categories).toEqual([line.category]);
     }
   });

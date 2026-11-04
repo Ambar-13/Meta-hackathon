@@ -6,8 +6,16 @@ import { measureSupportRate } from "./support-rate.js";
 // A rows object with every list empty except the one the test sets.
 function rowsWith(partial: Partial<EvalRows>): EvalRows {
   return {
-    claims: [], briefLines: [], turns: new Map(), events: [], meetings: [], ledger: [],
-    questionByMeeting: new Map(), personBySide: new Map(), plantedMarkers: [], briefMeta: [],
+    claims: [],
+    briefLines: [],
+    turns: new Map(),
+    events: [],
+    meetings: [],
+    ledger: [],
+    questionByMeeting: new Map(),
+    personBySide: new Map(),
+    plantedMarkers: [],
+    briefMeta: [],
     ...partial,
   };
 }

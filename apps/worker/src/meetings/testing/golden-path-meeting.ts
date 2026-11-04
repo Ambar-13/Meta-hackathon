@@ -9,10 +9,17 @@ import { readPrompt } from "@meet-first/prompts";
 import { questionCheckCallArgs, questionCheckMessages } from "../check-question-job.js";
 import { claimLabel } from "../prompt-builder.js";
 import { drainJobs, makeMeetingTestContext, readSideItems } from "./meeting-test-context.js";
-import { chatBodyFor, scriptedRecordedCall, structuredReplyLayout, type ReplyScript, type ScriptedSpeech } from "./scripted-replies.js";
+import {
+  chatBodyFor,
+  scriptedRecordedCall,
+  structuredReplyLayout,
+  type ReplyScript,
+  type ScriptedSpeech,
+} from "./scripted-replies.js";
 
 // The golden path's free-text question (specs/checks/golden-path.md step 7.3b), a help question.
-export const GOLDEN_PATH_FREE_TEXT = "Where could each of us help the other most on a 10-day hackathon?";
+export const GOLDEN_PATH_FREE_TEXT =
+  "Where could each of us help the other most on a 10-day hackathon?";
 // The repository root, from this file's folder five levels down.
 const REPO_ROOT = fileURLToPath(new URL("../../../../../", import.meta.url));
 // The folder of the recorded replies, relative to the repository root.
@@ -47,7 +54,8 @@ const GOLDEN_WORDS: MeetingWords = {
     "My human would likely enjoy it too: quiet mornings, one owner per piece and written feedback all suit them. They keep one limit, stopping at six most days. So you would probably click on how you work and rub on how late you work. Talk first about the last two days and who covers the evenings, if anyone does.",
   ],
   concede: "My human can accept the other side's point on this.",
-  holdA: "My human would likely enjoy the hackathon if mornings stay quiet and feedback stays written.",
+  holdA:
+    "My human would likely enjoy the hackathon if mornings stay quiet and feedback stays written.",
   holdB: "My human would likely enjoy it if most evenings stay free after six.",
 };
 
@@ -68,30 +76,49 @@ const DIRECTORY_WORDS: MeetingWords = {
     "My human would likely finish the degree first: their week fits one page, and a company would not fit next to a degree. You agree on a plain reason and a pause before deciding, and split on timing. Talk first about a small side project in the last year, which might suit you both.",
   ],
   concede: "My human can accept the other side's point on this.",
-  holdA: "My human would likely start a small company in school if its reason fits in one sentence.",
+  holdA:
+    "My human would likely start a small company in school if its reason fits in one sentence.",
   holdB: "My human would likely finish the degree first and start soon after.",
 };
 
 // The turn at this place of the words, or an error naming the place when the words are too short.
 function turnOf(words: MeetingWords, index: number): string {
   const text = words.turns[index];
-  if (text === undefined) throw new ContractError("golden_words_short", `The scripted meeting has no turn ${String(index + 1)}. Each script needs ten turns.`, 500);
+  if (text === undefined)
+    throw new ContractError(
+      "golden_words_short",
+      `The scripted meeting has no turn ${String(index + 1)}. Each script needs ten turns.`,
+      500,
+    );
   return text;
 }
 
 // The replies of one scripted meeting, in call order, built from the two sides' approved items and the words.
-async function scriptFor(db: Kysely<Database>, meetingId: string, words: MeetingWords): Promise<ReplyScript> {
+async function scriptFor(
+  db: Kysely<Database>,
+  meetingId: string,
+  words: MeetingWords,
+): Promise<ReplyScript> {
   const sideA = await readSideItems(db, meetingId, "a");
   const sideB = await readSideItems(db, meetingId, "b");
   const speech: ScriptedSpeech[] = [
-    { text: "", toolCalls: [{ name: "recall", arguments: { query: firstWords(pick(sideA, 0).quote) } }] },
+    {
+      text: "",
+      toolCalls: [{ name: "recall", arguments: { query: firstWords(pick(sideA, 0).quote) } }],
+    },
     { text: turnOf(words, 0) },
-    { text: "", toolCalls: [{ name: "recall", arguments: { query: firstWords(pick(sideB, 0).quote) } }] },
+    {
+      text: "",
+      toolCalls: [{ name: "recall", arguments: { query: firstWords(pick(sideB, 0).quote) } }],
+    },
     ...[1, 2, 3, 4, 5, 6, 7].map((index) => ({ text: turnOf(words, index) })),
-    { text: "", toolCalls: [
-      { name: "concede", arguments: { claimId: claimLabel(2, 1), reason: words.concede } },
-      { name: "hold", arguments: { reason: words.holdA } },
-    ] },
+    {
+      text: "",
+      toolCalls: [
+        { name: "concede", arguments: { claimId: claimLabel(2, 1), reason: words.concede } },
+        { name: "hold", arguments: { reason: words.holdA } },
+      ],
+    },
     { text: turnOf(words, 8) },
     { text: "", toolCalls: [{ name: "hold", arguments: { reason: words.holdB } }] },
     { text: turnOf(words, 9) },
@@ -112,49 +139,110 @@ async function scriptFor(db: Kysely<Database>, meetingId: string, words: Meeting
 }
 
 // The replies of the scripted golden-path meeting, in call order, built from the two sides' approved items.
-export async function goldenPathScript(db: Kysely<Database>, meetingId: string): Promise<ReplyScript> {
+export async function goldenPathScript(
+  db: Kysely<Database>,
+  meetingId: string,
+): Promise<ReplyScript> {
   return scriptFor(db, meetingId, GOLDEN_WORDS);
 }
 
 // The replies of the golden path's directory meeting, in call order, with B's side quoting public items only.
-export async function directoryMeetingScript(db: Kysely<Database>, meetingId: string): Promise<ReplyScript> {
+export async function directoryMeetingScript(
+  db: Kysely<Database>,
+  meetingId: string,
+): Promise<ReplyScript> {
   return scriptFor(db, meetingId, DIRECTORY_WORDS);
 }
 
 // Writes the question_check fixture of GOLDEN_PATH_FREE_TEXT under the repository fixture root; needs no database. Returns the path.
 export async function writeQuestionCheckFixture(): Promise<string> {
   const prompt = readPrompt("question-check");
-  const args = questionCheckCallArgs({ meetingId: QUESTION_MEETING_ID, promptVersion: prompt.version, messages: questionCheckMessages(prompt.text, GOLDEN_PATH_FREE_TEXT) });
+  const args = questionCheckCallArgs({
+    meetingId: QUESTION_MEETING_ID,
+    promptVersion: prompt.version,
+    messages: questionCheckMessages(prompt.text, GOLDEN_PATH_FREE_TEXT),
+  });
   const body = chatBodyFor(args, false);
   const folder = join(FIXTURE_DIR, "question_check");
   const path = join(folder, requestHash(body) + ".json");
-  const response = structuredReplyLayout({ allowed: true, reason: "A question about how two people could help each other.", kind: "help", romantic: false });
+  const response = structuredReplyLayout({
+    allowed: true,
+    reason: "A question about how two people could help each other.",
+    kind: "help",
+    romantic: false,
+  });
   await mkdir(folder, { recursive: true });
-  await writeFile(path, JSON.stringify(scriptedRecordedCall({ callSite: "question_check", promptVersion: prompt.version, body }, response), null, 2) + "\n");
+  await writeFile(
+    path,
+    JSON.stringify(
+      scriptedRecordedCall(
+        { callSite: "question_check", promptVersion: prompt.version, body },
+        response,
+      ),
+      null,
+      2,
+    ) + "\n",
+  );
   return path;
 }
 
 // Runs a stopped golden-path meeting to its end with the scripted replies and writes its fixtures; returns the paths. The script is
 // the first meeting's, or the directory meeting's when script is "directory".
-export async function writeMeetingFixtures(options: { workerUrl: string; meetingId: string; script?: "golden" | "directory" }): Promise<string[]> {
+export async function writeMeetingFixtures(options: {
+  workerUrl: string;
+  meetingId: string;
+  script?: "golden" | "directory";
+}): Promise<string[]> {
   const db = makeDatabase(options.workerUrl, 4);
   try {
-    const meeting = await withMeeting(db, options.meetingId, (trx) => trx.selectFrom("meetings").select(["state", "started_at", "current_step_seq"]).where("id", "=", options.meetingId).executeTakeFirst());
-    if (meeting === undefined || meeting.state !== "running" || meeting.current_step_seq !== 1 || meeting.started_at === null) {
-      throw new ContractError("golden_meeting_not_at_start", "Run the golden path until it waits at step 8 (stream), or at step 18 (dir-decide) for the directory meeting, stop the worker, then run this command with that meeting id.", 400);
+    const meeting = await withMeeting(db, options.meetingId, (trx) =>
+      trx
+        .selectFrom("meetings")
+        .select(["state", "started_at", "current_step_seq"])
+        .where("id", "=", options.meetingId)
+        .executeTakeFirst(),
+    );
+    if (
+      meeting === undefined ||
+      meeting.state !== "running" ||
+      meeting.current_step_seq !== 1 ||
+      meeting.started_at === null
+    ) {
+      throw new ContractError(
+        "golden_meeting_not_at_start",
+        "Run the golden path until it waits at step 8 (stream), or at step 18 (dir-decide) for the directory meeting, stop the worker, then run this command with that meeting id.",
+        400,
+      );
     }
-    const script = options.script === "directory" ? await directoryMeetingScript(db, options.meetingId) : await goldenPathScript(db, options.meetingId);
-    const test = await makeMeetingTestContext({ db, script, clockStart: new Date(meeting.started_at.getTime() + 1000), fixtureRoot: FIXTURE_DIR });
+    const script =
+      options.script === "directory"
+        ? await directoryMeetingScript(db, options.meetingId)
+        : await goldenPathScript(db, options.meetingId);
+    const test = await makeMeetingTestContext({
+      db,
+      script,
+      clockStart: new Date(meeting.started_at.getTime() + 1000),
+      fixtureRoot: FIXTURE_DIR,
+    });
     try {
       await test.context.enqueue("meeting_step", { meetingId: options.meetingId, stepSeq: 1 });
       for (let loop = 0; loop < 30 && !(await isEnded(db, options.meetingId)); loop += 1) {
         await drainJobs(test, { limit: 50, names: ["meeting_step"], stepGapMs: 5_000 });
       }
-      if (!(await isEnded(db, options.meetingId))) throw new ContractError("golden_meeting_did_not_end", "The scripted golden meeting did not end within 30 rounds. Check the script against the steps.", 500);
+      if (!(await isEnded(db, options.meetingId)))
+        throw new ContractError(
+          "golden_meeting_did_not_end",
+          "The scripted golden meeting did not end within 30 rounds. Check the script against the steps.",
+          500,
+        );
       const remaining = test.client.remaining();
       if (remaining.speech + remaining.receipts + remaining.questionCheck > 0) {
         const counts = `speech ${String(remaining.speech)}, receipts ${String(remaining.receipts)}, question checks ${String(remaining.questionCheck)}`;
-        throw new ContractError("golden_script_unused", `The golden script has replies that were not used (${counts}). Check the meeting's step count.`, 500);
+        throw new ContractError(
+          "golden_script_unused",
+          `The golden script has replies that were not used (${counts}). Check the meeting's step count.`,
+          500,
+        );
       }
       return test.client.written;
     } finally {
@@ -168,18 +256,37 @@ export async function writeMeetingFixtures(options: { workerUrl: string; meeting
 // The one card item of a side at this index, wrapped so the position is never past the list.
 function pick(items: readonly ScriptItem[], k: number): ScriptItem {
   const item = items[k % items.length];
-  if (item === undefined) throw new ContractError("golden_items_missing", "The golden meeting has no approved items for this side. Check the card build.", 500);
+  if (item === undefined)
+    throw new ContractError(
+      "golden_items_missing",
+      "The golden meeting has no approved items for this side. Check the card build.",
+      500,
+    );
   return item;
 }
 
 // A verified card quote as a receipt claim, so every scripted receipt passes the quote check.
-function claimOf(item: ScriptItem): { text: string; quote: string; turn_id: string; lang: string; gloss: string } {
-  return { text: item.claim, quote: item.quote, turn_id: String(item.turnIndex), lang: item.lang, gloss: item.gloss };
+function claimOf(item: ScriptItem): {
+  text: string;
+  quote: string;
+  turn_id: string;
+  lang: string;
+  gloss: string;
+} {
+  return {
+    text: item.claim,
+    quote: item.quote,
+    turn_id: String(item.turnIndex),
+    lang: item.lang,
+    gloss: item.gloss,
+  };
 }
 
 // True when the meeting has ended.
 async function isEnded(db: Kysely<Database>, meetingId: string): Promise<boolean> {
-  const row = await withMeeting(db, meetingId, (trx) => trx.selectFrom("meetings").select("state").where("id", "=", meetingId).executeTakeFirst());
+  const row = await withMeeting(db, meetingId, (trx) =>
+    trx.selectFrom("meetings").select("state").where("id", "=", meetingId).executeTakeFirst(),
+  );
   return row?.state === "ended";
 }
 
@@ -189,20 +296,30 @@ async function main(argv: readonly string[]): Promise<string[]> {
   if (argv[0] === "question") return [await writeQuestionCheckFixture()];
   const meetingId = argv[1];
   const workerUrl = process.env.DATABASE_URL_WORKER ?? "";
-  if (argv[0] === "meeting" && meetingId !== undefined) return writeMeetingFixtures({ workerUrl, meetingId });
-  if (argv[0] === "directory" && meetingId !== undefined) return writeMeetingFixtures({ workerUrl, meetingId, script: "directory" });
-  throw new ContractError("golden_command_unknown", "Use the word question, or the word meeting or directory and a meeting id.", 400);
+  if (argv[0] === "meeting" && meetingId !== undefined)
+    return writeMeetingFixtures({ workerUrl, meetingId });
+  if (argv[0] === "directory" && meetingId !== undefined)
+    return writeMeetingFixtures({ workerUrl, meetingId, script: "directory" });
+  throw new ContractError(
+    "golden_command_unknown",
+    "Use the word question, or the word meeting or directory and a meeting id.",
+    400,
+  );
 }
 
 // Runs the command when this file is the process entry; importing it for tests starts nothing.
-const isEntryPoint = process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+const isEntryPoint =
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isEntryPoint) {
   main(process.argv.slice(2)).then(
     (paths) => {
       for (const path of paths) process.stdout.write(path + "\n");
     },
     (error: unknown) => {
-      const line = error instanceof ContractError ? error.code + ": " + error.message : "golden_failed: " + String(error);
+      const line =
+        error instanceof ContractError
+          ? error.code + ": " + error.message
+          : "golden_failed: " + String(error);
       process.stderr.write(line + "\n");
       process.exitCode = 1;
     },

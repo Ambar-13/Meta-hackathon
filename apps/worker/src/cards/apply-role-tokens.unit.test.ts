@@ -21,7 +21,8 @@ function token(text: string, role: string, isMinor = false): NameToken {
 
 describe("isAllowlisted", () => {
   it("R2.3-T1: the display name, its words and the affiliations are allowlisted in any letter case", () => {
-    for (const name of ["tom", "Lee", "TOM LEE", "kopi club"]) expect(isAllowlisted(name, person)).toBe(true);
+    for (const name of ["tom", "Lee", "TOM LEE", "kopi club"])
+      expect(isAllowlisted(name, person)).toBe(true);
     for (const name of ["Tomás", "Priya"]) expect(isAllowlisted(name, person)).toBe(false);
   });
 });
@@ -34,20 +35,32 @@ describe("applyRoleTokens", () => {
   });
 
   it("R2.3-T3: a longer name is replaced before its first name, and a token is not matched again", () => {
-    expect(applyRoleTokens("Rohan Mehta and Rohan met.", [token("Rohan", "colleague 2"), token("Rohan Mehta", "colleague")])).toBe(
-      "[person:colleague] and [person:colleague 2] met.",
-    );
+    expect(
+      applyRoleTokens("Rohan Mehta and Rohan met.", [
+        token("Rohan", "colleague 2"),
+        token("Rohan Mehta", "colleague"),
+      ]),
+    ).toBe("[person:colleague] and [person:colleague 2] met.");
   });
 
   it("R2.3-T4: placeholders, code placeholders and role tokens are never rewritten", () => {
-    const text = "Mail [redacted:email:3f9a1c2e] to Ana; [code: python, 12 lines] and [person:friend] stay.";
-    expect(applyRoleTokens(text, [token("Ana", "colleague"), token("email", "person"), token("friend", "person")])).toBe(
+    const text =
+      "Mail [redacted:email:3f9a1c2e] to Ana; [code: python, 12 lines] and [person:friend] stay.";
+    expect(
+      applyRoleTokens(text, [
+        token("Ana", "colleague"),
+        token("email", "person"),
+        token("friend", "person"),
+      ]),
+    ).toBe(
       "Mail [redacted:email:3f9a1c2e] to [person:colleague]; [code: python, 12 lines] and [person:friend] stay.",
     );
   });
 
   it("R2.3-T5: a Chinese name is matched inside a sentence", () => {
-    expect(applyRoleTokens("王伟说下周开会。", [token("王伟", "person")])).toBe("[person:person]说下周开会。");
+    expect(applyRoleTokens("王伟说下周开会。", [token("王伟", "person")])).toBe(
+      "[person:person]说下周开会。",
+    );
   });
 });
 
@@ -113,13 +126,30 @@ describe("planTurnRewrites and counts", () => {
       [
         { id: "t0", text: "Ask Rohan and Rohan again.", sensitive_categories: [] },
         { id: "t1", text: "My son Arjun is six.", sensitive_categories: [] },
-        { id: "t2", text: "Nothing new, [person:colleague] was here before.", sensitive_categories: [] },
+        {
+          id: "t2",
+          text: "Nothing new, [person:colleague] was here before.",
+          sensitive_categories: [],
+        },
       ],
       [token("Rohan", "colleague"), token("Arjun", "child", true)],
     );
-    expect(rewrites[0]).toMatchObject({ text: "Ask [person:colleague] and [person:colleague] again.", occurrences: [2, 0], isTextChanged: true, categories: [] });
-    expect(rewrites[1]).toMatchObject({ occurrences: [0, 1], categories: ["minor"], isCategoriesChanged: true });
-    expect(rewrites[2]).toMatchObject({ occurrences: [0, 0], isTextChanged: false, isCategoriesChanged: false });
+    expect(rewrites[0]).toMatchObject({
+      text: "Ask [person:colleague] and [person:colleague] again.",
+      occurrences: [2, 0],
+      isTextChanged: true,
+      categories: [],
+    });
+    expect(rewrites[1]).toMatchObject({
+      occurrences: [0, 1],
+      categories: ["minor"],
+      isCategoriesChanged: true,
+    });
+    expect(rewrites[2]).toMatchObject({
+      occurrences: [0, 0],
+      isTextChanged: false,
+      isCategoriesChanged: false,
+    });
   });
 
   it("R2.3-T8: countToken counts one token's occurrences and no other token's", () => {

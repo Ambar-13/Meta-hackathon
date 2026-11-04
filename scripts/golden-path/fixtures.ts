@@ -26,7 +26,8 @@ export const QUESTION_ID = 1;
 // half of the recorded meeting's 28 events, so the meeting is still running when the stream resumes and when step 11 closes it.
 export const PLANNED_DISCONNECT_SEQ = 10;
 // The free-text question the question check must allow, a help question. It starts a second meeting that is never started.
-export const FREE_TEXT_QUESTION = "Where could each of us help the other most on a 10-day hackathon?";
+export const FREE_TEXT_QUESTION =
+  "Where could each of us help the other most on a 10-day hackathon?";
 // The avatar B picks for the comic, the first of the fixed list.
 export const AVATAR = AVATARS[0];
 // How many of B's items B makes public in step 16: three, because the brief writer needs three distinct quotes of a side to fill
@@ -41,17 +42,25 @@ export const DIRECTORY_QUESTION_ID = 13;
 // A curated dating question, 17. B's listing refuses it, because B leaves the dating switch off.
 export const ROMANCE_QUESTION_ID = 17;
 // The friend ask A sends about B in step 20. apps/worker/src/asks/testing/golden-path-asks.ts writes its replies for the same text.
-export const REACT_ASK_TEXT = "How would you probably react if the team moved the demo day to a Saturday?";
+export const REACT_ASK_TEXT =
+  "How would you probably react if the team moved the demo day to a Saturday?";
 // What A types to the orchestrator in step 23: the question of step 20, quoted, so the plan carries it word for word and its ask
 // replays step 20's recorded replies. Meety's own reply (prompt orchestrator v3) was recorded live on 3 Nov 2026.
 export const ORCHESTRATOR_MESSAGE = `Can you ask B: "${REACT_ASK_TEXT}"`;
 // The help search A sends in step 21; its words meet B's public item about getting stuck. golden-path-asks.ts uses the same text.
-export const HELP_ASK_TEXT = "I keep getting stuck on one hard problem and go round in circles. Who could help me think it through?";
+export const HELP_ASK_TEXT =
+  "I keep getting stuck on one hard problem and go round in circles. Who could help me think it through?";
 // The consent sentence the phone gate reads on screen before any upload. The script cannot see the screen.
-export const CONSENT_COPY = "Your original archive stays on your device. After you review redactions, we upload and store only the selected excerpts shown here. You can delete them at any time.";
+export const CONSENT_COPY =
+  "Your original archive stays on your device. After you review redactions, we upload and store only the selected excerpts shown here. You can delete them at any time.";
 
 // One fixture made ready for the upload: its turns, its header, its NDJSON body, and the redactions the browser preview would show.
-export type LoadedSource = { header: SourceHeader; turns: Turn[]; ndjson: string; previewRedactions: number };
+export type LoadedSource = {
+  header: SourceHeader;
+  turns: Turn[];
+  ndjson: string;
+  previewRedactions: number;
+};
 // Both fixtures, loaded once at the start of a run.
 export type LoadedFixtures = { paste: LoadedSource; chatgpt: LoadedSource };
 
@@ -61,8 +70,14 @@ export function fixtureFolder(): string {
 }
 
 // Writes the NDJSON body (the header line, then one line per turn) and counts the redactions the browser preview would show.
-export function buildNdjson(header: SourceHeader, turns: readonly Turn[]): { ndjson: string; previewRedactions: number } {
-  const previewRedactions = turns.reduce((total, turn) => total + scrub(turn.text, { allowlist: [] }).redactions.length, 0);
+export function buildNdjson(
+  header: SourceHeader,
+  turns: readonly Turn[],
+): { ndjson: string; previewRedactions: number } {
+  const previewRedactions = turns.reduce(
+    (total, turn) => total + scrub(turn.text, { allowlist: [] }).redactions.length,
+    0,
+  );
   const ndjson = [JSON.stringify(header), ...turns.map((turn) => JSON.stringify(turn))].join("\n");
   return { ndjson, previewRedactions };
 }
@@ -84,7 +99,11 @@ function loadSource(name: string): LoadedSource {
     const reason = error instanceof Error ? error.message : "unknown reason";
     throw new ExitError(2, `golden_path_fixture_missing: ${path} does not parse: ${reason}`);
   }
-  if (extracted.turns.length === 0) throw new ExitError(2, `golden_path_fixture_missing: ${path} holds no turns written by its owner.`);
+  if (extracted.turns.length === 0)
+    throw new ExitError(
+      2,
+      `golden_path_fixture_missing: ${path} holds no turns written by its owner.`,
+    );
   const header: SourceHeader = {
     kind: extracted.kind,
     parserVersion: PARSER_VERSION,

@@ -16,7 +16,10 @@ describe("walkGeneric", () => {
         ],
       },
     };
-    expect(walkGeneric(root).map((turn) => turn.text)).toEqual(["I like quiet mornings.", "Second\nline"]);
+    expect(walkGeneric(root).map((turn) => turn.text)).toEqual([
+      "I like quiet mornings.",
+      "Second\nline",
+    ]);
   });
 
   it("R1.9-T2: parts and text inside content are read", () => {

@@ -2,7 +2,8 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { ZodError } from "zod";
 import { ContractError, ErrorBody, HTTP } from "@meet-first/contracts";
 
-const PAYLOAD_INVALID_SENTENCE = "The request body did not match the expected shape. Reload and try again.";
+const PAYLOAD_INVALID_SENTENCE =
+  "The request body did not match the expected shape. Reload and try again.";
 const REQUEST_REFUSED_SENTENCE = "The request was refused. Reload and try again.";
 const INTERNAL_SENTENCE = "Something went wrong on our side. Try again in a minute.";
 
@@ -10,21 +11,36 @@ const INTERNAL_SENTENCE = "Something went wrong on our side. Try again in a minu
 export type DescribedError = { status: number; code: string; message: string };
 
 // Status codes that Fastify or a plugin raises without a ContractError, each with the code and sentence the client sees (413 is the upload body limit).
-export const FRAMEWORK_STATUS_ERRORS: Readonly<Record<number, { code: string; message: string }>> = {
-  400: { code: "payload_invalid", message: PAYLOAD_INVALID_SENTENCE },
-  404: { code: "not_found", message: "This no longer exists or is not yours." },
-  413: { code: "payload_too_large", message: "The request body is over the size limit for this route. Send a smaller body." },
-  415: { code: "content_type_unsupported", message: "Send the body as JSON with Content-Type application/json." },
-};
+export const FRAMEWORK_STATUS_ERRORS: Readonly<Record<number, { code: string; message: string }>> =
+  {
+    400: { code: "payload_invalid", message: PAYLOAD_INVALID_SENTENCE },
+    404: { code: "not_found", message: "This no longer exists or is not yours." },
+    413: {
+      code: "payload_too_large",
+      message: "The request body is over the size limit for this route. Send a smaller body.",
+    },
+    415: {
+      code: "content_type_unsupported",
+      message: "Send the body as JSON with Content-Type application/json.",
+    },
+  };
 
 // session_missing, 401. Contracts HTTP now names 401 as unauthorized, so the constant is read from there.
 export function makeSessionMissingError(): ContractError {
-  return new ContractError("session_missing", "Sign in again from the start page.", HTTP.unauthorized);
+  return new ContractError(
+    "session_missing",
+    "Sign in again from the start page.",
+    HTTP.unauthorized,
+  );
 }
 
 // origin_mismatch, 403.
 export function makeOriginMismatchError(): ContractError {
-  return new ContractError("origin_mismatch", "Open the app from its own address and try again.", HTTP.forbidden);
+  return new ContractError(
+    "origin_mismatch",
+    "Open the app from its own address and try again.",
+    HTTP.forbidden,
+  );
 }
 
 // not_found, 404. It is also the answer for an id that is not a uuid, so a bad id tells nothing.
@@ -59,7 +75,11 @@ function readTextField(value: unknown, key: string): string | undefined {
 
 // The answer for a status that Fastify or a plugin raised: the limiter's own code and sentence, a framework code, or
 // request_refused for any other 4xx. Null for a status none of these rules cover.
-function describeStatus(status: number, code: string | undefined, message: string | undefined): DescribedError | null {
+function describeStatus(
+  status: number,
+  code: string | undefined,
+  message: string | undefined,
+): DescribedError | null {
   if (status === 429 && code !== undefined && message !== undefined) {
     return { status, code, message };
   }
@@ -76,7 +96,10 @@ function describeStatus(status: number, code: string | undefined, message: strin
 // Decides the status for an error that Fastify or a plugin raised, by the rules after ContractError and ZodError.
 function describeFastifyError(error: unknown): DescribedError {
   const status = readNumberField(error, "statusCode");
-  const described = status === undefined ? null : describeStatus(status, readTextField(error, "code"), readTextField(error, "message"));
+  const described =
+    status === undefined
+      ? null
+      : describeStatus(status, readTextField(error, "code"), readTextField(error, "message"));
   return described ?? { status: 500, code: "internal_error", message: INTERNAL_SENTENCE };
 }
 
@@ -112,16 +135,24 @@ export function replaceJsonParser(app: FastifyInstance): void {
 }
 
 // Sends ErrorBody for any thrown value, and logs the value at error level when it becomes internal_error (repo rule 3).
-export function handleRouteError(error: unknown, request: FastifyRequest, reply: FastifyReply): void {
+export function handleRouteError(
+  error: unknown,
+  request: FastifyRequest,
+  reply: FastifyReply,
+): void {
   const described = describeError(error);
   if (described.status === 500) {
     request.log.error({ err: error }, "internal_error");
   }
-  void reply.status(described.status).send(ErrorBody.parse({ code: described.code, message: described.message }));
+  void reply
+    .status(described.status)
+    .send(ErrorBody.parse({ code: described.code, message: described.message }));
 }
 
 // Answers a path no route claimed with not_found as JSON; the web-pages GET fallback answers GET paths before this runs.
 export function handleNotFound(request: FastifyRequest, reply: FastifyReply): void {
   const error = makeNotFoundError();
-  void reply.status(error.httpStatus).send(ErrorBody.parse({ code: error.code, message: error.message }));
+  void reply
+    .status(error.httpStatus)
+    .send(ErrorBody.parse({ code: error.code, message: error.message }));
 }

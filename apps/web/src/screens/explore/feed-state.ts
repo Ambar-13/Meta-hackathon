@@ -20,21 +20,53 @@ export type EndlessFeed = {
 };
 
 // What the feed holds between pages.
-type FeedState = { friends: Post[]; others: Post[]; part: FeedPart; cursor: FeedCursor | null; isLoading: boolean; error: ApiError | null; hasLoaded: boolean };
+type FeedState = {
+  friends: Post[];
+  others: Post[];
+  part: FeedPart;
+  cursor: FeedCursor | null;
+  isLoading: boolean;
+  error: ApiError | null;
+  hasLoaded: boolean;
+};
 
 // The feed before its first page.
-const START: FeedState = { friends: [], others: [], part: "friends", cursor: null, isLoading: false, error: null, hasLoaded: false };
+const START: FeedState = {
+  friends: [],
+  others: [],
+  part: "friends",
+  cursor: null,
+  isLoading: false,
+  error: null,
+  hasLoaded: false,
+};
 
 // The query of the next page: the part, and where it starts when it is not the part's first page.
 function queryOf(part: FeedScope, cursor: FeedCursor | null): Record<string, string> {
-  return cursor === null ? { scope: part } : { scope: part, before: cursor.before, beforeId: cursor.beforeId };
+  return cursor === null
+    ? { scope: part }
+    : { scope: part, before: cursor.before, beforeId: cursor.beforeId };
 }
 
 // The state after one page of a part: its posts added, and, after its last page, the next part from its start.
-function withPage(state: FeedState, part: FeedScope, page: { posts: Post[]; next: FeedCursor | null }): FeedState {
-  const lists = part === "friends" ? { friends: [...state.friends, ...page.posts], others: state.others } : { friends: state.friends, others: [...state.others, ...page.posts] };
+function withPage(
+  state: FeedState,
+  part: FeedScope,
+  page: { posts: Post[]; next: FeedCursor | null },
+): FeedState {
+  const lists =
+    part === "friends"
+      ? { friends: [...state.friends, ...page.posts], others: state.others }
+      : { friends: state.friends, others: [...state.others, ...page.posts] };
   const after: FeedPart = part === "friends" ? "others" : "end";
-  return { ...lists, part: page.next === null ? after : part, cursor: page.next, isLoading: false, error: null, hasLoaded: true };
+  return {
+    ...lists,
+    part: page.next === null ? after : part,
+    cursor: page.next,
+    isLoading: false,
+    error: null,
+    hasLoaded: true,
+  };
 }
 
 // Reads Home's feed a page at a time (GET /api/feed): the first page of your friends' posts when Home opens, and each next page when
@@ -59,7 +91,12 @@ export function useEndlessFeed(): EndlessFeed {
         setState(next);
       },
       (thrown: unknown) => {
-        const failed = { ...latest.current, isLoading: false, error: asApiError(thrown), hasLoaded: true };
+        const failed = {
+          ...latest.current,
+          isLoading: false,
+          error: asApiError(thrown),
+          hasLoaded: true,
+        };
         latest.current = failed;
         setState(failed);
       },
@@ -69,10 +106,30 @@ export function useEndlessFeed(): EndlessFeed {
     loadMore();
   }, [loadMore]);
   useEffect(() => {
-    if (state.part === "others" && state.friends.length === 0 && state.others.length === 0 && !state.isLoading && state.error === null) loadMore();
+    if (
+      state.part === "others" &&
+      state.friends.length === 0 &&
+      state.others.length === 0 &&
+      !state.isLoading &&
+      state.error === null
+    )
+      loadMore();
   }, [state, loadMore]);
   const remove = (postId: string): void => {
-    setState((now) => ({ ...now, friends: now.friends.filter((post) => post.postId !== postId), others: now.others.filter((post) => post.postId !== postId) }));
+    setState((now) => ({
+      ...now,
+      friends: now.friends.filter((post) => post.postId !== postId),
+      others: now.others.filter((post) => post.postId !== postId),
+    }));
   };
-  return { friends: state.friends, others: state.others, part: state.part, isLoading: state.isLoading, error: state.error, hasLoaded: state.hasLoaded, loadMore, remove };
+  return {
+    friends: state.friends,
+    others: state.others,
+    part: state.part,
+    isLoading: state.isLoading,
+    error: state.error,
+    hasLoaded: state.hasLoaded,
+    loadMore,
+    remove,
+  };
 }

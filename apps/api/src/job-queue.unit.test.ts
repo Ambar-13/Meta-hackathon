@@ -34,7 +34,11 @@ it("D45-T1: makeApiEnqueue passes maxAttempts from JOB_MAX_ATTEMPTS and no job k
   await makeApiEnqueue(utils)("delete_person", { personId: U });
 
   expect(calls.length).toBe(1);
-  expect(callAt(calls, 0)).toEqual({ name: "delete_person", payload: { personId: U }, spec: { maxAttempts: 5 } });
+  expect(callAt(calls, 0)).toEqual({
+    name: "delete_person",
+    payload: { personId: U },
+    spec: { maxAttempts: 5 },
+  });
   expect(Object.keys(callAt(calls, 0).spec)).toEqual(["maxAttempts"]);
 });
 

@@ -7,7 +7,12 @@ import { makeDatabase } from "@meet-first/db";
 import type { ApiEnv, RouteDeps, RoutePlugin } from "./app-types.js";
 import { makeApiEnqueue } from "./job-queue.js";
 import { handleNotFound, handleRouteError, replaceJsonParser } from "./route-errors.js";
-import { addOriginCheck, addSessionHook, registerAccountRateLimit, registerSessionsRoutes } from "./sessions/index.js";
+import {
+  addOriginCheck,
+  addSessionHook,
+  registerAccountRateLimit,
+  registerSessionsRoutes,
+} from "./sessions/index.js";
 import { registerHomeRoutes } from "./home/index.js";
 import { registerSummaryRoutes } from "./summary/index.js";
 import { registerCardsRoutes } from "./cards/index.js";
@@ -31,7 +36,14 @@ export const JSON_BODY_LIMIT_BYTES = 1_048_576;
 // The address the server listens on: every interface, because Render's proxy reaches the container from outside it.
 export const LISTEN_HOST = "0.0.0.0";
 // Log fields that could carry a secret; pino replaces their values before a line is written.
-export const LOG_REDACT_PATHS: string[] = ["req.headers.cookie", "req.headers.authorization", 'res.headers["set-cookie"]', "*.token", "*.sessionToken", "*.recoveryCode"];
+export const LOG_REDACT_PATHS: string[] = [
+  "req.headers.cookie",
+  "req.headers.authorization",
+  'res.headers["set-cookie"]',
+  "*.token",
+  "*.sessionToken",
+  "*.recoveryCode",
+];
 // The text that replaces a hidden log value.
 export const LOG_REDACT_CENSOR = "[hidden]";
 
@@ -44,12 +56,21 @@ export function readApiEnv(processEnv: NodeJS.ProcessEnv): ApiEnv {
   if (parsed.success) {
     return parsed.data;
   }
-  const names = [...new Set(parsed.error.issues.map((issue) => String(issue.path[0] ?? "env")))].sort((a, b) => a.localeCompare(b));
-  throw new ContractError("api_env_invalid", "Set " + names.join(", ") + " in the environment, then start the api again.", 500);
+  const names = [
+    ...new Set(parsed.error.issues.map((issue) => String(issue.path[0] ?? "env"))),
+  ].sort((a, b) => a.localeCompare(b));
+  throw new ContractError(
+    "api_env_invalid",
+    "Set " + names.join(", ") + " in the environment, then start the api again.",
+    500,
+  );
 }
 
 // The pino options for Fastify's logger: the env's level, the redaction above, and a test stream when one is given.
-export function loggerOptions(level: ApiEnv["LOG_LEVEL"], logStream?: NodeJS.WritableStream): LoggerOptions & { stream?: NodeJS.WritableStream } {
+export function loggerOptions(
+  level: ApiEnv["LOG_LEVEL"],
+  logStream?: NodeJS.WritableStream,
+): LoggerOptions & { stream?: NodeJS.WritableStream } {
   return {
     level,
     redact: { paths: LOG_REDACT_PATHS, censor: LOG_REDACT_CENSOR },
@@ -58,9 +79,16 @@ export function loggerOptions(level: ApiEnv["LOG_LEVEL"], logStream?: NodeJS.Wri
 }
 
 // Builds the app: logger, body limit, JSON parser, hooks, error and not-found handlers, then the routes.
-export async function buildApp(deps: RouteDeps, options: BuildAppOptions): Promise<FastifyInstance> {
+export async function buildApp(
+  deps: RouteDeps,
+  options: BuildAppOptions,
+): Promise<FastifyInstance> {
   // One trusted hop, Render's proxy: request.ip is then the address that proxy appended, never a value the client sent.
-  const app = fastify({ logger: loggerOptions(deps.env.LOG_LEVEL, options.logStream), trustProxy: 1, bodyLimit: JSON_BODY_LIMIT_BYTES });
+  const app = fastify({
+    logger: loggerOptions(deps.env.LOG_LEVEL, options.logStream),
+    trustProxy: 1,
+    bodyLimit: JSON_BODY_LIMIT_BYTES,
+  });
   replaceJsonParser(app);
   addContentSecurityPolicy(app);
   addOriginCheck(app, deps.env.APP_ORIGIN);
@@ -104,7 +132,10 @@ export async function startServer(processEnv: NodeJS.ProcessEnv): Promise<void> 
     const env = readApiEnv(processEnv);
     const db = makeDatabase(env.DATABASE_URL_API, API_POOL_SIZE);
     const workerUtils = await makeWorkerUtils({ connectionString: env.DATABASE_URL_API });
-    const app = await buildApp({ db, env, now: () => new Date(), enqueue: makeApiEnqueue(workerUtils) }, { routes: "all" });
+    const app = await buildApp(
+      { db, env, now: () => new Date(), enqueue: makeApiEnqueue(workerUtils) },
+      { routes: "all" },
+    );
     await app.listen({ port: env.PORT, host: LISTEN_HOST });
     let isStopping = false;
     const stop = async (): Promise<void> => {
@@ -118,14 +149,20 @@ export async function startServer(processEnv: NodeJS.ProcessEnv): Promise<void> 
     process.once("SIGTERM", () => void stop());
     process.once("SIGINT", () => void stop());
   } catch (error) {
-    const line = error instanceof ContractError ? error.code + ": " + error.message : "api_boot_failed: " + String(error) + ". Check DATABASE_URL_API and that pnpm db:migrate ran.";
+    const line =
+      error instanceof ContractError
+        ? error.code + ": " + error.message
+        : "api_boot_failed: " +
+          String(error) +
+          ". Check DATABASE_URL_API and that pnpm db:migrate ran.";
     process.stderr.write(line + "\n");
     process.exit(1);
   }
 }
 
 // Starts the api when this file is the process entry (pnpm --filter @meet-first/api start); importing it for tests starts nothing.
-const isEntryPoint = process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+const isEntryPoint =
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isEntryPoint) {
   void startServer(process.env);
 }

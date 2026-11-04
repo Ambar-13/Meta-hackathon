@@ -2,8 +2,20 @@ import { describe, expect, it, vi, beforeAll, afterAll } from "vitest";
 import { sql, type Kysely } from "kysely";
 import { ContractError } from "@meet-first/contracts";
 import { makeDatabase, numberFromPostgres, POOL_SIZE } from "./client.js";
-import { assertOneContext, withMeeting, withPerson, type DatabaseTransaction } from "./transaction.js";
-import { asPerson, createPairedMeetingWithTurns, freshTestDatabase, sha256Text, type SeededMeeting, type TestDatabase } from "./testing/index.js";
+import {
+  assertOneContext,
+  withMeeting,
+  withPerson,
+  type DatabaseTransaction,
+} from "./transaction.js";
+import {
+  asPerson,
+  createPairedMeetingWithTurns,
+  freshTestDatabase,
+  sha256Text,
+  type SeededMeeting,
+  type TestDatabase,
+} from "./testing/index.js";
 import type { Database } from "./types.js";
 
 let t: TestDatabase;
@@ -11,14 +23,24 @@ let one: Kysely<Database>;
 let m: SeededMeeting;
 
 // Reads the two settings of the current transaction, with the empty text read as null.
-async function readSettings(trx: DatabaseTransaction): Promise<{ person: string | null; meeting: string | null }> {
-  const result = await sql<{ person: string | null; meeting: string | null }>`SELECT nullif(current_setting('app.person_id', true), '') AS person, nullif(current_setting('app.meeting_id', true), '') AS meeting`.execute(trx);
+async function readSettings(
+  trx: DatabaseTransaction,
+): Promise<{ person: string | null; meeting: string | null }> {
+  const result = await sql<{
+    person: string | null;
+    meeting: string | null;
+  }>`SELECT nullif(current_setting('app.person_id', true), '') AS person, nullif(current_setting('app.meeting_id', true), '') AS meeting`.execute(
+    trx,
+  );
   return result.rows[0] ?? { person: null, meeting: null };
 }
 
 // The error an action throws, or undefined when it succeeds.
 async function caughtFrom(act: () => Promise<unknown>): Promise<unknown> {
-  return act().then(() => undefined, (caught: unknown) => caught);
+  return act().then(
+    () => undefined,
+    (caught: unknown) => caught,
+  );
 }
 
 beforeAll(async () => {
@@ -58,7 +80,9 @@ describe("transaction wrappers", () => {
       expect(error).toBeInstanceOf(ContractError);
       expect(Reflect.get(error ?? {}, "code")).toBe("context_both_set");
       expect(Reflect.get(error ?? {}, "httpStatus")).toBe(500);
-      expect(Reflect.get(error ?? {}, "message")).toBe("A transaction set both app.person_id and app.meeting_id. Use withPerson or withMeeting, not both.");
+      expect(Reflect.get(error ?? {}, "message")).toBe(
+        "A transaction set both app.person_id and app.meeting_id. Use withPerson or withMeeting, not both.",
+      );
       expect(run).toHaveBeenCalledTimes(0);
     } finally {
       await sql`SELECT set_config('app.meeting_id', '', false)`.execute(one);
@@ -74,7 +98,9 @@ describe("transaction wrappers", () => {
       expect(error).toBeInstanceOf(ContractError);
       expect(Reflect.get(error ?? {}, "code")).toBe("context_both_set");
       expect(Reflect.get(error ?? {}, "httpStatus")).toBe(500);
-      expect(Reflect.get(error ?? {}, "message")).toBe("A transaction set both app.person_id and app.meeting_id. Use withPerson or withMeeting, not both.");
+      expect(Reflect.get(error ?? {}, "message")).toBe(
+        "A transaction set both app.person_id and app.meeting_id. Use withPerson or withMeeting, not both.",
+      );
       expect(run).toHaveBeenCalledTimes(0);
     } finally {
       await sql`SELECT set_config('app.person_id', '', false)`.execute(one);
@@ -87,7 +113,9 @@ describe("transaction wrappers", () => {
     expect(error).toBeInstanceOf(ContractError);
     expect(Reflect.get(error ?? {}, "code")).toBe("context_missing");
     expect(Reflect.get(error ?? {}, "httpStatus")).toBe(500);
-    expect(Reflect.get(error ?? {}, "message")).toBe("A transaction set neither app.person_id nor app.meeting_id. Wrap the work in withPerson or withMeeting.");
+    expect(Reflect.get(error ?? {}, "message")).toBe(
+      "A transaction set neither app.person_id nor app.meeting_id. Wrap the work in withPerson or withMeeting.",
+    );
   });
 
   it("D55-T6: the wrappers refuse an id that is not a uuid", async () => {
@@ -97,18 +125,37 @@ describe("transaction wrappers", () => {
 
     expect(Reflect.get(personError ?? {}, "code")).toBe("context_id_invalid");
     expect(Reflect.get(personError ?? {}, "httpStatus")).toBe(500);
-    expect(Reflect.get(personError ?? {}, "message")).toBe("The person id passed to withPerson or withMeeting is not a uuid. Pass the row id, not a token.");
+    expect(Reflect.get(personError ?? {}, "message")).toBe(
+      "The person id passed to withPerson or withMeeting is not a uuid. Pass the row id, not a token.",
+    );
     expect(Reflect.get(meetingError ?? {}, "code")).toBe("context_id_invalid");
-    expect(Reflect.get(meetingError ?? {}, "message")).toBe("The meeting id passed to withPerson or withMeeting is not a uuid. Pass the row id, not a token.");
+    expect(Reflect.get(meetingError ?? {}, "message")).toBe(
+      "The meeting id passed to withPerson or withMeeting is not a uuid. Pass the row id, not a token.",
+    );
     expect(run).toHaveBeenCalledTimes(0);
   });
 
   it("D55-T7: a throw inside run rolls the transaction back", async () => {
-    const failure = await caughtFrom(() => withPerson(t.db, m.a.personId, async (trx) => {
-      await trx.insertInto("transfer_links").values({ person_id: m.a.personId, token_hash: sha256Text("rolled-back"), expires_at: new Date(Date.now() + 10 * 60_000) }).execute();
-      throw new Error("stop");
-    }));
-    const count = await asPerson(t.db, m.a.personId, (trx) => sql<{ n: string }>`SELECT count(*) AS n FROM transfer_links WHERE token_hash = ${sha256Text("rolled-back")}`.execute(trx));
+    const failure = await caughtFrom(() =>
+      withPerson(t.db, m.a.personId, async (trx) => {
+        await trx
+          .insertInto("transfer_links")
+          .values({
+            person_id: m.a.personId,
+            token_hash: sha256Text("rolled-back"),
+            expires_at: new Date(Date.now() + 10 * 60_000),
+          })
+          .execute();
+        throw new Error("stop");
+      }),
+    );
+    const count = await asPerson(t.db, m.a.personId, (trx) =>
+      sql<{
+        n: string;
+      }>`SELECT count(*) AS n FROM transfer_links WHERE token_hash = ${sha256Text("rolled-back")}`.execute(
+        trx,
+      ),
+    );
 
     expect(failure).toBeInstanceOf(Error);
     expect(Reflect.get(failure ?? {}, "message")).toBe("stop");
@@ -116,10 +163,14 @@ describe("transaction wrappers", () => {
   });
 
   it("D55-T8: a pooled connection carries no person into the next transaction", async () => {
-    const first = await withPerson(one, m.a.personId, (trx) => sql<{ n: string }>`SELECT count(*) AS n FROM sessions`.execute(trx));
+    const first = await withPerson(one, m.a.personId, (trx) =>
+      sql<{ n: string }>`SELECT count(*) AS n FROM sessions`.execute(trx),
+    );
     const second = await withPerson(one, m.b.personId, async (trx) => {
       const settings = await readSettings(trx);
-      const count = await sql<{ n: string }>`SELECT count(*) AS n FROM sessions WHERE person_id = ${m.a.personId}::uuid`.execute(trx);
+      const count = await sql<{
+        n: string;
+      }>`SELECT count(*) AS n FROM sessions WHERE person_id = ${m.a.personId}::uuid`.execute(trx);
       return { settings, count: numberFromPostgres(count.rows[0]?.n) };
     });
 
@@ -135,7 +186,11 @@ describe("transaction wrappers", () => {
   it("D56-T2: a client with pool size 2 opens at most two connections", async () => {
     const two = makeDatabase(t.apiUrl, 2);
     try {
-      const results = await Promise.all(Array.from({ length: 5 }, () => sql<{ pid: number }>`SELECT pg_backend_pid() AS pid, pg_sleep(0.3)`.execute(two)));
+      const results = await Promise.all(
+        Array.from({ length: 5 }, () =>
+          sql<{ pid: number }>`SELECT pg_backend_pid() AS pid, pg_sleep(0.3)`.execute(two),
+        ),
+      );
       const pids = new Set(results.map((result) => result.rows[0]?.pid));
 
       expect(pids.size).toBe(2);

@@ -1,6 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import type { DirectoryListing, DirectoryPage, ListedMeeting, MyListing, QuestionKind } from "@meet-first/contracts";
-import { apiFetch, ApiError, APP_PATHS, asApiError, readCardQuery, routes } from "../../app-shell/index.js";
+import type {
+  DirectoryListing,
+  DirectoryPage,
+  ListedMeeting,
+  MyListing,
+  QuestionKind,
+} from "@meet-first/contracts";
+import {
+  apiFetch,
+  ApiError,
+  APP_PATHS,
+  asApiError,
+  readCardQuery,
+  routes,
+} from "../../app-shell/index.js";
 import { readListingOrNull } from "../card/index.js";
 import { meetingCreateBody, type QuestionPick } from "../lobby/index.js";
 
@@ -10,26 +23,60 @@ export const SEARCH_MAX_CHARS = 200;
 export const FREE_TEXT_REFUSAL = "Write a question of 5 to 300 characters.";
 
 // The listings shown so far: the search they answer, the next page to ask for, whether more exist, and how the last load went.
-export type BrowseState = { query: string; listings: DirectoryListing[]; nextPage: number; hasMore: boolean; hasLoaded: boolean; isLoading: boolean; error: ApiError | null };
+export type BrowseState = {
+  query: string;
+  listings: DirectoryListing[];
+  nextPage: number;
+  hasMore: boolean;
+  hasLoaded: boolean;
+  isLoading: boolean;
+  error: ApiError | null;
+};
 // The listings with their two actions: a new search from page 0, and the next page of the same search.
 export type BrowseHook = BrowseState & { search: (query: string) => void; loadMore: () => void };
 // Where the Meet flow stands: whose picker is open, whether a create is out, and the sentence of the last refusal.
 export type MeetState = { openListingId: string | null; isSending: boolean; error: string | null };
 // The Meet flow with its two actions: open or close one listing's picker, and create the meeting from a pick.
-export type MeetControls = { state: MeetState; toggle: (listingId: string) => void; create: (listingId: string, pick: QuestionPick) => Promise<void> };
+export type MeetControls = {
+  state: MeetState;
+  toggle: (listingId: string) => void;
+  create: (listingId: string, pick: QuestionPick) => Promise<void>;
+};
 // The Your listing part's data: loading, failed, or ready with the listing (null when not listed), the card it was on when the page
 // opened, and the meetings the persona was in.
 export type YourListingLoad =
   | { kind: "loading" }
   | { kind: "failed"; error: ApiError }
-  | { kind: "ready"; listing: MyListing | null; listedCardId: string | null; meetings: ListedMeeting[] };
+  | {
+      kind: "ready";
+      listing: MyListing | null;
+      listedCardId: string | null;
+      meetings: ListedMeeting[];
+    };
 // Where the Leave button stands.
-export type LeaveState = { kind: "idle" } | { kind: "sending" } | { kind: "left" } | { kind: "failed"; error: ApiError };
+export type LeaveState =
+  | { kind: "idle" }
+  | { kind: "sending" }
+  | { kind: "left" }
+  | { kind: "failed"; error: ApiError };
 // The Your listing part's data with the Leave action, and replaceListing for a listing the person has joined with or saved.
-export type YourListingHook = { load: YourListingLoad; leaveState: LeaveState; leave: () => Promise<void>; replaceListing: (listing: MyListing) => void };
+export type YourListingHook = {
+  load: YourListingLoad;
+  leaveState: LeaveState;
+  leave: () => Promise<void>;
+  replaceListing: (listing: MyListing) => void;
+};
 
 // The listings before the first page arrives.
-const FIRST_BROWSE: BrowseState = { query: "", listings: [], nextPage: 0, hasMore: false, hasLoaded: false, isLoading: true, error: null };
+const FIRST_BROWSE: BrowseState = {
+  query: "",
+  listings: [],
+  nextPage: 0,
+  hasMore: false,
+  hasLoaded: false,
+  isLoading: true,
+  error: null,
+};
 
 // The query values of one directory request: the page always, and the words only when the trimmed search is not empty.
 export function directoryQueryFor(query: string, page: number): Record<string, string | number> {
@@ -40,11 +87,23 @@ export function directoryQueryFor(query: string, page: number): Record<string, s
 // The listings after a page arrives: page 0 replaces them, and a later page is added after them.
 export function withPage(state: BrowseState, reply: DirectoryPage): BrowseState {
   const listings = reply.page === 0 ? reply.listings : [...state.listings, ...reply.listings];
-  return { ...state, listings, nextPage: reply.page + 1, hasMore: reply.hasMore, hasLoaded: true, isLoading: false, error: null };
+  return {
+    ...state,
+    listings,
+    nextPage: reply.page + 1,
+    hasMore: reply.hasMore,
+    hasLoaded: true,
+    isLoading: false,
+    error: null,
+  };
 }
 
 // The card a Meet button speaks from: the card in the address, else the card this tab approved, else the card of the person's listing.
-export function cardForMeeting(input: { search: string; approvedCardId: string | null; listedCardId: string | null }): string | null {
+export function cardForMeeting(input: {
+  search: string;
+  approvedCardId: string | null;
+  listedCardId: string | null;
+}): string | null {
   return readCardQuery(input.search) ?? input.approvedCardId ?? input.listedCardId;
 }
 
@@ -66,7 +125,8 @@ export function useDirectoryBrowse(): BrowseHook {
         if (ticket === latestTicket.current) setState((previous) => withPage(previous, reply));
       },
       (thrown: unknown) => {
-        if (ticket === latestTicket.current) setState((previous) => ({ ...previous, isLoading: false, error: asApiError(thrown) }));
+        if (ticket === latestTicket.current)
+          setState((previous) => ({ ...previous, isLoading: false, error: asApiError(thrown) }));
       },
     );
   };
@@ -86,11 +146,22 @@ export function useDirectoryBrowse(): BrowseHook {
 }
 
 // The Meet flow of the directory page: one picker open at a time, and a created meeting opens its page.
-export function useListingMeeting(options: { cardId: string | null; go: (path: string) => void }): MeetControls {
+export function useListingMeeting(options: {
+  cardId: string | null;
+  go: (path: string) => void;
+}): MeetControls {
   const { cardId, go } = options;
-  const [state, setState] = useState<MeetState>({ openListingId: null, isSending: false, error: null });
+  const [state, setState] = useState<MeetState>({
+    openListingId: null,
+    isSending: false,
+    error: null,
+  });
   const toggle = (listingId: string): void => {
-    setState((previous) => ({ openListingId: previous.openListingId === listingId ? null : listingId, isSending: false, error: null }));
+    setState((previous) => ({
+      openListingId: previous.openListingId === listingId ? null : listingId,
+      isSending: false,
+      error: null,
+    }));
   };
   const create = async (listingId: string, pick: QuestionPick): Promise<void> => {
     if (cardId === null) return;
@@ -101,10 +172,17 @@ export function useListingMeeting(options: { cardId: string | null; go: (path: s
     }
     setState((previous) => ({ ...previous, isSending: true, error: null }));
     try {
-      const reply = await apiFetch(routes.directory.createListingMeeting, { params: { id: listingId }, body });
+      const reply = await apiFetch(routes.directory.createListingMeeting, {
+        params: { id: listingId },
+        body,
+      });
       go(APP_PATHS.meeting(reply.meetingId));
     } catch (thrown: unknown) {
-      setState((previous) => ({ ...previous, isSending: false, error: asApiError(thrown).message }));
+      setState((previous) => ({
+        ...previous,
+        isSending: false,
+        error: asApiError(thrown).message,
+      }));
     }
   };
   return { state, toggle, create };
@@ -118,7 +196,13 @@ export function useYourListing(): YourListingHook {
     let isActive = true;
     Promise.all([readListingOrNull(), apiFetch(routes.directory.listedMeetings)]).then(
       ([listing, view]) => {
-        if (isActive) setLoad({ kind: "ready", listing, listedCardId: listing?.cardId ?? null, meetings: view.meetings });
+        if (isActive)
+          setLoad({
+            kind: "ready",
+            listing,
+            listedCardId: listing?.cardId ?? null,
+            meetings: view.meetings,
+          });
       },
       (thrown: unknown) => {
         if (isActive) setLoad({ kind: "failed", error: asApiError(thrown) });
@@ -132,7 +216,9 @@ export function useYourListing(): YourListingHook {
     setLeaveState({ kind: "sending" });
     try {
       await apiFetch(routes.directory.leave);
-      setLoad((previous) => (previous.kind === "ready" ? { ...previous, listing: null } : previous));
+      setLoad((previous) =>
+        previous.kind === "ready" ? { ...previous, listing: null } : previous,
+      );
       setLeaveState({ kind: "left" });
     } catch (thrown: unknown) {
       setLeaveState({ kind: "failed", error: asApiError(thrown) });

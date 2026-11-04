@@ -1,4 +1,10 @@
-import type { DirectoryListing, HomeView, Post, PostsView, PublicItem } from "@meet-first/contracts";
+import type {
+  DirectoryListing,
+  HomeView,
+  Post,
+  PostsView,
+  PublicItem,
+} from "@meet-first/contracts";
 import { apiFetch, routes, usePolledView, type PolledView } from "../../app-shell/index.js";
 import { useAdds, type AddsModel } from "../chat/index.js";
 
@@ -13,16 +19,57 @@ export function peopleRowAt(postCount: number): number {
 
 // Words too common to tie a post to one of its writer's items.
 const COMMON_WORDS: ReadonlySet<string> = new Set([
-  "about", "after", "again", "also", "before", "being", "been", "does", "done", "every", "from", "have", "here", "into", "just", "like", "more", "most",
-  "much", "only", "over", "some", "than", "that", "their", "them", "then", "there", "they", "this", "those", "very", "what", "when", "where", "which",
-  "while", "will", "with", "would", "your", "yours",
+  "about",
+  "after",
+  "again",
+  "also",
+  "before",
+  "being",
+  "been",
+  "does",
+  "done",
+  "every",
+  "from",
+  "have",
+  "here",
+  "into",
+  "just",
+  "like",
+  "more",
+  "most",
+  "much",
+  "only",
+  "over",
+  "some",
+  "than",
+  "that",
+  "their",
+  "them",
+  "then",
+  "there",
+  "they",
+  "this",
+  "those",
+  "very",
+  "what",
+  "when",
+  "where",
+  "which",
+  "while",
+  "will",
+  "with",
+  "would",
+  "your",
+  "yours",
 ]);
 
 // The words of a text that can tie it to another: lower case, four letters or more, not common, a plural s taken off, and none of leaveOut.
 // Example: "Draw the three screens" gives draw, three, screen.
 export function keyWords(text: string, leaveOut: ReadonlySet<string> = new Set()): Set<string> {
   const words = text.toLowerCase().match(/[a-z]+/g) ?? [];
-  const kept = words.filter((word) => word.length >= 4 && !COMMON_WORDS.has(word)).map((word) => (word.length > 4 && word.endsWith("s") ? word.slice(0, -1) : word));
+  const kept = words
+    .filter((word) => word.length >= 4 && !COMMON_WORDS.has(word))
+    .map((word) => (word.length > 4 && word.endsWith("s") ? word.slice(0, -1) : word));
   return new Set(kept.filter((word) => !leaveOut.has(word)));
 }
 
@@ -36,7 +83,9 @@ export function noteItemFor(post: Post, listing: DirectoryListing | undefined): 
   let best: PublicItem | null = null;
   let bestScore = 0;
   for (const item of listing.items) {
-    const score = [...keyWords(`${item.claim} ${item.quote}`, name)].filter((word) => postWords.has(word)).length;
+    const score = [...keyWords(`${item.claim} ${item.quote}`, name)].filter((word) =>
+      postWords.has(word),
+    ).length;
     if (score > bestScore) {
       best = item;
       bestScore = score;
@@ -48,24 +97,44 @@ export function noteItemFor(post: Post, listing: DirectoryListing | undefined): 
 // The person's home view (GET /api/home), read once when the feed opens, for the next step while they have no approved card; a failed
 // read shows no next step and never blocks the feed.
 export function useFeedHome(): PolledView<HomeView> {
-  return usePolledView(() => apiFetch(routes.people.readHome, {}), { key: "feed-home", intervalMs: 30_000, keepPolling: () => false });
+  return usePolledView(() => apiFetch(routes.people.readHome, {}), {
+    key: "feed-home",
+    intervalMs: 30_000,
+    keepPolling: () => false,
+  });
 }
 
 // The newest posts of people in Explore (GET /api/posts), read once when the page opens; a failed read is tried again after 30 s.
 export function useExplorePosts(): PolledView<PostsView> {
-  return usePolledView(() => apiFetch(routes.social.listPosts, {}), { key: "explore-posts", intervalMs: 30_000, keepPolling: () => false });
+  return usePolledView(() => apiFetch(routes.social.listPosts, {}), {
+    key: "explore-posts",
+    intervalMs: 30_000,
+    keepPolling: () => false,
+  });
 }
 
 // Who among the people in Explore is already a friend, whose agent can be asked, and the Add friend requests sent from this page.
-export type ExploreFriends = { isFriend: (listingId: string) => boolean; canAsk: (listingId: string) => boolean; adds: AddsModel };
+export type ExploreFriends = {
+  isFriend: (listingId: string) => boolean;
+  canAsk: (listingId: string) => boolean;
+  adds: AddsModel;
+};
 
 // Reads the friends list once (GET /api/friends) and holds the Add friend buttons; adding a sample person, who accepts at once, reads
 // the friends list again.
 export function useExploreFriends(): ExploreFriends {
-  const friends = usePolledView(() => apiFetch(routes.directory.friends, {}), { key: "explore-friends", intervalMs: 30_000, keepPolling: () => false });
+  const friends = usePolledView(() => apiFetch(routes.directory.friends, {}), {
+    key: "explore-friends",
+    intervalMs: 30_000,
+    keepPolling: () => false,
+  });
   const adds = useAdds(friends.reload);
   const list = friends.value?.friends ?? [];
-  const byListing = new Map(list.flatMap((friend) => (friend.listingId === null ? [] : [[friend.listingId, friend] as const])));
+  const byListing = new Map(
+    list.flatMap((friend) =>
+      friend.listingId === null ? [] : [[friend.listingId, friend] as const],
+    ),
+  );
   return {
     isFriend: (listingId) => byListing.has(listingId) || adds.stateOf(listingId).kind === "friends",
     canAsk: (listingId) => byListing.get(listingId)?.canAsk === true,

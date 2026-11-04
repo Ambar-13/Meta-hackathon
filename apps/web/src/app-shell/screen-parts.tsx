@@ -9,7 +9,14 @@ import { Icon, Sticker } from "../look/index.js";
 export const COPIED_MS = 2_000;
 // The pages a visitor may open before they have a session: the start page, the claim page and the join page. The session cookie is
 // HttpOnly, so the browser cannot tell whether a session exists, and the frame goes by the page instead.
-const NO_SESSION_PATHS: readonly string[] = [APP_PATHS.welcome, APP_PATHS.claim, APP_PATHS.join, APP_PATHS.privacy, APP_PATHS.terms, APP_PATHS.cookies];
+const NO_SESSION_PATHS: readonly string[] = [
+  APP_PATHS.welcome,
+  APP_PATHS.claim,
+  APP_PATHS.join,
+  APP_PATHS.privacy,
+  APP_PATHS.terms,
+  APP_PATHS.cookies,
+];
 
 // True on every page except the ones above and the public share pages, which anyone with the link may open.
 function showsAppLinks(pathname: string): boolean {
@@ -20,7 +27,11 @@ function showsAppLinks(pathname: string): boolean {
 const SETTINGS_LINK = { label: "Settings", to: APP_PATHS.settings } as const;
 
 // The frame of a page without a session: the top bar with the logo, the content, and Settings as one chip.
-const OpenFrame = (props: { main: ReactElement; hasSettingsLink: boolean; pathname: string }): ReactElement => {
+const OpenFrame = (props: {
+  main: ReactElement;
+  hasSettingsLink: boolean;
+  pathname: string;
+}): ReactElement => {
   return (
     <>
       <header className="top-bar">
@@ -32,7 +43,10 @@ const OpenFrame = (props: { main: ReactElement; hasSettingsLink: boolean; pathna
       {props.main}
       {props.hasSettingsLink ? (
         <nav className="top-links" aria-label="Pages">
-          <Link to={SETTINGS_LINK.to} aria-current={props.pathname === SETTINGS_LINK.to ? "page" : undefined}>
+          <Link
+            to={SETTINGS_LINK.to}
+            aria-current={props.pathname === SETTINGS_LINK.to ? "page" : undefined}
+          >
             <Sticker name="gear" />
             {SETTINGS_LINK.label}
           </Link>
@@ -44,7 +58,11 @@ const OpenFrame = (props: { main: ReactElement; hasSettingsLink: boolean; pathna
 
 // The frame of a signed-in page: the phone's top bar as Instagram's, Create at its left end (the + that shares a post or a story; Create
 // links to Invite a friend), the logo in the middle and Settings at its right end, then the rail or tab bar and the content column.
-const SignedInFrame = (props: { main: ReactElement; hasSettingsLink: boolean; pathname: string }): ReactElement => {
+const SignedInFrame = (props: {
+  main: ReactElement;
+  hasSettingsLink: boolean;
+  pathname: string;
+}): ReactElement => {
   return (
     <div className="social-frame">
       <header className="top-bar social-top">
@@ -69,7 +87,14 @@ const SignedInFrame = (props: { main: ReactElement; hasSettingsLink: boolean; pa
 
 // What a screen passes to the frame: one h1 title (or hasOwnHeading when the screen draws its own h1), the content, and its options.
 // isWide lets a screen use the laptop's width; titleAside sits beside the h1, for a name tag or a status.
-type FrameProps = { title: string; children: ReactNode; hideSettingsLink?: boolean; isWide?: boolean; titleAside?: ReactNode; hasOwnHeading?: boolean };
+type FrameProps = {
+  title: string;
+  children: ReactNode;
+  hideSettingsLink?: boolean;
+  isWide?: boolean;
+  titleAside?: ReactNode;
+  hasOwnHeading?: boolean;
+};
 
 // The h1 of a screen, with the aside beside it when there is one.
 const FrameTitle = (props: FrameProps): ReactElement | null => {
@@ -89,15 +114,20 @@ export const ScreenFrame = (props: FrameProps): ReactElement => {
   const location = useLocation();
   const hasAppLinks = showsAppLinks(location.pathname);
   const hasSettingsLink = props.hideSettingsLink !== true;
-  const mainClass = ["screen", props.isWide === true ? "wide" : "", hasAppLinks ? "has-tabs" : ""].filter((part) => part !== "").join(" ");
+  const mainClass = ["screen", props.isWide === true ? "wide" : "", hasAppLinks ? "has-tabs" : ""]
+    .filter((part) => part !== "")
+    .join(" ");
   const main = (
     <main className={mainClass}>
       <FrameTitle {...props} />
       {props.children}
     </main>
   );
-  if (!hasAppLinks) return <OpenFrame main={main} hasSettingsLink={hasSettingsLink} pathname={location.pathname} />;
-  return <SignedInFrame main={main} hasSettingsLink={hasSettingsLink} pathname={location.pathname} />;
+  if (!hasAppLinks)
+    return <OpenFrame main={main} hasSettingsLink={hasSettingsLink} pathname={location.pathname} />;
+  return (
+    <SignedInFrame main={main} hasSettingsLink={hasSettingsLink} pathname={location.pathname} />
+  );
 };
 
 // Shows one ApiError: its sentence, plus a link to the start page when the session is missing (status 401).

@@ -19,7 +19,9 @@ describe("quiz screen", () => {
   it("R4.2-T1: the form stays locked while the persona answers and no persona answer shows before submitting", async () => {
     stubRoute(routes.cards.readQuiz, quizView("answering"));
     renderQuiz();
-    expect(await screen.findByText("Your Meety answers first. The form opens when it is done.")).toBeTruthy();
+    expect(
+      await screen.findByText("Your Meety answers first. The form opens when it is done."),
+    ).toBeTruthy();
     const boxes = screen.getAllByRole("textbox");
     expect(boxes).toHaveLength(10);
     for (const box of boxes) {
@@ -49,7 +51,8 @@ describe("quiz screen", () => {
     await waitFor(() => {
       expect(requestsTo(routes.cards.answerQuiz)).toHaveLength(1);
     });
-    const answers = (requestsTo(routes.cards.answerQuiz)[0]?.body as { answers: unknown[] }).answers;
+    const answers = (requestsTo(routes.cards.answerQuiz)[0]?.body as { answers: unknown[] })
+      .answers;
     expect(answers).toHaveLength(10);
     expect(answers[0]).toEqual({ position: 1, text: "answer 1" });
   });

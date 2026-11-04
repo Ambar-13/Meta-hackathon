@@ -7,9 +7,11 @@ import { buildTestApp } from "../testing/app-factory.js";
 import type { RoutePlugin } from "../app-types.js";
 import { registerWebPages } from "./index.js";
 
-const INDEX_HTML = '<!doctype html><html><head><title>Meet First</title></head><body><div id="root"></div></body></html>';
+const INDEX_HTML =
+  '<!doctype html><html><head><title>Meet First</title></head><body><div id="root"></div></body></html>';
 const HUGE_PLAN_BYTES = 1_000_000_000_000_000;
-const MISSING_BUILD_SENTENCE = "The web app is not built yet. Run pnpm --filter web build, then restart the api.";
+const MISSING_BUILD_SENTENCE =
+  "The web app is not built yet. Run pnpm --filter web build, then restart the api.";
 
 let distDir = "";
 let emptyDir = "";
@@ -24,8 +26,14 @@ beforeAll(async () => {
   await mkdir(join(distDir, "assets"));
   await writeFile(join(distDir, "assets", "app-1a2b3c4d.js"), 'console.log("meet first");');
   emptyDir = await mkdtemp(join(tmpdir(), "meet-first-empty-"));
-  const webWithClock: RoutePlugin = (app, deps) => registerWebPages(app, { ...deps, now: () => fakeNow ?? new Date() }, { distDir, diskPlanBytes: HUGE_PLAN_BYTES });
-  const webWithoutBuild: RoutePlugin = (app, deps) => registerWebPages(app, deps, { distDir: emptyDir, diskPlanBytes: 1 });
+  const webWithClock: RoutePlugin = (app, deps) =>
+    registerWebPages(
+      app,
+      { ...deps, now: () => fakeNow ?? new Date() },
+      { distDir, diskPlanBytes: HUGE_PLAN_BYTES },
+    );
+  const webWithoutBuild: RoutePlugin = (app, deps) =>
+    registerWebPages(app, deps, { distDir: emptyDir, diskPlanBytes: 1 });
   t1 = await buildTestApp({ routes: [webWithClock] });
   t2 = await buildTestApp({ routes: [webWithoutBuild] });
 });
@@ -62,12 +70,19 @@ it("A7-T5: GET / and client paths serve the built index.html with no-store, and 
 it("R9.4-T1: an /api path no route claims answers a JSON 404, never the app shell", async () => {
   const share = await t1.app.inject({ method: "GET", url: "/api/share/not-a-real-slug" });
   const bare = await t1.app.inject({ method: "GET", url: "/api" });
-  const post = await t1.app.inject({ method: "POST", url: "/api/nothing", headers: { origin: "http://localhost:3000" } });
+  const post = await t1.app.inject({
+    method: "POST",
+    url: "/api/nothing",
+    headers: { origin: "http://localhost:3000" },
+  });
 
   for (const response of [share, bare, post]) {
     expect(response.statusCode).toBe(404);
     expect(response.headers["content-type"]).toBe("application/json; charset=utf-8");
-    expect(response.json()).toEqual({ code: "not_found", message: "This no longer exists or is not yours." });
+    expect(response.json()).toEqual({
+      code: "not_found",
+      message: "This no longer exists or is not yours.",
+    });
   }
 });
 

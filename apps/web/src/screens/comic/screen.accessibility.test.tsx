@@ -14,16 +14,37 @@ afterEach(() => {
 });
 
 // The reply of the comic view when no comic was asked for yet.
-const NOT_REQUESTED = { status: 404, body: { code: "comic_not_found", message: "No comic has been requested for this meeting." } };
+const NOT_REQUESTED = {
+  status: 404,
+  body: { code: "comic_not_found", message: "No comic has been requested for this meeting." },
+};
 // A comic view in one state, with no panels yet.
 const comicIn = (state: ComicView["state"]): ComicView => ({ state, panels: [] });
 // Six panels with a caption each, in order.
-const CAPTIONS = ["A and B sit down to talk.", "A and B agree on a plan.", "A and B see a difference.", "A and B talk it through.", "A and B decide together.", "A and B settle the first piece."];
-const READY: ComicView = { state: "ready", panels: CAPTIONS.map((caption, index) => ({ position: index + 1, caption, imageUrl: `/api/comics/${IDS.meeting}/panels/${String(index + 1)}` })) };
+const CAPTIONS = [
+  "A and B sit down to talk.",
+  "A and B agree on a plan.",
+  "A and B see a difference.",
+  "A and B talk it through.",
+  "A and B decide together.",
+  "A and B settle the first piece.",
+];
+const READY: ComicView = {
+  state: "ready",
+  panels: CAPTIONS.map((caption, index) => ({
+    position: index + 1,
+    caption,
+    imageUrl: `/api/comics/${IDS.meeting}/panels/${String(index + 1)}`,
+  })),
+};
 
 // Renders the comic page for the fixture meeting, at one phone or desktop width.
 function renderComic(width: 375 | 1024 = 375): void {
-  renderScreen(<ComicScreen />, { pattern: ROUTE_PATTERNS.comic, url: APP_PATHS.comic(IDS.meeting), width });
+  renderScreen(<ComicScreen />, {
+    pattern: ROUTE_PATTERNS.comic,
+    url: APP_PATHS.comic(IDS.meeting),
+    width,
+  });
 }
 
 describe("comic screen", () => {
@@ -43,7 +64,9 @@ describe("comic screen", () => {
   });
 
   it("W2-COMIC-T17: the rendering copy shows, then six images with alt text equal to captions after the stub flips, using fake timers and says so", async () => {
-    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] });
+    vi.useFakeTimers({
+      toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"],
+    });
     stubRoute(routes.briefs.readComic, [comicIn("rendering"), READY]);
     renderComic();
     await act(async () => {
@@ -61,7 +84,12 @@ describe("comic screen", () => {
   });
 
   it("W2-COMIC-T18: each skipped reason renders its own sentence and no retry button exists", async () => {
-    const reasons: ComicSkipReason[] = ["deadline", "prompt_blocked", "render_failed", "no_supported_lines"];
+    const reasons: ComicSkipReason[] = [
+      "deadline",
+      "prompt_blocked",
+      "render_failed",
+      "no_supported_lines",
+    ];
     for (const reason of reasons) {
       const { unmount } = render(<SkippedNotice reason={reason} />);
       expect(screen.getByText(SKIP_COPY[reason])).toBeTruthy();

@@ -25,22 +25,40 @@ afterEach(async () => {
 
 describe("the boot self-test", () => {
   it("R3.1-T1: the self-test refuses a planted anyOf schema, calls nothing and exits 1", async () => {
-    const client = makeLlmClient({ db: workerDb, env: replayEnv, now: () => new Date(), sleep: noSleep, random: () => 0.5 });
+    const client = makeLlmClient({
+      db: workerDb,
+      env: replayEnv,
+      now: () => new Date(),
+      sleep: noSleep,
+      random: () => 0.5,
+    });
     const lines: string[] = [];
-    const results = await runBootSelfTestOn(client, { schemas: { planted: z.object({ x: z.union([z.string(), z.number()]) }) }, log: (line) => lines.push(line) });
-    expect(results).toEqual([{ name: "planted", ok: false, httpStatus: null, detail: "schema_not_strict" }]);
+    const results = await runBootSelfTestOn(client, {
+      schemas: { planted: z.object({ x: z.union([z.string(), z.number()]) }) },
+      log: (line) => lines.push(line),
+    });
+    expect(results).toEqual([
+      { name: "planted", ok: false, httpStatus: null, detail: "schema_not_strict" },
+    ]);
     expect(selfTestExitCode(results)).toBe(1);
     expect(lines).toEqual(["self-test planted: failed - schema_not_strict"]);
     expect((await readLedgerWindow(workerDb, 600)).callCount).toBe(0);
   });
 
   it("R3.1-T3: the boot self-test answers all twelve schemas from their fixtures and writes twelve ledger rows", async () => {
-    const client = makeLlmClient({ db: workerDb, env: replayEnv, now: () => new Date(), sleep: noSleep, random: () => 0.5 });
+    const client = makeLlmClient({
+      db: workerDb,
+      env: replayEnv,
+      now: () => new Date(),
+      sleep: noSleep,
+      random: () => 0.5,
+    });
     const lines: string[] = [];
     const results = await runBootSelfTest(client, (line) => lines.push(line));
     expect(results).toHaveLength(12);
     expect(results.map((result) => result.name)).toEqual(Object.keys(MODEL_OUTPUT_SCHEMAS));
-    for (const result of results) expect(result).toEqual({ name: result.name, ok: true, httpStatus: 200, detail: null });
+    for (const result of results)
+      expect(result).toEqual({ name: result.name, ok: true, httpStatus: 200, detail: null });
     expect(selfTestExitCode(results)).toBe(0);
     expect(lines).toHaveLength(12);
     for (const result of results) expect(lines).toContain(`self-test ${result.name}: ok`);
@@ -49,7 +67,11 @@ describe("the boot self-test", () => {
 
   it("R10.2-T1: selfTestMain names a missing DATABASE_URL_WORKER and returns 1", async () => {
     const spy = vi.spyOn(console, "log").mockImplementation(() => undefined);
-    const code = await selfTestMain({ META_API_KEY: "x", META_API_BASE_URL: "https://api.meta.ai/v1", LLM_MODE: "replay" });
+    const code = await selfTestMain({
+      META_API_KEY: "x",
+      META_API_BASE_URL: "https://api.meta.ai/v1",
+      LLM_MODE: "replay",
+    });
     expect(code).toBe(1);
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy).toHaveBeenCalledWith("env_invalid: DATABASE_URL_WORKER");
@@ -58,7 +80,13 @@ describe("the boot self-test", () => {
 
   it("D74-T1: selfTestMain refuses replay in production and returns 1", async () => {
     const spy = vi.spyOn(console, "log").mockImplementation(() => undefined);
-    const code = await selfTestMain({ DATABASE_URL_WORKER: "postgres://app_worker:test@localhost:5432/meet_first_test", META_API_KEY: "replay-no-key", META_API_BASE_URL: "https://api.meta.ai/v1", LLM_MODE: "replay", NODE_ENV: "production" });
+    const code = await selfTestMain({
+      DATABASE_URL_WORKER: "postgres://app_worker:test@localhost:5432/meet_first_test",
+      META_API_KEY: "replay-no-key",
+      META_API_BASE_URL: "https://api.meta.ai/v1",
+      LLM_MODE: "replay",
+      NODE_ENV: "production",
+    });
     expect(code).toBe(1);
     expect(spy).toHaveBeenCalledTimes(1);
     const line = String(spy.mock.calls[0]?.[0]);

@@ -3,13 +3,19 @@
 // number about a person. The step: each claim shows its text, its quote and at most one receipt mark as text. What it does not do:
 // show a position, a count or a rank.
 import type { ReactElement } from "react";
-import { NO_RECEIPT_COPY, WEAK_RECEIPT_COPY, type AnswerClaim, type AskAnswer } from "@meet-first/contracts";
+import {
+  NO_RECEIPT_COPY,
+  WEAK_RECEIPT_COPY,
+  type AnswerClaim,
+  type AskAnswer,
+} from "@meet-first/contracts";
 import { Avatar, Sticker } from "../../look/index.js";
 
 // The line for an answer that carries no claim.
 const NO_CLAIMS_LINE = "No quotes from their notes.";
 // The line in place of the meeting button when this phone knows no approved card; the lobby has the same limit.
-const NO_CARD_LINE = "Open your approved card on this phone first, then come back here to start a meeting.";
+const NO_CARD_LINE =
+  "Open your approved card on this phone first, then come back here to start a meeting.";
 // The words of the meeting button.
 const MEET_LABEL = "Start a meeting";
 
@@ -41,7 +47,10 @@ export const AnswerClaims = (props: { claims: AnswerClaim[] }): ReactElement => 
       {props.claims.map((claim, index) => {
         const mark = receiptMarkFor(claim);
         return (
-          <li key={`${String(index)}-${claim.quote}`} className={mark === null ? "ask-claim" : "ask-claim is-flagged"}>
+          <li
+            key={`${String(index)}-${claim.quote}`}
+            className={mark === null ? "ask-claim" : "ask-claim is-flagged"}
+          >
             <p className="ask-claim-text">{claim.text}</p>
             <blockquote className="receipt ask-quote">
               <Sticker name="quote" />
@@ -56,11 +65,23 @@ export const AnswerClaims = (props: { claims: AnswerClaim[] }): ReactElement => 
 };
 
 // The meeting control of a meetable answer: the button when this phone knows an approved card, else the line that says how to get one.
-const MeetControl = (props: { answerId: string; cardId: string | null; isBusy: boolean; onMeet: (answerId: string, cardId: string) => void }): ReactElement => {
+const MeetControl = (props: {
+  answerId: string;
+  cardId: string | null;
+  isBusy: boolean;
+  onMeet: (answerId: string, cardId: string) => void;
+}): ReactElement => {
   const { cardId } = props;
   if (cardId === null) return <p className="muted ask-no-card">{NO_CARD_LINE}</p>;
   return (
-    <button type="button" className="ask-meet" disabled={props.isBusy} onClick={() => { props.onMeet(props.answerId, cardId); }}>
+    <button
+      type="button"
+      className="ask-meet"
+      disabled={props.isBusy}
+      onClick={() => {
+        props.onMeet(props.answerId, cardId);
+      }}
+    >
       {MEET_LABEL}
     </button>
   );
@@ -68,7 +89,12 @@ const MeetControl = (props: { answerId: string; cardId: string | null; isBusy: b
 
 // One help answer: the persona's initial, display name and line, its answer in a blue bubble, its claims, and the meeting control when
 // canMeet is true.
-export const HelpAnswerItem = (props: { answer: AskAnswer; cardId: string | null; isBusy: boolean; onMeet: (answerId: string, cardId: string) => void }): ReactElement => {
+export const HelpAnswerItem = (props: {
+  answer: AskAnswer;
+  cardId: string | null;
+  isBusy: boolean;
+  onMeet: (answerId: string, cardId: string) => void;
+}): ReactElement => {
   const { answer } = props;
   return (
     <li className="ask-answer">
@@ -81,7 +107,14 @@ export const HelpAnswerItem = (props: { answer: AskAnswer; cardId: string | null
       </div>
       <p className="ask-answer-text">{answer.answer}</p>
       <AnswerClaims claims={answer.claims} />
-      {answer.canMeet ? <MeetControl answerId={answer.answerId} cardId={props.cardId} isBusy={props.isBusy} onMeet={props.onMeet} /> : null}
+      {answer.canMeet ? (
+        <MeetControl
+          answerId={answer.answerId}
+          cardId={props.cardId}
+          isBusy={props.isBusy}
+          onMeet={props.onMeet}
+        />
+      ) : null}
     </li>
   );
 };

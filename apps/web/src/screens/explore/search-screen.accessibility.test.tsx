@@ -1,7 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
-import { DirectoryListing, DirectoryPage, type FriendsView, type PostsView } from "@meet-first/contracts";
-import { APP_PATHS, chatPathWithDraft, clearClientState, personPostsPath, ROUTE_PATTERNS, routes } from "../../app-shell/index.js";
+import {
+  DirectoryListing,
+  DirectoryPage,
+  type FriendsView,
+  type PostsView,
+} from "@meet-first/contracts";
+import {
+  APP_PATHS,
+  chatPathWithDraft,
+  clearClientState,
+  personPostsPath,
+  ROUTE_PATTERNS,
+  routes,
+} from "../../app-shell/index.js";
 import { renderScreen, requestsTo, stubRoute, type StubInput } from "../../testing/index.js";
 import { unlabelledControls } from "../../testing/render-screen.js";
 import { LISTING_IDS } from "../../testing/fixtures.js";
@@ -23,7 +35,13 @@ function listing(listingId: string, displayName: string, isOpen: boolean): Direc
     line: `${displayName} builds small tools`,
     openToRomance: isOpen,
     isSample: false,
-    items: [{ kind: "habit", claim: `${displayName} starts work early`, quote: `I am at my desk by seven, says ${displayName}` }],
+    items: [
+      {
+        kind: "habit",
+        claim: `${displayName} starts work early`,
+        quote: `I am at my desk by seven, says ${displayName}`,
+      },
+    ],
   });
 }
 
@@ -34,8 +52,16 @@ function page(pageNumber: number, listings: DirectoryListing[], hasMore: boolean
 
 // A post by Ravi with a photo, n making its id, and these words for the photo.
 function photoPost(n: number, photo: string, photoAlt: string): PostsView["posts"][number] {
-  return { postId: `00000000-0000-4000-8000-00000000080${String(n)}`, listingId: LISTING_IDS.ravi, displayName: "Ravi", isSample: true, text: `Photo ${String(n)}.`,
-    createdAt: new Date(Date.now() - n * 3_600_000).toISOString(), photo, photoAlt };
+  return {
+    postId: `00000000-0000-4000-8000-00000000080${String(n)}`,
+    listingId: LISTING_IDS.ravi,
+    displayName: "Ravi",
+    isSample: true,
+    text: `Photo ${String(n)}.`,
+    createdAt: new Date(Date.now() - n * 3_600_000).toISOString(),
+    photo,
+    photoAlt,
+  };
 }
 
 // What Search's other two reads answer in a test: the replies for GET /api/posts, and the friends list.
@@ -65,7 +91,9 @@ async function personLinkOf(name: string): Promise<HTMLElement> {
 
 // Types these words into the search box and presses Search.
 function searchFor(words: string): void {
-  fireEvent.change(screen.getByRole("searchbox", { name: "Search people" }), { target: { value: words } });
+  fireEvent.change(screen.getByRole("searchbox", { name: "Search people" }), {
+    target: { value: words },
+  });
   fireEvent.click(screen.getByRole("button", { name: "Search" }));
 }
 
@@ -74,7 +102,10 @@ const RAVI = listing(LISTING_IDS.ravi, "Ravi", false);
 
 describe("Search, against the MSW route stubs (a fake server)", () => {
   it("W7-SEARCH-T1: each person is a row linking to their profile with their line, first claim and dating words, never an id or a number, and Add friend sends a friend request", async () => {
-    stubRoute(routes.social.sendFriendRequest, { status: 201, body: { requestId: LISTING_IDS.request } });
+    stubRoute(routes.social.sendFriendRequest, {
+      status: 201,
+      body: { requestId: LISTING_IDS.request },
+    });
     renderSearch([page(0, [MIRA, RAVI], false)]);
     const mira = await personLinkOf("Mira");
 
@@ -88,7 +119,9 @@ describe("Search, against the MSW route stubs (a fake server)", () => {
     fireEvent.click(screen.getByRole("button", { name: "Add Ravi as a friend" }));
 
     expect(await screen.findByText("Requested")).toBeTruthy();
-    expect(requestsTo(routes.social.sendFriendRequest)[0]?.body).toEqual({ listingId: LISTING_IDS.ravi });
+    expect(requestsTo(routes.social.sendFriendRequest)[0]?.body).toEqual({
+      listingId: LISTING_IDS.ravi,
+    });
   });
 
   it("W7-SEARCH-T2: a search sends the trimmed words from page 0 and shows People; nobody found shows the empty state; the first load sends no words", async () => {
@@ -109,7 +142,9 @@ describe("Search, against the MSW route stubs (a fake server)", () => {
   });
 
   it("W7-SEARCH-T3: with no search it suggests six people, See everyone shows the rest, and Show more loads the next page", async () => {
-    const many = ["Ana", "Bea", "Cal", "Dee", "Eli", "Fay", "Gus"].map((name, index) => listing(`00000000-0000-4000-8000-00000000090${String(index)}`, name, false));
+    const many = ["Ana", "Bea", "Cal", "Dee", "Eli", "Fay", "Gus"].map((name, index) =>
+      listing(`00000000-0000-4000-8000-00000000090${String(index)}`, name, false),
+    );
     renderSearch([page(0, many, true), page(1, [RAVI], false)]);
     await screen.findByRole("heading", { name: "Suggested for you" });
 
@@ -124,12 +159,27 @@ describe("Search, against the MSW route stubs (a fake server)", () => {
   });
 
   it("W7-SEARCH-T4: the photos sit under Explore as Instagram's grid, each a link to its writer's Posts tab named with the words for the photo; with no photos there is no Explore", async () => {
-    renderSearch([page(0, [MIRA, RAVI], false)], { posts: [{ posts: [photoPost(1, "ravi-whiteboard", "A whiteboard."), photoPost(2, "jun-robot", "A robot.")] }] });
+    renderSearch([page(0, [MIRA, RAVI], false)], {
+      posts: [
+        {
+          posts: [
+            photoPost(1, "ravi-whiteboard", "A whiteboard."),
+            photoPost(2, "jun-robot", "A robot."),
+          ],
+        },
+      ],
+    });
     const photos = await screen.findByRole("region", { name: "Explore" });
     const tiles = within(photos).getAllByRole("link");
 
-    expect(tiles.map((tile) => tile.getAttribute("aria-label"))).toEqual(["Ravi's posts: A whiteboard.", "Ravi's posts: A robot."]);
-    expect(tiles.map((tile) => tile.getAttribute("href"))).toEqual([personPostsPath(LISTING_IDS.ravi), personPostsPath(LISTING_IDS.ravi)]);
+    expect(tiles.map((tile) => tile.getAttribute("aria-label"))).toEqual([
+      "Ravi's posts: A whiteboard.",
+      "Ravi's posts: A robot.",
+    ]);
+    expect(tiles.map((tile) => tile.getAttribute("href"))).toEqual([
+      personPostsPath(LISTING_IDS.ravi),
+      personPostsPath(LISTING_IDS.ravi),
+    ]);
     expect(tiles[1]?.querySelector("img")?.getAttribute("src")).toContain("jun-robot");
     cleanup();
     renderSearch([page(0, [MIRA], false)]);
@@ -139,17 +189,24 @@ describe("Search, against the MSW route stubs (a fake server)", () => {
   });
 
   it("W7-SEARCH-T5: a failed load shows the server's sentence and Try again loads again; the help line opens Meety with a question started", async () => {
-    renderSearch([{ status: 500, body: { code: "server_error", message: "Something went wrong on our side." } }, page(0, [MIRA], false)]);
+    renderSearch([
+      { status: 500, body: { code: "server_error", message: "Something went wrong on our side." } },
+      page(0, [MIRA], false),
+    ]);
 
     expect(await screen.findByText("Something went wrong on our side.")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Ask Meety who could help." }).getAttribute("href")).toBe(chatPathWithDraft("Who could help me with "));
+    expect(
+      screen.getByRole("link", { name: "Ask Meety who could help." }).getAttribute("href"),
+    ).toBe(chatPathWithDraft("Who could help me with "));
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
 
     expect(await screen.findByRole("heading", { name: "Mira" })).toBeTruthy();
   });
 
   it("W7-SEARCH-T6: every control on Search has an accessible name at 375 px", async () => {
-    renderSearch([page(0, [MIRA, RAVI], true)], { posts: [{ posts: [photoPost(1, "ravi-whiteboard", "A whiteboard.")] }] });
+    renderSearch([page(0, [MIRA, RAVI], true)], {
+      posts: [{ posts: [photoPost(1, "ravi-whiteboard", "A whiteboard.")] }],
+    });
     await personLinkOf("Mira");
     await screen.findByRole("region", { name: "Explore" });
 

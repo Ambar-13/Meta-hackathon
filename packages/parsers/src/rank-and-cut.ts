@@ -1,4 +1,8 @@
-import { CANONICAL_TEXT_MAX_BYTES, TURNS_PER_SOURCE_MAX, TURN_TEXT_MAX_CHARS } from "@meet-first/contracts";
+import {
+  CANONICAL_TEXT_MAX_BYTES,
+  TURNS_PER_SOURCE_MAX,
+  TURN_TEXT_MAX_CHARS,
+} from "@meet-first/contracts";
 import type { RawTurn } from "./chatgpt-shapes.js";
 import { personaScore } from "./persona-signal.js";
 import type { SummaryPriority } from "./summary-format.js";
@@ -25,7 +29,8 @@ function cutTurnText(text: string): string {
 
 // Recency order: newer createTime first, turns without a time after every timed turn, then the later export position first.
 function byRecency(a: Ranked, b: Ranked): number {
-  if (a.createTime !== null && b.createTime !== null && a.createTime !== b.createTime) return b.createTime - a.createTime;
+  if (a.createTime !== null && b.createTime !== null && a.createTime !== b.createTime)
+    return b.createTime - a.createTime;
   if (a.createTime === null && b.createTime !== null) return 1;
   if (a.createTime !== null && b.createTime === null) return -1;
   return b.exportOrder - a.exportOrder;
@@ -52,7 +57,11 @@ type PriorityMatchers = { quotes: string[]; topics: RegExp[] };
 
 // Text folded for finding a summary quote in it: lower case, no quote marks, runs of space as one.
 function foldForMatch(text: string): string {
-  return text.toLowerCase().replace(/[\u2018\u2019\u201c\u201d"'`]/g, "").replace(/\s+/g, " ").trim();
+  return text
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201c\u201d"'`]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 // A pattern that finds a topic as a whole word, in any case: "Rentably" matches "rentably's plan", not "rentablyish".
@@ -65,7 +74,9 @@ function topicPattern(topic: string): RegExp {
 function matchersOf(priority: SummaryPriority | undefined): PriorityMatchers {
   if (priority === undefined) return { quotes: [], topics: [] };
   return {
-    quotes: priority.quotes.map(foldForMatch).filter((quote) => quote.length >= PRIORITY_QUOTE_MIN_CHARS),
+    quotes: priority.quotes
+      .map(foldForMatch)
+      .filter((quote) => quote.length >= PRIORITY_QUOTE_MIN_CHARS),
     topics: priority.topics.filter((topic) => topic.trim() !== "").map(topicPattern),
   };
 }
@@ -82,11 +93,18 @@ function priorityTier(canonical: string, matchers: PriorityMatchers): number {
 // Ranks turns and cuts to the size caps: at most 10,000 turns, 20,000 characters each, 2 MiB in all. With a summary, turns that hold
 // one of its quotes come first, then turns that name one of its topics; then personaScore, then recency. A turn longer than
 // 20,000 characters is cut at the last line break before 20,000, so a quote never starts mid-line.
-export function rankAndCut(turns: Array<RawTurn & { canonical: string }>, priority?: SummaryPriority): Array<RawTurn & { canonical: string }> {
+export function rankAndCut(
+  turns: Array<RawTurn & { canonical: string }>,
+  priority?: SummaryPriority,
+): Array<RawTurn & { canonical: string }> {
   const matchers = matchersOf(priority);
   const scored = turns.map((turn) => {
     const cut: Ranked = { ...turn, canonical: cutTurnText(turn.canonical) };
-    return { turn: cut, tier: priorityTier(cut.canonical, matchers), score: personaScore(cut.canonical) };
+    return {
+      turn: cut,
+      tier: priorityTier(cut.canonical, matchers),
+      score: personaScore(cut.canonical),
+    };
   });
   scored.sort((a, b) => {
     if (a.tier !== b.tier) return b.tier - a.tier;

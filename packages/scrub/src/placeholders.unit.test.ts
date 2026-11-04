@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { ContractError } from "@meet-first/contracts";
-import { countPlaceholders, findPlaceholders, formatPlaceholder, isCategory, makePlaceholderCounter } from "./placeholders.js";
+import {
+  countPlaceholders,
+  findPlaceholders,
+  formatPlaceholder,
+  isCategory,
+  makePlaceholderCounter,
+} from "./placeholders.js";
 
 describe("placeholders", () => {
   it("D14-T5: the counter writes 8 hex digits and can start anywhere", () => {
@@ -32,7 +38,11 @@ describe("placeholders", () => {
   });
 
   it("R2.5-T1: countPlaceholders counts known placeholders and code lines only", () => {
-    expect(countPlaceholders("a [redacted:email:00000001] b [code: js, 2 lines] c [person:friend] [redacted:foo:12345678]")).toBe(2);
+    expect(
+      countPlaceholders(
+        "a [redacted:email:00000001] b [code: js, 2 lines] c [person:friend] [redacted:foo:12345678]",
+      ),
+    ).toBe(2);
   });
 
   it("D14-T8: findPlaceholders lists kind, category and position in order", () => {

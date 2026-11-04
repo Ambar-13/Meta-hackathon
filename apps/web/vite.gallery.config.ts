@@ -8,5 +8,10 @@ export default defineConfig({
   plugins: [react()],
   base: "./",
   worker: { format: "es" },
-  build: { outDir: "dist-gallery", emptyOutDir: true, sourcemap: false, rollupOptions: { input: "gallery.html" } },
+  build: {
+    outDir: "dist-gallery",
+    emptyOutDir: true,
+    sourcemap: false,
+    rollupOptions: { input: "gallery.html" },
+  },
 });

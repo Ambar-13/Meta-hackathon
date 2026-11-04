@@ -8,7 +8,9 @@ import { QuizForm, QuizResult } from "./quiz-parts.js";
 import { useQuizScreen, type SubmitState } from "./quiz-state.js";
 
 // The words for a quiz that is not answered yet: the persona first, then the form.
-const AnsweringLine = (): ReactElement => <LoadingLine text="Your Meety answers first. The form opens when it is done." />;
+const AnsweringLine = (): ReactElement => (
+  <LoadingLine text="Your Meety answers first. The form opens when it is done." />
+);
 
 // The status of sending the answers: the word while sending, the error when it failed.
 const SubmitStatus = (props: { submit: SubmitState }): ReactElement | null => {
@@ -27,7 +29,9 @@ const StateLine = (props: { quiz: QuizView }): ReactElement | null => {
         Go home
       </Link>
     );
-    return <EmptyState sticker="poof" title="The quiz could not be scored this time." action={home} />;
+    return (
+      <EmptyState sticker="poof" title="The quiz could not be scored this time." action={home} />
+    );
   }
   return null;
 };
@@ -38,16 +42,35 @@ export const QuizScreen = (): ReactElement => {
   const { polled, answers, setAnswer, submit, send } = useQuizScreen(quizId);
   const quiz = polled.value;
   if (quiz === null) {
-    return <ScreenFrame title="Knows-me quiz">{polled.error === null ? <LoadingLine text="Loading the quiz." /> : <ErrorNotice error={polled.error} />}</ScreenFrame>;
+    return (
+      <ScreenFrame title="Knows-me quiz">
+        {polled.error === null ? (
+          <LoadingLine text="Loading the quiz." />
+        ) : (
+          <ErrorNotice error={polled.error} />
+        )}
+      </ScreenFrame>
+    );
   }
   const isLocked = quiz.state === "answering";
   const isOpen = quiz.state === "answering" || quiz.state === "waiting_human";
   return (
     <ScreenFrame title="Knows-me quiz">
-      {isOpen ? <p className="quiz-lead">Ten questions about you. Your Meety answers them too, then a judge compares.</p> : null}
+      {isOpen ? (
+        <p className="quiz-lead">
+          Ten questions about you. Your Meety answers them too, then a judge compares.
+        </p>
+      ) : null}
       {isLocked ? <AnsweringLine /> : null}
       {isOpen ? (
-        <QuizForm items={quiz.items} answers={answers} isLocked={isLocked} isSending={submit.kind === "sending"} onChange={setAnswer} onSend={() => void send()} />
+        <QuizForm
+          items={quiz.items}
+          answers={answers}
+          isLocked={isLocked}
+          isSending={submit.kind === "sending"}
+          onChange={setAnswer}
+          onSend={() => void send()}
+        />
       ) : null}
       <SubmitStatus submit={submit} />
       <StateLine quiz={quiz} />

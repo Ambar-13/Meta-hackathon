@@ -1,7 +1,17 @@
 import { z } from "zod";
 
 // The kinds of point a summary holds, as the copy prompt names them; anything else the person's AI writes counts as other.
-export const SUMMARY_KINDS = ["work", "value", "view", "habit", "style", "avoid", "change", "contradiction", "other"] as const;
+export const SUMMARY_KINDS = [
+  "work",
+  "value",
+  "view",
+  "habit",
+  "style",
+  "avoid",
+  "change",
+  "contradiction",
+  "other",
+] as const;
 // One kind of summary point.
 export const SummaryKind = z.enum(SUMMARY_KINDS);
 // The type of SummaryKind, read from the schema above.
@@ -39,7 +49,11 @@ export const SUMMARY_SAVES_PER_DAY = 10;
 
 // Where one point's quote was found: the quote as it stands in the person's own message, that message's index in its upload, and
 // its id, since indexes repeat across uploads.
-export const SummaryFound = z.object({ quote: z.string().min(1), turnIndex: z.number().int().min(0), turnId: z.string().uuid() });
+export const SummaryFound = z.object({
+  quote: z.string().min(1),
+  turnIndex: z.number().int().min(0),
+  turnId: z.string().uuid(),
+});
 // The type of SummaryFound, read from the schema above.
 export type SummaryFound = z.infer<typeof SummaryFound>;
 // One point as the person sees it: the point, and where its quote was found in their messages, or null when it was not.
@@ -57,6 +71,9 @@ export const SummaryView = z.object({
 // The type of SummaryView, read from the schema above.
 export type SummaryView = z.infer<typeof SummaryView>;
 // The body of PUT /api/people/me/summary: the pasted text, trimmed and not empty, and whether friends' asks may use it.
-export const SummarySave = z.object({ text: z.string().trim().min(1).max(SUMMARY_MAX_CHARS), friendsCanAsk: z.boolean() });
+export const SummarySave = z.object({
+  text: z.string().trim().min(1).max(SUMMARY_MAX_CHARS),
+  friendsCanAsk: z.boolean(),
+});
 // The type of SummarySave, read from the schema above.
 export type SummarySave = z.infer<typeof SummarySave>;

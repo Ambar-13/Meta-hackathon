@@ -2,7 +2,12 @@ import { POLL_MS, routes, SSE_FIRST_BYTE_MS } from "@meet-first/contracts";
 import { ApiError, buildApiPath, errorFromResponse } from "../app-shell/index.js";
 import { createPoller, pollEventsOnce, type Poller } from "./poll-fallback.js";
 import { reconnectDelayMs, watchVisibility, type VisibilitySource } from "./reconnect-schedule.js";
-import { emptyMeetingState, foldPollReply, foldRaw, type MeetingFoldState } from "../transcript/event-fold.js";
+import {
+  emptyMeetingState,
+  foldPollReply,
+  foldRaw,
+  type MeetingFoldState,
+} from "../transcript/event-fold.js";
 
 // One frame of the stream: its id, event and data lines; all three are null for a comment such as the heartbeat or the padding.
 export type SseFrame = { id: string | null; event: string | null; data: string | null };
@@ -19,7 +24,11 @@ export type MeetingFeedOptions = {
   origin?: string;
 };
 // An open feed: close it, or read its current state and status.
-export type MeetingFeed = { close: () => void; currentState: () => MeetingFoldState; currentStatus: () => FeedStatus };
+export type MeetingFeed = {
+  close: () => void;
+  currentState: () => MeetingFoldState;
+  currentStatus: () => FeedStatus;
+};
 
 // Applies one line of a frame to it: id, event and data are kept, and any other field is ignored.
 function applyField(frame: SseFrame, line: string): void {
@@ -187,8 +196,17 @@ function openStream(ctx: FeedContext): void {
   ctx.firstByteTimer = setTimeout(() => {
     startPolling(ctx);
   }, SSE_FIRST_BYTE_MS);
-  const url = new URL(buildApiPath(routes.meetings.events.path, { id: ctx.meetingId }, {}), ctx.origin);
-  const init: RequestInit = { method: "GET", headers, credentials: "same-origin", cache: "no-store", signal: controller.signal };
+  const url = new URL(
+    buildApiPath(routes.meetings.events.path, { id: ctx.meetingId }, {}),
+    ctx.origin,
+  );
+  const init: RequestInit = {
+    method: "GET",
+    headers,
+    credentials: "same-origin",
+    cache: "no-store",
+    signal: controller.signal,
+  };
   ctx.fetchImpl(url, init).then(
     (response) => readStream(ctx, response, number),
     () => {
@@ -219,10 +237,19 @@ function closeFeed(ctx: FeedContext): void {
 // One poll for the feed: folds the reply after the last seq; an auth or not-found error stops the feed.
 async function pollAndFold(ctx: FeedContext): Promise<void> {
   try {
-    const reply = await pollEventsOnce({ meetingId: ctx.meetingId, afterSeq: ctx.state.lastSeq, fetchImpl: ctx.fetchImpl, origin: ctx.origin });
+    const reply = await pollEventsOnce({
+      meetingId: ctx.meetingId,
+      afterSeq: ctx.state.lastSeq,
+      fetchImpl: ctx.fetchImpl,
+      origin: ctx.origin,
+    });
     publish(ctx, foldPollReply(ctx.state, reply), ctx.status);
   } catch (thrown: unknown) {
-    if (thrown instanceof ApiError && (thrown.status === 401 || thrown.status === 403 || thrown.status === 404)) stopFeed(ctx, thrown);
+    if (
+      thrown instanceof ApiError &&
+      (thrown.status === 401 || thrown.status === 403 || thrown.status === 404)
+    )
+      stopFeed(ctx, thrown);
   }
 }
 

@@ -6,7 +6,13 @@ import { Side } from "../primitives.js";
 // Keys a share page must never send, because they would reveal who the people are.
 export const FORBIDDEN_SHARE_KEYS = ["person_id", "email", "pair_id"] as const;
 // One supported brief point as the public page shows it: the text and its quotes, with no turn ids (share_read never returns ids).
-const SharedPoint = z.object({ text: z.string(), quotes: z.array(z.object({ text: z.string(), side: Side })).min(1).max(3) });
+const SharedPoint = z.object({
+  text: z.string(),
+  quotes: z
+    .array(z.object({ text: z.string(), side: Side }))
+    .min(1)
+    .max(3),
+});
 // The public snapshot of a meeting. It is strict, so an extra key fails the build.
 export const ShareSnapshot = z
   .object({
@@ -21,7 +27,11 @@ export const ShareSnapshot = z
         claims: z.array(z.object({ text: z.string(), quote: z.string() })),
       }),
     ),
-    brief: z.object({ agree: z.array(SharedPoint), clash: z.array(SharedPoint), decideFirst: z.array(SharedPoint) }), // supported lines only
+    brief: z.object({
+      agree: z.array(SharedPoint),
+      clash: z.array(SharedPoint),
+      decideFirst: z.array(SharedPoint),
+    }), // supported lines only
     comic: z.array(z.object({ caption: z.string(), imageUrl: z.string() })).optional(),
   })
   .strict();

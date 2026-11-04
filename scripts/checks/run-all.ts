@@ -21,7 +21,9 @@ const checks: readonly ((root: string) => Finding[])[] = [
 ];
 const findings = checks.flatMap((check) => check(root));
 for (const finding of findings) {
-  console.error(`${relative(root, finding.file)}:${String(finding.line)} ${finding.level ?? "error"} ${finding.message}`);
+  console.error(
+    `${relative(root, finding.file)}:${String(finding.line)} ${finding.level ?? "error"} ${finding.message}`,
+  );
 }
 const errors = findings.filter((finding) => (finding.level ?? "error") === "error").length;
 console.log(errors === 0 ? "checks: no errors" : `checks: ${String(errors)} error(s)`);

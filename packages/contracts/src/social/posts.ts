@@ -57,8 +57,11 @@ export const FeedCursor = z.object({ before: IsoTime, beforeId: Uuid });
 // The type of FeedCursor, read from the schema above.
 export type FeedCursor = z.infer<typeof FeedCursor>;
 // The query of GET /api/feed: the part, and where the page starts.
-export const FeedQuery = z.object({ scope: FeedScope, before: IsoTime.optional(), beforeId: Uuid.optional() })
-  .refine((query) => (query.before === undefined) === (query.beforeId === undefined), { message: "Give both before and beforeId, or neither." });
+export const FeedQuery = z
+  .object({ scope: FeedScope, before: IsoTime.optional(), beforeId: Uuid.optional() })
+  .refine((query) => (query.before === undefined) === (query.beforeId === undefined), {
+    message: "Give both before and beforeId, or neither.",
+  });
 // The type of FeedQuery, read from the schema above.
 export type FeedQuery = z.infer<typeof FeedQuery>;
 // What GET /api/feed returns: up to FEED_PAGE_SIZE posts, newest first, and where the next page starts, or null after the last one.
@@ -72,16 +75,28 @@ export const PostKind = z.enum(["post", "story"]);
 export type PostKind = z.infer<typeof PostKind>;
 
 // The body of POST /api/posts: a post or a story, with words, a photo as base64 JPEG bytes, or both.
-export const PostCreate = z.object({
-  kind: PostKind,
-  text: z.string().trim().max(POST_TEXT_MAX_CHARS),
-  photo: z.string().max(POST_PHOTO_BASE64_MAX_CHARS).regex(/^[A-Za-z0-9+/]+={0,2}$/).nullable(),
-}).refine((body) => body.text !== "" || body.photo !== null, { message: "A post needs words or a photo." });
+export const PostCreate = z
+  .object({
+    kind: PostKind,
+    text: z.string().trim().max(POST_TEXT_MAX_CHARS),
+    photo: z
+      .string()
+      .max(POST_PHOTO_BASE64_MAX_CHARS)
+      .regex(/^[A-Za-z0-9+/]+={0,2}$/)
+      .nullable(),
+  })
+  .refine((body) => body.text !== "" || body.photo !== null, {
+    message: "A post needs words or a photo.",
+  });
 // The type of PostCreate, read from the schema above.
 export type PostCreate = z.infer<typeof PostCreate>;
 
 // What POST /api/posts returns: the new post's id, its kind, and when a story stops showing (null for a post).
-export const PostCreated = z.object({ postId: Uuid, kind: PostKind, expiresAt: IsoTime.nullable() });
+export const PostCreated = z.object({
+  postId: Uuid,
+  kind: PostKind,
+  expiresAt: IsoTime.nullable(),
+});
 // The type of PostCreated, read from the schema above.
 export type PostCreated = z.infer<typeof PostCreated>;
 
@@ -91,7 +106,13 @@ export const PostLiked = z.object({ postId: Uuid, isLiked: z.boolean() });
 export type PostLiked = z.infer<typeof PostLiked>;
 
 // One of your own posts, as your own Posts tab shows it whether or not you are in Explore: the words, when it went up and its photo.
-export const MyPost = z.object({ postId: Uuid, text: z.string(), createdAt: IsoTime, photo: PhotoKey.nullable(), photoAlt: z.string().max(300).nullable() });
+export const MyPost = z.object({
+  postId: Uuid,
+  text: z.string(),
+  createdAt: IsoTime,
+  photo: PhotoKey.nullable(),
+  photoAlt: z.string().max(300).nullable(),
+});
 // The type of MyPost, read from the schema above.
 export type MyPost = z.infer<typeof MyPost>;
 

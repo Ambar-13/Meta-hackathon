@@ -38,16 +38,27 @@ const FrozenBody = (props: { save: SaveState; onBuild: () => void }): ReactEleme
 };
 
 // The save button and its messages: the hint while the names check runs, and the errors of a failed save. On a phone it is a dock.
-const SaveBlock = (props: { isStable: boolean; save: SaveState; onSave: () => void; onBuild: () => void }): ReactElement => {
+const SaveBlock = (props: {
+  isStable: boolean;
+  save: SaveState;
+  onSave: () => void;
+  onBuild: () => void;
+}): ReactElement => {
   const { save } = props;
   return (
     <div className="nr-save">
       {save.kind === "review_failed" ? <ErrorNotice error={save.error} /> : null}
       {save.kind === "card_failed" ? <ErrorNotice error={save.error} /> : null}
       <div className="nr-save-row">
-        {props.isStable ? null : <p className="muted nr-save-note">The button opens when the names check has finished.</p>}
+        {props.isStable ? null : (
+          <p className="muted nr-save-note">The button opens when the names check has finished.</p>
+        )}
         {save.kind === "saving" ? <LoadingLine text="Saving." /> : null}
-        <button type="button" disabled={!props.isStable || save.kind === "saving"} onClick={props.onSave}>
+        <button
+          type="button"
+          disabled={!props.isStable || save.kind === "saving"}
+          onClick={props.onSave}
+        >
           Save and build my card
         </button>
         {save.kind === "card_failed" ? (
@@ -61,7 +72,10 @@ const SaveBlock = (props: { isStable: boolean; save: SaveState; onSave: () => vo
 };
 
 // The review of a source that is not frozen yet: the names, the choices, the opt-ins and the save.
-const ReviewBody = (props: { review: ReturnType<typeof useNamesReview>; view: SourceView }): ReactElement => {
+const ReviewBody = (props: {
+  review: ReturnType<typeof useNamesReview>;
+  view: SourceView;
+}): ReactElement => {
   const { review, view } = props;
   const total = view.names.total;
   return (
@@ -77,8 +91,15 @@ const ReviewBody = (props: { review: ReturnType<typeof useNamesReview>; view: So
           </EmptyState>
         ) : (
           <>
-            <RoleGroups rows={view.names.rows} mode={review.mode} kept={review.kept} onToggle={review.toggleKeep} />
-            {total > NAMES_PAGE_SIZE ? <NamesPager page={review.page} total={total} onPage={review.setPage} /> : null}
+            <RoleGroups
+              rows={view.names.rows}
+              mode={review.mode}
+              kept={review.kept}
+              onToggle={review.toggleKeep}
+            />
+            {total > NAMES_PAGE_SIZE ? (
+              <NamesPager page={review.page} total={total} onPage={review.setPage} />
+            ) : null}
           </>
         )}
       </div>
@@ -91,14 +112,23 @@ const ReviewBody = (props: { review: ReturnType<typeof useNamesReview>; view: So
         <div className="nr-side-optins">
           <OptInChoices optIns={review.optIns} onToggle={review.toggleOptIn} />
         </div>
-        <SaveBlock isStable={review.isStable} save={review.save} onSave={() => void review.saveReview()} onBuild={() => void review.requestCard()} />
+        <SaveBlock
+          isStable={review.isStable}
+          save={review.save}
+          onSave={() => void review.saveReview()}
+          onBuild={() => void review.requestCard()}
+        />
       </aside>
     </div>
   );
 };
 
 // The first load failed: the error in one sentence, and a button that asks for the names again (the poll's own reload).
-const FailedBody = (props: { error: ApiError; isLoading: boolean; onRetry: () => void }): ReactElement => {
+const FailedBody = (props: {
+  error: ApiError;
+  isLoading: boolean;
+  onRetry: () => void;
+}): ReactElement => {
   const [isRetrying, setIsRetrying] = useState(false);
   useEffect(() => {
     if (!props.isLoading) setIsRetrying(false);
@@ -138,7 +168,11 @@ export const NamesReviewScreen = (): ReactElement => {
             <LoadingLine text={LOOKING_WORDS} />
           </section>
         ) : (
-          <FailedBody error={error} isLoading={review.polled.isLoading} onRetry={review.polled.reload} />
+          <FailedBody
+            error={error}
+            isLoading={review.polled.isLoading}
+            onRetry={review.polled.reload}
+          />
         )}
       </ScreenFrame>
     );
@@ -146,7 +180,11 @@ export const NamesReviewScreen = (): ReactElement => {
   const isFrozen = view.frozenAt !== null;
   return (
     <ScreenFrame title="Check the names" isWide={!isFrozen}>
-      {isFrozen ? <FrozenBody save={review.save} onBuild={() => void review.requestCard()} /> : <ReviewBody review={review} view={view} />}
+      {isFrozen ? (
+        <FrozenBody save={review.save} onBuild={() => void review.requestCard()} />
+      ) : (
+        <ReviewBody review={review} view={view} />
+      )}
     </ScreenFrame>
   );
 };

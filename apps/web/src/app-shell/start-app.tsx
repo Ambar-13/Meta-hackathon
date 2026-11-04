@@ -23,7 +23,12 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { hasFailed: b
       return (
         <main className="screen">
           <p>Something on this screen broke. Reload the page to try again.</p>
-          <button type="button" onClick={() => { window.location.reload(); }}>
+          <button
+            type="button"
+            onClick={() => {
+              window.location.reload();
+            }}
+          >
             Reload
           </button>
         </main>
@@ -48,6 +53,9 @@ export const AppRoot = (): ReactElement => {
 
 const rootElement = document.getElementById("root");
 if (rootElement === null) {
-  throw new ContractError("root_element_missing", "The page has no root element. Rebuild the web app with pnpm --filter web build.");
+  throw new ContractError(
+    "root_element_missing",
+    "The page has no root element. Rebuild the web app with pnpm --filter web build.",
+  );
 }
 createRoot(rootElement).render(<AppRoot />);

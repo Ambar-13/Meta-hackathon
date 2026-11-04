@@ -7,7 +7,12 @@ import codeOnlyText from "../../../../packages/parsers/fixtures/code-only.json?r
 import codexText from "../../../../packages/parsers/fixtures/codex-session.jsonl?raw";
 import type { UploadProgress, UploadReady, UploadRefused } from "./index.js";
 import { FILE_UNREADABLE_SENTENCE } from "./zip-stream.js";
-import { installWorkerHandler, prepareInWorker, toRefusal, type WorkerRequest } from "./worker-entry.js";
+import {
+  installWorkerHandler,
+  prepareInWorker,
+  toRefusal,
+  type WorkerRequest,
+} from "./worker-entry.js";
 
 // The progress messages of the most recent call, in order.
 const stages: UploadProgress[] = [];
@@ -31,10 +36,21 @@ async function gunzipped(body: Blob): Promise<string> {
 describe("prepareInWorker", () => {
   it("W7-SUMMARY-T9: the summary's quotes reach the ranking, so the oldest quoted message is sent even when 10,000 newer ones outrank it", async () => {
     const prose = "I think the weather is nice today and tomorrow";
-    const blocks = ["rentably was never a bad idea, the timing was just early", ...Array.from({ length: 10_000 }, (value, index) => `${prose} ${String(index)}`)];
-    const priority = { quotes: ["Rentably was never a bad idea, the timing was just early"], topics: [] };
+    const blocks = [
+      "rentably was never a bad idea, the timing was just early",
+      ...Array.from({ length: 10_000 }, (value, index) => `${prose} ${String(index)}`),
+    ];
+    const priority = {
+      quotes: ["Rentably was never a bad idea, the timing was just early"],
+      topics: [],
+    };
 
-    const ready = readyOf(await prepareInWorker({ input: { kind: "paste", text: blocks.join("\n\n") }, allowlist: [], priority }, () => undefined));
+    const ready = readyOf(
+      await prepareInWorker(
+        { input: { kind: "paste", text: blocks.join("\n\n") }, allowlist: [], priority },
+        () => undefined,
+      ),
+    );
 
     expect(ready.keptTurns).toBe(10_000);
     expect(await gunzipped(ready.body)).toContain("rentably was never a bad idea");
@@ -68,10 +84,23 @@ describe("prepareInWorker", () => {
   it("D1-T10: a zipped folder of Codex sessions becomes a body of the person's own turns, stored as chatgpt", async () => {
     stages.length = 0;
     const reviewer = [
-      JSON.stringify({ type: "session_meta", payload: { source: { subagent: { other: "guardian" } }, thread_source: "guardian_review" } }),
-      JSON.stringify({ type: "response_item", payload: { type: "message", role: "user", content: [{ type: "input_text", text: "Review this command: rm -rf build" }] } }),
+      JSON.stringify({
+        type: "session_meta",
+        payload: { source: { subagent: { other: "guardian" } }, thread_source: "guardian_review" },
+      }),
+      JSON.stringify({
+        type: "response_item",
+        payload: {
+          type: "message",
+          role: "user",
+          content: [{ type: "input_text", text: "Review this command: rm -rf build" }],
+        },
+      }),
     ].join("\n");
-    const zip = zipSync({ "sessions/2026/10/02/rollout-a.jsonl": strToU8(codexText), "sessions/2026/10/02/rollout-b.jsonl": strToU8(reviewer) });
+    const zip = zipSync({
+      "sessions/2026/10/02/rollout-a.jsonl": strToU8(codexText),
+      "sessions/2026/10/02/rollout-b.jsonl": strToU8(reviewer),
+    });
     const ready = readyOf(await run({ kind: "file", file: new File([zip], "codex-sessions.zip") }));
     expect(ready.header.kind).toBe("chatgpt");
     expect(ready.foundTurns).toBe(6);
@@ -79,14 +108,23 @@ describe("prepareInWorker", () => {
     const body = await gunzipped(ready.body);
     expect(body.split("\n")).toHaveLength(7);
     expect(body).toContain("I drew the layout on paper first, because that is how I think.");
-    for (const absent of ["environment_context", "AGENTS.md", "## My request", "Here is a gentler reminder schedule", "rm -rf build"]) {
+    for (const absent of [
+      "environment_context",
+      "AGENTS.md",
+      "## My request",
+      "Here is a gentler reminder schedule",
+      "rm -rf build",
+    ]) {
       expect(body).not.toContain(absent);
     }
   });
 
   it("D9-T3: an export with no own turns is refused before any body exists", async () => {
     stages.length = 0;
-    const file = new File(['[{"messages":[{"role":"assistant","content":"Hello there."}]}]'], "conversations.json");
+    const file = new File(
+      ['[{"messages":[{"role":"assistant","content":"Hello there."}]}]'],
+      "conversations.json",
+    );
     const result = await run({ kind: "file", file });
     expect(result).toEqual({
       ok: false,
@@ -99,7 +137,9 @@ describe("prepareInWorker", () => {
 
   it("R3.8-T6: the code-only export is flagged as low signal", async () => {
     stages.length = 0;
-    const ready = readyOf(await run({ kind: "file", file: new File([codeOnlyText], "conversations.json") }));
+    const ready = readyOf(
+      await run({ kind: "file", file: new File([codeOnlyText], "conversations.json") }),
+    );
     expect(ready.personaSignal).toBe(0.115);
     expect(ready.isLowSignal).toBe(true);
     expect(ready.keptTurns).toBe(30);
@@ -108,7 +148,12 @@ describe("prepareInWorker", () => {
   it("A3-T2: a paste reports four stages in order and previews 1 redaction", async () => {
     stages.length = 0;
     const ready = readyOf(await run({ kind: "paste", text: pasteText }));
-    expect(stages.map((progress) => progress.stage)).toEqual(["reading", "parsing", "scrubbing", "compressing"]);
+    expect(stages.map((progress) => progress.stage)).toEqual([
+      "reading",
+      "parsing",
+      "scrubbing",
+      "compressing",
+    ]);
     expect(ready.header.kind).toBe("paste");
     expect(ready.keptTurns).toBe(8);
     expect(ready.previewRedactionCount).toBe(1);
@@ -121,7 +166,8 @@ describe("prepareInWorker", () => {
     expect(result).toMatchObject({
       ok: false,
       code: "source_file_not_json",
-      message: "This file is not a JSON export. Pick conversations.json from the zip, or paste text.",
+      message:
+        "This file is not a JSON export. Pick conversations.json from the zip, or paste text.",
     });
   });
 
@@ -134,19 +180,31 @@ describe("prepareInWorker", () => {
       arrayBuffer: () => Promise.reject(new TypeError("gone")),
     } as unknown as File;
     const result = await run({ kind: "file", file: fake });
-    expect(result).toEqual({ ok: false, code: "file_unreadable", message: FILE_UNREADABLE_SENTENCE });
+    expect(result).toEqual({
+      ok: false,
+      code: "file_unreadable",
+      message: FILE_UNREADABLE_SENTENCE,
+    });
   });
 });
 
 describe("toRefusal", () => {
   it("D1-T3: toRefusal keeps a known refusal and replaces anything else", () => {
-    expect(toRefusal(new ContractError("zip_too_large", "s", 413))).toEqual({ ok: false, code: "zip_too_large", message: "s" });
+    expect(toRefusal(new ContractError("zip_too_large", "s", 413))).toEqual({
+      ok: false,
+      code: "zip_too_large",
+      message: "s",
+    });
     expect(toRefusal(new ContractError("payload_invalid", "x", 400))).toEqual({
       ok: false,
       code: "file_unreadable",
       message: FILE_UNREADABLE_SENTENCE,
     });
-    expect(toRefusal("boom")).toEqual({ ok: false, code: "file_unreadable", message: FILE_UNREADABLE_SENTENCE });
+    expect(toRefusal("boom")).toEqual({
+      ok: false,
+      code: "file_unreadable",
+      message: FILE_UNREADABLE_SENTENCE,
+    });
   });
 
   it("D1-T4: the handler is not installed outside a worker", () => {

@@ -16,7 +16,12 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-const READY_ROW = { id: IDS.meeting, state: "ready" as const, questionText: CURATED_QUESTIONS[2]?.text ?? "", createdAt: SERVER_NOW };
+const READY_ROW = {
+  id: IDS.meeting,
+  state: "ready" as const,
+  questionText: CURATED_QUESTIONS[2]?.text ?? "",
+  createdAt: SERVER_NOW,
+};
 const LOBBY_URL = `${APP_PATHS.lobby(IDS.pair)}?card=${IDS.card}`;
 
 // Renders the lobby for the fixture pair with a card.
@@ -33,7 +38,9 @@ async function advance(ms: number): Promise<void> {
 
 describe("lobby screen", () => {
   it("D54-T1: the lobby polls GET /api/pairs/:id every 5 s, using fake timers", async () => {
-    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] });
+    vi.useFakeTimers({
+      toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"],
+    });
     stubRoute(routes.meetings.readPair, pairView({ hasJoiner: true, meetings: [] }));
     renderLobby();
     await advance(0);
@@ -45,7 +52,9 @@ describe("lobby screen", () => {
   });
 
   it("R8.6-T1: the lobby never requests the events route, using fake timers", async () => {
-    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] });
+    vi.useFakeTimers({
+      toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"],
+    });
     stubRoute(routes.meetings.readPair, pairView({ hasJoiner: true, meetings: [READY_ROW] }));
     stubRoute(routes.meetings.readMeeting, meetingView({}));
     stubRoute(routes.meetings.events, { status: 200, body: "" });
@@ -55,7 +64,9 @@ describe("lobby screen", () => {
   });
 
   it("D53-T1: the lobby waits for the other person to say ready and sends no start request, using fake timers", async () => {
-    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] });
+    vi.useFakeTimers({
+      toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"],
+    });
     stubRoute(routes.meetings.readPair, pairView({ hasJoiner: true, meetings: [READY_ROW] }));
     stubRoute(routes.meetings.readMeeting, [
       meetingView({
@@ -75,7 +86,9 @@ describe("lobby screen", () => {
     await advance(0);
     expect(screen.getByText("Waiting for the other person to say ready.")).toBeTruthy();
     await advance(5000);
-    expect(screen.getByText("Both of you have said ready. The meeting starts by itself.")).toBeTruthy();
+    expect(
+      screen.getByText("Both of you have said ready. The meeting starts by itself."),
+    ).toBeTruthy();
     expect(requestsTo(routes.meetings.start)).toHaveLength(0);
   });
 
@@ -83,34 +96,56 @@ describe("lobby screen", () => {
     stubRoute(routes.meetings.readPair, pairView({ hasJoiner: true, meetings: [] }));
     stubRoute(routes.meetings.createMeeting, { status: 201, body: { meetingId: IDS.meeting } });
     renderLobby();
-    const picker = await screen.findByRole("group", { name: "What should your Meetys talk about?" });
-    expect(picker.querySelectorAll('input[type="radio"]')).toHaveLength(CURATED_QUESTIONS.length + 1);
+    const picker = await screen.findByRole("group", {
+      name: "What should your Meetys talk about?",
+    });
+    expect(picker.querySelectorAll('input[type="radio"]')).toHaveLength(
+      CURATED_QUESTIONS.length + 1,
+    );
     fireEvent.click(screen.getByRole("radio", { name: "Write your own question" }));
     fireEvent.change(screen.getByLabelText("Your question"), { target: { value: "Hm?" } });
     fireEvent.click(screen.getByRole("button", { name: "Create the meeting" }));
     expect(screen.getByText("Write a question of 5 to 300 characters.")).toBeTruthy();
     expect(requestsTo(routes.meetings.createMeeting)).toHaveLength(0);
-    fireEvent.change(screen.getByLabelText("Your question"), { target: { value: "Should we split work by strengths?" } });
+    fireEvent.change(screen.getByLabelText("Your question"), {
+      target: { value: "Should we split work by strengths?" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Create the meeting" }));
     await waitFor(() => {
       expect(requestsTo(routes.meetings.createMeeting)).toHaveLength(1);
     });
-    expect(requestsTo(routes.meetings.createMeeting)[0]?.body).toEqual({ freeText: "Should we split work by strengths?", cardId: IDS.card });
+    expect(requestsTo(routes.meetings.createMeeting)[0]?.body).toEqual({
+      freeText: "Should we split work by strengths?",
+      cardId: IDS.card,
+    });
   });
 
   it("R10.5-T7: the curated questions sit in five named groups of four", async () => {
     stubRoute(routes.meetings.readPair, pairView({ hasJoiner: true, meetings: [] }));
     renderLobby();
     await screen.findByRole("group", { name: "What should your Meetys talk about?" });
-    for (const name of ["Would you get along?", "Could you help each other?", "Would you make a deal?", "Where would your views split?", "Would you get on as a couple?"]) {
-      expect(screen.getByRole("group", { name }).querySelectorAll('input[type="radio"]')).toHaveLength(4);
+    for (const name of [
+      "Would you get along?",
+      "Could you help each other?",
+      "Would you make a deal?",
+      "Where would your views split?",
+      "Would you get on as a couple?",
+    ]) {
+      expect(
+        screen.getByRole("group", { name }).querySelectorAll('input[type="radio"]'),
+      ).toHaveLength(4);
     }
   });
 
   it("D53-T2: when the meeting starts the lobby opens the meeting page, using fake timers", async () => {
-    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] });
+    vi.useFakeTimers({
+      toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"],
+    });
     stubRoute(routes.meetings.readPair, pairView({ hasJoiner: true, meetings: [READY_ROW] }));
-    stubRoute(routes.meetings.readMeeting, [meetingView({}), meetingView({ state: "running", startedAt: SERVER_NOW, endsAt: "2026-10-27T10:10:00.000Z" })]);
+    stubRoute(routes.meetings.readMeeting, [
+      meetingView({}),
+      meetingView({ state: "running", startedAt: SERVER_NOW, endsAt: "2026-10-27T10:10:00.000Z" }),
+    ]);
     renderLobby();
     await advance(0);
     await advance(5000);

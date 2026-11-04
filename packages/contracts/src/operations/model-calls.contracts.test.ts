@@ -35,19 +35,24 @@ function nestingDepth(node: unknown): number {
 
 /** The highest vN folder of one prompt, such as "v2". */
 function newestVersion(name: string): string {
-  const numbers = readdirSync(`${PROMPTS_FOLDER}${name}`).filter((entry) => /^v\d+$/.test(entry)).map((entry) => Number(entry.slice(1)));
+  const numbers = readdirSync(`${PROMPTS_FOLDER}${name}`)
+    .filter((entry) => /^v\d+$/.test(entry))
+    .map((entry) => Number(entry.slice(1)));
   return `v${String(Math.max(...numbers))}`;
 }
 
 describe("model output schemas", () => {
   it("R3.1-T1: every model output schema converts to strict JSON schema", () => {
-    const converted = Object.entries(MODEL_OUTPUT_SCHEMAS).map(([name, schema]) => toStrictJsonSchema(schema, name));
+    const converted = Object.entries(MODEL_OUTPUT_SCHEMAS).map(([name, schema]) =>
+      toStrictJsonSchema(schema, name),
+    );
 
     const offenders = converted.flatMap((result) =>
       objectSchemas(result.schema).filter(
         (object) =>
           object.additionalProperties !== false ||
-          JSON.stringify(object.required) !== JSON.stringify(Object.keys(object.properties as JsonObject)),
+          JSON.stringify(object.required) !==
+            JSON.stringify(Object.keys(object.properties as JsonObject)),
       ),
     );
 
@@ -55,9 +60,13 @@ describe("model output schemas", () => {
   });
 
   it("R3.1-T2: no converted schema contains anyOf, oneOf or allOf", () => {
-    const converted = Object.entries(MODEL_OUTPUT_SCHEMAS).map(([name, schema]) => toStrictJsonSchema(schema, name));
+    const converted = Object.entries(MODEL_OUTPUT_SCHEMAS).map(([name, schema]) =>
+      toStrictJsonSchema(schema, name),
+    );
 
-    const hits = converted.filter((result) => /"(anyOf|oneOf|allOf)"/.test(JSON.stringify(result.schema)));
+    const hits = converted.filter((result) =>
+      /"(anyOf|oneOf|allOf)"/.test(JSON.stringify(result.schema)),
+    );
 
     expect(hits.map((result) => result.name)).toEqual([]);
   });
@@ -89,7 +98,9 @@ describe("model output schemas", () => {
     const folders = readdirSync(PROMPTS_FOLDER).filter((name) => name in MODEL_OUTPUT_SCHEMAS);
 
     const mismatches = folders.filter((name) => {
-      const saved: unknown = JSON.parse(readFileSync(`${PROMPTS_FOLDER}${name}/${newestVersion(name)}/schema.json`, "utf8"));
+      const saved: unknown = JSON.parse(
+        readFileSync(`${PROMPTS_FOLDER}${name}/${newestVersion(name)}/schema.json`, "utf8"),
+      );
       const schema = MODEL_OUTPUT_SCHEMAS[name as keyof typeof MODEL_OUTPUT_SCHEMAS];
       return JSON.stringify(saved) !== JSON.stringify(toStrictJsonSchema(schema, name));
     });

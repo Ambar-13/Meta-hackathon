@@ -1,28 +1,52 @@
 import { useEffect, useLayoutEffect, useRef, type ReactElement } from "react";
 import type { Claim, Phase } from "@meet-first/contracts";
 import { Avatar, Receipt, ReceiptFlag, TypingDots } from "../../look/index.js";
-import { SafeMarkdown, type MeetingFoldState, type Side, type TimelineItem, claimNeedsMark } from "../../transcript/index.js";
+import {
+  SafeMarkdown,
+  type MeetingFoldState,
+  type Side,
+  type TimelineItem,
+  claimNeedsMark,
+} from "../../transcript/index.js";
 
 // How close to the bottom counts as at the bottom for autoscroll, 80 px.
 export const AT_BOTTOM_PX = 80;
 // The words for each phase (drafted copy).
-export const PHASE_LABELS: Record<Phase, string> = { open: "Opening", explore: "Exploring", decide: "Deciding", close: "Closing" };
+export const PHASE_LABELS: Record<Phase, string> = {
+  open: "Opening",
+  explore: "Exploring",
+  decide: "Deciding",
+  close: "Closing",
+};
 
 // A side's display name from meeting.started, or the side letter in capitals when the meeting has not started.
 export function speakerName(fold: MeetingFoldState, side: Side): string {
-  return fold.started?.members.find((member) => member.side === side)?.displayName ?? side.toUpperCase();
+  return (
+    fold.started?.members.find((member) => member.side === side)?.displayName ?? side.toUpperCase()
+  );
 }
 
 // One timeline line for the items that are not turns: a phase change, a look in the notes, a point accepted or kept.
-function renderLine(fold: MeetingFoldState, item: Exclude<TimelineItem, { kind: "turn" }>): ReactElement {
+function renderLine(
+  fold: MeetingFoldState,
+  item: Exclude<TimelineItem, { kind: "turn" }>,
+): ReactElement {
   const name = item.kind === "phase" ? "" : speakerName(fold, item.side);
   let text = "";
   if (item.kind === "phase") text = `Phase: ${PHASE_LABELS[item.phase]}`;
   if (item.kind === "recall") text = `${name}'s Meety looked in its notes for: ${item.query}`;
-  if (item.kind === "recall_result") text = item.found === 1 ? `${name}'s Meety found 1 note.` : `${name}'s Meety found ${String(item.found)} notes.`;
+  if (item.kind === "recall_result")
+    text =
+      item.found === 1
+        ? `${name}'s Meety found 1 note.`
+        : `${name}'s Meety found ${String(item.found)} notes.`;
   if (item.kind === "concede") text = `${name}'s Meety accepted a point: ${item.reason}`;
   if (item.kind === "hold") text = `${name}'s Meety kept its position: ${item.reason}`;
-  return <p className="timeline-line" key={item.seq}>{text}</p>;
+  return (
+    <p className="timeline-line" key={item.seq}>
+      {text}
+    </p>
+  );
 }
 
 // One quote a persona leaned on: the quote card, and the no-receipt flag when it was not found in the person's own words.
@@ -36,7 +60,10 @@ const ClaimReceipt = (props: { claim: Claim; name: string }): ReactElement => {
 };
 
 // One finished turn as a bubble in its side's colour, with the persona's name, the text, and each quote under it.
-function renderTurn(fold: MeetingFoldState, item: Extract<TimelineItem, { kind: "turn" }>): ReactElement {
+function renderTurn(
+  fold: MeetingFoldState,
+  item: Extract<TimelineItem, { kind: "turn" }>,
+): ReactElement {
   const name = speakerName(fold, item.side);
   return (
     <article className={`msg ${item.side}`} key={item.seq} aria-label={`${name}'s Meety`}>
@@ -62,7 +89,11 @@ const PartialTurn = (props: { fold: MeetingFoldState }): ReactElement | null => 
   if (partial === null) return null;
   const name = speakerName(props.fold, partial.side);
   return (
-    <article className={`msg ${partial.side}`} aria-live="polite" aria-label={`${name}'s Meety is speaking`}>
+    <article
+      className={`msg ${partial.side}`}
+      aria-live="polite"
+      aria-label={`${name}'s Meety is speaking`}
+    >
       <Avatar name={name} side={partial.side} />
       <div className="bubble writing">
         <h3 className="who">{`${name}'s Meety is speaking`}</h3>
@@ -73,7 +104,10 @@ const PartialTurn = (props: { fold: MeetingFoldState }): ReactElement | null => 
 };
 
 // The meeting's lines in seq order, the turn being written, and the thinking line; follows new lines only for a reader at the bottom.
-export const TranscriptView = (props: { fold: MeetingFoldState; isThinkingNow: boolean }): ReactElement => {
+export const TranscriptView = (props: {
+  fold: MeetingFoldState;
+  isThinkingNow: boolean;
+}): ReactElement => {
   const { fold } = props;
   const ref = useRef<HTMLDivElement | null>(null);
   const isAtBottom = useRef(true);
@@ -82,7 +116,8 @@ export const TranscriptView = (props: { fold: MeetingFoldState; isThinkingNow: b
     const element = ref.current;
     if (element === null) return undefined;
     const onScroll = (): void => {
-      isAtBottom.current = element.scrollHeight - element.scrollTop - element.clientHeight <= AT_BOTTOM_PX;
+      isAtBottom.current =
+        element.scrollHeight - element.scrollTop - element.clientHeight <= AT_BOTTOM_PX;
     };
     element.addEventListener("scroll", onScroll);
     return () => {
@@ -98,7 +133,9 @@ export const TranscriptView = (props: { fold: MeetingFoldState; isThinkingNow: b
   return (
     <div className="transcript" ref={ref}>
       <div className="talk">
-        {fold.timeline.map((item) => (item.kind === "turn" ? renderTurn(fold, item) : renderLine(fold, item)))}
+        {fold.timeline.map((item) =>
+          item.kind === "turn" ? renderTurn(fold, item) : renderLine(fold, item),
+        )}
         <PartialTurn fold={fold} />
         {props.isThinkingNow ? (
           <p className="timeline-line">

@@ -3,9 +3,17 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { CALL_SITES } from "../operations/model-calls.js";
 import { CATEGORIES } from "../sources/scrub-categories.js";
-import { COMMITTED_EVENT_TYPES, CommittedEvent, MeetingEvent, eventToPayload, rowToEvent } from "./events.js";
+import {
+  COMMITTED_EVENT_TYPES,
+  CommittedEvent,
+  MeetingEvent,
+  eventToPayload,
+  rowToEvent,
+} from "./events.js";
 
-const MIGRATION_FILE = fileURLToPath(new URL("../../../db/migrations/0001_foundation.sql", import.meta.url));
+const MIGRATION_FILE = fileURLToPath(
+  new URL("../../../db/migrations/0001_foundation.sql", import.meta.url),
+);
 const MEETING_ID = "0f2b9d0c-4f0e-4f7e-9a63-5e8b2b1a9c11";
 const CLAIM_ID = "3f2504e0-4f89-41d3-9a0c-0305e82c3301";
 const AT = "2026-10-27T08:00:00.000Z";
@@ -18,12 +26,56 @@ function checkNames(sql: string, pattern: RegExp): string[] {
 }
 
 const COMMITTED_SAMPLES: unknown[] = [
-  { ...BASE, seq: 1, type: "meeting.started", startedAt: AT, endsAt: AT, question: "Who decides?", members: [{ side: "a", displayName: "Ann" }, { side: "b", displayName: "Bo" }] },
+  {
+    ...BASE,
+    seq: 1,
+    type: "meeting.started",
+    startedAt: AT,
+    endsAt: AT,
+    question: "Who decides?",
+    members: [
+      { side: "a", displayName: "Ann" },
+      { side: "b", displayName: "Bo" },
+    ],
+  },
   { ...BASE, seq: 2, type: "phase.changed", phase: "open", stepSeq: 1 },
-  { ...BASE, seq: 3, type: "turn.committed", stepSeq: 1, side: "a", phase: "open", text: "Hello.", claims: [] },
-  { ...BASE, seq: 4, type: "tool.called", stepSeq: 1, side: "a", tool: "recall", args: { query: "rent" } },
-  { ...BASE, seq: 5, type: "tool.result", stepSeq: 1, side: "a", tool: "recall", result: { turns: [] } },
-  { ...BASE, seq: 6, type: "concede", stepSeq: 3, side: "b", claimId: CLAIM_ID, reason: "Fair point." },
+  {
+    ...BASE,
+    seq: 3,
+    type: "turn.committed",
+    stepSeq: 1,
+    side: "a",
+    phase: "open",
+    text: "Hello.",
+    claims: [],
+  },
+  {
+    ...BASE,
+    seq: 4,
+    type: "tool.called",
+    stepSeq: 1,
+    side: "a",
+    tool: "recall",
+    args: { query: "rent" },
+  },
+  {
+    ...BASE,
+    seq: 5,
+    type: "tool.result",
+    stepSeq: 1,
+    side: "a",
+    tool: "recall",
+    result: { turns: [] },
+  },
+  {
+    ...BASE,
+    seq: 6,
+    type: "concede",
+    stepSeq: 3,
+    side: "b",
+    claimId: CLAIM_ID,
+    reason: "Fair point.",
+  },
   { ...BASE, seq: 7, type: "hold", stepSeq: 3, side: "a", reason: "Still my view." },
   { ...BASE, seq: 8, type: "meeting.ended", reason: "decided", endedAt: AT },
   { ...BASE, seq: 9, type: "brief.ready", supportRate: { a: null, b: null } },
@@ -40,7 +92,15 @@ describe("meeting events", () => {
   });
 
   it("R5.11-T2: turn.delta has no seq and parses in MeetingEvent but not CommittedEvent", () => {
-    const delta = { ...BASE, type: "turn.delta", stepSeq: 3, attempt: 1, side: "b", offset: 0, text: "Well" };
+    const delta = {
+      ...BASE,
+      type: "turn.delta",
+      stepSeq: 3,
+      attempt: 1,
+      side: "b",
+      offset: 0,
+      text: "Well",
+    };
 
     expect(MeetingEvent.safeParse(delta).success).toBe(true);
     expect(CommittedEvent.safeParse(delta).success).toBe(false);
@@ -56,9 +116,15 @@ describe("meeting events", () => {
   });
 
   it("R13.2-T2: CALL_SITES equals the ledger call_site CHECK list as 0016 last sets it", () => {
-    const sql = readFileSync(new URL("../../../db/migrations/0016_summaries_and_self_asks.sql", import.meta.url), "utf8");
+    const sql = readFileSync(
+      new URL("../../../db/migrations/0016_summaries_and_self_asks.sql", import.meta.url),
+      "utf8",
+    );
 
-    const names = checkNames(sql, /ADD CONSTRAINT ledger_call_site_check CHECK \(call_site IN \(([^)]*)\)\)/);
+    const names = checkNames(
+      sql,
+      /ADD CONSTRAINT ledger_call_site_check CHECK \(call_site IN \(([^)]*)\)\)/,
+    );
 
     expect([...names].sort()).toEqual([...CALL_SITES].sort());
     expect(CALL_SITES).toHaveLength(16);
@@ -77,16 +143,34 @@ describe("meeting events", () => {
     const events = COMMITTED_SAMPLES.map((sample) => CommittedEvent.parse(sample));
 
     const rebuilt = events.map((event) =>
-      rowToEvent({ meeting_id: event.meetingId, seq: event.seq, type: event.type, v: event.v, payload: eventToPayload(event), created_at: new Date(event.at) }),
+      rowToEvent({
+        meeting_id: event.meetingId,
+        seq: event.seq,
+        type: event.type,
+        v: event.v,
+        payload: eventToPayload(event),
+        created_at: new Date(event.at),
+      }),
     );
 
     expect(rebuilt).toEqual(events);
-    expect(Object.keys(eventToPayload(events[1] ?? CommittedEvent.parse(COMMITTED_SAMPLES[1])))).toEqual(["phase", "stepSeq"]);
+    expect(
+      Object.keys(eventToPayload(events[1] ?? CommittedEvent.parse(COMMITTED_SAMPLES[1]))),
+    ).toEqual(["phase", "stepSeq"]);
   });
 
   it("R5.2-T2: rowToEvent refuses a stored row that no longer matches its schema", () => {
-    const row = { meeting_id: MEETING_ID, seq: 2, type: "phase.changed", v: 1, payload: { phase: "lunch", stepSeq: 1 }, created_at: AT };
+    const row = {
+      meeting_id: MEETING_ID,
+      seq: 2,
+      type: "phase.changed",
+      v: 1,
+      payload: { phase: "lunch", stepSeq: 1 },
+      created_at: AT,
+    };
 
-    expect(() => rowToEvent(row)).toThrowError(expect.objectContaining({ code: "event_row_invalid", httpStatus: 500 }) as Error);
+    expect(() => rowToEvent(row)).toThrowError(
+      expect.objectContaining({ code: "event_row_invalid", httpStatus: 500 }) as Error,
+    );
   });
 });

@@ -8,10 +8,65 @@ import type { FailedItem } from "./verify-items.js";
 export const RECENCY_SHARE = 0.5;
 // Common English words that do not count as keywords for diversity.
 export const STOP_WORDS: ReadonlySet<string> = new Set([
-  "the", "and", "for", "you", "that", "with", "this", "have", "are", "was", "but", "not", "what", "all", "can", "her", "his", "one", "our", "out", "had", "has", "she", "they", "them", "their", "there", "from", "your", "about", "would", "which", "will", "like", "into", "than", "then", "when", "where", "who", "how", "also", "been", "did", "does", "some", "any", "more", "much", "other",
+  "the",
+  "and",
+  "for",
+  "you",
+  "that",
+  "with",
+  "this",
+  "have",
+  "are",
+  "was",
+  "but",
+  "not",
+  "what",
+  "all",
+  "can",
+  "her",
+  "his",
+  "one",
+  "our",
+  "out",
+  "had",
+  "has",
+  "she",
+  "they",
+  "them",
+  "their",
+  "there",
+  "from",
+  "your",
+  "about",
+  "would",
+  "which",
+  "will",
+  "like",
+  "into",
+  "than",
+  "then",
+  "when",
+  "where",
+  "who",
+  "how",
+  "also",
+  "been",
+  "did",
+  "does",
+  "some",
+  "any",
+  "more",
+  "much",
+  "other",
 ]);
 // One turn as the card build uses it.
-export type SampledTurn = { id: string; turnIndex: number; text: string; normText: string; isSensitive: boolean };
+export type SampledTurn = {
+  id: string;
+  turnIndex: number;
+  text: string;
+  normText: string;
+  isSensitive: boolean;
+};
 // One turn with its block cost and its keywords, computed once for the sampler.
 type Candidate = { turn: SampledTurn; cost: number; keywords: Set<string> };
 
@@ -21,7 +76,11 @@ function blockCost(turn: SampledTurn): number {
 }
 
 // The newest turns, from the newest down, while they fit the recency allowance.
-function takeRecent(candidates: readonly Candidate[], chosen: Set<number>, allowance: number): number {
+function takeRecent(
+  candidates: readonly Candidate[],
+  chosen: Set<number>,
+  allowance: number,
+): number {
   let used = 0;
   for (let index = candidates.length - 1; index >= 0; index -= 1) {
     const candidate = candidates[index];
@@ -39,12 +98,17 @@ type Room = { budget: number; used: number };
 // The turns that add new keywords, most new keywords first, each taken while it fits the budget.
 function takeDiverse(candidates: readonly Candidate[], chosen: Set<number>, room: Room): number {
   const covered = new Set<string>();
-  for (const index of chosen) for (const keyword of candidates[index]?.keywords ?? []) covered.add(keyword);
-  const newCount = (candidate: Candidate): number => [...candidate.keywords].filter((keyword) => !covered.has(keyword)).length;
+  for (const index of chosen)
+    for (const keyword of candidates[index]?.keywords ?? []) covered.add(keyword);
+  const newCount = (candidate: Candidate): number =>
+    [...candidate.keywords].filter((keyword) => !covered.has(keyword)).length;
   const order = candidates
     .map((candidate, index) => ({ index, candidate, fresh: newCount(candidate) }))
     .filter((entry) => !chosen.has(entry.index))
-    .sort((left, right) => right.fresh - left.fresh || right.candidate.turn.turnIndex - left.candidate.turn.turnIndex);
+    .sort(
+      (left, right) =>
+        right.fresh - left.fresh || right.candidate.turn.turnIndex - left.candidate.turn.turnIndex,
+    );
   let total = room.used;
   for (const entry of order) {
     const hasNewKeyword = [...entry.candidate.keywords].some((keyword) => !covered.has(keyword));
@@ -76,7 +140,11 @@ export function sampleTurns(turns: readonly SampledTurn[], maxChars: number): Sa
   const budget = maxChars + TURN_BLOCK_SEPARATOR.length;
   const total = ordered.reduce((sum, turn) => sum + blockCost(turn), 0);
   if (total <= budget) return ordered;
-  const candidates: Candidate[] = ordered.map((turn) => ({ turn, cost: blockCost(turn), keywords: keywordsOf(turn.text) }));
+  const candidates: Candidate[] = ordered.map((turn) => ({
+    turn,
+    cost: blockCost(turn),
+    keywords: keywordsOf(turn.text),
+  }));
   const chosen = new Set<number>();
   const used = takeRecent(candidates, chosen, Math.floor(budget * RECENCY_SHARE));
   const afterDiversity = takeDiverse(candidates, chosen, { budget, used });
@@ -92,7 +160,8 @@ export function keywordsOf(text: string): Set<string> {
   for (const word of words) {
     const points = Array.from(word);
     if (NO_SPACE_SCRIPT.test(word)) {
-      for (let index = 0; index + 1 < points.length; index += 1) keywords.add(`${points[index] ?? ""}${points[index + 1] ?? ""}`);
+      for (let index = 0; index + 1 < points.length; index += 1)
+        keywords.add(`${points[index] ?? ""}${points[index + 1] ?? ""}`);
     } else if (points.length >= 3 && !STOP_WORDS.has(word)) {
       keywords.add(word);
     }
@@ -104,7 +173,10 @@ export function keywordsOf(text: string): Set<string> {
 export function cardCall(turns: readonly SampledTurn[]): ModelCall {
   const prompt = readPrompt("dossier");
   const rules = readPrompt("untrusted-data-rules");
-  const blocks = [...turns].sort((a, b) => a.turnIndex - b.turnIndex).map(formatTurnBlock).join(TURN_BLOCK_SEPARATOR);
+  const blocks = [...turns]
+    .sort((a, b) => a.turnIndex - b.turnIndex)
+    .map(formatTurnBlock)
+    .join(TURN_BLOCK_SEPARATOR);
   return {
     callSite: "card",
     promptVersion: prompt.version,
@@ -117,10 +189,23 @@ export function cardCall(turns: readonly SampledTurn[]): ModelCall {
 }
 
 // The one regeneration call: the first call's messages, the first reply as the assistant message, and the failed items as a new user message.
-export function cardRegenerationCall(first: ModelCall, firstReplyText: string, failures: readonly FailedItem[]): ModelCall {
-  const lines = failures.map((failure) => `item ${String(failure.position)}: turn_id "${failure.item.turn_id}", reason ${failure.reason}`).join("\n");
+export function cardRegenerationCall(
+  first: ModelCall,
+  firstReplyText: string,
+  failures: readonly FailedItem[],
+): ModelCall {
+  const lines = failures
+    .map(
+      (failure) =>
+        `item ${String(failure.position)}: turn_id "${failure.item.turn_id}", reason ${failure.reason}`,
+    )
+    .join("\n");
   return {
     ...first,
-    messages: [...first.messages, { role: "assistant", content: firstReplyText }, { role: "user", content: `<failed_items>\n${lines}\n</failed_items>` }],
+    messages: [
+      ...first.messages,
+      { role: "assistant", content: firstReplyText },
+      { role: "user", content: `<failed_items>\n${lines}\n</failed_items>` },
+    ],
   };
 }

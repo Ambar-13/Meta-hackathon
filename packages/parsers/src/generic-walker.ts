@@ -14,7 +14,9 @@ function isNode(value: unknown): value is Record<string, unknown> {
 function isOwnRole(node: Record<string, unknown>): boolean {
   const author = node.author;
   const authorRole = isNode(author) ? author.role : undefined;
-  return [authorRole, node.role, node.sender].some((role) => typeof role === "string" && OWN_ROLES.includes(role));
+  return [authorRole, node.role, node.sender].some(
+    (role) => typeof role === "string" && OWN_ROLES.includes(role),
+  );
 }
 
 // The string elements of a parts array joined by a line break.
@@ -46,7 +48,8 @@ function visit(value: unknown, depth: number, found: RawTurn[]): void {
   if (depth > WALK_DEPTH_MAX || !isNode(value)) return;
   if (isOwnRole(value)) {
     const text = textOf(value);
-    if (text !== null && text !== "") found.push({ text, exportOrder: 0, createTime: timeOf(value) });
+    if (text !== null && text !== "")
+      found.push({ text, exportOrder: 0, createTime: timeOf(value) });
     return;
   }
   for (const child of Object.values(value)) visit(child, depth + 1, found);

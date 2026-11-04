@@ -6,7 +6,15 @@ const hex = (bytes: Uint8Array): string => Buffer.from(bytes).toString("hex");
 
 describe("seeded sample", () => {
   it("D28-T4: sha256 matches Node's crypto for empty, short, block-edge and long inputs", () => {
-    const inputs = ["", "abc", "a".repeat(55), "a".repeat(56), "a".repeat(64), "0f2b9d0c-4f0e-4f7e-9a63-5e8b2b1a9c11", "é".repeat(500)];
+    const inputs = [
+      "",
+      "abc",
+      "a".repeat(55),
+      "a".repeat(56),
+      "a".repeat(64),
+      "0f2b9d0c-4f0e-4f7e-9a63-5e8b2b1a9c11",
+      "é".repeat(500),
+    ];
 
     for (const input of inputs) {
       const expected = createHash("sha256").update(input, "utf8").digest("hex");
@@ -27,7 +35,9 @@ describe("seeded sample", () => {
       [ids[place], ids[other]] = [ids[other] ?? 0, ids[place] ?? 0];
     }
 
-    expect(seededSample(seedText, 10, 30)).toEqual(ids.slice(0, 10).sort((left, right) => left - right));
+    expect(seededSample(seedText, 10, 30)).toEqual(
+      ids.slice(0, 10).sort((left, right) => left - right),
+    );
   });
 
   it("D28-T6: card ids that differ only in their last digit still get different samples", () => {

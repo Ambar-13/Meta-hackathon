@@ -1,6 +1,12 @@
 import {
-  SUMMARY_KINDS, SUMMARY_LINE_MAX_CHARS, SUMMARY_MAX_POINTS, SUMMARY_QUOTES_MAX, SUMMARY_TOPIC_MAX_CHARS,
-  type SummaryKind, type SummaryPoint, type SummaryStrength,
+  SUMMARY_KINDS,
+  SUMMARY_LINE_MAX_CHARS,
+  SUMMARY_MAX_POINTS,
+  SUMMARY_QUOTES_MAX,
+  SUMMARY_TOPIC_MAX_CHARS,
+  type SummaryKind,
+  type SummaryPoint,
+  type SummaryStrength,
 } from "@meet-first/contracts";
 
 // The quotes and topics of a summary, which the browser keeps first when it chooses what to send.
@@ -13,9 +19,17 @@ type Draft = { kind?: string; topic?: string; point?: string; strength?: string;
 
 // A field line after any bullets (hyphens, en or em dashes, dots), numbers, quote markers or bold around the field name, with an
 // optional number after it: "1. **Kind:** view", "- point: ...", "Quote 2: ...", "Quote #3: ...".
-const FIELD_LINE = /^[\s>*•\-\u2013\u2014\d.)]*(?:\*\*|__)?(kind|topic|point|strength|quote)(?:\s*#?\d+)?(?:\*\*|__)?\s*:\s*(?:\*\*|__)?\s*(.*)$/i;
+const FIELD_LINE =
+  /^[\s>*•\-\u2013\u2014\d.)]*(?:\*\*|__)?(kind|topic|point|strength|quote)(?:\s*#?\d+)?(?:\*\*|__)?\s*:\s*(?:\*\*|__)?\s*(.*)$/i;
 // Quote marks that may wrap a value, each opener with its closer.
-const WRAPPERS: ReadonlyArray<[string, string]> = [['"', '"'], ["'", "'"], ["“", "”"], ["‘", "’"], ["«", "»"], ["`", "`"]];
+const WRAPPERS: ReadonlyArray<[string, string]> = [
+  ['"', '"'],
+  ["'", "'"],
+  ["“", "”"],
+  ["‘", "’"],
+  ["«", "»"],
+  ["`", "`"],
+];
 // The kinds as a set, for a quick check.
 const KINDS: ReadonlySet<string> = new Set(SUMMARY_KINDS);
 // The strengths, in the words the copy prompt asks for.
@@ -24,7 +38,9 @@ const STRENGTHS: ReadonlySet<string> = new Set(["strong", "moderate", "mild"]);
 // A value with bold markers at its end and one pair of wrapping quote marks removed.
 function cleanValue(raw: string): string {
   const value = raw.replace(/(?:\*\*|__)\s*$/, "").trim();
-  const wrapper = WRAPPERS.find(([open, close]) => value.length >= 2 && value.startsWith(open) && value.endsWith(close));
+  const wrapper = WRAPPERS.find(
+    ([open, close]) => value.length >= 2 && value.startsWith(open) && value.endsWith(close),
+  );
   return (wrapper === undefined ? value : value.slice(1, -1)).trim();
 }
 
@@ -44,7 +60,10 @@ function pointOf(draft: Draft): SummaryPoint | null {
     topic: cutTo(draft.topic ?? "", SUMMARY_TOPIC_MAX_CHARS),
     point,
     strength: (STRENGTHS.has(strength) ? strength : "moderate") as SummaryStrength,
-    quotes: draft.quotes.filter((quote) => quote !== "").slice(0, SUMMARY_QUOTES_MAX).map((quote) => cutTo(quote, SUMMARY_LINE_MAX_CHARS)),
+    quotes: draft.quotes
+      .filter((quote) => quote !== "")
+      .slice(0, SUMMARY_QUOTES_MAX)
+      .map((quote) => cutTo(quote, SUMMARY_LINE_MAX_CHARS)),
   };
 }
 
@@ -104,6 +123,14 @@ export function summaryPriority(points: readonly SummaryPoint[]): SummaryPriorit
 // no Topic or Quote line where the point has none. parseSummary reads the same points from it.
 export function formatSummary(points: readonly SummaryPoint[]): string {
   return points
-    .map((point) => [`Kind: ${point.kind}`, ...(point.topic === "" ? [] : [`Topic: ${point.topic}`]), `Point: ${point.point}`, `Strength: ${point.strength}`, ...point.quotes.map((quote) => `Quote: ${quote}`)].join("\n"))
+    .map((point) =>
+      [
+        `Kind: ${point.kind}`,
+        ...(point.topic === "" ? [] : [`Topic: ${point.topic}`]),
+        `Point: ${point.point}`,
+        `Strength: ${point.strength}`,
+        ...point.quotes.map((quote) => `Quote: ${quote}`),
+      ].join("\n"),
+    )
     .join("\n\n");
 }

@@ -6,7 +6,13 @@ import "./ask.css";
 import type { ReactElement } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { HELP_RESULTS_HEADING, type AskView } from "@meet-first/contracts";
-import { APP_PATHS, ErrorNotice, readApprovedCard, readCardQuery, ScreenFrame } from "../../app-shell/index.js";
+import {
+  APP_PATHS,
+  ErrorNotice,
+  readApprovedCard,
+  readCardQuery,
+  ScreenFrame,
+} from "../../app-shell/index.js";
 import { Avatar, LoadingLine, Sticker, TypingDots } from "../../look/index.js";
 import { AnswerClaims, HelpAnswerItem } from "./answer-parts.js";
 import { splitHelpAnswers, useAskScreen, type AskScreenModel } from "./ask-state.js";
@@ -14,7 +20,11 @@ import { splitHelpAnswers, useAskScreen, type AskScreenModel } from "./ask-state
 // The lines of this page.
 const LOADING_LINE = "Loading the answers.";
 const ASKED_PREFIX = "You asked: ";
-const WAITING_LINES = { checking: "Checking your question.", asking: "Asking their Meetys. This takes about a minute.", ranking: "Checking the quotes in each answer." } as const;
+const WAITING_LINES = {
+  checking: "Checking your question.",
+  asking: "Asking their Meetys. This takes about a minute.",
+  ranking: "Checking the quotes in each answer.",
+} as const;
 const FAILED_LINE = "This ask could not finish. Try again.";
 const REFUSED_FALLBACK_LINE = "The question check did not allow this question.";
 const NO_MATCH_LINE = "Nobody in Explore matches this yet.";
@@ -83,19 +93,35 @@ const EndedNotice = (props: { view: AskView; line: string }): ReactElement => {
 };
 
 // The finished help search: the placed answers under the results heading, then the answers that showed no clear sign.
-const HelpResults = (props: { view: AskView; cardId: string | null; model: AskScreenModel }): ReactElement => {
+const HelpResults = (props: {
+  view: AskView;
+  cardId: string | null;
+  model: AskScreenModel;
+}): ReactElement => {
   const { placed, unplaced } = splitHelpAnswers(props.view.answers);
   const onMeet = (answerId: string, cardId: string): void => {
     void props.model.startMeeting(answerId, cardId);
   };
-  const toItem = (answer: Answer): ReactElement => <HelpAnswerItem key={answer.answerId} answer={answer} cardId={props.cardId} isBusy={props.model.isMeeting} onMeet={onMeet} />;
+  const toItem = (answer: Answer): ReactElement => (
+    <HelpAnswerItem
+      key={answer.answerId}
+      answer={answer}
+      cardId={props.cardId}
+      isBusy={props.model.isMeeting}
+      onMeet={onMeet}
+    />
+  );
   return (
     <>
       <section className="ask-section">
         <h2>{HELP_RESULTS_HEADING}</h2>
         {props.view.answers.length === 0 ? <p className="ask-none">{NO_MATCH_LINE}</p> : null}
-        {props.view.answers.length > 0 && placed.length === 0 ? <p className="ask-none">{NONE_PLACED_LINE}</p> : null}
-        {placed.length > 0 ? <ul className="ask-answers">{placed.map((answer) => toItem(answer))}</ul> : null}
+        {props.view.answers.length > 0 && placed.length === 0 ? (
+          <p className="ask-none">{NONE_PLACED_LINE}</p>
+        ) : null}
+        {placed.length > 0 ? (
+          <ul className="ask-answers">{placed.map((answer) => toItem(answer))}</ul>
+        ) : null}
       </section>
       {unplaced.length > 0 ? (
         <section className="ask-section">
@@ -136,10 +162,16 @@ const ReactResult = (props: { view: AskView }): ReactElement => {
 };
 
 // The part under the question: the waiting bubble, the refusal, the failure, or the finished answers.
-const AskBody = (props: { view: AskView; cardId: string | null; model: AskScreenModel }): ReactElement => {
+const AskBody = (props: {
+  view: AskView;
+  cardId: string | null;
+  model: AskScreenModel;
+}): ReactElement => {
   const { view } = props;
-  if (view.state === "checking" || view.state === "asking" || view.state === "ranking") return <WaitingBubble view={view} line={WAITING_LINES[view.state]} />;
-  if (view.state === "refused") return <EndedNotice view={view} line={view.refusedReason ?? REFUSED_FALLBACK_LINE} />;
+  if (view.state === "checking" || view.state === "asking" || view.state === "ranking")
+    return <WaitingBubble view={view} line={WAITING_LINES[view.state]} />;
+  if (view.state === "refused")
+    return <EndedNotice view={view} line={view.refusedReason ?? REFUSED_FALLBACK_LINE} />;
   if (view.state === "failed") return <EndedNotice view={view} line={FAILED_LINE} />;
   if (view.mode !== "help") return <ReactResult view={view} />;
   return <HelpResults view={view} cardId={props.cardId} model={props.model} />;
@@ -157,7 +189,15 @@ export const AskScreen = (): ReactElement => {
   });
   const view = model.ask.value;
   if (view === null) {
-    return <ScreenFrame title="Answers">{model.ask.error === null ? <LoadingLine text={LOADING_LINE} /> : <ErrorNotice error={model.ask.error} />}</ScreenFrame>;
+    return (
+      <ScreenFrame title="Answers">
+        {model.ask.error === null ? (
+          <LoadingLine text={LOADING_LINE} />
+        ) : (
+          <ErrorNotice error={model.ask.error} />
+        )}
+      </ScreenFrame>
+    );
   }
   return (
     <ScreenFrame title="Answers">

@@ -5,7 +5,14 @@
 import type { FastifyInstance } from "fastify";
 import { sql } from "kysely";
 import { z } from "zod";
-import { MyPhoto, NameUpdate, NameUpdated, PROFILE_PHOTO_MAX_BYTES, routes, Uuid } from "@meet-first/contracts";
+import {
+  MyPhoto,
+  NameUpdate,
+  NameUpdated,
+  PROFILE_PHOTO_MAX_BYTES,
+  routes,
+  Uuid,
+} from "@meet-first/contracts";
 import { withPerson } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { makeNotFoundError, makePayloadInvalidError } from "../route-errors.js";
@@ -20,7 +27,13 @@ const PhotoParams = z.object({ id: Uuid });
 // True for bytes that start and end as a JPEG does: FF D8 FF at the start, FF D9 at the end.
 export function isJpeg(bytes: Buffer): boolean {
   if (bytes.length < PHOTO_MIN_BYTES) return false;
-  return bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff && bytes[bytes.length - 2] === 0xff && bytes[bytes.length - 1] === 0xd9;
+  return (
+    bytes[0] === 0xff &&
+    bytes[1] === 0xd8 &&
+    bytes[2] === 0xff &&
+    bytes[bytes.length - 2] === 0xff &&
+    bytes[bytes.length - 1] === 0xd9
+  );
 }
 
 // Registers PUT /api/people/me/name: 200 NameUpdated with the name as saved, trimmed; 400 for an empty or too long name.
@@ -30,7 +43,12 @@ function registerNameUpdate(app: FastifyInstance, deps: RouteDeps): void {
     const body = NameUpdate.safeParse(request.body);
     if (!body.success) throw makePayloadInvalidError();
     const row = await withPerson(deps.db, personId, (trx) =>
-      trx.updateTable("people").set({ display_name: body.data.displayName }).where("id", "=", personId).returning("display_name").executeTakeFirstOrThrow(),
+      trx
+        .updateTable("people")
+        .set({ display_name: body.data.displayName })
+        .where("id", "=", personId)
+        .returning("display_name")
+        .executeTakeFirstOrThrow(),
     );
     return reply.code(200).send(NameUpdated.parse({ displayName: row.display_name }));
   });
@@ -40,22 +58,36 @@ function registerNameUpdate(app: FastifyInstance, deps: RouteDeps): void {
 // is 413 before it is read), replaces any earlier photo with a new row, and answers 200 MyPhoto with the new key; a body that is not a
 // JPEG is 400. DELETE takes the photo down and answers 200 MyPhoto with null, also when there was none.
 function registerPhotoUpdate(app: FastifyInstance, deps: RouteDeps): void {
-  app.addContentTypeParser("image/jpeg", { parseAs: "buffer", bodyLimit: PROFILE_PHOTO_MAX_BYTES }, (request, body, done) => {
-    done(null, body);
-  });
-  app.put(routes.people.uploadPhoto.path, { bodyLimit: PROFILE_PHOTO_MAX_BYTES }, async (request, reply) => {
-    const personId = requirePerson(request);
-    const bytes = request.body;
-    if (!Buffer.isBuffer(bytes) || !isJpeg(bytes)) throw makePayloadInvalidError();
-    const row = await withPerson(deps.db, personId, async (trx) => {
-      await trx.deleteFrom("profile_photos").where("person_id", "=", personId).execute();
-      return trx.insertInto("profile_photos").values({ person_id: personId, image: bytes }).returning("id").executeTakeFirstOrThrow();
-    });
-    return reply.code(200).send(MyPhoto.parse({ photo: photoKeyOf(row.id) }));
-  });
+  app.addContentTypeParser(
+    "image/jpeg",
+    { parseAs: "buffer", bodyLimit: PROFILE_PHOTO_MAX_BYTES },
+    (request, body, done) => {
+      done(null, body);
+    },
+  );
+  app.put(
+    routes.people.uploadPhoto.path,
+    { bodyLimit: PROFILE_PHOTO_MAX_BYTES },
+    async (request, reply) => {
+      const personId = requirePerson(request);
+      const bytes = request.body;
+      if (!Buffer.isBuffer(bytes) || !isJpeg(bytes)) throw makePayloadInvalidError();
+      const row = await withPerson(deps.db, personId, async (trx) => {
+        await trx.deleteFrom("profile_photos").where("person_id", "=", personId).execute();
+        return trx
+          .insertInto("profile_photos")
+          .values({ person_id: personId, image: bytes })
+          .returning("id")
+          .executeTakeFirstOrThrow();
+      });
+      return reply.code(200).send(MyPhoto.parse({ photo: photoKeyOf(row.id) }));
+    },
+  );
   app.delete(routes.people.removePhoto.path, async (request, reply) => {
     const personId = requirePerson(request);
-    await withPerson(deps.db, personId, (trx) => trx.deleteFrom("profile_photos").where("person_id", "=", personId).execute());
+    await withPerson(deps.db, personId, (trx) =>
+      trx.deleteFrom("profile_photos").where("person_id", "=", personId).execute(),
+    );
     return reply.code(200).send(MyPhoto.parse({ photo: null }));
   });
 }
@@ -69,7 +101,18 @@ function registerPhotoRead(app: FastifyInstance, deps: RouteDeps): void {
     const params = PhotoParams.safeParse(request.params);
     if (!params.success) throw makeNotFoundError();
     const id = params.data.id;
-    const image = await withPerson(deps.db, personId, async (trx) => (await sql<{ image: Buffer | null }>`SELECT coalesce(profile_photo_read(${id}::uuid), post_photo_read(${id}::uuid)) AS image`.execute(trx)).rows[0]?.image ?? null);
+    const image = await withPerson(
+      deps.db,
+      personId,
+      async (trx) =>
+        (
+          await sql<{
+            image: Buffer | null;
+          }>`SELECT coalesce(profile_photo_read(${id}::uuid), post_photo_read(${id}::uuid)) AS image`.execute(
+            trx,
+          )
+        ).rows[0]?.image ?? null,
+    );
     if (image === null) throw makeNotFoundError();
     return reply
       .code(200)

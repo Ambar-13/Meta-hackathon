@@ -8,18 +8,36 @@ import type { JobContext, JobTask } from "../job-context.js";
 import { TASKS } from "../runner.js";
 
 // One job a test context was asked to enqueue.
-export type EnqueuedJob = { name: JobName; payload: unknown; options: { runAt?: Date } | undefined };
+export type EnqueuedJob = {
+  name: JobName;
+  payload: unknown;
+  options: { runAt?: Date } | undefined;
+};
 
 // Runs one task of the merged task list inline, with the real database and no Graphile.
-export async function runJobOnce(context: JobContext, name: JobName, payload: unknown): Promise<void> {
+export async function runJobOnce(
+  context: JobContext,
+  name: JobName,
+  payload: unknown,
+): Promise<void> {
   const task = TASKS[name] as JobTask<JobName> | undefined;
-  if (task === undefined) throw new ContractError("task_missing", "No task is registered for this job name. Check the slot block in runner.ts.", 500);
+  if (task === undefined)
+    throw new ContractError(
+      "task_missing",
+      "No task is registered for this job name. Check the slot block in runner.ts.",
+      500,
+    );
   const parsed = JobPayloads[name].parse(payload) as Parameters<JobTask<JobName>>[0];
   await task(parsed, context);
 }
 
 // A job context for tests: the real client over the scripted replies, a recording enqueue, a silent log. With live, the mode is live and the live caller is that fake.
-export function makeTestJobContext(options: { db: Kysely<Database>; now?: () => Date; live?: LiveCaller; timeoutSignal?: (ms: number) => AbortSignal }): { context: JobContext; enqueued: EnqueuedJob[] } {
+export function makeTestJobContext(options: {
+  db: Kysely<Database>;
+  now?: () => Date;
+  live?: LiveCaller;
+  timeoutSignal?: (ms: number) => AbortSignal;
+}): { context: JobContext; enqueued: EnqueuedJob[] } {
   const env = testWorkerEnv(options.live === undefined ? "replay" : "live");
   const now = options.now ?? (() => new Date());
   const llm = makeLlmClient({

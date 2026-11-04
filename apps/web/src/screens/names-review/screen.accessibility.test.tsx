@@ -13,7 +13,10 @@ afterEach(() => {
 
 // Renders the names review for the fixture source.
 function renderNames(): void {
-  renderScreen(<NamesReviewScreen />, { pattern: ROUTE_PATTERNS.namesReview, url: APP_PATHS.namesReview(IDS.source) });
+  renderScreen(<NamesReviewScreen />, {
+    pattern: ROUTE_PATTERNS.namesReview,
+    url: APP_PATHS.namesReview(IDS.source),
+  });
 }
 
 describe("names review screen", () => {
@@ -22,7 +25,9 @@ describe("names review screen", () => {
     renderNames();
     expect(await screen.findByText("21 names found.")).toBeTruthy();
     expect(screen.getAllByText(/^Name \d+$/)).toHaveLength(20);
-    expect(screen.getByRole("radio", { name: "Replace all names with role labels" })).toHaveProperty("checked", true);
+    expect(
+      screen.getByRole("radio", { name: "Replace all names with role labels" }),
+    ).toHaveProperty("checked", true);
     expect(screen.getByText("Page 1 of 2")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Next page" }));
     expect(await screen.findByText("Name 21")).toBeTruthy();
@@ -31,7 +36,10 @@ describe("names review screen", () => {
 
   it("R2.4-T2: keeping a name takes the choose mode and a row tap, and the review sends keep true for that name only", async () => {
     stubRoute(routes.sources.readSource, sourceView(1, 2));
-    stubRoute(routes.sources.namesReview, { status: 200, body: { frozenAt: "2026-10-27T10:00:00.000Z", redactionCount: 3 } });
+    stubRoute(routes.sources.namesReview, {
+      status: 200,
+      body: { frozenAt: "2026-10-27T10:00:00.000Z", redactionCount: 3 },
+    });
     stubRoute(routes.sources.requestCard, { status: 202, body: { cardId: IDS.card } });
     renderNames();
     await screen.findByText("2 names found.");
@@ -50,23 +58,35 @@ describe("names review screen", () => {
   });
 
   it("D16-T1: the save button opens only once the names check has finished, using fake timers", async () => {
-    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] });
-    stubRoute(routes.sources.readSource, [{ ...sourceView(1, 1), namesPassDone: false }, sourceView(1, 1)]);
+    vi.useFakeTimers({
+      toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"],
+    });
+    stubRoute(routes.sources.readSource, [
+      { ...sourceView(1, 1), namesPassDone: false },
+      sourceView(1, 1),
+    ]);
     renderNames();
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);
     });
-    expect(screen.getByRole("button", { name: "Save and build my card" }).hasAttribute("disabled")).toBe(true);
+    expect(
+      screen.getByRole("button", { name: "Save and build my card" }).hasAttribute("disabled"),
+    ).toBe(true);
     expect(screen.getByText("The button opens when the names check has finished.")).toBeTruthy();
     await act(async () => {
       await vi.advanceTimersByTimeAsync(3000);
     });
-    expect(screen.getByRole("button", { name: "Save and build my card" }).hasAttribute("disabled")).toBe(false);
+    expect(
+      screen.getByRole("button", { name: "Save and build my card" }).hasAttribute("disabled"),
+    ).toBe(false);
   });
 
   it("D18-T1: the three opt-ins start unticked, a ticked one is sent, and minors are never offered", async () => {
     stubRoute(routes.sources.readSource, sourceView(1, 1));
-    stubRoute(routes.sources.namesReview, { status: 200, body: { frozenAt: "2026-10-27T10:00:00.000Z", redactionCount: 1 } });
+    stubRoute(routes.sources.namesReview, {
+      status: 200,
+      body: { frozenAt: "2026-10-27T10:00:00.000Z", redactionCount: 1 },
+    });
     stubRoute(routes.sources.requestCard, { status: 202, body: { cardId: IDS.card } });
     renderNames();
     await screen.findByText("1 name found.");
@@ -77,7 +97,10 @@ describe("names review screen", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: "Health" }));
     fireEvent.click(screen.getByRole("button", { name: "Save and build my card" }));
     await screen.findByTestId("location");
-    expect(requestsTo(routes.sources.namesReview)[0]?.body).toEqual({ decisions: [{ text: "Name 1", keep: false }], sensitiveOptIn: ["health"] });
+    expect(requestsTo(routes.sources.namesReview)[0]?.body).toEqual({
+      decisions: [{ text: "Name 1", keep: false }],
+      sensitiveOptIn: ["health"],
+    });
   });
 
   it("R2.4-T3: every control on the names page has an accessible name at 375 px", async () => {

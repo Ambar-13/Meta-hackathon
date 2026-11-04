@@ -1,4 +1,10 @@
-import { type CallSite, ContractError, type Effort, type LlmMode, type RecordedCall } from "@meet-first/contracts";
+import {
+  type CallSite,
+  ContractError,
+  type Effort,
+  type LlmMode,
+  type RecordedCall,
+} from "@meet-first/contracts";
 import { type Kysely, sql } from "kysely";
 import type { Database, LedgerTable } from "@meet-first/db";
 
@@ -45,11 +51,20 @@ export async function startLedgerRow(trx: Kysely<Database>, start: LedgerStart):
 }
 
 // The usage columns of a finish that carries no usage, such as a vendor HTTP error, a replay miss or a failed image call.
-const NO_USAGE = { promptTokens: null, cachedTokens: null, completionTokens: null, reasoningTokens: null };
+const NO_USAGE = {
+  promptTokens: null,
+  cachedTokens: null,
+  completionTokens: null,
+  reasoningTokens: null,
+};
 
 // Fills the row after the call: usage, dollars, status, request id. A row it cannot see is a fault, never a silent skip,
 // because a missing finish would leave the spend uncounted.
-export async function finishLedgerRow(trx: Kysely<Database>, id: string, finish: LedgerFinish): Promise<void> {
+export async function finishLedgerRow(
+  trx: Kysely<Database>,
+  id: string,
+  finish: LedgerFinish,
+): Promise<void> {
   const usage = finish.usage ?? NO_USAGE;
   const result = await trx
     .updateTable("ledger")
@@ -67,15 +82,30 @@ export async function finishLedgerRow(trx: Kysely<Database>, id: string, finish:
     .where("id", "=", id)
     .executeTakeFirst();
   if (result.numUpdatedRows !== 1n) {
-    throw new ContractError("ledger_row_missing", `Ledger row ${id} was not found to finish. Finish it in the same context that started it.`, 500);
+    throw new ContractError(
+      "ledger_row_missing",
+      `Ledger row ${id} was not found to finish. Finish it in the same context that started it.`,
+      500,
+    );
   }
 }
 
 // Token and call totals over the last n seconds across everyone, through the SECURITY DEFINER function.
-export async function readLedgerWindow(db: Kysely<Database>, seconds: number): Promise<{ sumEstTokens: number; callCount: number; imageCallCount: number }> {
-  const result = await sql<{ sum_est_tokens: string; call_count: string; image_call_count: string }>`SELECT * FROM ledger_window(${seconds})`.execute(db);
+export async function readLedgerWindow(
+  db: Kysely<Database>,
+  seconds: number,
+): Promise<{ sumEstTokens: number; callCount: number; imageCallCount: number }> {
+  const result = await sql<{
+    sum_est_tokens: string;
+    call_count: string;
+    image_call_count: string;
+  }>`SELECT * FROM ledger_window(${seconds})`.execute(db);
   const row = result.rows[0];
-  return { sumEstTokens: Number(row?.sum_est_tokens ?? 0), callCount: Number(row?.call_count ?? 0), imageCallCount: Number(row?.image_call_count ?? 0) };
+  return {
+    sumEstTokens: Number(row?.sum_est_tokens ?? 0),
+    callCount: Number(row?.call_count ?? 0),
+    imageCallCount: Number(row?.image_call_count ?? 0),
+  };
 }
 
 // Dollars spent since a time across everyone, for the daily and total caps. Postgres sends numeric as text.
@@ -86,6 +116,8 @@ export async function readUsdSince(db: Kysely<Database>, since: Date): Promise<n
 
 // Tokens one meeting has used so far, for the 1,500,000 stop. Postgres sends bigint as text.
 export async function readMeetingTokens(db: Kysely<Database>, meetingId: string): Promise<number> {
-  const result = await sql<{ tokens: string }>`SELECT ledger_meeting_tokens(${meetingId}) AS tokens`.execute(db);
+  const result = await sql<{
+    tokens: string;
+  }>`SELECT ledger_meeting_tokens(${meetingId}) AS tokens`.execute(db);
   return Number(result.rows[0]?.tokens ?? 0);
 }

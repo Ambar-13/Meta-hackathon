@@ -8,12 +8,14 @@ type BrowserItem = { name: string; purpose: string; stays: string };
 const COOKIES: readonly BrowserItem[] = [
   {
     name: "__Host-session",
-    purpose: "Keeps you signed in. Only Meety's server can read it, and only over a secure connection.",
+    purpose:
+      "Keeps you signed in. Only Meety's server can read it, and only over a secure connection.",
     stays: "Lasts 90 days. Deleting your account removes it.",
   },
   {
     name: "__Host-google",
-    purpose: "Carries a one-time check while you sign in with Google, so Google's answer comes back only to the browser that asked for it.",
+    purpose:
+      "Carries a one-time check while you sign in with Google, so Google's answer comes back only to the browser that asked for it.",
     stays: "Lasts 10 minutes, and goes as soon as you are back.",
   },
 ];
@@ -27,8 +29,10 @@ const NOTES: readonly BrowserItem[] = [
   },
   {
     name: "meet-first.access-code",
-    purpose: "The access code you joined with, so the invite links you share carry it and your friends need not type it.",
-    stays: "Stays until you clear this site's data. It leaves your browser only inside the invite links you share.",
+    purpose:
+      "The access code you joined with, so the invite links you share carry it and your friends need not type it.",
+    stays:
+      "Stays until you clear this site's data. It leaves your browser only inside the invite links you share.",
   },
 ];
 
@@ -36,11 +40,15 @@ const NOTES: readonly BrowserItem[] = [
 const COOKIE_SECTIONS: readonly PolicySection[] = [
   {
     title: "Google's own page",
-    lines: ["If you choose Continue with Google, Google's sign-in page may set cookies of its own on google.com. Google's privacy policy covers those."],
+    lines: [
+      "If you choose Continue with Google, Google's sign-in page may set cookies of its own on google.com. Google's privacy policy covers those.",
+    ],
   },
   {
     title: "Removing them",
-    lines: ["Deleting your account in Settings removes the sign-in cookie. Clearing this site's data in your browser removes all four."],
+    lines: [
+      "Deleting your account in Settings removes the sign-in cookie. Clearing this site's data in your browser removes all four.",
+    ],
   },
 ];
 
@@ -67,8 +75,9 @@ export const CookiesScreen = (): ReactElement => {
   return (
     <PolicyPage title="Cookies" changed="3 November 2026">
       <p className="policy-lead">
-        Meety keeps four small things in your browser: two cookies that sign you in, and two notes for the app. There are no ads, no
-        trackers and no analytics, so there is nothing to accept or refuse.
+        Meety keeps four small things in your browser: two cookies that sign you in, and two notes
+        for the app. There are no ads, no trackers and no analytics, so there is nothing to accept
+        or refuse.
       </p>
       <ItemList title="The two cookies" items={COOKIES} />
       <ItemList title="The two notes" items={NOTES} />

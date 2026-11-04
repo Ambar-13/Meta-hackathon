@@ -21,7 +21,16 @@ export const registerSessionsRoutes: RoutePlugin = (app, deps) => {
 };
 
 // The session hook, the person check, and the cookie and token functions that server.ts and the pairs folder use.
-export { addSessionHook, clearSessionCookie, hashToken, isPublicRoute, newHexToken, PUBLIC_ROUTES, requirePerson, setSessionCookie } from "./cookie.js";
+export {
+  addSessionHook,
+  clearSessionCookie,
+  hashToken,
+  isPublicRoute,
+  newHexToken,
+  PUBLIC_ROUTES,
+  requirePerson,
+  setSessionCookie,
+} from "./cookie.js";
 // The Origin check and the allowed-origin reader.
 export { addOriginCheck, appOrigin } from "./origin-check.js";
 // The account limit for POST /api/people.

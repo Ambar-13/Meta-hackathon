@@ -11,7 +11,8 @@ export type StubInput = StubReply | object;
 
 // Reads one stubRoute argument: a { status, body } reply as it is, or any other value as a 200 reply with that body.
 function asStubReply(input: StubInput): StubReply {
-  if ("status" in input && "body" in input && typeof input.status === "number") return { ...input, status: input.status, body: input.body };
+  if ("status" in input && "body" in input && typeof input.status === "number")
+    return { ...input, status: input.status, body: input.body };
   return { status: 200, body: input };
 }
 
@@ -19,15 +20,30 @@ function asStubReply(input: StubInput): StubReply {
 // for the reads of the home page, Explore and profiles: no listings and no posts.
 // server.resetHandlers keeps these, and a test's own stubRoute goes in front of them.
 const RAIL_DEFAULTS = [
-  http.get(new URL("/api/friends", window.location.origin).href, () => HttpResponse.json({ friends: [] })),
-  http.get(new URL("/api/friend-requests", window.location.origin).href, () => HttpResponse.json({ incoming: [], outgoing: [] })),
+  http.get(new URL("/api/friends", window.location.origin).href, () =>
+    HttpResponse.json({ friends: [] }),
+  ),
+  http.get(new URL("/api/friend-requests", window.location.origin).href, () =>
+    HttpResponse.json({ incoming: [], outgoing: [] }),
+  ),
   // The home page's suggestions read the first page of Explore; a test that needs listings stubs its own.
-  http.get(new URL("/api/directory", window.location.origin).href, () => HttpResponse.json({ listings: [], page: 0, hasMore: false })),
+  http.get(new URL("/api/directory", window.location.origin).href, () =>
+    HttpResponse.json({ listings: [], page: 0, hasMore: false }),
+  ),
   // Explore and profiles read posts; a test that needs posts stubs its own.
-  http.get(new URL("/api/posts", window.location.origin).href, () => HttpResponse.json({ posts: [] })),
-  http.get(new URL("/api/directory/:id/posts", window.location.origin).href, () => HttpResponse.json({ posts: [] })),
+  http.get(new URL("/api/posts", window.location.origin).href, () =>
+    HttpResponse.json({ posts: [] }),
+  ),
+  http.get(new URL("/api/directory/:id/posts", window.location.origin).href, () =>
+    HttpResponse.json({ posts: [] }),
+  ),
   // Me and the upload page read the summary; a test that needs one stubs its own.
-  http.get(new URL("/api/people/me/summary", window.location.origin).href, () => HttpResponse.json({ code: "not_found", message: "This no longer exists or is not yours." }, { status: 404 })),
+  http.get(new URL("/api/people/me/summary", window.location.origin).href, () =>
+    HttpResponse.json(
+      { code: "not_found", message: "This no longer exists or is not yours." },
+      { status: 404 },
+    ),
+  ),
 ];
 // One MSW server for every accessibility test, shared by all its files.
 const server = setupServer(...RAIL_DEFAULTS);
@@ -46,12 +62,19 @@ async function readBody(request: Request): Promise<unknown> {
 }
 
 // Answers one contracts route from the MSW server; with a list, the replies are served in order and the last one repeats.
-export function stubRoute(route: { method: string; path: string }, replies: StubInput | StubInput[]): void {
+export function stubRoute(
+  route: { method: string; path: string },
+  replies: StubInput | StubInput[],
+): void {
   const list: StubReply[] = (Array.isArray(replies) ? replies : [replies]).map(asStubReply);
-  if (list.length === 0) throw new ContractError("stub_replies_empty", "Give stubRoute at least one reply.");
+  if (list.length === 0)
+    throw new ContractError("stub_replies_empty", "Give stubRoute at least one reply.");
   const key = `${route.method} ${route.path}`;
-  const method = { GET: http.get, POST: http.post, PUT: http.put, DELETE: http.delete }[route.method];
-  if (method === undefined) throw new ContractError("stub_method_unknown", "Stub only GET, POST, PUT or DELETE routes.");
+  const method = { GET: http.get, POST: http.post, PUT: http.put, DELETE: http.delete }[
+    route.method
+  ];
+  if (method === undefined)
+    throw new ContractError("stub_method_unknown", "Stub only GET, POST, PUT or DELETE routes.");
   let served = 0;
   server.use(
     method(new URL(route.path, window.location.origin).href, async ({ request }) => {
@@ -60,11 +83,16 @@ export function stubRoute(route: { method: string; path: string }, replies: Stub
       recorded.set(key, log);
       const reply = list[Math.min(served, list.length - 1)] ?? list[0];
       served += 1;
-      if (reply === undefined) throw new ContractError("stub_replies_empty", "Give stubRoute at least one reply.");
+      if (reply === undefined)
+        throw new ContractError("stub_replies_empty", "Give stubRoute at least one reply.");
       if (reply.delayMs !== undefined) await delay(reply.delayMs);
-      if (reply.body === undefined || reply.body === null) return new HttpResponse(null, { status: reply.status });
+      if (reply.body === undefined || reply.body === null)
+        return new HttpResponse(null, { status: reply.status });
       if (typeof reply.body === "string") {
-        return new HttpResponse(reply.body, { status: reply.status, headers: { "Content-Type": "text/event-stream" } });
+        return new HttpResponse(reply.body, {
+          status: reply.status,
+          headers: { "Content-Type": "text/event-stream" },
+        });
       }
       return HttpResponse.json(reply.body, { status: reply.status });
     }),
@@ -72,7 +100,10 @@ export function stubRoute(route: { method: string; path: string }, replies: Stub
 }
 
 // Every request the MSW server received for one route, in order, so a test can count them.
-export function requestsTo(route: { method: string; path: string }): Array<{ url: string; body: unknown }> {
+export function requestsTo(route: {
+  method: string;
+  path: string;
+}): Array<{ url: string; body: unknown }> {
   return [...(recorded.get(`${route.method} ${route.path}`) ?? [])];
 }
 

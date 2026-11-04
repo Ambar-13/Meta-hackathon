@@ -5,7 +5,13 @@ import { renderComicTask } from "./render-comic-job.js";
 // The comic tasks for the worker task list: the render_comic job.
 export const comicTasks: TaskList = { render_comic: renderComicTask };
 // The job's constants, its skip reasons and its task, for the golden path and the tests.
-export { COMIC_DEADLINE_MS, PANEL_COUNT, renderComicTask, type SkipReason, checkPromptsWithScrubber } from "./render-comic-job.js";
+export {
+  COMIC_DEADLINE_MS,
+  PANEL_COUNT,
+  renderComicTask,
+  type SkipReason,
+  checkPromptsWithScrubber,
+} from "./render-comic-job.js";
 // The headline pick, the prompt builders and the style prefix, shared with the tests and the golden path.
 export { buildImagePrompts, HEADLINES_MAX, pickHeadlines, STYLE_PREFIX } from "./panel-prompts.js";
 // The image calls and the webp encoder under the cap, shared with the tests and the golden path.

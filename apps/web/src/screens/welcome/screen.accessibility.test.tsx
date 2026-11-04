@@ -24,7 +24,9 @@ describe("welcome screens", () => {
     fireEvent.click(screen.getByRole("button", { name: "Create my profile" }));
     expect(await screen.findByText(RECOVERY_CODE)).toBeTruthy();
     expect(screen.getByRole("button", { name: "Copy code" })).toBeTruthy();
-    expect(screen.getByText("Save this code. It is the only way back in if you lose this device.")).toBeTruthy();
+    expect(
+      screen.getByText("Save this code. It is the only way back in if you lose this device."),
+    ).toBeTruthy();
     expect(screen.queryByLabelText("Your display name")).toBeNull();
   });
 
@@ -35,7 +37,13 @@ describe("welcome screens", () => {
 
   it("R9.5-T5: when the server asks for an access code, the form shows the field, and the next try sends the code", async () => {
     stubRoute(routes.people.createPerson, [
-      { status: 403, body: { code: "access_code_needed", message: "Meety is invite-only for now. Enter the access code you were given." } },
+      {
+        status: 403,
+        body: {
+          code: "access_code_needed",
+          message: "Meety is invite-only for now. Enter the access code you were given.",
+        },
+      },
       { status: 201, body: personCreated() },
     ]);
     renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/" });
@@ -44,12 +52,17 @@ describe("welcome screens", () => {
     fireEvent.click(screen.getByRole("button", { name: "Create my profile" }));
 
     const field = await screen.findByLabelText("Access code");
-    expect(screen.getByText("Meety is invite-only for now. Enter the access code you were given.")).toBeTruthy();
+    expect(
+      screen.getByText("Meety is invite-only for now. Enter the access code you were given."),
+    ).toBeTruthy();
     fireEvent.change(field, { target: { value: "judges" } });
     fireEvent.click(screen.getByRole("button", { name: "Create my profile" }));
 
     expect(await screen.findByText(RECOVERY_CODE)).toBeTruthy();
-    expect(requestsTo(routes.people.createPerson).map((request) => request.body)).toEqual([{ displayName: "A" }, { displayName: "A", accessCode: "judges" }]);
+    expect(requestsTo(routes.people.createPerson).map((request) => request.body)).toEqual([
+      { displayName: "A" },
+      { displayName: "A", accessCode: "judges" },
+    ]);
   });
 
   it("R9.5-T6: a link with ?access= fills the access code, and the sign-up sends it", async () => {
@@ -61,7 +74,9 @@ describe("welcome screens", () => {
     fireEvent.click(screen.getByRole("button", { name: "Create my profile" }));
 
     expect(await screen.findByText(RECOVERY_CODE)).toBeTruthy();
-    expect(requestsTo(routes.people.createPerson).map((request) => request.body)).toEqual([{ displayName: "A", accessCode: "judges" }]);
+    expect(requestsTo(routes.people.createPerson).map((request) => request.body)).toEqual([
+      { displayName: "A", accessCode: "judges" },
+    ]);
   });
 
   it("A5-T2: continuing opens the upload page and the code is gone for good", async () => {
@@ -79,10 +94,15 @@ describe("welcome screens", () => {
     stubRoute(routes.people.createPerson, { status: 201, body: personCreated() });
     renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/" });
     fireEvent.change(screen.getByLabelText("Your display name"), { target: { value: "Priya" } });
-    fireEvent.change(screen.getByLabelText("Groups you belong to (optional)"), { target: { value: "robotics club, design team" } });
+    fireEvent.change(screen.getByLabelText("Groups you belong to (optional)"), {
+      target: { value: "robotics club, design team" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Create my profile" }));
     await screen.findByText(RECOVERY_CODE);
-    expect(requestsTo(routes.people.createPerson)[0]?.body).toEqual({ displayName: "Priya", affiliations: ["robotics club", "design team"] });
+    expect(requestsTo(routes.people.createPerson)[0]?.body).toEqual({
+      displayName: "Priya",
+      affiliations: ["robotics club", "design team"],
+    });
     expect(readAllowlist()).toEqual(["Priya", "robotics club", "design team"]);
   });
 
@@ -101,7 +121,10 @@ describe("welcome screens", () => {
     fireEvent.click(screen.getByRole("button", { name: "Sign in with the code" }));
     expect((await screen.findByTestId("location")).textContent).toBe("/upload");
     cleanup();
-    stubRoute(routes.people.recover, { status: 404, body: { code: "recovery_code_unknown", message: "This code is unknown or was used already." } });
+    stubRoute(routes.people.recover, {
+      status: 404,
+      body: { code: "recovery_code_unknown", message: "This code is unknown or was used already." },
+    });
     renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/" });
     fireEvent.change(screen.getByLabelText("Recovery code"), { target: { value: RECOVERY_CODE } });
     fireEvent.click(screen.getByRole("button", { name: "Sign in with the code" }));
@@ -110,7 +133,10 @@ describe("welcome screens", () => {
 
   it("R9.2-T1: the claim page posts the token from the fragment once and opens the upload page", async () => {
     stubRoute(routes.people.claim, { status: 200, body: { personId: IDS.personA } });
-    renderScreen(<ClaimScreen />, { pattern: ROUTE_PATTERNS.claim, url: `/claim#${TRANSFER_TOKEN}` });
+    renderScreen(<ClaimScreen />, {
+      pattern: ROUTE_PATTERNS.claim,
+      url: `/claim#${TRANSFER_TOKEN}`,
+    });
     fireEvent.click(screen.getByRole("button", { name: "Use this link" }));
     expect((await screen.findByTestId("location")).textContent).toBe("/upload");
     expect(requestsTo(routes.people.claim)).toHaveLength(1);
@@ -119,7 +145,11 @@ describe("welcome screens", () => {
 
   it("R9.2-T2: a claim link without a token says so and offers no button", () => {
     renderScreen(<ClaimScreen />, { pattern: ROUTE_PATTERNS.claim, url: "/claim" });
-    expect(screen.getByText("This link is not complete. Make a new one in Settings on your other browser.")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "This link is not complete. Make a new one in Settings on your other browser.",
+      ),
+    ).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Use this link" })).toBeNull();
   });
 
@@ -135,7 +165,10 @@ describe("welcome screens", () => {
     const google = await screen.findByRole("link", { name: "Continue with Google" });
     expect(google.getAttribute("href")).toBe("/api/auth/google");
     expect(screen.getByText("or start with only your name")).toBeTruthy();
-    expect(google.compareDocumentPosition(screen.getByLabelText("Your display name")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(
+      google.compareDocumentPosition(screen.getByLabelText("Your display name")) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     cleanup();
 
     stubRoute(routes.people.authOptions, { google: false });
@@ -149,11 +182,16 @@ describe("welcome screens", () => {
   it("W7-GOOGLE-WEB-T2: a Google sign-in that came back unfinished says so, cancelled or failed", async () => {
     stubRoute(routes.people.authOptions, { google: true });
     renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/?google=cancelled" });
-    expect((await screen.findByText("Google sign-in was cancelled. Try again whenever you like.")).getAttribute("role")).toBe("status");
+    expect(
+      (
+        await screen.findByText("Google sign-in was cancelled. Try again whenever you like.")
+      ).getAttribute("role"),
+    ).toBe("status");
     cleanup();
 
     renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/?google=failed" });
-    expect((await screen.findByText("Google sign-in did not finish. Try again.")).getAttribute("role")).toBe("status");
+    expect(
+      (await screen.findByText("Google sign-in did not finish. Try again.")).getAttribute("role"),
+    ).toBe("status");
   });
 });
-

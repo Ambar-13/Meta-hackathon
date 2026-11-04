@@ -36,7 +36,9 @@ const TERMS_SECTIONS: readonly PolicySection[] = [
   },
   {
     title: "When the rules are broken",
-    lines: ["Meety may take down a post or a story, or close an account, that breaks these terms. To report something, write to the address below."],
+    lines: [
+      "Meety may take down a post or a story, or close an account, that breaks these terms. To report something, write to the address below.",
+    ],
   },
   {
     title: "What Meety promises",
@@ -47,11 +49,15 @@ const TERMS_SECTIONS: readonly PolicySection[] = [
   },
   {
     title: "Leaving",
-    lines: ["You can delete your account at any time in Settings. That removes everything that belongs to you."],
+    lines: [
+      "You can delete your account at any time in Settings. That removes everything that belongs to you.",
+    ],
   },
   {
     title: "Changes to these terms",
-    lines: ["When these terms change, the date at the top changes too. Using Meety after that means you accept the new terms."],
+    lines: [
+      "When these terms change, the date at the top changes too. Using Meety after that means you accept the new terms.",
+    ],
   },
 ];
 

@@ -41,7 +41,11 @@ export function parseSseFrame(frame: string): SseItem[] {
     applyField(fields, field, value);
   }
   if (fields.id !== undefined || fields.event !== undefined || fields.data.length > 0) {
-    items.push({ id: fields.id ?? null, event: fields.event ?? "message", data: fields.data.join("\n") });
+    items.push({
+      id: fields.id ?? null,
+      event: fields.event ?? "message",
+      data: fields.data.join("\n"),
+    });
   }
   return items;
 }
@@ -70,7 +74,13 @@ function absorbChunk(state: ReadState, chunk: string, untilSeq: number | undefin
 }
 
 // What one read loop needs: the reader and decoder, the timer, the state it fills, and the wanted seq.
-type ReadLoop = { reader: ReadableStreamDefaultReader<Uint8Array>; decoder: TextDecoder; timeout: Promise<"timeout">; state: ReadState; untilSeq: number | undefined };
+type ReadLoop = {
+  reader: ReadableStreamDefaultReader<Uint8Array>;
+  decoder: TextDecoder;
+  timeout: Promise<"timeout">;
+  state: ReadState;
+  untilSeq: number | undefined;
+};
 
 // Reads chunks until the stream ends, the time is up, or the wanted event has come, and says which.
 async function readUntilStop(loop: ReadLoop): Promise<StopReason> {
@@ -89,7 +99,10 @@ async function readUntilStop(loop: ReadLoop): Promise<StopReason> {
 }
 
 // Reads an SSE body into frames, stopping at the first event whose id is untilSeq or more, at the end of the stream, or at timeoutMs.
-export async function readSse(response: ReadableStream<Uint8Array>, options: { untilSeq?: number; timeoutMs: number }): Promise<SseItem[]> {
+export async function readSse(
+  response: ReadableStream<Uint8Array>,
+  options: { untilSeq?: number; timeoutMs: number },
+): Promise<SseItem[]> {
   const reader = response.getReader();
   const decoder = new TextDecoder();
   const state: ReadState = { buffer: "", items: [] };
@@ -99,11 +112,19 @@ export async function readSse(response: ReadableStream<Uint8Array>, options: { u
       resolve("timeout");
     }, options.timeoutMs);
   });
-  const reason = await readUntilStop({ reader, decoder, timeout, state, untilSeq: options.untilSeq });
+  const reason = await readUntilStop({
+    reader,
+    decoder,
+    timeout,
+    state,
+    untilSeq: options.untilSeq,
+  });
   clearTimeout(handle);
   await reader.cancel().catch(() => undefined);
   if (reason === "timeout" && options.untilSeq !== undefined) {
-    throw new Error(`sse_read_timeout: no event with id ${String(options.untilSeq)} or more within ${String(options.timeoutMs)} ms; got ${String(state.items.length)} items`);
+    throw new Error(
+      `sse_read_timeout: no event with id ${String(options.untilSeq)} or more within ${String(options.timeoutMs)} ms; got ${String(state.items.length)} items`,
+    );
   }
   return state.items;
 }

@@ -37,7 +37,12 @@ export type {
 // The schema version and the boot check the worker runs.
 export { SCHEMA_VERSION, assertSchemaVersion, readSchemaVersion } from "./migrate.js";
 // Reading a refusal off a Postgres error.
-export { parseDatabaseError, TRIGGER_CODES, type DatabaseRefusal, type TriggerCode } from "./database-errors.js";
+export {
+  parseDatabaseError,
+  TRIGGER_CODES,
+  type DatabaseRefusal,
+  type TriggerCode,
+} from "./database-errors.js";
 // The recall lookup.
 export { queryWords, searchRecallCorpus } from "./recall-search.js";
 // The event log seq and the event append.

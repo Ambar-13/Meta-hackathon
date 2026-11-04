@@ -11,10 +11,16 @@ export const QUIZ_BANK: ReadonlyArray<{ id: number; text: string }> = [
   { id: 5, text: "How do you decide between two options that both look fine?" },
   { id: 6, text: "What is a boundary you hold at work that others sometimes push on?" },
   { id: 7, text: "How much structure do you want in a week: a fixed plan, or room to move?" },
-  { id: 8, text: "What do you need from a collaborator before you trust them with something hard?" },
+  {
+    id: 8,
+    text: "What do you need from a collaborator before you trust them with something hard?",
+  },
   { id: 9, text: "When you disagree with someone senior, what do you do?" },
   { id: 10, text: "What do you do on a day when nothing is going right?" },
-  { id: 11, text: "Do you prefer to finish one thing before starting the next, or keep several moving?" },
+  {
+    id: 11,
+    text: "Do you prefer to finish one thing before starting the next, or keep several moving?",
+  },
   { id: 12, text: "What makes you say no to an otherwise good opportunity?" },
   { id: 13, text: "How do you like to be thanked, if at all?" },
   { id: 14, text: "What do you do when you realise you were wrong in front of others?" },
@@ -33,7 +39,10 @@ export const QUIZ_BANK: ReadonlyArray<{ id: number; text: string }> = [
   { id: 27, text: "How do you split credit when a team wins?" },
   { id: 28, text: "What do you do in the first hour of a free day?" },
   { id: 29, text: "What topic do you avoid at work, and why?" },
-  { id: 30, text: "If a project could only have one of speed, quality or low cost, which would you give up?" },
+  {
+    id: 30,
+    text: "If a project could only have one of speed, quality or low cost, which would you give up?",
+  },
 ];
 // How many bank questions one quiz asks.
 export const QUIZ_SAMPLE_SIZE = 10;

@@ -11,22 +11,44 @@ const BriefParams = z.object({ id: Uuid });
 
 // The answer for a brief that does not exist for this caller. A bad id, a meeting the caller is not in and a missing brief all get it, so ids cannot be probed.
 function makeBriefNotFoundError(): ContractError {
-  return new ContractError("brief_not_found", "This brief does not exist or is not yours.", HTTP.notFound);
+  return new ContractError(
+    "brief_not_found",
+    "This brief does not exist or is not yours.",
+    HTTP.notFound,
+  );
 }
 
 // The answer while the brief is still being written. The screen asks again in a few seconds.
 function makeBriefNotReadyError(): ContractError {
-  return new ContractError("brief_not_ready", "The brief is not written yet. Ask again in a few seconds.", HTTP.notFound);
+  return new ContractError(
+    "brief_not_ready",
+    "The brief is not written yet. Ask again in a few seconds.",
+    HTTP.notFound,
+  );
 }
 
 // Reads the caller's own brief of one meeting: missing membership is brief_not_found; a member with no row yet is brief_not_ready.
 async function readOwnBrief(deps: RouteDeps, personId: string, meetingId: string): Promise<Brief> {
   return withPerson(deps.db, personId, async (trx) => {
-    const member = await trx.selectFrom("meeting_members").select("person_id").where("meeting_id", "=", meetingId).where("person_id", "=", personId).executeTakeFirst();
+    const member = await trx
+      .selectFrom("meeting_members")
+      .select("person_id")
+      .where("meeting_id", "=", meetingId)
+      .where("person_id", "=", personId)
+      .executeTakeFirst();
     if (member === undefined) throw makeBriefNotFoundError();
-    const row = await trx.selectFrom("briefs").select(["agree", "clash", "decide_first", "support_rate", "support_reliable"]).where("meeting_id", "=", meetingId).where("person_id", "=", personId).executeTakeFirst();
+    const row = await trx
+      .selectFrom("briefs")
+      .select(["agree", "clash", "decide_first", "support_rate", "support_reliable"])
+      .where("meeting_id", "=", meetingId)
+      .where("person_id", "=", personId)
+      .executeTakeFirst();
     if (row === undefined) throw makeBriefNotReadyError();
-    const meeting = await trx.selectFrom("meetings").select("question_kind").where("id", "=", meetingId).executeTakeFirstOrThrow();
+    const meeting = await trx
+      .selectFrom("meetings")
+      .select("question_kind")
+      .where("id", "=", meetingId)
+      .executeTakeFirstOrThrow();
     return toBriefView(row, meeting.question_kind);
   });
 }

@@ -21,15 +21,33 @@ const PLAIN = [
 // The two points PLAIN holds.
 const PLAIN_POINTS = [
   {
-    kind: "view", topic: "Rentably", point: "Rentably was never a bad idea.", strength: "strong",
-    quotes: ["rentably was never a bad idea, the timing was just early", "i'd build it again tomorrow"],
+    kind: "view",
+    topic: "Rentably",
+    point: "Rentably was never a bad idea.",
+    strength: "strong",
+    quotes: [
+      "rentably was never a bad idea, the timing was just early",
+      "i'd build it again tomorrow",
+    ],
   },
-  { kind: "habit", topic: "Mornings", point: "Writes before checking messages.", strength: "mild", quotes: ["i write for an hour before i open slack"] },
+  {
+    kind: "habit",
+    topic: "Mornings",
+    point: "Writes before checking messages.",
+    strength: "mild",
+    quotes: ["i write for an hour before i open slack"],
+  },
 ];
 
 // One block in the format, with the given point and quotes.
 function block(point: string, quotes: readonly string[] = []): string {
-  return ["Kind: value", "Topic: Work", `Point: ${point}`, "Strength: moderate", ...quotes.map((quote) => `Quote: ${quote}`)].join("\n");
+  return [
+    "Kind: value",
+    "Topic: Work",
+    `Point: ${point}`,
+    "Strength: moderate",
+    ...quotes.map((quote) => `Quote: ${quote}`),
+  ].join("\n");
 }
 
 describe("the summary format", () => {
@@ -46,7 +64,7 @@ describe("the summary format", () => {
       "* point: Rentably was never a bad idea.",
       "> **Strength**: strong",
       "- Quote: “rentably was never a bad idea, the timing was just early”",
-      "- quote: \"i'd build it again tomorrow\"",
+      '- quote: "i\'d build it again tomorrow"',
       "2. **Kind:** habit",
       "   **Topic:** Mornings",
       "   **Point:** Writes before checking messages.",
@@ -58,13 +76,38 @@ describe("the summary format", () => {
   });
 
   it("W7-SUMMARY-T3: drops blocks with no point, fills unknown kinds and strengths, keeps at most 80 points and 3 quotes each, and cuts long fields", () => {
-    const odd = ["Kind: dreams", "Topic: Sleep", "Point: Naps after lunch.", "Strength: enormous"].join("\n");
+    const odd = [
+      "Kind: dreams",
+      "Topic: Sleep",
+      "Point: Naps after lunch.",
+      "Strength: enormous",
+    ].join("\n");
     const noPoint = ["Kind: view", "Topic: Nothing", "Strength: strong"].join("\n");
-    const many = Array.from({ length: SUMMARY_MAX_POINTS + 5 }, (value, index) => block(`Point number ${String(index)}.`)).join("\n\n");
-    const quoted = block("Has many quotes.", ["first quote here", "second quote here", "third quote here", "fourth quote here"]);
-    const long = ["Kind: view", `Topic: ${"t".repeat(80)}`, `Point: ${"p".repeat(400)}`, `Quote: ${"q".repeat(400)}`].join("\n");
+    const many = Array.from({ length: SUMMARY_MAX_POINTS + 5 }, (value, index) =>
+      block(`Point number ${String(index)}.`),
+    ).join("\n\n");
+    const quoted = block("Has many quotes.", [
+      "first quote here",
+      "second quote here",
+      "third quote here",
+      "fourth quote here",
+    ]);
+    const long = [
+      "Kind: view",
+      `Topic: ${"t".repeat(80)}`,
+      `Point: ${"p".repeat(400)}`,
+      `Quote: ${"q".repeat(400)}`,
+    ].join("\n");
 
-    expect(parseSummary(`${odd}\n\n${noPoint}`)).toEqual([{ kind: "other", topic: "Sleep", point: "Naps after lunch.", strength: "moderate", quotes: [] }]);
+    expect(parseSummary(`${odd}\n\n${noPoint}`)).toEqual([
+      {
+        kind: "other",
+        topic: "Sleep",
+        point: "Naps after lunch.",
+        strength: "moderate",
+        quotes: [],
+      },
+    ]);
     expect(parseSummary(many)).toHaveLength(SUMMARY_MAX_POINTS);
     expect(parseSummary(quoted)[0]?.quotes).toHaveLength(SUMMARY_QUOTES_MAX);
     const [cut] = parseSummary(long);
@@ -72,25 +115,55 @@ describe("the summary format", () => {
   });
 
   it("W7-SUMMARY-T4: returns no points for text that is not in the format", () => {
-    expect(parseSummary("I am a builder who likes quiet mornings and loud ideas.\nThat is all.")).toEqual([]);
+    expect(
+      parseSummary("I am a builder who likes quiet mornings and loud ideas.\nThat is all."),
+    ).toEqual([]);
     expect(parseSummary("")).toEqual([]);
   });
 
   it("W7-SUMMARY-T5: summaryPriority lists every quote and every distinct topic, in order", () => {
-    const again = block("Talks about Rentably a lot.", ["rentably again and again"]).replace("Topic: Work", "Topic: rentably");
+    const again = block("Talks about Rentably a lot.", ["rentably again and again"]).replace(
+      "Topic: Work",
+      "Topic: rentably",
+    );
 
     expect(summaryPriority(parseSummary(`${PLAIN}\n\n${again}`))).toEqual({
-      quotes: ["rentably was never a bad idea, the timing was just early", "i'd build it again tomorrow", "i write for an hour before i open slack", "rentably again and again"],
+      quotes: [
+        "rentably was never a bad idea, the timing was just early",
+        "i'd build it again tomorrow",
+        "i write for an hour before i open slack",
+        "rentably again and again",
+      ],
       topics: ["Rentably", "Mornings"],
     });
   });
 
   it("W7-SUMMARY-T11: numbered quote lines, dash bullets and a strength with a note read like the plain format", () => {
     const dash = "\u2013 ";
-    const text = ["Kind: view", "Topic: Rentably", "Point: Rentably was never a bad idea.", "Strength: strong (said often)", "Quote 1: rentably was never a bad idea, the timing was just early", "Quote #2: i'd build it again tomorrow"].map((line) => dash + line).join("\n");
+    const text = [
+      "Kind: view",
+      "Topic: Rentably",
+      "Point: Rentably was never a bad idea.",
+      "Strength: strong (said often)",
+      "Quote 1: rentably was never a bad idea, the timing was just early",
+      "Quote #2: i'd build it again tomorrow",
+    ]
+      .map((line) => dash + line)
+      .join("\n");
     const emDash = text.replaceAll("\u2013", "\u2014");
 
-    const expected = [{ kind: "view", topic: "Rentably", point: "Rentably was never a bad idea.", strength: "strong", quotes: ["rentably was never a bad idea, the timing was just early", "i'd build it again tomorrow"] }];
+    const expected = [
+      {
+        kind: "view",
+        topic: "Rentably",
+        point: "Rentably was never a bad idea.",
+        strength: "strong",
+        quotes: [
+          "rentably was never a bad idea, the timing was just early",
+          "i'd build it again tomorrow",
+        ],
+      },
+    ];
     expect(parseSummary(text)).toEqual(expected);
     expect(parseSummary(emDash)).toEqual(expected);
   });
@@ -101,7 +174,15 @@ describe("the summary format", () => {
 
     expect(parseSummary(text)).toEqual(points);
     expect(text.split("\n\n")).toHaveLength(points.length);
-    expect(text.startsWith("Kind: view\nTopic: Rentably\nPoint: Rentably was never a bad idea.\nStrength: strong\nQuote: ")).toBe(true);
-    expect(formatSummary([{ kind: "habit", topic: "", point: "Writes first.", strength: "mild", quotes: [] }])).toBe("Kind: habit\nPoint: Writes first.\nStrength: mild");
+    expect(
+      text.startsWith(
+        "Kind: view\nTopic: Rentably\nPoint: Rentably was never a bad idea.\nStrength: strong\nQuote: ",
+      ),
+    ).toBe(true);
+    expect(
+      formatSummary([
+        { kind: "habit", topic: "", point: "Writes first.", strength: "mild", quotes: [] },
+      ]),
+    ).toBe("Kind: habit\nPoint: Writes first.\nStrength: mild");
   });
 });

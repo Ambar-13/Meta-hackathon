@@ -23,7 +23,9 @@ const CUT_MARK = "...";
 
 // The three example chips under an empty thread: a help search, then how the first and the second friend would probably react. With no
 // friends list (it failed to load or is empty) the names fall back to Mira and my investor.
-export function chipTexts(friends: readonly { displayName: string }[] | null): readonly [string, string, string] {
+export function chipTexts(
+  friends: readonly { displayName: string }[] | null,
+): readonly [string, string, string] {
   const first = friends?.[0]?.displayName.trim() ?? "";
   const second = friends?.[1]?.displayName.trim() ?? "";
   return [
@@ -36,7 +38,9 @@ export function chipTexts(friends: readonly { displayName: string }[] | null): r
 // The greeting over an empty thread, with the person's name when it is known.
 export function greetingOf(displayName: string | null): string {
   const name = displayName?.trim() ?? "";
-  return name === "" ? "What do you want to find out?" : `Hi ${name}, what do you want to find out?`;
+  return name === ""
+    ? "What do you want to find out?"
+    : `Hi ${name}, what do you want to find out?`;
 }
 
 // The first sentence of an answer, at most ANSWER_LINE_MAX characters; a longer one is cut at a word and ends with "...".
@@ -47,7 +51,8 @@ export function firstSentence(text: string): string {
   if (sentence.length <= ANSWER_LINE_MAX) return sentence;
   const room = sentence.slice(0, ANSWER_LINE_MAX - CUT_MARK.length + 1);
   const lastSpace = room.lastIndexOf(" ");
-  const cut = lastSpace > 0 ? room.slice(0, lastSpace) : room.slice(0, ANSWER_LINE_MAX - CUT_MARK.length);
+  const cut =
+    lastSpace > 0 ? room.slice(0, lastSpace) : room.slice(0, ANSWER_LINE_MAX - CUT_MARK.length);
   return `${cut.replace(/[\s,;:.!?-]+$/, "")}${CUT_MARK}`;
 }
 
@@ -58,7 +63,10 @@ export function shouldPollThread(thread: OrchestratorThread): boolean {
 }
 
 // The person's own message nearest before a reply, which "Try again" puts back in the composer; null when there is none.
-export function messageBefore(messages: readonly OrchestratorMessage[], replyId: string): string | null {
+export function messageBefore(
+  messages: readonly OrchestratorMessage[],
+  replyId: string,
+): string | null {
   const index = messages.findIndex((message) => message.id === replyId);
   const earlier = index < 0 ? [] : messages.slice(0, index);
   return earlier.reverse().find((message) => message.role === "you")?.text ?? null;
@@ -66,10 +74,19 @@ export function messageBefore(messages: readonly OrchestratorMessage[], replyId:
 
 // The thread as the page shows it: the server's messages with the replies a run returned put in their place, then the messages sent
 // from this page that the server's thread does not hold yet.
-export function shownMessages(input: { server: readonly OrchestratorMessage[]; ran: ReadonlyMap<string, OrchestratorMessage>; sent: readonly OrchestratorMessage[] }): OrchestratorMessage[] {
+export function shownMessages(input: {
+  server: readonly OrchestratorMessage[];
+  ran: ReadonlyMap<string, OrchestratorMessage>;
+  sent: readonly OrchestratorMessage[];
+}): OrchestratorMessage[] {
   const known = new Set(input.server.map((message) => message.id));
   const server = input.server.map((message) => input.ran.get(message.id) ?? message);
-  return [...server, ...input.sent.filter((message) => !known.has(message.id)).map((message) => input.ran.get(message.id) ?? message)];
+  return [
+    ...server,
+    ...input.sent
+      .filter((message) => !known.has(message.id))
+      .map((message) => input.ran.get(message.id) ?? message),
+  ];
 }
 
 // True when a message starts a time line: the first message, and any message sent TIME_GAP_MS or more after the one before it.
@@ -91,7 +108,20 @@ export function joinsPrevious(messages: readonly OrchestratorMessage[], index: n
 
 // The short names of the weekdays and months the time lines use, written out so every browser says them the same way.
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+] as const;
 
 // The midnight that starts the local day of a time.
 function dayStart(time: Date): number {

@@ -17,7 +17,10 @@ const NAMES_NONE_TURNS = [
 
 describe("chunkTurnsForNames", () => {
   it("D15-T2: six turns of 18,999 characters make one chunk of five turns and one of the sixth", () => {
-    const turns = [0, 1, 2, 3, 4, 5].map((turnIndex) => ({ turnIndex, text: "word ".repeat(3800).trimEnd() }));
+    const turns = [0, 1, 2, 3, 4, 5].map((turnIndex) => ({
+      turnIndex,
+      text: "word ".repeat(3800).trimEnd(),
+    }));
     const chunks = chunkTurnsForNames(turns);
     expect(chunks).toHaveLength(2);
     expect(chunks[0]?.turnIndexes).toEqual([0, 1, 2, 3, 4]);
@@ -42,7 +45,9 @@ describe("chunkTurnsForNames", () => {
   });
 
   it("R2.6-T1: a 40-line paste of 8 turns is one chunk", () => {
-    const chunks = chunkTurnsForNames(NAMES_NONE_TURNS.map((text, turnIndex) => ({ turnIndex, text })));
+    const chunks = chunkTurnsForNames(
+      NAMES_NONE_TURNS.map((text, turnIndex) => ({ turnIndex, text })),
+    );
     expect(chunks).toHaveLength(1);
     expect(chunks[0]?.turnIndexes).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
   });
@@ -59,7 +64,8 @@ describe("namesPassCall", () => {
     });
     expect(call.messages[1]).toEqual({
       role: "user",
-      content: "<allowlist>\nTom\nKopi Club\n</allowlist>\n<source_turns>\n[t:0] hi\n</source_turns>",
+      content:
+        "<allowlist>\nTom\nKopi Club\n</allowlist>\n<source_turns>\n[t:0] hi\n</source_turns>",
     });
     expect(call.schema).toEqual(toStrictJsonSchema(NamesPassOutput, "scrub-names"));
   });

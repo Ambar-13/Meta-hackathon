@@ -11,7 +11,16 @@ import { EvalFailure, parseEvalFlags, REPO_ROOT, type EvalFlags } from "./eval-f
 import { countPlantedSurvivors, findPersonFixture, type PersonFixture } from "./fixture-people.js";
 import { drivePair, type DrivenPair, type PairSpec } from "./drive-pair.js";
 import { computeAllMetrics, parseTargets, type MetricResult } from "./metrics/index.js";
-import { decideExitCode, formatResultsTable, generatedByLine, thresholdFailuresOf, thresholdLinesOf, writeReadmeBlock, writeResultsFile, type EvalResults } from "./results-writer.js";
+import {
+  decideExitCode,
+  formatResultsTable,
+  generatedByLine,
+  thresholdFailuresOf,
+  thresholdLinesOf,
+  writeReadmeBlock,
+  writeResultsFile,
+  type EvalResults,
+} from "./results-writer.js";
 import { buildHumanTable } from "./human-table.js";
 
 // How many pairs run at once: the replay stack stays calm and the live run stays under the daily cap.
@@ -53,16 +62,24 @@ function codeOf(error: unknown): string {
 
 // Checks that the api answers its health route before any pair runs. A worker heartbeat that is absent is only a warning.
 async function checkApi(flags: EvalFlags): Promise<void> {
-  const reply = await fetch(flags.baseUrl + routes.people.health.path, { signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS) }).catch(() => undefined);
-  if (reply === undefined || reply.status !== 200) throw new EvalFailure("eval_api_unreachable", "Start the api and worker, or check --base.");
+  const reply = await fetch(flags.baseUrl + routes.people.health.path, {
+    signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS),
+  }).catch(() => undefined);
+  if (reply === undefined || reply.status !== 200)
+    throw new EvalFailure("eval_api_unreachable", "Start the api and worker, or check --base.");
   const health = Health.safeParse((await reply.json()) as unknown);
-  if (!health.success) throw new EvalFailure("eval_api_unreachable", "Start the api and worker, or check --base.");
-  if (!health.data.worker) console.log("warning: worker heartbeat absent; pairs will wait for the worker.");
+  if (!health.success)
+    throw new EvalFailure("eval_api_unreachable", "Start the api and worker, or check --base.");
+  if (!health.data.worker)
+    console.log("warning: worker heartbeat absent; pairs will wait for the worker.");
 }
 
 // Reads the pair list and refuses a file that does not match it.
 async function loadPairs(path: string): Promise<PairSpec[]> {
-  const invalid = new EvalFailure("eval_pairs_invalid", `The pairs file ${path} is missing or does not match the pair list shape.`);
+  const invalid = new EvalFailure(
+    "eval_pairs_invalid",
+    `The pairs file ${path} is missing or does not match the pair list shape.`,
+  );
   const text = await readFile(path, "utf8").catch(() => {
     throw invalid;
   });
@@ -82,7 +99,11 @@ function fixturesFor(specs: readonly PairSpec[]): Map<string, PersonFixture> {
 }
 
 // Runs the pairs with at most PAIRS_IN_FLIGHT in flight. A failed pair is recorded with its code, and the run goes on.
-async function driveAll(specs: readonly PairSpec[], flags: EvalFlags, fixtures: Map<string, PersonFixture>): Promise<{ driven: DrivenPair[]; errors: PairError[] }> {
+async function driveAll(
+  specs: readonly PairSpec[],
+  flags: EvalFlags,
+  fixtures: Map<string, PersonFixture>,
+): Promise<{ driven: DrivenPair[]; errors: PairError[] }> {
   const driven: DrivenPair[] = [];
   const errors: PairError[] = [];
   let next = 0;
@@ -95,7 +116,9 @@ async function driveAll(specs: readonly PairSpec[], flags: EvalFlags, fixtures: 
         driven.push(await drivePair(spec, flags, fixtures));
       } catch (error) {
         errors.push({ pair: `${spec.a} vs ${spec.b}`, code: codeOf(error) });
-        console.log(`pair ${spec.a} vs ${spec.b} stopped: ${error instanceof Error ? error.message : "unknown error"}`);
+        console.log(
+          `pair ${spec.a} vs ${spec.b} stopped: ${error instanceof Error ? error.message : "unknown error"}`,
+        );
       }
     }
   };
@@ -110,7 +133,13 @@ function modelsOf(rows: { ledger: { model: string }[] }): string {
 }
 
 // Reads the scrub-planted secrets count and the targets, then builds the results of the run.
-function buildResults(input: { flags: EvalFlags; driven: DrivenPair[]; errors: PairError[]; metrics: MetricResult[]; model: string }): EvalResults {
+function buildResults(input: {
+  flags: EvalFlags;
+  driven: DrivenPair[];
+  errors: PairError[];
+  metrics: MetricResult[];
+  model: string;
+}): EvalResults {
   const planted = countPlantedSurvivors(PLANTED_FILE);
   return {
     commit: commitHash(),
@@ -135,7 +164,11 @@ async function readTargets(path: string): Promise<ReturnType<typeof parseTargets
 
 // Runs the pairs and prints the table: the whole path of a replay or a live run.
 async function runPairs(flags: EvalFlags): Promise<number> {
-  if (flags.databaseUrl === "") throw new EvalFailure("eval_database_missing", "Set DATABASE_URL_WORKER to the database behind the api.");
+  if (flags.databaseUrl === "")
+    throw new EvalFailure(
+      "eval_database_missing",
+      "Set DATABASE_URL_WORKER to the database behind the api.",
+    );
   await checkApi(flags);
   const specs = await loadPairs(flags.pairsPath);
   const db: Kysely<Database> = makeDatabase(flags.databaseUrl, POOL_SIZE.test);

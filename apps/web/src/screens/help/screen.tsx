@@ -6,7 +6,15 @@ import "./help.css";
 import { useState, type FormEvent, type ReactElement } from "react";
 import { useNavigate } from "react-router-dom";
 import { HELP_SEND_COPY } from "@meet-first/contracts";
-import { apiFetch, APP_PATHS, asApiError, ErrorNotice, routes, ScreenFrame, type ApiError } from "../../app-shell/index.js";
+import {
+  apiFetch,
+  APP_PATHS,
+  asApiError,
+  ErrorNotice,
+  routes,
+  ScreenFrame,
+  type ApiError,
+} from "../../app-shell/index.js";
 import { LoadingLine, Sticker } from "../../look/index.js";
 
 // The label of the problem box; 5 to 300 characters is what AskCreate accepts after trimming.
@@ -22,7 +30,12 @@ const SEND_LABEL = "Find who could help";
 const SENDING_LINE = "Asking the people in Explore.";
 
 // The help page's send action: the length check, the POST, then the answers page; go navigates.
-function useHelpSend(go: (path: string) => void): { isSending: boolean; lengthLine: string | null; sendError: ApiError | null; send: (text: string) => Promise<void> } {
+function useHelpSend(go: (path: string) => void): {
+  isSending: boolean;
+  lengthLine: string | null;
+  sendError: ApiError | null;
+  send: (text: string) => Promise<void>;
+} {
   const [isSending, setIsSending] = useState(false);
   const [lengthLine, setLengthLine] = useState<string | null>(null);
   const [sendError, setSendError] = useState<ApiError | null>(null);
@@ -36,7 +49,9 @@ function useHelpSend(go: (path: string) => void): { isSending: boolean; lengthLi
     setLengthLine(null);
     setIsSending(true);
     try {
-      const reply = await apiFetch(routes.asks.createAsk, { body: { mode: "help", text: trimmed } });
+      const reply = await apiFetch(routes.asks.createAsk, {
+        body: { mode: "help", text: trimmed },
+      });
       go(APP_PATHS.ask(reply.askId));
     } catch (thrown: unknown) {
       setSendError(asApiError(thrown));
@@ -63,9 +78,19 @@ export const HelpScreen = (): ReactElement => {
         <Sticker name="buoy" className="help-sticker" />
         <label>
           {PROBLEM_LABEL}
-          <textarea maxLength={PROBLEM_MAX_CHARACTERS} value={text} onChange={(event) => { setText(event.target.value); }} />
+          <textarea
+            maxLength={PROBLEM_MAX_CHARACTERS}
+            value={text}
+            onChange={(event) => {
+              setText(event.target.value);
+            }}
+          />
         </label>
-        {help.lengthLine === null ? null : <p className="help-length" role="alert">{help.lengthLine}</p>}
+        {help.lengthLine === null ? null : (
+          <p className="help-length" role="alert">
+            {help.lengthLine}
+          </p>
+        )}
         <p className="help-where">{HELP_SEND_COPY}</p>
         <button type="submit" className="big" disabled={help.isSending}>
           {SEND_LABEL}

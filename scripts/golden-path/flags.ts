@@ -4,11 +4,38 @@ import { ExitError } from "./report.js";
 // Which worker mode the run expects: live, replay (mock), record, or neither (no ledger assertion).
 export type RunMode = "live" | "mock" | "record" | "none";
 // The run options the flags make.
-export type RunOptions = { base: string; until: string | undefined; mode: RunMode; reportPath: string };
+export type RunOptions = {
+  base: string;
+  until: string | undefined;
+  mode: RunMode;
+  reportPath: string;
+};
 // The step names in order, as --until takes them. Steps 9 and 10 stay in the list, because they are removed steps that keep their numbers.
 export const STEP_NAMES = [
-  "person", "paste", "card-a", "upload-b", "quiz", "approve", "pair", "stream", "ask", "ask-timeout", "background", "decide", "brief", "comic", "share",
-  "sharing", "directory", "dir-decide", "dir-brief", "friend-ask", "help", "friend-request", "orchestrator", "delete",
+  "person",
+  "paste",
+  "card-a",
+  "upload-b",
+  "quiz",
+  "approve",
+  "pair",
+  "stream",
+  "ask",
+  "ask-timeout",
+  "background",
+  "decide",
+  "brief",
+  "comic",
+  "share",
+  "sharing",
+  "directory",
+  "dir-decide",
+  "dir-brief",
+  "friend-ask",
+  "help",
+  "friend-request",
+  "orchestrator",
+  "delete",
 ] as const;
 // The origin the script drives when --base is not given.
 export const DEFAULT_BASE = "http://localhost:3000";
@@ -33,7 +60,8 @@ export function selectSteps(until: string | undefined): StepSlot[] {
   const slots = STEP_NAMES.map((name, index) => ({ number: index + 1, name }));
   if (until === undefined) return slots;
   const cut = STEP_NAMES.findIndex((name) => name === until);
-  if (cut < 0) throw new ExitError(2, `golden_path_unknown_step: use one of ${STEP_NAMES.join(", ")}.`);
+  if (cut < 0)
+    throw new ExitError(2, `golden_path_unknown_step: use one of ${STEP_NAMES.join(", ")}.`);
   return slots.slice(0, cut);
 }
 
@@ -49,13 +77,17 @@ function readArguments(argv: readonly string[]): Map<string, string> {
     const arg = argv[index] ?? "";
     if (VALUE_FLAGS.has(arg)) {
       const value = argv[index + 1];
-      if (value === undefined) throw new ExitError(2, `golden_path_flags_value: ${arg} needs a value after it.`);
+      if (value === undefined)
+        throw new ExitError(2, `golden_path_flags_value: ${arg} needs a value after it.`);
       values.set(arg, value);
       index += 1;
     } else if (SWITCH_FLAGS.has(arg)) {
       values.set(arg, "true");
     } else {
-      throw new ExitError(2, `golden_path_flags_unknown: ${arg} is not a flag this command knows. Run with --help to see them.`);
+      throw new ExitError(
+        2,
+        `golden_path_flags_unknown: ${arg} is not a flag this command knows. Run with --help to see them.`,
+      );
     }
   }
   return values;
@@ -64,7 +96,8 @@ function readArguments(argv: readonly string[]): Map<string, string> {
 // The mode the switches ask for. More than one switch at once exits 2.
 function modeOf(values: ReadonlyMap<string, string>): RunMode {
   const chosen = (["--live", "--mock", "--record"] as const).filter((flag) => values.has(flag));
-  if (chosen.length > 1) throw new ExitError(2, "golden_path_flags_conflict: pass one of --live, --mock or --record.");
+  if (chosen.length > 1)
+    throw new ExitError(2, "golden_path_flags_conflict: pass one of --live, --mock or --record.");
   if (chosen[0] === "--live") return "live";
   if (chosen[0] === "--mock") return "mock";
   return chosen[0] === "--record" ? "record" : "none";

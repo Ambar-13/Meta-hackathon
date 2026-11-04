@@ -24,7 +24,10 @@ const turns = new Map<number, CitableTurn>([
 ]);
 
 // The texts a quote may never repeat: the meeting question and a rules text.
-const forbidden = ["How do we split money if one of us does more of the work this month?", "RULES TEXT"];
+const forbidden = [
+  "How do we split money if one of us does more of the work this month?",
+  "RULES TEXT",
+];
 
 // One claim as the receipts reply holds it.
 function claim(label: string, quote: string, extra: { lang?: string; gloss?: string } = {}) {
@@ -32,7 +35,12 @@ function claim(label: string, quote: string, extra: { lang?: string; gloss?: str
 }
 
 // The first messages of every receipts request in these tests.
-const messages0: ChatMessage[] = buildReceiptsMessages("RECEIPTS RULES", { side: "a", speechText: "s", cardQuotes: [], recallTurns: [] });
+const messages0: ChatMessage[] = buildReceiptsMessages("RECEIPTS RULES", {
+  side: "a",
+  speechText: "s",
+  cardQuotes: [],
+  recallTurns: [],
+});
 
 // A fake receipts call: returns its scripted replies in order, records the messages of each call, and throws a scripted error when a reply is an Error.
 function fakeReceipts(replies: ReadonlyArray<unknown>) {
@@ -48,19 +56,36 @@ function fakeReceipts(replies: ReadonlyArray<unknown>) {
 }
 
 it("R6.2-T1: turn labels read as numbers in three forms and nothing else", () => {
-  expect([parseTurnLabel("14"), parseTurnLabel("t:14"), parseTurnLabel("[t:14]"), parseTurnLabel(" 14 ")]).toEqual([14, 14, 14, 14]);
-  expect([parseTurnLabel("t:x"), parseTurnLabel(""), parseTurnLabel("1e3"), parseTurnLabel("-3")]).toEqual([null, null, null, null]);
+  expect([
+    parseTurnLabel("14"),
+    parseTurnLabel("t:14"),
+    parseTurnLabel("[t:14]"),
+    parseTurnLabel(" 14 "),
+  ]).toEqual([14, 14, 14, 14]);
+  expect([
+    parseTurnLabel("t:x"),
+    parseTurnLabel(""),
+    parseTurnLabel("1e3"),
+    parseTurnLabel("-3"),
+  ]).toEqual([null, null, null, null]);
 });
 
 it("D26-T1: a claim is checked only inside the turn its label names", () => {
-  const checked = checkClaims({ claims: [claim("14", "Each of us should own one area")] }, turns, forbidden);
+  const checked = checkClaims(
+    { claims: [claim("14", "Each of us should own one area")] },
+    turns,
+    forbidden,
+  );
   expect(checked?.length).toBe(1);
   expect(checked?.[0]?.failure).toBe("not_in_turn");
   expect(checked?.[0]?.turnId).toBe("turn-14");
 });
 
 it("R6.4-T1: a label outside the speaking side's turns is dropped and counted, using a fake receipts call", async () => {
-  const replies = [{ claims: [claim("99", "Each of us should own one area end to end")] }, { claims: [claim("99", "Each of us should own one area end to end")] }];
+  const replies = [
+    { claims: [claim("99", "Each of us should own one area end to end")] },
+    { claims: [claim("99", "Each of us should own one area end to end")] },
+  ];
   const receipts = fakeReceipts(replies);
   const result = await runReceipts({ messages: messages0, call: receipts.call, turns, forbidden });
   expect(result).toEqual({ claims: [], droppedCount: 1, callCount: 2 });
@@ -79,11 +104,15 @@ it("D27-T1: one failed claim causes exactly one regeneration whose reply is used
   expect(result.claims[0]?.turnId).toBe("turn-14");
   const second = receipts.seen[1] ?? [];
   expect(second.length).toBe(messages0.length + 2);
-  expect(second[second.length - 1]?.content).toContain("- claim 1: the quote is not found in the turn it names");
+  expect(second[second.length - 1]?.content).toContain(
+    "- claim 1: the quote is not found in the turn it names",
+  );
 });
 
 it("D27-T2: when every claim passes, the receipts call runs once, using a fake receipts call", async () => {
-  const receipts = fakeReceipts([{ claims: [claim("15", "Each of us should own one area end to end")] }]);
+  const receipts = fakeReceipts([
+    { claims: [claim("15", "Each of us should own one area end to end")] },
+  ]);
   const result = await runReceipts({ messages: messages0, call: receipts.call, turns, forbidden });
   expect(result.callCount).toBe(1);
   expect(result.claims[0]?.isVerified).toBe(true);
@@ -100,12 +129,25 @@ it("R6.5-T1: a claim that fails twice is stored flagged, using a fake receipts c
 });
 
 it("R6.6-T1: a quote taken from the meeting question is refused", () => {
-  const checked = checkClaims({ claims: [claim("30", "split money if one of us does more of the work")] }, turns, forbidden);
+  const checked = checkClaims(
+    { claims: [claim("30", "split money if one of us does more of the work")] },
+    turns,
+    forbidden,
+  );
   expect(checked?.[0]?.failure).toBe("substring_of_prompt");
 });
 
 it("R6.3-T1: a Hindi quote keeps its language and its English gloss", async () => {
-  const receipts = fakeReceipts([{ claims: [claim("20", "सब फैसले लिख कर रखो ताकि", { lang: "hi", gloss: "Wants decisions written down" })] }]);
+  const receipts = fakeReceipts([
+    {
+      claims: [
+        claim("20", "सब फैसले लिख कर रखो ताकि", {
+          lang: "hi",
+          gloss: "Wants decisions written down",
+        }),
+      ],
+    },
+  ]);
   const result = await runReceipts({ messages: messages0, call: receipts.call, turns, forbidden });
   expect(result.claims[0]?.quote).toBe("सब फैसले लिख कर रखो ताकि");
   expect(result.claims[0]?.lang).toBe("hi");
@@ -114,10 +156,15 @@ it("R6.3-T1: a Hindi quote keeps its language and its English gloss", async () =
 });
 
 it("R6.2-T2: a reply that breaks the schema is regenerated once with the schema line, using a fake receipts call", async () => {
-  const receipts = fakeReceipts([{ foo: 1 }, { claims: [claim("15", "Each of us should own one area end to end")] }]);
+  const receipts = fakeReceipts([
+    { foo: 1 },
+    { claims: [claim("15", "Each of us should own one area end to end")] },
+  ]);
   const result = await runReceipts({ messages: messages0, call: receipts.call, turns, forbidden });
   const second = receipts.seen[1] ?? [];
-  expect(second[second.length - 1]?.content).toContain("- claim 1: the reply did not match the claims schema");
+  expect(second[second.length - 1]?.content).toContain(
+    "- claim 1: the reply did not match the claims schema",
+  );
   expect(result.claims[0]?.isVerified).toBe(true);
   expect(result.callCount).toBe(2);
 });

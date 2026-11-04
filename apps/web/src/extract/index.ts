@@ -7,7 +7,11 @@ import type { WorkerMessage, WorkerRequest } from "./worker-entry.js";
 export type UploadInput = { kind: "file"; file: File } | { kind: "paste"; text: string };
 
 // One progress message from the Web Worker, so the screen can show where it is.
-export type UploadProgress = { stage: "reading" | "parsing" | "scrubbing" | "compressing"; inflatedBytes: number; keptTurns: number };
+export type UploadProgress = {
+  stage: "reading" | "parsing" | "scrubbing" | "compressing";
+  inflatedBytes: number;
+  keptTurns: number;
+};
 
 // The prepared upload: the NDJSON body plus the numbers the upload screen shows before the person attests.
 export type UploadReady = {
@@ -25,19 +29,36 @@ export type UploadReady = {
 // A refusal the screen shows as is: a stable code and the sentence to show.
 export type UploadRefused = { ok: false; code: UploadRefusalCode; message: string };
 // The refusal codes, each with its sentence.
-export type UploadRefusalCode = "source_no_own_turns" | "source_file_not_json" | "zip_too_large" | "zip_inflated_too_large" | "file_unreadable" | "upload_too_large" | "upload_cancelled";
+export type UploadRefusalCode =
+  | "source_no_own_turns"
+  | "source_file_not_json"
+  | "zip_too_large"
+  | "zip_inflated_too_large"
+  | "file_unreadable"
+  | "upload_too_large"
+  | "upload_cancelled";
 
 // The sentence for an upload the person stopped before it finished (the upload_cancelled row of the table in 4.4).
-const UPLOAD_CANCELLED_SENTENCE = "The upload was stopped before it finished. Pick the file again to start over.";
+const UPLOAD_CANCELLED_SENTENCE =
+  "The upload was stopped before it finished. Pick the file again to start over.";
 
 // Runs extraction, ranking (the summary's quotes and topics first, when there is one), the scrub preview and compression inside the Web
 // Worker; resolves once, never rejects.
 export function prepareUpload(
   input: UploadInput,
-  options: { allowlist: string[]; onProgress: (progress: UploadProgress) => void; signal: AbortSignal; priority?: SummaryPriority },
+  options: {
+    allowlist: string[];
+    onProgress: (progress: UploadProgress) => void;
+    signal: AbortSignal;
+    priority?: SummaryPriority;
+  },
 ): Promise<UploadReady | UploadRefused> {
   return new Promise((resolve) => {
-    const cancelled: UploadRefused = { ok: false, code: "upload_cancelled", message: UPLOAD_CANCELLED_SENTENCE };
+    const cancelled: UploadRefused = {
+      ok: false,
+      code: "upload_cancelled",
+      message: UPLOAD_CANCELLED_SENTENCE,
+    };
     if (options.signal.aborted) {
       resolve(cancelled);
       return;
@@ -63,6 +84,10 @@ export function prepareUpload(
       finish({ ok: false, code: "file_unreadable", message: FILE_UNREADABLE_SENTENCE });
     };
     const priority = options.priority === undefined ? {} : { priority: options.priority };
-    worker.postMessage({ input, allowlist: options.allowlist, ...priority } satisfies WorkerRequest);
+    worker.postMessage({
+      input,
+      allowlist: options.allowlist,
+      ...priority,
+    } satisfies WorkerRequest);
   });
 }

@@ -24,7 +24,8 @@ export type ExtractResult = {
 const NO_OWN_TURNS_SENTENCE =
   "No messages written by you were found in this file. Pick the export file itself (conversations.json inside the zip), or paste some notes instead.";
 // The sentence for a .json file that does not parse.
-const NOT_JSON_SENTENCE = "This file is not a JSON export. Pick conversations.json from the zip, or paste text.";
+const NOT_JSON_SENTENCE =
+  "This file is not a JSON export. Pick conversations.json from the zip, or paste text.";
 // A byte order mark at the start of a JSON file, removed before parsing.
 const JSON_BOM = /^﻿/;
 // The start of a structured file: an optional byte order mark, spaces or line breaks, then an opening bracket or brace.
@@ -63,7 +64,10 @@ function genericKind(input: ExtractInput, kindHint: SourceKind | null): SourceKi
 }
 
 // Runs the four structured parsers in order; the first that returns one or more turns wins and sets the kind.
-function structuredTurns(input: ExtractInput, kindHint: SourceKind | null): { kind: SourceKind; turns: RawTurn[] } {
+function structuredTurns(
+  input: ExtractInput,
+  kindHint: SourceKind | null,
+): { kind: SourceKind; turns: RawTurn[] } {
   const root = parseJson(input.text);
   const mapping = parseChatGptMapping(root);
   if (mapping !== null && mapping.length > 0) return { kind: "chatgpt", turns: mapping };
@@ -89,8 +93,10 @@ type InputRead = { kind: SourceKind; turns: RawTurn[]; dropsRepeats: boolean };
 // Reads one input into raw turns and the kind its path gives. Only Codex sessions drop repeats (see withoutRepeats).
 function readInput(input: ExtractInput, kindHint: SourceKind | null): InputRead {
   const path = detectKind(input, kindHint);
-  if (path === "notes" || path === "paste") return { kind: path, turns: blockTurns(input.text), dropsRepeats: false };
-  if (CODEX_FILE_NAME.test(input.name)) return { kind: CODEX_KIND, turns: parseCodexRollout(input.text), dropsRepeats: true };
+  if (path === "notes" || path === "paste")
+    return { kind: path, turns: blockTurns(input.text), dropsRepeats: false };
+  if (CODEX_FILE_NAME.test(input.name))
+    return { kind: CODEX_KIND, turns: parseCodexRollout(input.text), dropsRepeats: true };
   return { ...structuredTurns(input, kindHint), dropsRepeats: false };
 }
 
@@ -116,7 +122,11 @@ function withoutRepeats(turns: RawTurn[], seen: Set<string>): RawTurn[] {
 // Order of attempts: ChatGPT 2024 mapping, ChatGPT 2026 messages, Claude chat_messages, generic walker, then notes or paste for plain text.
 // A Codex .jsonl session log goes to the Codex reader, and a message repeated in a later session is kept once. With a summary, its
 // quotes and topics decide first which messages are kept.
-export function extractOwnTurns(inputs: ExtractInput[], kindHint: SourceKind | null, priority?: SummaryPriority): ExtractResult {
+export function extractOwnTurns(
+  inputs: ExtractInput[],
+  kindHint: SourceKind | null,
+  priority?: SummaryPriority,
+): ExtractResult {
   const collected: RawTurn[] = [];
   const seenCodexTexts = new Set<string>();
   let kind: SourceKind | null = null;
@@ -131,7 +141,11 @@ export function extractOwnTurns(inputs: ExtractInput[], kindHint: SourceKind | n
   if (kind === null || collected.length === 0) {
     throw new ContractError("source_no_own_turns", NO_OWN_TURNS_SENTENCE, HTTP.unprocessable);
   }
-  const candidates = collected.map((turn, index) => ({ ...turn, exportOrder: index, canonical: turn.text }));
+  const candidates = collected.map((turn, index) => ({
+    ...turn,
+    exportOrder: index,
+    canonical: turn.text,
+  }));
   const personaSignal = computePersonaSignal(candidates.map((turn) => turn.canonical));
   const kept = rankAndCut(candidates, priority);
   const turns: Turn[] = kept.map((turn, index) => ({

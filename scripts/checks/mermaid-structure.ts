@@ -49,7 +49,8 @@ export function mermaidBlocks(markdown: string): MermaidBlock[] {
   markdown.split("\n").forEach((text, index) => {
     const trimmed = text.trim();
     if (current === undefined) {
-      if (/^```mermaid\s*$/.test(trimmed)) current = { fenceLine: index + 1, lines: [], isClosed: false };
+      if (/^```mermaid\s*$/.test(trimmed))
+        current = { fenceLine: index + 1, lines: [], isClosed: false };
       return;
     }
     if (trimmed.startsWith("```")) {
@@ -84,7 +85,8 @@ function bracketText(text: string, kind: string): string {
   let result = text.replace(/"[^"]*"/g, "");
   if (FREE_TEXT_AFTER_COLON.has(kind)) result = result.split(":")[0] ?? "";
   if (kind === "sequenceDiagram") result = result.replace(/-{1,2}\)/g, "-");
-  if (kind === "erDiagram") result = result.replace(/(?:\|o|\|\||\}o|\}\|)(?:--|\.\.)(?:o\||\|\||o\{|\|\{)/g, " -- ");
+  if (kind === "erDiagram")
+    result = result.replace(/(?:\|o|\|\||\}o|\}\|)(?:--|\.\.)(?:o\||\|\||o\{|\|\{)/g, " -- ");
   if (kind === "flowchart") result = result.replace(/([A-Za-z0-9_])>[^\]]*\]/g, "$1");
   return result;
 }
@@ -118,7 +120,8 @@ function checkBlockEnds(block: MermaidBlock, kind: string, firstLine: number): D
     if (openLines.pop() === undefined)
       problems.push({ line: firstLine + index, message: '"end" has no block to close' });
   });
-  for (const line of openLines) problems.push({ line, message: 'this block is never closed with "end"' });
+  for (const line of openLines)
+    problems.push({ line, message: 'this block is never closed with "end"' });
   return problems;
 }
 
@@ -129,10 +132,12 @@ function checkLines(block: MermaidBlock, kind: string, firstLine: number): Diagr
   block.lines.forEach((text, index) => {
     if (!isContent(text)) return;
     const line = firstLine + index;
-    if ((text.match(/"/g) ?? []).length % 2 === 1) problems.push({ line, message: "a quote is left open" });
+    if ((text.match(/"/g) ?? []).length % 2 === 1)
+      problems.push({ line, message: "a quote is left open" });
     problems.push(...checkBrackets(bracketText(text, kind), line, open));
   });
-  for (const bracket of open) problems.push({ line: bracket.line, message: `"${bracket.character}" is never closed` });
+  for (const bracket of open)
+    problems.push({ line: bracket.line, message: `"${bracket.character}" is never closed` });
   return problems;
 }
 
@@ -140,10 +145,19 @@ function checkLines(block: MermaidBlock, kind: string, firstLine: number): Diagr
 export const MAX_BOXES = 15;
 
 // Lines that name no box: block openers and closers, styling, notes and activations.
-const NO_BOX_LINE = /^(subgraph|end|direction|classDef|class|style|linkStyle|click|note|Note|alt|else|opt|loop|par|and|critical|break|rect|box|activate|deactivate|autonumber|title)\b/;
+const NO_BOX_LINE =
+  /^(subgraph|end|direction|classDef|class|style|linkStyle|click|note|Note|alt|else|opt|loop|par|and|critical|break|rect|box|activate|deactivate|autonumber|title)\b/;
 
 // The words of a flowchart line that are never a node name: its own keywords and directions.
-const FLOWCHART_WORDS: ReadonlySet<string> = new Set(["flowchart", "graph", "TB", "TD", "BT", "RL", "LR"]);
+const FLOWCHART_WORDS: ReadonlySet<string> = new Set([
+  "flowchart",
+  "graph",
+  "TB",
+  "TD",
+  "BT",
+  "RL",
+  "LR",
+]);
 
 // Removes quoted text and every bracketed shape, innermost first, so a label never reads as a box name.
 function withoutShapes(text: string): string {
@@ -224,7 +238,8 @@ export function boxNames(lines: readonly string[], kind: string): Set<string> {
 export function diagramProblems(block: MermaidBlock): DiagramProblem[] {
   const firstLine = block.fenceLine + 1;
   const problems: DiagramProblem[] = [];
-  if (!block.isClosed) problems.push({ line: block.fenceLine, message: "the ```mermaid fence is never closed" });
+  if (!block.isClosed)
+    problems.push({ line: block.fenceLine, message: "the ```mermaid fence is never closed" });
   const found = diagramKind(block);
   if (found === undefined) {
     const firstWord = block.lines.find(isContent)?.trim().split(/\s+/)[0];
@@ -236,10 +251,16 @@ export function diagramProblems(block: MermaidBlock): DiagramProblem[] {
   }
   const body = block.lines.slice(found.index + 1);
   if (!body.some(isContent))
-    problems.push({ line: firstLine + found.index, message: "the diagram has a type but nothing in it" });
+    problems.push({
+      line: firstLine + found.index,
+      message: "the diagram has a type but nothing in it",
+    });
   const boxes = boxNames(body, found.kind);
   if (boxes.size > MAX_BOXES)
-    problems.push({ line: block.fenceLine, message: `the diagram has ${String(boxes.size)} boxes; the limit is ${String(MAX_BOXES)}` });
+    problems.push({
+      line: block.fenceLine,
+      message: `the diagram has ${String(boxes.size)} boxes; the limit is ${String(MAX_BOXES)}`,
+    });
   const bodyBlock = { ...block, lines: body };
   const bodyFirstLine = firstLine + found.index + 1;
   return [

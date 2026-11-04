@@ -45,13 +45,17 @@ const UPLOADED_PREFIX = "photos/";
 // key, or for one this build does not have.
 export function photoOf(key: string | null | undefined): BundledPhoto | null {
   if (key === null || key === undefined) return null;
-  if (key.startsWith(UPLOADED_PREFIX)) return { src: uploadedUrl(key), width: POST_PHOTO_SIDE, height: POST_PHOTO_SIDE };
+  if (key.startsWith(UPLOADED_PREFIX))
+    return { src: uploadedUrl(key), width: POST_PHOTO_SIDE, height: POST_PHOTO_SIDE };
   return PHOTOS[key] ?? null;
 }
 
 // The api address of a photo a person put up, by its key.
 function uploadedUrl(key: string): string {
-  return routes.people.readPhoto.path.replace(":id", encodeURIComponent(key.slice(UPLOADED_PREFIX.length)));
+  return routes.people.readPhoto.path.replace(
+    ":id",
+    encodeURIComponent(key.slice(UPLOADED_PREFIX.length)),
+  );
 }
 
 // The address of a photo by its key: a photo a person put up, from GET /api/photos/:id, or a bundled photo; null for no key, or for one

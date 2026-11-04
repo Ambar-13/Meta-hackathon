@@ -13,12 +13,15 @@ const ROUND_CONSTANTS = [
   0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
 ];
 // The eight starting words of the SHA-256 state (FIPS 180-4).
-const START_STATE = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+const START_STATE = [
+  0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
+];
 // Keeps a BigInt inside 64 bits.
 const MASK_64 = (1n << 64n) - 1n;
 
 const word = (words: ArrayLike<number>, index: number): number => words[index] ?? 0;
-const rotateRight = (value: number, bits: number): number => (value >>> bits) | (value << (32 - bits));
+const rotateRight = (value: number, bits: number): number =>
+  (value >>> bits) | (value << (32 - bits));
 
 // Pads the message to whole 64-byte blocks, with its length in bits in the last 8 bytes (FIPS 180-4).
 function padMessage(message: Uint8Array): DataView {
@@ -40,7 +43,8 @@ function messageSchedule(view: DataView, offset: number): Uint32Array {
     const back2 = word(schedule, index - 2);
     const sigma0 = rotateRight(back15, 7) ^ rotateRight(back15, 18) ^ (back15 >>> 3);
     const sigma1 = rotateRight(back2, 17) ^ rotateRight(back2, 19) ^ (back2 >>> 10);
-    schedule[index] = (word(schedule, index - 16) + sigma0 + word(schedule, index - 7) + sigma1) >>> 0;
+    schedule[index] =
+      (word(schedule, index - 16) + sigma0 + word(schedule, index - 7) + sigma1) >>> 0;
   }
   return schedule;
 }
@@ -66,7 +70,8 @@ function compressionRound(work: Uint32Array, constant: number, scheduled: number
 // Runs the 64 rounds on one block and adds the result into the state (FIPS 180-4, 6.2.2 steps 2 to 4).
 function compressBlock(state: Uint32Array, schedule: Uint32Array): void {
   const work = Uint32Array.from(state);
-  for (let round = 0; round < 64; round += 1) compressionRound(work, word(ROUND_CONSTANTS, round), word(schedule, round));
+  for (let round = 0; round < 64; round += 1)
+    compressionRound(work, word(ROUND_CONSTANTS, round), word(schedule, round));
   state.set(state.map((value, index) => value + word(work, index)));
 }
 
@@ -74,9 +79,12 @@ function compressBlock(state: Uint32Array, schedule: Uint32Array): void {
 export function sha256(message: Uint8Array): Uint8Array {
   const view = padMessage(message);
   const state = Uint32Array.from(START_STATE);
-  for (let offset = 0; offset < view.byteLength; offset += 64) compressBlock(state, messageSchedule(view, offset));
+  for (let offset = 0; offset < view.byteLength; offset += 64)
+    compressBlock(state, messageSchedule(view, offset));
   const digest = new DataView(new ArrayBuffer(32));
-  state.forEach((value, index) => { digest.setUint32(index * 4, value); });
+  state.forEach((value, index) => {
+    digest.setUint32(index * 4, value);
+  });
   return new Uint8Array(digest.buffer);
 }
 

@@ -48,17 +48,33 @@ const SearchForm = (props: { onSearch: (query: string) => void }): ReactElement 
       <label className="explore-field">
         <span className="hidden-words">{SEARCH_COPY.label}</span>
         <Icon name="search" size={18} className="explore-glass" />
-        <input type="search" placeholder={SEARCH_COPY.placeholder} maxLength={SEARCH_MAX_CHARS} value={text} enterKeyHint="search"
-          onChange={(event) => { setText(event.target.value); }} />
+        <input
+          type="search"
+          placeholder={SEARCH_COPY.placeholder}
+          maxLength={SEARCH_MAX_CHARS}
+          value={text}
+          enterKeyHint="search"
+          onChange={(event) => {
+            setText(event.target.value);
+          }}
+        />
       </label>
-      <button type="submit" className="quiet">{SEARCH_COPY.submit}</button>
+      <button type="submit" className="quiet">
+        {SEARCH_COPY.submit}
+      </button>
     </form>
   );
 };
 
 // People as rows, each with Add friend, under a heading, with Show more while more pages exist; a cap shows only the first ones, with
 // See everyone under them.
-const PeopleRows = (props: { title: string; browse: BrowseHook; friends: ExploreFriends; cap: number | null; onSeeEveryone: () => void }): ReactElement => {
+const PeopleRows = (props: {
+  title: string;
+  browse: BrowseHook;
+  friends: ExploreFriends;
+  cap: number | null;
+  onSeeEveryone: () => void;
+}): ReactElement => {
   const { browse, cap } = props;
   const shown = cap === null ? browse.listings : browse.listings.slice(0, cap);
   const hasHidden = cap !== null && browse.listings.length > cap;
@@ -68,11 +84,24 @@ const PeopleRows = (props: { title: string; browse: BrowseHook; friends: Explore
         <h2 id="people-list-title">{props.title}</h2>
       </div>
       <ul className="person-rows">
-        {shown.map((listing) => <PersonRow key={listing.listingId} listing={listing} friends={props.friends} />)}
+        {shown.map((listing) => (
+          <PersonRow key={listing.listingId} listing={listing} friends={props.friends} />
+        ))}
       </ul>
-      {hasHidden ? <button type="button" className="quiet explore-more" onClick={props.onSeeEveryone}>{SEARCH_COPY.seeEveryone}</button> : null}
+      {hasHidden ? (
+        <button type="button" className="quiet explore-more" onClick={props.onSeeEveryone}>
+          {SEARCH_COPY.seeEveryone}
+        </button>
+      ) : null}
       {!hasHidden && browse.hasMore ? (
-        <button type="button" className="quiet explore-more" disabled={browse.isLoading} onClick={browse.loadMore}>{SEARCH_COPY.more}</button>
+        <button
+          type="button"
+          className="quiet explore-more"
+          disabled={browse.isLoading}
+          onClick={browse.loadMore}
+        >
+          {SEARCH_COPY.more}
+        </button>
       ) : null}
     </section>
   );
@@ -81,17 +110,30 @@ const PeopleRows = (props: { title: string; browse: BrowseHook; friends: Explore
 // The states above the people: an error with Try again, loading, and nobody found.
 const SearchStatus = (props: { browse: BrowseHook }): ReactElement => {
   const { browse } = props;
-  const isNobody = browse.hasLoaded && !browse.isLoading && browse.error === null && browse.listings.length === 0;
+  const isNobody =
+    browse.hasLoaded && !browse.isLoading && browse.error === null && browse.listings.length === 0;
   return (
     <>
       {browse.error === null ? null : (
         <div className="explore-error">
           <ErrorNotice error={browse.error} />
-          <button type="button" className="quiet" onClick={() => { browse.search(browse.query); }}>{SEARCH_COPY.retry}</button>
+          <button
+            type="button"
+            className="quiet"
+            onClick={() => {
+              browse.search(browse.query);
+            }}
+          >
+            {SEARCH_COPY.retry}
+          </button>
         </div>
       )}
       {browse.isLoading && !browse.hasLoaded ? <LoadingLine text={SEARCH_COPY.loading} /> : null}
-      {isNobody ? <EmptyState sticker="lens" title={SEARCH_COPY.emptyTitle}>{SEARCH_COPY.emptyLine}</EmptyState> : null}
+      {isNobody ? (
+        <EmptyState sticker="lens" title={SEARCH_COPY.emptyTitle}>
+          {SEARCH_COPY.emptyLine}
+        </EmptyState>
+      ) : null}
     </>
   );
 };
@@ -110,7 +152,9 @@ export const SearchScreen = (): ReactElement => {
     browse.search(query);
   };
   const title = peopleTitle(isSearching, isEveryone);
-  const hasPhotos = (posts.value?.posts ?? []).some((post) => post.isMine !== true && photoOf(post.photo) !== null);
+  const hasPhotos = (posts.value?.posts ?? []).some(
+    (post) => post.isMine !== true && photoOf(post.photo) !== null,
+  );
   return (
     <ScreenFrame title={SEARCH_COPY.title} hasOwnHeading isWide>
       <div className="search-page">
@@ -122,7 +166,15 @@ export const SearchScreen = (): ReactElement => {
         </p>
         <SearchStatus browse={browse} />
         {browse.listings.length === 0 ? null : (
-          <PeopleRows title={title} browse={browse} friends={friends} cap={isSearching || isEveryone ? null : SUGGESTED_MAX} onSeeEveryone={() => { setIsEveryone(true); }} />
+          <PeopleRows
+            title={title}
+            browse={browse}
+            friends={friends}
+            cap={isSearching || isEveryone ? null : SUGGESTED_MAX}
+            onSeeEveryone={() => {
+              setIsEveryone(true);
+            }}
+          />
         )}
         {isSearching || !hasPhotos ? null : (
           <section className="search-photos" aria-labelledby="search-photos-title">

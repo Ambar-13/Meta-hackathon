@@ -4,8 +4,21 @@
 // The step: three loads through the shared polling hook, which tries a failed load again every ASK_POLL_MS, the send action, and
 // Accept and Decline, which read the requests and the friends again. What it does not do: poll the lists after they loaded.
 import { useState } from "react";
-import { ASK_POLL_MS, type AsksView, type FriendRequestsView, type FriendsView } from "@meet-first/contracts";
-import { apiFetch, APP_PATHS, asApiError, routes, usePolledView, type ApiError, type PolledView } from "../../app-shell/index.js";
+import {
+  ASK_POLL_MS,
+  type AsksView,
+  type FriendRequestsView,
+  type FriendsView,
+} from "@meet-first/contracts";
+import {
+  apiFetch,
+  APP_PATHS,
+  asApiError,
+  routes,
+  usePolledView,
+  type ApiError,
+  type PolledView,
+} from "../../app-shell/index.js";
 
 // The fewest and the most characters of a friend ask, the bounds of AskCreate in contracts.
 const ASK_MIN_CHARACTERS = 5;
@@ -35,9 +48,21 @@ export type FriendsScreenModel = {
 // Loads the friends, the friend requests and the caller's asks once each, sends a friend ask and then opens its answers page (go
 // navigates), and answers incoming requests.
 export function useFriendsScreen(go: (path: string) => void): FriendsScreenModel {
-  const friends = usePolledView(() => apiFetch(routes.directory.friends), { key: "friends", intervalMs: ASK_POLL_MS, keepPolling: () => false });
-  const asks = usePolledView(() => apiFetch(routes.asks.listAsks), { key: "asks", intervalMs: ASK_POLL_MS, keepPolling: () => false });
-  const requests = usePolledView(() => apiFetch(routes.social.listFriendRequests), { key: "friend-requests", intervalMs: ASK_POLL_MS, keepPolling: () => false });
+  const friends = usePolledView(() => apiFetch(routes.directory.friends), {
+    key: "friends",
+    intervalMs: ASK_POLL_MS,
+    keepPolling: () => false,
+  });
+  const asks = usePolledView(() => apiFetch(routes.asks.listAsks), {
+    key: "asks",
+    intervalMs: ASK_POLL_MS,
+    keepPolling: () => false,
+  });
+  const requests = usePolledView(() => apiFetch(routes.social.listFriendRequests), {
+    key: "friend-requests",
+    intervalMs: ASK_POLL_MS,
+    keepPolling: () => false,
+  });
   const [chosenPairId, setChosenPairId] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [formLine, setFormLine] = useState<string | null>(null);
@@ -57,7 +82,9 @@ export function useFriendsScreen(go: (path: string) => void): FriendsScreenModel
     setFormLine(null);
     setIsSending(true);
     try {
-      const reply = await apiFetch(routes.asks.createAsk, { body: { mode: "react", pairId, text: trimmed } });
+      const reply = await apiFetch(routes.asks.createAsk, {
+        body: { mode: "react", pairId, text: trimmed },
+      });
       go(APP_PATHS.ask(reply.askId));
     } catch (thrown: unknown) {
       setSendError(asApiError(thrown));
@@ -68,11 +95,26 @@ export function useFriendsScreen(go: (path: string) => void): FriendsScreenModel
     requests.reload();
     friends.reload();
   });
-  return { friends, requests, ...requestAnswers, asks, chosenPairId, isSending, formLine, sendError, choose, sendReactAsk };
+  return {
+    friends,
+    requests,
+    ...requestAnswers,
+    asks,
+    chosenPairId,
+    isSending,
+    formLine,
+    sendError,
+    choose,
+    sendReactAsk,
+  };
 }
 
 // Accept and Decline for incoming requests: each posts to its route with the request id, then afterAnswer reads the lists again.
-function useRequestAnswers(afterAnswer: () => void): { answer: RequestAnswerState; accept: (requestId: string) => Promise<void>; decline: (requestId: string) => Promise<void> } {
+function useRequestAnswers(afterAnswer: () => void): {
+  answer: RequestAnswerState;
+  accept: (requestId: string) => Promise<void>;
+  decline: (requestId: string) => Promise<void>;
+} {
   const [answer, setAnswer] = useState<RequestAnswerState>({ busyId: null, error: null });
   const run = async (requestId: string, send: () => Promise<unknown>): Promise<void> => {
     setAnswer({ busyId: requestId, error: null });
@@ -86,7 +128,13 @@ function useRequestAnswers(afterAnswer: () => void): { answer: RequestAnswerStat
   };
   return {
     answer,
-    accept: (requestId) => run(requestId, () => apiFetch(routes.social.acceptFriendRequest, { params: { id: requestId } })),
-    decline: (requestId) => run(requestId, () => apiFetch(routes.social.declineFriendRequest, { params: { id: requestId } })),
+    accept: (requestId) =>
+      run(requestId, () =>
+        apiFetch(routes.social.acceptFriendRequest, { params: { id: requestId } }),
+      ),
+    decline: (requestId) =>
+      run(requestId, () =>
+        apiFetch(routes.social.declineFriendRequest, { params: { id: requestId } }),
+      ),
   };
 }

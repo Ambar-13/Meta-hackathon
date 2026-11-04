@@ -44,10 +44,17 @@ async function freshDatabaseForApp(): Promise<TestDatabase> {
 }
 
 // Builds the api on a fresh test database with the real hooks, the real job queue and the routes given; every slot when none are given.
-export async function buildTestApp(options?: { routes?: RoutePlugin[]; env?: Partial<ApiEnv> }): Promise<{ app: FastifyInstance; db: Kysely<Database>; close: () => Promise<void> }> {
+export async function buildTestApp(options?: {
+  routes?: RoutePlugin[];
+  env?: Partial<ApiEnv>;
+}): Promise<{ app: FastifyInstance; db: Kysely<Database>; close: () => Promise<void> }> {
   const fresh = await freshDatabaseForApp();
   liveApps += 1;
-  const env = apiEnv.parse({ DATABASE_URL_API: fresh.apiUrl, APP_ORIGIN: TEST_APP_ORIGIN, ...options?.env });
+  const env = apiEnv.parse({
+    DATABASE_URL_API: fresh.apiUrl,
+    APP_ORIGIN: TEST_APP_ORIGIN,
+    ...options?.env,
+  });
   const db = makeDatabase(env.DATABASE_URL_API, TEST_POOL_SIZE);
   const workerUtils = await makeWorkerUtils({ connectionString: env.DATABASE_URL_API });
   const lines: string[] = [];
@@ -63,7 +70,10 @@ export async function buildTestApp(options?: { routes?: RoutePlugin[]; env?: Par
     await realEnqueue(name, payload, enqueueOptions);
     jobs.push({ name, payload });
   };
-  const app = await buildApp({ db, env, now: () => new Date(), enqueue }, { routes: options?.routes ?? "all", logStream });
+  const app = await buildApp(
+    { db, env, now: () => new Date(), enqueue },
+    { routes: options?.routes ?? "all", logStream },
+  );
   await app.ready();
   records.set(app, { lines, jobs });
   const close = async (): Promise<void> => {

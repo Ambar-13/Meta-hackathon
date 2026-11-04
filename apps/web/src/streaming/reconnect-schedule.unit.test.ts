@@ -22,15 +22,25 @@ function fakeDocument(): VisibilitySource & { dispatch: (state: string) => void 
 
 describe("reconnect schedule", () => {
   it("D51-T1: the backoff is 1, 2, 4, 8, 16, 30 and 30 s before jitter", () => {
-    expect([0, 1, 2, 3, 4, 5, 6].map((attempt) => reconnectDelayMs(attempt, () => 0))).toEqual([1000, 2000, 4000, 8000, 16000, 30000, 30000]);
+    expect([0, 1, 2, 3, 4, 5, 6].map((attempt) => reconnectDelayMs(attempt, () => 0))).toEqual([
+      1000, 2000, 4000, 8000, 16000, 30000, 30000,
+    ]);
   });
 
   it("R8.4-T2: jitter keeps every wait between 80% and 100% of its base, so reconnects spread out", () => {
     const base = [1000, 2000, 4000, 8000, 16000, 30000, 30000];
-    expect([0, 1, 2, 3, 4, 5, 6].map((attempt) => reconnectDelayMs(attempt, () => 0.5))).toEqual([900, 1800, 3600, 7200, 14400, 27000, 27000]);
-    expect([0, 1, 2, 3, 4, 5, 6].map((attempt) => reconnectDelayMs(attempt, () => 1))).toEqual([800, 1600, 3200, 6400, 12800, 24000, 24000]);
-    expect([0, 1, 2, 3, 4, 5, 6].map((attempt) => reconnectDelayMs(attempt, () => 5))).toEqual([800, 1600, 3200, 6400, 12800, 24000, 24000]);
-    expect([0, 1, 2, 3, 4, 5, 6].map((attempt) => reconnectDelayMs(attempt, () => -1))).toEqual(base);
+    expect([0, 1, 2, 3, 4, 5, 6].map((attempt) => reconnectDelayMs(attempt, () => 0.5))).toEqual([
+      900, 1800, 3600, 7200, 14400, 27000, 27000,
+    ]);
+    expect([0, 1, 2, 3, 4, 5, 6].map((attempt) => reconnectDelayMs(attempt, () => 1))).toEqual([
+      800, 1600, 3200, 6400, 12800, 24000, 24000,
+    ]);
+    expect([0, 1, 2, 3, 4, 5, 6].map((attempt) => reconnectDelayMs(attempt, () => 5))).toEqual([
+      800, 1600, 3200, 6400, 12800, 24000, 24000,
+    ]);
+    expect([0, 1, 2, 3, 4, 5, 6].map((attempt) => reconnectDelayMs(attempt, () => -1))).toEqual(
+      base,
+    );
   });
 
   it("D51-T2: watchVisibility calls back when the page turns visible and not when it hides, using a fake document", () => {

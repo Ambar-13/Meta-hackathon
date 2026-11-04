@@ -32,15 +32,24 @@ describe("makeEnqueue", () => {
     const { utils, calls } = fakeWorkerUtils({ id: "1" });
     const enqueue = makeEnqueue(utils);
     await enqueue("build_card", { cardId: sourceId, personId });
-    await enqueue("meeting_step", { meetingId: personId, stepSeq: 1 }, { runAt: new Date("2026-10-27T10:01:30.000Z") });
+    await enqueue(
+      "meeting_step",
+      { meetingId: personId, stepSeq: 1 },
+      { runAt: new Date("2026-10-27T10:01:30.000Z") },
+    );
     expect(calls[0]?.[2]).toEqual({ maxAttempts: JOB_MAX_ATTEMPTS.build_card });
     expect(calls[0]?.[2]).toEqual({ maxAttempts: 2 });
-    expect(calls[1]?.[2]).toEqual({ maxAttempts: JOB_MAX_ATTEMPTS.meeting_step, runAt: new Date("2026-10-27T10:01:30.000Z") });
+    expect(calls[1]?.[2]).toEqual({
+      maxAttempts: JOB_MAX_ATTEMPTS.meeting_step,
+      runAt: new Date("2026-10-27T10:01:30.000Z"),
+    });
   });
 
   it("D45-T2: a null from addJob throws enqueue_failed (fake worker utils)", async () => {
     const { utils } = fakeWorkerUtils(null);
-    const error = await makeEnqueue(utils)("build_card", { cardId: sourceId, personId }).catch((caught: unknown) => caught);
+    const error = await makeEnqueue(utils)("build_card", { cardId: sourceId, personId }).catch(
+      (caught: unknown) => caught,
+    );
     expect(error).toBeInstanceOf(ContractError);
     expect(error).toMatchObject({ code: "enqueue_failed" });
   });
@@ -66,7 +75,9 @@ describe("definePayloadTask", () => {
       calls += 1;
       return Promise.resolve();
     };
-    await expect(definePayloadTask("scrub_names", task, context)({ sourceId: "not-a-uuid", personId })).resolves.toBeUndefined();
+    await expect(
+      definePayloadTask("scrub_names", task, context)({ sourceId: "not-a-uuid", personId }),
+    ).resolves.toBeUndefined();
     expect(calls).toBe(0);
     expect(errorSpy).toHaveBeenCalledTimes(1);
     expect(errorSpy.mock.calls[0]?.[1]).toBe("job_payload_invalid");
@@ -75,13 +86,23 @@ describe("definePayloadTask", () => {
   it("D58-T5: a task that throws LimiterBusy is re-enqueued at now + 5 s and the wrapper does not throw (fake task, fake clock)", async () => {
     const { context, enqueued } = makeTestJobContext({ db: unusedDb(), now: () => NOW });
     const task: JobTask<"build_card"> = () => Promise.reject(new LimiterBusy(0));
-    await expect(definePayloadTask("build_card", task, context)({ cardId: sourceId, personId })).resolves.toBeUndefined();
-    expect(enqueued).toEqual([{ name: "build_card", payload: { cardId: sourceId, personId }, options: { runAt: new Date("2026-10-27T10:00:05.000Z") } }]);
+    await expect(
+      definePayloadTask("build_card", task, context)({ cardId: sourceId, personId }),
+    ).resolves.toBeUndefined();
+    expect(enqueued).toEqual([
+      {
+        name: "build_card",
+        payload: { cardId: sourceId, personId },
+        options: { runAt: new Date("2026-10-27T10:00:05.000Z") },
+      },
+    ]);
   });
 
   it("D59-T11: any other task error is thrown, so Graphile's attempts apply (fake task)", async () => {
     const { context } = makeTestJobContext({ db: unusedDb(), now: () => NOW });
     const task: JobTask<"build_card"> = () => Promise.reject(new Error("boom"));
-    await expect(definePayloadTask("build_card", task, context)({ cardId: sourceId, personId })).rejects.toThrow("boom");
+    await expect(
+      definePayloadTask("build_card", task, context)({ cardId: sourceId, personId }),
+    ).rejects.toThrow("boom");
   });
 });

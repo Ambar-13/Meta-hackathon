@@ -3,7 +3,12 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { BriefPoint, JOB_MAX_ATTEMPTS, type BriefSupportJudgeOutput } from "@meet-first/contracts";
 import { makeDatabase, POOL_SIZE, withMeeting, type Database } from "@meet-first/db";
-import { freshTestDatabase, SEED_TURNS_B, type SeededMeeting, type TestDatabase } from "@meet-first/db/testing";
+import {
+  freshTestDatabase,
+  SEED_TURNS_B,
+  type SeededMeeting,
+  type TestDatabase,
+} from "@meet-first/db/testing";
 import { CHAT_MODEL, LimiterBusy, makeLlmClient, type LlmClient } from "@meet-first/llm";
 import { makeReplayFolder, SCRIPTED_REPLIES_DIR, testWorkerEnv } from "@meet-first/llm/testing";
 import { readPrompt } from "@meet-first/prompts";
@@ -17,7 +22,17 @@ const NOW = new Date("2026-10-26T12:00:00.000Z");
 // The first note turn of side b: a quote only side b's judge call carries.
 const SIDE_B_FIRST_QUOTE = SEED_TURNS_B[0];
 // The row of a brief as the test reads it.
-const BriefRow = z.object({ person_id: z.string(), agree: z.array(BriefPoint), clash: z.array(BriefPoint), decide_first: z.array(BriefPoint), model: z.string(), prompt_version: z.string(), support_rate: z.union([z.string(), z.number()]).nullable(), support_reliable: z.boolean().nullable(), support_raw: z.record(z.unknown()).nullable() });
+const BriefRow = z.object({
+  person_id: z.string(),
+  agree: z.array(BriefPoint),
+  clash: z.array(BriefPoint),
+  decide_first: z.array(BriefPoint),
+  model: z.string(),
+  prompt_version: z.string(),
+  support_rate: z.union([z.string(), z.number()]).nullable(),
+  support_reliable: z.boolean().nullable(),
+  support_raw: z.record(z.unknown()).nullable(),
+});
 
 let fresh: TestDatabase;
 let workerDb: Kysely<Database>;
@@ -37,17 +52,34 @@ function seed(end: boolean): Promise<SeededMeeting> {
 
 // The brief rows of one meeting, read in its context.
 async function briefRows(meetingId: string): Promise<z.infer<typeof BriefRow>[]> {
-  const rows = await withMeeting(workerDb, meetingId, (trx) => trx.selectFrom("briefs").selectAll().where("meeting_id", "=", meetingId).orderBy("created_at", "asc").execute());
+  const rows = await withMeeting(workerDb, meetingId, (trx) =>
+    trx
+      .selectFrom("briefs")
+      .selectAll()
+      .where("meeting_id", "=", meetingId)
+      .orderBy("created_at", "asc")
+      .execute(),
+  );
   return rows.map((row) => BriefRow.parse(row));
 }
 
 // The ledger rows of one meeting for one call site, read in the meeting's context.
 function ledgerRows(meetingId: string, callSite: string) {
-  return withMeeting(workerDb, meetingId, (trx) => trx.selectFrom("ledger").select(["call_site", "model", "status"]).where("meeting_id", "=", meetingId).where("call_site", "=", callSite).execute());
+  return withMeeting(workerDb, meetingId, (trx) =>
+    trx
+      .selectFrom("ledger")
+      .select(["call_site", "model", "status"])
+      .where("meeting_id", "=", meetingId)
+      .where("call_site", "=", callSite)
+      .execute(),
+  );
 }
 
 // The brief row of one person, which the test expects to exist.
-function briefOf(rows: Array<z.infer<typeof BriefRow>>, personId: string): z.infer<typeof BriefRow> {
+function briefOf(
+  rows: Array<z.infer<typeof BriefRow>>,
+  personId: string,
+): z.infer<typeof BriefRow> {
   const row = rows.find((candidate) => candidate.person_id === personId);
   if (row === undefined) throw new Error(`no brief row for ${personId}`);
   return row;
@@ -55,28 +87,57 @@ function briefOf(rows: Array<z.infer<typeof BriefRow>>, personId: string): z.inf
 
 // The ready events of one meeting, with their payloads and sequence numbers.
 function readyEvents(meetingId: string) {
-  return withMeeting(workerDb, meetingId, (trx) => trx.selectFrom("meeting_events").select(["seq", "payload"]).where("meeting_id", "=", meetingId).where("type", "=", "brief.ready").execute());
+  return withMeeting(workerDb, meetingId, (trx) =>
+    trx
+      .selectFrom("meeting_events")
+      .select(["seq", "payload"])
+      .where("meeting_id", "=", meetingId)
+      .where("type", "=", "brief.ready")
+      .execute(),
+  );
 }
 
 // Whether a judge call is the one for side b, read from the side b quote it carries.
-function isSideBJudge(args: { callSite: string; messages: Array<{ content: string | null }> }): boolean {
-  return args.callSite === "brief_support_judge" && (args.messages[1]?.content ?? "").includes(`<quote>"${SIDE_B_FIRST_QUOTE}"</quote>`);
+function isSideBJudge(args: {
+  callSite: string;
+  messages: Array<{ content: string | null }>;
+}): boolean {
+  return (
+    args.callSite === "brief_support_judge" &&
+    (args.messages[1]?.content ?? "").includes(`<quote>"${SIDE_B_FIRST_QUOTE}"</quote>`)
+  );
 }
 
 // A replay client over the scripted replies, or over a given fixture folder.
 function replayClient(fixtureRoot = SCRIPTED_REPLIES_DIR): LlmClient {
-  return makeLlmClient({ db: workerDb, env: testWorkerEnv("replay"), now: () => NOW, sleep: () => Promise.resolve(), random: () => 0.5, fixtureRoot });
+  return makeLlmClient({
+    db: workerDb,
+    env: testWorkerEnv("replay"),
+    now: () => NOW,
+    sleep: () => Promise.resolve(),
+    random: () => 0.5,
+    fixtureRoot,
+  });
 }
 
 // The judge verdicts of one brief with one line changed: index 6 unsupported, index 0 supported.
 function judgeWithIndexSix(): BriefSupportJudgeOutput {
-  return { lines: Array.from(Array(9).keys(), (index) => ({ index, supported: index !== 6, reason: "The quote carries the point of the line." })) };
+  return {
+    lines: Array.from(Array(9).keys(), (index) => ({
+      index,
+      supported: index !== 6,
+      reason: "The quote carries the point of the line.",
+    })),
+  };
 }
 
 describe("write_briefs job", () => {
   it("W2-BRIEF-T8 (R3.2, D26): every quote on every stored line is verified against a turn or an item, using replay fixtures", async () => {
     const seeded = await seed(true);
-    await writeBriefsTask({ meetingId: seeded.meetingId }, makeTestJobContext({ db: workerDb, now: () => NOW }).context);
+    await writeBriefsTask(
+      { meetingId: seeded.meetingId },
+      makeTestJobContext({ db: workerDb, now: () => NOW }).context,
+    );
     const rows = await briefRows(seeded.meetingId);
     expect(rows).toHaveLength(2);
     const turnIds = new Set([...seeded.a.turnIds, ...seeded.b.turnIds]);
@@ -84,7 +145,11 @@ describe("write_briefs job", () => {
     const quotes = points.flatMap((point) => point.quotes);
     expect(points).toHaveLength(18);
     expect(quotes.every((quote) => quote.verified && turnIds.has(quote.turnId))).toBe(true);
-    expect(rows.every((row) => row.model === CHAT_MODEL && row.prompt_version === readPrompt("brief").version)).toBe(true);
+    expect(
+      rows.every(
+        (row) => row.model === CHAT_MODEL && row.prompt_version === readPrompt("brief").version,
+      ),
+    ).toBe(true);
     const ledger = await ledgerRows(seeded.meetingId, "brief");
     expect(ledger.map((entry) => entry.model)).toEqual([CHAT_MODEL, CHAT_MODEL]);
   });
@@ -94,9 +159,15 @@ describe("write_briefs job", () => {
     const empty = await makeReplayFolder([]);
     const replay = replayClient();
     const missing = replayClient(empty.root);
-    const llm: LlmClient = { ...replay, complete: (args) => (isSideBJudge(args) ? missing.complete(args) : replay.complete(args)) };
+    const llm: LlmClient = {
+      ...replay,
+      complete: (args) => (isSideBJudge(args) ? missing.complete(args) : replay.complete(args)),
+    };
     try {
-      await writeBriefsTask({ meetingId: seeded.meetingId }, { ...makeTestJobContext({ db: workerDb, now: () => NOW }).context, llm });
+      await writeBriefsTask(
+        { meetingId: seeded.meetingId },
+        { ...makeTestJobContext({ db: workerDb, now: () => NOW }).context, llm },
+      );
     } finally {
       await empty.remove();
     }
@@ -105,7 +176,9 @@ describe("write_briefs job", () => {
     const sideB = briefOf(rows, seeded.b.personId);
     expect(sideB.support_reliable).toBe(false);
     expect(sideB.support_rate).toBeNull();
-    expect([...sideB.agree, ...sideB.clash, ...sideB.decide_first].map((point) => point.supported)).toEqual(Array.from(Array(9), () => null));
+    expect(
+      [...sideB.agree, ...sideB.clash, ...sideB.decide_first].map((point) => point.supported),
+    ).toEqual(Array.from(Array(9), () => null));
     expect(sideB.support_raw).toEqual({ error: "replay_fixture_missing" });
     expect(sideA.support_reliable).toBe(true);
     const judged = await ledgerRows(seeded.meetingId, "brief_support_judge");
@@ -123,7 +196,8 @@ describe("write_briefs job", () => {
     const ready = await readyEvents(seeded.meetingId);
     expect(ready).toHaveLength(1);
     expect(ready[0]?.seq).toBe(9);
-    const rates = (ready[0]?.payload as { supportRate: { a: number | null; b: number | null } }).supportRate;
+    const rates = (ready[0]?.payload as { supportRate: { a: number | null; b: number | null } })
+      .supportRate;
     const rows = await briefRows(seeded.meetingId);
     const sideA = rows.find((row) => row.person_id === seeded.a.personId);
     expect(rates.a).toBe(Number(sideA?.support_rate));
@@ -140,12 +214,18 @@ describe("write_briefs job", () => {
       ...replay,
       complete: async (args) => {
         const reply = await replay.complete(args);
-        if (args.callSite === "brief_support_judge" && !isSideBJudge(args)) return { ...reply, parsed: judgeWithIndexSix() };
+        if (args.callSite === "brief_support_judge" && !isSideBJudge(args))
+          return { ...reply, parsed: judgeWithIndexSix() };
         return reply;
       },
     };
-    await writeBriefsTask({ meetingId: seeded.meetingId }, { ...makeTestJobContext({ db: workerDb, now: () => NOW }).context, llm });
-    const sideA = (await briefRows(seeded.meetingId)).find((row) => row.person_id === seeded.a.personId);
+    await writeBriefsTask(
+      { meetingId: seeded.meetingId },
+      { ...makeTestJobContext({ db: workerDb, now: () => NOW }).context, llm },
+    );
+    const sideA = (await briefRows(seeded.meetingId)).find(
+      (row) => row.person_id === seeded.a.personId,
+    );
     expect(sideA?.decide_first[0]?.supported).toBe(false);
     expect(Number(sideA?.support_rate)).toBe(0.889);
   });
@@ -158,32 +238,53 @@ describe("write_briefs job", () => {
       stream: () => Promise.reject(new LimiterBusy(NOW.getTime() + 5_000)),
       image: () => Promise.reject(new LimiterBusy(NOW.getTime() + 5_000)),
     };
-    await definePayloadTask("write_briefs", writeBriefsTask, { ...made.context, llm: busy })({ meetingId: seeded.meetingId });
-    expect(made.enqueued).toEqual([{ name: "write_briefs", payload: { meetingId: seeded.meetingId }, options: { runAt: new Date(NOW.getTime() + 5_000) } }]);
+    await definePayloadTask("write_briefs", writeBriefsTask, { ...made.context, llm: busy })({
+      meetingId: seeded.meetingId,
+    });
+    expect(made.enqueued).toEqual([
+      {
+        name: "write_briefs",
+        payload: { meetingId: seeded.meetingId },
+        options: { runAt: new Date(NOW.getTime() + 5_000) },
+      },
+    ]);
     expect(JOB_MAX_ATTEMPTS.write_briefs).toBe(2);
     expect(await briefRows(seeded.meetingId)).toHaveLength(0);
   });
 
   it("W2-BRIEF-T13 (R9.6): a meeting that is not ended gets no brief and the job returns success", async () => {
     const seeded = await seed(false);
-    await expect(writeBriefsTask({ meetingId: seeded.meetingId }, makeTestJobContext({ db: workerDb, now: () => NOW }).context)).resolves.toBeUndefined();
+    await expect(
+      writeBriefsTask(
+        { meetingId: seeded.meetingId },
+        makeTestJobContext({ db: workerDb, now: () => NOW }).context,
+      ),
+    ).resolves.toBeUndefined();
     expect(await briefRows(seeded.meetingId)).toHaveLength(0);
     expect(await ledgerRows(seeded.meetingId, "brief")).toHaveLength(0);
   });
 });
 
 // How many briefs, committed events and model calls a meeting has, to check that a second run adds nothing.
-async function countsOf(meetingId: string): Promise<{ briefs: number; events: number; ledger: number }> {
+async function countsOf(
+  meetingId: string,
+): Promise<{ briefs: number; events: number; ledger: number }> {
   const briefs = (await briefRows(meetingId)).length;
   const events = await countEvents(meetingId);
-  const ledger = (await ledgerRows(meetingId, "brief")).length + (await ledgerRows(meetingId, "brief_support_judge")).length;
+  const ledger =
+    (await ledgerRows(meetingId, "brief")).length +
+    (await ledgerRows(meetingId, "brief_support_judge")).length;
   return { briefs, events, ledger };
 }
 
 // The number of committed events of one meeting.
 async function countEvents(meetingId: string): Promise<number> {
   return withMeeting(workerDb, meetingId, async (trx) => {
-    const rows = await trx.selectFrom("meeting_events").select("seq").where("meeting_id", "=", meetingId).execute();
+    const rows = await trx
+      .selectFrom("meeting_events")
+      .select("seq")
+      .where("meeting_id", "=", meetingId)
+      .execute();
     return rows.length;
   });
 }

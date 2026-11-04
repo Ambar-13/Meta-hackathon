@@ -28,7 +28,14 @@ function readRanges(root: string): { ranges: NumberRange[]; findings: Finding[] 
   if (!existsSync(file)) {
     return {
       ranges: [],
-      findings: [{ check: "migrations", file, line: 1, message: `${RANGES_FILE} is missing, so no number can be checked` }],
+      findings: [
+        {
+          check: "migrations",
+          file,
+          line: 1,
+          message: `${RANGES_FILE} is missing, so no number can be checked`,
+        },
+      ],
     };
   }
   const ranges: NumberRange[] = [];
@@ -42,7 +49,12 @@ function readRanges(root: string): { ranges: NumberRange[]; findings: Finding[] 
       const last = match?.[2];
       const owner = match?.[3];
       if (first === undefined || last === undefined || owner === undefined) {
-        findings.push({ check: "migrations", file, line: index + 1, message: "must read NNNN-NNNN owner" });
+        findings.push({
+          check: "migrations",
+          file,
+          line: index + 1,
+          message: "must read NNNN-NNNN owner",
+        });
         return;
       }
       ranges.push({ first: Number(first), last: Number(last), owner });
@@ -108,15 +120,30 @@ export function checkMigrations(root: string): Finding[] {
     const name = basename(file);
     const numberText = /^(\d{4})_[a-z0-9_]+\.sql$/.exec(name)?.[1];
     if (numberText === undefined) {
-      findings.push({ check: "migrations", file, line: 1, message: "file name must be NNNN_snake_name.sql" });
+      findings.push({
+        check: "migrations",
+        file,
+        line: 1,
+        message: "file name must be NNNN_snake_name.sql",
+      });
       continue;
     }
     const number = Number(numberText);
     const sql = readFileSync(file, "utf8");
     const earlier = seen.get(number);
-    if (earlier !== undefined) findings.push({ check: "migrations", file, line: 1, message: `number ${numberText} repeats ${earlier}` });
+    if (earlier !== undefined)
+      findings.push({
+        check: "migrations",
+        file,
+        line: 1,
+        message: `number ${numberText} repeats ${earlier}`,
+      });
     seen.set(number, name);
-    const problems = [...headerProblems(sql), ...numberProblems(number, ranges), ...securityProblems(sql, globals)];
+    const problems = [
+      ...headerProblems(sql),
+      ...numberProblems(number, ranges),
+      ...securityProblems(sql, globals),
+    ];
     findings.push(...problems.map((message) => ({ check: "migrations", file, line: 1, message })));
   }
   return findings;

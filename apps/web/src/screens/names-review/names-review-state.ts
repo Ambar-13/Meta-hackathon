@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { apiFetch, asApiError, ApiError, routes, usePolledView, type PolledView } from "../../app-shell/index.js";
+import {
+  apiFetch,
+  asApiError,
+  ApiError,
+  routes,
+  usePolledView,
+  type PolledView,
+} from "../../app-shell/index.js";
 import { NamesReview, SourceView } from "@meet-first/contracts";
 
 // How often the names screen polls while the source is not frozen (the 3 s card interval).
@@ -9,16 +16,33 @@ export const OFFERED_OPT_INS = ["health", "address", "identifier"] as const;
 // One offered opt-in.
 export type SensitiveOptIn = (typeof OFFERED_OPT_INS)[number];
 // The label of each offered opt-in (drafted copy).
-export const OPT_IN_LABELS: Record<SensitiveOptIn, string> = { health: "Health", address: "Home and street addresses", identifier: "ID and account numbers" };
+export const OPT_IN_LABELS: Record<SensitiveOptIn, string> = {
+  health: "Health",
+  address: "Home and street addresses",
+  identifier: "ID and account numbers",
+};
 // Where saving stands.
-export type SaveState = { kind: "idle" } | { kind: "saving" } | { kind: "review_failed"; error: ApiError } | { kind: "card_failed"; error: ApiError };
+export type SaveState =
+  | { kind: "idle" }
+  | { kind: "saving" }
+  | { kind: "review_failed"; error: ApiError }
+  | { kind: "card_failed"; error: ApiError };
 // The mode of the review and the names the person keeps, with the opt-ins they ticked.
-export type ReviewChoice = { mode: "replace_all" | "choose"; kept: ReadonlySet<string>; optIns: ReadonlySet<SensitiveOptIn> };
+export type ReviewChoice = {
+  mode: "replace_all" | "choose";
+  kept: ReadonlySet<string>;
+  optIns: ReadonlySet<SensitiveOptIn>;
+};
 
 // Builds the review body: every name seen so far, keep true only for kept names in choose mode, and the ticked opt-ins.
 export function buildNamesReview(seenNames: readonly string[], choice: ReviewChoice): NamesReview {
-  const decisions = seenNames.map((text) => ({ text, keep: choice.mode === "choose" && choice.kept.has(text) }));
-  const sensitiveOptIn: NamesReview["sensitiveOptIn"] = OFFERED_OPT_INS.filter((optIn) => choice.optIns.has(optIn));
+  const decisions = seenNames.map((text) => ({
+    text,
+    keep: choice.mode === "choose" && choice.kept.has(text),
+  }));
+  const sensitiveOptIn: NamesReview["sensitiveOptIn"] = OFFERED_OPT_INS.filter((optIn) =>
+    choice.optIns.has(optIn),
+  );
   return NamesReview.parse({ decisions, sensitiveOptIn });
 }
 
@@ -62,7 +86,10 @@ function useReviewChoices(): {
 }
 
 // The save of the review and the card request after it.
-function useReviewSave(sourceId: string, onCardRequested: (cardId: string) => void): {
+function useReviewSave(
+  sourceId: string,
+  onCardRequested: (cardId: string) => void,
+): {
   save: SaveState;
   requestCard: () => Promise<void>;
   saveReview: (body: NamesReview) => Promise<void>;
@@ -115,11 +142,14 @@ export function useNamesReview(
   const [seen, setSeen] = useState<string[]>([]);
   const choices = useReviewChoices();
   const reviewSave = useReviewSave(sourceId, onCardRequested);
-  const polled = usePolledView(() => apiFetch(routes.sources.readSource, { params: { id: sourceId }, query: { page } }), {
-    key: `${sourceId}:${String(page)}`,
-    intervalMs: NAMES_POLL_MS,
-    keepPolling: (view) => view.frozenAt === null,
-  });
+  const polled = usePolledView(
+    () => apiFetch(routes.sources.readSource, { params: { id: sourceId }, query: { page } }),
+    {
+      key: `${sourceId}:${String(page)}`,
+      intervalMs: NAMES_POLL_MS,
+      keepPolling: (view) => view.frozenAt === null,
+    },
+  );
 
   useEffect(() => {
     setSeen((previous) => addSeen(previous, polled.value));

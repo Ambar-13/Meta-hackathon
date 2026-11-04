@@ -18,7 +18,11 @@ function conversationsOf(root: unknown): unknown[] {
 
 // True when a value is an object with a chat_messages array, the test for the Claude shape.
 function hasChatMessages(value: unknown): value is { chat_messages: unknown[] } {
-  return typeof value === "object" && value !== null && Array.isArray((value as { chat_messages?: unknown }).chat_messages);
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    Array.isArray((value as { chat_messages?: unknown }).chat_messages)
+  );
 }
 
 // The text of a Claude message: its text field when that is not empty, else the text entries of content joined by a line break.
@@ -59,7 +63,8 @@ export function parseClaudeChatMessages(root: unknown): RawTurn[] | null {
   if (shaped.length === 0) return null;
   const turns: RawTurn[] = [];
   for (const conversation of shaped) {
-    for (const turn of humanTurns(conversation.chat_messages)) turns.push({ ...turn, exportOrder: turns.length });
+    for (const turn of humanTurns(conversation.chat_messages))
+      turns.push({ ...turn, exportOrder: turns.length });
   }
   return turns;
 }

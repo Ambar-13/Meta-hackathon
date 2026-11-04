@@ -1,5 +1,14 @@
 import { randomBytes } from "node:crypto";
-import { type QuestionKind, BriefPoint, ContractError, FORBIDDEN_SHARE_KEYS, HTTP, rowToEvent, SHARE_SLUG_BYTES, ShareSnapshot } from "@meet-first/contracts";
+import {
+  type QuestionKind,
+  BriefPoint,
+  ContractError,
+  FORBIDDEN_SHARE_KEYS,
+  HTTP,
+  rowToEvent,
+  SHARE_SLUG_BYTES,
+  ShareSnapshot,
+} from "@meet-first/contracts";
 import type { DatabaseTransaction } from "@meet-first/db";
 
 // Random bytes in a share slug, from the contracts: 16 bytes, which is 22 URL-safe base64 characters.
@@ -20,7 +29,11 @@ type Section = "agree" | "clash" | "decide_first";
 
 // The sentence for a snapshot that failed its own check; nothing is stored when it is raised (share_snapshot_invalid).
 function snapshotInvalid(): ContractError {
-  return new ContractError("share_snapshot_invalid", "The share snapshot failed its own check and was not stored. Nothing is public. Report this with the meeting id.", HTTP.internal);
+  return new ContractError(
+    "share_snapshot_invalid",
+    "The share snapshot failed its own check and was not stored. Nothing is public. Report this with the meeting id.",
+    HTTP.internal,
+  );
 }
 
 // Returns a new random slug of 22 characters, unrelated to any id.
@@ -40,7 +53,11 @@ export function assertNoForbiddenKeys(value: unknown): void {
   if (typeof value !== "object" || value === null) return;
   for (const [key, child] of Object.entries(value)) {
     if ((FORBIDDEN_SHARE_KEYS as readonly string[]).includes(key)) {
-      throw new ContractError("share_snapshot_forbidden_key", "The share snapshot holds a key that must never be public. Nothing was stored. Report this with the meeting id.", HTTP.internal);
+      throw new ContractError(
+        "share_snapshot_forbidden_key",
+        "The share snapshot holds a key that must never be public. Nothing was stored. Report this with the meeting id.",
+        HTTP.internal,
+      );
     }
     assertNoForbiddenKeys(child);
   }
@@ -48,12 +65,23 @@ export function assertNoForbiddenKeys(value: unknown): void {
 
 // Returns true when a brief line may be shared: the support judge said yes and every quote was found in its turn.
 export function isShareableLine(point: BriefPoint): boolean {
-  return point.supported === true && point.quotes.length > 0 && point.quotes.every((quote) => quote.verified);
+  return (
+    point.supported === true &&
+    point.quotes.length > 0 &&
+    point.quotes.every((quote) => quote.verified)
+  );
 }
 
 // Reads the question the meeting was asked and its kind, which picks the public page's section labels.
-async function readQuestion(trx: DatabaseTransaction, meetingId: string): Promise<{ text: string; kind: QuestionKind }> {
-  const meeting = await trx.selectFrom("meetings").select(["question_text", "question_kind"]).where("id", "=", meetingId).executeTakeFirstOrThrow();
+async function readQuestion(
+  trx: DatabaseTransaction,
+  meetingId: string,
+): Promise<{ text: string; kind: QuestionKind }> {
+  const meeting = await trx
+    .selectFrom("meetings")
+    .select(["question_text", "question_kind"])
+    .where("id", "=", meetingId)
+    .executeTakeFirstOrThrow();
   return { text: meeting.question_text, kind: meeting.question_kind };
 }
 
@@ -66,12 +94,26 @@ async function readMembers(trx: DatabaseTransaction, meetingId: string): Promise
     .where("mm.meeting_id", "=", meetingId)
     .orderBy("mm.side")
     .execute();
-  return rows.map((row) => ({ side: row.side, personId: row.person_id, displayName: row.display_name }));
+  return rows.map((row) => ({
+    side: row.side,
+    personId: row.person_id,
+    displayName: row.display_name,
+  }));
 }
 
 // Reads the approved, verified card items of both sides, in side order and then in card position order; a listed persona met through the
 // directory shows only its public items.
-async function readItems(trx: DatabaseTransaction, meetingId: string): Promise<Array<{ side: Side; kind: "value" | "preference" | "habit" | "boundary" | "goal"; claim: string; quote: string }>> {
+async function readItems(
+  trx: DatabaseTransaction,
+  meetingId: string,
+): Promise<
+  Array<{
+    side: Side;
+    kind: "value" | "preference" | "habit" | "boundary" | "goal";
+    claim: string;
+    quote: string;
+  }>
+> {
   const rows = await trx
     .selectFrom("card_items as ci")
     .innerJoin("meeting_members as mm", "mm.card_id", "ci.card_id")
@@ -83,11 +125,19 @@ async function readItems(trx: DatabaseTransaction, meetingId: string): Promise<A
     .orderBy("mm.side")
     .orderBy("ci.position")
     .execute();
-  return rows.map((row) => ({ side: row.side, kind: row.kind, claim: row.claim, quote: row.quote }));
+  return rows.map((row) => ({
+    side: row.side,
+    kind: row.kind,
+    claim: row.claim,
+    quote: row.quote,
+  }));
 }
 
 // Reads each committed turn in order, keeping only the claims that were verified.
-async function readTurns(trx: DatabaseTransaction, meetingId: string): Promise<Array<{ side: Side; text: string; claims: Array<{ text: string; quote: string }> }>> {
+async function readTurns(
+  trx: DatabaseTransaction,
+  meetingId: string,
+): Promise<Array<{ side: Side; text: string; claims: Array<{ text: string; quote: string }> }>> {
   const rows = await trx
     .selectFrom("meeting_events")
     .select(["meeting_id", "seq", "type", "v", "payload", "created_at"])
@@ -98,23 +148,47 @@ async function readTurns(trx: DatabaseTransaction, meetingId: string): Promise<A
   return rows.flatMap((row) => {
     const event = rowToEvent(row);
     if (event.type !== "turn.committed") return [];
-    const claims = event.claims.filter((claim) => claim.verified).map((claim) => ({ text: claim.text, quote: claim.quote }));
+    const claims = event.claims
+      .filter((claim) => claim.verified)
+      .map((claim) => ({ text: claim.text, quote: claim.quote }));
     return [{ side: event.side, text: event.text, claims }];
   });
 }
 
 // Reads both brief rows, side a's first, so a line that both briefs hold keeps side a's place.
-async function readBriefs(trx: DatabaseTransaction, meetingId: string, sideOf: ReadonlyMap<string, Side>): Promise<BriefRow[]> {
-  const rows = await trx.selectFrom("briefs").select(["person_id", "agree", "clash", "decide_first"]).where("meeting_id", "=", meetingId).execute();
-  return rows.sort((left, right) => (sideOf.get(left.person_id) ?? "b").localeCompare(sideOf.get(right.person_id) ?? "b"));
+async function readBriefs(
+  trx: DatabaseTransaction,
+  meetingId: string,
+  sideOf: ReadonlyMap<string, Side>,
+): Promise<BriefRow[]> {
+  const rows = await trx
+    .selectFrom("briefs")
+    .select(["person_id", "agree", "clash", "decide_first"])
+    .where("meeting_id", "=", meetingId)
+    .execute();
+  return rows.sort((left, right) =>
+    (sideOf.get(left.person_id) ?? "b").localeCompare(sideOf.get(right.person_id) ?? "b"),
+  );
 }
 
 // Reads the comic panels when the comic is ready; null when it is not, so the snapshot has no comic field.
 async function readComic(trx: DatabaseTransaction, meetingId: string): Promise<ComicLine[] | null> {
-  const comic = await trx.selectFrom("comics").select(["id", "state"]).where("meeting_id", "=", meetingId).executeTakeFirst();
+  const comic = await trx
+    .selectFrom("comics")
+    .select(["id", "state"])
+    .where("meeting_id", "=", meetingId)
+    .executeTakeFirst();
   if (comic === undefined || comic.state !== "ready") return null;
-  const panels = await trx.selectFrom("comic_panels").select(["caption", "image"]).where("comic_id", "=", comic.id).orderBy("position").execute();
-  return panels.map((panel) => ({ caption: panel.caption, imageUrl: `data:image/webp;base64,${panel.image.toString("base64")}` }));
+  const panels = await trx
+    .selectFrom("comic_panels")
+    .select(["caption", "image"])
+    .where("comic_id", "=", comic.id)
+    .orderBy("position")
+    .execute();
+  return panels.map((panel) => ({
+    caption: panel.caption,
+    imageUrl: `data:image/webp;base64,${panel.image.toString("base64")}`,
+  }));
 }
 
 // Reads the stored lines of one brief section; a line that does not parse as a BriefPoint is left out.
@@ -128,7 +202,10 @@ function parsedPoints(stored: unknown): BriefPoint[] {
 
 // Turns a brief point into the shape the public page shows: its text and quotes, with no turn ids.
 function toSharedLine(point: BriefPoint): SharedLine {
-  return { text: point.text, quotes: point.quotes.map((quote) => ({ text: quote.text, side: quote.side })) };
+  return {
+    text: point.text,
+    quotes: point.quotes.map((quote) => ({ text: quote.text, side: quote.side })),
+  };
 }
 
 // The shareable lines of one section across both briefs, deduplicated by exact text, side a's brief first.
@@ -160,7 +237,10 @@ function checkedSnapshot(candidate: unknown): ShareSnapshot {
 
 // Builds the public snapshot inside the meeting context, so both members' rows and briefs are visible; the caller has
 // already proved membership in withPerson. Every field of the public page is read here and nowhere else.
-export async function buildShareSnapshot(trx: DatabaseTransaction, meetingId: string): Promise<ShareSnapshot> {
+export async function buildShareSnapshot(
+  trx: DatabaseTransaction,
+  meetingId: string,
+): Promise<ShareSnapshot> {
   const question = await readQuestion(trx, meetingId);
   const members = await readMembers(trx, meetingId);
   const sideOf = new Map(members.map((member) => [member.personId, member.side] as const));
@@ -174,7 +254,11 @@ export async function buildShareSnapshot(trx: DatabaseTransaction, meetingId: st
     people: members.map((member) => ({ side: member.side, displayName: member.displayName })),
     items,
     turns,
-    brief: { agree: sharedSection(briefs, "agree"), clash: sharedSection(briefs, "clash"), decideFirst: sharedSection(briefs, "decide_first") },
+    brief: {
+      agree: sharedSection(briefs, "agree"),
+      clash: sharedSection(briefs, "clash"),
+      decideFirst: sharedSection(briefs, "decide_first"),
+    },
     ...(comic === null ? {} : { comic }),
   };
   return checkedSnapshot(candidate);

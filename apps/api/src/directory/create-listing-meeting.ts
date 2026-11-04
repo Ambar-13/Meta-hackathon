@@ -4,8 +4,21 @@
 import type { FastifyInstance } from "fastify";
 import { sql, type Transaction } from "kysely";
 import { z } from "zod";
-import { ContractError, DIRECTORY_MEETINGS_PER_LISTING_PER_DAY, HTTP, MeetingCreate, MeetingCreateResponse, routes, Uuid } from "@meet-first/contracts";
-import { parseDatabaseError, withPerson, type Database, type DatabaseRefusal } from "@meet-first/db";
+import {
+  ContractError,
+  DIRECTORY_MEETINGS_PER_LISTING_PER_DAY,
+  HTTP,
+  MeetingCreate,
+  MeetingCreateResponse,
+  routes,
+  Uuid,
+} from "@meet-first/contracts";
+import {
+  parseDatabaseError,
+  withPerson,
+  type Database,
+  type DatabaseRefusal,
+} from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { assertUnderDailyMeetingCap, questionFromBody } from "../meetings/create-meeting.js";
 import { makeNotFoundError, makePayloadInvalidError } from "../route-errors.js";
@@ -23,7 +36,12 @@ const LISTING_MEETING_REFUSAL_STATUS: ReadonlyMap<string, number> = new Map<stri
 ]);
 
 // What one directory meeting needs: the listing, the caller, the caller's card and the question as questionFromBody reads it.
-type ListingMeetingInput = { listingId: string; personId: string; cardId: string; question: ReturnType<typeof questionFromBody> };
+type ListingMeetingInput = {
+  listingId: string;
+  personId: string;
+  cardId: string;
+  question: ReturnType<typeof questionFromBody>;
+};
 
 // The error to send for a refusal read off directory_meeting_create, with the database's sentence, or null when the refusal is not one of its five.
 export function toListingMeetingError(refusal: DatabaseRefusal | null): ContractError | null {
@@ -34,18 +52,30 @@ export function toListingMeetingError(refusal: DatabaseRefusal | null): Contract
 }
 
 // Calls directory_meeting_create as the caller with the listing's daily cap, and returns the meeting id. The function sets question_kind itself (the curated kind, or situation for free text), so nothing here writes it.
-async function createListingMeetingRow(trx: Transaction<Database>, input: ListingMeetingInput): Promise<string> {
+async function createListingMeetingRow(
+  trx: Transaction<Database>,
+  input: ListingMeetingInput,
+): Promise<string> {
   const { question } = input;
   let meetingId: string | null | undefined;
   try {
-    const result = await sql<{ meeting_id: string | null }>`SELECT directory_meeting_create(${input.listingId}::uuid, ${input.personId}::uuid, ${input.cardId}::uuid, ${question.questionId}::int, ${question.text}, ${question.isChecked}, ${question.kind}::text, ${DIRECTORY_MEETINGS_PER_LISTING_PER_DAY}) AS meeting_id`.execute(trx);
+    const result = await sql<{
+      meeting_id: string | null;
+    }>`SELECT directory_meeting_create(${input.listingId}::uuid, ${input.personId}::uuid, ${input.cardId}::uuid, ${question.questionId}::int, ${question.text}, ${question.isChecked}, ${question.kind}::text, ${DIRECTORY_MEETINGS_PER_LISTING_PER_DAY}) AS meeting_id`.execute(
+      trx,
+    );
     meetingId = result.rows[0]?.meeting_id;
   } catch (error) {
     const refusal = toListingMeetingError(parseDatabaseError(error));
     if (refusal !== null) throw refusal;
     throw error;
   }
-  if (meetingId === null || meetingId === undefined) throw new ContractError("meeting_create_failed", "The meeting could not be created. Try again.", HTTP.internal);
+  if (meetingId === null || meetingId === undefined)
+    throw new ContractError(
+      "meeting_create_failed",
+      "The meeting could not be created. Try again.",
+      HTTP.internal,
+    );
   return meetingId;
 }
 
@@ -60,7 +90,12 @@ export function registerCreateListingMeeting(app: FastifyInstance, deps: RouteDe
     const question = questionFromBody(body.data);
     const meetingId = await withPerson(deps.db, personId, async (trx) => {
       await assertUnderDailyMeetingCap(trx, personId, deps.now());
-      return createListingMeetingRow(trx, { listingId: params.data.id, personId, cardId: body.data.cardId, question });
+      return createListingMeetingRow(trx, {
+        listingId: params.data.id,
+        personId,
+        cardId: body.data.cardId,
+        question,
+      });
     });
     await deps.enqueue("check_question", { meetingId });
     return reply.code(201).send(MeetingCreateResponse.parse({ meetingId }));

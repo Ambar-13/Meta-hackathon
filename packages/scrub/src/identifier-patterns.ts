@@ -7,7 +7,8 @@ import type { PatternRule } from "./secret-patterns.js";
 export const EMAIL: PatternRule = {
   category: "email",
   group: 2,
-  pattern: /(^|[^A-Za-z0-9._%+-])([A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,})/g,
+  pattern:
+    /(^|[^A-Za-z0-9._%+-])([A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,})/g,
   needs: ["@"],
 };
 // An IBAN: 2 capitals, 2 digits, then groups of 4 capitals or digits with optional spaces; kept only when the mod-97 check passes.
@@ -45,26 +46,43 @@ export const POSTAL_SINGAPORE: PatternRule = {
 export const POSTAL_LABELLED: PatternRule = {
   category: "postal",
   group: 1,
-  pattern: /\b(?:postal code|postcode|post code|pin code|pincode|pin|zip code|zip)[ \t]{0,16}(?:is|:|#|-)?[ \t]{0,16}(\d{5,6}(?:-\d{4})?)(?!\d)/gi,
+  pattern:
+    /\b(?:postal code|postcode|post code|pin code|pincode|pin|zip code|zip)[ \t]{0,16}(?:is|:|#|-)?[ \t]{0,16}(\d{5,6}(?:-\d{4})?)(?!\d)/gi,
 };
 // A US ZIP code after a two-letter state code, as in CA 94105; only the code is replaced.
 export const POSTAL_US: PatternRule = {
   category: "postal",
   group: 1,
-  pattern: /\b(?:A[KLRZ]|C[AOT]|D[CE]|FL|GA|HI|I[ADLN]|K[SY]|LA|M[ADEINOST]|N[CDEHJMVY]|O[HKR]|PA|RI|S[CD]|T[NX]|UT|V[AT]|W[AIVY]) (\d{5}(?:-\d{4})?)(?!\d)/g,
+  pattern:
+    /\b(?:A[KLRZ]|C[AOT]|D[CE]|FL|GA|HI|I[ADLN]|K[SY]|LA|M[ADEINOST]|N[CDEHJMVY]|O[HKR]|PA|RI|S[CD]|T[NX]|UT|V[AT]|W[AIVY]) (\d{5}(?:-\d{4})?)(?!\d)/g,
 };
 // A phone number in one of four forms (see below); kept only when isValidPhoneNumber agrees.
 export const PHONE: PatternRule = {
   category: "phone",
   group: 2,
-  pattern: /(^|[^\w+])(\+\d{1,3}[ .-]?(?:\(\d{1,4\}\)[ .-]?)?\d{1,5}(?:[ .-]\d{1,5}){0,5}|\(\d{2,4}\)[ .-]?\d{2,5}(?:[ .-]\d{2,5}){0,3}|\d{2,5}(?:[ .-]\d{2,5}){1,4}|\d{8,12})(?!\w)/g,
+  pattern:
+    /(^|[^\w+])(\+\d{1,3}[ .-]?(?:\(\d{1,4\}\)[ .-]?)?\d{1,5}(?:[ .-]\d{1,5}){0,5}|\(\d{2,4}\)[ .-]?\d{2,5}(?:[ .-]\d{2,5}){0,3}|\d{2,5}(?:[ .-]\d{2,5}){1,4}|\d{8,12})(?!\w)/g,
   isValid: isValidPhoneNumber,
 };
 // The identifier rules in the order scrub applies them; postal codes go before phones so CA 94105-1234 stays a postal code.
-export const IDENTIFIER_RULES: readonly PatternRule[] = [EMAIL, IBAN, CARD, AADHAAR, NRIC, PAN, POSTAL_SINGAPORE, POSTAL_LABELLED, POSTAL_US, PHONE];
+export const IDENTIFIER_RULES: readonly PatternRule[] = [
+  EMAIL,
+  IBAN,
+  CARD,
+  AADHAAR,
+  NRIC,
+  PAN,
+  POSTAL_SINGAPORE,
+  POSTAL_LABELLED,
+  POSTAL_US,
+  PHONE,
+];
 
 // The two date shapes a phone candidate may not have: 2026-10-26 and 26.10.2026 (any of -. / between the parts).
-export const DATE_SHAPES: readonly RegExp[] = [/^\d{4}[-./]\d{1,2}[-./]\d{1,2}$/, /^\d{1,2}[-./]\d{1,2}[-./]\d{2,4}$/];
+export const DATE_SHAPES: readonly RegExp[] = [
+  /^\d{4}[-./]\d{1,2}[-./]\d{1,2}$/,
+  /^\d{1,2}[-./]\d{1,2}[-./]\d{2,4}$/,
+];
 
 // True when a card candidate has 13 to 19 digits and passes the Luhn check.
 export function isValidCardNumber(value: string): boolean {

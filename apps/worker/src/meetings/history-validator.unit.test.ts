@@ -39,7 +39,11 @@ it("R5.1-T2: tool results in any order after their assistant message are accepte
   const history: ChatMessage[] = [
     sys,
     usr,
-    { role: "assistant", content: null, tool_calls: [call("call_1", "recall"), call("call_2", "recall")] },
+    {
+      role: "assistant",
+      content: null,
+      tool_calls: [call("call_1", "recall"), call("call_2", "recall")],
+    },
     tool("call_2"),
     tool("call_1"),
   ];
@@ -49,7 +53,11 @@ it("R5.1-T2: tool results in any order after their assistant message are accepte
 });
 
 it("R5.1-T3: an unanswered tool call is rejected before the next request", () => {
-  const history: ChatMessage[] = [sys, usr, { role: "assistant", content: null, tool_calls: [call("call_1", "recall")] }];
+  const history: ChatMessage[] = [
+    sys,
+    usr,
+    { role: "assistant", content: null, tool_calls: [call("call_1", "recall")] },
+  ];
   const failure = errorOf(history);
   expect(failure.code).toBe("history_invalid");
   expect(failure.message).toContain("unanswered_tool_call at message 3");

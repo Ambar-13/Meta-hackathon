@@ -43,6 +43,9 @@ export const NamesReview = z.object({
 // The type of NamesReview, read from the schema above.
 export type NamesReview = z.infer<typeof NamesReview>;
 // What the names review returns once the source is frozen.
-export const NamesReviewResponse = z.object({ frozenAt: IsoTime, redactionCount: z.number().int() });
+export const NamesReviewResponse = z.object({
+  frozenAt: IsoTime,
+  redactionCount: z.number().int(),
+});
 // The type of NamesReviewResponse, read from the schema above.
 export type NamesReviewResponse = z.infer<typeof NamesReviewResponse>;

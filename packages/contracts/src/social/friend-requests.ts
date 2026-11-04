@@ -31,7 +31,10 @@ export const FriendRequestView = z.object({
 export type FriendRequestView = z.infer<typeof FriendRequestView>;
 
 // What GET /api/friend-requests returns: the caller's pending requests, received and sent, newest first.
-export const FriendRequestsView = z.object({ incoming: z.array(FriendRequestView), outgoing: z.array(FriendRequestView) });
+export const FriendRequestsView = z.object({
+  incoming: z.array(FriendRequestView),
+  outgoing: z.array(FriendRequestView),
+});
 // The type of FriendRequestsView, read from the schema above.
 export type FriendRequestsView = z.infer<typeof FriendRequestsView>;
 

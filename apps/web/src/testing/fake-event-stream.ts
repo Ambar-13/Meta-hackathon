@@ -4,7 +4,10 @@ import type { FeedStatus, MeetingFeed, MeetingFeedOptions } from "../streaming/s
 import { IDS } from "./fixtures.js";
 
 // One scripted stream connection: frames that then end or hang, a silent stream, or an error status.
-export type FakeStream = { kind: "frames"; chunks: string[]; then: "end" | "hang" } | { kind: "silent" } | { kind: "status"; status: number; body: unknown };
+export type FakeStream =
+  | { kind: "frames"; chunks: string[]; then: "end" | "hang" }
+  | { kind: "silent" }
+  | { kind: "status"; status: number; body: unknown };
 // A fake fetch for the meeting routes, and the requests it saw.
 export type FakeMeetingServer = {
   fetchImpl: typeof fetch;
@@ -15,10 +18,16 @@ export type FakeMeetingServer = {
 // The response a stream script gives: an error status, a silent stream, or the frames it lists.
 function streamResponse(script: FakeStream | undefined, signal: AbortSignal | null): Response {
   if (script === undefined || script.kind === "silent") {
-    return new Response(new ReadableStream<Uint8Array>({ start: () => undefined }), { status: 200, headers: { "Content-Type": "text/event-stream" } });
+    return new Response(new ReadableStream<Uint8Array>({ start: () => undefined }), {
+      status: 200,
+      headers: { "Content-Type": "text/event-stream" },
+    });
   }
   if (script.kind === "status") {
-    return new Response(JSON.stringify(script.body), { status: script.status, headers: { "Content-Type": "application/json" } });
+    return new Response(JSON.stringify(script.body), {
+      status: script.status,
+      headers: { "Content-Type": "application/json" },
+    });
   }
   const encoder = new TextEncoder();
   const body = new ReadableStream<Uint8Array>({
@@ -46,14 +55,21 @@ export function fakeMeetingServer(streams: FakeStream[], polls: unknown[]): Fake
       pollRequests.push({ url: url.href, after: url.searchParams.get("after") });
       const reply = polls[Math.min(pollCount, polls.length - 1)];
       pollCount += 1;
-      return new Response(JSON.stringify(reply), { status: 200, headers: { "Content-Type": "application/json" } });
+      return new Response(JSON.stringify(reply), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
     }
-    streamRequests.push({ url: url.href, lastEventId: new Headers(init?.headers).get("Last-Event-ID") });
+    streamRequests.push({
+      url: url.href,
+      lastEventId: new Headers(init?.headers).get("Last-Event-ID"),
+    });
     const script = streams[Math.min(streamCount, streams.length - 1)];
     streamCount += 1;
     return streamResponse(script, init?.signal ?? null);
   };
-  const fetchImpl = ((input: RequestInfo | URL, init?: RequestInit): Promise<Response> => Promise.resolve(answer(input, init))) as typeof fetch;
+  const fetchImpl = ((input: RequestInfo | URL, init?: RequestInit): Promise<Response> =>
+    Promise.resolve(answer(input, init))) as typeof fetch;
   return { fetchImpl, streamRequests, pollRequests };
 }
 
@@ -64,7 +80,11 @@ export function sseFrame(event: MeetingEvent): string {
 }
 
 // A fake feed: hands the screen's callbacks to the test, which then pushes states and statuses.
-export function fakeMeetingFeed(): { openFeed: (options: MeetingFeedOptions) => MeetingFeed; push: (state: MeetingFoldState, status: FeedStatus) => void; openCount: () => number } {
+export function fakeMeetingFeed(): {
+  openFeed: (options: MeetingFeedOptions) => MeetingFeed;
+  push: (state: MeetingFoldState, status: FeedStatus) => void;
+  openCount: () => number;
+} {
   let options: MeetingFeedOptions | null = null;
   let lastState: MeetingFoldState = emptyMeetingState(IDS.meeting);
   let lastStatus: FeedStatus = "connecting";

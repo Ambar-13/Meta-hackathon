@@ -3,7 +3,12 @@
 // The token travels in the URL fragment, which a browser never sends to a server, so no log line can hold it
 // (the /claim screen reads the token from the fragment).
 import type { FastifyInstance } from "fastify";
-import { routes, TRANSFER_LIFETIME_MINUTES, TRANSFER_TOKEN_BYTES, TransferResponse } from "@meet-first/contracts";
+import {
+  routes,
+  TRANSFER_LIFETIME_MINUTES,
+  TRANSFER_TOKEN_BYTES,
+  TransferResponse,
+} from "@meet-first/contracts";
 import { withPerson } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { hashToken, newHexToken, requirePerson } from "./cookie.js";
@@ -24,8 +29,16 @@ export function registerTransfer(app: FastifyInstance, deps: RouteDeps): void {
     const token = newHexToken(TRANSFER_TOKEN_BYTES);
     const expiresAt = new Date(deps.now().getTime() + TRANSFER_LIFETIME_MINUTES * 60_000);
     await withPerson(deps.db, personId, (trx) =>
-      trx.insertInto("transfer_links").values({ person_id: personId, token_hash: hashToken(token), expires_at: expiresAt }).execute(),
+      trx
+        .insertInto("transfer_links")
+        .values({ person_id: personId, token_hash: hashToken(token), expires_at: expiresAt })
+        .execute(),
     );
-    return reply.code(200).send(TransferResponse.parse({ url: transferUrl(deps.env.APP_ORIGIN, token), expiresAt: expiresAt.toISOString() }));
+    return reply.code(200).send(
+      TransferResponse.parse({
+        url: transferUrl(deps.env.APP_ORIGIN, token),
+        expiresAt: expiresAt.toISOString(),
+      }),
+    );
   });
 }

@@ -4,7 +4,9 @@ import { assignPlaceholderIds, markExistingPlaceholders, scrub } from "./scrub.j
 
 describe("scrub", () => {
   it("D11-T1: the worked example replaces the email and the phone with ids 1 and 2", () => {
-    expect(scrub("Mail priya.nair@example.com or call +65 9123 4567 today.", { allowlist: [] })).toEqual({
+    expect(
+      scrub("Mail priya.nair@example.com or call +65 9123 4567 today.", { allowlist: [] }),
+    ).toEqual({
       text: "Mail [redacted:email:00000001] or call [redacted:phone:00000002] today.",
       redactions: [
         { category: "email", placeholderId: "00000001" },
@@ -15,13 +17,22 @@ describe("scrub", () => {
 
   it("D14-T1: ids keep counting across calls that share a counter", () => {
     const nextId = makePlaceholderCounter();
-    expect(scrub("a@example.com", { allowlist: [], nextId }).text).toBe("[redacted:email:00000001]");
-    expect(scrub("b@example.com", { allowlist: [], nextId }).text).toBe("[redacted:email:00000002]");
+    expect(scrub("a@example.com", { allowlist: [], nextId }).text).toBe(
+      "[redacted:email:00000001]",
+    );
+    expect(scrub("b@example.com", { allowlist: [], nextId }).text).toBe(
+      "[redacted:email:00000002]",
+    );
   });
 
   it("D14-T2: placeholders already in the text are kept and renumbered in text order", () => {
-    const result = scrub("Old [redacted:email:0000000f] and [code: js, 3 lines] then c@example.com", { allowlist: [] });
-    expect(result.text).toBe("Old [redacted:email:00000001] and [code: js, 3 lines] then [redacted:email:00000003]");
+    const result = scrub(
+      "Old [redacted:email:0000000f] and [code: js, 3 lines] then c@example.com",
+      { allowlist: [] },
+    );
+    expect(result.text).toBe(
+      "Old [redacted:email:00000001] and [code: js, 3 lines] then [redacted:email:00000003]",
+    );
     expect(result.redactions).toEqual([
       { category: "email", placeholderId: "00000001" },
       { category: "code", placeholderId: "00000002" },
@@ -70,7 +81,9 @@ describe("scrub", () => {
   });
 
   it("D11-T2: scrubbing a scrubbed text again changes nothing", () => {
-    const first = scrub("Mail priya.nair@example.com or call +65 9123 4567 today.", { allowlist: [] });
+    const first = scrub("Mail priya.nair@example.com or call +65 9123 4567 today.", {
+      allowlist: [],
+    });
     const second = scrub(first.text, { allowlist: [] });
     expect(second).toEqual(first);
   });
@@ -81,7 +94,13 @@ describe("scrub", () => {
 
   it("D14-T9: an unknown category stays free text when existing placeholders are marked", () => {
     expect(
-      markExistingPlaceholders([{ text: "[redacted:foo:12345678] and [redacted:email:00000009]", isProtected: false, category: null }]),
+      markExistingPlaceholders([
+        {
+          text: "[redacted:foo:12345678] and [redacted:email:00000009]",
+          isProtected: false,
+          category: null,
+        },
+      ]),
     ).toEqual([
       { text: "[redacted:foo:12345678] and ", isProtected: false, category: null },
       { text: "[redacted:email:00000009]", isProtected: true, category: "email" },

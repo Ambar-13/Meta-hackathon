@@ -14,14 +14,22 @@ const STEP_WAIT_MS = 300;
 // The first button, link or label on the page whose words or accessible name are these words.
 function findTarget(words: string): HTMLElement | undefined {
   const candidates = Array.from(document.querySelectorAll<HTMLElement>("button, a, label"));
-  return candidates.find((element) => element.getAttribute("aria-label") === words || (element.textContent ?? "").trim() === words);
+  return candidates.find(
+    (element) =>
+      element.getAttribute("aria-label") === words || (element.textContent ?? "").trim() === words,
+  );
 }
 
 // Types into the field inside the label with these words, the way React hears a person typing.
 function typeInto(label: string, text: string): void {
-  const field = findTarget(label)?.querySelector<HTMLInputElement | HTMLTextAreaElement>("input, textarea");
+  const field = findTarget(label)?.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+    "input, textarea",
+  );
   if (field === undefined || field === null) return;
-  const prototype = field instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+  const prototype =
+    field instanceof HTMLTextAreaElement
+      ? HTMLTextAreaElement.prototype
+      : HTMLInputElement.prototype;
   Object.getOwnPropertyDescriptor(prototype, "value")?.set?.call(field, text);
   field.dispatchEvent(new Event("input", { bubbles: true }));
 }
@@ -36,12 +44,18 @@ function runStep(step: PressStep): void {
 }
 
 // Wraps a screen and takes the given steps after it loads, so the gallery can show a state that only a tap reaches.
-export const AfterSteps = (props: { steps: readonly PressStep[]; children: ReactNode }): ReactElement => {
+export const AfterSteps = (props: {
+  steps: readonly PressStep[];
+  children: ReactNode;
+}): ReactElement => {
   useEffect(() => {
     const timers = props.steps.map((step, index) =>
-      setTimeout(() => {
-        runStep(step);
-      }, STEP_WAIT_MS * (index + 1)),
+      setTimeout(
+        () => {
+          runStep(step);
+        },
+        STEP_WAIT_MS * (index + 1),
+      ),
     );
     return () => {
       timers.forEach((timer) => {
@@ -55,11 +69,20 @@ export const AfterSteps = (props: { steps: readonly PressStep[]; children: React
 // The problem the help views type in.
 const PROBLEM = "Our deploys fail at night and nobody knows why.";
 // The steps that type a problem and send it.
-const SEND_STEPS: readonly PressStep[] = [{ type: PROBLEM, into: "Your problem" }, { press: "Find who could help" }];
+const SEND_STEPS: readonly PressStep[] = [
+  { type: PROBLEM, into: "Your problem" },
+  { press: "Find who could help" },
+];
 
 // The Find help page: the empty problem box, a problem that is too short, the search being sent, and the daily limit reached.
 export const views: readonly GalleryView[] = [
-  { name: "help-ready", title: "Find help, the empty problem box", pattern: ROUTE_PATTERNS.help, url: "/help", element: <HelpScreen /> },
+  {
+    name: "help-ready",
+    title: "Find help, the empty problem box",
+    pattern: ROUTE_PATTERNS.help,
+    url: "/help",
+    element: <HelpScreen />,
+  },
   {
     name: "help-too-short",
     title: "Find help, a problem under 5 characters",
@@ -81,7 +104,16 @@ export const views: readonly GalleryView[] = [
         <HelpScreen />
       </AfterSteps>
     ),
-    stubs: [{ route: routes.asks.createAsk, replies: { status: 201, body: { askId: "00000000-0000-4000-8000-000000000501" }, delayMs: FOREVER_MS } }],
+    stubs: [
+      {
+        route: routes.asks.createAsk,
+        replies: {
+          status: 201,
+          body: { askId: "00000000-0000-4000-8000-000000000501" },
+          delayMs: FOREVER_MS,
+        },
+      },
+    ],
   },
   {
     name: "help-limit",
@@ -93,6 +125,17 @@ export const views: readonly GalleryView[] = [
         <HelpScreen />
       </AfterSteps>
     ),
-    stubs: [{ route: routes.asks.createAsk, replies: { status: 429, body: { code: "help_daily_cap", message: "You have used today's help searches. Try again tomorrow." } } }],
+    stubs: [
+      {
+        route: routes.asks.createAsk,
+        replies: {
+          status: 429,
+          body: {
+            code: "help_daily_cap",
+            message: "You have used today's help searches. Try again tomorrow.",
+          },
+        },
+      },
+    ],
   },
 ];

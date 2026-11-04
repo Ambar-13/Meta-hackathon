@@ -20,7 +20,8 @@ export type PatternRule = {
 export const PEM_PRIVATE_KEY: PatternRule = {
   category: "secret",
   group: 0,
-  pattern: /-----BEGIN [A-Z ]{0,40}PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]{0,40}PRIVATE KEY-----|$)/g,
+  pattern:
+    /-----BEGIN [A-Z ]{0,40}PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]{0,40}PRIVATE KEY-----|$)/g,
 };
 // A URL with a user name and a password, such as postgres://user:pass@host/db. The password may hold any character but a
 // space, including "/", "#" and "?", up to its last "@" (at most 1,024 characters, so a failed try costs a bounded scan). The
@@ -45,14 +46,20 @@ export const JWT: PatternRule = {
 export const SECRET_ASSIGNMENT: PatternRule = {
   category: "secret",
   group: 1,
-  pattern: /\b[A-Z][A-Z0-9_]{0,63}[ \t]*[=:][ \t]*("[^"\n]{4,1024}|'[^'\n]{4,1024}|[^\s"']{4,1024})/g,
+  pattern:
+    /\b[A-Z][A-Z0-9_]{0,63}[ \t]*[=:][ \t]*("[^"\n]{4,1024}|'[^'\n]{4,1024}|[^\s"']{4,1024})/g,
   needs: ["=", ":"],
   isValid: (value, whole) => isSecretName(whole),
   resumeAt: (whole) => leadingNameLength(whole),
   extend: (text, start, value) => extendSecretValue(text, start, value),
 };
 // The secret rules in the order scrub applies them; they run before the identifier rules.
-export const SECRET_RULES: readonly PatternRule[] = [PEM_PRIVATE_KEY, URL_WITH_CREDENTIALS, JWT, SECRET_ASSIGNMENT];
+export const SECRET_RULES: readonly PatternRule[] = [
+  PEM_PRIVATE_KEY,
+  URL_WITH_CREDENTIALS,
+  JWT,
+  SECRET_ASSIGNMENT,
+];
 
 // The words that make a setting name a secret name.
 const SECRET_NAME_WORD = /KEY|SECRET|TOKEN|PASSWORD|PASSWD/;
@@ -110,7 +117,11 @@ function extendSecretValue(text: string, start: number, value: string): number {
 }
 
 // The span of text one match replaces, as [start, end), or null when the rule refuses the match by its name check.
-function replacedSpan(text: string, match: RegExpExecArray, rule: PatternRule): [number, number] | null {
+function replacedSpan(
+  text: string,
+  match: RegExpExecArray,
+  rule: PatternRule,
+): [number, number] | null {
   const value = match[rule.group];
   if (value === undefined || value === "") return null;
   if (rule.isValid !== undefined && !rule.isValid(value, match[0])) return null;
@@ -121,7 +132,8 @@ function replacedSpan(text: string, match: RegExpExecArray, rule: PatternRule): 
 
 // After a refused match, the next try starts where the rule's resumeAt says, when the rule has one.
 function resumeAfterRefusal(pattern: RegExp, match: RegExpExecArray, rule: PatternRule): void {
-  if (rule.resumeAt !== undefined) pattern.lastIndex = match.index + Math.max(1, rule.resumeAt(match[0]));
+  if (rule.resumeAt !== undefined)
+    pattern.lastIndex = match.index + Math.max(1, rule.resumeAt(match[0]));
 }
 
 // Splits one free segment at every match of the rule that passes its checks; each value the rule replaces becomes a protected piece.

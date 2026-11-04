@@ -22,7 +22,9 @@ export const PolicySections = (props: { sections: readonly PolicySection[] }): R
       {props.sections.map((section) => (
         <section key={section.title} className="policy-section">
           <h2>{section.title}</h2>
-          {section.lines.map((line) => <p key={line}>{line}</p>)}
+          {section.lines.map((line) => (
+            <p key={line}>{line}</p>
+          ))}
         </section>
       ))}
     </>
@@ -31,7 +33,11 @@ export const PolicySections = (props: { sections: readonly PolicySection[] }): R
 
 // A policy page, which opens without a session: its title, the day it last changed, the page's own parts, then who to write to and
 // the links to the other two pages and back to the start page.
-export const PolicyPage = (props: { title: string; changed: string; children: ReactNode }): ReactElement => {
+export const PolicyPage = (props: {
+  title: string;
+  changed: string;
+  children: ReactNode;
+}): ReactElement => {
   return (
     <ScreenFrame title={props.title}>
       <p className="policy-date">{`Last changed ${props.changed}.`}</p>
@@ -45,7 +51,9 @@ export const PolicyPage = (props: { title: string; changed: string; children: Re
       </section>
       <nav className="policy-links" aria-label="Meety's policies">
         {POLICY_LINKS.filter((link) => link.title !== props.title).map((link) => (
-          <Link key={link.to} to={link.to}>{link.title}</Link>
+          <Link key={link.to} to={link.to}>
+            {link.title}
+          </Link>
         ))}
         <Link to={APP_PATHS.welcome}>Back to Meety</Link>
       </nav>

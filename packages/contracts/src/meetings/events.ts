@@ -39,7 +39,12 @@ export const MeetingStarted = z.object({
 // The type of MeetingStarted, read from the schema above.
 export type MeetingStarted = z.infer<typeof MeetingStarted>;
 // The meeting moved to a new phase.
-export const PhaseChanged = z.object({ ...committed, type: z.literal("phase.changed"), phase: Phase, stepSeq: z.number().int() });
+export const PhaseChanged = z.object({
+  ...committed,
+  type: z.literal("phase.changed"),
+  phase: Phase,
+  stepSeq: z.number().int(),
+});
 // The type of PhaseChanged, read from the schema above.
 export type PhaseChanged = z.infer<typeof PhaseChanged>;
 // A slice of a turn still being written. It is not stored and has no seq, so a reconnect never replays it.
@@ -100,7 +105,13 @@ export const Concede = z.object({
 // The type of Concede, read from the schema above.
 export type Concede = z.infer<typeof Concede>;
 // A persona kept its position.
-export const Hold = z.object({ ...committed, type: z.literal("hold"), stepSeq: z.number().int(), side: Side, reason: z.string() });
+export const Hold = z.object({
+  ...committed,
+  type: z.literal("hold"),
+  stepSeq: z.number().int(),
+  side: Side,
+  reason: z.string(),
+});
 // The type of Hold, read from the schema above.
 export type Hold = z.infer<typeof Hold>;
 // The meeting is over: decided, out of token budget, or deleted.
@@ -125,7 +136,12 @@ export const ComicReady = z.object({ ...committed, type: z.literal("comic.ready"
 // The type of ComicReady, read from the schema above.
 export type ComicReady = z.infer<typeof ComicReady>;
 // The comic was not made, with the reason.
-export const ComicSkipped = z.object({ ...committed, type: z.literal("comic.skipped"), comicId: Uuid, reason: z.string() });
+export const ComicSkipped = z.object({
+  ...committed,
+  type: z.literal("comic.skipped"),
+  comicId: Uuid,
+  reason: z.string(),
+});
 // The type of ComicSkipped, read from the schema above.
 export type ComicSkipped = z.infer<typeof ComicSkipped>;
 // Any committed event, told apart by its type.
@@ -149,11 +165,20 @@ export const MeetingEvent = z.union([CommittedEvent, TurnDelta]);
 // The type of MeetingEvent, read from the schema above.
 export type MeetingEvent = z.infer<typeof MeetingEvent>;
 // The 11 committed type names, for the CHECK list in 0001.
-export const COMMITTED_EVENT_TYPES = CommittedEvent.options.map((option) => option.shape.type.value);
+export const COMMITTED_EVENT_TYPES = CommittedEvent.options.map(
+  (option) => option.shape.type.value,
+);
 // The keys of a committed event that live in their own meeting_events columns, not in payload.
 const KEYS_STORED_APART = new Set(["v", "type", "meetingId", "seq", "at"]);
 // One stored meeting_events row, as Kysely selects it. created_at is the event's time.
-export type MeetingEventRow = { meeting_id: string; seq: number; type: string; v: number; payload: Record<string, unknown>; created_at: Date | string };
+export type MeetingEventRow = {
+  meeting_id: string;
+  seq: number;
+  type: string;
+  v: number;
+  payload: Record<string, unknown>;
+  created_at: Date | string;
+};
 // Rebuilds and checks one committed event from its row. A row that no longer matches its schema is a server fault.
 export function rowToEvent(row: MeetingEventRow): CommittedEvent {
   const parsed = CommittedEvent.safeParse({
@@ -165,7 +190,11 @@ export function rowToEvent(row: MeetingEventRow): CommittedEvent {
     at: new Date(row.created_at).toISOString(),
   });
   if (!parsed.success) {
-    throw new ContractError("event_row_invalid", "A stored meeting event does not match its schema. Check the code that wrote this event type.", 500);
+    throw new ContractError(
+      "event_row_invalid",
+      "A stored meeting event does not match its schema. Check the code that wrote this event type.",
+      500,
+    );
   }
   return parsed.data;
 }
@@ -178,7 +207,9 @@ export function eventToPayload(event: CommittedEvent): Record<string, unknown> {
 export const PollResponse = z.object({
   v: z.literal(EVENT_VERSION),
   events: z.array(CommittedEvent),
-  partial: z.object({ stepSeq: z.number().int(), attempt: z.number().int(), side: Side, text: z.string() }).nullable(),
+  partial: z
+    .object({ stepSeq: z.number().int(), attempt: z.number().int(), side: Side, text: z.string() })
+    .nullable(),
   serverNow: IsoTime,
 });
 // The type of PollResponse, read from the schema above.

@@ -46,7 +46,12 @@ export class EvalFailure extends Error {
 // The flags that take a value, by their names on the command line.
 const VALUE_FLAGS = new Set(["--base", "--pairs", "--results", "--readme", "--targets"]);
 // The flags that choose the mode; exactly one of them must be given.
-const MODE_FLAGS: Record<string, EvalMode> = { "--replay": "replay", "--live": "live", "--human": "human", "--write-readme": "write-readme" };
+const MODE_FLAGS: Record<string, EvalMode> = {
+  "--replay": "replay",
+  "--live": "live",
+  "--human": "human",
+  "--write-readme": "write-readme",
+};
 
 // Reads the flags into a map from name to value (or "" for a switch), refusing any name the command does not know.
 function readArguments(argv: readonly string[]): Map<string, string> {
@@ -57,11 +62,15 @@ function readArguments(argv: readonly string[]): Map<string, string> {
       values.set(name, "");
     } else if (VALUE_FLAGS.has(name)) {
       const value = argv[index + 1];
-      if (value === undefined || value.startsWith("--")) throw new EvalFailure("eval_bad_flags", `${name} needs a value. Pass it as ${name} VALUE.`);
+      if (value === undefined || value.startsWith("--"))
+        throw new EvalFailure("eval_bad_flags", `${name} needs a value. Pass it as ${name} VALUE.`);
       values.set(name, value);
       index += 1;
     } else {
-      throw new EvalFailure("eval_bad_flags", `Unknown flag ${name}. Use one of --replay, --live, --human, --write-readme, and --base, --pairs, --results, --readme, --targets.`);
+      throw new EvalFailure(
+        "eval_bad_flags",
+        `Unknown flag ${name}. Use one of --replay, --live, --human, --write-readme, and --base, --pairs, --results, --readme, --targets.`,
+      );
     }
   }
   return values;
@@ -70,7 +79,11 @@ function readArguments(argv: readonly string[]): Map<string, string> {
 // The one mode flag given, or a refusal when there are none or several.
 function modeOf(values: Map<string, string>): EvalMode {
   const chosen = Object.keys(MODE_FLAGS).filter((flag) => values.has(flag));
-  if (chosen.length !== 1) throw new EvalFailure("eval_bad_flags", "Pass exactly one of --replay, --live, --human or --write-readme.");
+  if (chosen.length !== 1)
+    throw new EvalFailure(
+      "eval_bad_flags",
+      "Pass exactly one of --replay, --live, --human or --write-readme.",
+    );
   const flag = chosen[0] ?? "";
   return MODE_FLAGS[flag] ?? "replay";
 }
@@ -86,7 +99,11 @@ export function parseEvalFlags(argv: readonly string[], env: NodeJS.ProcessEnv):
   const values = readArguments(argv);
   const mode = modeOf(values);
   const base = values.get("--base");
-  if (mode === "live" && base === undefined) throw new EvalFailure("eval_base_missing", "Pass --base https://your-app-origin for a live run.");
+  if (mode === "live" && base === undefined)
+    throw new EvalFailure(
+      "eval_base_missing",
+      "Pass --base https://your-app-origin for a live run.",
+    );
   return {
     mode,
     baseUrl: base ?? `http://localhost:${env.PORT ?? "3000"}`,

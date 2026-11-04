@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { ContractError, type CallSite, type Effort, type ToolDefinition, type toStrictJsonSchema } from "@meet-first/contracts";
+import {
+  ContractError,
+  type CallSite,
+  type Effort,
+  type ToolDefinition,
+  type toStrictJsonSchema,
+} from "@meet-first/contracts";
 import { CALL_SITE_CONFIG } from "./call-sites.js";
 import { CHAT_MODEL } from "./config.js";
 
@@ -10,7 +16,11 @@ export type ChatMessage =
   | { role: "assistant"; content: string | null; tool_calls?: ToolCall[] }
   | { role: "tool"; tool_call_id: string; content: string };
 // One tool call the model made, with its name and its arguments as a JSON string.
-export type ToolCall = { id: string; type: "function"; function: { name: string; arguments: string } };
+export type ToolCall = {
+  id: string;
+  type: "function";
+  function: { name: string; arguments: string };
+};
 // The arguments that build one chat request for one call site.
 export type ChatRequestArgs = {
   callSite: CallSite;
@@ -52,7 +62,8 @@ export function buildChatRequest(args: ChatRequestArgs): Record<string, unknown>
 // Adds the keys that exist only for some calls: tools, the output schema and the cache key.
 function addOptionalFields(body: Record<string, unknown>, args: ChatRequestArgs): void {
   if (args.tools !== undefined) body.tools = args.tools;
-  if (args.schema !== undefined) body.response_format = { type: "json_schema", json_schema: args.schema };
+  if (args.schema !== undefined)
+    body.response_format = { type: "json_schema", json_schema: args.schema };
   if (args.promptCacheKey !== undefined) body.prompt_cache_key = args.promptCacheKey;
 }
 
@@ -60,9 +71,16 @@ function addOptionalFields(body: Record<string, unknown>, args: ChatRequestArgs)
 export function requestChars(body: Record<string, unknown>): number {
   const parsed = CountedBody.safeParse(body);
   if (!parsed.success) {
-    throw new ContractError("request_body_invalid", "A chat request body has no messages array. Build it with buildChatRequest.", 500);
+    throw new ContractError(
+      "request_body_invalid",
+      "A chat request body has no messages array. Build it with buildChatRequest.",
+      500,
+    );
   }
-  const messageChars = parsed.data.messages.reduce((sum, message) => sum + (typeof message.content === "string" ? message.content.length : 0), 0);
+  const messageChars = parsed.data.messages.reduce(
+    (sum, message) => sum + (typeof message.content === "string" ? message.content.length : 0),
+    0,
+  );
   const toolChars = parsed.data.tools === undefined ? 0 : JSON.stringify(parsed.data.tools).length;
   return messageChars + toolChars;
 }

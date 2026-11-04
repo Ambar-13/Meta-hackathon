@@ -1,7 +1,20 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { GOOGLE_RESULT_QUERY, GoogleSignInResult, PersonCreate, Recover, type PersonCreateResponse } from "@meet-first/contracts";
-import { apiFetch, asApiError, ApiError, readFragmentToken, rememberAllowlist, routes } from "../../app-shell/index.js";
+import {
+  GOOGLE_RESULT_QUERY,
+  GoogleSignInResult,
+  PersonCreate,
+  Recover,
+  type PersonCreateResponse,
+} from "@meet-first/contracts";
+import {
+  apiFetch,
+  asApiError,
+  ApiError,
+  readFragmentToken,
+  rememberAllowlist,
+  routes,
+} from "../../app-shell/index.js";
 import { rememberAccessCode } from "./access-code.js";
 
 // The message for a display name the contracts refuse.
@@ -22,11 +35,26 @@ export function parseAffiliations(text: string): string[] {
 }
 
 // The create flow: idle, sending, created with the code to show once, invalid input, or failed.
-export type CreateState = { kind: "idle" } | { kind: "sending" } | { kind: "created"; recoveryCode: string } | { kind: "invalid"; message: string } | { kind: "failed"; error: ApiError };
+export type CreateState =
+  | { kind: "idle" }
+  | { kind: "sending" }
+  | { kind: "created"; recoveryCode: string }
+  | { kind: "invalid"; message: string }
+  | { kind: "failed"; error: ApiError };
 // The recovery flow: idle, sending, done, invalid input, or failed.
-export type RecoverState = { kind: "idle" } | { kind: "sending" } | { kind: "done" } | { kind: "invalid"; message: string } | { kind: "failed"; error: ApiError };
+export type RecoverState =
+  | { kind: "idle" }
+  | { kind: "sending" }
+  | { kind: "done" }
+  | { kind: "invalid"; message: string }
+  | { kind: "failed"; error: ApiError };
 // The claim flow of /claim: no token, a token ready, sending, done, or failed.
-export type ClaimState = { kind: "missing" } | { kind: "ready"; token: string } | { kind: "sending"; token: string } | { kind: "done" } | { kind: "failed"; error: ApiError };
+export type ClaimState =
+  | { kind: "missing" }
+  | { kind: "ready"; token: string }
+  | { kind: "sending"; token: string }
+  | { kind: "done" }
+  | { kind: "failed"; error: ApiError };
 
 // The invalid message for a rejected create body: the name sentence when the name is the cause, the access code sentence when the
 // code is, else the groups sentence.
@@ -37,20 +65,33 @@ function createMessage(issuePaths: Array<string | number | undefined>): string {
 
 // Creates a person and keeps the allowlist in memory; the recovery code lives only in this state. An access code, when
 // one was typed or came in the link, goes with the request and is kept for the invite links this person shares.
-export function useCreatePerson(): { state: CreateState; create: (displayName: string, groups: string, accessCode: string) => Promise<void>; forgetCode: () => void } {
+export function useCreatePerson(): {
+  state: CreateState;
+  create: (displayName: string, groups: string, accessCode: string) => Promise<void>;
+  forgetCode: () => void;
+} {
   const [state, setState] = useState<CreateState>({ kind: "idle" });
   const create = async (displayName: string, groups: string, accessCode: string): Promise<void> => {
     const affiliations = parseAffiliations(groups);
     const code = accessCode.trim();
-    const body = { displayName, ...(affiliations.length > 0 ? { affiliations } : {}), ...(code !== "" ? { accessCode: code } : {}) };
+    const body = {
+      displayName,
+      ...(affiliations.length > 0 ? { affiliations } : {}),
+      ...(code !== "" ? { accessCode: code } : {}),
+    };
     const checked = PersonCreate.safeParse(body);
     if (!checked.success) {
-      setState({ kind: "invalid", message: createMessage(checked.error.issues.map((issue) => issue.path[0])) });
+      setState({
+        kind: "invalid",
+        message: createMessage(checked.error.issues.map((issue) => issue.path[0])),
+      });
       return;
     }
     setState({ kind: "sending" });
     try {
-      const reply: PersonCreateResponse = await apiFetch(routes.people.createPerson, { body: checked.data });
+      const reply: PersonCreateResponse = await apiFetch(routes.people.createPerson, {
+        body: checked.data,
+      });
       rememberAllowlist(checked.data.displayName, checked.data.affiliations ?? []);
       rememberAccessCode(checked.data.accessCode ?? "");
       setState({ kind: "created", recoveryCode: reply.recoveryCode });
@@ -89,10 +130,13 @@ export function useClaim(): { state: ClaimState; claim: () => Promise<void> } {
   const location = useLocation();
   const navigate = useNavigate();
   const [initialToken] = useState(() => readFragmentToken(location.hash));
-  const [state, setState] = useState<ClaimState>(() => (initialToken === null ? { kind: "missing" } : { kind: "ready", token: initialToken }));
+  const [state, setState] = useState<ClaimState>(() =>
+    initialToken === null ? { kind: "missing" } : { kind: "ready", token: initialToken },
+  );
 
   useEffect(() => {
-    if (location.hash !== "") navigate({ pathname: location.pathname, search: location.search }, { replace: true });
+    if (location.hash !== "")
+      navigate({ pathname: location.pathname, search: location.search }, { replace: true });
     // The fragment is read once, when the page opens, so the effect runs once.
   }, []);
 
@@ -134,4 +178,3 @@ export function googleResultIn(search: string): GoogleSignInResult | null {
   const parsed = GoogleSignInResult.safeParse(new URLSearchParams(search).get(GOOGLE_RESULT_QUERY));
   return parsed.success ? parsed.data : null;
 }
-

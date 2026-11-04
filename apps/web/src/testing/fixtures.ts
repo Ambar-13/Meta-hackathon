@@ -76,7 +76,12 @@ export function sourceView(page: number, total: number): SourceView {
   const rows = [];
   for (let index = first; index < last; index += 1) {
     const roleToken = index % 2 === 0 ? "[person:friend]" : "[person:manager]";
-    rows.push({ text: `Name ${String(index + 1)}`, roleToken, context: `lunch with ${roleToken} today`, keep: false });
+    rows.push({
+      text: `Name ${String(index + 1)}`,
+      roleToken,
+      context: `lunch with ${roleToken} today`,
+      keep: false,
+    });
   }
   return SourceView.parse({
     id: IDS.source,
@@ -139,7 +144,12 @@ export function quizView(state: QuizView["state"]): QuizView {
     const n = index + 1;
     const base = { position: n, questionId: n, questionText: bankText(n) };
     if (state !== "judged") return base;
-    return { ...base, personaAnswer: `Persona answer ${String(n)}`, humanAnswer: `My answer ${String(n)}`, agree: n <= 7 };
+    return {
+      ...base,
+      personaAnswer: `Persona answer ${String(n)}`,
+      humanAnswer: `My answer ${String(n)}`,
+      agree: n <= 7,
+    };
   });
   const isJudged = state === "judged";
   return QuizView.parse({
@@ -223,28 +233,70 @@ export function phaseChanged(seq: number, phase: Phase, stepSeq: number): Commit
 }
 
 // The turn.delta frame for a slice of a turn that is still being written. Takes one object so the call stays within three parameters.
-export function turnDelta(slot: { stepSeq: number; attempt: number; side: "a" | "b"; offset: number; text: string }): TurnDelta {
-  return TurnDelta.parse({ v: 1, meetingId: IDS.meeting, at: SERVER_NOW, type: "turn.delta", ...slot });
+export function turnDelta(slot: {
+  stepSeq: number;
+  attempt: number;
+  side: "a" | "b";
+  offset: number;
+  text: string;
+}): TurnDelta {
+  return TurnDelta.parse({
+    v: 1,
+    meetingId: IDS.meeting,
+    at: SERVER_NOW,
+    type: "turn.delta",
+    ...slot,
+  });
 }
 
 // The turn.committed event with its claims, in the open phase. Takes one object so the call stays within three parameters.
-export function turnCommitted(slot: { seq: number; stepSeq: number; side: "a" | "b"; text: string; claims?: Claim[] }): CommittedEvent {
-  return CommittedEvent.parse({ ...committedBase(slot.seq), type: "turn.committed", stepSeq: slot.stepSeq, side: slot.side, phase: "open", text: slot.text, claims: slot.claims ?? [] });
+export function turnCommitted(slot: {
+  seq: number;
+  stepSeq: number;
+  side: "a" | "b";
+  text: string;
+  claims?: Claim[];
+}): CommittedEvent {
+  return CommittedEvent.parse({
+    ...committedBase(slot.seq),
+    type: "turn.committed",
+    stepSeq: slot.stepSeq,
+    side: slot.side,
+    phase: "open",
+    text: slot.text,
+    claims: slot.claims ?? [],
+  });
 }
 
 // The tool.called event for a recall lookup by one side.
 export function recallCalled(seq: number, side: "a" | "b", query: string): CommittedEvent {
-  return CommittedEvent.parse({ ...committedBase(seq), type: "tool.called", stepSeq: 1, side, tool: "recall", args: { query } });
+  return CommittedEvent.parse({
+    ...committedBase(seq),
+    type: "tool.called",
+    stepSeq: 1,
+    side,
+    tool: "recall",
+    args: { query },
+  });
 }
 
 // The meeting.ended event for a decided meeting.
 export function meetingEnded(seq: number): CommittedEvent {
-  return CommittedEvent.parse({ ...committedBase(seq), type: "meeting.ended", reason: "decided", endedAt: "2026-10-27T10:09:00.000Z" });
+  return CommittedEvent.parse({
+    ...committedBase(seq),
+    type: "meeting.ended",
+    reason: "decided",
+    endedAt: "2026-10-27T10:09:00.000Z",
+  });
 }
 
 // The brief.ready event with the two support rates.
 export function briefReady(seq: number): CommittedEvent {
-  return CommittedEvent.parse({ ...committedBase(seq), type: "brief.ready", supportRate: { a: 0.889, b: 1 } });
+  return CommittedEvent.parse({
+    ...committedBase(seq),
+    type: "brief.ready",
+    supportRate: { a: 0.889, b: 1 },
+  });
 }
 
 // A ReplayExport of IDS.meeting holding the given events.
@@ -269,9 +321,21 @@ export function profileView(overrides: Partial<ProfileView>): ProfileView {
     openToRomance: true,
     isSample: false,
     items: [
-      { kind: "habit", claim: "Mira starts work early", quote: "I am at my desk by seven, says Mira" },
-      { kind: "value", claim: "Small demos that work", quote: "Show one thing that works, not ten that almost do." },
-      { kind: "goal", claim: "Wants to ship a hardware hack", quote: "This year I want something you can hold." },
+      {
+        kind: "habit",
+        claim: "Mira starts work early",
+        quote: "I am at my desk by seven, says Mira",
+      },
+      {
+        kind: "value",
+        claim: "Small demos that work",
+        quote: "Show one thing that works, not ten that almost do.",
+      },
+      {
+        kind: "goal",
+        claim: "Wants to ship a hardware hack",
+        quote: "This year I want something you can hold.",
+      },
     ],
     friendship: "none",
     requestId: null,

@@ -1,10 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import { prepareUpload, type UploadInput, type UploadProgress, type UploadReady, type UploadRefused } from "../../extract/index.js";
+import {
+  prepareUpload,
+  type UploadInput,
+  type UploadProgress,
+  type UploadReady,
+  type UploadRefused,
+} from "../../extract/index.js";
 import type { SummaryPriority } from "@meet-first/parsers";
 import { apiUpload, asApiError, ApiError, readAllowlist } from "../../app-shell/index.js";
 
 // The consent copy, shown unchanged with the preview count before the upload button.
-export const CONSENT_COPY = "Your original archive stays on your device. After you review redactions, we upload and store only the selected excerpts shown here. You can delete them at any time.";
+export const CONSENT_COPY =
+  "Your original archive stays on your device. After you review redactions, we upload and store only the selected excerpts shown here. You can delete them at any time.";
 // Under 640 px the paste tab comes first.
 export const NARROW_SCREEN_QUERY = "(max-width: 639px)";
 // The words shown for each stage the extraction worker reports (drafted copy).
@@ -65,13 +72,19 @@ export function useUploadFlow(
     controller.current = next;
     setFlow({ kind: "preparing", progress: null });
     const onProgress = (progress: UploadProgress): void => {
-      setFlow((current) => (current.kind === "preparing" ? { kind: "preparing", progress } : current));
+      setFlow((current) =>
+        current.kind === "preparing" ? { kind: "preparing", progress } : current,
+      );
     };
     const first = priority === undefined ? {} : { priority };
     prepare(input, { allowlist: readAllowlist(), onProgress, signal: next.signal, ...first }).then(
       (result) => {
         if (controller.current !== next) return;
-        setFlow(result.ok ? { kind: "ready", ready: result, isAttested: false } : { kind: "refused", refusal: result });
+        setFlow(
+          result.ok
+            ? { kind: "ready", ready: result, isAttested: false }
+            : { kind: "refused", refusal: result },
+        );
       },
       () => {
         if (controller.current === next) setFlow({ kind: "crashed" });
@@ -92,7 +105,10 @@ export function useUploadFlow(
     if (current.kind !== "ready" || !current.isAttested) return;
     setFlow({ kind: "uploading", ready: current.ready });
     try {
-      const reply = await apiUpload({ body: current.ready.body, contentEncoding: current.ready.contentEncoding });
+      const reply = await apiUpload({
+        body: current.ready.body,
+        contentEncoding: current.ready.contentEncoding,
+      });
       onUploaded(reply.sourceId);
     } catch (thrown: unknown) {
       setFlow({ kind: "failed", ready: current.ready, error: asApiError(thrown) });

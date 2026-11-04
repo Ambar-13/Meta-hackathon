@@ -14,7 +14,13 @@ export const views: readonly GalleryView[] = [
     element: <FeedScreen />,
     stubs: [
       ...railStubs(railFriends(14), railRequests(2)),
-      { route: routes.directory.browse, replies: { status: 200, body: DirectoryPage.parse({ listings: EXPLORE_LISTINGS, page: 0, hasMore: false }) } },
+      {
+        route: routes.directory.browse,
+        replies: {
+          status: 200,
+          body: DirectoryPage.parse({ listings: EXPLORE_LISTINGS, page: 0, hasMore: false }),
+        },
+      },
       { route: routes.social.listPosts, replies: { status: 200, body: { posts: [] } } },
     ],
   },

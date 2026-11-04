@@ -58,7 +58,9 @@ export const quizCopy = (matched: number, isReliable: boolean): string =>
     ? `matched ${String(matched)} of 10`
     : `matched ${String(matched)} of 10. The judge failed its own check twice, so treat this count as rough.`;
 // What the persona answer call returns: one short answer (quiz-persona-answer prompt).
-export const QuizPersonaAnswerOutput = z.object({ answer: z.string().min(1).max(QUIZ_ANSWER_MAX_CHARS) });
+export const QuizPersonaAnswerOutput = z.object({
+  answer: z.string().min(1).max(QUIZ_ANSWER_MAX_CHARS),
+});
 // The type of QuizPersonaAnswerOutput, read from the schema above.
 export type QuizPersonaAnswerOutput = z.infer<typeof QuizPersonaAnswerOutput>;
 // What the blind judge returns: whether the two answers agree and why.
@@ -66,7 +68,12 @@ export const QuizJudgeOutput = z.object({ agree: z.boolean(), reason: z.string()
 // The type of QuizJudgeOutput, read from the schema above.
 export type QuizJudgeOutput = z.infer<typeof QuizJudgeOutput>;
 // One item's raw judge record, kept in quiz_items.judge_raw: the run, the order the judge saw, its parsed output and the ledger row of the call.
-export const QuizJudgeRaw = z.object({ run: z.union([z.literal(1), z.literal(2)]), isHumanFirst: z.boolean(), output: QuizJudgeOutput, ledgerId: Uuid });
+export const QuizJudgeRaw = z.object({
+  run: z.union([z.literal(1), z.literal(2)]),
+  isHumanFirst: z.boolean(),
+  output: QuizJudgeOutput,
+  ledgerId: Uuid,
+});
 // The type of QuizJudgeRaw, read from the schema above.
 export type QuizJudgeRaw = z.infer<typeof QuizJudgeRaw>;
 // One calibration run, kept in quizzes.calibration_raw: the probe used, both pair results and whether the run passed.
@@ -75,7 +82,15 @@ export const QuizCalibrationRun = z.object({
   entryIndex: z.number().int().min(0).max(7),
   isPassed: z.boolean(),
   pairs: z
-    .array(z.object({ pair: z.enum(["identical", "contradicting"]), shouldAgree: z.boolean(), output: QuizJudgeOutput.nullable(), isPassed: z.boolean(), ledgerId: Uuid }))
+    .array(
+      z.object({
+        pair: z.enum(["identical", "contradicting"]),
+        shouldAgree: z.boolean(),
+        output: QuizJudgeOutput.nullable(),
+        isPassed: z.boolean(),
+        ledgerId: Uuid,
+      }),
+    )
     .length(2),
 });
 // The type of QuizCalibrationRun, read from the schema above.

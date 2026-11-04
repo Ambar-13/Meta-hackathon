@@ -18,14 +18,19 @@ export function assertValidHistory(messages: readonly ChatMessage[]): void {
   if (fault === null) return;
   throw new ContractError(
     "history_invalid",
-    "The stored messages of this step break the tool call order (" + fault.reason + " at message " + String(fault.index) + "). The step stops and the sweeper retries it.",
+    "The stored messages of this step break the tool call order (" +
+      fault.reason +
+      " at message " +
+      String(fault.index) +
+      "). The step stops and the sweeper retries it.",
     500,
   );
 }
 
 // The fault in the prefix: the system message, then one user message.
 function prefixFault(messages: readonly ChatMessage[]): Fault | null {
-  const isPrefixOk = messages.length >= 2 && messages[0]?.role === "system" && messages[1]?.role === "user";
+  const isPrefixOk =
+    messages.length >= 2 && messages[0]?.role === "system" && messages[1]?.role === "user";
   return isPrefixOk ? null : { reason: "missing_prefix", index: 0 };
 }
 

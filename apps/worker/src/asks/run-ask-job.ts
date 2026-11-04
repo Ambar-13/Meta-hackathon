@@ -26,7 +26,11 @@ export const runAsk: JobTask<"run_ask"> = async (payload, context) => {
 };
 
 // Design step 2: the question check. Refused or failed ends the ask; allowed stores the kind and moves the ask to asking.
-async function checkAsk(context: JobContext, payload: AskPayload, ask: AskRow): Promise<AskRow | null> {
+async function checkAsk(
+  context: JobContext,
+  payload: AskPayload,
+  ask: AskRow,
+): Promise<AskRow | null> {
   const verdict = await runQuestionCheck(context, ask);
   if (verdict === "limited") {
     await reenqueueAfterLimiter(context, "run_ask", payload);
@@ -37,7 +41,11 @@ async function checkAsk(context: JobContext, payload: AskPayload, ask: AskRow): 
     return null;
   }
   if (!verdict.allowed) {
-    await moveInAsker(context, ask, { from: "checking", to: "refused", refusedReason: verdict.reason });
+    await moveInAsker(context, ask, {
+      from: "checking",
+      to: "refused",
+      refusedReason: verdict.reason,
+    });
     return null;
   }
   const questionKind = askKindOf(verdict);
@@ -50,24 +58,43 @@ async function checkAsk(context: JobContext, payload: AskPayload, ask: AskRow): 
 async function runQuestionCheck(context: JobContext, ask: AskRow): Promise<CheckResult> {
   const prompt = readPrompt("question-check");
   try {
-    const result = await context.llm.complete(askCheckCallArgs({ askerId: ask.personId, promptVersion: prompt.version, messages: askCheckMessages(prompt.text, ask) }));
+    const result = await context.llm.complete(
+      askCheckCallArgs({
+        askerId: ask.personId,
+        promptVersion: prompt.version,
+        messages: askCheckMessages(prompt.text, ask),
+      }),
+    );
     const verdict = QuestionCheckOutput.safeParse(result.parsed);
     if (verdict.success) return verdict.data;
-    context.log.warn({ code: "ask_check_reply_invalid", askId: ask.id }, "The question check reply did not match its schema, so the ask fails.");
+    context.log.warn(
+      { code: "ask_check_reply_invalid", askId: ask.id },
+      "The question check reply did not match its schema, so the ask fails.",
+    );
     return "failed";
   } catch (error) {
     if (error instanceof LimiterBusy) return "limited";
     const code = error instanceof ContractError ? error.code : "ask_check_failed";
-    context.log.warn({ code, askId: ask.id }, "The question check call failed, so the ask fails and no persona sees it.");
+    context.log.warn(
+      { code, askId: ask.id },
+      "The question check call failed, so the ask fails and no persona sees it.",
+    );
     return "failed";
   }
 }
 
 // Design steps 3 and 4: the answer rows, then one persona answer for each pending row; moves the ask to ranking when none is pending.
-async function askPersonas(context: JobContext, payload: AskPayload, ask: AskRow): Promise<AskRow | null> {
+async function askPersonas(
+  context: JobContext,
+  payload: AskPayload,
+  ask: AskRow,
+): Promise<AskRow | null> {
   const subjects = await chooseSubjects(context, ask);
   if (subjects !== "rows") {
-    await moveInAsker(context, ask, { from: "asking", to: subjects === "none" ? "done" : "failed" });
+    await moveInAsker(context, ask, {
+      from: "asking",
+      to: subjects === "none" ? "done" : "failed",
+    });
     return null;
   }
   const answered = await answerPending(context, ask);
@@ -80,6 +107,12 @@ async function askPersonas(context: JobContext, payload: AskPayload, ask: AskRow
 }
 
 // Moves the ask in its asker's context, the only context whose policy lets the job write it, and says whether it moved.
-function moveInAsker(context: JobContext, ask: AskRow, change: Omit<AskMove, "askId" | "now">): Promise<boolean> {
-  return withPerson(context.db, ask.personId, (trx) => moveAsk(trx, { ...change, askId: ask.id, now: context.now() }));
+function moveInAsker(
+  context: JobContext,
+  ask: AskRow,
+  change: Omit<AskMove, "askId" | "now">,
+): Promise<boolean> {
+  return withPerson(context.db, ask.personId, (trx) =>
+    moveAsk(trx, { ...change, askId: ask.id, now: context.now() }),
+  );
 }

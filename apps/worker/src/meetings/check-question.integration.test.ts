@@ -1,12 +1,31 @@
 import { readFileSync } from "node:fs";
 import type { Kysely } from "kysely";
 import { afterAll, afterEach, beforeAll, beforeEach, expect, it } from "vitest";
-import { QUIZ_BANK, RecordedCall, ROMANCE_NOT_OPEN_REASON, sampleQuiz, rowToEvent, type CommittedEvent } from "@meet-first/contracts";
+import {
+  QUIZ_BANK,
+  RecordedCall,
+  ROMANCE_NOT_OPEN_REASON,
+  sampleQuiz,
+  rowToEvent,
+  type CommittedEvent,
+} from "@meet-first/contracts";
 import { readPrompt } from "@meet-first/prompts";
-import { makeDatabase, parseDatabaseError, POOL_SIZE, withMeeting, withPerson, type Database } from "@meet-first/db";
+import {
+  makeDatabase,
+  parseDatabaseError,
+  POOL_SIZE,
+  withMeeting,
+  withPerson,
+  type Database,
+} from "@meet-first/db";
 import { createPairedMeeting, freshTestDatabase, type TestDatabase } from "@meet-first/db/testing";
 import { QUESTION_CHECK_UNREADABLE_REASON } from "./check-question-job.js";
-import { makeMeetingTestContext, runMeetingJob, startTestMeeting, type MeetingTestContext } from "./testing/meeting-test-context.js";
+import {
+  makeMeetingTestContext,
+  runMeetingJob,
+  startTestMeeting,
+  type MeetingTestContext,
+} from "./testing/meeting-test-context.js";
 import { type ReplyScript } from "./testing/scripted-replies.js";
 
 // The question a free-text meeting asks in these tests.
@@ -33,7 +52,9 @@ beforeEach(async () => {
 
 afterEach(async () => {
   for (const id of created) {
-    await withMeeting(workerDb, id, (trx) => trx.updateTable("meetings").set({ state: "deleted" }).where("id", "=", id).execute());
+    await withMeeting(workerDb, id, (trx) =>
+      trx.updateTable("meetings").set({ state: "deleted" }).where("id", "=", id).execute(),
+    );
   }
   for (const context of contexts.splice(0)) await context.close();
 });
@@ -57,24 +78,49 @@ function questionCheck(verdict: unknown): ReplyScript {
 
 // Makes the test meeting free text that has not been checked yet, with the kind a new free-text meeting has.
 async function freeText(meetingId: string): Promise<void> {
-  await withMeeting(workerDb, meetingId, (trx) => trx.updateTable("meetings")
-    .set({ question_id: null, question_text: FREE_TEXT, question_checked_at: null, question_kind: "situation" }).where("id", "=", meetingId).execute());
+  await withMeeting(workerDb, meetingId, (trx) =>
+    trx
+      .updateTable("meetings")
+      .set({
+        question_id: null,
+        question_text: FREE_TEXT,
+        question_checked_at: null,
+        question_kind: "situation",
+      })
+      .where("id", "=", meetingId)
+      .execute(),
+  );
 }
 
 // One meeting row, as the checks read it.
 async function meetingOf(meetingId: string) {
-  return withMeeting(workerDb, meetingId, (trx) => trx.selectFrom("meetings").selectAll().where("id", "=", meetingId).executeTakeFirstOrThrow());
+  return withMeeting(workerDb, meetingId, (trx) =>
+    trx.selectFrom("meetings").selectAll().where("id", "=", meetingId).executeTakeFirstOrThrow(),
+  );
 }
 
 // The two members of a meeting, in side order.
 async function membersOf(meetingId: string) {
-  return withMeeting(workerDb, meetingId, (trx) => trx.selectFrom("meeting_members").selectAll().where("meeting_id", "=", meetingId).orderBy("side").execute());
+  return withMeeting(workerDb, meetingId, (trx) =>
+    trx
+      .selectFrom("meeting_members")
+      .selectAll()
+      .where("meeting_id", "=", meetingId)
+      .orderBy("side")
+      .execute(),
+  );
 }
 
 // Every committed event of a meeting, in seq order.
 async function eventsOf(meetingId: string): Promise<CommittedEvent[]> {
-  const rows = await withMeeting(workerDb, meetingId, (trx) => trx.selectFrom("meeting_events")
-    .select(["meeting_id", "seq", "type", "v", "payload", "created_at"]).where("meeting_id", "=", meetingId).orderBy("seq").execute());
+  const rows = await withMeeting(workerDb, meetingId, (trx) =>
+    trx
+      .selectFrom("meeting_events")
+      .select(["meeting_id", "seq", "type", "v", "payload", "created_at"])
+      .where("meeting_id", "=", meetingId)
+      .orderBy("seq")
+      .execute(),
+  );
   return rows.map(rowToEvent);
 }
 
@@ -95,7 +141,14 @@ function moderatorText(): string {
 
 it("R10.5-T1: an allowed free-text question is marked checked and both prefixes are stored", async () => {
   await freeText(m.meetingId);
-  const t = await openTest(questionCheck({ allowed: true, reason: "A question about splitting work.", kind: "decision", romantic: false }));
+  const t = await openTest(
+    questionCheck({
+      allowed: true,
+      reason: "A question about splitting work.",
+      kind: "decision",
+      romantic: false,
+    }),
+  );
   await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
   const checked = await meetingOf(m.meetingId);
   expect(checked.question_checked_at).not.toBeNull();
@@ -107,16 +160,31 @@ it("R10.5-T1: an allowed free-text question is marked checked and both prefixes 
   expect(a.frozen_prefix_tokens).toBe(Math.ceil(prefix.length / 1.33));
   expect(b.frozen_prefix_tokens).toBe(Math.ceil((b.frozen_prefix ?? "").length / 1.33));
   expect(prefix).toContain("your human: Test A");
-  expect(prefix).toContain('<meeting_question kind="decision">\n' + FREE_TEXT + "\n</meeting_question>");
-  const ledger = await withMeeting(workerDb, m.meetingId, (trx) => trx.selectFrom("ledger").select("call_site").where("meeting_id", "=", m.meetingId).execute());
+  expect(prefix).toContain(
+    '<meeting_question kind="decision">\n' + FREE_TEXT + "\n</meeting_question>",
+  );
+  const ledger = await withMeeting(workerDb, m.meetingId, (trx) =>
+    trx.selectFrom("ledger").select("call_site").where("meeting_id", "=", m.meetingId).execute(),
+  );
   expect(ledger.map((row) => row.call_site)).toEqual(["question_check"]);
-  const call = RecordedCall.parse(JSON.parse(readFileSync(t.client.written[0] ?? "", "utf8")) as unknown);
-  expect((call.request.body.messages as Array<{ content: string }>)[1]?.content).toBe("<meeting_question>\n" + FREE_TEXT + "\n</meeting_question>");
+  const call = RecordedCall.parse(
+    JSON.parse(readFileSync(t.client.written[0] ?? "", "utf8")) as unknown,
+  );
+  expect((call.request.body.messages as Array<{ content: string }>)[1]?.content).toBe(
+    "<meeting_question>\n" + FREE_TEXT + "\n</meeting_question>",
+  );
 });
 
 it("R10.5-T2: a refused free-text question keeps its reason and gets no prefix", async () => {
   await freeText(m.meetingId);
-  const t = await openTest(questionCheck({ allowed: false, reason: "Questions about health are not allowed.", kind: "situation", romantic: false }));
+  const t = await openTest(
+    questionCheck({
+      allowed: false,
+      reason: "Questions about health are not allowed.",
+      kind: "situation",
+      romantic: false,
+    }),
+  );
   await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
   const meeting = await meetingOf(m.meetingId);
   expect(meeting.question_rejected_reason).toBe("Questions about health are not allowed.");
@@ -130,8 +198,21 @@ it("R10.5-T2: a refused free-text question keeps its reason and gets no prefix",
 
 it("W5-DIR-T10: a free-text question the check calls romance is refused in a meeting whose listed person has dating questions off", async () => {
   await freeText(m.meetingId);
-  await withMeeting(workerDb, m.meetingId, (trx) => trx.updateTable("meetings").set({ romance_allowed: false }).where("id", "=", m.meetingId).execute());
-  const t = await openTest(questionCheck({ allowed: true, reason: "A question about whether two people would enjoy a first date.", kind: "romance", romantic: true }));
+  await withMeeting(workerDb, m.meetingId, (trx) =>
+    trx
+      .updateTable("meetings")
+      .set({ romance_allowed: false })
+      .where("id", "=", m.meetingId)
+      .execute(),
+  );
+  const t = await openTest(
+    questionCheck({
+      allowed: true,
+      reason: "A question about whether two people would enjoy a first date.",
+      kind: "romance",
+      romantic: true,
+    }),
+  );
   await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
   const meeting = await meetingOf(m.meetingId);
   expect(meeting.question_rejected_reason).toBe(ROMANCE_NOT_OPEN_REASON);
@@ -141,8 +222,21 @@ it("W5-DIR-T10: a free-text question the check calls romance is refused in a mee
 
 it("W5-DIR-T11: a question the check marks romantic under another kind is refused just the same when dating questions are off", async () => {
   await freeText(m.meetingId);
-  await withMeeting(workerDb, m.meetingId, (trx) => trx.updateTable("meetings").set({ romance_allowed: false }).where("id", "=", m.meetingId).execute());
-  const t = await openTest(questionCheck({ allowed: true, reason: "A question about splitting work, with a date in it.", kind: "deal", romantic: true }));
+  await withMeeting(workerDb, m.meetingId, (trx) =>
+    trx
+      .updateTable("meetings")
+      .set({ romance_allowed: false })
+      .where("id", "=", m.meetingId)
+      .execute(),
+  );
+  const t = await openTest(
+    questionCheck({
+      allowed: true,
+      reason: "A question about splitting work, with a date in it.",
+      kind: "deal",
+      romantic: true,
+    }),
+  );
   await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
   const meeting = await meetingOf(m.meetingId);
   expect(meeting.question_rejected_reason).toBe(ROMANCE_NOT_OPEN_REASON);
@@ -151,7 +245,9 @@ it("W5-DIR-T11: a question the check marks romantic under another kind is refuse
 
 it("W3-WORK-T6: a question-check reply that does not match its schema makes one model call, throws nothing and refuses the question", async () => {
   await freeText(m.meetingId);
-  const t = await openTest(questionCheck({ allowed: "yes", reason: "", kind: "chat", romantic: "no" }));
+  const t = await openTest(
+    questionCheck({ allowed: "yes", reason: "", kind: "chat", romantic: "no" }),
+  );
   await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
   // A second run, as a Graphile retry would be, finds the question refused and makes no call.
   await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
@@ -159,7 +255,9 @@ it("W3-WORK-T6: a question-check reply that does not match its schema makes one 
   expect(meeting.question_rejected_reason).toBe(QUESTION_CHECK_UNREADABLE_REASON);
   expect(meeting.question_checked_at).toBeNull();
   for (const side of await membersOf(m.meetingId)) expect(side.frozen_prefix).toBeNull();
-  const ledger = await withMeeting(workerDb, m.meetingId, (trx) => trx.selectFrom("ledger").select("call_site").where("meeting_id", "=", m.meetingId).execute());
+  const ledger = await withMeeting(workerDb, m.meetingId, (trx) =>
+    trx.selectFrom("ledger").select("call_site").where("meeting_id", "=", m.meetingId).execute(),
+  );
   expect(ledger.map((row) => row.call_site)).toEqual(["question_check"]);
   expect(t.pending).toEqual([]);
 });
@@ -167,9 +265,12 @@ it("W3-WORK-T6: a question-check reply that does not match its schema makes one 
 it("D41-T4: a curated question needs no model call and gets both prefixes, which carry the curated question's kind", async () => {
   const t = await openTest({ speech: [], receipts: [], questionCheck: [] });
   await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
-  for (const side of await membersOf(m.meetingId)) expect(side.frozen_prefix).toContain('<meeting_question kind="get_along">');
+  for (const side of await membersOf(m.meetingId))
+    expect(side.frozen_prefix).toContain('<meeting_question kind="get_along">');
   expect(t.client.written).toHaveLength(0);
-  const ledger = await withMeeting(workerDb, m.meetingId, (trx) => trx.selectFrom("ledger").select("id").where("meeting_id", "=", m.meetingId).execute());
+  const ledger = await withMeeting(workerDb, m.meetingId, (trx) =>
+    trx.selectFrom("ledger").select("id").where("meeting_id", "=", m.meetingId).execute(),
+  );
   expect(ledger).toHaveLength(0);
 });
 
@@ -187,22 +288,55 @@ it("invariant-9-T1: the job writes no prefix once the meeting runs, and the trig
   await startTestMeeting(t, m.meetingId);
   const before = await membersOf(m.meetingId);
   await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
-  expect((await membersOf(m.meetingId)).map((side) => side.frozen_prefix)).toEqual(before.map((side) => side.frozen_prefix));
-  const refusal = await withMeeting(workerDb, m.meetingId, (trx) => trx.updateTable("meeting_members").set({ frozen_prefix: "x" }).where("side", "=", "a").execute())
-    .then(() => undefined, (error: unknown) => error);
+  expect((await membersOf(m.meetingId)).map((side) => side.frozen_prefix)).toEqual(
+    before.map((side) => side.frozen_prefix),
+  );
+  const refusal = await withMeeting(workerDb, m.meetingId, (trx) =>
+    trx
+      .updateTable("meeting_members")
+      .set({ frozen_prefix: "x" })
+      .where("side", "=", "a")
+      .execute(),
+  ).then(
+    () => undefined,
+    (error: unknown) => error,
+  );
   expect(parseDatabaseError(refusal)?.code).toBe("prefix_frozen");
 });
 
 it("D31-T2: a judged quiz's misses enter that side's prefix and only that side's", async () => {
   const ids = sampleQuiz(m.a.cardId);
   await withPerson(workerDb, m.a.personId, async (trx) => {
-    const quiz = await trx.insertInto("quizzes").values({
-      card_id: m.a.cardId, person_id: m.a.personId, bank_version: 1, seed: m.a.cardId, state: "judged", matched: 9, reliable: true, judge_runs: 1,
-    }).returning("id").executeTakeFirstOrThrow();
-    await trx.insertInto("quiz_items").values(ids.map((questionId, index) => ({
-      quiz_id: quiz.id, person_id: m.a.personId, position: index + 1, bank_version: 1, question_id: questionId,
-      persona_answer: "p", human_answer: "h", flipped: false, agree: index !== 0,
-    }))).execute();
+    const quiz = await trx
+      .insertInto("quizzes")
+      .values({
+        card_id: m.a.cardId,
+        person_id: m.a.personId,
+        bank_version: 1,
+        seed: m.a.cardId,
+        state: "judged",
+        matched: 9,
+        reliable: true,
+        judge_runs: 1,
+      })
+      .returning("id")
+      .executeTakeFirstOrThrow();
+    await trx
+      .insertInto("quiz_items")
+      .values(
+        ids.map((questionId, index) => ({
+          quiz_id: quiz.id,
+          person_id: m.a.personId,
+          position: index + 1,
+          bank_version: 1,
+          question_id: questionId,
+          persona_answer: "p",
+          human_answer: "h",
+          flipped: false,
+          agree: index !== 0,
+        })),
+      )
+      .execute();
   });
   const t = await openTest({ speech: [], receipts: [], questionCheck: [] });
   await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
@@ -215,11 +349,18 @@ it("D31-T2: a judged quiz's misses enter that side's prefix and only that side's
 
 it("D57-T2: a meeting whose two go-aheads came first starts when its prefixes are stored, with nobody online", async () => {
   const t = await openTest({ speech: [], receipts: [], questionCheck: [] });
-  await withMeeting(workerDb, m.meetingId, (trx) => trx.updateTable("meeting_members").set({ ready_at: new Date(), last_seen_at: null })
-    .where("meeting_id", "=", m.meetingId).execute());
+  await withMeeting(workerDb, m.meetingId, (trx) =>
+    trx
+      .updateTable("meeting_members")
+      .set({ ready_at: new Date(), last_seen_at: null })
+      .where("meeting_id", "=", m.meetingId)
+      .execute(),
+  );
   await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
   expect((await meetingOf(m.meetingId)).state).toBe("running");
-  const steps = await withMeeting(workerDb, m.meetingId, (trx) => trx.selectFrom("meeting_steps").selectAll().where("meeting_id", "=", m.meetingId).execute());
+  const steps = await withMeeting(workerDb, m.meetingId, (trx) =>
+    trx.selectFrom("meeting_steps").selectAll().where("meeting_id", "=", m.meetingId).execute(),
+  );
   expect(steps).toHaveLength(1);
   expect(steps[0]).toMatchObject({ step_seq: 1, side: "a", phase: "open", state: "pending" });
   const events = await eventsOf(m.meetingId);
@@ -233,12 +374,20 @@ it("D57-T2: a meeting whose two go-aheads came first starts when its prefixes ar
 
 it("D57-T3: with one go-ahead missing, the job stores the prefixes and does not start the meeting", async () => {
   const t = await openTest({ speech: [], receipts: [], questionCheck: [] });
-  await withMeeting(workerDb, m.meetingId, (trx) => trx.updateTable("meeting_members").set({ ready_at: new Date() })
-    .where("meeting_id", "=", m.meetingId).where("side", "=", "a").execute());
+  await withMeeting(workerDb, m.meetingId, (trx) =>
+    trx
+      .updateTable("meeting_members")
+      .set({ ready_at: new Date() })
+      .where("meeting_id", "=", m.meetingId)
+      .where("side", "=", "a")
+      .execute(),
+  );
   await runMeetingJob(t, "check_question", { meetingId: m.meetingId });
   for (const side of await membersOf(m.meetingId)) expect(side.frozen_prefix).not.toBeNull();
   expect((await meetingOf(m.meetingId)).state).toBe("ready");
-  const steps = await withMeeting(workerDb, m.meetingId, (trx) => trx.selectFrom("meeting_steps").select("id").where("meeting_id", "=", m.meetingId).execute());
+  const steps = await withMeeting(workerDb, m.meetingId, (trx) =>
+    trx.selectFrom("meeting_steps").select("id").where("meeting_id", "=", m.meetingId).execute(),
+  );
   expect(steps).toHaveLength(0);
   expect(await eventsOf(m.meetingId)).toHaveLength(0);
   expect(t.pending.some((job) => job.name === "meeting_step")).toBe(false);

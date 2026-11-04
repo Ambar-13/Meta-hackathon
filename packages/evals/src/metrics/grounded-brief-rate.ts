@@ -6,11 +6,23 @@ import type { BriefLineRow, EvalRows, TurnTextRow } from "../collect-rows.js";
 import type { MetricResult } from "./index.js";
 
 // Whether one quote holds: verified, found in the named turn, and that turn belongs to the person on the quote's side.
-function quoteHolds(quote: Quote, context: { sides: Record<"a" | "b", string> | undefined; question: string; turns: Map<string, TurnTextRow> }): boolean {
+function quoteHolds(
+  quote: Quote,
+  context: {
+    sides: Record<"a" | "b", string> | undefined;
+    question: string;
+    turns: Map<string, TurnTextRow>;
+  },
+): boolean {
   if (!quote.verified || context.sides === undefined) return false;
   const turn = context.turns.get(quote.turnId);
   if (turn === undefined || turn.personId !== context.sides[quote.side]) return false;
-  return verifyQuote({ quote: quote.text, turnText: turn.text, turnNormText: turn.normText, forbidden: [context.question] }).ok;
+  return verifyQuote({
+    quote: quote.text,
+    turnText: turn.text,
+    turnNormText: turn.normText,
+    forbidden: [context.question],
+  }).ok;
 }
 
 // Whether one brief line is grounded: it has at least one quote and every quote holds.
@@ -18,7 +30,10 @@ function isGrounded(line: BriefLineRow, rows: EvalRows): boolean {
   const quotes = line.point.quotes;
   const sides = rows.personBySide.get(line.meetingId);
   const question = rows.questionByMeeting.get(line.meetingId) ?? "";
-  return quotes.length >= 1 && quotes.every((quote) => quoteHolds(quote, { sides, question, turns: rows.turns }));
+  return (
+    quotes.length >= 1 &&
+    quotes.every((quote) => quoteHolds(quote, { sides, question, turns: rows.turns }))
+  );
 }
 
 // Reads the brief lines of the driven meetings and returns the grounded share, or no value when there are no lines.

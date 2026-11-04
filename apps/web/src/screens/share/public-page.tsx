@@ -45,7 +45,15 @@ export const PublicSharePage = (): ReactElement => {
   if (state.kind === "not_found") {
     return (
       <ScreenFrame title={PAGE_TITLE} hideSettingsLink>
-        <EmptyState sticker="poof" title={PUBLIC_COPY.notFoundTitle} action={<Link className="btn quiet" to={APP_PATHS.welcome}>{PUBLIC_COPY.whatIs}</Link>}>
+        <EmptyState
+          sticker="poof"
+          title={PUBLIC_COPY.notFoundTitle}
+          action={
+            <Link className="btn quiet" to={APP_PATHS.welcome}>
+              {PUBLIC_COPY.whatIs}
+            </Link>
+          }
+        >
           {NOT_FOUND_TEXT}
         </EmptyState>
       </ScreenFrame>

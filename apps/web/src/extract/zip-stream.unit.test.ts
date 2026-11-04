@@ -37,7 +37,13 @@ describe("readPickedFile", () => {
     const slice = vi.fn();
     const stream = vi.fn();
     const arrayBuffer = vi.fn();
-    const fake = { size: 150_000_001, name: "big.zip", slice, stream, arrayBuffer } as unknown as File;
+    const fake = {
+      size: 150_000_001,
+      name: "big.zip",
+      slice,
+      stream,
+      arrayBuffer,
+    } as unknown as File;
     await expect(readPickedFile(fake, options)).rejects.toMatchObject({ code: "zip_too_large" });
     expect(slice).not.toHaveBeenCalled();
     expect(stream).not.toHaveBeenCalled();
@@ -47,18 +53,25 @@ describe("readPickedFile", () => {
   it("R1.3-T1: a zip is found by its first bytes whatever its name", async () => {
     const zip = zipSync({ "conversations.json": strToU8(chatgpt2024Text) });
     const file = new File([zip], "export.dat");
-    await expect(readPickedFile(file, options)).resolves.toEqual([{ name: "conversations.json", text: chatgpt2024Text }]);
-  });
-
-  it("R1.3-T2: a file that is neither a zip nor .json, .md or .txt is unreadable, and a .md file is read as text", async () => {
-    await expect(readPickedFile(new File(["hello"], "x.exe"), options)).rejects.toMatchObject({ code: "file_unreadable" });
-    await expect(readPickedFile(new File(["# Notes\n\nOne."], "notes.md"), options)).resolves.toEqual([
-      { name: "notes.md", text: "# Notes\n\nOne." },
+    await expect(readPickedFile(file, options)).resolves.toEqual([
+      { name: "conversations.json", text: chatgpt2024Text },
     ]);
   });
 
+  it("R1.3-T2: a file that is neither a zip nor .json, .md or .txt is unreadable, and a .md file is read as text", async () => {
+    await expect(readPickedFile(new File(["hello"], "x.exe"), options)).rejects.toMatchObject({
+      code: "file_unreadable",
+    });
+    await expect(
+      readPickedFile(new File(["# Notes\n\nOne."], "notes.md"), options),
+    ).resolves.toEqual([{ name: "notes.md", text: "# Notes\n\nOne." }]);
+  });
+
   it("R1.3-T3: a picked Codex .jsonl file is read keeping only the lines the Codex reader wants", async () => {
-    const picked = await readPickedFile(new File([codexText], "rollout-2026-10-02T08-00-00.jsonl"), options);
+    const picked = await readPickedFile(
+      new File([codexText], "rollout-2026-10-02T08-00-00.jsonl"),
+      options,
+    );
     expect(picked.map((entry) => entry.name)).toEqual(["rollout-2026-10-02T08-00-00.jsonl"]);
     const lines = itemAt(picked, 0).text.split("\n");
     expect(lines).toHaveLength(16);
@@ -90,11 +103,14 @@ describe("readZipEntries entry choice", () => {
   it("R1.1-T39: a zip of Codex sessions reads every .jsonl entry with only its wanted lines, and skips compressed .jsonl.zst entries", async () => {
     const zip = zipSync({
       "sessions/2026/10/02/rollout-a.jsonl": strToU8(codexText),
-      "sessions/2026/10/01/rollout-b.jsonl": strToU8("{\"type\":\"turn_context\",\"payload\":{}}"),
+      "sessions/2026/10/01/rollout-b.jsonl": strToU8('{"type":"turn_context","payload":{}}'),
       "sessions/2026/09/01/rollout-c.jsonl.zst": new Uint8Array([0x28, 0xb5, 0x2f, 0xfd]),
     });
     const entries = await readZipEntries(new Blob([zip]), options);
-    expect(entries.map((entry) => entry.name)).toEqual(["sessions/2026/10/02/rollout-a.jsonl", "sessions/2026/10/01/rollout-b.jsonl"]);
+    expect(entries.map((entry) => entry.name)).toEqual([
+      "sessions/2026/10/02/rollout-a.jsonl",
+      "sessions/2026/10/01/rollout-b.jsonl",
+    ]);
     expect(itemAt(entries, 0).text.split("\n")).toHaveLength(16);
     expect(itemAt(entries, 0).text).not.toContain("Here is a gentler reminder schedule");
     expect(itemAt(entries, 1).text).toBe("");
@@ -110,7 +126,10 @@ describe("readZipEntries inflation cap", () => {
     const zip = zipSync({ "conversations.json": new Uint8Array(67_108_864) });
     const start = performance.now();
     failure = await rejectionOf(
-      readZipEntries(new Blob([zip]), { inflatedCapBytes: 16_777_216, onInflated: (bytes) => seen.push(bytes) }),
+      readZipEntries(new Blob([zip]), {
+        inflatedCapBytes: 16_777_216,
+        onInflated: (bytes) => seen.push(bytes),
+      }),
     );
     elapsedMs = performance.now() - start;
   });

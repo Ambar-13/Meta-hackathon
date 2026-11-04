@@ -7,7 +7,15 @@
 import type { FastifyInstance } from "fastify";
 import { sql, type Transaction } from "kysely";
 import { z } from "zod";
-import { AnswerMeetingCreate, ContractError, DIRECTORY_MEETINGS_PER_LISTING_PER_DAY, HTTP, MeetingCreateResponse, routes, Uuid } from "@meet-first/contracts";
+import {
+  AnswerMeetingCreate,
+  ContractError,
+  DIRECTORY_MEETINGS_PER_LISTING_PER_DAY,
+  HTTP,
+  MeetingCreateResponse,
+  routes,
+  Uuid,
+} from "@meet-first/contracts";
 import { parseDatabaseError, withPerson, type Database } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { assertUnderDailyMeetingCap } from "../meetings/create-meeting.js";
@@ -24,17 +32,44 @@ type MeetTarget = { askText: string; kind: "help" | "romance"; listingId: string
 
 // The refusal for every answer that cannot be met from these results.
 function makeHelperNotMeetableError(): ContractError {
-  return new ContractError("helper_not_meetable", "This person can no longer be met from these results.", HTTP.conflict);
+  return new ContractError(
+    "helper_not_meetable",
+    "This person can no longer be met from these results.",
+    HTTP.conflict,
+  );
 }
 
 // Reads the caller's ask and the answer as the caller, and refuses unless the answer is meetable.
-async function readMeetTarget(trx: Transaction<Database>, input: { personId: string; askId: string; answerId: string }): Promise<MeetTarget> {
-  const ask = await trx.selectFrom("persona_asks").select(["mode", "state", "text", "question_kind"]).where("id", "=", input.askId).where("person_id", "=", input.personId).executeTakeFirst();
-  const answer = await trx.selectFrom("persona_answers").select(["state", "position", "listing_id"])
-    .where("id", "=", input.answerId).where("ask_id", "=", input.askId).where("asker_person_id", "=", input.personId).executeTakeFirst();
-  if (ask === undefined || answer === undefined || answer.listing_id === null || !isMeetableAnswer(ask, answer)) throw makeHelperNotMeetableError();
+async function readMeetTarget(
+  trx: Transaction<Database>,
+  input: { personId: string; askId: string; answerId: string },
+): Promise<MeetTarget> {
+  const ask = await trx
+    .selectFrom("persona_asks")
+    .select(["mode", "state", "text", "question_kind"])
+    .where("id", "=", input.askId)
+    .where("person_id", "=", input.personId)
+    .executeTakeFirst();
+  const answer = await trx
+    .selectFrom("persona_answers")
+    .select(["state", "position", "listing_id"])
+    .where("id", "=", input.answerId)
+    .where("ask_id", "=", input.askId)
+    .where("asker_person_id", "=", input.personId)
+    .executeTakeFirst();
+  if (
+    ask === undefined ||
+    answer === undefined ||
+    answer.listing_id === null ||
+    !isMeetableAnswer(ask, answer)
+  )
+    throw makeHelperNotMeetableError();
   // A dating ask stays a dating question in the meeting, so the listing's dating switch is checked again when the meeting is made.
-  return { askText: ask.text, kind: ask.question_kind === "romance" ? "romance" : "help", listingId: answer.listing_id };
+  return {
+    askText: ask.text,
+    kind: ask.question_kind === "romance" ? "romance" : "help",
+    listingId: answer.listing_id,
+  };
 }
 
 // Turns a refusal of directory_meeting_create into this route's error, or returns null for any other error, which goes on unchanged.
@@ -43,32 +78,62 @@ async function readMeetTarget(trx: Transaction<Database>, input: { personId: str
 function toMeetRefusal(error: unknown): ContractError | null {
   const refusal = parseDatabaseError(error);
   if (refusal === null) return null;
-  if (refusal.code === "listing_not_found" || refusal.code === "directory_self") return makeHelperNotMeetableError();
-  if (refusal.code === "card_not_approved" || refusal.code === "romance_not_open") return new ContractError(refusal.code, refusal.message, HTTP.conflict);
-  if (refusal.code === "directory_daily_cap") return new ContractError(refusal.code, refusal.message, HTTP.tooMany);
+  if (refusal.code === "listing_not_found" || refusal.code === "directory_self")
+    return makeHelperNotMeetableError();
+  if (refusal.code === "card_not_approved" || refusal.code === "romance_not_open")
+    return new ContractError(refusal.code, refusal.message, HTTP.conflict);
+  if (refusal.code === "directory_daily_cap")
+    return new ContractError(refusal.code, refusal.message, HTTP.tooMany);
   return null;
 }
 
 // Starts the meeting with the ask's text as an already checked question of kind help, or romance for a dating ask.
-async function createDirectoryMeeting(trx: Transaction<Database>, input: { listingId: string; personId: string; cardId: string; askText: string; kind: MeetTarget["kind"] }): Promise<string> {
+async function createDirectoryMeeting(
+  trx: Transaction<Database>,
+  input: {
+    listingId: string;
+    personId: string;
+    cardId: string;
+    askText: string;
+    kind: MeetTarget["kind"];
+  },
+): Promise<string> {
   let meetingId: string | null | undefined;
   try {
     // In words: meet the listing's person as side a with this card, on the ask's text, checked now, of the ask's kind, at most 10 a day for that person.
-    const result = await sql<{ meeting_id: string | null }>`SELECT directory_meeting_create(${input.listingId}::uuid, ${input.personId}::uuid, ${input.cardId}::uuid, NULL::int, ${input.askText}::text, true, ${input.kind}::text, ${DIRECTORY_MEETINGS_PER_LISTING_PER_DAY}::int) AS meeting_id`.execute(trx);
+    const result = await sql<{
+      meeting_id: string | null;
+    }>`SELECT directory_meeting_create(${input.listingId}::uuid, ${input.personId}::uuid, ${input.cardId}::uuid, NULL::int, ${input.askText}::text, true, ${input.kind}::text, ${DIRECTORY_MEETINGS_PER_LISTING_PER_DAY}::int) AS meeting_id`.execute(
+      trx,
+    );
     meetingId = result.rows[0]?.meeting_id;
   } catch (error) {
     throw toMeetRefusal(error) ?? error;
   }
-  if (meetingId === null || meetingId === undefined) throw new ContractError("meeting_create_failed", "The meeting could not be created. Try again.", HTTP.internal);
+  if (meetingId === null || meetingId === undefined)
+    throw new ContractError(
+      "meeting_create_failed",
+      "The meeting could not be created. Try again.",
+      HTTP.internal,
+    );
   return meetingId;
 }
 
 // Starts a full meeting with a helper from the caller's help results, then enqueues check_question after the commit.
-async function meetHelper(deps: AskDeps, input: { personId: string; askId: string; answerId: string; cardId: string }): Promise<string> {
+async function meetHelper(
+  deps: AskDeps,
+  input: { personId: string; askId: string; answerId: string; cardId: string },
+): Promise<string> {
   const meetingId = await withPerson(deps.db, input.personId, async (trx) => {
     const target = await readMeetTarget(trx, input);
     await assertUnderDailyMeetingCap(trx, input.personId, deps.now());
-    return createDirectoryMeeting(trx, { listingId: target.listingId, personId: input.personId, cardId: input.cardId, askText: target.askText, kind: target.kind });
+    return createDirectoryMeeting(trx, {
+      listingId: target.listingId,
+      personId: input.personId,
+      cardId: input.cardId,
+      askText: target.askText,
+      kind: target.kind,
+    });
   });
   await deps.enqueue("check_question", { meetingId });
   return meetingId;
@@ -83,7 +148,12 @@ export function registerMeetHelper(app: FastifyInstance, deps: RouteDeps): void 
     if (!params.success) throw makeNotFoundError();
     const body = AnswerMeetingCreate.safeParse(request.body);
     if (!body.success) throw makePayloadInvalidError();
-    const meetingId = await meetHelper(deps, { personId, askId: params.data.id, answerId: params.data.answerId, cardId: body.data.cardId });
+    const meetingId = await meetHelper(deps, {
+      personId,
+      askId: params.data.id,
+      answerId: params.data.answerId,
+      cardId: body.data.cardId,
+    });
     return reply.code(201).send(MeetingCreateResponse.parse({ meetingId }));
   });
 }

@@ -61,6 +61,7 @@ export function collectorFor(name: string): TextCollector {
 // Reads a whole file through a collector, a chunk at a time.
 export async function collectFile(file: Blob, collector: TextCollector): Promise<string> {
   const reader = file.stream().getReader();
-  for (let result = await reader.read(); !result.done; result = await reader.read()) collector.push(result.value);
+  for (let result = await reader.read(); !result.done; result = await reader.read())
+    collector.push(result.value);
   return collector.finish();
 }

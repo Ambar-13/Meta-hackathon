@@ -14,12 +14,20 @@ function line(type: string, payload: unknown): string {
 
 // The session line Codex writes first, with the given source and thread source.
 function sessionLine(source: unknown, threadSource?: string): string {
-  return line("session_meta", { id: "0199a1b2-0000-7000-8000-000000000002", source, thread_source: threadSource });
+  return line("session_meta", {
+    id: "0199a1b2-0000-7000-8000-000000000002",
+    source,
+    thread_source: threadSource,
+  });
 }
 
 // A user message line with one text part.
 function userLine(text: string): string {
-  return line("response_item", { type: "message", role: "user", content: [{ type: "input_text", text }] });
+  return line("response_item", {
+    type: "message",
+    role: "user",
+    content: [{ type: "input_text", text }],
+  });
 }
 
 // The texts of the turns read from the given lines.
@@ -44,7 +52,9 @@ describe("parseCodexRollout", () => {
   });
 
   it("R1.1-T27: drops what Codex added to user messages: instructions, context blocks, image tags, summaries and imported markers", async () => {
-    const joined = parseCodexRollout(await codexFixture()).map((turn) => turn.text).join("\n");
+    const joined = parseCodexRollout(await codexFixture())
+      .map((turn) => turn.text)
+      .join("\n");
     for (const added of [
       "AGENTS.md",
       "Use tabs",
@@ -75,31 +85,79 @@ describe("parseCodexRollout", () => {
 
   it("R1.1-T28: skips sessions Codex ran for its own helpers: sub-agents, reviewers, MCP calls and agent-made threads", () => {
     const words = userLine("Review this command before it runs: rm -rf build");
-    expect(textsOf([sessionLine({ subagent: { other: "guardian" } }, "guardian_review"), words])).toEqual([]);
-    expect(textsOf([sessionLine({ subagent: { thread_spawn: { parent_thread_id: "t1", depth: 1 } } }, "subagent"), words])).toEqual([]);
+    expect(
+      textsOf([sessionLine({ subagent: { other: "guardian" } }, "guardian_review"), words]),
+    ).toEqual([]);
+    expect(
+      textsOf([
+        sessionLine(
+          { subagent: { thread_spawn: { parent_thread_id: "t1", depth: 1 } } },
+          "subagent",
+        ),
+        words,
+      ]),
+    ).toEqual([]);
     expect(textsOf([sessionLine("mcp"), words])).toEqual([]);
     expect(textsOf([sessionLine("vscode", "agent_created_thread"), words])).toEqual([]);
-    expect(textsOf([sessionLine("vscode", "user"), words])).toEqual(["Review this command before it runs: rm -rf build"]);
-    expect(textsOf([sessionLine("vscode", "chatgpt_handoff"), words])).toEqual(["Review this command before it runs: rm -rf build"]);
+    expect(textsOf([sessionLine("vscode", "user"), words])).toEqual([
+      "Review this command before it runs: rm -rf build",
+    ]);
+    expect(textsOf([sessionLine("vscode", "chatgpt_handoff"), words])).toEqual([
+      "Review this command before it runs: rm -rf build",
+    ]);
   });
 
   it("R1.1-T29: the first session line decides, so a helper that copied the person's history is still skipped", () => {
-    const helper = [sessionLine({ subagent: { thread_spawn: { depth: 1 } } }, "subagent"), sessionLine("vscode", "user"), userLine("I copied this from the parent thread.")];
+    const helper = [
+      sessionLine({ subagent: { thread_spawn: { depth: 1 } } }, "subagent"),
+      sessionLine("vscode", "user"),
+      userLine("I copied this from the parent thread."),
+    ];
     expect(textsOf(helper)).toEqual([]);
-    const person = [sessionLine("vscode", "user"), sessionLine({ subagent: { other: "guardian" } }, "guardian_review"), userLine("I am the person here.")];
+    const person = [
+      sessionLine("vscode", "user"),
+      sessionLine({ subagent: { other: "guardian" } }, "guardian_review"),
+      userLine("I am the person here."),
+    ];
     expect(textsOf(person)).toEqual(["I am the person here."]);
   });
 
   it("R1.1-T30: reads the older Codex form, where each line is the message itself and the first line has no type", () => {
     const lines = [
-      JSON.stringify({ id: "0199a1b2-0000-7000-8000-000000000003", timestamp: "2025-06-01T10:00:00Z", instructions: null }),
+      JSON.stringify({
+        id: "0199a1b2-0000-7000-8000-000000000003",
+        timestamp: "2025-06-01T10:00:00Z",
+        instructions: null,
+      }),
       JSON.stringify({ record_type: "state" }),
-      JSON.stringify({ type: "message", role: "user", content: [{ type: "input_text", text: "<user_instructions>\nBe brief.\n</user_instructions>" }] }),
-      JSON.stringify({ type: "message", role: "user", content: [{ type: "input_text", text: "I like small commits that I can explain in one line." }] }),
-      JSON.stringify({ type: "message", role: "assistant", content: [{ type: "output_text", text: "Noted." }] }),
+      JSON.stringify({
+        type: "message",
+        role: "user",
+        content: [
+          { type: "input_text", text: "<user_instructions>\nBe brief.\n</user_instructions>" },
+        ],
+      }),
+      JSON.stringify({
+        type: "message",
+        role: "user",
+        content: [
+          { type: "input_text", text: "I like small commits that I can explain in one line." },
+        ],
+      }),
+      JSON.stringify({
+        type: "message",
+        role: "assistant",
+        content: [{ type: "output_text", text: "Noted." }],
+      }),
     ];
     const turns = parseCodexRollout(lines.join("\n"));
-    expect(turns).toEqual([{ text: "I like small commits that I can explain in one line.", exportOrder: 0, createTime: null }]);
+    expect(turns).toEqual([
+      {
+        text: "I like small commits that I can explain in one line.",
+        exportOrder: 0,
+        createTime: null,
+      },
+    ]);
   });
 
   it("R1.1-T31: a context block with no closing tag is dropped whole, and a half-written line is skipped", () => {
@@ -107,13 +165,18 @@ describe("parseCodexRollout", () => {
       sessionLine("cli", "user"),
       userLine("<environment_context>\n  <cwd>/home/sam</cwd>"),
       userLine("I check the weather before I plan a weekend."),
-      "{\"type\":\"response_item\",\"payload\":{\"type\":\"message\",\"role\":\"user\",\"content\":[{\"type\":\"input_te",
+      '{"type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_te',
     ];
     expect(textsOf(lines)).toEqual(["I check the weather before I plan a weekend."]);
   });
 
   it("R1.1-T36: the words after a context block stay when no request heading marks them", () => {
-    const lines = [sessionLine("vscode", "user"), userLine("<in-app-browser-context source=\"tab\">\nhttps://example.com\n</in-app-browser-context>\nI read this every morning.")];
+    const lines = [
+      sessionLine("vscode", "user"),
+      userLine(
+        '<in-app-browser-context source="tab">\nhttps://example.com\n</in-app-browser-context>\nI read this every morning.',
+      ),
+    ];
     expect(textsOf(lines)).toEqual(["I read this every morning."]);
   });
 });
@@ -123,16 +186,43 @@ describe("isCodexLineWanted", () => {
     const fixtureLines = [
       sessionLine("cli", "user"),
       userLine("I keep a list of plants I have killed."),
-      JSON.stringify({ type: "message", role: "user", content: [{ type: "input_text", text: "Older form." }] }),
+      JSON.stringify({
+        type: "message",
+        role: "user",
+        content: [{ type: "input_text", text: "Older form." }],
+      }),
     ];
     for (const wanted of fixtureLines) expect(isCodexLineWanted(wanted)).toBe(true);
     const unwanted = [
-      line("response_item", { type: "message", role: "assistant", content: [{ type: "output_text", text: "Tell the user." }] }),
-      line("response_item", { type: "message", role: "developer", content: [{ type: "input_text", text: "The user is a gardener." }] }),
-      line("response_item", { type: "reasoning", summary: [{ type: "summary_text", text: "The user wants gentle reminders." }] }),
-      line("response_item", { type: "function_call_output", call_id: "c1", output: "sam  user  160 src" }),
-      line("compacted", { message: "summary", replacement_history: [{ type: "message", role: "user", content: [{ type: "input_text", text: "x" }] }] }),
-      line("event_msg", { type: "user_message", message: "I keep a list of plants I have killed." }),
+      line("response_item", {
+        type: "message",
+        role: "assistant",
+        content: [{ type: "output_text", text: "Tell the user." }],
+      }),
+      line("response_item", {
+        type: "message",
+        role: "developer",
+        content: [{ type: "input_text", text: "The user is a gardener." }],
+      }),
+      line("response_item", {
+        type: "reasoning",
+        summary: [{ type: "summary_text", text: "The user wants gentle reminders." }],
+      }),
+      line("response_item", {
+        type: "function_call_output",
+        call_id: "c1",
+        output: "sam  user  160 src",
+      }),
+      line("compacted", {
+        message: "summary",
+        replacement_history: [
+          { type: "message", role: "user", content: [{ type: "input_text", text: "x" }] },
+        ],
+      }),
+      line("event_msg", {
+        type: "user_message",
+        message: "I keep a list of plants I have killed.",
+      }),
       line("turn_context", { cwd: "/home/sam" }),
       "not json, but it mentions the user",
       "",

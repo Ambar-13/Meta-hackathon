@@ -8,7 +8,12 @@ export const POOL_SIZE = { api: 10, worker: 8, migrate: 2, test: 4 } as const;
 
 // Opens a Kysely client on url with poolSize connections. The url decides the role (app_api, app_worker or app_migrate); nothing here changes it.
 export function makeDatabase(url: string, poolSize: number): Kysely<Database> {
-  const pool = new pg.Pool({ connectionString: url, max: poolSize, idleTimeoutMillis: 30_000, connectionTimeoutMillis: 5_000 });
+  const pool = new pg.Pool({
+    connectionString: url,
+    max: poolSize,
+    idleTimeoutMillis: 30_000,
+    connectionTimeoutMillis: 5_000,
+  });
   return new Kysely<Database>({ dialect: new PostgresDialect({ pool }) });
 }
 
@@ -16,5 +21,8 @@ export function makeDatabase(url: string, poolSize: number): Kysely<Database> {
 export function numberFromPostgres(value: unknown): number {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string" && /^-?[0-9]+(\.[0-9]+)?$/.test(value)) return Number(value);
-  throw new ContractError("postgres_number_invalid", "A count or sum came back in a shape that is not a number. Check the query.");
+  throw new ContractError(
+    "postgres_number_invalid",
+    "A count or sum came back in a shape that is not a number. Check the query.",
+  );
 }

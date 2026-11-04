@@ -5,7 +5,13 @@ import { walkFiles } from "./walk-files.js";
 import { levelFor, readPassedPaths, repositoryPath } from "./style-scope.js";
 
 /** Names that say nothing about what a file holds. Matched without the extension and in any case. */
-export const BANNED_NAMES: ReadonlySet<string> = new Set(["utils", "helpers", "misc", "common", "manager"]);
+export const BANNED_NAMES: ReadonlySet<string> = new Set([
+  "utils",
+  "helpers",
+  "misc",
+  "common",
+  "manager",
+]);
 
 const SEARCHED_FOLDERS = ["apps", "packages", "scripts", "tests"];
 
@@ -27,7 +33,13 @@ export function checkBannedFileNames(root: string): Finding[] {
     const banned = bannedNameIn(repositoryPath(root, file));
     if (banned === undefined) continue;
     const message = `uses the name "${banned}", which hides what is inside; name the file or folder after its one idea`;
-    findings.push({ check: "banned-file-names", file, line: 1, message, level: levelFor(root, file, passedPaths) });
+    findings.push({
+      check: "banned-file-names",
+      file,
+      line: 1,
+      message,
+      level: levelFor(root, file, passedPaths),
+    });
   }
   return findings;
 }

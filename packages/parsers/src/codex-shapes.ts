@@ -3,7 +3,11 @@ import type { RawTurn } from "./chatgpt-shapes.js";
 // The file name of a Codex session log, one JSON object per line; Codex keeps them under ~/.codex/sessions.
 export const CODEX_FILE_NAME = /\.jsonl$/i;
 // Thread sources of the sessions Codex starts for its own helpers; their user lines are the helper's instructions, not the person's words.
-const HELPER_THREAD_SOURCES: ReadonlyArray<string> = ["subagent", "guardian_review", "agent_created_thread"];
+const HELPER_THREAD_SOURCES: ReadonlyArray<string> = [
+  "subagent",
+  "guardian_review",
+  "agent_created_thread",
+];
 // The session source of a run that another program started as a tool call, so its user lines come from that program.
 const TOOL_CALL_SOURCE = "mcp";
 // An opening tag at the start of a text, such as <environment_context> or <in-app-browser-context source="tab">; group 1 is its name.
@@ -51,7 +55,10 @@ function isHelperSession(line: Record<string, unknown>): boolean {
   const session = isRecord(line.payload) ? line.payload : {};
   if (isRecord(session.source) && "subagent" in session.source) return true;
   if (session.source === TOOL_CALL_SOURCE) return true;
-  return typeof session.thread_source === "string" && HELPER_THREAD_SOURCES.includes(session.thread_source);
+  return (
+    typeof session.thread_source === "string" &&
+    HELPER_THREAD_SOURCES.includes(session.thread_source)
+  );
 }
 
 // The text left after the tagged blocks at its start, such as <environment_context>...</environment_context>; null when a block never closes.
@@ -119,7 +126,8 @@ export function parseCodexRollout(text: string): RawTurn[] {
     }
     const message = userMessageOf(line);
     const words = message === null ? "" : messageText(message);
-    if (words !== "") turns.push({ text: words, exportOrder: turns.length, createTime: timeOf(line.timestamp) });
+    if (words !== "")
+      turns.push({ text: words, exportOrder: turns.length, createTime: timeOf(line.timestamp) });
   }
   return turns;
 }
@@ -128,7 +136,7 @@ export function parseCodexRollout(text: string): RawTurn[] {
 // .jsonl file, so a session log of hundreds of megabytes never sits whole in memory. A line that names neither "user" nor
 // session_meta is passed over without being parsed.
 export function isCodexLineWanted(text: string): boolean {
-  if (!text.includes("\"user\"") && !text.includes("session_meta")) return false;
+  if (!text.includes('"user"') && !text.includes("session_meta")) return false;
   const line = parseLine(text);
   if (line === null) return false;
   return line.type === "session_meta" || userMessageOf(line) !== null;

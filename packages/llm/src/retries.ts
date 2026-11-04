@@ -11,7 +11,11 @@ export const RETRY_AFTER_CAP_MS = 10_000;
 // One attempt at a call, by its zero-based index.
 export type Attempt<T> = () => Promise<T>;
 // Whether a failed call may be tried again, how long to wait first, and why it failed.
-export type RetryDecision = { shouldRetry: boolean; waitMs: number; reason: "rate_limited" | "server_error" | "none" };
+export type RetryDecision = {
+  shouldRetry: boolean;
+  waitMs: number;
+  reason: "rate_limited" | "server_error" | "none";
+};
 // The fields of a vendor error the retry rule reads: its HTTP status and its headers (the openai README names both).
 const VendorError = z
   .object({
@@ -29,7 +33,9 @@ function jitterWait(random: () => number): number {
 }
 
 // The retry-after header, read without regard to letter case; seconds when digits only, else an HTTP date.
-function retryAfterMs(headers: Record<string, string | null | undefined> | undefined): number | null {
+function retryAfterMs(
+  headers: Record<string, string | null | undefined> | undefined,
+): number | null {
   const entry = Object.entries(headers ?? {}).find(([key]) => key.toLowerCase() === "retry-after");
   const value = entry?.[1]?.trim();
   if (value === undefined || value === "") return null;
@@ -40,7 +46,11 @@ function retryAfterMs(headers: Record<string, string | null | undefined> | undef
 }
 
 // The decision for a vendor error: 429 is rate limited, 500 to 599 is a server error, anything else is not retried.
-function decideVendorError(error: unknown, attemptIndex: number, random: () => number): RetryDecision {
+function decideVendorError(
+  error: unknown,
+  attemptIndex: number,
+  random: () => number,
+): RetryDecision {
   if (!(error instanceof openai.APIError)) return NO_RETRY;
   const parsed = VendorError.safeParse(error);
   if (!parsed.success) return NO_RETRY;
@@ -53,7 +63,11 @@ function decideVendorError(error: unknown, attemptIndex: number, random: () => n
 
 // Decides whether one failed call may be retried and how long to wait: retry-after wins up to 10 s, else jitter 200 to 800 ms.
 // Checks run in order and stop at the first match: the attempt limit, the first-token timeout, the call timeout, a vendor error, anything else.
-export function decideRetry(error: unknown, attemptIndex: number, random: () => number): RetryDecision {
+export function decideRetry(
+  error: unknown,
+  attemptIndex: number,
+  random: () => number,
+): RetryDecision {
   if (attemptIndex >= TRANSPORT_RETRIES) return NO_RETRY;
   if (error instanceof ContractError && error.code === "model_first_token_timeout") {
     // Speech is the only streaming call site and retries its first-token timeout once.
@@ -80,7 +94,11 @@ export async function withTransportRetries<T>(
       await hooks.sleep(decision.waitMs);
     }
   }
-  throw new ContractError("retries_exhausted", "The model call failed after every retry. The job fails closed and the sweeper or the next attempt picks it up.", 503);
+  throw new ContractError(
+    "retries_exhausted",
+    "The model call failed after every retry. The job fails closed and the sweeper or the next attempt picks it up.",
+    503,
+  );
 }
 
 // True when a finished reply must be discarded and retried once at effort minimal and max_tokens of at least 8,000.

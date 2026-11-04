@@ -12,14 +12,23 @@ function dollarsOf(row: LedgerRow): { usd: number; isMissing: boolean } {
 function costOf(meetingId: string, rows: EvalRows): { usd: number; missing: number } {
   const sides = rows.personBySide.get(meetingId);
   const members = sides === undefined ? [] : [sides.a, sides.b];
-  const relevant = rows.ledger.filter((row) => row.meetingId === meetingId || (row.callSite === "card" && row.personId !== null && members.includes(row.personId)));
+  const relevant = rows.ledger.filter(
+    (row) =>
+      row.meetingId === meetingId ||
+      (row.callSite === "card" && row.personId !== null && members.includes(row.personId)),
+  );
   const priced = relevant.map(dollarsOf);
-  return { usd: priced.reduce((total, item) => total + item.usd, 0), missing: priced.filter((item) => item.isMissing).length };
+  return {
+    usd: priced.reduce((total, item) => total + item.usd, 0),
+    missing: priced.filter((item) => item.isMissing).length,
+  };
 }
 
 // Reads the completed meetings and returns the mean cost per completed meeting, with the rows that had no dollars counted in detail.
 export function measureCostPerPair(rows: EvalRows): MetricResult {
-  const completed = rows.meetings.filter((meeting) => meeting.startedAt !== null && isCompleted(meeting));
+  const completed = rows.meetings.filter(
+    (meeting) => meeting.startedAt !== null && isCompleted(meeting),
+  );
   const costs = completed.map((meeting) => costOf(meeting.meetingId, rows));
   const total = costs.reduce((sum, item) => sum + item.usd, 0);
   const value = costs.length === 0 ? null : total / costs.length;

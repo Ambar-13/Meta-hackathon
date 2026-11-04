@@ -4,7 +4,9 @@ import type { MetricResult } from "./index.js";
 
 // Reads the brief support rows and returns the mean over reliable briefs, with the count of unreliable ones in detail.
 export function measureSupportRate(rows: EvalRows): MetricResult {
-  const reliable = rows.briefMeta.filter((brief) => brief.supportReliable === true && brief.supportRate !== null);
+  const reliable = rows.briefMeta.filter(
+    (brief) => brief.supportReliable === true && brief.supportRate !== null,
+  );
   const unreliable = rows.briefMeta.filter((brief) => brief.supportReliable !== true).length;
   const sum = reliable.reduce((total, brief) => total + (brief.supportRate ?? 0), 0);
   const value = reliable.length === 0 ? null : sum / reliable.length;

@@ -11,7 +11,10 @@ import { CardScreen } from "./screen.js";
 // keep the card tests below as they were: nothing shared, not listed.
 beforeEach(() => {
   stubRoute(routes.directory.readSharing, { friendsCanAsk: false, publicPositions: [] });
-  stubRoute(routes.directory.readMyListing, { status: 404, body: { code: "not_listed", message: "You are not in Explore yet." } });
+  stubRoute(routes.directory.readMyListing, {
+    status: 404,
+    body: { code: "not_listed", message: "You are not in Explore yet." },
+  });
 });
 
 afterEach(() => {
@@ -26,8 +29,14 @@ function renderCard(): void {
 
 describe("card screen", () => {
   it("R3.4-T2: while building the screen polls every 3 s and counts seconds on the server clock, using fake timers", async () => {
-    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] });
-    stubRoute(routes.cards.readCard, [cardView("building", "2026-10-27T10:00:00.000Z"), cardView("building", "2026-10-27T10:00:03.000Z"), cardView("ready", "2026-10-27T10:00:06.000Z")]);
+    vi.useFakeTimers({
+      toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"],
+    });
+    stubRoute(routes.cards.readCard, [
+      cardView("building", "2026-10-27T10:00:00.000Z"),
+      cardView("building", "2026-10-27T10:00:03.000Z"),
+      cardView("ready", "2026-10-27T10:00:06.000Z"),
+    ]);
     renderCard();
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);
@@ -56,17 +65,24 @@ describe("card screen", () => {
     expect((recall as HTMLInputElement).checked).toBe(false);
     const third = toggles[2];
     const first = toggles[0];
-    if (third === undefined || first === undefined) throw new Error("the card has fewer than three items");
+    if (third === undefined || first === undefined)
+      throw new Error("the card has fewer than three items");
     fireEvent.click(third);
     fireEvent.click(first);
     fireEvent.click(screen.getByRole("button", { name: "Approve my card" }));
     expect(await screen.findByText("Card approved.")).toBeTruthy();
-    expect(requestsTo(routes.cards.approveCard)[0]?.body).toEqual({ itemIds: [itemId(1), itemId(3)], recallAllowed: false });
+    expect(requestsTo(routes.cards.approveCard)[0]?.body).toEqual({
+      itemIds: [itemId(1), itemId(3)],
+      recallAllowed: false,
+    });
     expect(readApprovedCard()).toBe(IDS.card);
   });
 
   it("D23-T1: a thin card shows the thin badge and no quiz button once approved", async () => {
-    stubRoute(routes.cards.readCard, [cardView("thin"), { ...cardView("thin"), state: "approved" }]);
+    stubRoute(routes.cards.readCard, [
+      cardView("thin"),
+      { ...cardView("thin"), state: "approved" },
+    ]);
     stubRoute(routes.cards.approveCard, { status: 200, body: { state: "approved" } });
     renderCard();
     const toggles = await screen.findAllByRole("checkbox", { name: "Use this in meetings" });
@@ -75,18 +91,31 @@ describe("card screen", () => {
     fireEvent.click(first);
     fireEvent.click(screen.getByRole("button", { name: "Approve my card" }));
     expect(await screen.findByText("Card approved.")).toBeTruthy();
-    expect(screen.getByText("Your card is short: fewer than 6 items had a quote that checked out. Meetings still work; the quiz is skipped.")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "Your card is short: fewer than 6 items had a quote that checked out. Meetings still work; the quiz is skipped.",
+      ),
+    ).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Take the knows-me quiz" })).toBeNull();
-    expect(within(screen.getByRole("main")).getByRole("link", { name: "Invite a friend" }).getAttribute("href")).toBe(`/pair?card=${IDS.card}`);
+    expect(
+      within(screen.getByRole("main"))
+        .getByRole("link", { name: "Invite a friend" })
+        .getAttribute("href"),
+    ).toBe(`/pair?card=${IDS.card}`);
   });
 
   it("R3.2-T1: tapping a quote opens a sheet with the full quote that closes again", async () => {
     const quote = "I said this in my own words, number 1";
     const text = `Hello. ${quote}.`;
     stubRoute(routes.cards.readCard, cardView("ready"));
-    stubRoute(routes.cards.readItemSource, { status: 200, body: { turnIndex: 0, text, highlight: { start: 7, end: 7 + quote.length } } });
+    stubRoute(routes.cards.readItemSource, {
+      status: 200,
+      body: { turnIndex: 0, text, highlight: { start: 7, end: 7 + quote.length } },
+    });
     renderCard();
-    fireEvent.click((await screen.findAllByRole("button", { name: "Show the quote" }))[0] as HTMLElement);
+    fireEvent.click(
+      (await screen.findAllByRole("button", { name: "Show the quote" }))[0] as HTMLElement,
+    );
     const dialog = await screen.findByRole("dialog");
     expect(await within(dialog).findByText(quote)).toBeTruthy();
     expect(within(dialog).getByText("Found word for word in your message.")).toBeTruthy();
@@ -106,7 +135,10 @@ describe("card screen", () => {
     const row = rows[1];
     if (row === undefined) throw new Error("no second row");
     expect(row.textContent).toContain("no quote");
-    expect(within(row).getByRole("checkbox", { name: "Use this in meetings" })).toHaveProperty("disabled", true);
+    expect(within(row).getByRole("checkbox", { name: "Use this in meetings" })).toHaveProperty(
+      "disabled",
+      true,
+    );
   });
 
   it("R3.4-T3: every control on the card page has an accessible name at 375 px", async () => {

@@ -22,19 +22,29 @@ export type TakedownOutput = { out: (line: string) => void; err: (line: string) 
 
 // The sentence for a call with neither flag, or with both.
 function badArguments(): ContractError {
-  return new ContractError("takedown_bad_arguments", "Give --slug with the 22-character slug, or --meeting with the meeting id. Give one of them, not both.", HTTP.badRequest);
+  return new ContractError(
+    "takedown_bad_arguments",
+    "Give --slug with the 22-character slug, or --meeting with the meeting id. Give one of them, not both.",
+    HTTP.badRequest,
+  );
 }
 
 // Reads the one flag the script takes; an unknown flag, a missing value, or both flags is bad arguments.
 function readTarget(argv: readonly string[]): Target {
   let values: { slug?: string | undefined; meeting?: string | undefined };
   try {
-    values = parseArgs({ args: [...argv], options: { slug: { type: "string" }, meeting: { type: "string" } }, strict: true }).values;
+    values = parseArgs({
+      args: [...argv],
+      options: { slug: { type: "string" }, meeting: { type: "string" } },
+      strict: true,
+    }).values;
   } catch {
     throw badArguments();
   }
-  if (values.slug !== undefined && values.meeting === undefined) return { kind: "slug", slug: values.slug };
-  if (values.meeting !== undefined && values.slug === undefined) return { kind: "meeting", meetingId: values.meeting };
+  if (values.slug !== undefined && values.meeting === undefined)
+    return { kind: "slug", slug: values.slug };
+  if (values.meeting !== undefined && values.slug === undefined)
+    return { kind: "meeting", meetingId: values.meeting };
   throw badArguments();
 }
 
@@ -53,12 +63,18 @@ export async function revokeShareByMeeting(db: Db, meetingId: string): Promise<n
 
 // Hides the share page with this slug through share_revoke: true the first time, null after.
 async function revokeShareBySlug(db: Db, slug: string): Promise<boolean | null> {
-  const row = await db.selectNoFrom((eb) => eb.fn<boolean | null>("share_revoke", [eb.val(slug)]).as("revoked")).executeTakeFirst();
+  const row = await db
+    .selectNoFrom((eb) => eb.fn<boolean | null>("share_revoke", [eb.val(slug)]).as("revoked"))
+    .executeTakeFirst();
   return row?.revoked ?? null;
 }
 
 // Runs one takedown on the database given, and writes only the result word or the count, never a snapshot.
-export async function runTakedown(argv: readonly string[], db: Db, output: TakedownOutput): Promise<number> {
+export async function runTakedown(
+  argv: readonly string[],
+  db: Db,
+  output: TakedownOutput,
+): Promise<number> {
   const target = readTarget(argv);
   if (target.kind === "meeting") {
     output.out(String(await revokeShareByMeeting(db, target.meetingId)));
@@ -71,14 +87,25 @@ export async function runTakedown(argv: readonly string[], db: Db, output: Taked
 
 // True when a database error says the function is absent (42883).
 function isUndefinedFunction(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && error.code === UNDEFINED_FUNCTION;
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === UNDEFINED_FUNCTION
+  );
 }
 
 // Reads the worker URL, opens the database, runs the takedown, and maps each failure to its exit code.
-export async function main(argv: readonly string[], env: NodeJS.ProcessEnv, output: TakedownOutput): Promise<number> {
+export async function main(
+  argv: readonly string[],
+  env: NodeJS.ProcessEnv,
+  output: TakedownOutput,
+): Promise<number> {
   const url = env["DATABASE_URL_WORKER"];
   if (url === undefined || url === "") {
-    output.err("takedown_database_url_missing: Set DATABASE_URL_WORKER in the environment, then run the takedown again.");
+    output.err(
+      "takedown_database_url_missing: Set DATABASE_URL_WORKER in the environment, then run the takedown again.",
+    );
     return EXIT_FAILED;
   }
   const db = makeDatabase(url, 1);
@@ -89,7 +116,11 @@ export async function main(argv: readonly string[], env: NodeJS.ProcessEnv, outp
       output.err("share_revoke_missing: The database does not have share_revoke. Use --meeting.");
       return EXIT_REVOKE_MISSING;
     }
-    output.err(error instanceof ContractError ? `${error.code}: ${error.message}` : "takedown_failed: The takedown did not finish. Check DATABASE_URL_WORKER and try again.");
+    output.err(
+      error instanceof ContractError
+        ? `${error.code}: ${error.message}`
+        : "takedown_failed: The takedown did not finish. Check DATABASE_URL_WORKER and try again.",
+    );
     return EXIT_FAILED;
   } finally {
     await db.destroy();
@@ -97,7 +128,8 @@ export async function main(argv: readonly string[], env: NodeJS.ProcessEnv, outp
 }
 
 // Runs the script when this file is the process entry (pnpm share:takedown); importing it starts nothing.
-const isEntryPoint = process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+const isEntryPoint =
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isEntryPoint) {
   void main(process.argv.slice(2), process.env, {
     out: (line) => process.stdout.write(line + "\n"),

@@ -1,9 +1,10 @@
 import { z } from "zod";
 
 // Environment names and their defaults, shared by every app.
-const base = { LOG_LEVEL: z.enum(['debug','info','warn','error']).default('info') };
+const base = { LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info") };
 // The variables apps/api reads at boot. PORT defaults to 3000 because Render's PORT handling is unverified.
-export const apiEnv = z.object({ ...base,
+export const apiEnv = z.object({
+  ...base,
   DATABASE_URL_API: z.string().url(),
   APP_ORIGIN: z.string().url(),
   PORT: z.coerce.number().int().default(3000),
@@ -17,11 +18,12 @@ export const apiEnv = z.object({ ...base,
   GOOGLE_CLIENT_SECRET: z.string().trim().default(""),
 });
 // The variables apps/worker reads at boot. Production refuses LLM_MODE=replay.
-export const workerEnv = z.object({ ...base,
+export const workerEnv = z.object({
+  ...base,
   DATABASE_URL_WORKER: z.string().url(),
   META_API_KEY: z.string().min(1),
-  META_API_BASE_URL: z.string().url(),            // https://api.meta.ai/v1
-  LLM_MODE: z.enum(['live','record','replay']),   // production refuses 'replay'
+  META_API_BASE_URL: z.string().url(), // https://api.meta.ai/v1
+  LLM_MODE: z.enum(["live", "record", "replay"]), // production refuses 'replay'
   DAILY_USD_CAP: z.coerce.number().default(40),
   TOTAL_USD_CAP: z.coerce.number().default(130),
   MAX_CONCURRENT_MEETINGS: z.coerce.number().int().default(40),

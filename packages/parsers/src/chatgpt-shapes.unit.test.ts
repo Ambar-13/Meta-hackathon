@@ -11,7 +11,13 @@ describe("ChatGPT shapes", () => {
     const root = [
       {
         current_node: "a",
-        mapping: { a: { id: "a", message: { author: { role: "assistant" }, content: { parts: ["hi"] } }, parent: null } },
+        mapping: {
+          a: {
+            id: "a",
+            message: { author: { role: "assistant" }, content: { parts: ["hi"] } },
+            parent: null,
+          },
+        },
       },
     ];
     expect(parseChatGptMapping(root)).toEqual([]);
@@ -22,8 +28,16 @@ describe("ChatGPT shapes", () => {
       {
         current_node: "x",
         mapping: {
-          x: { id: "x", message: { author: { role: "user" }, content: { parts: ["loop one"] } }, parent: "y" },
-          y: { id: "y", message: { author: { role: "user" }, content: { parts: ["loop two"] } }, parent: "x" },
+          x: {
+            id: "x",
+            message: { author: { role: "user" }, content: { parts: ["loop one"] } },
+            parent: "y",
+          },
+          y: {
+            id: "y",
+            message: { author: { role: "user" }, content: { parts: ["loop two"] } },
+            parent: "x",
+          },
         },
       },
     ];
@@ -36,15 +50,40 @@ describe("ChatGPT shapes", () => {
       {
         current_node: "u1",
         mapping: {
-          u1: { id: "u1", message: { author: { role: "user" }, create_time: 10, content: { parts: ["on path"] } }, parent: null },
-          b2: { id: "b2", message: { author: { role: "user" }, create_time: 5, content: { parts: ["branch with time"] } }, parent: null },
-          b1: { id: "b1", message: { author: { role: "user" }, content: { parts: ["branch b1"] } }, parent: null },
-          b0: { id: "b0", message: { author: { role: "user" }, content: { parts: ["branch b0"] } }, parent: null },
+          u1: {
+            id: "u1",
+            message: { author: { role: "user" }, create_time: 10, content: { parts: ["on path"] } },
+            parent: null,
+          },
+          b2: {
+            id: "b2",
+            message: {
+              author: { role: "user" },
+              create_time: 5,
+              content: { parts: ["branch with time"] },
+            },
+            parent: null,
+          },
+          b1: {
+            id: "b1",
+            message: { author: { role: "user" }, content: { parts: ["branch b1"] } },
+            parent: null,
+          },
+          b0: {
+            id: "b0",
+            message: { author: { role: "user" }, content: { parts: ["branch b0"] } },
+            parent: null,
+          },
         },
       },
     ];
     const turns = parseChatGptMapping(root) ?? [];
-    expect(turns.map((turn) => turn.text)).toEqual(["on path", "branch with time", "branch b0", "branch b1"]);
+    expect(turns.map((turn) => turn.text)).toEqual([
+      "on path",
+      "branch with time",
+      "branch b0",
+      "branch b1",
+    ]);
     expect(turns.map((turn) => turn.exportOrder)).toEqual([0, 1, 2, 3]);
   });
 

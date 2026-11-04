@@ -14,12 +14,15 @@ export const INFLATE_SLICE_BYTES = 4_096;
 // Names a file that is not a zip may have and still be read as text, .jsonl being a Codex session log.
 export const TEXT_FILE_NAME = /\.(json|jsonl|md|txt)$/i;
 // Shown when a file cannot be read; the worker also uses it for any failure it did not expect.
-export const FILE_UNREADABLE_SENTENCE = "This file could not be read. Pick the .zip, .json, .jsonl, .md or .txt file again, or paste your notes instead.";
+export const FILE_UNREADABLE_SENTENCE =
+  "This file could not be read. Pick the .zip, .json, .jsonl, .md or .txt file again, or paste your notes instead.";
 
 // Shown when a zip is over 150 MB; the code is zip_too_large.
-const ZIP_TOO_LARGE_SENTENCE = "This file is over 150 MB, more than a phone browser can read. Export a shorter date range, or paste your notes instead.";
+const ZIP_TOO_LARGE_SENTENCE =
+  "This file is over 150 MB, more than a phone browser can read. Export a shorter date range, or paste your notes instead.";
 // Shown when a zip unpacks to more than 1.5 GB; the code is zip_inflated_too_large.
-const ZIP_INFLATED_TOO_LARGE_SENTENCE = "This zip unpacks to more than 1.5 GB, so reading stopped. Pick conversations.json on its own, or export a shorter date range.";
+const ZIP_INFLATED_TOO_LARGE_SENTENCE =
+  "This zip unpacks to more than 1.5 GB, so reading stopped. Pick conversations.json on its own, or export a shorter date range.";
 
 // How one read reports and limits inflation; the cap is a parameter so a test can use a small one.
 export type ReadOptions = { inflatedCapBytes: number; onInflated: (inflatedBytes: number) => void };
@@ -65,7 +68,11 @@ function startEntry(entry: UnzipFile, context: ZipContext): void {
     progress.inflated += chunk.length;
     options.onInflated(progress.inflated);
     if (progress.inflated > options.inflatedCapBytes) {
-      progress.failure = new ContractError("zip_inflated_too_large", ZIP_INFLATED_TOO_LARGE_SENTENCE, HTTP.payloadTooLarge);
+      progress.failure = new ContractError(
+        "zip_inflated_too_large",
+        ZIP_INFLATED_TOO_LARGE_SENTENCE,
+        HTTP.payloadTooLarge,
+      );
       entry.terminate();
       return;
     }
@@ -120,12 +127,14 @@ export async function readZipEntries(file: Blob, options: ReadOptions): Promise<
 // Reads a picked file into parser inputs: a zip through readZipEntries, a Codex .jsonl session log a chunk at a time keeping only the
 // lines its reader wants, and a .json, .md or .txt file as UTF-8 text.
 export async function readPickedFile(file: File, options: ReadOptions): Promise<ExtractInput[]> {
-  if (file.size > ZIP_MAX_BYTES) throw new ContractError("zip_too_large", ZIP_TOO_LARGE_SENTENCE, HTTP.payloadTooLarge);
+  if (file.size > ZIP_MAX_BYTES)
+    throw new ContractError("zip_too_large", ZIP_TOO_LARGE_SENTENCE, HTTP.payloadTooLarge);
   const head = new Uint8Array(await file.slice(0, 4).arrayBuffer());
   if (isZip(head)) return readZipEntries(file, options);
   if (!TEXT_FILE_NAME.test(file.name)) {
     throw new ContractError("file_unreadable", FILE_UNREADABLE_SENTENCE, HTTP.unprocessable);
   }
-  if (CODEX_FILE_NAME.test(file.name)) return [{ name: file.name, text: await collectFile(file, collectorFor(file.name)) }];
+  if (CODEX_FILE_NAME.test(file.name))
+    return [{ name: file.name, text: await collectFile(file, collectorFor(file.name)) }];
   return [{ name: file.name, text: new TextDecoder("utf-8").decode(await file.arrayBuffer()) }];
 }

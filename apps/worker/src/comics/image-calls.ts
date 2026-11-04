@@ -5,7 +5,11 @@ import sharp from "sharp";
 // One panel that was encoded and fits under the size cap.
 export type PanelRender = { position: number; bytes: Uint8Array; sizeBytes: number };
 // How the six image calls ended: all six panels, a reason they cannot be stored, the deadline, or a full token window.
-export type RenderOutcome = { kind: "ready"; panels: PanelRender[] } | { kind: "failed"; reason: "render_failed" } | { kind: "deadline" } | { kind: "limiter_busy" };
+export type RenderOutcome =
+  | { kind: "ready"; panels: PanelRender[] }
+  | { kind: "failed"; reason: "render_failed" }
+  | { kind: "deadline" }
+  | { kind: "limiter_busy" };
 // The result of encoding one image: its webp bytes, or the reason it is too large.
 export type EncodeResult = { ok: true; bytes: Uint8Array } | { ok: false; reason: "over_size_cap" };
 // What the renderer needs from the model client: the image call only, so a test can pass a fake.
@@ -49,7 +53,9 @@ export type EncodedPipeline = { toBuffer: () => Promise<Uint8Array> };
 
 // Encodes one webp at the given quality, 1024 by 1024, cover fit.
 async function webpAt(bytes: Uint8Array, quality: number): Promise<Uint8Array> {
-  const pipeline = sharp(bytes).resize(PANEL_EDGE_PX, PANEL_EDGE_PX, { fit: "cover" }).webp({ quality }) as unknown as EncodedPipeline;
+  const pipeline = sharp(bytes)
+    .resize(PANEL_EDGE_PX, PANEL_EDGE_PX, { fit: "cover" })
+    .webp({ quality }) as unknown as EncodedPipeline;
   return pipeline.toBuffer();
 }
 
@@ -63,8 +69,18 @@ export async function encodePanelWebp(bytes: Uint8Array): Promise<EncodeResult> 
 }
 
 // Runs one image call per prompt in parallel, with no retry, and encodes every result. Resolves as failed for any rejected call or any image that cannot be stored.
-export async function renderPanels(llm: ImageClient, prompts: string[], options: { signal: AbortSignal; meetingId: string }): Promise<RenderOutcome> {
-  const calls = prompts.map((prompt) => llm.image({ callSite: "comic_image", prompt, ledger: { personId: null, meetingId: options.meetingId } }));
+export async function renderPanels(
+  llm: ImageClient,
+  prompts: string[],
+  options: { signal: AbortSignal; meetingId: string },
+): Promise<RenderOutcome> {
+  const calls = prompts.map((prompt) =>
+    llm.image({
+      callSite: "comic_image",
+      prompt,
+      ledger: { personId: null, meetingId: options.meetingId },
+    }),
+  );
   const settled = await raceWithDeadline(Promise.allSettled(calls), options.signal);
   if (settled.kind === "deadline" || options.signal.aborted) return { kind: "deadline" };
   const results = settled.value;
@@ -80,7 +96,9 @@ export async function renderPanels(llm: ImageClient, prompts: string[], options:
 }
 
 // True when one settled call was refused by the full token window, so no bytes came back from it.
-function isRefusedByLimiter(result: PromiseSettledResult<{ webp: Uint8Array; ledgerId: string }>): boolean {
+function isRefusedByLimiter(
+  result: PromiseSettledResult<{ webp: Uint8Array; ledgerId: string }>,
+): boolean {
   return result.status === "rejected" && isLimiterBusy(result.reason);
 }
 

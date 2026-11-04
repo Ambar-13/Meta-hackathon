@@ -10,13 +10,24 @@ import { escapeBlockText } from "../meetings/prompt-builder.js";
 export function searchWordsCall(input: { askText: string; topics: readonly string[] }): ModelCall {
   const prompt = readPrompt("search-words");
   const rules = readPrompt("untrusted-data-rules");
-  const topics = input.topics.length === 0 ? ["(none)"] : input.topics.map((topic) => "- " + escapeBlockText(topic));
+  const topics =
+    input.topics.length === 0
+      ? ["(none)"]
+      : input.topics.map((topic) => "- " + escapeBlockText(topic));
   return {
     callSite: "search_words",
     promptVersion: prompt.version,
     messages: [
       { role: "system", content: `${prompt.text}\n\n${rules.text}` },
-      { role: "user", content: ["<ask>" + escapeBlockText(input.askText) + "</ask>", "<topics>", ...topics, "</topics>"].join("\n") },
+      {
+        role: "user",
+        content: [
+          "<ask>" + escapeBlockText(input.askText) + "</ask>",
+          "<topics>",
+          ...topics,
+          "</topics>",
+        ].join("\n"),
+      },
     ],
     schema: toStrictJsonSchema(SearchWordsOutput, "search-words"),
   };

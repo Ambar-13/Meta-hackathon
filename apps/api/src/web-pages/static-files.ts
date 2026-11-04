@@ -9,7 +9,8 @@ export const WEB_DIST_DIR = fileURLToPath(new URL("../../../web/dist/", import.m
 // The cache header of a hashed build file: one year, never revalidated, because its name changes when its content does.
 export const IMMUTABLE_CACHE = "public, max-age=31536000, immutable";
 // The Content-Security-Policy: everything from this site only, and images also from data: URLs.
-export const CONTENT_SECURITY_POLICY = "default-src 'self'; img-src 'self' data:; connect-src 'self'";
+export const CONTENT_SECURITY_POLICY =
+  "default-src 'self'; img-src 'self' data:; connect-src 'self'";
 
 // True when the folder holds a web build: an index.html and an assets folder.
 export function hasWebBuild(distDir: string): boolean {

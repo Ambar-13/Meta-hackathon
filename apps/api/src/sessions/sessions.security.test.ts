@@ -1,5 +1,10 @@
 import { afterAll, beforeAll, expect, it } from "vitest";
-import { PersonCreateResponse, RecoverResponse, TransferClaimResponse, TransferResponse } from "@meet-first/contracts";
+import {
+  PersonCreateResponse,
+  RecoverResponse,
+  TransferClaimResponse,
+  TransferResponse,
+} from "@meet-first/contracts";
 import { asPerson, createTestPerson } from "@meet-first/db/testing";
 import type { FastifyInstance } from "fastify";
 import type { LightMyRequestResponse } from "fastify";
@@ -21,7 +26,11 @@ function signUp(n: number, displayName: string): Promise<LightMyRequestResponse>
   return appUnderTest.inject({
     method: "POST",
     url: "/api/people",
-    headers: { origin: ORIGIN, "content-type": "application/json", "x-forwarded-for": "192.0.2." + String(n) },
+    headers: {
+      origin: ORIGIN,
+      "content-type": "application/json",
+      "x-forwarded-for": "192.0.2." + String(n),
+    },
     payload: JSON.stringify({ displayName }),
   });
 }
@@ -37,13 +46,18 @@ function keyNames(value: unknown): string[] {
     return value.flatMap((item: unknown) => keyNames(item));
   }
   if (typeof value === "object" && value !== null) {
-    return Object.entries(value).flatMap(([key, inner]: [string, unknown]) => [key, ...keyNames(inner)]);
+    return Object.entries(value).flatMap(([key, inner]: [string, unknown]) => [
+      key,
+      ...keyNames(inner),
+    ]);
   }
   return [];
 }
 
 beforeAll(async () => {
-  t = await buildTestApp({ routes: [registerSessionsRoutes, registerPairsRoutes, registerWebPagesRoutes] });
+  t = await buildTestApp({
+    routes: [registerSessionsRoutes, registerPairsRoutes, registerWebPagesRoutes],
+  });
   appUnderTest = t.app;
 });
 
@@ -57,8 +71,13 @@ it("A7-T1: the sign-up cookie is __Host-session with HttpOnly, Secure, Path=/, S
   expect(r.statusCode).toBe(201);
   const cookie = String(r.headers["set-cookie"]);
   expect(cookie).toMatch(/^__Host-session=[0-9a-f]{64};/);
-  const attributes = cookie.split(";").slice(1).map((part) => part.trim());
-  expect(attributes).toEqual(expect.arrayContaining(["HttpOnly", "Secure", "Path=/", "SameSite=Lax", "Max-Age=7776000"]));
+  const attributes = cookie
+    .split(";")
+    .slice(1)
+    .map((part) => part.trim());
+  expect(attributes).toEqual(
+    expect.arrayContaining(["HttpOnly", "Secure", "Path=/", "SameSite=Lax", "Max-Age=7776000"]),
+  );
   expect(attributes.some((attribute) => attribute.toLowerCase().startsWith("domain="))).toBe(false);
 });
 
@@ -66,15 +85,31 @@ it("A7-T2: no session token reaches a response body or a log line through sign-u
   const r1 = await signUp(2, "B");
   const tokenA = tokenOf(r1);
   const code = PersonCreateResponse.parse(r1.json()).recoveryCode;
-  const r2 = await appUnderTest.inject({ method: "POST", url: "/api/sessions/recover", headers: { origin: ORIGIN, "content-type": "application/json" }, payload: JSON.stringify({ code }) });
+  const r2 = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/sessions/recover",
+    headers: { origin: ORIGIN, "content-type": "application/json" },
+    payload: JSON.stringify({ code }),
+  });
   const tokenB = tokenOf(r2);
-  const r3 = await appUnderTest.inject({ method: "POST", url: "/api/sessions/transfer", headers: sessionHeader(tokenB ?? "") });
+  const r3 = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/sessions/transfer",
+    headers: sessionHeader(tokenB ?? ""),
+  });
   const claimToken = new URL(TransferResponse.parse(r3.json()).url).hash.slice(1);
-  const r4 = await appUnderTest.inject({ method: "POST", url: "/api/sessions/claim", headers: { origin: ORIGIN, "content-type": "application/json" }, payload: JSON.stringify({ token: claimToken }) });
+  const r4 = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/sessions/claim",
+    headers: { origin: ORIGIN, "content-type": "application/json" },
+    payload: JSON.stringify({ token: claimToken }),
+  });
   const tokenC = tokenOf(r4);
   const log = testLogLines(appUnderTest).join("\n");
 
-  expect([r1.statusCode, r2.statusCode, r3.statusCode, r4.statusCode]).toEqual([201, 200, 200, 200]);
+  expect([r1.statusCode, r2.statusCode, r3.statusCode, r4.statusCode]).toEqual([
+    201, 200, 200, 200,
+  ]);
   for (const token of [tokenA, tokenB, tokenC]) {
     expect(token).toMatch(TOKEN_PATTERN);
   }
@@ -101,16 +136,43 @@ it("A7-T2: no session token reaches a response body or a log line through sign-u
 it("A7-T3: a POST or DELETE without our exact Origin is 403 origin_mismatch and changes nothing (invariant 21)", async () => {
   const p = await createTestPerson(t.db, "C");
 
-  const noOrigin = await appUnderTest.inject({ method: "POST", url: "/api/people", headers: { "content-type": "application/json", "x-forwarded-for": "192.0.2.3" }, payload: JSON.stringify({ displayName: "C2" }) });
-  const evilOrigin = await appUnderTest.inject({ method: "POST", url: "/api/people", headers: { origin: "http://evil.example", "content-type": "application/json", "x-forwarded-for": "192.0.2.3" }, payload: JSON.stringify({ displayName: "C2" }) });
-  const deleteNoOrigin = await appUnderTest.inject({ method: "DELETE", url: "/api/people/me", headers: { cookie: "__Host-session=" + p.sessionToken } });
-  const state = await asPerson(t.db, p.personId, (trx) => trx.selectFrom("people").select("state").where("id", "=", p.personId).executeTakeFirstOrThrow());
-  const pairFromPort = await appUnderTest.inject({ method: "POST", url: "/api/pairs", headers: { ...sessionHeader(p.sessionToken), origin: "http://localhost:3001" } });
+  const noOrigin = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/people",
+    headers: { "content-type": "application/json", "x-forwarded-for": "192.0.2.3" },
+    payload: JSON.stringify({ displayName: "C2" }),
+  });
+  const evilOrigin = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/people",
+    headers: {
+      origin: "http://evil.example",
+      "content-type": "application/json",
+      "x-forwarded-for": "192.0.2.3",
+    },
+    payload: JSON.stringify({ displayName: "C2" }),
+  });
+  const deleteNoOrigin = await appUnderTest.inject({
+    method: "DELETE",
+    url: "/api/people/me",
+    headers: { cookie: "__Host-session=" + p.sessionToken },
+  });
+  const state = await asPerson(t.db, p.personId, (trx) =>
+    trx.selectFrom("people").select("state").where("id", "=", p.personId).executeTakeFirstOrThrow(),
+  );
+  const pairFromPort = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/pairs",
+    headers: { ...sessionHeader(p.sessionToken), origin: "http://localhost:3001" },
+  });
   const health = await appUnderTest.inject({ method: "GET", url: "/api/health" });
 
   for (const response of [noOrigin, evilOrigin]) {
     expect(response.statusCode).toBe(403);
-    expect(response.json()).toEqual({ code: "origin_mismatch", message: "Open the app from its own address and try again." });
+    expect(response.json()).toEqual({
+      code: "origin_mismatch",
+      message: "Open the app from its own address and try again.",
+    });
     expect(response.headers["set-cookie"]).toBeUndefined();
   }
   expect(deleteNoOrigin.statusCode).toBe(403);
@@ -121,17 +183,49 @@ it("A7-T3: a POST or DELETE without our exact Origin is 403 origin_mismatch and 
 
 it("A7-T4: a non-public /api route answers 401 session_missing without a live session, and the public routes answer without one", async () => {
   const p = await createTestPerson(t.db, "D");
-  await asPerson(t.db, p.personId, (trx) => trx.updateTable("sessions").set({ revoked_at: new Date() }).where("person_id", "=", p.personId).execute());
+  await asPerson(t.db, p.personId, (trx) =>
+    trx
+      .updateTable("sessions")
+      .set({ revoked_at: new Date() })
+      .where("person_id", "=", p.personId)
+      .execute(),
+  );
   const sessionMissing = { code: "session_missing", message: "Sign in again from the start page." };
 
-  const noCookiePair = await appUnderTest.inject({ method: "POST", url: "/api/pairs", headers: { origin: ORIGIN } });
+  const noCookiePair = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/pairs",
+    headers: { origin: ORIGIN },
+  });
   const noCookieRead = await appUnderTest.inject({ method: "GET", url: "/api/pairs/" + U });
-  const zeroCookie = await appUnderTest.inject({ method: "POST", url: "/api/sessions/transfer", headers: { origin: ORIGIN, cookie: "__Host-session=" + "0".repeat(64) } });
-  const shortCookie = await appUnderTest.inject({ method: "POST", url: "/api/sessions/transfer", headers: { origin: ORIGIN, cookie: "__Host-session=abc" } });
-  const revokedCookie = await appUnderTest.inject({ method: "POST", url: "/api/sessions/transfer", headers: sessionHeader(p.sessionToken) });
+  const zeroCookie = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/sessions/transfer",
+    headers: { origin: ORIGIN, cookie: "__Host-session=" + "0".repeat(64) },
+  });
+  const shortCookie = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/sessions/transfer",
+    headers: { origin: ORIGIN, cookie: "__Host-session=abc" },
+  });
+  const revokedCookie = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/sessions/transfer",
+    headers: sessionHeader(p.sessionToken),
+  });
   const health = await appUnderTest.inject({ method: "GET", url: "/api/health" });
-  const recover = await appUnderTest.inject({ method: "POST", url: "/api/sessions/recover", headers: { origin: ORIGIN, "content-type": "application/json" }, payload: JSON.stringify({ code: "a".repeat(32) }) });
-  const claim = await appUnderTest.inject({ method: "POST", url: "/api/sessions/claim", headers: { origin: ORIGIN, "content-type": "application/json" }, payload: JSON.stringify({ token: "0".repeat(32) }) });
+  const recover = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/sessions/recover",
+    headers: { origin: ORIGIN, "content-type": "application/json" },
+    payload: JSON.stringify({ code: "a".repeat(32) }),
+  });
+  const claim = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/sessions/claim",
+    headers: { origin: ORIGIN, "content-type": "application/json" },
+    payload: JSON.stringify({ token: "0".repeat(32) }),
+  });
 
   for (const response of [noCookiePair, noCookieRead, zeroCookie, shortCookie, revokedCookie]) {
     expect(response.statusCode).toBe(401);
@@ -146,10 +240,24 @@ it("A7-T4: a non-public /api route answers 401 session_missing without a live se
 
 it("A5-T1: a recovery code redeems once, opens a new session, and the second try is 404 recovery_code_unknown (invariant 20)", async () => {
   const r1 = await signUp(4, "E");
-  const r2 = await appUnderTest.inject({ method: "POST", url: "/api/sessions/recover", headers: { origin: ORIGIN, "content-type": "application/json" }, payload: JSON.stringify({ code: PersonCreateResponse.parse(r1.json()).recoveryCode }) });
+  const r2 = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/sessions/recover",
+    headers: { origin: ORIGIN, "content-type": "application/json" },
+    payload: JSON.stringify({ code: PersonCreateResponse.parse(r1.json()).recoveryCode }),
+  });
   const token2 = tokenOf(r2);
-  const r3 = await appUnderTest.inject({ method: "POST", url: "/api/sessions/transfer", headers: sessionHeader(token2 ?? "") });
-  const r4 = await appUnderTest.inject({ method: "POST", url: "/api/sessions/recover", headers: { origin: ORIGIN, "content-type": "application/json" }, payload: JSON.stringify({ code: PersonCreateResponse.parse(r1.json()).recoveryCode }) });
+  const r3 = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/sessions/transfer",
+    headers: sessionHeader(token2 ?? ""),
+  });
+  const r4 = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/sessions/recover",
+    headers: { origin: ORIGIN, "content-type": "application/json" },
+    payload: JSON.stringify({ code: PersonCreateResponse.parse(r1.json()).recoveryCode }),
+  });
 
   expect(r2.statusCode).toBe(200);
   expect(r2.json()).toEqual({ personId: PersonCreateResponse.parse(r1.json()).personId });
@@ -157,14 +265,22 @@ it("A5-T1: a recovery code redeems once, opens a new session, and the second try
   expect(token2).not.toBe(tokenOf(r1));
   expect(r3.statusCode).toBe(200);
   expect(r4.statusCode).toBe(404);
-  expect(r4.json()).toEqual({ code: "recovery_code_unknown", message: "This code is wrong or was already used. Each code works once." });
+  expect(r4.json()).toEqual({
+    code: "recovery_code_unknown",
+    message: "This code is wrong or was already used. Each code works once.",
+  });
   expect(r4.headers["set-cookie"]).toBeUndefined();
 });
 
 it("A5-T2: a recovery code typed in capitals still redeems, because the alphabet is lower case only", async () => {
   const r1 = await signUp(5, "F");
   const created = PersonCreateResponse.parse(r1.json());
-  const r2 = await appUnderTest.inject({ method: "POST", url: "/api/sessions/recover", headers: { origin: ORIGIN, "content-type": "application/json" }, payload: JSON.stringify({ code: created.recoveryCode.toUpperCase() }) });
+  const r2 = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/sessions/recover",
+    headers: { origin: ORIGIN, "content-type": "application/json" },
+    payload: JSON.stringify({ code: created.recoveryCode.toUpperCase() }),
+  });
 
   expect(r2.statusCode).toBe(200);
   expect(RecoverResponse.parse(r2.json())).toEqual({ personId: created.personId });
@@ -172,11 +288,25 @@ it("A5-T2: a recovery code typed in capitals still redeems, because the alphabet
 
 it("R9.2-T1: a transfer link claims once in a new browser, and the second claim is 409 transfer_used_or_expired", async () => {
   const p = await createTestPerson(t.db, "G");
-  const r1 = await appUnderTest.inject({ method: "POST", url: "/api/sessions/transfer", headers: sessionHeader(p.sessionToken) });
+  const r1 = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/sessions/transfer",
+    headers: sessionHeader(p.sessionToken),
+  });
   const parsed = TransferResponse.parse(r1.json());
   const token = new URL(parsed.url).hash.slice(1);
-  const r2 = await appUnderTest.inject({ method: "POST", url: "/api/sessions/claim", headers: { origin: ORIGIN, "content-type": "application/json" }, payload: JSON.stringify({ token }) });
-  const r3 = await appUnderTest.inject({ method: "POST", url: "/api/sessions/claim", headers: { origin: ORIGIN, "content-type": "application/json" }, payload: JSON.stringify({ token }) });
+  const r2 = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/sessions/claim",
+    headers: { origin: ORIGIN, "content-type": "application/json" },
+    payload: JSON.stringify({ token }),
+  });
+  const r3 = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/sessions/claim",
+    headers: { origin: ORIGIN, "content-type": "application/json" },
+    payload: JSON.stringify({ token }),
+  });
 
   expect(r1.statusCode).toBe(200);
   expect(parsed.url).toMatch(/^http:\/\/localhost:3000\/claim#([0-9a-f]{32})$/);
@@ -189,16 +319,35 @@ it("R9.2-T1: a transfer link claims once in a new browser, and the second claim 
   expect(claimedToken).toMatch(TOKEN_PATTERN);
   expect(claimedToken).not.toBe(p.sessionToken);
   expect(r3.statusCode).toBe(409);
-  expect(r3.json()).toEqual({ code: "transfer_used_or_expired", message: "This link was already used or is older than 10 minutes. Make a new one on the device that is signed in." });
+  expect(r3.json()).toEqual({
+    code: "transfer_used_or_expired",
+    message:
+      "This link was already used or is older than 10 minutes. Make a new one on the device that is signed in.",
+  });
 });
 
 it("R9.2-T2: a transfer link past its 10 minutes is 409 transfer_used_or_expired", async () => {
   const p = await createTestPerson(t.db, "H");
-  const r1 = await appUnderTest.inject({ method: "POST", url: "/api/sessions/transfer", headers: sessionHeader(p.sessionToken) });
+  const r1 = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/sessions/transfer",
+    headers: sessionHeader(p.sessionToken),
+  });
   const token = new URL(TransferResponse.parse(r1.json()).url).hash.slice(1);
-  await asPerson(t.db, p.personId, (trx) => trx.updateTable("transfer_links").set({ expires_at: new Date(Date.now() - 1_000) }).where("person_id", "=", p.personId).execute());
+  await asPerson(t.db, p.personId, (trx) =>
+    trx
+      .updateTable("transfer_links")
+      .set({ expires_at: new Date(Date.now() - 1_000) })
+      .where("person_id", "=", p.personId)
+      .execute(),
+  );
 
-  const r2 = await appUnderTest.inject({ method: "POST", url: "/api/sessions/claim", headers: { origin: ORIGIN, "content-type": "application/json" }, payload: JSON.stringify({ token }) });
+  const r2 = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/sessions/claim",
+    headers: { origin: ORIGIN, "content-type": "application/json" },
+    payload: JSON.stringify({ token }),
+  });
 
   expect(r2.statusCode).toBe(409);
   expect(r2.json()).toMatchObject({ code: "transfer_used_or_expired" });
@@ -207,26 +356,83 @@ it("R9.2-T2: a transfer link past its 10 minutes is 409 transfer_used_or_expired
 it("R9.5-T1: the 11th account from one address in an hour is 429 too_many_accounts, and another address still gets 201", async () => {
   const statuses: number[] = [];
   for (let i = 1; i <= 10; i += 1) {
-    const r = await appUnderTest.inject({ method: "POST", url: "/api/people", headers: { origin: ORIGIN, "content-type": "application/json", "x-forwarded-for": "203.0.113.7" }, payload: JSON.stringify({ displayName: "R" + String(i) }) });
+    const r = await appUnderTest.inject({
+      method: "POST",
+      url: "/api/people",
+      headers: {
+        origin: ORIGIN,
+        "content-type": "application/json",
+        "x-forwarded-for": "203.0.113.7",
+      },
+      payload: JSON.stringify({ displayName: "R" + String(i) }),
+    });
     statuses.push(r.statusCode);
   }
-  const eleventh = await appUnderTest.inject({ method: "POST", url: "/api/people", headers: { origin: ORIGIN, "content-type": "application/json", "x-forwarded-for": "203.0.113.7" }, payload: JSON.stringify({ displayName: "R11" }) });
-  const other = await appUnderTest.inject({ method: "POST", url: "/api/people", headers: { origin: ORIGIN, "content-type": "application/json", "x-forwarded-for": "198.51.100.9" }, payload: JSON.stringify({ displayName: "R12" }) });
+  const eleventh = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/people",
+    headers: {
+      origin: ORIGIN,
+      "content-type": "application/json",
+      "x-forwarded-for": "203.0.113.7",
+    },
+    payload: JSON.stringify({ displayName: "R11" }),
+  });
+  const other = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/people",
+    headers: {
+      origin: ORIGIN,
+      "content-type": "application/json",
+      "x-forwarded-for": "198.51.100.9",
+    },
+    payload: JSON.stringify({ displayName: "R12" }),
+  });
 
   expect(statuses.every((status) => status === 201)).toBe(true);
   expect(eleventh.statusCode).toBe(429);
-  expect(eleventh.json()).toMatchObject({ code: "too_many_accounts", message: "This network made 10 accounts in the last hour. Wait an hour, then try again." });
+  expect(eleventh.json()).toMatchObject({
+    code: "too_many_accounts",
+    message: "This network made 10 accounts in the last hour. Wait an hour, then try again.",
+  });
   expect(other.statusCode).toBe(201);
 });
 
 it("R9.5-T2: a client cannot dodge the account limit by choosing the first X-Forwarded-For entry; the entry the proxy appends is the one counted", async () => {
   const statuses: number[] = [];
   for (let n = 1; n <= 10; n += 1) {
-    const r = await appUnderTest.inject({ method: "POST", url: "/api/people", headers: { origin: ORIGIN, "content-type": "application/json", "x-forwarded-for": "198.51.100." + String(n) + ", 192.0.2.77" }, payload: JSON.stringify({ displayName: "F" + String(n) }) });
+    const r = await appUnderTest.inject({
+      method: "POST",
+      url: "/api/people",
+      headers: {
+        origin: ORIGIN,
+        "content-type": "application/json",
+        "x-forwarded-for": "198.51.100." + String(n) + ", 192.0.2.77",
+      },
+      payload: JSON.stringify({ displayName: "F" + String(n) }),
+    });
     statuses.push(r.statusCode);
   }
-  const eleventh = await appUnderTest.inject({ method: "POST", url: "/api/people", headers: { origin: ORIGIN, "content-type": "application/json", "x-forwarded-for": "198.51.100.11, 192.0.2.77" }, payload: JSON.stringify({ displayName: "F11" }) });
-  const otherProxyAddress = await appUnderTest.inject({ method: "POST", url: "/api/people", headers: { origin: ORIGIN, "content-type": "application/json", "x-forwarded-for": "198.51.100.12, 192.0.2.78" }, payload: JSON.stringify({ displayName: "F12" }) });
+  const eleventh = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/people",
+    headers: {
+      origin: ORIGIN,
+      "content-type": "application/json",
+      "x-forwarded-for": "198.51.100.11, 192.0.2.77",
+    },
+    payload: JSON.stringify({ displayName: "F11" }),
+  });
+  const otherProxyAddress = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/people",
+    headers: {
+      origin: ORIGIN,
+      "content-type": "application/json",
+      "x-forwarded-for": "198.51.100.12, 192.0.2.78",
+    },
+    payload: JSON.stringify({ displayName: "F12" }),
+  });
 
   expect(statuses.every((status) => status === 201)).toBe(true);
   expect(eleventh.statusCode).toBe(429);
@@ -235,8 +441,16 @@ it("R9.5-T2: a client cannot dodge the account limit by choosing the first X-For
 });
 
 it("D4-T1: a JSON body over 1 MiB is 413 payload_too_large", async () => {
-  const r = await appUnderTest.inject({ method: "POST", url: "/api/people", headers: { origin: ORIGIN, "content-type": "application/json", "x-forwarded-for": "192.0.2.6" }, payload: JSON.stringify({ displayName: "a".repeat(1_048_576) }) });
+  const r = await appUnderTest.inject({
+    method: "POST",
+    url: "/api/people",
+    headers: { origin: ORIGIN, "content-type": "application/json", "x-forwarded-for": "192.0.2.6" },
+    payload: JSON.stringify({ displayName: "a".repeat(1_048_576) }),
+  });
 
   expect(r.statusCode).toBe(413);
-  expect(r.json()).toEqual({ code: "payload_too_large", message: "The request body is over the size limit for this route. Send a smaller body." });
+  expect(r.json()).toEqual({
+    code: "payload_too_large",
+    message: "The request body is over the size limit for this route. Send a smaller body.",
+  });
 });

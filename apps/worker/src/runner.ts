@@ -2,10 +2,22 @@ import { pathToFileURL } from "node:url";
 import { pino } from "pino";
 import { makeWorkerUtils, run, type Runner, type Task } from "graphile-worker";
 import { ZodError } from "zod";
-import { ContractError, CRONTAB, JOB_NAMES, WORKER_CONCURRENCY, workerEnv } from "@meet-first/contracts";
+import {
+  ContractError,
+  CRONTAB,
+  JOB_NAMES,
+  WORKER_CONCURRENCY,
+  workerEnv,
+} from "@meet-first/contracts";
 import { assertSchemaVersion, makeDatabase, POOL_SIZE, SCHEMA_VERSION } from "@meet-first/db";
 import { assertWorkerModeAllowed, runBootSelfTest, selfTestExitCode } from "@meet-first/llm";
-import { definePayloadTask, makeJobContext, type JobContext, type JobTask, type TaskList } from "./job-context.js";
+import {
+  definePayloadTask,
+  makeJobContext,
+  type JobContext,
+  type JobTask,
+  type TaskList,
+} from "./job-context.js";
 import { briefTasks } from "./briefs/index.js";
 import { cardTasks } from "./cards/index.js";
 import { comicTasks } from "./comics/index.js";
@@ -51,7 +63,8 @@ export function crontabForTasks(tasks: TaskList): string {
 
 // The one line printed when the worker cannot start: the env names that failed, or the error code and sentence.
 export function describeBootError(error: unknown): string {
-  if (error instanceof ZodError) return `env_invalid: ${error.issues.map((issue) => issue.path.join(".")).join(", ")}`;
+  if (error instanceof ZodError)
+    return `env_invalid: ${error.issues.map((issue) => issue.path.join(".")).join(", ")}`;
   if (error instanceof ContractError) return `${error.code}: ${error.message}`;
   return String(error);
 }
@@ -69,9 +82,19 @@ export async function startWorker(processEnv: NodeJS.ProcessEnv): Promise<Runner
     log.info(line);
   });
   if (selfTestExitCode(results) !== 0) {
-    throw new ContractError("self_test_failed", "The boot self-test refused at least one output schema. Read the self-test lines, fix the schema, and start the worker again.", 500);
+    throw new ContractError(
+      "self_test_failed",
+      "The boot self-test refused at least one output schema. Read the self-test lines, fix the schema, and start the worker again.",
+      500,
+    );
   }
-  return run({ connectionString: env.DATABASE_URL_WORKER, concurrency: WORKER_CONCURRENCY, crontab: crontabForTasks(TASKS), taskList: graphileTaskList(TASKS, context), pollInterval: 1000 });
+  return run({
+    connectionString: env.DATABASE_URL_WORKER,
+    concurrency: WORKER_CONCURRENCY,
+    crontab: crontabForTasks(TASKS),
+    taskList: graphileTaskList(TASKS, context),
+    pollInterval: 1000,
+  });
 }
 
 // Starts the worker when this file is the process entry (pnpm start); importing it for tests starts nothing.

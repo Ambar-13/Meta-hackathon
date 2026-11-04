@@ -15,4 +15,13 @@ export * from "./briefs.js";
 export * from "./directory.js";
 export * from "./social.js";
 // Every route map under one name: routes.sources.createSource.path, routes.meetings.startMeeting.method, and so on.
-export const routes = { people: peopleRoutes, sources: sourcesRoutes, cards: cardsRoutes, meetings: meetingsRoutes, briefs: briefsRoutes, directory: directoryRoutes, asks: asksRoutes, social: socialRoutes } as const;
+export const routes = {
+  people: peopleRoutes,
+  sources: sourcesRoutes,
+  cards: cardsRoutes,
+  meetings: meetingsRoutes,
+  briefs: briefsRoutes,
+  directory: directoryRoutes,
+  asks: asksRoutes,
+  social: socialRoutes,
+} as const;

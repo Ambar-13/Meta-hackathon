@@ -13,7 +13,9 @@ export const ClaimScreen = (): ReactElement => {
   }, [isDone, navigate]);
   return (
     <ScreenFrame title="Move your profile here">
-      {state.kind === "missing" ? <p>This link is not complete. Make a new one in Settings on your other browser.</p> : null}
+      {state.kind === "missing" ? (
+        <p>This link is not complete. Make a new one in Settings on your other browser.</p>
+      ) : null}
       {state.kind === "ready" || state.kind === "sending" ? (
         <>
           <p>This link moves your profile into this browser. It works once.</p>

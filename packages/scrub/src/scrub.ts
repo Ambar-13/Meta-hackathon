@@ -1,5 +1,13 @@
 import type { Redaction, ScrubResult } from "@meet-first/contracts";
-import { CODE_PLACEHOLDER, REDACTED_PLACEHOLDER, ROLE_TOKEN_PATTERN, formatPlaceholder, isCategory, makePlaceholderCounter, type Segment } from "./placeholders.js";
+import {
+  CODE_PLACEHOLDER,
+  REDACTED_PLACEHOLDER,
+  ROLE_TOKEN_PATTERN,
+  formatPlaceholder,
+  isCategory,
+  makePlaceholderCounter,
+  type Segment,
+} from "./placeholders.js";
 import { replaceCodeFences } from "./code-fences.js";
 import { SECRET_RULES, applyPatternRule } from "./secret-patterns.js";
 import { IDENTIFIER_RULES } from "./identifier-patterns.js";
@@ -9,7 +17,10 @@ import { applyEntropyRule } from "./entropy.js";
 export type ScrubOptions = { allowlist: readonly string[]; nextId?: () => string };
 
 // Every placeholder kind already in a text: a redacted one, a code one, or a role token, as one pattern with groups in that order.
-const EXISTING_TOKENS = new RegExp(REDACTED_PLACEHOLDER.source + "|" + CODE_PLACEHOLDER.source + "|" + ROLE_TOKEN_PATTERN.source, "g");
+const EXISTING_TOKENS = new RegExp(
+  REDACTED_PLACEHOLDER.source + "|" + CODE_PLACEHOLDER.source + "|" + ROLE_TOKEN_PATTERN.source,
+  "g",
+);
 
 // How a placeholder found in free text is protected: its category, or null for a role token, or null overall when it stays free.
 function protectedCategory(match: RegExpMatchArray): { category: Segment["category"] } | null {
@@ -27,12 +38,14 @@ function markFree(segment: Segment): Segment[] {
     const found = protectedCategory(match);
     if (found === null) continue;
     const start = match.index;
-    if (start > last) pieces.push({ text: segment.text.slice(last, start), isProtected: false, category: null });
+    if (start > last)
+      pieces.push({ text: segment.text.slice(last, start), isProtected: false, category: null });
     pieces.push({ text: match[0], isProtected: true, category: found.category });
     last = start + match[0].length;
   }
   if (pieces.length === 0) return [segment];
-  if (last < segment.text.length) pieces.push({ text: segment.text.slice(last), isProtected: false, category: null });
+  if (last < segment.text.length)
+    pieces.push({ text: segment.text.slice(last), isProtected: false, category: null });
   return pieces;
 }
 
@@ -52,7 +65,10 @@ export function assignPlaceholderIds(segments: Segment[], nextId: () => string):
     }
     const placeholderId = nextId();
     redactions.push({ category: segment.category, placeholderId });
-    text += segment.category === "code" ? segment.text : formatPlaceholder(segment.category, placeholderId);
+    text +=
+      segment.category === "code"
+        ? segment.text
+        : formatPlaceholder(segment.category, placeholderId);
   }
   return { text, redactions };
 }
@@ -63,7 +79,8 @@ export function scrub(text: string, options: ScrubOptions): ScrubResult {
   const nextId = options.nextId ?? makePlaceholderCounter();
   let segments = replaceCodeFences(text);
   segments = markExistingPlaceholders(segments);
-  for (const rule of [...SECRET_RULES, ...IDENTIFIER_RULES]) segments = applyPatternRule(segments, rule);
+  for (const rule of [...SECRET_RULES, ...IDENTIFIER_RULES])
+    segments = applyPatternRule(segments, rule);
   segments = applyEntropyRule(segments, options.allowlist);
   return assignPlaceholderIds(segments, nextId);
 }

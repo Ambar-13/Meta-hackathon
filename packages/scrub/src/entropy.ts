@@ -54,12 +54,14 @@ function splitTokens(segment: Segment, names: readonly string[]): Segment[] {
     const { token, lead } = coreOf(match[0]);
     if (!isKeyLike(token, names)) continue;
     const start = match.index + lead;
-    if (start > last) pieces.push({ text: segment.text.slice(last, start), isProtected: false, category: null });
+    if (start > last)
+      pieces.push({ text: segment.text.slice(last, start), isProtected: false, category: null });
     pieces.push({ text: token, isProtected: true, category: "secret" });
     last = start + token.length;
   }
   if (pieces.length === 0) return [segment];
-  if (last < segment.text.length) pieces.push({ text: segment.text.slice(last), isProtected: false, category: null });
+  if (last < segment.text.length)
+    pieces.push({ text: segment.text.slice(last), isProtected: false, category: null });
   return pieces;
 }
 
@@ -68,5 +70,7 @@ export function applyEntropyRule(segments: Segment[], allowlist: readonly string
   const names = allowlist
     .map((name) => name.trim().toLowerCase())
     .filter((name) => name.length >= ALLOWLIST_MIN_LENGTH);
-  return segments.flatMap((segment) => (segment.isProtected ? [segment] : splitTokens(segment, names)));
+  return segments.flatMap((segment) =>
+    segment.isProtected ? [segment] : splitTokens(segment, names),
+  );
 }

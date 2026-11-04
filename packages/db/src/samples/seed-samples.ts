@@ -33,62 +33,181 @@ function unusableHash(): Buffer {
 }
 
 // The card item rows of one sample person, each quote checked against its note as the card job checks the model's.
-function itemRows(person: SamplePerson, ids: { personId: string; cardId: string }, turns: ReadonlyArray<{ id: string; text: string; norm_text: string }>) {
+function itemRows(
+  person: SamplePerson,
+  ids: { personId: string; cardId: string },
+  turns: ReadonlyArray<{ id: string; text: string; norm_text: string }>,
+) {
   return person.items.map((item, index) => {
     const turn = turns[item.note];
-    const check = turn === undefined ? null : verifyQuote({ quote: item.quote, turnText: turn.text, turnNormText: turn.norm_text, forbidden: [] });
+    const check =
+      turn === undefined
+        ? null
+        : verifyQuote({
+            quote: item.quote,
+            turnText: turn.text,
+            turnNormText: turn.norm_text,
+            forbidden: [],
+          });
     if (turn === undefined || check === null || !check.ok) {
-      throw new ContractError("seed_quote_not_in_note", `${person.displayName}'s item ${String(index + 1)} quotes words that are not in note ${String(item.note)}. Fix sample-people.ts.`, 500);
+      throw new ContractError(
+        "seed_quote_not_in_note",
+        `${person.displayName}'s item ${String(index + 1)} quotes words that are not in note ${String(item.note)}. Fix sample-people.ts.`,
+        500,
+      );
     }
     return {
-      card_id: ids.cardId, person_id: ids.personId, position: index + 1, kind: item.kind, claim: item.claim, lang: "en", gloss: item.claim, turn_id: turn.id,
-      quote: item.quote, norm_quote: normQuote(item.quote), verified: true, flagged: false, approved: true, sensitive: false, is_public: item.isPublic,
+      card_id: ids.cardId,
+      person_id: ids.personId,
+      position: index + 1,
+      kind: item.kind,
+      claim: item.claim,
+      lang: "en",
+      gloss: item.claim,
+      turn_id: turn.id,
+      quote: item.quote,
+      norm_quote: normQuote(item.quote),
+      verified: true,
+      flagged: false,
+      approved: true,
+      sensitive: false,
+      is_public: item.isPublic,
     };
   });
 }
 
 // Writes one sample person, listed at listedAt. The names pass runs as the worker, so the notes are committed first; everything after
 // it is one transaction, so a failed run leaves at most a person with unfrozen notes, whom Explore never shows, and never half a listing.
-async function addSamplePerson(clients: SeedClients, person: SamplePerson, times: { now: Date; listedAt: Date }): Promise<void> {
+// eslint-disable-next-line max-lines-per-function -- one sample person's rows in the order the transaction writes them
+async function addSamplePerson(
+  clients: SeedClients,
+  person: SamplePerson,
+  times: { now: Date; listedAt: Date },
+): Promise<void> {
   const { now } = times;
   const { api, worker } = clients;
-  const created = await sql<{ person_id: string | null }>`SELECT auth_create_person(${person.displayName}, ${[]}::text[], ${unusableHash()}, ${unusableHash()}) AS person_id`.execute(api);
+  const created = await sql<{
+    person_id: string | null;
+  }>`SELECT auth_create_person(${person.displayName}, ${[]}::text[], ${unusableHash()}, ${unusableHash()}) AS person_id`.execute(
+    api,
+  );
   const personId = created.rows[0]?.person_id;
-  if (personId === null || personId === undefined) throw new ContractError("seed_person_failed", "auth_create_person returned no id. Check that the migrations ran.", 500);
+  if (personId === null || personId === undefined)
+    throw new ContractError(
+      "seed_person_failed",
+      "auth_create_person returned no id. Check that the migrations ran.",
+      500,
+    );
   const sourceId = await withPerson(api, personId, async (trx) => {
-    const source = await trx.insertInto("sources").values({
-      person_id: personId, kind: "notes", content_hash: createHash("sha256").update(person.notes.join("\n"), "utf8").digest(), turn_count: person.notes.length,
-      canonical_chars: person.notes.reduce((sum, text) => sum + text.length, 0), persona_signal: "0.500", parser_version: "sample", scrub_version: "sample", attested_at: now,
-    }).returning("id").executeTakeFirstOrThrow();
-    await trx.insertInto("turns").values(person.notes.map((text, index) => ({ source_id: source.id, person_id: personId, turn_index: index, role: "user" as const, text, norm_text: normQuote(text) }))).execute();
+    const source = await trx
+      .insertInto("sources")
+      .values({
+        person_id: personId,
+        kind: "notes",
+        content_hash: createHash("sha256").update(person.notes.join("\n"), "utf8").digest(),
+        turn_count: person.notes.length,
+        canonical_chars: person.notes.reduce((sum, text) => sum + text.length, 0),
+        persona_signal: "0.500",
+        parser_version: "sample",
+        scrub_version: "sample",
+        attested_at: now,
+      })
+      .returning("id")
+      .executeTakeFirstOrThrow();
+    await trx
+      .insertInto("turns")
+      .values(
+        person.notes.map((text, index) => ({
+          source_id: source.id,
+          person_id: personId,
+          turn_index: index,
+          role: "user" as const,
+          text,
+          norm_text: normQuote(text),
+        })),
+      )
+      .execute();
     return source.id;
   });
-  await withPerson(worker, personId, (trx) => trx.insertInto("names_passes").values({ source_id: sourceId, person_id: personId }).execute());
+  await withPerson(worker, personId, (trx) =>
+    trx.insertInto("names_passes").values({ source_id: sourceId, person_id: personId }).execute(),
+  );
   await withPerson(api, personId, async (trx) => {
-    await trx.updateTable("sources").set({ names_reviewed_at: now, frozen_at: now }).where("id", "=", sourceId).execute();
-    const turns = await trx.selectFrom("turns").select(["id", "text", "norm_text"]).where("source_id", "=", sourceId).orderBy("turn_index").execute();
-    const card = await trx.insertInto("cards").values({
-      source_id: sourceId, person_id: personId, state: "approved", model: "sample", prompt_version: "sample", items_total: person.items.length, items_verified: person.items.length,
-      thin: false, recall_allowed: true, friends_can_ask: true, built_at: now, approved_at: now,
-    }).returning("id").executeTakeFirstOrThrow();
-    await trx.insertInto("card_items").values(itemRows(person, { personId, cardId: card.id }, turns)).execute();
+    await trx
+      .updateTable("sources")
+      .set({ names_reviewed_at: now, frozen_at: now })
+      .where("id", "=", sourceId)
+      .execute();
+    const turns = await trx
+      .selectFrom("turns")
+      .select(["id", "text", "norm_text"])
+      .where("source_id", "=", sourceId)
+      .orderBy("turn_index")
+      .execute();
+    const card = await trx
+      .insertInto("cards")
+      .values({
+        source_id: sourceId,
+        person_id: personId,
+        state: "approved",
+        model: "sample",
+        prompt_version: "sample",
+        items_total: person.items.length,
+        items_verified: person.items.length,
+        thin: false,
+        recall_allowed: true,
+        friends_can_ask: true,
+        built_at: now,
+        approved_at: now,
+      })
+      .returning("id")
+      .executeTakeFirstOrThrow();
+    await trx
+      .insertInto("card_items")
+      .values(itemRows(person, { personId, cardId: card.id }, turns))
+      .execute();
     await trx.updateTable("people").set({ is_sample: true }).where("id", "=", personId).execute();
-    await trx.insertInto("directory_listings").values({ person_id: personId, card_id: card.id, line: person.line, open_to_romance: false, created_at: times.listedAt }).execute();
-    await trx.insertInto("posts").values(person.posts.map((post) => ({ person_id: personId, text: post.text, created_at: new Date(now.getTime() - post.hoursAgo * HOUR_MS) }))).execute();
+    await trx
+      .insertInto("directory_listings")
+      .values({
+        person_id: personId,
+        card_id: card.id,
+        line: person.line,
+        open_to_romance: false,
+        created_at: times.listedAt,
+      })
+      .execute();
+    await trx
+      .insertInto("posts")
+      .values(
+        person.posts.map((post) => ({
+          person_id: personId,
+          text: post.text,
+          created_at: new Date(now.getTime() - post.hoursAgo * HOUR_MS),
+        })),
+      )
+      .execute();
   });
 }
 
 // Adds every sample person Explore does not list yet, under the seed lock; the tests pass their own people and clock. Each listing is
 // a minute older than the one before it, so Explore, newest first, shows them in the order of the list.
-export async function seedSamplePeople(clients: SeedClients, options: { people?: readonly SamplePerson[]; now?: Date } = {}): Promise<SeedReport> {
+export async function seedSamplePeople(
+  clients: SeedClients,
+  options: { people?: readonly SamplePerson[]; now?: Date } = {},
+): Promise<SeedReport> {
   const { api } = clients;
   const people = options.people ?? SAMPLE_PEOPLE;
   const now = options.now ?? new Date();
   return api.connection().execute(async (lock) => {
-    const taken = await sql<{ ok: boolean }>`SELECT pg_try_advisory_lock(${SEED_LOCK}::bigint) AS ok`.execute(lock);
+    const taken = await sql<{
+      ok: boolean;
+    }>`SELECT pg_try_advisory_lock(${SEED_LOCK}::bigint) AS ok`.execute(lock);
     if (taken.rows[0]?.ok !== true) return { added: [], present: [], wasBusy: true };
     try {
-      const listed = await sql<{ display_name: string }>`SELECT display_name FROM sample_people_listed()`.execute(api);
+      const listed = await sql<{
+        display_name: string;
+      }>`SELECT display_name FROM sample_people_listed()`.execute(api);
       const present = new Set(listed.rows.map((row) => row.display_name));
       const report: SeedReport = { added: [], present: [], wasBusy: false };
       for (const [index, person] of people.entries()) {
@@ -96,7 +215,10 @@ export async function seedSamplePeople(clients: SeedClients, options: { people?:
           report.present.push(person.displayName);
           continue;
         }
-        await addSamplePerson(clients, person, { now, listedAt: new Date(now.getTime() - index * MINUTE_MS) });
+        await addSamplePerson(clients, person, {
+          now,
+          listedAt: new Date(now.getTime() - index * MINUTE_MS),
+        });
         report.added.push(person.displayName);
       }
       return report;
@@ -107,7 +229,9 @@ export async function seedSamplePeople(clients: SeedClients, options: { people?:
 }
 
 // The two role URLs the seed needs; it never sees the app_migrate URL.
-const SeedEnv = apiEnv.pick({ DATABASE_URL_API: true }).merge(workerEnv.pick({ DATABASE_URL_WORKER: true }));
+const SeedEnv = apiEnv
+  .pick({ DATABASE_URL_API: true })
+  .merge(workerEnv.pick({ DATABASE_URL_WORKER: true }));
 
 async function main(): Promise<void> {
   const env = SeedEnv.safeParse(process.env);
@@ -119,8 +243,12 @@ async function main(): Promise<void> {
   const worker = makeDatabase(env.data.DATABASE_URL_WORKER, 1);
   try {
     const report = await seedSamplePeople({ api, worker });
-    if (report.wasBusy) console.log("seed-samples: another seed is running, so this one added nothing");
-    else console.log(`seed-samples: added ${String(report.added.length)} (${report.added.join(", ") || "none"}), already listed ${String(report.present.length)}`);
+    if (report.wasBusy)
+      console.log("seed-samples: another seed is running, so this one added nothing");
+    else
+      console.log(
+        `seed-samples: added ${String(report.added.length)} (${report.added.join(", ") || "none"}), already listed ${String(report.present.length)}`,
+      );
   } finally {
     await api.destroy();
     await worker.destroy();

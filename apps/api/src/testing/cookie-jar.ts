@@ -17,7 +17,9 @@ function toCookieLines(value: string | string[] | number | undefined): string[] 
 }
 
 // Reads __Host-session from Set-Cookie: the token, "" when the server cleared it (an empty value or Max-Age=0), or undefined when no such line came.
-export function readSessionCookie(setCookie: string | string[] | number | undefined): string | undefined {
+export function readSessionCookie(
+  setCookie: string | string[] | number | undefined,
+): string | undefined {
   for (const line of toCookieLines(setCookie)) {
     const [pair = "", ...attributes] = line.split(";");
     const separator = pair.indexOf("=");
@@ -25,7 +27,9 @@ export function readSessionCookie(setCookie: string | string[] | number | undefi
       continue;
     }
     const value = pair.slice(separator + 1).trim();
-    const isCleared = value === "" || attributes.some((attribute) => attribute.trim().toLowerCase() === "max-age=0");
+    const isCleared =
+      value === "" ||
+      attributes.some((attribute) => attribute.trim().toLowerCase() === "max-age=0");
     return isCleared ? "" : value;
   }
   return undefined;
@@ -37,7 +41,10 @@ export function sessionHeader(token: string): Record<string, string> {
 }
 
 // Keeps the session cookie between inject calls the way a browser would, and adds the test app's Origin to every request.
-export function cookieJar(): { header: () => Record<string, string>; absorb: (response: LightMyRequestResponse) => void } {
+export function cookieJar(): {
+  header: () => Record<string, string>;
+  absorb: (response: LightMyRequestResponse) => void;
+} {
   let token: string | undefined;
   return {
     header: () => (token === undefined ? { origin: TEST_APP_ORIGIN } : sessionHeader(token)),

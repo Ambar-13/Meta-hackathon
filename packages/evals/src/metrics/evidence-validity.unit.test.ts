@@ -22,14 +22,29 @@ function rowsWith(partial: Partial<EvalRows>): EvalRows {
 
 // One claim row with the flags the metric reads.
 function claim(evidenceValid: boolean, flagged: boolean) {
-  return { meetingId: "m1", side: "a" as const, verified: evidenceValid, flagged, evidenceValid, text: "A claim." };
+  return {
+    meetingId: "m1",
+    side: "a" as const,
+    verified: evidenceValid,
+    flagged,
+    evidenceValid,
+    text: "A claim.",
+  };
 }
 
 describe("evidence validity", () => {
   it("W2-EVAL-T1 (A2, R6.4): evidence validity is valid claims over all committed claims, flagged ones included", () => {
     const claims = [
-      claim(true, false), claim(true, false), claim(true, false), claim(true, false), claim(true, false), claim(true, false), claim(true, false),
-      claim(false, true), claim(false, true), claim(false, false),
+      claim(true, false),
+      claim(true, false),
+      claim(true, false),
+      claim(true, false),
+      claim(true, false),
+      claim(true, false),
+      claim(true, false),
+      claim(false, true),
+      claim(false, true),
+      claim(false, false),
     ];
     const result = measureEvidenceValidity(rowsWith({ claims }));
     expect(result.value).toBeCloseTo(0.7, 10);

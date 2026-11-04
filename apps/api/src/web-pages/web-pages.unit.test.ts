@@ -20,8 +20,21 @@ it("R12.5-T5: isWorkerFresh is true under 120 s and false at 120 s or with no he
 });
 
 it("R12.5-T6: toHealth reports db false when the reads failed, and ok only with a fresh worker and a disk under 80%", () => {
-  expect(toHealth(null, new Date(0), 10_000_000_000)).toEqual({ ok: false, db: false, worker: false, schemaVersion: 0, diskPct: null, degraded: false });
-  expect(toHealth({ schemaVersion: 1, workerSeenAt: new Date(0), databaseBytes: 1_000 }, new Date(60_000), 10_000_000_000)).toEqual({
+  expect(toHealth(null, new Date(0), 10_000_000_000)).toEqual({
+    ok: false,
+    db: false,
+    worker: false,
+    schemaVersion: 0,
+    diskPct: null,
+    degraded: false,
+  });
+  expect(
+    toHealth(
+      { schemaVersion: 1, workerSeenAt: new Date(0), databaseBytes: 1_000 },
+      new Date(60_000),
+      10_000_000_000,
+    ),
+  ).toEqual({
     ok: true,
     db: true,
     worker: true,
@@ -29,7 +42,13 @@ it("R12.5-T6: toHealth reports db false when the reads failed, and ok only with 
     diskPct: 0,
     degraded: false,
   });
-  expect(toHealth({ schemaVersion: 1, workerSeenAt: new Date(0), databaseBytes: 9_000_000_000 }, new Date(60_000), 10_000_000_000)).toEqual({
+  expect(
+    toHealth(
+      { schemaVersion: 1, workerSeenAt: new Date(0), databaseBytes: 9_000_000_000 },
+      new Date(60_000),
+      10_000_000_000,
+    ),
+  ).toEqual({
     ok: false,
     db: true,
     worker: true,

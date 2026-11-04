@@ -11,7 +11,9 @@ type OutputLine = { text: string; isFence: boolean };
 
 // The line index that closes a fence opened on `start` with `marker`, or the line count when no line closes it.
 function closingIndex(lines: string[], start: number, marker: string): number {
-  const closer = new RegExp("^[ \\t]{0,3}" + marker.charAt(0) + "{" + String(marker.length) + ",}[ \\t]*$");
+  const closer = new RegExp(
+    "^[ \\t]{0,3}" + marker.charAt(0) + "{" + String(marker.length) + ",}[ \\t]*$",
+  );
   for (let index = start + 1; index < lines.length; index += 1) {
     if (closer.test(lines[index] ?? "")) return index;
   }
@@ -57,7 +59,10 @@ export function replaceCodeFences(text: string): Segment[] {
     }
     const close = closingIndex(lines, index, opener[1] ?? "`");
     const count = close - index - 1;
-    output.push({ text: CODE_FENCE_PLACEHOLDER(languageOf(opener[2] ?? ""), count), isFence: true });
+    output.push({
+      text: CODE_FENCE_PLACEHOLDER(languageOf(opener[2] ?? ""), count),
+      isFence: true,
+    });
     index = close + 1;
   }
   return toSegments(output);

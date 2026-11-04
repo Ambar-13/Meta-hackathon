@@ -35,8 +35,19 @@ const COPY_ANSWER_LABEL = "Your Meety's answer";
 // The name on the caller's own persona bubble, so its initial reads Y.
 const SELF_NAME = "You";
 // The words for where each sent ask is, and its kind.
-const SENT_STATE_LINES: Record<AskSummary["state"], string> = { checking: "Still running", asking: "Still running", ranking: "Still running", done: "Answered", refused: "Not allowed", failed: "Could not finish" };
-const SENT_MODE_LINES: Record<AskSummary["mode"], string> = { react: "Asked a friend's Meety", help: "Found who could help", self: "Asked your own Meety" };
+const SENT_STATE_LINES: Record<AskSummary["state"], string> = {
+  checking: "Still running",
+  asking: "Still running",
+  ranking: "Still running",
+  done: "Answered",
+  refused: "Not allowed",
+  failed: "Could not finish",
+};
+const SENT_MODE_LINES: Record<AskSummary["mode"], string> = {
+  react: "Asked a friend's Meety",
+  help: "Found who could help",
+  self: "Asked your own Meety",
+};
 // The most characters the ask box takes, the upper bound of AskCreate.
 const ASK_MAX_CHARACTERS = 300;
 
@@ -52,7 +63,8 @@ function askBoxLabel(friend: Friend): string {
 
 // The line that opens one copy: who asked and what, by the kind of ask.
 function askedLine(copy: AboutMeAnswer): string {
-  if (copy.mode === "react") return `${copy.askerName} asked how you would probably react to: ${copy.text}`;
+  if (copy.mode === "react")
+    return `${copy.askerName} asked how you would probably react to: ${copy.text}`;
   return `${copy.askerName} asked people in Explore for help: ${copy.text}`;
 }
 
@@ -60,11 +72,19 @@ function askedLine(copy: AboutMeAnswer): string {
 const PersonName = (props: { name: string; listingId: string | null }): ReactElement => {
   const name = <strong className="friends-name">{props.name}</strong>;
   if (props.listingId === null) return name;
-  return <Link className="friends-name-link" to={APP_PATHS.person(props.listingId)}>{name}</Link>;
+  return (
+    <Link className="friends-name-link" to={APP_PATHS.person(props.listingId)}>
+      {name}
+    </Link>
+  );
 };
 
 // The ask box of the chosen friend; its text stays here until it is sent.
-const ReactAskForm = (props: { friend: Friend; isSending: boolean; onSend: (text: string) => void }): ReactElement => {
+const ReactAskForm = (props: {
+  friend: Friend;
+  isSending: boolean;
+  onSend: (text: string) => void;
+}): ReactElement => {
   const [text, setText] = useState("");
   const onSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
@@ -74,7 +94,13 @@ const ReactAskForm = (props: { friend: Friend; isSending: boolean; onSend: (text
     <form className="friends-ask-form" onSubmit={onSubmit}>
       <label>
         {askBoxLabel(props.friend)}
-        <textarea maxLength={ASK_MAX_CHARACTERS} value={text} onChange={(event) => { setText(event.target.value); }} />
+        <textarea
+          maxLength={ASK_MAX_CHARACTERS}
+          value={text}
+          onChange={(event) => {
+            setText(event.target.value);
+          }}
+        />
       </label>
       <button type="submit" disabled={props.isSending}>
         {SEND_LABEL}
@@ -88,23 +114,43 @@ const ReactAskForm = (props: { friend: Friend; isSending: boolean; onSend: (text
 const FriendAction = (props: { friend: Friend; model: FriendsScreenModel }): ReactElement => {
   const { friend, model } = props;
   const isChosen = model.chosenPairId === friend.pairId;
-  const meetTo = friend.listingId === null ? APP_PATHS.lobby(friend.pairId) : APP_PATHS.person(friend.listingId);
+  const meetTo =
+    friend.listingId === null ? APP_PATHS.lobby(friend.pairId) : APP_PATHS.person(friend.listingId);
   return (
     <div className="friends-action">
       <div className="friends-buttons">
         {friend.canAsk ? (
-          <button type="button" className="quiet" aria-expanded={isChosen} onClick={() => { model.choose(friend.pairId); }}>
+          <button
+            type="button"
+            className="quiet"
+            aria-expanded={isChosen}
+            onClick={() => {
+              model.choose(friend.pairId);
+            }}
+          >
             {ASK_BUTTON_LABEL}
           </button>
         ) : (
           <p className="muted friends-off">{asksOffLine(friend)}</p>
         )}
-        <Link className="btn quiet" to={meetTo} aria-label={`${MEET_LABEL} ${friend.displayName}`}>{MEET_LABEL}</Link>
+        <Link className="btn quiet" to={meetTo} aria-label={`${MEET_LABEL} ${friend.displayName}`}>
+          {MEET_LABEL}
+        </Link>
       </div>
       {isChosen && friend.canAsk ? (
         <>
-          <ReactAskForm friend={friend} isSending={model.isSending} onSend={(text) => { void model.sendReactAsk(friend.pairId, text); }} />
-          {model.formLine === null ? null : <p className="friends-form-line" role="alert">{model.formLine}</p>}
+          <ReactAskForm
+            friend={friend}
+            isSending={model.isSending}
+            onSend={(text) => {
+              void model.sendReactAsk(friend.pairId, text);
+            }}
+          />
+          {model.formLine === null ? null : (
+            <p className="friends-form-line" role="alert">
+              {model.formLine}
+            </p>
+          )}
           {model.sendError === null ? null : <ErrorNotice error={model.sendError} />}
         </>
       ) : null}
@@ -115,10 +161,23 @@ const FriendAction = (props: { friend: Friend; model: FriendsScreenModel }): Rea
 // The friends part: loading, an error, nobody yet, or one row per friend in the order the server gives (most recently joined first).
 const FriendsBody = (props: { model: FriendsScreenModel }): ReactElement => {
   const { friends } = props.model;
-  if (friends.value === null) return friends.error === null ? <LoadingLine text={LOADING_FRIENDS_LINE} /> : <ErrorNotice error={friends.error} />;
+  if (friends.value === null)
+    return friends.error === null ? (
+      <LoadingLine text={LOADING_FRIENDS_LINE} />
+    ) : (
+      <ErrorNotice error={friends.error} />
+    );
   if (friends.value.friends.length === 0) {
-    const action = <Link className="btn" to={APP_PATHS.search}>{NO_FRIENDS_ACTION}</Link>;
-    return <EmptyState sticker="smile" title={NO_FRIENDS_TITLE} action={action}>{NO_FRIENDS_LINE}</EmptyState>;
+    const action = (
+      <Link className="btn" to={APP_PATHS.search}>
+        {NO_FRIENDS_ACTION}
+      </Link>
+    );
+    return (
+      <EmptyState sticker="smile" title={NO_FRIENDS_TITLE} action={action}>
+        {NO_FRIENDS_LINE}
+      </EmptyState>
+    );
   }
   return (
     <ul className="friends-list">
@@ -134,7 +193,10 @@ const FriendsBody = (props: { model: FriendsScreenModel }): ReactElement => {
 };
 
 // The incoming requests, first on the page and only when there are some: each with Accept (the main action) and Decline.
-const RequestsSection = (props: { model: FriendsScreenModel; incoming: FriendRequestView[] }): ReactElement | null => {
+const RequestsSection = (props: {
+  model: FriendsScreenModel;
+  incoming: FriendRequestView[];
+}): ReactElement | null => {
   const { model } = props;
   if (props.incoming.length === 0) return null;
   return (
@@ -146,8 +208,21 @@ const RequestsSection = (props: { model: FriendsScreenModel; incoming: FriendReq
             <PersonAvatar name={request.otherName} />
             <PersonName name={request.otherName} listingId={request.otherListingId} />
             <div className="friends-buttons">
-              <button type="button" disabled={model.answer.busyId === request.requestId} onClick={() => void model.accept(request.requestId)}>Accept</button>
-              <button type="button" className="quiet" disabled={model.answer.busyId === request.requestId} onClick={() => void model.decline(request.requestId)}>Decline</button>
+              <button
+                type="button"
+                disabled={model.answer.busyId === request.requestId}
+                onClick={() => void model.accept(request.requestId)}
+              >
+                Accept
+              </button>
+              <button
+                type="button"
+                className="quiet"
+                disabled={model.answer.busyId === request.requestId}
+                onClick={() => void model.decline(request.requestId)}
+              >
+                Decline
+              </button>
             </div>
           </li>
         ))}
@@ -206,8 +281,18 @@ const CopyItem = (props: { copy: AboutMeAnswer }): ReactElement => {
 // The copies part: every answer the caller's persona gave, newest first, with who asked, what, the answer and its claims.
 const CopiesBody = (props: { model: FriendsScreenModel }): ReactElement => {
   const { asks } = props.model;
-  if (asks.value === null) return asks.error === null ? <LoadingLine text={LOADING_COPIES_LINE} /> : <ErrorNotice error={asks.error} />;
-  if (asks.value.aboutMe.length === 0) return <EmptyState sticker="chat" title={NO_COPIES_TITLE}>{NO_COPIES_LINE}</EmptyState>;
+  if (asks.value === null)
+    return asks.error === null ? (
+      <LoadingLine text={LOADING_COPIES_LINE} />
+    ) : (
+      <ErrorNotice error={asks.error} />
+    );
+  if (asks.value.aboutMe.length === 0)
+    return (
+      <EmptyState sticker="chat" title={NO_COPIES_TITLE}>
+        {NO_COPIES_LINE}
+      </EmptyState>
+    );
   return (
     <ul className="friends-copies">
       {asks.value.aboutMe.map((copy) => (
@@ -226,7 +311,9 @@ const SentBody = (props: { model: FriendsScreenModel }): ReactElement | null => 
     return (
       <section>
         <h2>{SENT_HEADING}</h2>
-        <EmptyState sticker="ask" title={NO_SENT_TITLE}>{NO_SENT_LINE}</EmptyState>
+        <EmptyState sticker="ask" title={NO_SENT_TITLE}>
+          {NO_SENT_LINE}
+        </EmptyState>
       </section>
     );
   }
@@ -239,7 +326,15 @@ const SentBody = (props: { model: FriendsScreenModel }): ReactElement | null => 
             <Link className="friends-sent-link" to={APP_PATHS.ask(ask.askId)}>
               <span className="friends-sent-kind">{SENT_MODE_LINES[ask.mode]}</span>
               <span className="friends-sent-text">{ask.text}</span>
-              <span className={ask.state === "done" ? "pill friends-sent-state is-done" : "pill friends-sent-state"}>{SENT_STATE_LINES[ask.state]}</span>
+              <span
+                className={
+                  ask.state === "done"
+                    ? "pill friends-sent-state is-done"
+                    : "pill friends-sent-state"
+                }
+              >
+                {SENT_STATE_LINES[ask.state]}
+              </span>
             </Link>
           </li>
         ))}

@@ -14,8 +14,22 @@ import { ContractError } from "./errors.js";
 
 // The call sites that reach the model. The ledger CHECK in 0001, widened in 0006 and 0016, lists the same names.
 export const CALL_SITES = [
-  "scrub_names", "question_check", "card", "quiz_answer", "quiz_judge", "speech", "receipts", "brief",
-  "brief_support_judge", "comic_panels", "comic_image", "self_test", "persona_answer", "ask_support_judge", "orchestrator", "search_words",
+  "scrub_names",
+  "question_check",
+  "card",
+  "quiz_answer",
+  "quiz_judge",
+  "speech",
+  "receipts",
+  "brief",
+  "brief_support_judge",
+  "comic_panels",
+  "comic_image",
+  "self_test",
+  "persona_answer",
+  "ask_support_judge",
+  "orchestrator",
+  "search_words",
 ] as const;
 // One call site, checked against the list above.
 export const CallSite = z.enum(CALL_SITES);
@@ -48,7 +62,15 @@ export type RecordedCall = z.infer<typeof RecordedCall>;
 // Deepest nesting the Meta strict mode accepts, counted in container levels.
 const MAX_SCHEMA_NESTING = 10;
 // Keys the strict mode rejects. The zod schema still enforces them after parsing.
-const DROPPED_KEYS = new Set(["minLength", "maxLength", "minItems", "maxItems", "minimum", "maximum", "format"]);
+const DROPPED_KEYS = new Set([
+  "minLength",
+  "maxLength",
+  "minItems",
+  "maxItems",
+  "minimum",
+  "maximum",
+  "format",
+]);
 // Keys that make a schema non-strict. Their presence is refused.
 const COMBINATOR_KEYS = ["anyOf", "oneOf", "allOf"];
 type JsonObject = Record<string, unknown>;
@@ -77,13 +99,16 @@ function makeStrict(node: unknown): unknown {
 function hasCombinator(node: unknown): boolean {
   if (Array.isArray(node)) return node.some(hasCombinator);
   if (!isJsonObject(node)) return false;
-  return Object.entries(node).some(([key, value]) => COMBINATOR_KEYS.includes(key) || hasCombinator(value));
+  return Object.entries(node).some(
+    ([key, value]) => COMBINATOR_KEYS.includes(key) || hasCombinator(value),
+  );
 }
 
 // The sub-schemas one level down: property values and array items.
 function childSchemas(node: JsonObject): JsonObject[] {
   const children: JsonObject[] = [];
-  if (isJsonObject(node.properties)) children.push(...Object.values(node.properties).filter(isJsonObject));
+  if (isJsonObject(node.properties))
+    children.push(...Object.values(node.properties).filter(isJsonObject));
   if (isJsonObject(node.items)) children.push(node.items);
   return children;
 }

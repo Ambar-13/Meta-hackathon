@@ -57,7 +57,10 @@ const Panel = (props: { panel: ComicView["panels"][number] }): ReactElement => {
 export const PanelGrid = (props: { panels: ComicView["panels"] }): ReactElement => {
   const columns = useColumnCount();
   return (
-    <ol className="comic-grid" style={{ gridTemplateColumns: `repeat(${String(columns)}, minmax(0, 1fr))` }}>
+    <ol
+      className="comic-grid"
+      style={{ gridTemplateColumns: `repeat(${String(columns)}, minmax(0, 1fr))` }}
+    >
       {props.panels.map((panel) => (
         <Panel key={panel.position} panel={panel} />
       ))}

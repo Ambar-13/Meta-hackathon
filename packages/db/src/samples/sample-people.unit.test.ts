@@ -8,11 +8,21 @@ import { sampleFaceKey, samplePostPhoto } from "./sample-photos.js";
 
 describe("the sample people", () => {
   it("W7-SAMPLE-T1: every item quotes its own note word for word, as the card job checks a quote", () => {
-    const failures = SAMPLE_PEOPLE.flatMap((person) => person.items.flatMap((item, index) => {
-      const note = person.notes[item.note];
-      const check = note === undefined ? null : verifyQuote({ quote: item.quote, turnText: note, turnNormText: normQuote(note), forbidden: [] });
-      return check?.ok === true ? [] : [`${person.displayName} item ${String(index + 1)}`];
-    }));
+    const failures = SAMPLE_PEOPLE.flatMap((person) =>
+      person.items.flatMap((item, index) => {
+        const note = person.notes[item.note];
+        const check =
+          note === undefined
+            ? null
+            : verifyQuote({
+                quote: item.quote,
+                turnText: note,
+                turnNormText: normQuote(note),
+                forbidden: [],
+              });
+        return check?.ok === true ? [] : [`${person.displayName} item ${String(index + 1)}`];
+      }),
+    );
 
     expect(failures).toEqual([]);
   });
@@ -27,22 +37,41 @@ describe("the sample people", () => {
       expect(person.line.length).toBeLessThanOrEqual(LISTING_LINE_MAX_CHARS);
       expect(person.posts.length).toBeGreaterThanOrEqual(1);
       expect(person.posts.length).toBeLessThanOrEqual(2);
-      expect(person.posts.every((post) => post.text.length >= 1 && post.text.length <= 600 && post.hoursAgo > 0)).toBe(true);
+      expect(
+        person.posts.every(
+          (post) => post.text.length >= 1 && post.text.length <= 600 && post.hoursAgo > 0,
+        ),
+      ).toBe(true);
     }
   });
 
   it("W7-SAMPLE-T3: no sample text has a dash used as punctuation", () => {
-    const texts = SAMPLE_PEOPLE.flatMap((person) => [person.line, ...person.notes, ...person.items.map((item) => item.claim), ...person.posts.map((post) => post.text)]);
+    const texts = SAMPLE_PEOPLE.flatMap((person) => [
+      person.line,
+      ...person.notes,
+      ...person.items.map((item) => item.claim),
+      ...person.posts.map((post) => post.text),
+    ]);
 
     expect(texts.filter((text) => /[\u2013\u2014]|\s-\s|--/.test(text))).toEqual([]);
   });
 
   it("W7-PHOTO-T6: each sample person has a face, each photo key fits the contract and has its picture in the web build, and each photo has its words", () => {
-    const keys = SAMPLE_PEOPLE.flatMap((person) => [person.face, ...person.posts.flatMap((post) => (post.photo === undefined ? [] : [post.photo.key]))]);
+    const keys = SAMPLE_PEOPLE.flatMap((person) => [
+      person.face,
+      ...person.posts.flatMap((post) => (post.photo === undefined ? [] : [post.photo.key])),
+    ]);
 
-    expect(SAMPLE_PEOPLE.map((person) => person.face)).toEqual(SAMPLE_PEOPLE.map((person) => `faces/${person.displayName.toLowerCase()}`));
+    expect(SAMPLE_PEOPLE.map((person) => person.face)).toEqual(
+      SAMPLE_PEOPLE.map((person) => `faces/${person.displayName.toLowerCase()}`),
+    );
     expect(keys.filter((key) => !PhotoKey.safeParse(key).success)).toEqual([]);
-    expect(keys.filter((key) => !existsSync(new URL(`../../../../apps/web/src/look/samples/${key}.jpg`, import.meta.url)))).toEqual([]);
+    expect(
+      keys.filter(
+        (key) =>
+          !existsSync(new URL(`../../../../apps/web/src/look/samples/${key}.jpg`, import.meta.url)),
+      ),
+    ).toEqual([]);
     for (const post of SAMPLE_PEOPLE.flatMap((person) => person.posts)) {
       if (post.photo !== undefined) expect(post.photo.alt).toMatch(/^[A-Z].{9,298}\.$/);
     }

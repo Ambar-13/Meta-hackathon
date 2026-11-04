@@ -18,7 +18,9 @@ describe("entropy rule", () => {
   });
 
   it("D12-T3: a 19-character token is left alone however random", () => {
-    expect(scrub("abcdefghijklmnopqrs is 19", { allowlist: [] }).text).toBe("abcdefghijklmnopqrs is 19");
+    expect(scrub("abcdefghijklmnopqrs is 19", { allowlist: [] }).text).toBe(
+      "abcdefghijklmnopqrs is 19",
+    );
   });
 
   it("D12-T4: a long English word under 3.5 bits is left alone", () => {
@@ -33,7 +35,9 @@ describe("entropy rule", () => {
   });
 
   it("D12-T6: a link of 20 or more characters is replaced as a secret", () => {
-    expect(scrub("see https://example.com/a", { allowlist: [] }).text).toBe("see [redacted:secret:00000001]");
+    expect(scrub("see https://example.com/a", { allowlist: [] }).text).toBe(
+      "see [redacted:secret:00000001]",
+    );
   });
 
   it("D17-T3: an allowlist entry of 2 characters protects nothing", () => {

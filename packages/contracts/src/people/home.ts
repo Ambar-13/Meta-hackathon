@@ -9,7 +9,11 @@ export const HOME_LIST_MAX = 10;
 export const HOME_CARD_ITEMS_MAX = 3;
 
 // The person's newest upload: its id and whether the names check has written its result.
-export const HomeSource = z.object({ id: Uuid, namesPassDone: z.boolean(), namesReviewed: z.boolean() });
+export const HomeSource = z.object({
+  id: Uuid,
+  namesPassDone: z.boolean(),
+  namesReviewed: z.boolean(),
+});
 // The type of HomeSource, read from the schema above.
 export type HomeSource = z.infer<typeof HomeSource>;
 

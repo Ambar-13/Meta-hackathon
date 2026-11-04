@@ -7,7 +7,8 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 
-const CHROME = process.env["CHROME_PATH"] ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+const CHROME =
+  process.env["CHROME_PATH"] ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const WEB_DIR = resolve("apps/web");
 const GALLERY_FILE = join(WEB_DIR, "dist-gallery", "gallery.html");
 // The two widths every screen is checked at: a phone first, then a laptop.
@@ -22,7 +23,10 @@ const FULL_MAX_PX = 12_000;
 
 type Options = { only: string[]; out: string; scale: number; shouldBuild: boolean };
 type CdpReply = { result?: Record<string, unknown>; error?: { message: string } };
-type Cdp = { send: (method: string, params?: object, sessionId?: string) => Promise<CdpReply>; close: () => Promise<void> };
+type Cdp = {
+  send: (method: string, params?: object, sessionId?: string) => Promise<CdpReply>;
+  close: () => Promise<void>;
+};
 
 // Reads the command line flags.
 function readOptions(argv: readonly string[]): Options {
@@ -32,7 +36,12 @@ function readOptions(argv: readonly string[]): Options {
   };
   const only = (valueOf("--only") ?? "").split(",").filter((part) => part !== "");
   const out = resolve(valueOf("--out") ?? join(tmpdir(), "meet-first-screens"));
-  return { only, out, scale: Number(valueOf("--scale") ?? "1"), shouldBuild: !argv.includes("--no-build") };
+  return {
+    only,
+    out,
+    scale: Number(valueOf("--scale") ?? "1"),
+    shouldBuild: !argv.includes("--no-build"),
+  };
 }
 
 // Waits for the given time.
@@ -44,19 +53,35 @@ function sleep(ms: number): Promise<void> {
 async function openChrome(port: number): Promise<Cdp> {
   const profile = join(tmpdir(), `meet-first-gallery-${String(port)}`);
   // Tabs opened in the background are throttled by default (slow timers, no painting); these flags keep every tab at full speed.
-  const unthrottled = ["--disable-background-timer-throttling", "--disable-renderer-backgrounding", "--disable-backgrounding-occluded-windows"];
-  const args = ["--headless=new", `--remote-debugging-port=${String(port)}`, "--hide-scrollbars", "--disable-gpu", "--allow-file-access-from-files", ...unthrottled, `--user-data-dir=${profile}`, "about:blank"];
+  const unthrottled = [
+    "--disable-background-timer-throttling",
+    "--disable-renderer-backgrounding",
+    "--disable-backgrounding-occluded-windows",
+  ];
+  const args = [
+    "--headless=new",
+    `--remote-debugging-port=${String(port)}`,
+    "--hide-scrollbars",
+    "--disable-gpu",
+    "--allow-file-access-from-files",
+    ...unthrottled,
+    `--user-data-dir=${profile}`,
+    "about:blank",
+  ];
   const chrome = spawn(CHROME, args, { stdio: "ignore" });
   let socketUrl: string | undefined;
   for (let attempt = 0; attempt < 40 && socketUrl === undefined; attempt += 1) {
     try {
-      const version = (await (await fetch(`http://127.0.0.1:${String(port)}/json/version`)).json()) as { webSocketDebuggerUrl: string };
+      const version = (await (
+        await fetch(`http://127.0.0.1:${String(port)}/json/version`)
+      ).json()) as { webSocketDebuggerUrl: string };
       socketUrl = version.webSocketDebuggerUrl;
     } catch {
       await sleep(250);
     }
   }
-  if (socketUrl === undefined) throw new Error("Chrome did not open its debugging port; set CHROME_PATH to your Chrome.");
+  if (socketUrl === undefined)
+    throw new Error("Chrome did not open its debugging port; set CHROME_PATH to your Chrome.");
   const socket = new WebSocket(socketUrl);
   await new Promise<void>((done) => {
     socket.addEventListener("open", () => {
@@ -98,7 +123,11 @@ async function openPage(cdp: Cdp, page: PageRequest): Promise<Tab> {
   const targetId = String(target.result?.["targetId"]);
   const attached = await cdp.send("Target.attachToTarget", { targetId, flatten: true });
   const sessionId = String(attached.result?.["sessionId"]);
-  await cdp.send("Emulation.setDeviceMetricsOverride", { width: size.width, height: size.height, deviceScaleFactor: scale, mobile: size.isMobile }, sessionId);
+  await cdp.send(
+    "Emulation.setDeviceMetricsOverride",
+    { width: size.width, height: size.height, deviceScaleFactor: scale, mobile: size.isMobile },
+    sessionId,
+  );
   await cdp.send("Emulation.setFocusEmulationEnabled", { enabled: true }, sessionId);
   await cdp.send("Target.activateTarget", { targetId });
   await cdp.send("Page.enable", {}, sessionId);
@@ -120,16 +149,28 @@ async function capture(cdp: Cdp, sessionId: string, file: string): Promise<void>
 }
 
 // Shoots one view at one size: the first screen, then the whole page when it is taller than a screen.
-async function shootView(cdp: Cdp, shot: { name: string; size: (typeof SIZES)[number] }, options: Options): Promise<string[]> {
+async function shootView(
+  cdp: Cdp,
+  shot: { name: string; size: (typeof SIZES)[number] },
+  options: Options,
+): Promise<string[]> {
   const { name, size } = shot;
-  const { targetId, sessionId } = await openPage(cdp, { url: `file://${GALLERY_FILE}?view=${name}`, size, scale: options.scale });
+  const { targetId, sessionId } = await openPage(cdp, {
+    url: `file://${GALLERY_FILE}?view=${name}`,
+    size,
+    scale: options.scale,
+  });
   const first = join(options.out, `${name}-${String(size.width)}.png`);
   await capture(cdp, sessionId, first);
   const files = [first];
   const height = Number(await evaluate(cdp, sessionId, "document.documentElement.scrollHeight"));
   if (height > size.height + 40) {
     const full = Math.min(height, FULL_MAX_PX);
-    await cdp.send("Emulation.setDeviceMetricsOverride", { width: size.width, height: full, deviceScaleFactor: options.scale, mobile: size.isMobile }, sessionId);
+    await cdp.send(
+      "Emulation.setDeviceMetricsOverride",
+      { width: size.width, height: full, deviceScaleFactor: options.scale, mobile: size.isMobile },
+      sessionId,
+    );
     await sleep(600);
     const fullFile = join(options.out, `${name}-${String(size.width)}-full.png`);
     await capture(cdp, sessionId, fullFile);
@@ -142,15 +183,35 @@ async function shootView(cdp: Cdp, shot: { name: string; size: (typeof SIZES)[nu
 // Builds the gallery, reads its view names, and shoots the chosen views at both sizes.
 async function main(): Promise<void> {
   const options = readOptions(process.argv.slice(2));
-  if (options.shouldBuild) execFileSync("pnpm", ["--filter", "@meet-first/web", "exec", "vite", "build", "--config", "vite.gallery.config.ts"], { stdio: "inherit" });
+  if (options.shouldBuild)
+    execFileSync(
+      "pnpm",
+      [
+        "--filter",
+        "@meet-first/web",
+        "exec",
+        "vite",
+        "build",
+        "--config",
+        "vite.gallery.config.ts",
+      ],
+      { stdio: "inherit" },
+    );
   mkdirSync(options.out, { recursive: true });
   const cdp = await openChrome(9400 + Math.floor(Math.random() * 400));
   try {
     const index = await openPage(cdp, { url: `file://${GALLERY_FILE}`, size: SIZES[1], scale: 1 });
-    const names = (await evaluate(cdp, index.sessionId, "[...document.querySelectorAll('a[data-name]')].map((a) => a.dataset.name)")) as string[];
-    const chosen = names.filter((name) => options.only.length === 0 || options.only.some((prefix) => name.startsWith(prefix)));
+    const names = (await evaluate(
+      cdp,
+      index.sessionId,
+      "[...document.querySelectorAll('a[data-name]')].map((a) => a.dataset.name)",
+    )) as string[];
+    const chosen = names.filter(
+      (name) => options.only.length === 0 || options.only.some((prefix) => name.startsWith(prefix)),
+    );
     for (const name of chosen) {
-      for (const size of SIZES) console.log((await shootView(cdp, { name, size }, options)).join("\n"));
+      for (const size of SIZES)
+        console.log((await shootView(cdp, { name, size }, options)).join("\n"));
     }
   } finally {
     await cdp.close();

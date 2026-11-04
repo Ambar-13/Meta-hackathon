@@ -38,18 +38,36 @@ const StopBody = (props: { error: ApiError; onReset: () => void }): ReactElement
 // The screen body for the flow after the person picked or pasted something.
 const FlowBody = (props: { flow: UploadFlow; actions: UploadActions }): ReactElement | null => {
   const { flow, actions } = props;
-  if (flow.kind === "preparing") return <PreparingLine progress={flow.progress} onCancel={actions.onCancel} />;
+  if (flow.kind === "preparing")
+    return <PreparingLine progress={flow.progress} onCancel={actions.onCancel} />;
   if (flow.kind === "refused") {
-    return <StopBody error={new ApiError({ status: 0, code: flow.refusal.code, message: flow.refusal.message })} onReset={actions.onReset} />;
+    return (
+      <StopBody
+        error={new ApiError({ status: 0, code: flow.refusal.code, message: flow.refusal.message })}
+        onReset={actions.onReset}
+      />
+    );
   }
   if (flow.kind === "crashed") {
-    return <StopBody error={new ApiError({ status: 0, code: "file_check_crashed", message: CRASHED_SENTENCE })} onReset={actions.onReset} />;
+    return (
+      <StopBody
+        error={new ApiError({ status: 0, code: "file_check_crashed", message: CRASHED_SENTENCE })}
+        onReset={actions.onReset}
+      />
+    );
   }
   if (flow.kind === "ready" || flow.kind === "uploading" || flow.kind === "failed") {
     const isAttested = flow.kind === "ready" ? flow.isAttested : true;
     return (
       <>
-        <PreviewPanel ready={flow.ready} isAttested={isAttested} isUploading={flow.kind === "uploading"} onAttest={actions.onAttest} onUpload={actions.onUpload} onPasteInstead={actions.onPasteInstead} />
+        <PreviewPanel
+          ready={flow.ready}
+          isAttested={isAttested}
+          isUploading={flow.kind === "uploading"}
+          onAttest={actions.onAttest}
+          onUpload={actions.onUpload}
+          onPasteInstead={actions.onPasteInstead}
+        />
         {flow.kind === "failed" ? <ErrorNotice error={flow.error} /> : null}
       </>
     );
@@ -59,7 +77,13 @@ const FlowBody = (props: { flow: UploadFlow; actions: UploadActions }): ReactEle
 
 // The page for one flow state: while nothing is picked, your AI's summary first, then your chats with their lede and tabs; after that
 // the flow body. The gallery renders it directly.
-export const UploadView = (props: { flow: UploadFlow; tab: "paste" | "file"; isNarrow: boolean; actions: UploadActions; summary: SummaryHook }): ReactElement => {
+export const UploadView = (props: {
+  flow: UploadFlow;
+  tab: "paste" | "file";
+  isNarrow: boolean;
+  actions: UploadActions;
+  summary: SummaryHook;
+}): ReactElement => {
   const { flow, actions } = props;
   const chatsId = useId();
   return (
@@ -69,9 +93,26 @@ export const UploadView = (props: { flow: UploadFlow; tab: "paste" | "file"; isN
           <SummarySection hasChats={null} summary={props.summary} />
           <section className="up-chats" aria-labelledby={chatsId}>
             <h2 id={chatsId}>Your chats</h2>
-            <p className="up-lede">Pick a chat export or paste a few notes. You see what will be sent before anything leaves this device.</p>
+            <p className="up-lede">
+              Pick a chat export or paste a few notes. You see what will be sent before anything
+              leaves this device.
+            </p>
             <UploadTabs isNarrow={props.isNarrow} selected={props.tab} onSelect={actions.onTab} />
-            {props.tab === "paste" ? <PasteTab isBusy={false} onSubmit={(text) => { actions.onStart({ kind: "paste", text }); }} /> : <FileTab isBusy={false} onPick={(file) => { actions.onStart({ kind: "file", file }); }} />}
+            {props.tab === "paste" ? (
+              <PasteTab
+                isBusy={false}
+                onSubmit={(text) => {
+                  actions.onStart({ kind: "paste", text });
+                }}
+              />
+            ) : (
+              <FileTab
+                isBusy={false}
+                onPick={(file) => {
+                  actions.onStart({ kind: "file", file });
+                }}
+              />
+            )}
           </section>
         </>
       ) : (
@@ -105,5 +146,13 @@ export const UploadScreen = (props: { prepare?: typeof prepareUpload }): ReactEl
     onAttest: upload.setAttested,
     onUpload: () => void upload.upload(),
   };
-  return <UploadView flow={upload.flow} tab={tab} isNarrow={isNarrow} actions={actions} summary={summary} />;
+  return (
+    <UploadView
+      flow={upload.flow}
+      tab={tab}
+      isNarrow={isNarrow}
+      actions={actions}
+      summary={summary}
+    />
+  );
 };

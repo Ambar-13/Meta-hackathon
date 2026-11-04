@@ -93,7 +93,14 @@ const OVERVIEW_DIAGRAMS = [
   "",
 ].join("\n");
 
-const STATE_BLOCK = ["```mermaid", "stateDiagram-v2", "  [*] --> first", "  first --> second", "```", ""].join("\n");
+const STATE_BLOCK = [
+  "```mermaid",
+  "stateDiagram-v2",
+  "  [*] --> first",
+  "  first --> second",
+  "```",
+  "",
+].join("\n");
 const STATES_DOC = ["# States", "", ...Array.from({ length: 6 }, () => STATE_BLOCK)].join("\n");
 
 const SAFETY_DOC = [
@@ -165,85 +172,129 @@ function runChecks(tree: Tree): Run {
 }
 
 describe("repo checks", () => {
-  it("W2-DEPLOY-T8: pnpm checks fails on an em dash in a .ts comment and in a .md line", () => {
-    const run = runChecks({
-      files: {
-        "scripts/bad-note.ts": `// A note with a dash ${EM_DASH} here.\nexport const NOTE = "x";\n`,
-        "docs/extra.md": `A line with a dash ${EM_DASH} here.\n`,
-      },
-    });
+  it(
+    "W2-DEPLOY-T8: pnpm checks fails on an em dash in a .ts comment and in a .md line",
+    () => {
+      const run = runChecks({
+        files: {
+          "scripts/bad-note.ts": `// A note with a dash ${EM_DASH} here.\nexport const NOTE = "x";\n`,
+          "docs/extra.md": `A line with a dash ${EM_DASH} here.\n`,
+        },
+      });
 
-    expect(run.status).not.toBe(0);
-    expect(run.output).toContain("em dash");
-    expect(run.output).toContain("scripts/bad-note.ts");
-    expect(run.output).toContain("docs/extra.md");
-  }, TEST_TIMEOUT_MS);
+      expect(run.status).not.toBe(0);
+      expect(run.output).toContain("em dash");
+      expect(run.output).toContain("scripts/bad-note.ts");
+      expect(run.output).toContain("docs/extra.md");
+    },
+    TEST_TIMEOUT_MS,
+  );
 
-  it("W3-CHECKS-T1 (D74): pnpm checks reads no recorded model reply, so an em dash the model wrote does not fail it", () => {
-    const run = runChecks({
-      files: { "packages/evals/fixtures/model-replies/speech/0a1b.json": `{"response": "A reply as the model wrote it ${EM_DASH} kept as received."}\n` },
-    });
+  it(
+    "W3-CHECKS-T1 (D74): pnpm checks reads no recorded model reply, so an em dash the model wrote does not fail it",
+    () => {
+      const run = runChecks({
+        files: {
+          "packages/evals/fixtures/model-replies/speech/0a1b.json": `{"response": "A reply as the model wrote it ${EM_DASH} kept as received."}\n`,
+        },
+      });
 
-    expect(run.output).not.toContain("em dash");
-    expect(run.status).toBe(0);
-  }, TEST_TIMEOUT_MS);
+      expect(run.output).not.toContain("em dash");
+      expect(run.status).toBe(0);
+    },
+    TEST_TIMEOUT_MS,
+  );
 
-  it("W2-DEPLOY-T9: pnpm checks fails on a file named utils.ts and a folder named helpers", () => {
-    const run = runChecks({
-      files: {
-        "apps/api/src/utils.ts": "export const READY = true;\n",
-        "packages/db/src/helpers/index.ts": "export const COUNT = 1;\n",
-      },
-    });
+  it(
+    "W2-DEPLOY-T9: pnpm checks fails on a file named utils.ts and a folder named helpers",
+    () => {
+      const run = runChecks({
+        files: {
+          "apps/api/src/utils.ts": "export const READY = true;\n",
+          "packages/db/src/helpers/index.ts": "export const COUNT = 1;\n",
+        },
+      });
 
-    expect(run.status).not.toBe(0);
-    expect(run.output).toContain('uses the name "utils.ts"');
-    expect(run.output).toContain('uses the name "helpers"');
-  }, TEST_TIMEOUT_MS);
+      expect(run.status).not.toBe(0);
+      expect(run.output).toContain('uses the name "utils.ts"');
+      expect(run.output).toContain('uses the name "helpers"');
+    },
+    TEST_TIMEOUT_MS,
+  );
 
-  it("W2-DEPLOY-T10: pnpm checks fails on a README missing one of the five headings or with them out of order", () => {
-    const missing = runChecks({ files: { "apps/api/README.md": FIVE_HEADINGS.replace("## How to test it", "## Testing") } });
-    expect(missing.status).not.toBe(0);
-    expect(missing.output).toContain("How to test it");
+  it(
+    "W2-DEPLOY-T10: pnpm checks fails on a README missing one of the five headings or with them out of order",
+    () => {
+      const missing = runChecks({
+        files: { "apps/api/README.md": FIVE_HEADINGS.replace("## How to test it", "## Testing") },
+      });
+      expect(missing.status).not.toBe(0);
+      expect(missing.output).toContain("How to test it");
 
-    const outOfOrder = runChecks({ files: { "apps/api/README.md": OUT_OF_ORDER } });
-    expect(outOfOrder.status).not.toBe(0);
-    expect(outOfOrder.output).toContain("is out of order");
-  }, TEST_TIMEOUT_MS);
+      const outOfOrder = runChecks({ files: { "apps/api/README.md": OUT_OF_ORDER } });
+      expect(outOfOrder.status).not.toBe(0);
+      expect(outOfOrder.output).toContain("is out of order");
+    },
+    TEST_TIMEOUT_MS,
+  );
 
-  it("W2-DEPLOY-T11: pnpm checks fails on a Mermaid block with 16 boxes and passes one with 15", () => {
-    const boxes = (count: number): string =>
-      ["# How it is built", "", "```mermaid", "flowchart LR", ...[...Array(count).keys()].map((i) => `  N${String(i)}[Box ${String(i)}]`), "```", ""].join("\n");
+  it(
+    "W2-DEPLOY-T11: pnpm checks fails on a Mermaid block with 16 boxes and passes one with 15",
+    () => {
+      const boxes = (count: number): string =>
+        [
+          "# How it is built",
+          "",
+          "```mermaid",
+          "flowchart LR",
+          ...[...Array(count).keys()].map((i) => `  N${String(i)}[Box ${String(i)}]`),
+          "```",
+          "",
+        ].join("\n");
 
-    // A docs file of its own: OVERVIEW.md must also hold its sequence and data diagrams, which would fail the 15-box case for another reason.
-    const fifteen = runChecks({ files: { "docs/box-count.md": boxes(15) } });
-    expect(fifteen.status).toBe(0);
+      // A docs file of its own: OVERVIEW.md must also hold its sequence and data diagrams, which would fail the 15-box case for another reason.
+      const fifteen = runChecks({ files: { "docs/box-count.md": boxes(15) } });
+      expect(fifteen.status).toBe(0);
 
-    const sixteen = runChecks({ files: { "docs/box-count.md": boxes(16) } });
-    expect(sixteen.status).not.toBe(0);
-  }, TEST_TIMEOUT_MS);
+      const sixteen = runChecks({ files: { "docs/box-count.md": boxes(16) } });
+      expect(sixteen.status).not.toBe(0);
+    },
+    TEST_TIMEOUT_MS,
+  );
 
   it.each([
     "docs/architecture/OVERVIEW.md",
     "docs/architecture/STATES.md",
     "docs/architecture/SAFETY.md",
     "docs/GLOSSARY.md",
-  ])("W2-DEPLOY-T12: pnpm checks fails when %s is missing", (path) => {
-    const run = runChecks({ remove: [path] });
+  ])(
+    "W2-DEPLOY-T12: pnpm checks fails when %s is missing",
+    (path) => {
+      const run = runChecks({ remove: [path] });
 
-    expect(run.status).not.toBe(0);
-    expect(run.output).toContain(path);
-  }, TEST_TIMEOUT_MS);
+      expect(run.status).not.toBe(0);
+      expect(run.output).toContain(path);
+    },
+    TEST_TIMEOUT_MS,
+  );
 
-  it("W2-DEPLOY-T13: pnpm checks fails on a migration without -- package: in its first lines and on a CREATE TABLE without FORCE ROW LEVEL SECURITY", () => {
-    const noPackageLine = MIGRATION.replace("-- package: db\n", "");
-    const missingPackage = runChecks({ files: { "packages/db/migrations/0002_no_package.sql": noPackageLine } });
-    expect(missingPackage.status).not.toBe(0);
-    expect(missingPackage.output).toContain("package: db");
+  it(
+    "W2-DEPLOY-T13: pnpm checks fails on a migration without -- package: in its first lines and on a CREATE TABLE without FORCE ROW LEVEL SECURITY",
+    () => {
+      const noPackageLine = MIGRATION.replace("-- package: db\n", "");
+      const missingPackage = runChecks({
+        files: { "packages/db/migrations/0002_no_package.sql": noPackageLine },
+      });
+      expect(missingPackage.status).not.toBe(0);
+      expect(missingPackage.output).toContain("package: db");
 
-    const noForce = MIGRATION.replace("ALTER TABLE people FORCE ROW LEVEL SECURITY;\n", "");
-    const missingForce = runChecks({ files: { "packages/db/migrations/0001_foundation.sql": noForce } });
-    expect(missingForce.status).not.toBe(0);
-    expect(missingForce.output).toContain("lacks FORCE ROW LEVEL SECURITY");
-  }, TEST_TIMEOUT_MS);
+      const noForce = MIGRATION.replace("ALTER TABLE people FORCE ROW LEVEL SECURITY;\n", "");
+      const missingForce = runChecks({
+        files: { "packages/db/migrations/0001_foundation.sql": noForce },
+      });
+      expect(missingForce.status).not.toBe(0);
+      expect(missingForce.output).toContain("lacks FORCE ROW LEVEL SECURITY");
+    },
+    TEST_TIMEOUT_MS,
+  );
 });

@@ -1,6 +1,13 @@
 import { useId, useState, type FormEvent, type ReactElement } from "react";
 import { useNavigate } from "react-router-dom";
-import { APP_PATHS, apiFetch, asApiError, ErrorNotice, routes, type ApiError } from "../../app-shell/index.js";
+import {
+  APP_PATHS,
+  apiFetch,
+  asApiError,
+  ErrorNotice,
+  routes,
+  type ApiError,
+} from "../../app-shell/index.js";
 
 // The words of Try your Meety.
 const TRY_COPY = {
@@ -16,7 +23,11 @@ const TRY_COPY = {
 const QUESTION_MIN_CHARACTERS = 5;
 
 // Where a question to your own Meety stands: not sent, sending, refused before any request, or failed.
-type TryState = { kind: "idle" } | { kind: "sending" } | { kind: "refused"; sentence: string } | { kind: "failed"; error: ApiError };
+type TryState =
+  | { kind: "idle" }
+  | { kind: "sending" }
+  | { kind: "refused"; sentence: string }
+  | { kind: "failed"; error: ApiError };
 
 // Sends a self ask with POST /api/asks and opens its page, where the answer shows as a friend ask's does.
 function useSelfAsk(): { state: TryState; send: (text: string) => Promise<void> } {
@@ -30,7 +41,9 @@ function useSelfAsk(): { state: TryState; send: (text: string) => Promise<void> 
     }
     setState({ kind: "sending" });
     try {
-      const reply = await apiFetch(routes.asks.createAsk, { body: { mode: "self", text: trimmed } });
+      const reply = await apiFetch(routes.asks.createAsk, {
+        body: { mode: "self", text: trimmed },
+      });
       navigate(APP_PATHS.ask(reply.askId));
     } catch (thrown: unknown) {
       setState({ kind: "failed", error: asApiError(thrown) });
@@ -56,13 +69,27 @@ export const TryMeety = (): ReactElement => {
       <form onSubmit={onSubmit}>
         <label>
           <span>{TRY_COPY.label}</span>
-          <textarea rows={2} maxLength={300} value={text} placeholder={TRY_COPY.placeholder} onChange={(event) => { setText(event.target.value); }} />
+          <textarea
+            rows={2}
+            maxLength={300}
+            value={text}
+            placeholder={TRY_COPY.placeholder}
+            onChange={(event) => {
+              setText(event.target.value);
+            }}
+          />
         </label>
         <div className="actions">
-          <button type="submit" disabled={isSending}>{isSending ? TRY_COPY.asking : TRY_COPY.ask}</button>
+          <button type="submit" disabled={isSending}>
+            {isSending ? TRY_COPY.asking : TRY_COPY.ask}
+          </button>
         </div>
       </form>
-      {state.kind === "refused" ? <p className="me-try-note" role="alert">{state.sentence}</p> : null}
+      {state.kind === "refused" ? (
+        <p className="me-try-note" role="alert">
+          {state.sentence}
+        </p>
+      ) : null}
       {state.kind === "failed" ? <ErrorNotice error={state.error} /> : null}
     </section>
   );

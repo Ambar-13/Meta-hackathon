@@ -1,9 +1,20 @@
 // The social routes as one plugin for apps/api/src/server.ts slot 13: friend requests, a person's profile in Explore, the
 // orchestrator chat, posts, and sharing posts and stories and liking posts.
 import type { RoutePlugin } from "../app-types.js";
-import { registerAcceptFriendRequest, registerDeclineFriendRequest, registerListFriendRequests, registerSendFriendRequest } from "./friend-requests.js";
+import {
+  registerAcceptFriendRequest,
+  registerDeclineFriendRequest,
+  registerListFriendRequests,
+  registerSendFriendRequest,
+} from "./friend-requests.js";
 import { registerReadThread, registerRunPlan, registerSendToOrchestrator } from "./orchestrator.js";
-import { registerListFeed, registerListListingPosts, registerListMyPosts, registerListPosts, registerListStories } from "./posts.js";
+import {
+  registerListFeed,
+  registerListListingPosts,
+  registerListMyPosts,
+  registerListPosts,
+  registerListStories,
+} from "./posts.js";
 import { registerReadProfile } from "./profile.js";
 import { registerCreatePost, registerDeletePost, registerLikePost } from "./share-posts.js";
 

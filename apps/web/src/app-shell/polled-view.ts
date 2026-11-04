@@ -2,7 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, NETWORK_FAILED_SENTENCE } from "./api-fetch.js";
 
 // One view kept fresh by polling: the last good value, the last error, whether a request is out, and a reload.
-export type PolledView<T> = { value: T | null; error: ApiError | null; isLoading: boolean; reload: () => void };
+export type PolledView<T> = {
+  value: T | null;
+  error: ApiError | null;
+  isLoading: boolean;
+  reload: () => void;
+};
 
 // The statuses that stop a poll: the session or the page is gone for good.
 const STOP_STATUSES: ReadonlySet<number> = new Set([401, 403, 404]);
@@ -17,7 +22,10 @@ function toApiError(thrown: unknown): ApiError {
 }
 
 // Loads at once, then again intervalMs after each settled request while keepPolling(value) is true; key restarts it.
-export function usePolledView<T>(load: () => Promise<T>, options: { key: string; intervalMs: number; keepPolling: (value: T) => boolean }): PolledView<T> {
+export function usePolledView<T>(
+  load: () => Promise<T>,
+  options: { key: string; intervalMs: number; keepPolling: (value: T) => boolean },
+): PolledView<T> {
   const [view, setView] = useState<PollState<T>>({ value: null, error: null, isLoading: true });
   const latest = useRef({ load, options });
   latest.current = { load, options };

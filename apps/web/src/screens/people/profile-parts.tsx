@@ -1,8 +1,33 @@
-import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactElement, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 import { Link } from "react-router-dom";
 import type { Post, PublicItem } from "@meet-first/contracts";
-import { APP_PATHS, asApiError, ErrorNotice, routes, apiFetch, type ApiError, type PolledView } from "../../app-shell/index.js";
-import { EmptyState, Icon, LoadingLine, PersonAvatar, photoOf, PostPhoto, Receipt, SampleChip } from "../../look/index.js";
+import {
+  APP_PATHS,
+  asApiError,
+  ErrorNotice,
+  routes,
+  apiFetch,
+  type ApiError,
+  type PolledView,
+} from "../../app-shell/index.js";
+import {
+  EmptyState,
+  Icon,
+  LoadingLine,
+  PersonAvatar,
+  photoOf,
+  PostPhoto,
+  Receipt,
+  SampleChip,
+} from "../../look/index.js";
 import { postAgeWords, postsEmptyCopy } from "./people-state.js";
 
 // The tabs under a profile header, in order, with their icons; Meetings shows only on your own profile.
@@ -14,15 +39,28 @@ const TABS = [
 // One tab's key.
 export type TabKey = (typeof TABS)[number]["key"];
 // The line under a sample person's name, so nobody takes them for a real person.
-const SAMPLE_NOTE = "A sample person, not a real one. Friend requests to them are accepted at once.";
+const SAMPLE_NOTE =
+  "A sample person, not a real one. Friend requests to them are accepted at once.";
 
 // The Instagram-style header of a profile: the person's round picture, then the name as the h1, the line, the sample note for a sample
 // person, and the buttons. No count of anything about the person shows here (PRODUCT.md principle 5). On a phone the picture sits left
 // of the name and the buttons go full width under them.
-export const ProfileHeader = (props: { name: string; line: string | null; isSample?: boolean; photo?: string | null | undefined; children: ReactNode }): ReactElement => {
+export const ProfileHeader = (props: {
+  name: string;
+  line: string | null;
+  isSample?: boolean;
+  photo?: string | null | undefined;
+  children: ReactNode;
+}): ReactElement => {
   return (
     <header className="profile-head">
-      <PersonAvatar name={props.name} size="xl" className="profile-avatar" photo={props.photo} isSample={props.isSample} />
+      <PersonAvatar
+        name={props.name}
+        size="xl"
+        className="profile-avatar"
+        photo={props.photo}
+        isSample={props.isSample}
+      />
       <div className="profile-words">
         <h1>{props.name}</h1>
         {props.line === null ? null : <p className="profile-line">{props.line}</p>}
@@ -54,27 +92,59 @@ export const PostsEmptyCard = (props: { name: string | null }): ReactElement => 
       </span>
       <h2>{copy.heading}</h2>
       <p>{copy.body}</p>
-      {props.name === null ? <Link className="btn" to={APP_PATHS.create}>New post</Link> : null}
+      {props.name === null ? (
+        <Link className="btn" to={APP_PATHS.create}>
+          New post
+        </Link>
+      ) : null}
     </section>
   );
 };
 
 // Delete on one of your own posts: the first press asks once more, the second deletes it (DELETE /api/posts/:id), then onDeleted runs
 // so the page reads again. buttonClass is the look of its buttons where it sits.
-export const DeletePost = (props: { postId: string; onDeleted: () => void; buttonClass: string }): ReactElement => {
+export const DeletePost = (props: {
+  postId: string;
+  onDeleted: () => void;
+  buttonClass: string;
+}): ReactElement => {
   const [isAsking, setIsAsking] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const remove = (): void => {
-    apiFetch(routes.social.deletePost, { params: { id: props.postId } }).then(props.onDeleted, (thrown: unknown) => {
-      setError(asApiError(thrown));
-    });
+    apiFetch(routes.social.deletePost, { params: { id: props.postId } }).then(
+      props.onDeleted,
+      (thrown: unknown) => {
+        setError(asApiError(thrown));
+      },
+    );
   };
-  if (!isAsking) return <button type="button" className={props.buttonClass} onClick={() => { setIsAsking(true); }}>Delete</button>;
+  if (!isAsking)
+    return (
+      <button
+        type="button"
+        className={props.buttonClass}
+        onClick={() => {
+          setIsAsking(true);
+        }}
+      >
+        Delete
+      </button>
+    );
   return (
     <span className="post-delete">
       <span>Delete this post for good?</span>
-      <button type="button" className={`${props.buttonClass} is-danger`} onClick={remove}>Delete</button>
-      <button type="button" className={props.buttonClass} onClick={() => { setIsAsking(false); }}>Keep it</button>
+      <button type="button" className={`${props.buttonClass} is-danger`} onClick={remove}>
+        Delete
+      </button>
+      <button
+        type="button"
+        className={props.buttonClass}
+        onClick={() => {
+          setIsAsking(false);
+        }}
+      >
+        Keep it
+      </button>
       {error === null ? null : <ErrorNotice error={error} />}
     </span>
   );
@@ -104,11 +174,22 @@ const POSTS_LOOKS = [
 ] as const;
 
 // The switch between the grid and the list, as two buttons that say which one is on.
-const LookSwitch = (props: { look: PostsLook; onChange: (look: PostsLook) => void }): ReactElement => {
+const LookSwitch = (props: {
+  look: PostsLook;
+  onChange: (look: PostsLook) => void;
+}): ReactElement => {
   return (
     <div className="posts-look" role="group" aria-label="Show posts as">
       {POSTS_LOOKS.map((option) => (
-        <button key={option.key} type="button" className="posts-look-button" aria-pressed={props.look === option.key} onClick={() => { props.onChange(option.key); }}>
+        <button
+          key={option.key}
+          type="button"
+          className="posts-look-button"
+          aria-pressed={props.look === option.key}
+          onClick={() => {
+            props.onChange(option.key);
+          }}
+        >
           <Icon name={option.icon} size={18} />
           {option.label}
         </button>
@@ -119,15 +200,33 @@ const LookSwitch = (props: { look: PostsLook; onChange: (look: PostsLook) => voi
 
 // The grid: three square tiles to a row with square corners, a photo post as its photo and a post of words as its words on a soft
 // ground. A tile opens its post in the list.
-const PostGrid = (props: { posts: readonly ShownPost[]; onOpen: (postId: string) => void }): ReactElement => {
+const PostGrid = (props: {
+  posts: readonly ShownPost[];
+  onOpen: (postId: string) => void;
+}): ReactElement => {
   return (
     <ul className="post-grid">
       {props.posts.map((post) => {
         const found = photoOf(post.photo);
         return (
           <li key={post.postId}>
-            <button type="button" className={found === null ? "post-tile is-words" : "post-tile"} onClick={() => { props.onOpen(post.postId); }}>
-              {found === null ? <span className="post-tile-words">{post.text}</span> : <img src={found.src} alt={post.photoAlt ?? (post.text === "" ? "Photo" : post.text)} loading="lazy" decoding="async" />}
+            <button
+              type="button"
+              className={found === null ? "post-tile is-words" : "post-tile"}
+              onClick={() => {
+                props.onOpen(post.postId);
+              }}
+            >
+              {found === null ? (
+                <span className="post-tile-words">{post.text}</span>
+              ) : (
+                <img
+                  src={found.src}
+                  alt={post.photoAlt ?? (post.text === "" ? "Photo" : post.text)}
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
             </button>
           </li>
         );
@@ -138,7 +237,11 @@ const PostGrid = (props: { posts: readonly ShownPost[]; onOpen: (postId: string)
 
 // The list: each post with its photo when it has one and how long ago it went up, and Delete on your own. The post opened from the grid
 // scrolls into view and takes the focus, so the reader lands on it.
-const PostList = (props: { posts: readonly ShownPost[]; openId: string | null; onDeleted: (() => void) | undefined }): ReactElement => {
+const PostList = (props: {
+  posts: readonly ShownPost[];
+  openId: string | null;
+  onDeleted: (() => void) | undefined;
+}): ReactElement => {
   const now = new Date();
   const openRef = useRef<HTMLLIElement | null>(null);
   useEffect(() => {
@@ -150,12 +253,25 @@ const PostList = (props: { posts: readonly ShownPost[]; openId: string | null; o
   return (
     <ul className="profile-posts">
       {props.posts.map((post) => (
-        <li key={post.postId} className="profile-post" ref={post.postId === props.openId ? openRef : undefined} tabIndex={post.postId === props.openId ? -1 : undefined}>
+        <li
+          key={post.postId}
+          className="profile-post"
+          ref={post.postId === props.openId ? openRef : undefined}
+          tabIndex={post.postId === props.openId ? -1 : undefined}
+        >
           {post.text === "" ? null : <p className="post-text">{post.text}</p>}
           <PostPhoto photo={post.photo} alt={post.photoAlt ?? "Photo"} />
           <div className="post-foot">
-            <time className="post-time" dateTime={post.createdAt}>{postAgeWords(post.createdAt, now)}</time>
-            {props.onDeleted === undefined ? null : <DeletePost postId={post.postId} onDeleted={props.onDeleted} buttonClass="text-button" />}
+            <time className="post-time" dateTime={post.createdAt}>
+              {postAgeWords(post.createdAt, now)}
+            </time>
+            {props.onDeleted === undefined ? null : (
+              <DeletePost
+                postId={post.postId}
+                onDeleted={props.onDeleted}
+                buttonClass="text-button"
+              />
+            )}
           </div>
         </li>
       ))}
@@ -166,7 +282,11 @@ const PostList = (props: { posts: readonly ShownPost[]; openId: string | null; o
 // The Posts tab: the person's posts, newest first. With a photo among them they open as the grid, with the switch to the list; posts
 // of words alone show as the list with no switch. The empty card shows when there are none. On your own, New post sits above them and
 // each post in the list has Delete.
-const PostsPanel = (props: { posts: PolledView<ShownPosts> | null; name: string | null; onDeleted: (() => void) | undefined }): ReactElement => {
+const PostsPanel = (props: {
+  posts: PolledView<ShownPosts> | null;
+  name: string | null;
+  onDeleted: (() => void) | undefined;
+}): ReactElement => {
   const { posts } = props;
   const [chosenLook, setChosenLook] = useState<PostsLook | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -176,7 +296,9 @@ const PostsPanel = (props: { posts: PolledView<ShownPosts> | null; name: string 
     return (
       <div className="profile-posts-error">
         <ErrorNotice error={posts.error} />
-        <button type="button" className="quiet" onClick={posts.reload}>Try again</button>
+        <button type="button" className="quiet" onClick={posts.reload}>
+          Try again
+        </button>
       </div>
     );
   }
@@ -194,9 +316,17 @@ const PostsPanel = (props: { posts: PolledView<ShownPosts> | null; name: string 
   };
   return (
     <div className="profile-posts-panel">
-      {props.name === null ? <Link className="btn quiet posts-new" to={APP_PATHS.create}>New post</Link> : null}
+      {props.name === null ? (
+        <Link className="btn quiet posts-new" to={APP_PATHS.create}>
+          New post
+        </Link>
+      ) : null}
       {hasPhotos ? <LookSwitch look={look} onChange={choose} /> : null}
-      {look === "grid" ? <PostGrid posts={list} onOpen={open} /> : <PostList posts={list} openId={openId} onDeleted={props.onDeleted} />}
+      {look === "grid" ? (
+        <PostGrid posts={list} onOpen={open} />
+      ) : (
+        <PostList posts={list} openId={openId} onDeleted={props.onDeleted} />
+      )}
     </div>
   );
 };
@@ -217,8 +347,21 @@ type ProfileTabsProps = {
 
 // The panel of one tab.
 function panelOf(key: TabKey, props: ProfileTabsProps): ReactNode {
-  if (key === "about") return <><AboutPanel items={props.items} source={props.source} />{props.aboutEnd}</>;
-  if (key === "posts") return <PostsPanel posts={props.posts ?? null} name={props.postsName} onDeleted={props.onPostDeleted} />;
+  if (key === "about")
+    return (
+      <>
+        <AboutPanel items={props.items} source={props.source} />
+        {props.aboutEnd}
+      </>
+    );
+  if (key === "posts")
+    return (
+      <PostsPanel
+        posts={props.posts ?? null}
+        name={props.postsName}
+        onDeleted={props.onPostDeleted}
+      />
+    );
   return props.meetings;
 }
 
@@ -235,7 +378,9 @@ export const ProfileTabs = (props: ProfileTabsProps): ReactElement => {
   };
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
     const index = tabs.findIndex((tab) => tab.key === selected);
-    const step = { ArrowRight: 1, ArrowLeft: -1, Home: -index, End: tabs.length - 1 - index }[event.key];
+    const step = { ArrowRight: 1, ArrowLeft: -1, Home: -index, End: tabs.length - 1 - index }[
+      event.key
+    ];
     if (step === undefined) return;
     event.preventDefault();
     const next = tabs[(index + step + tabs.length) % tabs.length];
@@ -247,14 +392,18 @@ export const ProfileTabs = (props: ProfileTabsProps): ReactElement => {
         {tabs.map((tab) => (
           <button
             key={tab.key}
-            ref={(element) => { tabRefs.current[tab.key] = element; }}
+            ref={(element) => {
+              tabRefs.current[tab.key] = element;
+            }}
             type="button"
             role="tab"
             id={`${baseId}-${tab.key}-tab`}
             aria-selected={selected === tab.key}
             aria-controls={`${baseId}-${tab.key}-panel`}
             tabIndex={selected === tab.key ? 0 : -1}
-            onClick={() => { select(tab.key, false); }}
+            onClick={() => {
+              select(tab.key, false);
+            }}
           >
             <Icon name={tab.icon} size={16} />
             {tab.label}
@@ -262,7 +411,13 @@ export const ProfileTabs = (props: ProfileTabsProps): ReactElement => {
         ))}
       </div>
       {tabs.map((tab) => (
-        <div key={tab.key} role="tabpanel" id={`${baseId}-${tab.key}-panel`} aria-labelledby={`${baseId}-${tab.key}-tab`} hidden={selected !== tab.key}>
+        <div
+          key={tab.key}
+          role="tabpanel"
+          id={`${baseId}-${tab.key}-panel`}
+          aria-labelledby={`${baseId}-${tab.key}-tab`}
+          hidden={selected !== tab.key}
+        >
           {panelOf(tab.key, props)}
         </div>
       ))}

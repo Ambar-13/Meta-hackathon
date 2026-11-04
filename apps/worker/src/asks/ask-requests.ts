@@ -1,6 +1,14 @@
 // What the run_ask job sends to the model, built without the database, and the checks that read what comes back: an ask's question
 // check, one persona's answer request, the support check of the answers' quotes, and the quote check of each claim.
-import { BriefSupportJudgeOutput, PersonaAnswerOutput, QuestionCheckOutput, toStrictJsonSchema, type AskMode, type BriefPoint, type QuestionKind } from "@meet-first/contracts";
+import {
+  BriefSupportJudgeOutput,
+  PersonaAnswerOutput,
+  QuestionCheckOutput,
+  toStrictJsonSchema,
+  type AskMode,
+  type BriefPoint,
+  type QuestionKind,
+} from "@meet-first/contracts";
 import { queryWords } from "@meet-first/db";
 import type { ChatMessage, CompleteArgs } from "@meet-first/llm";
 import { verifyQuote } from "@meet-first/receipts";
@@ -20,15 +28,27 @@ export type RecallLine = { turnIndex: number; text: string };
 // Everything the user message of one persona_answer call holds. summaryFound are the subject's summary points found in their own
 // messages, shown like card items; summaryOnly are the texts of the points that were not found.
 export type PersonaAnswerInput = {
-  mode: AskMode; askText: string; subjectName: string; askerName: string;
-  items: readonly PersonaItem[]; recall: readonly RecallLine[]; misses: readonly string[];
-  summaryFound: readonly PersonaItem[]; summaryOnly: readonly string[];
+  mode: AskMode;
+  askText: string;
+  subjectName: string;
+  askerName: string;
+  items: readonly PersonaItem[];
+  recall: readonly RecallLine[];
+  misses: readonly string[];
+  summaryFound: readonly PersonaItem[];
+  summaryOnly: readonly string[];
 };
 // The two prompt texts a persona_answer system message joins.
 export type PersonaPromptTexts = { personaAnswer: string; untrustedRules: string };
 // One claim as persona_answers.claims stores it (migration 0006): turnId is the turn's id when the quote was found, else null;
 // supported stays null until the support check backs the claim (true) or not (false).
-export type StoredAnswerClaim = { text: string; quote: string; turnId: string | null; verified: boolean; supported: boolean | null };
+export type StoredAnswerClaim = {
+  text: string;
+  quote: string;
+  turnId: string | null;
+  verified: boolean;
+  supported: boolean | null;
+};
 // One verified claim as the support check reads it.
 export type JudgeClaim = { text: string; quote: string; turnId: string };
 
@@ -70,7 +90,11 @@ export function askKindOf(verdict: QuestionCheckOutput): QuestionKind {
 // In words: control characters and line or paragraph breaks become a space, every <, > and & is removed, runs of spaces become one, and
 // the ends are trimmed. The result holds no <, > or &, so escapeBlockText would change nothing in it and is not called.
 export function promptLine(name: string): string {
-  return name.replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, " ").replace(/[<>&]/g, "").replace(/ {2,}/g, " ").trim();
+  return name
+    .replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, " ")
+    .replace(/[<>&]/g, "")
+    .replace(/ {2,}/g, " ")
+    .trim();
 }
 
 // The user message of one persona_answer call, line by line. The ask text and the names are
@@ -85,16 +109,35 @@ export function personaAnswerUserText(input: PersonaAnswerInput): string {
     ...(input.items.length === 0 ? ["(no items)"] : input.items.map(itemLine)),
     "</your_card>",
   ];
-  if (input.summaryFound.length > 0) lines.push("<summary_points>", ...input.summaryFound.map(summaryPointLine), "</summary_points>");
-  if (input.recall.length > 0) lines.push("<recall_result>", ...input.recall.map((row) => "[" + turnLabel(row.turnIndex) + "] " + row.text), "</recall_result>");
-  if (input.summaryOnly.length > 0) lines.push("<summary_only>", ...input.summaryOnly.map((text) => "- " + escapeBlockText(text)), "</summary_only>");
-  if (input.misses.length > 0) lines.push("<do_not_guess>", ...input.misses.map((text) => "- " + text), "</do_not_guess>");
+  if (input.summaryFound.length > 0)
+    lines.push(
+      "<summary_points>",
+      ...input.summaryFound.map(summaryPointLine),
+      "</summary_points>",
+    );
+  if (input.recall.length > 0)
+    lines.push(
+      "<recall_result>",
+      ...input.recall.map((row) => "[" + turnLabel(row.turnIndex) + "] " + row.text),
+      "</recall_result>",
+    );
+  if (input.summaryOnly.length > 0)
+    lines.push(
+      "<summary_only>",
+      ...input.summaryOnly.map((text) => "- " + escapeBlockText(text)),
+      "</summary_only>",
+    );
+  if (input.misses.length > 0)
+    lines.push("<do_not_guess>", ...input.misses.map((text) => "- " + text), "</do_not_guess>");
   return lines.join("\n");
 }
 
 // The two messages of one persona_answer call: the persona-answer prompt, a blank line and the untrusted-data rules as the system
 // message, then the data blocks as the user message.
-export function personaAnswerMessages(texts: PersonaPromptTexts, input: PersonaAnswerInput): ChatMessage[] {
+export function personaAnswerMessages(
+  texts: PersonaPromptTexts,
+  input: PersonaAnswerInput,
+): ChatMessage[] {
   return [
     { role: "system", content: texts.personaAnswer + "\n\n" + texts.untrustedRules },
     { role: "user", content: personaAnswerUserText(input) },
@@ -120,13 +163,35 @@ export function shortlistWords(text: string): string[] {
 
 // Checks each claim's quote inside the one turn its turn_id names, among the turns the request showed; a label naming no such turn
 // leaves the claim unverified. The forbidden texts are the ask and the two prompts, so a quote cannot repeat them.
-export function checkAnswerClaims(claims: PersonaAnswerOutput["claims"], turns: ReadonlyMap<number, CitableTurn>, forbidden: readonly string[]): StoredAnswerClaim[] {
+export function checkAnswerClaims(
+  claims: PersonaAnswerOutput["claims"],
+  turns: ReadonlyMap<number, CitableTurn>,
+  forbidden: readonly string[],
+): StoredAnswerClaim[] {
   return claims.map((claim) => {
     const index = parseTurnLabel(claim.turn_id);
     const turn = index === null ? undefined : turns.get(index);
-    if (turn === undefined) return { text: claim.text, quote: claim.quote, turnId: null, verified: false, supported: null };
-    const result = verifyQuote({ quote: claim.quote, turnText: turn.text, turnNormText: turn.normText, forbidden });
-    return { text: claim.text, quote: claim.quote, turnId: result.ok ? turn.turnId : null, verified: result.ok, supported: null };
+    if (turn === undefined)
+      return {
+        text: claim.text,
+        quote: claim.quote,
+        turnId: null,
+        verified: false,
+        supported: null,
+      };
+    const result = verifyQuote({
+      quote: claim.quote,
+      turnText: turn.text,
+      turnNormText: turn.normText,
+      forbidden,
+    });
+    return {
+      text: claim.text,
+      quote: claim.quote,
+      turnId: result.ok ? turn.turnId : null,
+      verified: result.ok,
+      supported: null,
+    };
   });
 }
 
@@ -166,16 +231,40 @@ export function askJudgeCallArgs(input: AskCallInput): CompleteArgs {
 
 // One item line of <your_card>: the turn label, the kind, the claim and the quote in double quotes.
 function itemLine(item: PersonaItem): string {
-  return "[" + turnLabel(item.turnIndex) + "] " + item.kind + " | " + item.claim + ' | "' + item.quote + '"';
+  return (
+    "[" +
+    turnLabel(item.turnIndex) +
+    "] " +
+    item.kind +
+    " | " +
+    item.claim +
+    ' | "' +
+    item.quote +
+    '"'
+  );
 }
 
 // One line of <summary_points>: like an item line, with the point's text escaped.
 function summaryPointLine(point: PersonaItem): string {
-  return "[" + turnLabel(point.turnIndex) + "] " + point.kind + " | " + escapeBlockText(point.claim) + ' | "' + point.quote + '"';
+  return (
+    "[" +
+    turnLabel(point.turnIndex) +
+    "] " +
+    point.kind +
+    " | " +
+    escapeBlockText(point.claim) +
+    ' | "' +
+    point.quote +
+    '"'
+  );
 }
 
 // A claim in the shape isFlippedLine reads. It reads only the text and the quote; side and verified are filled because the
 // BriefPoint type requires them.
 function judgePointOf(claim: JudgeClaim): BriefPoint {
-  return { text: claim.text, quotes: [{ text: claim.quote, side: "b", turnId: claim.turnId, verified: true }], supported: null };
+  return {
+    text: claim.text,
+    quotes: [{ text: claim.quote, side: "b", turnId: claim.turnId, verified: true }],
+    supported: null,
+  };
 }

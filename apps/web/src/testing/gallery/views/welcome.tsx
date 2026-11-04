@@ -50,7 +50,18 @@ export const views: readonly GalleryView[] = [
     pattern: ROUTE_PATTERNS.welcome,
     url: APP_PATHS.welcome,
     element: <WelcomeScreen />,
-    stubs: [{ route: routes.people.recover, replies: { status: 404, body: { code: "recovery_code_unknown", message: "This code is unknown or was used already." } } }],
+    stubs: [
+      {
+        route: routes.people.recover,
+        replies: {
+          status: 404,
+          body: {
+            code: "recovery_code_unknown",
+            message: "This code is unknown or was used already.",
+          },
+        },
+      },
+    ],
     play: () => {
       typeInto("Recovery code", RECOVERY_CODE);
       press("Sign in with the code");
@@ -63,7 +74,9 @@ export const views: readonly GalleryView[] = [
     pattern: ROUTE_PATTERNS.claim,
     url: `${APP_PATHS.claim}#${TRANSFER_TOKEN}`,
     element: <ClaimScreen />,
-    stubs: [{ route: routes.people.claim, replies: { status: 200, body: { personId: IDS.personA } } }],
+    stubs: [
+      { route: routes.people.claim, replies: { status: 200, body: { personId: IDS.personA } } },
+    ],
   },
   {
     name: "claim-missing",
@@ -72,7 +85,25 @@ export const views: readonly GalleryView[] = [
     url: APP_PATHS.claim,
     element: <ClaimScreen />,
   },
-  { name: "privacy", title: "Privacy, what Meety keeps", pattern: ROUTE_PATTERNS.privacy, url: APP_PATHS.privacy, element: <PrivacyScreen /> },
-  { name: "terms", title: "Terms of using Meety", pattern: ROUTE_PATTERNS.terms, url: APP_PATHS.terms, element: <TermsScreen /> },
-  { name: "cookies", title: "Cookies, what Meety keeps in the browser", pattern: ROUTE_PATTERNS.cookies, url: APP_PATHS.cookies, element: <CookiesScreen /> },
+  {
+    name: "privacy",
+    title: "Privacy, what Meety keeps",
+    pattern: ROUTE_PATTERNS.privacy,
+    url: APP_PATHS.privacy,
+    element: <PrivacyScreen />,
+  },
+  {
+    name: "terms",
+    title: "Terms of using Meety",
+    pattern: ROUTE_PATTERNS.terms,
+    url: APP_PATHS.terms,
+    element: <TermsScreen />,
+  },
+  {
+    name: "cookies",
+    title: "Cookies, what Meety keeps in the browser",
+    pattern: ROUTE_PATTERNS.cookies,
+    url: APP_PATHS.cookies,
+    element: <CookiesScreen />,
+  },
 ];

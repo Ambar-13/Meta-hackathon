@@ -12,7 +12,12 @@ export const TRANSFER_TOKEN_BYTES = 16;
 // Minutes a transfer link works before it expires.
 export const TRANSFER_LIFETIME_MINUTES = 10;
 // Attributes of the session cookie.
-export const COOKIE_ATTRIBUTES = { httpOnly: true, secure: true, path: "/", sameSite: "lax" } as const;
+export const COOKIE_ATTRIBUTES = {
+  httpOnly: true,
+  secure: true,
+  path: "/",
+  sameSite: "lax",
+} as const;
 // The body of POST /api/sessions/recover: the 32-character recovery code.
 export const Recover = z.object({ code: z.string().length(32) });
 // The type of Recover, read from the schema above.

@@ -13,17 +13,53 @@ import { recordedReplyPath } from "./recorded-replies.js";
 // The one third-party name of A's paste, the golden path's FIXTURE_NAME.
 export const GOLDEN_PATH_NAME = "Rohan Mehta";
 // The phrase that marks a third-party name in B's export: "my" or "My", a relation word, then one or two capitalised words.
-export const THIRD_PARTY_PATTERN = /\b[Mm]y (friend|colleague|manager|boss|sister|brother|partner|teammate|mentor) (\p{Lu}\p{Ll}+(?: \p{Lu}\p{Ll}+)?)/gu;
+export const THIRD_PARTY_PATTERN =
+  /\b[Mm]y (friend|colleague|manager|boss|sister|brother|partner|teammate|mentor) (\p{Lu}\p{Ll}+(?: \p{Lu}\p{Ll}+)?)/gu;
 // The kinds given to the golden path's card items, in order.
-export const GOLDEN_PATH_KINDS = ["habit", "preference", "value", "boundary", "goal", "habit", "preference", "value"] as const;
+export const GOLDEN_PATH_KINDS = [
+  "habit",
+  "preference",
+  "value",
+  "boundary",
+  "goal",
+  "habit",
+  "preference",
+  "value",
+] as const;
 // The reply one golden path request gets by rule, or the reason no rule gives one.
-export type GoldenPathReply = { ok: true; response: Record<string, unknown>; usage: { promptTokens: number; cachedTokens: number; completionTokens: number; reasoningTokens: number } } | { ok: false; reason: string };
+export type GoldenPathReply =
+  | {
+      ok: true;
+      response: Record<string, unknown>;
+      usage: {
+        promptTokens: number;
+        cachedTokens: number;
+        completionTokens: number;
+        reasoningTokens: number;
+      };
+    }
+  | { ok: false; reason: string };
 
-const MESSAGES = z.array(z.object({ role: z.string(), content: z.string().nullable() }).passthrough());
+const MESSAGES = z.array(
+  z.object({ role: z.string(), content: z.string().nullable() }).passthrough(),
+);
 
 // The usage a rule-made reply reports: 4 characters per token for the prompt (an estimate) and the given completion tokens.
-function usageFor(request: LlmRequest, completionTokens: number): { promptTokens: number; cachedTokens: number; completionTokens: number; reasoningTokens: number } {
-  return { promptTokens: Math.ceil(requestChars(request.body) / 4), cachedTokens: 0, completionTokens, reasoningTokens: 0 };
+function usageFor(
+  request: LlmRequest,
+  completionTokens: number,
+): {
+  promptTokens: number;
+  cachedTokens: number;
+  completionTokens: number;
+  reasoningTokens: number;
+} {
+  return {
+    promptTokens: Math.ceil(requestChars(request.body) / 4),
+    cachedTokens: 0,
+    completionTokens,
+    reasoningTokens: 0,
+  };
 }
 
 // The names A and B get: A's one name by rule, or every marked name in the turns of B, each written once (golden path steps 2.5 and 4.3).
@@ -52,10 +88,28 @@ function cardItemsFor(system: string, user: string, request: LlmRequest): Golden
     const line = match[2] ?? "";
     const cut = line.length <= 80 ? line.length : Math.max(0, line.slice(0, 80).lastIndexOf(" "));
     const quote = line.slice(0, cut).replace(/[\s\p{P}]+$/u, "");
-    if (quote.includes(" ") && hasEnoughOwnText(quote) && !normQuote(system).includes(normQuote(quote))) kept.push({ label, quote });
+    if (
+      quote.includes(" ") &&
+      hasEnoughOwnText(quote) &&
+      !normQuote(system).includes(normQuote(quote))
+    )
+      kept.push({ label, quote });
   }
-  if (kept.length < 6) return { ok: false, reason: `only ${String(kept.length)} turns give a quote; a ready card needs 6` };
-  const items = kept.slice(0, 8).map((entry, index) => englishItem([GOLDEN_PATH_KINDS[index] ?? "habit", `Says: ${entry.quote}`.slice(0, 300), entry.label, entry.quote]));
+  if (kept.length < 6)
+    return {
+      ok: false,
+      reason: `only ${String(kept.length)} turns give a quote; a ready card needs 6`,
+    };
+  const items = kept
+    .slice(0, 8)
+    .map((entry, index) =>
+      englishItem([
+        GOLDEN_PATH_KINDS[index] ?? "habit",
+        `Says: ${entry.quote}`.slice(0, 300),
+        entry.label,
+        entry.quote,
+      ]),
+    );
   return { ok: true, response: replyResponse({ items }), usage: usageFor(request, 1200) };
 }
 
@@ -64,25 +118,44 @@ export function goldenPathReply(request: LlmRequest): GoldenPathReply {
   const messages = MESSAGES.parse(request.body.messages);
   const system = messages[0]?.content ?? "";
   const user = messages[1]?.content ?? "";
-  if (request.callSite === "scrub_names") return { ok: true, response: replyResponse({ names: namesFor(user) }), usage: usageFor(request, 20) };
+  if (request.callSite === "scrub_names")
+    return {
+      ok: true,
+      response: replyResponse({ names: namesFor(user) }),
+      usage: usageFor(request, 20),
+    };
   if (request.callSite === "card") return cardItemsFor(system, user, request);
   return { ok: false, reason: `no golden path rule for call site ${request.callSite}` };
 }
 
 // Writes a hand-written fixture for every miss file that has none yet; stops at the first request no rule answers.
-export function writeGoldenPathFixtures(missRoot: string): { written: string[]; stoppedAt: string | null } {
+export function writeGoldenPathFixtures(missRoot: string): {
+  written: string[];
+  stoppedAt: string | null;
+} {
   const written: string[] = [];
   for (const callSite of ["scrub_names", "card"] as const) {
     const folder = join(missRoot, callSite);
     if (!existsSync(folder)) continue;
-    for (const name of readdirSync(folder).filter((file) => file.endsWith(".request.json")).sort()) {
+    for (const name of readdirSync(folder)
+      .filter((file) => file.endsWith(".request.json"))
+      .sort()) {
       const path = join(folder, name);
       const request = JSON.parse(readFileSync(path, "utf8")) as LlmRequest;
       const hash = requestHash(request.body);
       if (existsSync(recordedReplyPath(request.callSite, hash))) continue;
       const reply = goldenPathReply(request);
       if (!reply.ok) return { written, stoppedAt: `${path}: ${reply.reason}` };
-      const call = RecordedCall.parse({ callSite: request.callSite, promptVersion: request.promptVersion, requestHash: hash, request, response: reply.response, usage: reply.usage, recordedAt: null, handWritten: true });
+      const call = RecordedCall.parse({
+        callSite: request.callSite,
+        promptVersion: request.promptVersion,
+        requestHash: hash,
+        request,
+        response: reply.response,
+        usage: reply.usage,
+        recordedAt: null,
+        handWritten: true,
+      });
       const target = recordedReplyPath(request.callSite, hash);
       mkdirSync(dirname(target), { recursive: true });
       writeFileSync(target, `${JSON.stringify(call, null, 2)}\n`);

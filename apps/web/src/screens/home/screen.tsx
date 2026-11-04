@@ -3,7 +3,14 @@ import { Link } from "react-router-dom";
 import type { HomeCard, HomeView } from "@meet-first/contracts";
 import { APP_PATHS, ErrorNotice, ScreenFrame } from "../../app-shell/index.js";
 import { Avatar, EmptyState, KIND_LOOK, LoadingLine, NameTag, Sticker } from "../../look/index.js";
-import { ITEM_KIND_COLOUR, meetingLink, meetingStateWords, nextStepOf, shortDay, useHomeView } from "./home-state.js";
+import {
+  ITEM_KIND_COLOUR,
+  meetingLink,
+  meetingStateWords,
+  nextStepOf,
+  shortDay,
+  useHomeView,
+} from "./home-state.js";
 import "./home.css";
 
 // The one next step, on a tilted blue panel with its sticker: the main link, and a second one when there is a real choice.
@@ -12,11 +19,16 @@ export const NextStepPanel = (props: { home: HomeView }): ReactElement => {
   return (
     <section className="colour-panel c-blue home-next" aria-labelledby="home-next-title">
       <Sticker name={step.sticker} />
-      <span className="pill"><span className="dot" />Your next step</span>
+      <span className="pill">
+        <span className="dot" />
+        Your next step
+      </span>
       <h2 id="home-next-title">{step.title}</h2>
       <p>{step.text}</p>
       <div className="actions">
-        <Link className="btn quiet" to={step.action.to}>{step.action.label}</Link>
+        <Link className="btn quiet" to={step.action.to}>
+          {step.action.label}
+        </Link>
         {step.second === undefined ? null : <Link to={step.second.to}>{step.second.label}</Link>}
       </div>
     </section>
@@ -27,13 +39,22 @@ export const NextStepPanel = (props: { home: HomeView }): ReactElement => {
 const CardTag = (props: { card: HomeCard; name: string }): ReactElement => {
   const first = props.card.items[0];
   return (
-    <Link className="home-card" to={APP_PATHS.card(props.card.id)} aria-label={`Your card, ${String(props.card.itemCount)} items`}>
-      <span className="home-card-band" aria-hidden="true"><b /><i /></span>
+    <Link
+      className="home-card"
+      to={APP_PATHS.card(props.card.id)}
+      aria-label={`Your card, ${String(props.card.itemCount)} items`}
+    >
+      <span className="home-card-band" aria-hidden="true">
+        <b />
+        <i />
+      </span>
       <span className="home-card-name">{props.name}</span>
       {props.card.items.length === 0 ? null : (
         <span className="home-card-items">
           {props.card.items.map((item) => (
-            <span key={item.claim} className={`home-item ${ITEM_KIND_COLOUR[item.kind]}`}>{item.claim}</span>
+            <span key={item.claim} className={`home-item ${ITEM_KIND_COLOUR[item.kind]}`}>
+              {item.claim}
+            </span>
           ))}
         </span>
       )}
@@ -51,7 +72,13 @@ export const CardSection = (props: { home: HomeView }): ReactElement => {
         <h2 id="home-card-title">Your card</h2>
         {card === null ? null : <Link to={APP_PATHS.card(card.id)}>See it all</Link>}
       </div>
-      {card === null ? <p className="muted">Your card appears here once your notes are in and the names are checked.</p> : <CardTag card={card} name={props.home.displayName} />}
+      {card === null ? (
+        <p className="muted">
+          Your card appears here once your notes are in and the names are checked.
+        </p>
+      ) : (
+        <CardTag card={card} name={props.home.displayName} />
+      )}
     </section>
   );
 };
@@ -63,16 +90,27 @@ export const MeetingsSection = (props: { home: HomeView }): ReactElement => {
     <section aria-labelledby="home-meetings-title">
       <h2 id="home-meetings-title">Meetings</h2>
       {meetings.length === 0 ? (
-        <EmptyState sticker="chat" title="No meetings yet">Your first one starts from an invite or Explore.</EmptyState>
+        <EmptyState sticker="chat" title="No meetings yet">
+          Your first one starts from an invite or Explore.
+        </EmptyState>
       ) : (
         <ul className="home-rows">
           {meetings.map((meeting) => (
             <li key={meeting.id}>
-              <Link className={`home-row ${KIND_LOOK[meeting.questionKind].colour}`} to={meetingLink(meeting)}>
+              <Link
+                className={`home-row ${KIND_LOOK[meeting.questionKind].colour}`}
+                to={meetingLink(meeting)}
+              >
                 <Avatar name={meeting.otherDisplayName} side="b" />
                 <span>
                   <b>{`With ${meeting.otherDisplayName}: ${meeting.questionText}`}</b>
-                  <small><span className="pill"><span className="dot" />{meetingStateWords(meeting)}</span>{shortDay(meeting.createdAt, serverNow)}</small>
+                  <small>
+                    <span className="pill">
+                      <span className="dot" />
+                      {meetingStateWords(meeting)}
+                    </span>
+                    {shortDay(meeting.createdAt, serverNow)}
+                  </small>
                 </span>
               </Link>
             </li>
@@ -95,7 +133,11 @@ export const PairsSection = (props: { home: HomeView }): ReactElement | null => 
             <Link className="home-row c-yellow" to={APP_PATHS.lobby(pair.id)}>
               <Sticker name="tags" />
               <span>
-                <b>{pair.otherDisplayName === null ? "Waiting for someone to join" : `With ${pair.otherDisplayName}`}</b>
+                <b>
+                  {pair.otherDisplayName === null
+                    ? "Waiting for someone to join"
+                    : `With ${pair.otherDisplayName}`}
+                </b>
                 <small>{`Open until ${shortDay(pair.expiresAt, props.home.serverNow)}`}</small>
               </span>
             </Link>
@@ -111,7 +153,12 @@ export const HomeScreen = (): ReactElement => {
   const home = useHomeView();
   const value = home.value;
   return (
-    <ScreenFrame title="Hello," titleAside={value === null ? undefined : <NameTag name={value.displayName} className="home-hello-tag" />}>
+    <ScreenFrame
+      title="Hello,"
+      titleAside={
+        value === null ? undefined : <NameTag name={value.displayName} className="home-hello-tag" />
+      }
+    >
       {value === null && home.error === null ? <LoadingLine text="Opening your home." /> : null}
       {home.error === null ? null : <ErrorNotice error={home.error} />}
       {value === null ? null : (

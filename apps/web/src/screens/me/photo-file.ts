@@ -36,24 +36,45 @@ function drawFrame(bitmap: ImageBitmap, frame: Frame): HTMLCanvasElement {
   canvas.height = frame.height;
   const context = canvas.getContext("2d");
   if (context === null || frame.sw === 0 || frame.sh === 0) throw new PhotoFileError("no canvas");
-  context.drawImage(bitmap, frame.sx, frame.sy, frame.sw, frame.sh, 0, 0, frame.width, frame.height);
+  context.drawImage(
+    bitmap,
+    frame.sx,
+    frame.sy,
+    frame.sw,
+    frame.sh,
+    0,
+    0,
+    frame.width,
+    frame.height,
+  );
   return canvas;
 }
 
 // The canvas as a JPEG at one quality.
 function jpegOf(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (blob === null) reject(new PhotoFileError("no jpeg"));
-      else resolve(blob);
-    }, "image/jpeg", quality);
+    canvas.toBlob(
+      (blob) => {
+        if (blob === null) reject(new PhotoFileError("no jpeg"));
+        else resolve(blob);
+      },
+      "image/jpeg",
+      quality,
+    );
   });
 }
 
 // The middle square of a bitmap, drawn side pixels a side.
 function middleSquare(bitmap: ImageBitmap, side: number): Frame {
   const crop = Math.min(bitmap.width, bitmap.height);
-  return { sx: (bitmap.width - crop) / 2, sy: (bitmap.height - crop) / 2, sw: crop, sh: crop, width: side, height: side };
+  return {
+    sx: (bitmap.width - crop) / 2,
+    sy: (bitmap.height - crop) / 2,
+    sw: crop,
+    sh: crop,
+    width: side,
+    height: side,
+  };
 }
 
 // The middle square of a picture file as a JPEG of PHOTO_SIDE pixels a side, for a profile photo; throws PhotoFileError when the file
@@ -88,7 +109,14 @@ export async function postJpeg(file: Blob): Promise<Blob> {
 export async function storyJpeg(file: Blob): Promise<Blob> {
   const bitmap = await readBitmap(file);
   const scale = Math.min(1, POST_PHOTO_SIDE / bitmap.width, STORY_MAX_HEIGHT / bitmap.height);
-  const canvas = drawFrame(bitmap, { sx: 0, sy: 0, sw: bitmap.width, sh: bitmap.height, width: Math.round(bitmap.width * scale), height: Math.round(bitmap.height * scale) });
+  const canvas = drawFrame(bitmap, {
+    sx: 0,
+    sy: 0,
+    sw: bitmap.width,
+    sh: bitmap.height,
+    width: Math.round(bitmap.width * scale),
+    height: Math.round(bitmap.height * scale),
+  });
   bitmap.close();
   return fittingJpeg(canvas);
 }
@@ -97,6 +125,7 @@ export async function storyJpeg(file: Blob): Promise<Blob> {
 export async function base64Of(blob: Blob): Promise<string> {
   const bytes = new Uint8Array(await blob.arrayBuffer());
   let text = "";
-  for (let start = 0; start < bytes.length; start += 0x8000) text += String.fromCharCode(...bytes.subarray(start, start + 0x8000));
+  for (let start = 0; start < bytes.length; start += 0x8000)
+    text += String.fromCharCode(...bytes.subarray(start, start + 0x8000));
   return btoa(text);
 }

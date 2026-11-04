@@ -16,7 +16,8 @@ type PassedList = { about: string; paths: string[] };
 function isPassedList(value: unknown): value is PassedList {
   if (typeof value !== "object" || value === null) return false;
   const candidate = value as { about?: unknown; paths?: unknown };
-  const hasPaths = Array.isArray(candidate.paths) && candidate.paths.every((path) => typeof path === "string");
+  const hasPaths =
+    Array.isArray(candidate.paths) && candidate.paths.every((path) => typeof path === "string");
   return typeof candidate.about === "string" && hasPaths;
 }
 
@@ -26,7 +27,8 @@ function isPassedList(value: unknown): value is PassedList {
  */
 export function readPassedPaths(root: string): string[] {
   const parsed: unknown = JSON.parse(readFileSync(join(root, STYLE_CHECKED_FILE), "utf8"));
-  if (!isPassedList(parsed)) throw new Error(`${STYLE_CHECKED_FILE} must look like {"about": "...", "paths": ["..."]}`);
+  if (!isPassedList(parsed))
+    throw new Error(`${STYLE_CHECKED_FILE} must look like {"about": "...", "paths": ["..."]}`);
   return parsed.paths;
 }
 

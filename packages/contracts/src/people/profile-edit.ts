@@ -7,7 +7,9 @@ export const DISPLAY_NAME_MAX_CHARS = 80;
 export const PROFILE_PHOTO_MAX_BYTES = 400_000;
 
 // The body of PUT /api/people/me/name: the person's new display name (Instagram's Edit profile).
-export const NameUpdate = z.object({ displayName: z.string().trim().min(1).max(DISPLAY_NAME_MAX_CHARS) });
+export const NameUpdate = z.object({
+  displayName: z.string().trim().min(1).max(DISPLAY_NAME_MAX_CHARS),
+});
 // The type of NameUpdate, read from the schema above.
 export type NameUpdate = z.infer<typeof NameUpdate>;
 // What PUT /api/people/me/name returns: the name as saved.

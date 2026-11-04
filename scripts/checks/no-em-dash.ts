@@ -22,11 +22,20 @@ const SEARCHED_FOLDERS: readonly string[] = [
 
 /** Every line of a text file in the searched folders that holds an em dash, with its file and line number. */
 export function noEmDash(root: string): Finding[] {
-  const files = SEARCHED_FOLDERS.flatMap((folder) => walkFiles(root, folder, (name) => TEXT_FILE.test(name))).filter((file) => !relative(root, file).startsWith(RECORDINGS));
+  const files = SEARCHED_FOLDERS.flatMap((folder) =>
+    walkFiles(root, folder, (name) => TEXT_FILE.test(name)),
+  ).filter((file) => !relative(root, file).startsWith(RECORDINGS));
   return files.flatMap((file) =>
     readLines(file).flatMap((text, index) =>
       text.includes(EM_DASH)
-        ? [{ check: "no-em-dash", file, line: index + 1, message: "em dash (U+2014); rewrite the sentence" }]
+        ? [
+            {
+              check: "no-em-dash",
+              file,
+              line: index + 1,
+              message: "em dash (U+2014); rewrite the sentence",
+            },
+          ]
         : [],
     ),
   );

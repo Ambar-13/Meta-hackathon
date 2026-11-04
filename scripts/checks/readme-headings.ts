@@ -65,7 +65,10 @@ export function readmeProblems(text: string): ReadmeProblem[] {
       continue;
     }
     if (line < previousLine)
-      problems.push({ line, message: `"## ${heading}" is out of order; the five headings go in their fixed order` });
+      problems.push({
+        line,
+        message: `"## ${heading}" is out of order; the five headings go in their fixed order`,
+      });
     previousLine = Math.max(previousLine, line);
   }
   const fitsLine = found.get("how it fits");

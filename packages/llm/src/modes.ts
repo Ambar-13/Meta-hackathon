@@ -4,7 +4,11 @@ import { dirname, join } from "node:path";
 import { ContractError, RecordedCall, type CallSite, type LlmMode } from "@meet-first/contracts";
 
 // One model request as the worker sends it. body is the chat completions request, exactly as it goes out.
-export type LlmRequest = { callSite: CallSite; promptVersion: string; body: Record<string, unknown> };
+export type LlmRequest = {
+  callSite: CallSite;
+  promptVersion: string;
+  body: Record<string, unknown>;
+};
 // What a model call returns. httpStatus is null for a replay, because a stored reply has no status to return.
 export type LlmReply = {
   response: Record<string, unknown>;
@@ -93,6 +97,9 @@ export async function runInMode(args: {
 // Refuses to run replayed replies in production, so a demo never runs on recorded text.
 export function assertModeAllowed(mode: LlmMode, nodeEnv: string | undefined): void {
   if (mode === "replay" && nodeEnv === "production") {
-    throw new ContractError("llm_mode_replay_in_production", "Production cannot run on recorded replies. Set LLM_MODE=live.");
+    throw new ContractError(
+      "llm_mode_replay_in_production",
+      "Production cannot run on recorded replies. Set LLM_MODE=live.",
+    );
   }
 }

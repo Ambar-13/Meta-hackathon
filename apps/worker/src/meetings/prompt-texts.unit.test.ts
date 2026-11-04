@@ -7,16 +7,27 @@ import { readPrompt } from "@meet-first/prompts";
 import { normQuote, QUOTE_MIN_CHARS } from "@meet-first/receipts";
 
 // The people fixtures the golden path and the eval upload.
-const PEOPLE_DIR = fileURLToPath(new URL("../../../../packages/evals/fixtures/people", import.meta.url));
+const PEOPLE_DIR = fileURLToPath(
+  new URL("../../../../packages/evals/fixtures/people", import.meta.url),
+);
 
 // The user messages of one ChatGPT export fixture.
 function exportLines(text: string): string[] {
-  const conversations = JSON.parse(text) as Array<{ mapping: Record<string, { message: { author: { role: string }; content: { parts?: unknown[] } } | null }> }>;
-  return conversations.flatMap((conversation) => Object.values(conversation.mapping).flatMap((node) => {
-    const message = node.message;
-    if (message === null || message.author.role !== "user") return [];
-    return (message.content.parts ?? []).filter((part): part is string => typeof part === "string");
-  }));
+  const conversations = JSON.parse(text) as Array<{
+    mapping: Record<
+      string,
+      { message: { author: { role: string }; content: { parts?: unknown[] } } | null }
+    >;
+  }>;
+  return conversations.flatMap((conversation) =>
+    Object.values(conversation.mapping).flatMap((node) => {
+      const message = node.message;
+      if (message === null || message.author.role !== "user") return [];
+      return (message.content.parts ?? []).filter(
+        (part): part is string => typeof part === "string",
+      );
+    }),
+  );
 }
 
 // Every note line a test quote can come from: the people fixtures and the seeded turns.
@@ -42,7 +53,9 @@ function sharedRun(line: string, texts: readonly string[]): string | null {
 }
 
 it("R6.6-T2: no test note shares 20 or more characters with a meeting prompt, so the receipt check never refuses a real quote as prompt text", () => {
-  const prompts = (["meeting-moderator", "meeting-speech", "meeting-receipts", "untrusted-data-rules"] as const).map((name) => normQuote(readPrompt(name).text));
+  const prompts = (
+    ["meeting-moderator", "meeting-speech", "meeting-receipts", "untrusted-data-rules"] as const
+  ).map((name) => normQuote(readPrompt(name).text));
   const shared = noteLines().flatMap((line) => {
     const run = sharedRun(line, prompts);
     return run === null ? [] : [run];

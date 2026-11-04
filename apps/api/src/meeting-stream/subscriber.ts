@@ -1,10 +1,21 @@
 import type { FastifyBaseLogger } from "fastify";
-import { EVENT_VERSION, HEARTBEAT_MS, SERVER_SAFETY_POLL_MS, SSE_PADDING_BYTES, TurnDelta, type CommittedEvent } from "@meet-first/contracts";
+import {
+  EVENT_VERSION,
+  HEARTBEAT_MS,
+  SERVER_SAFETY_POLL_MS,
+  SSE_PADDING_BYTES,
+  TurnDelta,
+  type CommittedEvent,
+} from "@meet-first/contracts";
 import type { WakeSignal } from "./listen-fan-out.js";
 import type { RunningPartial, StreamReads } from "./replay-and-poll.js";
 
 // The SSE response headers; nothing else is set on the stream.
-export const SSE_HEADERS = { "content-type": "text/event-stream", "cache-control": "no-cache, no-transform", "x-accel-buffering": "no" } as const;
+export const SSE_HEADERS = {
+  "content-type": "text/event-stream",
+  "cache-control": "no-cache, no-transform",
+  "x-accel-buffering": "no",
+} as const;
 // One comment line of exactly SSE_PADDING_BYTES (2,048) bytes, written first so a proxy that holds back the first
 // 2 KB lets the stream through: a colon, 2,045 spaces, and the blank line that ends a frame.
 export const SSE_PADDING = `:${" ".repeat(SSE_PADDING_BYTES - 3)}\n\n`;
@@ -14,16 +25,42 @@ export const HEARTBEAT_LINE = ":hb\n\n";
 export type StreamTiming = { heartbeatMs: number; safetyPollMs: number; sessionCheckMs: number };
 // The timing every real stream uses: the 15 s heartbeat, the 10 s safety poll, and a session re-check
 // at the heartbeat interval by default, so a signed-out session ends its stream within one heartbeat.
-export const STREAM_TIMING: StreamTiming = { heartbeatMs: HEARTBEAT_MS, safetyPollMs: SERVER_SAFETY_POLL_MS, sessionCheckMs: HEARTBEAT_MS };
+export const STREAM_TIMING: StreamTiming = {
+  heartbeatMs: HEARTBEAT_MS,
+  safetyPollMs: SERVER_SAFETY_POLL_MS,
+  sessionCheckMs: HEARTBEAT_MS,
+};
 // What one stream has sent of a running step's partial text.
 export type SentDelta = { stepSeq: number; attempt: number; sentLen: number };
 // One open stream.
-export type Subscriber = { start: () => void; wake: (signal: WakeSignal) => void; stop: () => void; end: () => void; whenIdle: () => Promise<void> };
+export type Subscriber = {
+  start: () => void;
+  wake: (signal: WakeSignal) => void;
+  stop: () => void;
+  end: () => void;
+  whenIdle: () => Promise<void>;
+};
 // What a subscriber needs; write and end are the HTTP response's. sessionStillValid answers whether the session and the
 // membership that opened the stream still hold; a false answer, or a failed check, ends the stream.
-export type SubscriberOptions = { personId: string; meetingId: string; lastSeq: number; reads: StreamReads; write: (chunk: string) => void; end: () => void; now: () => Date; log: FastifyBaseLogger; timing: StreamTiming; sessionStillValid: () => Promise<boolean> };
+export type SubscriberOptions = {
+  personId: string;
+  meetingId: string;
+  lastSeq: number;
+  reads: StreamReads;
+  write: (chunk: string) => void;
+  end: () => void;
+  now: () => Date;
+  log: FastifyBaseLogger;
+  timing: StreamTiming;
+  sessionStillValid: () => Promise<boolean>;
+};
 // The open streams of one process, at most a fixed number per person and meeting.
-export type ConnectionLimit<T> = { admit: (key: string, stream: T) => void; release: (key: string, stream: T) => void; endAll: () => void; count: (key: string) => number };
+export type ConnectionLimit<T> = {
+  admit: (key: string, stream: T) => void;
+  release: (key: string, stream: T) => void;
+  endAll: () => void;
+  count: (key: string) => number;
+};
 
 // A committed event as one SSE frame: its seq as the id, its type as the event name, the whole event as JSON.
 export function formatCommittedEvent(event: CommittedEvent): string {
@@ -36,7 +73,10 @@ export function formatDelta(delta: TurnDelta): string {
 }
 
 // What to send of a running step's partial text, given what this stream already sent.
-export function nextDelta(sent: SentDelta | null, partial: RunningPartial | null): { offset: number; text: string } | null {
+export function nextDelta(
+  sent: SentDelta | null,
+  partial: RunningPartial | null,
+): { offset: number; text: string } | null {
   if (partial === null || partial.text.length === 0) {
     return null;
   }
@@ -50,12 +90,22 @@ export function nextDelta(sent: SentDelta | null, partial: RunningPartial | null
 }
 
 // True when a delta payload may carry text this stream has not sent; false lets the stream skip the read.
-export function isDeltaNews(sent: SentDelta | null, payload: { stepSeq: number; attempt: number; len: number }): boolean {
-  return sent === null || sent.stepSeq !== payload.stepSeq || sent.attempt !== payload.attempt || payload.len > sent.sentLen;
+export function isDeltaNews(
+  sent: SentDelta | null,
+  payload: { stepSeq: number; attempt: number; len: number },
+): boolean {
+  return (
+    sent === null ||
+    sent.stepSeq !== payload.stepSeq ||
+    sent.attempt !== payload.attempt ||
+    payload.len > sent.sentLen
+  );
 }
 
 // Keeps at most max open streams per key and ends the oldest when one more arrives.
-export function makeConnectionLimit<T extends { end: () => void }>(max: number): ConnectionLimit<T> {
+export function makeConnectionLimit<T extends { end: () => void }>(
+  max: number,
+): ConnectionLimit<T> {
   const map = new Map<string, T[]>();
   return {
     admit: (key, stream) => {
@@ -113,7 +163,9 @@ class StreamSubscriber implements Subscriber {
   start(): void {
     this.enqueue(() => this.pumpEvents());
     this.enqueue(() => this.pumpPartial());
-    this.enqueue(() => this.options.reads.touchPresence(this.options.personId, this.options.meetingId));
+    this.enqueue(() =>
+      this.options.reads.touchPresence(this.options.personId, this.options.meetingId),
+    );
     this.heartbeatTimer = setInterval(() => {
       this.heartbeat();
     }, this.options.timing.heartbeatMs);
@@ -137,10 +189,16 @@ class StreamSubscriber implements Subscriber {
     try {
       isStillValid = await this.options.sessionStillValid();
     } catch (error) {
-      this.options.log.warn({ code: "stream_session_check_failed", meetingId: this.options.meetingId, err: error }, "stream_session_check_failed");
+      this.options.log.warn(
+        { code: "stream_session_check_failed", meetingId: this.options.meetingId, err: error },
+        "stream_session_check_failed",
+      );
     }
     if (!isStillValid) {
-      this.options.log.info({ code: "stream_session_ended", meetingId: this.options.meetingId }, "stream_session_ended");
+      this.options.log.info(
+        { code: "stream_session_ended", meetingId: this.options.meetingId },
+        "stream_session_ended",
+      );
       this.end();
     }
   }
@@ -151,7 +209,9 @@ class StreamSubscriber implements Subscriber {
       return;
     }
     this.options.write(HEARTBEAT_LINE);
-    this.enqueue(() => this.options.reads.touchPresence(this.options.personId, this.options.meetingId));
+    this.enqueue(() =>
+      this.options.reads.touchPresence(this.options.personId, this.options.meetingId),
+    );
   }
 
   // Reacts to one notice: an event newer than the last sent seq, a delta with new text, or a poll that reads both.
@@ -184,13 +244,20 @@ class StreamSubscriber implements Subscriber {
         }
       })
       .catch((error: unknown) => {
-        this.options.log.warn({ code: "stream_read_failed", meetingId: this.options.meetingId, err: error }, "stream_read_failed");
+        this.options.log.warn(
+          { code: "stream_read_failed", meetingId: this.options.meetingId, err: error },
+          "stream_read_failed",
+        );
       });
   }
 
   // Sends every committed event after the last sent seq, in order, and no event twice.
   private async pumpEvents(): Promise<void> {
-    const events = await this.options.reads.readEventsAfter(this.options.personId, this.options.meetingId, this.lastSentSeq);
+    const events = await this.options.reads.readEventsAfter(
+      this.options.personId,
+      this.options.meetingId,
+      this.lastSentSeq,
+    );
     for (const event of events) {
       if (this.isStopped) {
         return;
@@ -205,7 +272,10 @@ class StreamSubscriber implements Subscriber {
 
   // Sends the running step's partial text as a turn.delta, but only the part this stream has not sent yet.
   private async pumpPartial(): Promise<void> {
-    const partial = await this.options.reads.readRunningPartial(this.options.personId, this.options.meetingId);
+    const partial = await this.options.reads.readRunningPartial(
+      this.options.personId,
+      this.options.meetingId,
+    );
     const delta = nextDelta(this.sent, partial);
     if (delta === null || partial === null || this.isStopped) {
       return;
@@ -222,7 +292,11 @@ class StreamSubscriber implements Subscriber {
       text: delta.text,
     });
     this.options.write(formatDelta(frame));
-    this.sent = { stepSeq: partial.stepSeq, attempt: partial.attempt, sentLen: partial.text.length };
+    this.sent = {
+      stepSeq: partial.stepSeq,
+      attempt: partial.attempt,
+      sentLen: partial.text.length,
+    };
   }
 
   // Stops the reads and the timers. Safe to call twice.

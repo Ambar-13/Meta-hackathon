@@ -2,7 +2,13 @@ import "./create.css";
 import type { FormEvent, ReactElement } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { POST_TEXT_MAX_CHARS, type PostKind } from "@meet-first/contracts";
-import { APP_PATHS, ErrorNotice, PROFILE_TAB_QUERY, readCreateKind, ScreenFrame } from "../../app-shell/index.js";
+import {
+  APP_PATHS,
+  ErrorNotice,
+  PROFILE_TAB_QUERY,
+  readCreateKind,
+  ScreenFrame,
+} from "../../app-shell/index.js";
 import { Icon, MeetyMark, StoryPicture } from "../../look/index.js";
 import { canShare, useCreate, type CreateModel } from "./create-state.js";
 
@@ -33,7 +39,8 @@ const COUNT_FROM_CHARS = 500;
 // Where Create goes once something is shared: a story to Home, where Your story leads the row; a post to Home, where the feed shows it,
 // unless you are known not to be in Explore, when it goes to your own Posts tab, the one place it shows until you join.
 function afterShare(kind: PostKind, listed: CreateModel["listed"]): string {
-  if (kind === "post" && listed === "not-listed") return `${APP_PATHS.me}?${PROFILE_TAB_QUERY}=posts`;
+  if (kind === "post" && listed === "not-listed")
+    return `${APP_PATHS.me}?${PROFILE_TAB_QUERY}=posts`;
   return APP_PATHS.home;
 }
 
@@ -43,7 +50,15 @@ const KindSwitch = (props: { model: CreateModel }): ReactElement => {
   return (
     <div className="create-kinds" role="group" aria-label={CREATE_COPY.kindLabel}>
       {(["post", "story"] as const).map((kind) => (
-        <button key={kind} type="button" className="create-kind" aria-pressed={model.kind === kind} onClick={() => { model.setKind(kind); }}>
+        <button
+          key={kind}
+          type="button"
+          className="create-kind"
+          aria-pressed={model.kind === kind}
+          onClick={() => {
+            model.setKind(kind);
+          }}
+        >
           {CREATE_COPY.kinds[kind]}
         </button>
       ))}
@@ -52,17 +67,26 @@ const KindSwitch = (props: { model: CreateModel }): ReactElement => {
 };
 
 // A file picker that looks like the words it holds: the input fills the label, so a tap anywhere on it opens the photos or the camera.
-const PhotoPicker = (props: { model: CreateModel; className: string; children: ReactElement | string }): ReactElement => {
+const PhotoPicker = (props: {
+  model: CreateModel;
+  className: string;
+  children: ReactElement | string;
+}): ReactElement => {
   const isBusy = props.model.state.kind === "drawing" || props.model.state.kind === "sending";
   return (
     <label className={isBusy ? `${props.className} is-busy` : props.className}>
       {props.children}
-      <input type="file" accept="image/*" className="create-file" disabled={isBusy}
+      <input
+        type="file"
+        accept="image/*"
+        className="create-file"
+        disabled={isBusy}
         onChange={(event) => {
           const file = event.target.files?.[0];
           event.target.value = "";
           if (file !== undefined) void props.model.pickPhoto(file);
-        }} />
+        }}
+      />
     </label>
   );
 };
@@ -85,15 +109,24 @@ const PhotoPart = (props: { model: CreateModel }): ReactElement => {
   return (
     <div className="create-photo">
       {model.kind === "story" ? (
-        <StoryPicture src={model.photo.url} alt={CREATE_COPY.preview} text={model.text.trim()} className="create-preview" />
+        <StoryPicture
+          src={model.photo.url}
+          alt={CREATE_COPY.preview}
+          text={model.text.trim()}
+          className="create-preview"
+        />
       ) : (
         <div className="post-photo is-square create-preview">
           <img src={model.photo.url} alt={CREATE_COPY.preview} />
         </div>
       )}
       <div className="create-photo-actions">
-        <PhotoPicker model={model} className="btn quiet create-change">{CREATE_COPY.change}</PhotoPicker>
-        <button type="button" className="text-button" onClick={model.removePhoto}>{CREATE_COPY.remove}</button>
+        <PhotoPicker model={model} className="btn quiet create-change">
+          {CREATE_COPY.change}
+        </PhotoPicker>
+        <button type="button" className="text-button" onClick={model.removePhoto}>
+          {CREATE_COPY.remove}
+        </button>
       </div>
     </div>
   );
@@ -102,7 +135,12 @@ const PhotoPart = (props: { model: CreateModel }): ReactElement => {
 // The line under Share: a refusal before any request, or the api's error.
 const ShareLine = (props: { model: CreateModel }): ReactElement | null => {
   const { state } = props.model;
-  if (state.kind === "refused") return <p className="create-refusal" role="alert">{state.sentence}</p>;
+  if (state.kind === "refused")
+    return (
+      <p className="create-refusal" role="alert">
+        {state.sentence}
+      </p>
+    );
   if (state.kind === "failed") return <ErrorNotice error={state.error} />;
   return null;
 };
@@ -132,19 +170,34 @@ export const CreateScreen = (): ReactElement => {
           <div className="create-words">
             <label className="create-caption">
               {CREATE_COPY.caption[model.kind]}
-              <textarea value={model.text} rows={4} maxLength={POST_TEXT_MAX_CHARS} placeholder={CREATE_COPY.placeholder[model.kind]}
-                onChange={(event) => { model.setText(event.target.value); }} />
+              <textarea
+                value={model.text}
+                rows={4}
+                maxLength={POST_TEXT_MAX_CHARS}
+                placeholder={CREATE_COPY.placeholder[model.kind]}
+                onChange={(event) => {
+                  model.setText(event.target.value);
+                }}
+              />
             </label>
-            {model.text.length >= COUNT_FROM_CHARS ? <p className="create-count" aria-live="polite">{`${String(left)} characters left`}</p> : null}
+            {model.text.length >= COUNT_FROM_CHARS ? (
+              <p className="create-count" aria-live="polite">{`${String(left)} characters left`}</p>
+            ) : null}
             {model.kind === "story" ? <p className="create-note">{CREATE_COPY.storyLine}</p> : null}
             <p className="create-meety">
               <MeetyMark />
               {CREATE_COPY.meety}
             </p>
-            {model.listed === "not-listed" && model.kind === "post" ? <p className="create-note">{CREATE_COPY.notListed}</p> : null}
+            {model.listed === "not-listed" && model.kind === "post" ? (
+              <p className="create-note">{CREATE_COPY.notListed}</p>
+            ) : null}
             <ShareLine model={model} />
-            <button type="submit" className="btn create-share" disabled={!isReady}>{isSending ? CREATE_COPY.sharing : CREATE_COPY.share}</button>
-            <Link className="create-invite" to={APP_PATHS.pair}>{CREATE_COPY.invite}</Link>
+            <button type="submit" className="btn create-share" disabled={!isReady}>
+              {isSending ? CREATE_COPY.sharing : CREATE_COPY.share}
+            </button>
+            <Link className="create-invite" to={APP_PATHS.pair}>
+              {CREATE_COPY.invite}
+            </Link>
           </div>
         </div>
       </form>

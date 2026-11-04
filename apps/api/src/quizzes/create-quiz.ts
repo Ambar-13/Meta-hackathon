@@ -2,7 +2,14 @@ import { randomInt } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import type { Transaction } from "kysely";
-import { QUIZ_BANK_VERSION, sampleQuiz, QuizRequestResponse, ContractError, Uuid, routes } from "@meet-first/contracts";
+import {
+  QUIZ_BANK_VERSION,
+  sampleQuiz,
+  QuizRequestResponse,
+  ContractError,
+  Uuid,
+  routes,
+} from "@meet-first/contracts";
 import { parseDatabaseError, withPerson, type Database } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { requirePerson } from "../sessions/index.js";
@@ -13,24 +20,43 @@ const QUIZ_READY_STATES = ["ready", "approved"] as const;
 const CardRouteParams = z.object({ id: Uuid });
 
 // Refuses the quiz when the card is missing, still building, failed, or thin (a thin card skips the quiz).
-export function assertCardCanQuiz(card: { state: string; thin: boolean } | undefined): asserts card is { state: "ready" | "approved"; thin: false } {
+export function assertCardCanQuiz(
+  card: { state: string; thin: boolean } | undefined,
+): asserts card is { state: "ready" | "approved"; thin: false } {
   if (card === undefined) {
     throw new ContractError("not_found", "This no longer exists or is not yours.", 404);
   }
   if (card.thin) {
-    throw new ContractError("card_thin", "This card has fewer than 6 verified items, so the quiz is skipped. You can still meet.", 409);
+    throw new ContractError(
+      "card_thin",
+      "This card has fewer than 6 verified items, so the quiz is skipped. You can still meet.",
+      409,
+    );
   }
   if (!QUIZ_READY_STATES.some((state) => state === card.state)) {
-    throw new ContractError("card_not_ready", "The card is still being built or failed. Wait for it to be ready, then try again.", 409);
+    throw new ContractError(
+      "card_not_ready",
+      "The card is still being built or failed. Wait for it to be ready, then try again.",
+      409,
+    );
   }
 }
 
 // Inserts the quiz row and its ten items in the given transaction and returns the quiz id.
-export async function insertQuiz(trx: Transaction<Database>, card: { id: string; personId: string }): Promise<string> {
+export async function insertQuiz(
+  trx: Transaction<Database>,
+  card: { id: string; personId: string },
+): Promise<string> {
   const questionIds = sampleQuiz(card.id);
   const quiz = await trx
     .insertInto("quizzes")
-    .values({ card_id: card.id, person_id: card.personId, bank_version: QUIZ_BANK_VERSION, seed: card.id, state: "answering" })
+    .values({
+      card_id: card.id,
+      person_id: card.personId,
+      bank_version: QUIZ_BANK_VERSION,
+      seed: card.id,
+      state: "answering",
+    })
     .returning("id")
     .executeTakeFirstOrThrow();
   await trx
@@ -59,13 +85,21 @@ export function registerCreateQuiz(app: FastifyInstance, deps: RouteDeps): void 
     }
     const cardId = parsedCardId.data.id;
     const quizId = await withPerson(deps.db, personId, async (trx) => {
-      const card = await trx.selectFrom("cards").select(["id", "person_id", "state", "thin"]).where("id", "=", cardId).executeTakeFirst();
+      const card = await trx
+        .selectFrom("cards")
+        .select(["id", "person_id", "state", "thin"])
+        .where("id", "=", cardId)
+        .executeTakeFirst();
       assertCardCanQuiz(card);
       try {
         return await insertQuiz(trx, { id: card.id, personId });
       } catch (error) {
         if (parseDatabaseError(error)?.code === "duplicate") {
-          throw new ContractError("quiz_exists", "This card already has a quiz. Open it instead of starting another.", 409);
+          throw new ContractError(
+            "quiz_exists",
+            "This card already has a quiz. Open it instead of starting another.",
+            409,
+          );
         }
         throw error;
       }
@@ -75,7 +109,9 @@ export function registerCreateQuiz(app: FastifyInstance, deps: RouteDeps): void 
     try {
       await deps.enqueue("answer_quiz", payload);
     } catch (error) {
-      await withPerson(deps.db, personId, (trx) => trx.deleteFrom("quizzes").where("id", "=", quizId).execute());
+      await withPerson(deps.db, personId, (trx) =>
+        trx.deleteFrom("quizzes").where("id", "=", quizId).execute(),
+      );
       throw error;
     }
     return reply.code(202).send(QuizRequestResponse.parse({ quizId }));

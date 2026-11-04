@@ -19,19 +19,26 @@ export const PLAY_AFTER_MS = 400;
 
 // Types a value into the field with this label text inside a form, the way a person would, for a play step.
 export function typeInto(labelText: string, value: string): void {
-  const label = Array.from(document.querySelectorAll("label")).find((element) => (element.textContent ?? "").trim().startsWith(labelText));
+  const label = Array.from(document.querySelectorAll("label")).find((element) =>
+    (element.textContent ?? "").trim().startsWith(labelText),
+  );
   const field = label?.control ?? null;
-  if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) field.value = value;
+  if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement)
+    field.value = value;
 }
 
 // Presses the button with this exact text, for a play step.
 export function press(buttonText: string): void {
-  const button = Array.from(document.querySelectorAll("button")).find((element) => (element.textContent ?? "").trim() === buttonText);
+  const button = Array.from(document.querySelectorAll("button")).find(
+    (element) => (element.textContent ?? "").trim() === buttonText,
+  );
   button?.click();
 }
 
 // Every views file in ./views, collected at build time, so a new file needs no edit anywhere else.
-const MODULES = import.meta.glob<{ views: readonly GalleryView[] }>("./views/*.tsx", { eager: true });
+const MODULES = import.meta.glob<{ views: readonly GalleryView[] }>("./views/*.tsx", {
+  eager: true,
+});
 
 // All gallery views, in file name order and then in the order each file lists them.
 export const ALL_VIEWS: readonly GalleryView[] = Object.keys(MODULES)

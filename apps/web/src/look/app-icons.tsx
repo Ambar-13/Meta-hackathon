@@ -2,7 +2,32 @@
 // one of four colours that their name picks, so the same person always looks the same, and a sample person is their face with the
 // orange made-up mark. The landing keeps the name tags and stickers.
 import type { ReactElement } from "react";
-import { ArrowRight, ArrowUp, Check, ChevronLeft, ChevronRight, Compass, Grid3x3, Handshake, Heart, House, ImagePlus, LayoutGrid, MessageCircle, Plus, Quote, Rows3, Search, Settings, Sparkles, SquarePlus, UserPlus, UserRound, Users, X } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUp,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Compass,
+  Grid3x3,
+  Handshake,
+  Heart,
+  House,
+  ImagePlus,
+  LayoutGrid,
+  MessageCircle,
+  Plus,
+  Quote,
+  Rows3,
+  Search,
+  Settings,
+  Sparkles,
+  SquarePlus,
+  UserPlus,
+  UserRound,
+  Users,
+  X,
+} from "lucide-react";
 import { initialOf } from "./look-parts.js";
 import { photoOf, photoUrl } from "./sample-photos.js";
 import { Sticker } from "./stickers.js";
@@ -41,11 +66,25 @@ export type IconName = keyof typeof ICONS;
 const FILLED_WHEN_CURRENT: ReadonlySet<IconName> = new Set(["home", "meety", "friends", "me"]);
 
 // One line icon, hidden from screen readers because the words next to it say what it is. isBold draws the current page's icon.
-export const Icon = (props: { name: IconName; size?: number; isBold?: boolean; className?: string }): ReactElement => {
+export const Icon = (props: {
+  name: IconName;
+  size?: number;
+  isBold?: boolean;
+  className?: string;
+}): ReactElement => {
   const Drawn = ICONS[props.name];
   const className = props.className === undefined ? "icon" : `icon ${props.className}`;
   const isFilled = props.isBold === true && FILLED_WHEN_CURRENT.has(props.name);
-  return <Drawn aria-hidden="true" focusable="false" size={props.size ?? 24} strokeWidth={props.isBold === true ? 2.4 : 1.8} fill={isFilled ? "currentColor" : "none"} className={className} />;
+  return (
+    <Drawn
+      aria-hidden="true"
+      focusable="false"
+      size={props.size ?? 24}
+      strokeWidth={props.isBold === true ? 2.4 : 1.8}
+      fill={isFilled ? "currentColor" : "none"}
+      className={className}
+    />
+  );
 };
 
 // The four colours a person's circle can take; each class sets --c (the letter) and --k-soft (the circle) in app.css.
@@ -64,9 +103,23 @@ export type AvatarSize = "s" | "m" | "l" | "xl";
 // A person as a round picture: their face when there is one (only sample people have one so far), else their first letter on their
 // colour; a sample person also carries a small orange asterisk at the top right, so nobody takes a made-up face for a real one. Hidden from screen readers, because their name, and the Sample
 // mark in words, are always next to it.
-export const PersonAvatar = (props: { name: string; size?: AvatarSize; className?: string; photo?: string | null | undefined; isSample?: boolean | undefined }): ReactElement => {
+export const PersonAvatar = (props: {
+  name: string;
+  size?: AvatarSize;
+  className?: string;
+  photo?: string | null | undefined;
+  isSample?: boolean | undefined;
+}): ReactElement => {
   const url = photoUrl(props.photo);
-  const classes = ["person-avatar", `size-${props.size ?? "m"}`, tintOf(props.name), url === null ? "" : "has-photo", props.className ?? ""].filter((part) => part !== "").join(" ");
+  const classes = [
+    "person-avatar",
+    `size-${props.size ?? "m"}`,
+    tintOf(props.name),
+    url === null ? "" : "has-photo",
+    props.className ?? "",
+  ]
+    .filter((part) => part !== "")
+    .join(" ");
   return (
     <span className={classes} aria-hidden="true">
       {url === null ? initialOf(props.name) : <img src={url} alt="" loading="lazy" />}
@@ -84,13 +137,26 @@ function shapeOf(photo: { width: number; height: number }): "is-square" | "is-ta
 // A post's photo, with square corners: a wide photo at 3:2, a
 // tall one at 4:5 on a phone and square on wider screens, and a photo a person shared square. Nothing shows for a key this build does
 // not have.
-export const PostPhoto = (props: { photo: string | null | undefined; alt: string | null | undefined; className?: string }): ReactElement | null => {
+export const PostPhoto = (props: {
+  photo: string | null | undefined;
+  alt: string | null | undefined;
+  className?: string;
+}): ReactElement | null => {
   const found = photoOf(props.photo);
   if (found === null) return null;
-  const classes = ["post-photo", shapeOf(found), props.className ?? ""].filter((part) => part !== "").join(" ");
+  const classes = ["post-photo", shapeOf(found), props.className ?? ""]
+    .filter((part) => part !== "")
+    .join(" ");
   return (
     <div className={classes}>
-      <img src={found.src} alt={props.alt ?? ""} width={found.width} height={found.height} loading="lazy" decoding="async" />
+      <img
+        src={found.src}
+        alt={props.alt ?? ""}
+        width={found.width}
+        height={found.height}
+        loading="lazy"
+        decoding="async"
+      />
     </div>
   );
 };
@@ -98,8 +164,15 @@ export const PostPhoto = (props: { photo: string | null | undefined; alt: string
 // A story's picture, after Instagram's: a tall 9:16 frame with square corners holding the whole photo on a blurred, darkened copy of
 // itself, so a wide photo shows whole, with the story's words over the foot of it; a story of words alone shows them large on the warm
 // card. alt is what a screen reader reads for the photo.
-export const StoryPicture = (props: { src: string | null; alt: string; text: string; className?: string }): ReactElement => {
-  const classes = ["story-picture", props.src === null ? "is-words" : "", props.className ?? ""].filter((part) => part !== "").join(" ");
+export const StoryPicture = (props: {
+  src: string | null;
+  alt: string;
+  text: string;
+  className?: string;
+}): ReactElement => {
+  const classes = ["story-picture", props.src === null ? "is-words" : "", props.className ?? ""]
+    .filter((part) => part !== "")
+    .join(" ");
   return (
     <div className={classes}>
       {props.src === null ? null : (

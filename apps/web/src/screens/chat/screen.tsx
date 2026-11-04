@@ -18,7 +18,8 @@ import { MeetyName, Thread, type ReplyActions } from "./thread-parts.js";
 import { FriendsRow, HomeSide } from "./home-parts.js";
 
 // The lines of this page that the design gives word for word, and the loading line it does not.
-const UNDER_GREETING = "Ask who could help you with something, or how a friend would probably react to something.";
+const UNDER_GREETING =
+  "Ask who could help you with something, or how a friend would probably react to something.";
 const LOADING_LINE = "Loading your chat.";
 // The line under Meety's name at the top of the chat, as Instagram shows who you are talking to.
 const INTRO_LINE = "Your personal AI";
@@ -33,7 +34,9 @@ export const NextStep = (props: { home: HomeView }): ReactElement | null => {
       <p>
         <strong>{step.title}</strong> {step.text}
       </p>
-      <Link className="btn" to={step.action.to}>{step.action.label}</Link>
+      <Link className="btn" to={step.action.to}>
+        {step.action.label}
+      </Link>
     </section>
   );
 };
@@ -59,7 +62,9 @@ const Greeting = (props: { displayName: string | null; chips: ReactElement }): R
     <div className="chat-agent chat-hello">
       <MeetyName />
       <h2 className="chat-bubble chat-greeting joins-next" aria-label={text}>
-        {at < 0 ? text : (
+        {at < 0 ? (
+          text
+        ) : (
           <>
             {text.slice(0, at)}
             <span className="chat-greeting-name">{name}</span>
@@ -80,7 +85,14 @@ const Chips = (props: { model: ChatModel }): ReactElement => {
   return (
     <div className="chat-chips" role="group" aria-label="Examples to start from">
       {texts.map((text, index) => (
-        <button key={text} type="button" className="chat-chip" onClick={() => { props.model.composer.fill(text); }}>
+        <button
+          key={text}
+          type="button"
+          className="chat-chip"
+          onClick={() => {
+            props.model.composer.fill(text);
+          }}
+        >
           <KindIcon mode={index === 0 ? "help" : "react"} />
           <span>{text}</span>
         </button>
@@ -127,8 +139,12 @@ function useScrollToNewest(key: string): RefObject<HTMLDivElement | null> {
 function replyActions(model: ChatModel): ReplyActions {
   return {
     runStatus: model.runStatus,
-    runPlan: (replyId) => { void model.runPlan(replyId); },
-    tryAgain: (replyId) => { void model.composer.resend(messageBefore(model.messages, replyId) ?? ""); },
+    runPlan: (replyId) => {
+      void model.runPlan(replyId);
+    },
+    tryAgain: (replyId) => {
+      void model.composer.resend(messageBefore(model.messages, replyId) ?? "");
+    },
   };
 }
 
@@ -139,7 +155,9 @@ const ThreadState = (props: { model: ChatModel }): ReactElement | null => {
     return (
       <div className="chat-thread-error">
         <ErrorNotice error={thread.error} />
-        <button type="button" className="quiet" onClick={thread.reload}>Try again</button>
+        <button type="button" className="quiet" onClick={thread.reload}>
+          Try again
+        </button>
       </div>
     );
   }
@@ -148,7 +166,9 @@ const ThreadState = (props: { model: ChatModel }): ReactElement | null => {
 
 // The class of the page's root: chat, plus is-ready once the thread is read and is-empty when it holds nothing.
 function rootClass(isReady: boolean, isEmpty: boolean): string {
-  return ["chat", isReady ? "is-ready" : "", isEmpty ? "is-empty" : ""].filter((part) => part !== "").join(" ");
+  return ["chat", isReady ? "is-ready" : "", isEmpty ? "is-empty" : ""]
+    .filter((part) => part !== "")
+    .join(" ");
 }
 
 // The key that changes when the newest message changes: on load, on a send and when a reply arrives.
@@ -158,15 +178,23 @@ function newestKey(messages: ChatModel["messages"]): string {
 }
 
 // The chat itself: the next step while there is no approved card, the greeting or the thread, the box, and the chips.
-const ChatColumn = (props: { model: ChatModel; isEmpty: boolean; end: RefObject<HTMLDivElement | null> }): ReactElement => {
+const ChatColumn = (props: {
+  model: ChatModel;
+  isEmpty: boolean;
+  end: RefObject<HTMLDivElement | null>;
+}): ReactElement => {
   const { model, isEmpty } = props;
   const home = model.home.value;
   return (
     <div className={rootClass(model.thread.value !== null, isEmpty)}>
       {home === null ? null : <NextStep home={home} />}
       {model.thread.value === null ? null : <Intro />}
-      {isEmpty ? <Greeting displayName={home?.displayName ?? null} chips={<Chips model={model} />} /> : null}
-      {model.messages.length > 0 ? <Thread messages={model.messages} actions={replyActions(model)} /> : null}
+      {isEmpty ? (
+        <Greeting displayName={home?.displayName ?? null} chips={<Chips model={model} />} />
+      ) : null}
+      {model.messages.length > 0 ? (
+        <Thread messages={model.messages} actions={replyActions(model)} />
+      ) : null}
       <ThreadState model={model} />
       <Composer model={model.composer} />
       <div className="chat-end" ref={props.end} />
@@ -191,7 +219,13 @@ export const ChatScreen = (): ReactElement => {
           <FriendsRow friends={friends ?? []} />
           <ChatColumn model={model} isEmpty={isEmpty} end={end} />
         </div>
-        <HomeSide home={model.home.value} friends={friends} suggestions={model.suggestions.value?.listings ?? null} adds={model.adds} onAsk={onAsk} />
+        <HomeSide
+          home={model.home.value}
+          friends={friends}
+          suggestions={model.suggestions.value?.listings ?? null}
+          adds={model.adds}
+          onAsk={onAsk}
+        />
       </div>
     </ScreenFrame>
   );

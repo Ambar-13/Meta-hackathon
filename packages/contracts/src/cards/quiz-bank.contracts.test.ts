@@ -3,7 +3,9 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { QUIZ_BANK, sampleQuiz } from "./quiz-bank.js";
 
-const MIGRATION_FILE = fileURLToPath(new URL("../../../db/migrations/0001_foundation.sql", import.meta.url));
+const MIGRATION_FILE = fileURLToPath(
+  new URL("../../../db/migrations/0001_foundation.sql", import.meta.url),
+);
 const SEED_ROW = /\(1, (\d+), '((?:[^']|'')*)'\)/g;
 
 describe("quiz bank", () => {

@@ -12,11 +12,20 @@ import { LISTEN_APPLICATION_NAME } from "./listen-fan-out.js";
 let t: Awaited<ReturnType<typeof buildTestApp>>;
 let base = "";
 
-type Meeting = Pick<SeededMeeting, "meetingId"> & { a: { personId: string; sessionToken: string }; b: { personId: string; sessionToken: string } };
+type Meeting = Pick<SeededMeeting, "meetingId"> & {
+  a: { personId: string; sessionToken: string };
+  b: { personId: string; sessionToken: string };
+};
 
 // Opens the event stream of one meeting as one person, with the extra request headers the test gives.
-function openStream(meetingId: string, token: string, extra: Record<string, string> = {}): Promise<Response> {
-  return fetch(base + "/api/meetings/" + meetingId + "/events", { headers: { cookie: "__Host-session=" + token, accept: "text/event-stream", ...extra } });
+function openStream(
+  meetingId: string,
+  token: string,
+  extra: Record<string, string> = {},
+): Promise<Response> {
+  return fetch(base + "/api/meetings/" + meetingId + "/events", {
+    headers: { cookie: "__Host-session=" + token, accept: "text/event-stream", ...extra },
+  });
 }
 
 // The body of a stream response; a missing body is a test failure.
@@ -29,7 +38,16 @@ function bodyOf(response: Response): ReadableStream<Uint8Array> {
 async function insertEvents(meetingId: string, fromSeq: number, toSeq: number): Promise<void> {
   await asMeeting(t.db, meetingId, async (trx) => {
     for (let seq = fromSeq; seq <= toSeq; seq += 1) {
-      await trx.insertInto("meeting_events").values({ meeting_id: meetingId, seq, type: "phase.changed", v: 1, payload: JSON.stringify({ phase: "open", stepSeq: seq }) }).execute();
+      await trx
+        .insertInto("meeting_events")
+        .values({
+          meeting_id: meetingId,
+          seq,
+          type: "phase.changed",
+          v: 1,
+          payload: JSON.stringify({ phase: "open", stepSeq: seq }),
+        })
+        .execute();
     }
   });
 }
@@ -37,7 +55,19 @@ async function insertEvents(meetingId: string, fromSeq: number, toSeq: number): 
 // Inserts one running step with the given partial text, so a stream has something to send.
 async function insertRunningStep(meetingId: string, text: string): Promise<void> {
   await asMeeting(t.db, meetingId, (trx) =>
-    trx.insertInto("meeting_steps").values({ meeting_id: meetingId, step_seq: 1, side: "a", phase: "open", state: "running", attempt: 1, partial_text: text, partial_len: text.length }).execute(),
+    trx
+      .insertInto("meeting_steps")
+      .values({
+        meeting_id: meetingId,
+        step_seq: 1,
+        side: "a",
+        phase: "open",
+        state: "running",
+        attempt: 1,
+        partial_text: text,
+        partial_len: text.length,
+      })
+      .execute(),
   );
 }
 
@@ -53,12 +83,21 @@ function eventIds(items: SseItem[]): string[] {
 
 // The turn.delta frames of a read, parsed.
 function deltas(items: SseItem[]): ReturnType<typeof TurnDelta.parse>[] {
-  return items.flatMap((item) => ("event" in item && item.event === "turn.delta" ? [TurnDelta.parse(JSON.parse(item.data))] : []));
+  return items.flatMap((item) =>
+    "event" in item && item.event === "turn.delta" ? [TurnDelta.parse(JSON.parse(item.data))] : [],
+  );
 }
 
 // The last_seen_at a member row holds, as the meeting's own context reads it.
 async function lastSeen(meetingId: string, personId: string): Promise<Date | null> {
-  const row = await asMeeting(t.db, meetingId, (trx) => trx.selectFrom("meeting_members").select("last_seen_at").where("meeting_id", "=", meetingId).where("person_id", "=", personId).executeTakeFirstOrThrow());
+  const row = await asMeeting(t.db, meetingId, (trx) =>
+    trx
+      .selectFrom("meeting_members")
+      .select("last_seen_at")
+      .where("meeting_id", "=", meetingId)
+      .where("person_id", "=", personId)
+      .executeTakeFirstOrThrow(),
+  );
   return row.last_seen_at;
 }
 
@@ -69,7 +108,11 @@ function sleep(ms: number): Promise<void> {
 
 // The number of LISTEN connections this database holds.
 async function listenCount(): Promise<number> {
-  const rows = await sql<{ n: string }>`SELECT count(*) AS n FROM pg_stat_activity WHERE application_name = ${LISTEN_APPLICATION_NAME} AND datname = current_database()`.execute(t.db);
+  const rows = await sql<{
+    n: string;
+  }>`SELECT count(*) AS n FROM pg_stat_activity WHERE application_name = ${LISTEN_APPLICATION_NAME} AND datname = current_database()`.execute(
+    t.db,
+  );
   return Number(rows.rows[0]?.n);
 }
 
@@ -98,9 +141,15 @@ it("D50-T1: the stream answers 200 with exactly D50's three headers and starts w
 
 it("R8.2-T1: no stream or poll response is compressed, even when the client asks for gzip", async () => {
   const m: Meeting = await createPairedMeeting(t.db);
-  const response = await openStream(m.meetingId, m.a.sessionToken, { "accept-encoding": "gzip, br" });
+  const response = await openStream(m.meetingId, m.a.sessionToken, {
+    "accept-encoding": "gzip, br",
+  });
   await readSse(bodyOf(response), { timeoutMs: 200 });
-  const poll = await t.app.inject({ method: "GET", url: "/api/meetings/" + m.meetingId + "/events?after=0", headers: { ...sessionHeader(m.a.sessionToken), "accept-encoding": "gzip" } });
+  const poll = await t.app.inject({
+    method: "GET",
+    url: "/api/meetings/" + m.meetingId + "/events?after=0",
+    headers: { ...sessionHeader(m.a.sessionToken), "accept-encoding": "gzip" },
+  });
 
   expect(response.headers.get("content-encoding")).toBeNull();
   expect(poll.statusCode).toBe(200);
@@ -110,13 +159,21 @@ it("R8.2-T1: no stream or poll response is compressed, even when the client asks
 it("R8.1-T1: a reader that saw seq 3 reconnects with Last-Event-ID 3 and gets 4 first, with no repeat (invariant 18)", async () => {
   const m: Meeting = await createPairedMeeting(t.db);
   await insertEvents(m.meetingId, 1, 3);
-  const first = await readSse(bodyOf(await openStream(m.meetingId, m.a.sessionToken)), { untilSeq: 3, timeoutMs: 3000 });
+  const first = await readSse(bodyOf(await openStream(m.meetingId, m.a.sessionToken)), {
+    untilSeq: 3,
+    timeoutMs: 3000,
+  });
   await insertEvents(m.meetingId, 4, 5);
-  const second = await readSse(bodyOf(await openStream(m.meetingId, m.a.sessionToken, { "last-event-id": "3" })), { untilSeq: 5, timeoutMs: 3000 });
+  const second = await readSse(
+    bodyOf(await openStream(m.meetingId, m.a.sessionToken, { "last-event-id": "3" })),
+    { untilSeq: 5, timeoutMs: 3000 },
+  );
 
   expect(eventIds(first)).toEqual(["1", "2", "3"]);
   expect(eventIds(second)).toEqual(["4", "5"]);
-  const parsed = second.flatMap((item) => ("event" in item ? [CommittedEvent.parse(JSON.parse(item.data))] : []));
+  const parsed = second.flatMap((item) =>
+    "event" in item ? [CommittedEvent.parse(JSON.parse(item.data))] : [],
+  );
   expect(parsed.map((event) => event.seq)).toEqual([4, 5]);
   for (const event of parsed) {
     expect(event.meetingId).toBe(m.meetingId);
@@ -130,7 +187,11 @@ it("D52-T1: the poll form returns exactly the events after the given seq", async
   const m: Meeting = await createPairedMeeting(t.db);
   await insertEvents(m.meetingId, 1, 3);
   const seqsAfter = async (after: number): Promise<number[]> => {
-    const r = await t.app.inject({ method: "GET", url: "/api/meetings/" + m.meetingId + "/events?after=" + String(after), headers: sessionHeader(m.a.sessionToken) });
+    const r = await t.app.inject({
+      method: "GET",
+      url: "/api/meetings/" + m.meetingId + "/events?after=" + String(after),
+      headers: sessionHeader(m.a.sessionToken),
+    });
     return PollResponse.parse(r.json()).events.map((event) => event.seq);
   };
 
@@ -144,12 +205,28 @@ it("D49-T1: ?after= answers JSON PollResponse with the running step's partial te
   await insertEvents(m.meetingId, 1, 2);
   await insertRunningStep(m.meetingId, "Hello there");
 
-  const first = await t.app.inject({ method: "GET", url: "/api/meetings/" + m.meetingId + "/events?after=0", headers: sessionHeader(m.a.sessionToken) });
+  const first = await t.app.inject({
+    method: "GET",
+    url: "/api/meetings/" + m.meetingId + "/events?after=0",
+    headers: sessionHeader(m.a.sessionToken),
+  });
   const body = PollResponse.parse(first.json());
   await asMeeting(t.db, m.meetingId, (trx) =>
-    trx.updateTable("meeting_steps").set({ state: "done", output: JSON.stringify({ text: "Hello there", toolCalls: [], claimsCommitted: 0 }), finished_at: new Date() }).where("meeting_id", "=", m.meetingId).execute(),
+    trx
+      .updateTable("meeting_steps")
+      .set({
+        state: "done",
+        output: JSON.stringify({ text: "Hello there", toolCalls: [], claimsCommitted: 0 }),
+        finished_at: new Date(),
+      })
+      .where("meeting_id", "=", m.meetingId)
+      .execute(),
   );
-  const second = await t.app.inject({ method: "GET", url: "/api/meetings/" + m.meetingId + "/events?after=0", headers: sessionHeader(m.a.sessionToken) });
+  const second = await t.app.inject({
+    method: "GET",
+    url: "/api/meetings/" + m.meetingId + "/events?after=0",
+    headers: sessionHeader(m.a.sessionToken),
+  });
 
   expect(first.statusCode).toBe(200);
   expect(first.headers["content-type"]).toBe("application/json; charset=utf-8");
@@ -163,16 +240,39 @@ it("D49-T1: ?after= answers JSON PollResponse with the running step's partial te
 it("D49-T2: a bad after value is 400 poll_after_invalid and a bad Last-Event-ID is 400 last_event_id_invalid", async () => {
   const m: Meeting = await createPairedMeeting(t.db);
 
-  const abc = await t.app.inject({ method: "GET", url: "/api/meetings/" + m.meetingId + "/events?after=abc", headers: sessionHeader(m.a.sessionToken) });
-  const leadingZero = await t.app.inject({ method: "GET", url: "/api/meetings/" + m.meetingId + "/events?after=01", headers: sessionHeader(m.a.sessionToken) });
-  const badHeader = await t.app.inject({ method: "GET", url: "/api/meetings/" + m.meetingId + "/events", headers: { ...sessionHeader(m.a.sessionToken), accept: "text/event-stream", "last-event-id": "x" } });
+  const abc = await t.app.inject({
+    method: "GET",
+    url: "/api/meetings/" + m.meetingId + "/events?after=abc",
+    headers: sessionHeader(m.a.sessionToken),
+  });
+  const leadingZero = await t.app.inject({
+    method: "GET",
+    url: "/api/meetings/" + m.meetingId + "/events?after=01",
+    headers: sessionHeader(m.a.sessionToken),
+  });
+  const badHeader = await t.app.inject({
+    method: "GET",
+    url: "/api/meetings/" + m.meetingId + "/events",
+    headers: {
+      ...sessionHeader(m.a.sessionToken),
+      accept: "text/event-stream",
+      "last-event-id": "x",
+    },
+  });
 
   for (const response of [abc, leadingZero]) {
     expect(response.statusCode).toBe(400);
-    expect(response.json()).toEqual({ code: "poll_after_invalid", message: "The after value must be a whole number. Poll with the last seq you received." });
+    expect(response.json()).toEqual({
+      code: "poll_after_invalid",
+      message: "The after value must be a whole number. Poll with the last seq you received.",
+    });
   }
   expect(badHeader.statusCode).toBe(400);
-  expect(badHeader.json()).toEqual({ code: "last_event_id_invalid", message: "The Last-Event-ID header must be a whole number. Reconnect without it to replay from the start." });
+  expect(badHeader.json()).toEqual({
+    code: "last_event_id_invalid",
+    message:
+      "The Last-Event-ID header must be a whole number. Reconnect without it to replay from the start.",
+  });
   expect(badHeader.headers["content-type"]).toBe("application/json; charset=utf-8");
 });
 
@@ -181,30 +281,60 @@ it("D47-T1: after the replay the stream sends the running step's partial once, a
   await insertEvents(m.meetingId, 1, 2);
   await insertRunningStep(m.meetingId, "Hello there");
 
-  const items = await readSse(bodyOf(await openStream(m.meetingId, m.a.sessionToken)), { timeoutMs: 1500 });
+  const items = await readSse(bodyOf(await openStream(m.meetingId, m.a.sessionToken)), {
+    timeoutMs: 1500,
+  });
   const frames = items.slice(1);
-  const frameDeltas = items.filter((item) => "event" in item && item.event === "turn.delta" && item.id === null);
+  const frameDeltas = items.filter(
+    (item) => "event" in item && item.event === "turn.delta" && item.id === null,
+  );
 
   expect(eventIds(frames)).toEqual(["1", "2"]);
   expect(frameDeltas.length).toBe(1);
   expect(deltas(items)).toHaveLength(1);
-  expect(deltas(items)[0]).toMatchObject({ v: 1, meetingId: m.meetingId, stepSeq: 1, attempt: 1, side: "a", offset: 0, text: "Hello there" });
+  expect(deltas(items)[0]).toMatchObject({
+    v: 1,
+    meetingId: m.meetingId,
+    stepSeq: 1,
+    attempt: 1,
+    side: "a",
+    offset: 0,
+    text: "Hello there",
+  });
 });
 
 it("D47-T2: a d: NOTIFY sends only the new slice, and a new attempt sends its text from offset 0", async () => {
   const m: Meeting = await createPairedMeeting(t.db);
   await insertRunningStep(m.meetingId, "Hello there");
-  const reading = readSse(bodyOf(await openStream(m.meetingId, m.a.sessionToken)), { timeoutMs: 2500 });
+  const reading = readSse(bodyOf(await openStream(m.meetingId, m.a.sessionToken)), {
+    timeoutMs: 2500,
+  });
 
   await sleep(400);
-  await asMeeting(t.db, m.meetingId, (trx) => trx.updateTable("meeting_steps").set({ partial_text: "Hello there, friend", partial_len: 19 }).where("meeting_id", "=", m.meetingId).execute());
+  await asMeeting(t.db, m.meetingId, (trx) =>
+    trx
+      .updateTable("meeting_steps")
+      .set({ partial_text: "Hello there, friend", partial_len: 19 })
+      .where("meeting_id", "=", m.meetingId)
+      .execute(),
+  );
   await notify("d:" + m.meetingId + ":1:1:19");
   await sleep(400);
-  await asMeeting(t.db, m.meetingId, (trx) => trx.updateTable("meeting_steps").set({ attempt: 2, partial_text: "Hi", partial_len: 2 }).where("meeting_id", "=", m.meetingId).execute());
+  await asMeeting(t.db, m.meetingId, (trx) =>
+    trx
+      .updateTable("meeting_steps")
+      .set({ attempt: 2, partial_text: "Hi", partial_len: 2 })
+      .where("meeting_id", "=", m.meetingId)
+      .execute(),
+  );
   await notify("d:" + m.meetingId + ":1:2:2");
   const items = await reading;
 
-  const sent = deltas(items).map((delta) => ({ attempt: delta.attempt, offset: delta.offset, text: delta.text }));
+  const sent = deltas(items).map((delta) => ({
+    attempt: delta.attempt,
+    offset: delta.offset,
+    text: delta.text,
+  }));
   expect(sent).toEqual([
     { attempt: 1, offset: 0, text: "Hello there" },
     { attempt: 1, offset: 11, text: ", friend" },
@@ -214,7 +344,10 @@ it("D47-T2: a d: NOTIFY sends only the new slice, and a new attempt sends its te
 
 it("D48-T1: an event committed while the stream is open arrives through LISTEN within 2 s", async () => {
   const m: Meeting = await createPairedMeeting(t.db);
-  const reading = readSse(bodyOf(await openStream(m.meetingId, m.a.sessionToken)), { untilSeq: 1, timeoutMs: 3000 });
+  const reading = readSse(bodyOf(await openStream(m.meetingId, m.a.sessionToken)), {
+    untilSeq: 1,
+    timeoutMs: 3000,
+  });
 
   await sleep(300);
   const insertedAt = Date.now();
@@ -266,7 +399,9 @@ it("D56-T1: one LISTEN connection serves every open stream of the process", asyn
 
 it("D53-T2: the stream stamps last_seen_at at connect and again with each :hb heartbeat 15 s apart", async () => {
   const m: Meeting = await createPairedMeeting(t.db);
-  const reading = readSse(bodyOf(await openStream(m.meetingId, m.a.sessionToken)), { timeoutMs: 16_500 });
+  const reading = readSse(bodyOf(await openStream(m.meetingId, m.a.sessionToken)), {
+    timeoutMs: 16_500,
+  });
 
   await sleep(1000);
   const t1 = await lastSeen(m.meetingId, m.a.personId);
@@ -283,10 +418,17 @@ it("D53-T2: the stream stamps last_seen_at at connect and again with each :hb he
 
 it("R8.5-T1: with the LISTEN connection killed, an event still arrives within 10 s, and LISTEN is back within 3 s", async () => {
   const m: Meeting = await createPairedMeeting(t.db);
-  const reading = readSse(bodyOf(await openStream(m.meetingId, m.a.sessionToken)), { untilSeq: 1, timeoutMs: 11_000 });
+  const reading = readSse(bodyOf(await openStream(m.meetingId, m.a.sessionToken)), {
+    untilSeq: 1,
+    timeoutMs: 11_000,
+  });
 
   await sleep(300);
-  const killed = await sql<{ done: boolean }>`SELECT pg_terminate_backend(pid) AS done FROM pg_stat_activity WHERE application_name = ${LISTEN_APPLICATION_NAME} AND datname = current_database()`.execute(t.db);
+  const killed = await sql<{
+    done: boolean;
+  }>`SELECT pg_terminate_backend(pid) AS done FROM pg_stat_activity WHERE application_name = ${LISTEN_APPLICATION_NAME} AND datname = current_database()`.execute(
+    t.db,
+  );
   const insertedAt = Date.now();
   await insertEvents(m.meetingId, 1, 1);
   const items = await reading;

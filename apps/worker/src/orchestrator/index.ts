@@ -7,4 +7,10 @@ export const orchestratorTasks: TaskList = { orchestrate };
 // The job itself, for the tests and the golden path.
 export { orchestrate } from "./orchestrate-job.js";
 // The request builders and the checks, so a fixture writer builds exactly the bodies the job sends.
-export { checkPlan, planCallArgs, planMessages, planUserText, type PlanInput } from "./plan-requests.js";
+export {
+  checkPlan,
+  planCallArgs,
+  planMessages,
+  planUserText,
+  type PlanInput,
+} from "./plan-requests.js";

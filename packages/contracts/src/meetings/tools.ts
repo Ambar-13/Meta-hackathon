@@ -18,7 +18,9 @@ export const recallArgs = z.object({ query: z.string().min(1).max(200) });
 export type RecallArgs = z.infer<typeof recallArgs>;
 // What the recall tool returns: up to 5 turns, each cut to 600 characters.
 export const recallResult = z.object({
-  turns: z.array(z.object({ turnId: Uuid, text: z.string().max(RECALL_SNIPPET_CHARS) })).max(RECALL_TOP_K),
+  turns: z
+    .array(z.object({ turnId: Uuid, text: z.string().max(RECALL_SNIPPET_CHARS) }))
+    .max(RECALL_TOP_K),
 });
 // The type of recallResult, read from the schema above.
 export type RecallResult = z.infer<typeof recallResult>;
@@ -37,31 +39,56 @@ export type RecordedResult = z.infer<typeof recordedResult>;
 // One tool as the chat completions request expects it. Parameters come from the strict JSON schema of its arguments.
 export type ToolDefinition = {
   type: "function";
-  function: { name: ToolName; description: string; parameters: Record<string, unknown>; strict: true };
+  function: {
+    name: ToolName;
+    description: string;
+    parameters: Record<string, unknown>;
+    strict: true;
+  };
 };
 // The tools for one request, or undefined when none may be offered.
 // Rounds are 1-based, so round 5 is the first request with no tools.
-export function toolsForPhase(phase: "open" | "explore" | "decide", round: number): ToolDefinition[] | undefined {
+export function toolsForPhase(
+  phase: "open" | "explore" | "decide",
+  round: number,
+): ToolDefinition[] | undefined {
   if (round >= TOOL_ROUNDS_MAX + 1) return undefined;
   if (phase === "decide") return [buildConcedeTool(), buildHoldTool()];
   return [buildRecallTool()];
 }
 // The recall tool definition. Its description is fixed by the spec and read by the model.
 function buildRecallTool(): ToolDefinition {
-  return buildDefinition("recall", "Search your own scrubbed notes for up to 5 turns about the query. Quotes from them may be shown to the other person.", recallArgs);
+  return buildDefinition(
+    "recall",
+    "Search your own scrubbed notes for up to 5 turns about the query. Quotes from them may be shown to the other person.",
+    recallArgs,
+  );
 }
 // The concede tool definition. Its description is fixed by the spec and read by the model.
 function buildConcedeTool(): ToolDefinition {
-  return buildDefinition("concede", "Accept one of the other side's claims by id and say why.", concedeArgs);
+  return buildDefinition(
+    "concede",
+    "Accept one of the other side's claims by id and say why.",
+    concedeArgs,
+  );
 }
 // The hold tool definition. Its description is fixed by the spec and read by the model.
 function buildHoldTool(): ToolDefinition {
   return buildDefinition("hold", "Keep your position and say why.", holdArgs);
 }
 // Builds one tool definition with the strict parameter schema of its arguments.
-function buildDefinition(name: ToolName, description: string, args: z.ZodType<unknown, z.ZodTypeDef, unknown>): ToolDefinition {
+function buildDefinition(
+  name: ToolName,
+  description: string,
+  args: z.ZodType<unknown, z.ZodTypeDef, unknown>,
+): ToolDefinition {
   return {
     type: "function",
-    function: { name, description, parameters: toStrictJsonSchema(args, name).schema, strict: true },
+    function: {
+      name,
+      description,
+      parameters: toStrictJsonSchema(args, name).schema,
+      strict: true,
+    },
   };
 }

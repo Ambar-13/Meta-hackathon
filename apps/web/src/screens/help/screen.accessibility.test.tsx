@@ -60,14 +60,24 @@ describe("help screen", () => {
   });
 
   it("W6-ASKA-T30 (design section 5): a 429 help_daily_cap reply shows its sentence and the page stays, with fake api replies", async () => {
-    stubRoute(routes.asks.createAsk, { status: 429, body: { code: "help_daily_cap", message: "You have used today's help searches. Try again tomorrow." } });
+    stubRoute(routes.asks.createAsk, {
+      status: 429,
+      body: {
+        code: "help_daily_cap",
+        message: "You have used today's help searches. Try again tomorrow.",
+      },
+    });
     renderHelp();
 
     fireEvent.change(screen.getByLabelText("Your problem"), { target: { value: PROBLEM } });
     fireEvent.click(screen.getByRole("button", { name: "Find who could help" }));
 
-    expect(await screen.findByText("You have used today's help searches. Try again tomorrow.")).toBeTruthy();
+    expect(
+      await screen.findByText("You have used today's help searches. Try again tomorrow."),
+    ).toBeTruthy();
     expect(screen.queryByTestId("location")).toBeNull();
-    expect(screen.getByRole("button", { name: "Find who could help" }).hasAttribute("disabled")).toBe(false);
+    expect(
+      screen.getByRole("button", { name: "Find who could help" }).hasAttribute("disabled"),
+    ).toBe(false);
   });
 });

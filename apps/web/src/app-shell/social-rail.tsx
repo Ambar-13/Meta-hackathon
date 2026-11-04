@@ -6,7 +6,13 @@ import { friendsLinkName, useRailData } from "./social-rail-state.js";
 import { Icon, MeetyMark, Sticker, type IconName } from "../look/index.js";
 
 // One page of the signed-in nav: its words, where it goes, its line icon, and whether only the laptop rail shows it.
-type RailPage = { label: string; to: string; icon: IconName; isRailOnly?: boolean; isPhoneHidden?: boolean };
+type RailPage = {
+  label: string;
+  to: string;
+  icon: IconName;
+  isRailOnly?: boolean;
+  isPhoneHidden?: boolean;
+};
 // The pages, in this order, as Instagram's: Home (the feed), Search, Meety (the chat, where Instagram has messages), Friends, Create,
 // which the phone keeps as the + of its top bar instead, Me, then Settings, which the laptop keeps at the sidebar's foot and the phone
 // keeps in the top bar instead.
@@ -21,7 +27,13 @@ const RAIL_PAGES: readonly RailPage[] = [
 ];
 
 // The sidebar's own words on a laptop.
-const RAIL_COPY = { home: "Meety home", tagline: "Your Meety meets theirs first.", invite: "Invite a friend", meety: "Your Meety", meetyLine: "Shares only what you choose" } as const;
+const RAIL_COPY = {
+  home: "Meety home",
+  tagline: "Your Meety meets theirs first.",
+  invite: "Invite a friend",
+  meety: "Your Meety",
+  meetyLine: "Shares only what you choose",
+} as const;
 
 // The class of one page link: rail-only for the one the laptop keeps at the sidebar's foot, phone-hidden for one the phone keeps elsewhere.
 function pageClass(page: RailPage): string | undefined {
@@ -31,7 +43,11 @@ function pageClass(page: RailPage): string | undefined {
 
 // One page link: its icon, with the request count on the Friends link, and its words, shown beside the icon in the laptop sidebar,
 // under it on a phone, and on hover in the narrow rail between the two.
-const PageLink = (props: { page: RailPage; pathname: string; incomingCount: number }): ReactElement => {
+const PageLink = (props: {
+  page: RailPage;
+  pathname: string;
+  incomingCount: number;
+}): ReactElement => {
   const { page } = props;
   const hasCount = page.to === APP_PATHS.friends && props.incomingCount > 0;
   const isCurrent = props.pathname === page.to;
@@ -45,7 +61,11 @@ const PageLink = (props: { page: RailPage; pathname: string; incomingCount: numb
     >
       <span className="page-icon">
         <Icon name={page.icon} size={24} isBold={isCurrent} />
-        {hasCount ? <span className="count-pill" aria-hidden="true">{String(props.incomingCount)}</span> : null}
+        {hasCount ? (
+          <span className="count-pill" aria-hidden="true">
+            {String(props.incomingCount)}
+          </span>
+        ) : null}
       </span>
       <span className="page-word">{page.label}</span>
     </Link>
@@ -59,23 +79,34 @@ const PageLink = (props: { page: RailPage; pathname: string; incomingCount: numb
 export const SocialRail = (props: { pathname: string; hasSettingsLink: boolean }): ReactElement => {
   const rail = useRailData();
   const pages = RAIL_PAGES.filter((page) => page.isRailOnly !== true);
-  const settings = props.hasSettingsLink ? RAIL_PAGES.find((page) => page.isRailOnly === true) : undefined;
+  const settings = props.hasSettingsLink
+    ? RAIL_PAGES.find((page) => page.isRailOnly === true)
+    : undefined;
   return (
     <div className="social-rail">
       <Link className="rail-logo" to={APP_PATHS.home} aria-label={RAIL_COPY.home}>
         <Sticker name="tags" />
-        <span className="rail-wordmark" aria-hidden="true">Meety</span>
+        <span className="rail-wordmark" aria-hidden="true">
+          Meety
+        </span>
       </Link>
       <p className="rail-tagline">{RAIL_COPY.tagline}</p>
       <nav className="tab-bar social-pages" aria-label="Pages">
         {pages.map((page) => (
-          <PageLink key={page.to} page={page} pathname={props.pathname} incomingCount={rail.incomingCount} />
+          <PageLink
+            key={page.to}
+            page={page}
+            pathname={props.pathname}
+            incomingCount={rail.incomingCount}
+          />
         ))}
         <Link className="btn rail-invite" to={APP_PATHS.pair}>
           {RAIL_COPY.invite}
           <Icon name="add" size={18} />
         </Link>
-        {settings === undefined ? null : <PageLink page={settings} pathname={props.pathname} incomingCount={0} />}
+        {settings === undefined ? null : (
+          <PageLink page={settings} pathname={props.pathname} incomingCount={0} />
+        )}
       </nav>
       <div className="rail-foot">
         <MeetyMark size="m" />

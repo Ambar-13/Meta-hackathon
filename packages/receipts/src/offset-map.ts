@@ -17,7 +17,11 @@ export function buildOffsetMap(text: string): OffsetMap {
 }
 
 // The original slice behind a match in the normalised text. The end is the first original character after the match.
-export function originalSlice(map: OffsetMap, normStart: number, normEnd: number): { start: number; end: number; text: string } {
+export function originalSlice(
+  map: OffsetMap,
+  normStart: number,
+  normEnd: number,
+): { start: number; end: number; text: string } {
   const start = map.toOriginal[normStart] ?? 0;
   const end = map.toOriginal[normEnd] ?? map.original.length;
   return { start, end, text: map.original.slice(start, end) };

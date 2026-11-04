@@ -40,8 +40,16 @@ export const PERSON_TABLES: readonly PersonTable[] = [
   { table: "share_pages", reach: "meeting_id" },
   { table: "directory_listings", reach: "person_id" },
   { table: "persona_asks", reach: "person_id" },
-  { table: "persona_answers", reach: "answer_person", columns: ["asker_person_id", "subject_person_id"] },
-  { table: "friend_requests", reach: "request_person", columns: ["from_person_id", "to_person_id"] },
+  {
+    table: "persona_answers",
+    reach: "answer_person",
+    columns: ["asker_person_id", "subject_person_id"],
+  },
+  {
+    table: "friend_requests",
+    reach: "request_person",
+    columns: ["from_person_id", "to_person_id"],
+  },
   { table: "orchestrator_messages", reach: "person_id" },
   { table: "posts", reach: "person_id" },
   { table: "post_likes", reach: "person_id" },
@@ -58,8 +66,15 @@ type CountScope = { trx: DatabaseTransaction; personId: string; meetingIds: stri
 
 // Counts the rows each table will lose for this person, inside the person's own transaction. Joint tables count every row of the person's meetings, because those rows go for both members,
 // except briefs: the person's transaction sees only their own brief, so the other member's brief goes with the meeting without being counted here.
-export async function countPersonRows(trx: DatabaseTransaction, personId: string): Promise<Record<string, number>> {
-  const rows = await trx.selectFrom("meeting_members").select("meeting_id").where("person_id", "=", personId).execute();
+export async function countPersonRows(
+  trx: DatabaseTransaction,
+  personId: string,
+): Promise<Record<string, number>> {
+  const rows = await trx
+    .selectFrom("meeting_members")
+    .select("meeting_id")
+    .where("person_id", "=", personId)
+    .execute();
   const scope: CountScope = { trx, personId, meetingIds: rows.map((row) => row.meeting_id) };
   const counts: Record<string, number> = {};
   for (const entry of PERSON_TABLES) {
@@ -74,7 +89,9 @@ export async function countPersonRows(trx: DatabaseTransaction, personId: string
 async function countEntry(scope: CountScope, entry: CountableTable): Promise<number> {
   const condition = conditionFor(scope, entry);
   if (condition === null) return 0;
-  const result = await sql<{ n: string }>`SELECT count(*) AS n FROM ${sql.table(entry.table)} WHERE ${condition}`.execute(scope.trx);
+  const result = await sql<{
+    n: string;
+  }>`SELECT count(*) AS n FROM ${sql.table(entry.table)} WHERE ${condition}`.execute(scope.trx);
   return numberFromPostgres(result.rows[0]?.n);
 }
 
@@ -106,7 +123,9 @@ function personCondition(personId: string, table: string): RawBuilder<unknown> {
 // The rows of the person's meetings, by meeting_id (meetings by id); null when the person has no meetings.
 function meetingCondition(meetingIds: string[], table: string): RawBuilder<unknown> | null {
   if (meetingIds.length === 0) return null;
-  return table === "meetings" ? sql`id = ANY(${meetingIds}::uuid[])` : sql`meeting_id = ANY(${meetingIds}::uuid[])`;
+  return table === "meetings"
+    ? sql`id = ANY(${meetingIds}::uuid[])`
+    : sql`meeting_id = ANY(${meetingIds}::uuid[])`;
 }
 
 // The comic panels of the person's meetings, through their comics; null when the person has no meetings.

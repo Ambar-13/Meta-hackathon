@@ -24,6 +24,8 @@ describe("tools per phase", () => {
 
     expect(toolNames(open)).toEqual(["recall"]);
     expect(toolNames(explore)).toEqual(["recall"]);
-    expect(open?.every((tool) => tool.function.parameters.additionalProperties === false)).toBe(true);
+    expect(open?.every((tool) => tool.function.parameters.additionalProperties === false)).toBe(
+      true,
+    );
   });
 });

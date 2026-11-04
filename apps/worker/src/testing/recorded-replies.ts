@@ -12,13 +12,24 @@ export function recordedReplyPath(callSite: CallSite, requestHash: string): stri
 export function loadRecordedReply(callSite: CallSite, requestHash: string): RecordedCall {
   const path = recordedReplyPath(callSite, requestHash);
   if (!existsSync(path)) {
-    throw new ContractError("replay_fixture_missing", `No recorded reply for ${callSite} ${requestHash}. Record the flow once in record mode or write the fixture by hand.`, 500);
+    throw new ContractError(
+      "replay_fixture_missing",
+      `No recorded reply for ${callSite} ${requestHash}. Record the flow once in record mode or write the fixture by hand.`,
+      500,
+    );
   }
   return RecordedCall.parse(JSON.parse(readFileSync(path, "utf8")) as unknown);
 }
 
 // Throws unless the fixture's usage passes the check, so a test can assert recorded token counts.
-export function assertRecordedUsage(callSite: CallSite, requestHash: string, predicate: (usage: RecordedCall["usage"]) => boolean): void {
+export function assertRecordedUsage(
+  callSite: CallSite,
+  requestHash: string,
+  predicate: (usage: RecordedCall["usage"]) => boolean,
+): void {
   const usage = loadRecordedReply(callSite, requestHash).usage;
-  if (!predicate(usage)) throw new Error(`recorded usage check failed for ${callSite} ${requestHash}: ${JSON.stringify(usage)}`);
+  if (!predicate(usage))
+    throw new Error(
+      `recorded usage check failed for ${callSite} ${requestHash}: ${JSON.stringify(usage)}`,
+    );
 }

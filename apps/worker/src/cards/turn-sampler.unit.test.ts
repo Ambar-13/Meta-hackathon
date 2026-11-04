@@ -3,7 +3,13 @@ import { normQuote } from "@meet-first/receipts";
 import { CardBuildOutput, toStrictJsonSchema } from "@meet-first/contracts";
 import { readPrompt } from "@meet-first/prompts";
 import { formatTurnBlock } from "./name-chunks.js";
-import { cardCall, cardRegenerationCall, keywordsOf, sampleTurns, type SampledTurn } from "./turn-sampler.js";
+import {
+  cardCall,
+  cardRegenerationCall,
+  keywordsOf,
+  sampleTurns,
+  type SampledTurn,
+} from "./turn-sampler.js";
 
 // One sampled turn with a uuid made from its index.
 function turn(index: number, text: string): SampledTurn {
@@ -81,14 +87,11 @@ describe("sampleTurns", () => {
 
 describe("keywordsOf and the card requests", () => {
   it("D19-T5: keywords are lower-case runs of 3 or more characters minus stop words, and 2-character windows in Chinese", () => {
-    expect([...keywordsOf("The Plan, the PLAN and 2026 goals. [redacted:email:3f9a1c2e] 下周开会")].sort()).toEqual([
-      "2026",
-      "goals",
-      "plan",
-      "下周",
-      "周开",
-      "开会",
-    ]);
+    expect(
+      [
+        ...keywordsOf("The Plan, the PLAN and 2026 goals. [redacted:email:3f9a1c2e] 下周开会"),
+      ].sort(),
+    ).toEqual(["2026", "goals", "plan", "下周", "周开", "开会"]);
   });
 
   it("D21-T3: the card call sends the dossier prompt with the rules and the turns in label order", () => {
@@ -99,7 +102,10 @@ describe("keywordsOf and the card requests", () => {
       role: "system",
       content: `${readPrompt("dossier").text}\n\n${readPrompt("untrusted-data-rules").text}`,
     });
-    expect(call.messages[1]).toEqual({ role: "user", content: "<source_turns>\n[t:2] a\n\n[t:5] b\n</source_turns>" });
+    expect(call.messages[1]).toEqual({
+      role: "user",
+      content: "<source_turns>\n[t:2] a\n\n[t:5] b\n</source_turns>",
+    });
     expect(call.schema).toEqual(toStrictJsonSchema(CardBuildOutput, "dossier"));
   });
 
@@ -115,7 +121,9 @@ describe("keywordsOf and the card requests", () => {
     ]);
     expect(regeneration.messages).toHaveLength(4);
     expect(regeneration.messages[2]).toEqual({ role: "assistant", content: '{"items":[]}' });
-    expect(regeneration.messages[3]?.content).toBe('<failed_items>\nitem 7: turn_id "6", reason not_in_turn\n</failed_items>');
+    expect(regeneration.messages[3]?.content).toBe(
+      '<failed_items>\nitem 7: turn_id "6", reason not_in_turn\n</failed_items>',
+    );
     expect(regeneration.callSite).toBe(call.callSite);
     expect(regeneration.promptVersion).toBe(call.promptVersion);
     expect(regeneration.schema).toEqual(call.schema);

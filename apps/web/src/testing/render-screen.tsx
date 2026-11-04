@@ -31,7 +31,10 @@ const LocationProbe = (): ReactElement => {
 };
 
 // Renders one screen inside the app's router at a phone width, with the MSW server running.
-export function renderScreen(element: ReactElement, options: { pattern: string; url: string; width?: 375 | 1024 }): RenderResult {
+export function renderScreen(
+  element: ReactElement,
+  options: { pattern: string; url: string; width?: 375 | 1024 },
+): RenderResult {
   const width = options.width ?? 375;
   Object.defineProperty(window, "innerWidth", { value: width, configurable: true });
   window.matchMedia = fakeMatchMedia(width);
@@ -58,11 +61,14 @@ function isLabelled(control: Element): boolean {
 
 // Every input, textarea, select, button and link in a container that has no accessible name; [] means every control is labelled.
 export function unlabelledControls(container: ParentNode): string[] {
-  const controls = Array.from(container.querySelectorAll("input, textarea, select, button, a[href]"));
+  const controls = Array.from(
+    container.querySelectorAll("input, textarea, select, button, a[href]"),
+  );
   const names: string[] = [];
   controls.forEach((control, index) => {
     const isHidden = control.tagName === "INPUT" && (control as HTMLInputElement).type === "hidden";
-    if (!isHidden && !isLabelled(control)) names.push(`${control.tagName.toLowerCase()} ${String(index)}`);
+    if (!isHidden && !isLabelled(control))
+      names.push(`${control.tagName.toLowerCase()} ${String(index)}`);
   });
   return names;
 }

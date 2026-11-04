@@ -28,7 +28,9 @@ describe("quiz copy, calibration and misses", () => {
   });
 
   it("D31-T2: an unreliable count adds the second sentence", () => {
-    expect(quizCopy(7, false)).toBe("matched 7 of 10. The judge failed its own check twice, so treat this count as rough.");
+    expect(quizCopy(7, false)).toBe(
+      "matched 7 of 10. The judge failed its own check twice, so treat this count as rough.",
+    );
   });
 
   it("R4.5-T1: no copy is ever a percentage", () => {
@@ -50,8 +52,18 @@ describe("quiz copy, calibration and misses", () => {
     });
 
     expect(result.isPassed).toBe(true);
-    expect(requireElement(result.pairs, 0)).toMatchObject({ pair: "identical", shouldAgree: true, isPassed: true, ledgerId: U1 });
-    expect(requireElement(result.pairs, 1)).toMatchObject({ pair: "contradicting", shouldAgree: false, isPassed: true, ledgerId: U2 });
+    expect(requireElement(result.pairs, 0)).toMatchObject({
+      pair: "identical",
+      shouldAgree: true,
+      isPassed: true,
+      ledgerId: U1,
+    });
+    expect(requireElement(result.pairs, 1)).toMatchObject({
+      pair: "contradicting",
+      shouldAgree: false,
+      isPassed: true,
+      ledgerId: U2,
+    });
   });
 
   it("D30-T4: an identical pair judged as disagreeing fails the run", () => {
@@ -120,7 +132,11 @@ describe("quiz copy, calibration and misses", () => {
   });
 
   it("D31-T3: the misses are the disagreeing items in question id order", () => {
-    expect(missTexts({ state: "judged", reliable: true }, MISS_ITEMS)).toEqual(["four", "eight", "nine"]);
+    expect(missTexts({ state: "judged", reliable: true }, MISS_ITEMS)).toEqual([
+      "four",
+      "eight",
+      "nine",
+    ]);
   });
 
   it("D31-T4: there are no misses without a reliable judged quiz", () => {

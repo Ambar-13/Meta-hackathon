@@ -10,7 +10,11 @@ const SKIPPED_FOLDERS = new Set(["node_modules", "dist", ".git", ".local", "cove
  * Every file under root/folder whose name passes the filter, as absolute paths.
  * A folder that does not exist gives an empty list, so a check on a small test tree does not throw.
  */
-export function walkFiles(root: string, folder: string, isWanted: (name: string) => boolean): string[] {
+export function walkFiles(
+  root: string,
+  folder: string,
+  isWanted: (name: string) => boolean,
+): string[] {
   const start = join(root, folder);
   let names: string[];
   try {

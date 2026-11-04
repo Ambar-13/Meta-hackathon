@@ -2,7 +2,12 @@ import { createHash, randomBytes } from "node:crypto";
 import fastifyCookie from "@fastify/cookie";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { sql, type Kysely } from "kysely";
-import { COOKIE_ATTRIBUTES, routes, SESSION_COOKIE, SESSION_LIFETIME_DAYS } from "@meet-first/contracts";
+import {
+  COOKIE_ATTRIBUTES,
+  routes,
+  SESSION_COOKIE,
+  SESSION_LIFETIME_DAYS,
+} from "@meet-first/contracts";
 import type { Database } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { makeSessionMissingError } from "../route-errors.js";
@@ -14,8 +19,14 @@ export const SESSION_MAX_AGE_SECONDS = SESSION_LIFETIME_DAYS * 86_400;
 // The api routes that answer with no session, by their contracts names. Every other /api route refuses with session_missing when no
 // live session came, so a new route is closed until it is listed here.
 export const PUBLIC_ROUTES = [
-  routes.people.createPerson, routes.people.recover, routes.people.claim, routes.people.health, routes.briefs.readShare,
-  routes.people.authOptions, routes.people.googleStart, routes.people.googleCallback,
+  routes.people.createPerson,
+  routes.people.recover,
+  routes.people.claim,
+  routes.people.health,
+  routes.briefs.readShare,
+  routes.people.authOptions,
+  routes.people.googleStart,
+  routes.people.googleCallback,
 ] as const;
 
 // n random bytes as lower-case hex: 32 for a session, 16 for a transfer link or an invite.
@@ -31,7 +42,9 @@ export function hashToken(text: string): Buffer {
 // True when the method and the route pattern name one of PUBLIC_ROUTES; HEAD counts as GET.
 export function isPublicRoute(method: string, routePattern: string): boolean {
   const wanted = method.toUpperCase() === "HEAD" ? "GET" : method.toUpperCase();
-  return PUBLIC_ROUTES.some((route) => route.method.toUpperCase() === wanted && route.path === routePattern);
+  return PUBLIC_ROUTES.some(
+    (route) => route.method.toUpperCase() === wanted && route.path === routePattern,
+  );
 }
 
 // Sets __Host-session with HttpOnly, Secure, Path=/, SameSite=Lax and Max-Age 90 days, and no Domain.
@@ -46,13 +59,21 @@ export function clearSessionCookie(reply: FastifyReply): void {
 
 // The person behind a live session token hash, through auth_person_for_session, or null. A stream
 // uses the hash it kept on the request, because the token itself is not kept after the cookie is read.
-export async function findPersonForSessionHash(db: Kysely<Database>, tokenHash: Buffer): Promise<string | null> {
-  const result = await sql<{ person_id: string | null }>`SELECT auth_person_for_session(${tokenHash}) AS person_id`.execute(db);
+export async function findPersonForSessionHash(
+  db: Kysely<Database>,
+  tokenHash: Buffer,
+): Promise<string | null> {
+  const result = await sql<{
+    person_id: string | null;
+  }>`SELECT auth_person_for_session(${tokenHash}) AS person_id`.execute(db);
   return result.rows[0]?.person_id ?? null;
 }
 
 // The person behind a live session token, through auth_person_for_session, or null.
-export async function findSessionPerson(db: Kysely<Database>, token: string): Promise<string | null> {
+export async function findSessionPerson(
+  db: Kysely<Database>,
+  token: string,
+): Promise<string | null> {
   return findPersonForSessionHash(db, hashToken(token));
 }
 
@@ -63,7 +84,11 @@ export async function addSessionHook(app: FastifyInstance, deps: RouteDeps): Pro
   app.decorateRequest("sessionTokenHash", null);
   app.addHook("onRequest", async (request) => {
     const pattern: string | undefined = request.routeOptions.url;
-    if (pattern === undefined || !pattern.startsWith("/api/") || isPublicRoute(request.method, pattern)) {
+    if (
+      pattern === undefined ||
+      !pattern.startsWith("/api/") ||
+      isPublicRoute(request.method, pattern)
+    ) {
       return;
     }
     const token = request.cookies[SESSION_COOKIE];

@@ -1,7 +1,26 @@
 import { describe, expect, it } from "vitest";
 import type { CommittedEvent } from "@meet-first/contracts";
-import { emptyMeetingState, foldEvent, foldPollReply, foldRaw, isThinking, refreshNotice, claimNeedsMark, type MeetingFoldState } from "./event-fold.js";
-import { claimFixture, IDS, meetingEnded, meetingStarted, phaseChanged, recallCalled, SERVER_NOW, turnCommitted, turnDelta } from "../testing/fixtures.js";
+import {
+  emptyMeetingState,
+  foldEvent,
+  foldPollReply,
+  foldRaw,
+  isThinking,
+  refreshNotice,
+  claimNeedsMark,
+  type MeetingFoldState,
+} from "./event-fold.js";
+import {
+  claimFixture,
+  IDS,
+  meetingEnded,
+  meetingStarted,
+  phaseChanged,
+  recallCalled,
+  SERVER_NOW,
+  turnCommitted,
+  turnDelta,
+} from "../testing/fixtures.js";
 
 // Folds the events in order, starting from an empty meeting.
 function fold(...events: CommittedEvent[]): MeetingFoldState {
@@ -11,13 +30,25 @@ function fold(...events: CommittedEvent[]): MeetingFoldState {
 describe("event fold", () => {
   it("R5.11-T1: the fold ignores an unknown event type and returns the same state", () => {
     const state = fold(meetingStarted(1));
-    const next = foldRaw(state, { v: 1, type: "future.event", meetingId: IDS.meeting, at: SERVER_NOW, seq: 2 });
+    const next = foldRaw(state, {
+      v: 1,
+      type: "future.event",
+      meetingId: IDS.meeting,
+      at: SERVER_NOW,
+      seq: 2,
+    });
     expect(next).toBe(state);
   });
 
   it("R5.11-T2: a v 2 event sets needsRefresh, keeps the timeline, and refreshNotice gives the refresh copy", () => {
-    const state = fold(meetingStarted(1), turnCommitted({ seq: 2, stepSeq: 1, side: "a", text: "Hi" }));
-    const next = foldRaw(state, { ...turnCommitted({ seq: 3, stepSeq: 2, side: "b", text: "Yo" }), v: 2 });
+    const state = fold(
+      meetingStarted(1),
+      turnCommitted({ seq: 2, stepSeq: 1, side: "a", text: "Hi" }),
+    );
+    const next = foldRaw(state, {
+      ...turnCommitted({ seq: 3, stepSeq: 2, side: "b", text: "Yo" }),
+      v: 2,
+    });
     expect(next.needsRefresh).toBe(true);
     expect(next.timeline).toEqual(state.timeline);
     expect(next.lastSeq).toBe(2);
@@ -26,7 +57,12 @@ describe("event fold", () => {
   });
 
   it("R5.11-T3: a poll reply with v 2 sets needsRefresh and applies nothing", () => {
-    const reply = { v: 2, events: [turnCommitted({ seq: 2, stepSeq: 1, side: "a", text: "Hi" })], partial: null, serverNow: SERVER_NOW };
+    const reply = {
+      v: 2,
+      events: [turnCommitted({ seq: 2, stepSeq: 1, side: "a", text: "Hi" })],
+      partial: null,
+      serverNow: SERVER_NOW,
+    };
     const next = foldPollReply(fold(meetingStarted(1)), reply);
     expect(next.needsRefresh).toBe(true);
     expect(next.lastSeq).toBe(1);
@@ -40,10 +76,16 @@ describe("event fold", () => {
   });
 
   it("R8.1-T2: a gap asks for a resync and the poll reply fills it in seq order", () => {
-    const gapped = foldEvent(fold(meetingStarted(1)), turnCommitted({ seq: 3, stepSeq: 1, side: "a", text: "Hi" }));
+    const gapped = foldEvent(
+      fold(meetingStarted(1)),
+      turnCommitted({ seq: 3, stepSeq: 1, side: "a", text: "Hi" }),
+    );
     const filled = foldPollReply(gapped, {
       v: 1,
-      events: [turnCommitted({ seq: 3, stepSeq: 1, side: "a", text: "Hi" }), phaseChanged(2, "open", 1)],
+      events: [
+        turnCommitted({ seq: 3, stepSeq: 1, side: "a", text: "Hi" }),
+        phaseChanged(2, "open", 1),
+      ],
       partial: null,
       serverNow: SERVER_NOW,
     });
@@ -55,8 +97,14 @@ describe("event fold", () => {
   });
 
   it("R5.7-T1: turn.committed replaces the partial with the committed text", () => {
-    const state = foldEvent(fold(meetingStarted(1)), turnDelta({ stepSeq: 1, attempt: 1, side: "a", offset: 0, text: "Hel" }));
-    const next = foldEvent(state, turnCommitted({ seq: 2, stepSeq: 1, side: "a", text: "Hello world" }));
+    const state = foldEvent(
+      fold(meetingStarted(1)),
+      turnDelta({ stepSeq: 1, attempt: 1, side: "a", offset: 0, text: "Hel" }),
+    );
+    const next = foldEvent(
+      state,
+      turnCommitted({ seq: 2, stepSeq: 1, side: "a", text: "Hello world" }),
+    );
     expect(next.partial).toBeNull();
     const last = next.timeline.at(-1);
     expect(last?.kind === "turn" ? last.text : null).toBe("Hello world");

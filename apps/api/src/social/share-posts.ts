@@ -5,7 +5,19 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { sql } from "kysely";
 import { z } from "zod";
-import { ContractError, HTTP, POST_PHOTO_BASE64_MAX_CHARS, POST_PHOTO_MAX_BYTES, PostCreate, PostCreated, PostLiked, routes, SHARES_PER_DAY, STORY_HOURS, Uuid } from "@meet-first/contracts";
+import {
+  ContractError,
+  HTTP,
+  POST_PHOTO_BASE64_MAX_CHARS,
+  POST_PHOTO_MAX_BYTES,
+  PostCreate,
+  PostCreated,
+  PostLiked,
+  routes,
+  SHARES_PER_DAY,
+  STORY_HOURS,
+  Uuid,
+} from "@meet-first/contracts";
 import { numberFromPostgres, withPerson } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { isJpeg } from "../home/profile-edit.js";
@@ -30,24 +42,60 @@ function photoBytes(photo: string | null): Buffer | null {
 // body with neither words nor a photo, or a photo that is not a JPEG of at most POST_PHOTO_MAX_BYTES; 429 post_daily_cap once the caller
 // has shared SHARES_PER_DAY times this UTC day, counted after their other shares in progress are done.
 export function registerCreatePost(app: FastifyInstance, deps: RouteDeps): void {
-  app.post(routes.social.createPost.path, { bodyLimit: CREATE_BODY_LIMIT_BYTES }, async (request, reply) => {
-    const personId = requirePerson(request);
-    const body = PostCreate.safeParse(request.body);
-    if (!body.success) throw makePayloadInvalidError();
-    const photo = photoBytes(body.data.photo);
-    const row = await withPerson(deps.db, personId, async (trx) => {
-      // The sharer's row lock makes shares sent at the same moment take turns, so none can pass the day's count, as friend_request_send
-      // does for friend requests. NO KEY UPDATE leaves alone the key locks that rows pointing at the person take.
-      await trx.selectFrom("people").select("id").where("id", "=", personId).forNoKeyUpdate().execute();
-      const today = await trx.selectFrom("posts").select(sql<string>`count(*)`.as("n"))
-        .where("person_id", "=", personId).where("created_at", ">=", sql<Date>`date_trunc('day', now(), 'UTC')`).executeTakeFirstOrThrow();
-      if (numberFromPostgres(today.n) >= SHARES_PER_DAY) throw new ContractError("post_daily_cap", "You have shared a lot today. Try again tomorrow.", HTTP.tooMany);
-      const expiresAt = body.data.kind === "story" ? sql<Date>`now() + make_interval(hours => ${STORY_HOURS})` : null;
-      return trx.insertInto("posts").values({ person_id: personId, kind: body.data.kind, text: body.data.text, photo, expires_at: expiresAt })
-        .returning(["id", "kind", "expires_at"]).executeTakeFirstOrThrow();
-    });
-    return reply.code(201).send(PostCreated.parse({ postId: row.id, kind: row.kind, expiresAt: row.expires_at?.toISOString() ?? null }));
-  });
+  app.post(
+    routes.social.createPost.path,
+    { bodyLimit: CREATE_BODY_LIMIT_BYTES },
+    async (request, reply) => {
+      const personId = requirePerson(request);
+      const body = PostCreate.safeParse(request.body);
+      if (!body.success) throw makePayloadInvalidError();
+      const photo = photoBytes(body.data.photo);
+      const row = await withPerson(deps.db, personId, async (trx) => {
+        // The sharer's row lock makes shares sent at the same moment take turns, so none can pass the day's count, as friend_request_send
+        // does for friend requests. NO KEY UPDATE leaves alone the key locks that rows pointing at the person take.
+        await trx
+          .selectFrom("people")
+          .select("id")
+          .where("id", "=", personId)
+          .forNoKeyUpdate()
+          .execute();
+        const today = await trx
+          .selectFrom("posts")
+          .select(sql<string>`count(*)`.as("n"))
+          .where("person_id", "=", personId)
+          .where("created_at", ">=", sql<Date>`date_trunc('day', now(), 'UTC')`)
+          .executeTakeFirstOrThrow();
+        if (numberFromPostgres(today.n) >= SHARES_PER_DAY)
+          throw new ContractError(
+            "post_daily_cap",
+            "You have shared a lot today. Try again tomorrow.",
+            HTTP.tooMany,
+          );
+        const expiresAt =
+          body.data.kind === "story"
+            ? sql<Date>`now() + make_interval(hours => ${STORY_HOURS})`
+            : null;
+        return trx
+          .insertInto("posts")
+          .values({
+            person_id: personId,
+            kind: body.data.kind,
+            text: body.data.text,
+            photo,
+            expires_at: expiresAt,
+          })
+          .returning(["id", "kind", "expires_at"])
+          .executeTakeFirstOrThrow();
+      });
+      return reply.code(201).send(
+        PostCreated.parse({
+          postId: row.id,
+          kind: row.kind,
+          expiresAt: row.expires_at?.toISOString() ?? null,
+        }),
+      );
+    },
+  );
 }
 
 // Registers DELETE /api/posts/:id: 204 once the caller's own post or story is gone, with its likes; 404 not_found for an id that is not
@@ -57,7 +105,13 @@ export function registerDeletePost(app: FastifyInstance, deps: RouteDeps): void 
     const personId = requirePerson(request);
     const params = PostParams.safeParse(request.params);
     if (!params.success) throw makeNotFoundError();
-    const result = await withPerson(deps.db, personId, (trx) => trx.deleteFrom("posts").where("id", "=", params.data.id).where("person_id", "=", personId).executeTakeFirst());
+    const result = await withPerson(deps.db, personId, (trx) =>
+      trx
+        .deleteFrom("posts")
+        .where("id", "=", params.data.id)
+        .where("person_id", "=", personId)
+        .executeTakeFirst(),
+    );
     if (result.numDeletedRows === 0n) throw makeNotFoundError();
     return reply.code(204).send();
   });
@@ -73,12 +127,25 @@ function likeHandler(deps: RouteDeps, isLiked: boolean) {
     const postId = params.data.id;
     await withPerson(deps.db, personId, async (trx) => {
       if (!isLiked) {
-        await trx.deleteFrom("post_likes").where("post_id", "=", postId).where("person_id", "=", personId).execute();
+        await trx
+          .deleteFrom("post_likes")
+          .where("post_id", "=", postId)
+          .where("person_id", "=", personId)
+          .execute();
         return;
       }
-      const isVisible = (await sql<{ visible: boolean }>`SELECT post_is_visible(${postId}::uuid) AS visible`.execute(trx)).rows[0]?.visible === true;
+      const isVisible =
+        (
+          await sql<{
+            visible: boolean;
+          }>`SELECT post_is_visible(${postId}::uuid) AS visible`.execute(trx)
+        ).rows[0]?.visible === true;
       if (!isVisible) throw makeNotFoundError();
-      await trx.insertInto("post_likes").values({ post_id: postId, person_id: personId }).onConflict((conflict) => conflict.doNothing()).execute();
+      await trx
+        .insertInto("post_likes")
+        .values({ post_id: postId, person_id: personId })
+        .onConflict((conflict) => conflict.doNothing())
+        .execute();
     });
     return reply.code(200).send(PostLiked.parse({ postId, isLiked }));
   };

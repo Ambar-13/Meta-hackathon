@@ -21,19 +21,29 @@ const WelcomeHero = (props: { onDone: () => void }): ReactElement => {
           Meety
         </Link>
         <span className="wl-nav-chips">
-          <a className="chip c-green wl-desk" href="#how">How it works</a>
-          <a className="chip c-lilac wl-desk" href="#kinds">Questions</a>
-          <a className="chip c-coral" href="#code">I have a code</a>
+          <a className="chip c-green wl-desk" href="#how">
+            How it works
+          </a>
+          <a className="chip c-lilac wl-desk" href="#kinds">
+            Questions
+          </a>
+          <a className="chip c-coral" href="#code">
+            I have a code
+          </a>
         </span>
       </nav>
       <h1 className="wl-hl" id="wl-hero-title">
         <span className="wl-w">Your Meety</span> <br className="wl-br" />
-        <span className="wl-w">meets</span> <span className="wl-w">theirs</span> <br className="wl-br" />
+        <span className="wl-w">meets</span> <span className="wl-w">theirs</span>{" "}
+        <br className="wl-br" />
         <span className="wl-w wl-end">first.</span>
         <NameTag name="Mira" className="wl-hl-tag a" />
         <NameTag name="Jonah" colour="blue" className="wl-hl-tag b" />
       </h1>
-      <p className="wl-lede">They play out how the two of you would probably get on. Then you get a short brief, and every line shows the words it came from.</p>
+      <p className="wl-lede">
+        They play out how the two of you would probably get on. Then you get a short brief, and
+        every line shows the words it came from.
+      </p>
       <GoogleSignIn />
       <WelcomeForm onDone={props.onDone} />
       <div className="scallop" aria-hidden="true" />

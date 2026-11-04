@@ -1,23 +1,63 @@
 // First-person pronouns, lower case, matched as whole words (Latin scripts) or as substrings (scripts without word spaces).
 export const FIRST_PERSON_WORDS: ReadonlyArray<string> = [
-  "i", "i'm", "i've", "i'd", "i'll", "me", "my", "mine", "myself", // English
-  "je", "j'ai", "moi", "mon", "ma", "mes", // French
-  "ich", "mir", "mich", "mein", "meine", // German
-  "yo", "mi", "mis", "conmigo", // Spanish
-  "eu", "meu", "minha", "comigo", // Portuguese
-  "io", "mio", "mia", "miei", // Italian
-  "saya", "aku", "gue", // Malay, Indonesian
-  "ako", "ko", "akin", // Filipino
+  "i",
+  "i'm",
+  "i've",
+  "i'd",
+  "i'll",
+  "me",
+  "my",
+  "mine",
+  "myself", // English
+  "je",
+  "j'ai",
+  "moi",
+  "mon",
+  "ma",
+  "mes", // French
+  "ich",
+  "mir",
+  "mich",
+  "mein",
+  "meine", // German
+  "yo",
+  "mi",
+  "mis",
+  "conmigo", // Spanish
+  "eu",
+  "meu",
+  "minha",
+  "comigo", // Portuguese
+  "io",
+  "mio",
+  "mia",
+  "miei", // Italian
+  "saya",
+  "aku",
+  "gue", // Malay, Indonesian
+  "ako",
+  "ko",
+  "akin", // Filipino
 ];
 // Pronouns of scripts written without spaces between words, matched as substrings of the lower-cased text.
 export const FIRST_PERSON_SUBSTRINGS: ReadonlyArray<string> = [
-  "मैं", "मेरा", "मुझे", // Hindi: main, mera, mujhe
-  "நான்", "என்", // Tamil: naan, en
-  "我", "我的", // Chinese: wo, wode
-  "私", "僕", "俺", // Japanese: watashi, boku, ore
-  "나는", "제가", "내가", // Korean: naneun, jega, naega
+  "मैं",
+  "मेरा",
+  "मुझे", // Hindi: main, mera, mujhe
+  "நான்",
+  "என்", // Tamil: naan, en
+  "我",
+  "我的", // Chinese: wo, wode
+  "私",
+  "僕",
+  "俺", // Japanese: watashi, boku, ore
+  "나는",
+  "제가",
+  "내가", // Korean: naneun, jega, naega
   "أنا", // Arabic: ana
-  "я ", "мне", "мой", // Russian: ya, mne, moy
+  "я ",
+  "мне",
+  "мой", // Russian: ya, mne, moy
   "আমি", // Bengali: ami
 ];
 

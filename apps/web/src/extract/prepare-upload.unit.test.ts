@@ -30,7 +30,11 @@ function latestWorker(): FakeWorker {
 
 const CANCELLED = "The upload was stopped before it finished. Pick the file again to start over.";
 
-const refused: UploadRefused = { ok: false, code: "source_no_own_turns", message: "No messages written by you were found." };
+const refused: UploadRefused = {
+  ok: false,
+  code: "source_no_own_turns",
+  message: "No messages written by you were found.",
+};
 
 describe("prepareUpload with a fake Worker", () => {
   beforeEach(() => {
@@ -45,10 +49,18 @@ describe("prepareUpload with a fake Worker", () => {
   it("D1-T5: progress passes through and the done message resolves the upload (uses a fake Worker)", async () => {
     const onProgress = vi.fn<(progress: UploadProgress) => void>();
     const signal = new AbortController().signal;
-    const promise = prepareUpload({ kind: "paste", text: "x" }, { allowlist: ["Asha"], onProgress, signal });
+    const promise = prepareUpload(
+      { kind: "paste", text: "x" },
+      { allowlist: ["Asha"], onProgress, signal },
+    );
     const worker = latestWorker();
-    expect(worker.received[0]).toEqual({ input: { kind: "paste", text: "x" }, allowlist: ["Asha"] });
-    worker.onmessage?.({ data: { type: "progress", progress: { stage: "parsing", inflatedBytes: 0, keptTurns: 0 } } });
+    expect(worker.received[0]).toEqual({
+      input: { kind: "paste", text: "x" },
+      allowlist: ["Asha"],
+    });
+    worker.onmessage?.({
+      data: { type: "progress", progress: { stage: "parsing", inflatedBytes: 0, keptTurns: 0 } },
+    });
     worker.onmessage?.({ data: { type: "done", result: refused } });
     expect(await promise).toEqual(refused);
     expect(onProgress).toHaveBeenCalledTimes(1);
@@ -58,7 +70,10 @@ describe("prepareUpload with a fake Worker", () => {
 
   it("D1-T6: aborting resolves upload_cancelled and terminates the worker (uses a fake Worker)", async () => {
     const controller = new AbortController();
-    const promise = prepareUpload({ kind: "paste", text: "x" }, { allowlist: [], onProgress: () => undefined, signal: controller.signal });
+    const promise = prepareUpload(
+      { kind: "paste", text: "x" },
+      { allowlist: [], onProgress: () => undefined, signal: controller.signal },
+    );
     const worker = latestWorker();
     controller.abort();
     expect(await promise).toEqual({ ok: false, code: "upload_cancelled", message: CANCELLED });
@@ -70,14 +85,24 @@ describe("prepareUpload with a fake Worker", () => {
   it("D1-T7: an already aborted signal creates no worker (uses a fake Worker)", async () => {
     const controller = new AbortController();
     controller.abort();
-    const result = await prepareUpload({ kind: "paste", text: "x" }, { allowlist: [], onProgress: () => undefined, signal: controller.signal });
+    const result = await prepareUpload(
+      { kind: "paste", text: "x" },
+      { allowlist: [], onProgress: () => undefined, signal: controller.signal },
+    );
     expect(FakeWorker.instances.length).toBe(0);
     expect(result).toEqual({ ok: false, code: "upload_cancelled", message: CANCELLED });
   });
 
   it("D1-T8: a worker error resolves file_unreadable (uses a fake Worker)", async () => {
-    const promise = prepareUpload({ kind: "paste", text: "x" }, { allowlist: [], onProgress: () => undefined, signal: new AbortController().signal });
+    const promise = prepareUpload(
+      { kind: "paste", text: "x" },
+      { allowlist: [], onProgress: () => undefined, signal: new AbortController().signal },
+    );
     latestWorker().onerror?.();
-    expect(await promise).toEqual({ ok: false, code: "file_unreadable", message: FILE_UNREADABLE_SENTENCE });
+    expect(await promise).toEqual({
+      ok: false,
+      code: "file_unreadable",
+      message: FILE_UNREADABLE_SENTENCE,
+    });
   });
 });

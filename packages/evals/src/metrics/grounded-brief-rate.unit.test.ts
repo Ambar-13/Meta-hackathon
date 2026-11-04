@@ -16,7 +16,12 @@ function turn(turnId: string, personId: string, text: string): TurnTextRow {
 
 // One brief line with the quotes it rests on.
 function line(quotes: BriefLineRow["point"]["quotes"]): BriefLineRow {
-  return { meetingId: "m1", personId: "pa", section: "agree", point: { text: "A line.", quotes, supported: true } };
+  return {
+    meetingId: "m1",
+    personId: "pa",
+    section: "agree",
+    point: { text: "A line.", quotes, supported: true },
+  };
 }
 
 describe("grounded brief rate", () => {
@@ -28,13 +33,31 @@ describe("grounded brief rate", () => {
     ]);
     const lines = [
       // 1. exact quote from A's own turn: grounded
-      line([{ text: "I keep my notes in plain text files", side: "a", turnId: "t1", verified: true }]),
+      line([
+        { text: "I keep my notes in plain text files", side: "a", turnId: "t1", verified: true },
+      ]),
       // 2. curly apostrophe in the quote, straight one in the turn: grounded
-      line([{ text: "I’m keeping my notes in plain text files", side: "a", turnId: "t2", verified: true }]),
+      line([
+        {
+          text: "I’m keeping my notes in plain text files",
+          side: "a",
+          turnId: "t2",
+          verified: true,
+        },
+      ]),
       // 3. stored verified true, but the words were changed: not grounded
-      line([{ text: "I keep my notes in plain text files on my tablet", side: "a", turnId: "t1", verified: true }]),
+      line([
+        {
+          text: "I keep my notes in plain text files on my tablet",
+          side: "a",
+          turnId: "t1",
+          verified: true,
+        },
+      ]),
       // 4. right words, but the turn belongs to B while the quote says side a: not grounded
-      line([{ text: "I keep my notes in plain text files", side: "a", turnId: "t3", verified: true }]),
+      line([
+        { text: "I keep my notes in plain text files", side: "a", turnId: "t3", verified: true },
+      ]),
       // 5. no quotes at all: not grounded
       line([]),
       // 6. two quotes, both good: grounded
@@ -44,8 +67,14 @@ describe("grounded brief rate", () => {
       ]),
     ];
     const rows: EvalRows = {
-      claims: [], briefMeta: [], events: [], meetings: [], ledger: [], plantedMarkers: [],
-      briefLines: lines, turns,
+      claims: [],
+      briefMeta: [],
+      events: [],
+      meetings: [],
+      ledger: [],
+      plantedMarkers: [],
+      briefLines: lines,
+      turns,
       questionByMeeting: new Map([["m1", QUESTION]]),
       personBySide: new Map([["m1", { a: "pa", b: "pb" }]]),
     };

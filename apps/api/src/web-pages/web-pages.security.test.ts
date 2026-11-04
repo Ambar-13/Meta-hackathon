@@ -8,7 +8,8 @@ import { registerSessionsRoutes } from "../sessions/index.js";
 import { registerWebPages } from "./index.js";
 
 const POLICY = "default-src 'self'; img-src 'self' data:; connect-src 'self'";
-const INDEX_HTML = '<!doctype html><html><head><title>Meet First</title></head><body><div id="root"></div></body></html>';
+const INDEX_HTML =
+  '<!doctype html><html><head><title>Meet First</title></head><body><div id="root"></div></body></html>';
 
 let distDir = "";
 let t: Awaited<ReturnType<typeof buildTestApp>>;
@@ -18,7 +19,8 @@ beforeAll(async () => {
   await writeFile(join(distDir, "index.html"), INDEX_HTML);
   await mkdir(join(distDir, "assets"));
   await writeFile(join(distDir, "assets", "app-1a2b3c4d.js"), 'console.log("meet first");');
-  const webRoutes: RoutePlugin = (app, deps) => registerWebPages(app, deps, { distDir, diskPlanBytes: 1_000_000_000_000_000 });
+  const webRoutes: RoutePlugin = (app, deps) =>
+    registerWebPages(app, deps, { distDir, diskPlanBytes: 1_000_000_000_000_000 });
   t = await buildTestApp({ routes: [registerSessionsRoutes, webRoutes] });
 });
 
@@ -33,7 +35,12 @@ it("D67-T1: every response through Fastify carries exactly the D67 Content-Secur
     await t.app.inject({ method: "GET", url: "/api/health" }),
     await t.app.inject({ method: "GET", url: "/api/nothing" }),
     await t.app.inject({ method: "GET", url: "/assets/app-1a2b3c4d.js" }),
-    await t.app.inject({ method: "POST", url: "/api/people", headers: { "content-type": "application/json" }, payload: JSON.stringify({ displayName: "X" }) }),
+    await t.app.inject({
+      method: "POST",
+      url: "/api/people",
+      headers: { "content-type": "application/json" },
+      payload: JSON.stringify({ displayName: "X" }),
+    }),
   ];
 
   expect(responses.map((response) => response.statusCode)).toEqual([200, 200, 404, 200, 403]);

@@ -17,10 +17,17 @@ export const ROLE_TOKEN_PATTERN = /\[person:[^[\]\n]{1,60}\]/g;
 export const PLACEHOLDER_ID_MAX = 0xffffffff;
 
 // The sentence for an id counter that has run out, shown when a source has more redactions than 8 hex digits can name.
-const IDS_EXHAUSTED_SENTENCE = "This source has more redactions than the ids allow. Upload a smaller export.";
+const IDS_EXHAUSTED_SENTENCE =
+  "This source has more redactions than the ids allow. Upload a smaller export.";
 
 // One placeholder found in a text: its kind, its category, whether that category is one of the 17, and where it sits.
-export type FoundPlaceholder = { kind: "redacted" | "code"; category: string; isKnownCategory: boolean; start: number; end: number };
+export type FoundPlaceholder = {
+  kind: "redacted" | "code";
+  category: string;
+  isKnownCategory: boolean;
+  start: number;
+  end: number;
+};
 
 // True when a string is one of the 17 redaction categories.
 export function isCategory(value: string): value is Category {
@@ -32,7 +39,11 @@ export function makePlaceholderCounter(start = 1): () => string {
   let next = start;
   return () => {
     if (next > PLACEHOLDER_ID_MAX) {
-      throw new ContractError("placeholder_ids_exhausted", IDS_EXHAUSTED_SENTENCE, HTTP.payloadTooLarge);
+      throw new ContractError(
+        "placeholder_ids_exhausted",
+        IDS_EXHAUSTED_SENTENCE,
+        HTTP.payloadTooLarge,
+      );
     }
     const placeholderId = next.toString(16).padStart(8, "0");
     next += 1;
@@ -50,11 +61,23 @@ export function findPlaceholders(text: string): FoundPlaceholder[] {
   const redacted = [...text.matchAll(REDACTED_PLACEHOLDER)].map((match): FoundPlaceholder => {
     const category = match[1] ?? "";
     const start = match.index;
-    return { kind: "redacted", category, isKnownCategory: isCategory(category), start, end: start + match[0].length };
+    return {
+      kind: "redacted",
+      category,
+      isKnownCategory: isCategory(category),
+      start,
+      end: start + match[0].length,
+    };
   });
   const code = [...text.matchAll(CODE_PLACEHOLDER)].map((match): FoundPlaceholder => {
     const start = match.index;
-    return { kind: "code", category: "code", isKnownCategory: true, start, end: start + match[0].length };
+    return {
+      kind: "code",
+      category: "code",
+      isKnownCategory: true,
+      start,
+      end: start + match[0].length,
+    };
   });
   return [...redacted, ...code].sort((a, b) => a.start - b.start);
 }

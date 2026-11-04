@@ -1,10 +1,22 @@
 import { useEffect, useState } from "react";
 import type { PostsView, ProfileView } from "@meet-first/contracts";
-import { apiFetch, asApiError, readApprovedCard, readCardQuery, routes, usePolledView, type ApiError, type PolledView } from "../../app-shell/index.js";
+import {
+  apiFetch,
+  asApiError,
+  readApprovedCard,
+  readCardQuery,
+  routes,
+  usePolledView,
+  type ApiError,
+  type PolledView,
+} from "../../app-shell/index.js";
 import { readListingOrNull } from "../card/index.js";
 
 // Where the last friend request action stands: nothing sent, one on its way, or refused with the api's own sentence.
-export type ProfileActionState = { kind: "idle" } | { kind: "sending" } | { kind: "failed"; error: ApiError };
+export type ProfileActionState =
+  | { kind: "idle" }
+  | { kind: "sending" }
+  | { kind: "failed"; error: ApiError };
 // One profile with its friend request actions; each action reads the profile again once the api has answered.
 export type ProfileModel = {
   profile: PolledView<ProfileView>;
@@ -47,12 +59,18 @@ export function postAgeWords(createdAt: string, now: Date): string {
 
 // One profile's posts (GET /api/directory/:id/posts), read once when the profile opens; a failed read is tried again after 30 s.
 export function useListingPosts(listingId: string): PolledView<PostsView> {
-  return usePolledView(() => apiFetch(routes.social.listListingPosts, { params: { id: listingId } }), { key: `profile-posts-${listingId}`, intervalMs: 30_000, keepPolling: () => false });
+  return usePolledView(
+    () => apiFetch(routes.social.listListingPosts, { params: { id: listingId } }),
+    { key: `profile-posts-${listingId}`, intervalMs: 30_000, keepPolling: () => false },
+  );
 }
 
 // Reads one profile (GET /api/directory/:id) and sends, accepts or declines the friend request on it.
 export function useProfile(listingId: string): ProfileModel {
-  const profile = usePolledView(() => apiFetch(routes.social.readProfile, { params: { id: listingId } }), { key: `profile-${listingId}`, intervalMs: 30_000, keepPolling: () => false });
+  const profile = usePolledView(
+    () => apiFetch(routes.social.readProfile, { params: { id: listingId } }),
+    { key: `profile-${listingId}`, intervalMs: 30_000, keepPolling: () => false },
+  );
   const [action, setAction] = useState<ProfileActionState>({ kind: "idle" });
   const run = async (send: () => Promise<unknown>): Promise<void> => {
     setAction({ kind: "sending" });
@@ -68,8 +86,10 @@ export function useProfile(listingId: string): ProfileModel {
     profile,
     action,
     addFriend: () => run(() => apiFetch(routes.social.sendFriendRequest, { body: { listingId } })),
-    accept: (requestId) => run(() => apiFetch(routes.social.acceptFriendRequest, { params: { id: requestId } })),
-    decline: (requestId) => run(() => apiFetch(routes.social.declineFriendRequest, { params: { id: requestId } })),
+    accept: (requestId) =>
+      run(() => apiFetch(routes.social.acceptFriendRequest, { params: { id: requestId } })),
+    decline: (requestId) =>
+      run(() => apiFetch(routes.social.declineFriendRequest, { params: { id: requestId } })),
   };
 }
 

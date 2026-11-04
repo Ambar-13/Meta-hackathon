@@ -5,7 +5,12 @@ import { describeError } from "./database-errors.js";
 import { migrateDatabase, type MigrationReport } from "./migrate.js";
 
 // The four connection strings a rebuild needs: a superuser on this machine, and the three app roles on the target database.
-export type RebuildUrls = { adminUrl: string; migrateUrl: string; apiUrl: string; workerUrl: string };
+export type RebuildUrls = {
+  adminUrl: string;
+  migrateUrl: string;
+  apiUrl: string;
+  workerUrl: string;
+};
 
 // The hosts a rebuild may touch; any other host is refused before a statement runs.
 export const LOCAL_HOSTS: readonly string[] = ["localhost", "127.0.0.1"];
@@ -21,7 +26,11 @@ function refuse(code: string, sentence: string): never {
 // Refuses a URL whose host is not on this machine.
 function assertLocalHosts(urls: RebuildUrls): void {
   for (const url of [urls.adminUrl, urls.migrateUrl, urls.apiUrl, urls.workerUrl]) {
-    if (!LOCAL_HOSTS.includes(new URL(url).hostname)) refuse("fresh_not_local", "This command only rebuilds a database on this machine. Point every URL at localhost or 127.0.0.1.");
+    if (!LOCAL_HOSTS.includes(new URL(url).hostname))
+      refuse(
+        "fresh_not_local",
+        "This command only rebuilds a database on this machine. Point every URL at localhost or 127.0.0.1.",
+      );
   }
 }
 
@@ -30,16 +39,30 @@ function assertSameTarget(urls: RebuildUrls): void {
   const admin = new URL(urls.adminUrl);
   const migrate = new URL(urls.migrateUrl);
   const others = [new URL(urls.migrateUrl), new URL(urls.apiUrl), new URL(urls.workerUrl)];
-  const isSameHost = others.every((url) => url.hostname === admin.hostname && url.port === admin.port);
+  const isSameHost = others.every(
+    (url) => url.hostname === admin.hostname && url.port === admin.port,
+  );
   const isSameDatabase = others.every((url) => url.pathname === migrate.pathname);
-  if (!isSameHost || !isSameDatabase) refuse("fresh_urls_disagree", "The admin, migrate, api and worker URLs must name one host and port, and the last three one database.");
+  if (!isSameHost || !isSameDatabase)
+    refuse(
+      "fresh_urls_disagree",
+      "The admin, migrate, api and worker URLs must name one host and port, and the last three one database.",
+    );
 }
 
 // Refuses URLs that log in as the wrong role.
 function assertRoles(urls: RebuildUrls): void {
-  const expected: Array<[string, string]> = [[urls.migrateUrl, "app_migrate"], [urls.apiUrl, "app_api"], [urls.workerUrl, "app_worker"]];
+  const expected: Array<[string, string]> = [
+    [urls.migrateUrl, "app_migrate"],
+    [urls.apiUrl, "app_api"],
+    [urls.workerUrl, "app_worker"],
+  ];
   for (const [url, role] of expected) {
-    if (decodeURIComponent(new URL(url).username) !== role) refuse("fresh_wrong_role", "The migrate, api and worker URLs must log in as app_migrate, app_api and app_worker.");
+    if (decodeURIComponent(new URL(url).username) !== role)
+      refuse(
+        "fresh_wrong_role",
+        "The migrate, api and worker URLs must log in as app_migrate, app_api and app_worker.",
+      );
   }
 }
 
@@ -49,8 +72,16 @@ export function checkRebuildUrls(urls: RebuildUrls): string {
   assertSameTarget(urls);
   assertRoles(urls);
   const name = new URL(urls.migrateUrl).pathname.slice(1);
-  if (!NAME_PATTERN.test(name)) refuse("fresh_bad_database_name", "The target database name must be lower-case letters, digits and underscores, starting with a letter.");
-  if (new URL(urls.adminUrl).pathname.slice(1) === name) refuse("fresh_admin_is_target", "DATABASE_URL_ADMIN must point at another database, such as postgres, because the target is dropped.");
+  if (!NAME_PATTERN.test(name))
+    refuse(
+      "fresh_bad_database_name",
+      "The target database name must be lower-case letters, digits and underscores, starting with a letter.",
+    );
+  if (new URL(urls.adminUrl).pathname.slice(1) === name)
+    refuse(
+      "fresh_admin_is_target",
+      "DATABASE_URL_ADMIN must point at another database, such as postgres, because the target is dropped.",
+    );
   return name;
 }
 
@@ -62,30 +93,56 @@ async function connectTo(url: string): Promise<pg.Client> {
 }
 
 // Creates a role when it is missing; the attributes are the ones migration 0001 expects, and app_migrate may create roles.
-async function createRoleIfMissing(admin: pg.Client, role: string, statement: string): Promise<void> {
+async function createRoleIfMissing(
+  admin: pg.Client,
+  role: string,
+  statement: string,
+): Promise<void> {
   const found = await admin.query("SELECT 1 FROM pg_roles WHERE rolname = $1", [role]);
   if (found.rowCount === 0) await admin.query(statement);
 }
 
 // Creates the four roles when missing, so migration 0001 creates nothing of its own.
 async function createMissingRoles(admin: pg.Client): Promise<void> {
-  await createRoleIfMissing(admin, "app_migrate", "CREATE ROLE app_migrate LOGIN NOBYPASSRLS CREATEROLE");
-  await createRoleIfMissing(admin, "app_api", "CREATE ROLE app_api LOGIN NOBYPASSRLS NOINHERIT NOCREATEDB NOCREATEROLE");
-  await createRoleIfMissing(admin, "app_worker", "CREATE ROLE app_worker LOGIN NOBYPASSRLS NOINHERIT NOCREATEDB NOCREATEROLE");
-  await createRoleIfMissing(admin, "app_definer", "CREATE ROLE app_definer NOLOGIN NOBYPASSRLS NOINHERIT");
+  await createRoleIfMissing(
+    admin,
+    "app_migrate",
+    "CREATE ROLE app_migrate LOGIN NOBYPASSRLS CREATEROLE",
+  );
+  await createRoleIfMissing(
+    admin,
+    "app_api",
+    "CREATE ROLE app_api LOGIN NOBYPASSRLS NOINHERIT NOCREATEDB NOCREATEROLE",
+  );
+  await createRoleIfMissing(
+    admin,
+    "app_worker",
+    "CREATE ROLE app_worker LOGIN NOBYPASSRLS NOINHERIT NOCREATEDB NOCREATEROLE",
+  );
+  await createRoleIfMissing(
+    admin,
+    "app_definer",
+    "CREATE ROLE app_definer NOLOGIN NOBYPASSRLS NOINHERIT",
+  );
 }
 
 // Sets one role's password from its URL when the URL carries one; format quotes the value, so no text is pasted into SQL by hand.
 async function setPasswordFromUrl(admin: pg.Client, url: string, role: string): Promise<void> {
   const password = decodeURIComponent(new URL(url).password);
   if (password === "") return;
-  const built = await admin.query<{ statement: string }>("SELECT format('ALTER ROLE %I PASSWORD %L', $1::text, $2::text) AS statement", [role, password]);
+  const built = await admin.query<{ statement: string }>(
+    "SELECT format('ALTER ROLE %I PASSWORD %L', $1::text, $2::text) AS statement",
+    [role, password],
+  );
   await admin.query(built.rows[0]?.statement ?? "SELECT 1");
 }
 
 // Runs one format statement on the admin connection, with the database name it quotes.
 async function runFormatted(admin: pg.Client, template: string, name: string): Promise<void> {
-  const built = await admin.query<{ statement: string }>("SELECT format($1::text, $2::text) AS statement", [template, name]);
+  const built = await admin.query<{ statement: string }>(
+    "SELECT format($1::text, $2::text) AS statement",
+    [template, name],
+  );
   await admin.query(built.rows[0]?.statement ?? "SELECT 1");
 }
 
@@ -119,7 +176,9 @@ export async function prepareEmptyDatabase(urls: RebuildUrls): Promise<() => Pro
       await target.end();
     }
     // INHERIT FALSE: during the run app_migrate may become app_definer to hand it functions, but never reads through its policies.
-    await admin.query("GRANT app_definer TO app_migrate WITH ADMIN OPTION, INHERIT FALSE, SET TRUE");
+    await admin.query(
+      "GRANT app_definer TO app_migrate WITH ADMIN OPTION, INHERIT FALSE, SET TRUE",
+    );
   } finally {
     await admin.end();
   }
@@ -145,8 +204,16 @@ async function releaseGrants(urls: RebuildUrls, name: string): Promise<void> {
 // Drops one database on this machine through the admin connection.
 export async function dropDatabase(adminUrl: string, databaseName: string): Promise<void> {
   assertLocalHosts({ adminUrl, migrateUrl: adminUrl, apiUrl: adminUrl, workerUrl: adminUrl });
-  if (!NAME_PATTERN.test(databaseName)) refuse("fresh_bad_database_name", "The target database name must be lower-case letters, digits and underscores, starting with a letter.");
-  if (new URL(adminUrl).pathname.slice(1) === databaseName) refuse("fresh_admin_is_target", "DATABASE_URL_ADMIN must point at another database, such as postgres, because the target is dropped.");
+  if (!NAME_PATTERN.test(databaseName))
+    refuse(
+      "fresh_bad_database_name",
+      "The target database name must be lower-case letters, digits and underscores, starting with a letter.",
+    );
+  if (new URL(adminUrl).pathname.slice(1) === databaseName)
+    refuse(
+      "fresh_admin_is_target",
+      "DATABASE_URL_ADMIN must point at another database, such as postgres, because the target is dropped.",
+    );
   const admin = await connectTo(adminUrl);
   try {
     await runFormatted(admin, "DROP DATABASE IF EXISTS %I WITH (FORCE)", databaseName);
@@ -198,10 +265,17 @@ async function main(): Promise<void> {
     const names = env.error.issues.map((issue) => issue.path.join(".")).join(", ");
     throw new ContractError("env_missing", `Set ${names} before running this command.`, 500);
   }
-  const urls = { adminUrl: env.data.DATABASE_URL_ADMIN, migrateUrl: env.data.DATABASE_URL_MIGRATE, apiUrl: env.data.DATABASE_URL_API, workerUrl: env.data.DATABASE_URL_WORKER };
+  const urls = {
+    adminUrl: env.data.DATABASE_URL_ADMIN,
+    migrateUrl: env.data.DATABASE_URL_MIGRATE,
+    apiUrl: env.data.DATABASE_URL_API,
+    workerUrl: env.data.DATABASE_URL_WORKER,
+  };
   const name = checkRebuildUrls(urls);
   const report = await recreateDatabase(urls);
-  console.log(`fresh: rebuilt ${name}; applied ${report.applied.join(", ")}; schema version ${String(report.schemaVersion)}`);
+  console.log(
+    `fresh: rebuilt ${name}; applied ${report.applied.join(", ")}; schema version ${String(report.schemaVersion)}`,
+  );
 }
 
 if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {

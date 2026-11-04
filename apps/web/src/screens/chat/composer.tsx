@@ -56,7 +56,9 @@ export const Composer = (props: { model: ComposerModel }): ReactElement => {
           send();
         }}
       >
-        <label className="chat-hidden" htmlFor={fieldId}>{COMPOSER_LABEL}</label>
+        <label className="chat-hidden" htmlFor={fieldId}>
+          {COMPOSER_LABEL}
+        </label>
         <textarea
           id={fieldId}
           ref={field}
@@ -64,12 +66,23 @@ export const Composer = (props: { model: ComposerModel }): ReactElement => {
           maxLength={ORCHESTRATOR_MESSAGE_MAX_CHARS}
           placeholder={COMPOSER_LABEL}
           value={model.text}
-          onChange={(event) => { model.setText(event.target.value); }}
-          onKeyDown={(event) => { onEnter(event, send); }}
+          onChange={(event) => {
+            model.setText(event.target.value);
+          }}
+          onKeyDown={(event) => {
+            onEnter(event, send);
+          }}
         />
         <div className="chat-box-row">
-          {used > COUNTER_FROM_CHARS ? <span className="chat-left">{`${String(ORCHESTRATOR_MESSAGE_MAX_CHARS - used)} left`}</span> : null}
-          <button type="submit" className="chat-send" disabled={!canSend} aria-label={model.isSending ? "Sending" : "Send"}>
+          {used > COUNTER_FROM_CHARS ? (
+            <span className="chat-left">{`${String(ORCHESTRATOR_MESSAGE_MAX_CHARS - used)} left`}</span>
+          ) : null}
+          <button
+            type="submit"
+            className="chat-send"
+            disabled={!canSend}
+            aria-label={model.isSending ? "Sending" : "Send"}
+          >
             <Icon name="send" size={20} isBold />
           </button>
         </div>

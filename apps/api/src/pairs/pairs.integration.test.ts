@@ -28,8 +28,15 @@ function tokenOfInvite(url: string): string {
 }
 
 // Makes a second meeting in a pair, on the curated question 2, through meeting_create (granted to app_api).
-async function secondMeeting(m: { pairId: string; a: { personId: string; cardId: string } }): Promise<string> {
-  const result = await sql<{ id: string | null }>`SELECT meeting_create(${m.pairId}::uuid, ${m.a.personId}::uuid, ${m.a.cardId}::uuid, 2, ${SECOND_QUESTION}, true) AS id`.execute(t.db);
+async function secondMeeting(m: {
+  pairId: string;
+  a: { personId: string; cardId: string };
+}): Promise<string> {
+  const result = await sql<{
+    id: string | null;
+  }>`SELECT meeting_create(${m.pairId}::uuid, ${m.a.personId}::uuid, ${m.a.cardId}::uuid, 2, ${SECOND_QUESTION}, true) AS id`.execute(
+    t.db,
+  );
   const id = result.rows[0]?.id;
   if (id === null || id === undefined) throw new Error("meeting_create returned no id");
   return id;
@@ -42,7 +49,12 @@ function makeInvite(token: string): Promise<LightMyRequestResponse> {
 
 // POST /api/pairs/join as one person with an invite token.
 function joinWith(token: string, invite: string): Promise<LightMyRequestResponse> {
-  return appUnderTest.inject({ method: "POST", url: "/api/pairs/join", headers: { ...sessionHeader(token), "content-type": "application/json" }, payload: JSON.stringify({ token: invite }) });
+  return appUnderTest.inject({
+    method: "POST",
+    url: "/api/pairs/join",
+    headers: { ...sessionHeader(token), "content-type": "application/json" },
+    payload: JSON.stringify({ token: invite }),
+  });
 }
 
 beforeAll(async () => {
@@ -60,11 +72,13 @@ afterAll(async () => {
   await t.close();
 });
 
-it("D32-T1: POST /api/pairs answers 201 with an invite link that carries a 128-bit token after \"#\" and expires in 24 hours", async () => {
+it('D32-T1: POST /api/pairs answers 201 with an invite link that carries a 128-bit token after "#" and expires in 24 hours', async () => {
   const r = await makeInvite(a.sessionToken);
   const body = PairCreateResponse.parse(r.json());
   const token = tokenOfInvite(body.inviteUrl);
-  const stored = await asPerson(t.db, a.personId, (trx) => trx.selectFrom("pairs").selectAll().where("id", "=", body.pairId).executeTakeFirstOrThrow());
+  const stored = await asPerson(t.db, a.personId, (trx) =>
+    trx.selectFrom("pairs").selectAll().where("id", "=", body.pairId).executeTakeFirstOrThrow(),
+  );
   const remaining = Date.parse(body.expiresAt) - Date.now();
 
   expect(r.statusCode).toBe(201);
@@ -85,7 +99,9 @@ it("R9.3-T1: the first join wins; a second join, a third person and the creator'
   const third = await joinWith(c.sessionToken, token1);
   const pair2 = PairCreateResponse.parse((await makeInvite(a.sessionToken)).json());
   const own = await joinWith(a.sessionToken, tokenOfInvite(pair2.inviteUrl));
-  const rows = await asPerson(t.db, a.personId, (trx) => trx.selectFrom("pairs").selectAll().where("id", "in", [pair1.pairId, pair2.pairId]).execute());
+  const rows = await asPerson(t.db, a.personId, (trx) =>
+    trx.selectFrom("pairs").selectAll().where("id", "in", [pair1.pairId, pair2.pairId]).execute(),
+  );
   const row1 = rows.find((row) => row.id === pair1.pairId);
   const row2 = rows.find((row) => row.id === pair2.pairId);
 
@@ -93,7 +109,10 @@ it("R9.3-T1: the first join wins; a second join, a third person and the creator'
   expect(PairJoinResponse.parse(first.json())).toEqual({ pairId: pair1.pairId });
   for (const response of [second, third, own]) {
     expect(response.statusCode).toBe(409);
-    expect(response.json()).toEqual({ code: "pair_unavailable", message: "This invite was already used, has expired, or is your own. Ask for a new link." });
+    expect(response.json()).toEqual({
+      code: "pair_unavailable",
+      message: "This invite was already used, has expired, or is your own. Ask for a new link.",
+    });
   }
   expect(row1?.joiner_person_id).toBe(b.personId);
   expect(row1?.joined_at).not.toBeNull();
@@ -102,7 +121,13 @@ it("R9.3-T1: the first join wins; a second join, a third person and the creator'
 
 it("D32-T2: an invite past its 24 hours is 409 pair_unavailable", async () => {
   const pair3 = PairCreateResponse.parse((await makeInvite(a.sessionToken)).json());
-  await asPerson(t.db, a.personId, (trx) => trx.updateTable("pairs").set({ expires_at: new Date(Date.now() - 1_000) }).where("id", "=", pair3.pairId).execute());
+  await asPerson(t.db, a.personId, (trx) =>
+    trx
+      .updateTable("pairs")
+      .set({ expires_at: new Date(Date.now() - 1_000) })
+      .where("id", "=", pair3.pairId)
+      .execute(),
+  );
 
   const r = await joinWith(c.sessionToken, tokenOfInvite(pair3.inviteUrl));
 
@@ -114,18 +139,41 @@ it("D54-T1: GET /api/pairs/:id answers PairView with both display names and the 
   const m = await createPairedMeeting(t.db);
   await new Promise((resolve) => setTimeout(resolve, 10));
   const id2 = await secondMeeting(m);
-  const nameA = (await asPerson(t.db, m.a.personId, (trx) => trx.selectFrom("people").select("display_name").where("id", "=", m.a.personId).executeTakeFirstOrThrow())).display_name;
-  const nameB = (await asPerson(t.db, m.b.personId, (trx) => trx.selectFrom("people").select("display_name").where("id", "=", m.b.personId).executeTakeFirstOrThrow())).display_name;
+  const nameA = (
+    await asPerson(t.db, m.a.personId, (trx) =>
+      trx
+        .selectFrom("people")
+        .select("display_name")
+        .where("id", "=", m.a.personId)
+        .executeTakeFirstOrThrow(),
+    )
+  ).display_name;
+  const nameB = (
+    await asPerson(t.db, m.b.personId, (trx) =>
+      trx
+        .selectFrom("people")
+        .select("display_name")
+        .where("id", "=", m.b.personId)
+        .executeTakeFirstOrThrow(),
+    )
+  ).display_name;
 
-  const r = await appUnderTest.inject({ method: "GET", url: "/api/pairs/" + m.pairId, headers: sessionHeader(m.a.sessionToken) });
+  const r = await appUnderTest.inject({
+    method: "GET",
+    url: "/api/pairs/" + m.pairId,
+    headers: sessionHeader(m.a.sessionToken),
+  });
   const view = PairView.parse(r.json());
   const newest = view.meetings[0];
   const older = view.meetings[1];
-  if (newest === undefined || older === undefined) throw new Error("the pair should list two meetings");
+  if (newest === undefined || older === undefined)
+    throw new Error("the pair should list two meetings");
 
   expect(r.statusCode).toBe(200);
   expect(r.headers["content-type"]).toBe("application/json; charset=utf-8");
-  expect(new Set([view.creator.displayName, view.joiner?.displayName])).toEqual(new Set([nameA, nameB]));
+  expect(new Set([view.creator.displayName, view.joiner?.displayName])).toEqual(
+    new Set([nameA, nameB]),
+  );
   expect(view.meetings.length).toBe(2);
   expect(newest.id).toBe(id2);
   expect(newest.questionText).toBe(SECOND_QUESTION);
@@ -143,7 +191,11 @@ it("D54-T1: GET /api/pairs/:id answers PairView with both display names and the 
 it("R8.6-T1: the lobby route answers JSON even when the client asks for a stream", async () => {
   const m = await createPairedMeeting(t.db);
 
-  const r = await appUnderTest.inject({ method: "GET", url: "/api/pairs/" + m.pairId, headers: { ...sessionHeader(m.b.sessionToken), accept: "text/event-stream" } });
+  const r = await appUnderTest.inject({
+    method: "GET",
+    url: "/api/pairs/" + m.pairId,
+    headers: { ...sessionHeader(m.b.sessionToken), accept: "text/event-stream" },
+  });
 
   expect(r.statusCode).toBe(200);
   expect(String(r.headers["content-type"])).toMatch(/^application\/json/);
@@ -153,12 +205,30 @@ it("R8.6-T1: the lobby route answers JSON even when the client asks for a stream
 it("D53-T1: a lobby poll stamps last_seen_at on the caller's member rows of that pair's ready, queued or running meetings only", async () => {
   const m = await createPairedMeeting(t.db);
   const m2 = await secondMeeting(m);
-  await asMeeting(t.db, m2, (trx) => trx.updateTable("meetings").set({ state: "deleted" }).where("id", "=", m2).execute());
+  await asMeeting(t.db, m2, (trx) =>
+    trx.updateTable("meetings").set({ state: "deleted" }).where("id", "=", m2).execute(),
+  );
 
-  await appUnderTest.inject({ method: "GET", url: "/api/pairs/" + m.pairId, headers: sessionHeader(m.a.sessionToken) });
+  await appUnderTest.inject({
+    method: "GET",
+    url: "/api/pairs/" + m.pairId,
+    headers: sessionHeader(m.a.sessionToken),
+  });
 
-  const inFirst = await asMeeting(t.db, m.meetingId, (trx) => trx.selectFrom("meeting_members").select(["person_id", "last_seen_at"]).where("meeting_id", "=", m.meetingId).execute());
-  const inSecond = await asMeeting(t.db, m2, (trx) => trx.selectFrom("meeting_members").select(["person_id", "last_seen_at"]).where("meeting_id", "=", m2).execute());
+  const inFirst = await asMeeting(t.db, m.meetingId, (trx) =>
+    trx
+      .selectFrom("meeting_members")
+      .select(["person_id", "last_seen_at"])
+      .where("meeting_id", "=", m.meetingId)
+      .execute(),
+  );
+  const inSecond = await asMeeting(t.db, m2, (trx) =>
+    trx
+      .selectFrom("meeting_members")
+      .select(["person_id", "last_seen_at"])
+      .where("meeting_id", "=", m2)
+      .execute(),
+  );
   const seenA = inFirst.find((row) => row.person_id === m.a.personId);
   const seenB = inFirst.find((row) => row.person_id === m.b.personId);
   const seenInSecond = inSecond.find((row) => row.person_id === m.a.personId);
@@ -172,11 +242,22 @@ it("D53-T1: a lobby poll stamps last_seen_at on the caller's member rows of that
 it("D54-T2: a lobby poll for a pair you are not in, or with an id that is not a uuid, is 404 not_found", async () => {
   const m = await createPairedMeeting(t.db);
 
-  const other = await appUnderTest.inject({ method: "GET", url: "/api/pairs/" + m.pairId, headers: sessionHeader(c.sessionToken) });
-  const notUuid = await appUnderTest.inject({ method: "GET", url: "/api/pairs/abc", headers: sessionHeader(m.a.sessionToken) });
+  const other = await appUnderTest.inject({
+    method: "GET",
+    url: "/api/pairs/" + m.pairId,
+    headers: sessionHeader(c.sessionToken),
+  });
+  const notUuid = await appUnderTest.inject({
+    method: "GET",
+    url: "/api/pairs/abc",
+    headers: sessionHeader(m.a.sessionToken),
+  });
 
   for (const response of [other, notUuid]) {
     expect(response.statusCode).toBe(404);
-    expect(response.json()).toEqual({ code: "not_found", message: "This no longer exists or is not yours." });
+    expect(response.json()).toEqual({
+      code: "not_found",
+      message: "This no longer exists or is not yours.",
+    });
   }
 });

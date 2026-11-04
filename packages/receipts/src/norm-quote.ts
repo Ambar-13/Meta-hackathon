@@ -4,9 +4,21 @@
 
 // The character map used by normQuote, exported so the offset map can replay it one character at a time.
 export const QUOTE_FOLDS: ReadonlyMap<string, string> = new Map([
-  ["\u2018", "'"], ["\u2019", "'"], ["\u201A", "'"], ["\u201B", "'"],
-  ["\u201C", '"'], ["\u201D", '"'], ["\u201E", '"'], ["\u201F", '"'],
-  ["\u2010", "-"], ["\u2011", "-"], ["\u2012", "-"], ["\u2013", "-"], ["\u2014", "-"], ["\u2015", "-"], ["\u2212", "-"],
+  ["\u2018", "'"],
+  ["\u2019", "'"],
+  ["\u201A", "'"],
+  ["\u201B", "'"],
+  ["\u201C", '"'],
+  ["\u201D", '"'],
+  ["\u201E", '"'],
+  ["\u201F", '"'],
+  ["\u2010", "-"],
+  ["\u2011", "-"],
+  ["\u2012", "-"],
+  ["\u2013", "-"],
+  ["\u2014", "-"],
+  ["\u2015", "-"],
+  ["\u2212", "-"],
 ]);
 // Leading or trailing whitespace and punctuation, removed at both ends of a normalised quote.
 export const LEADING_TRAILING_PUNCTUATION = /^[\s\p{P}]+|[\s\p{P}]+$/gu;

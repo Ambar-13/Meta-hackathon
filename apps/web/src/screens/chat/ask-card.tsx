@@ -5,7 +5,13 @@
 import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { ASK_POLL_MS, type AskMode, type AskView } from "@meet-first/contracts";
-import { apiFetch, APP_PATHS, routes, usePolledView, type PolledView } from "../../app-shell/index.js";
+import {
+  apiFetch,
+  APP_PATHS,
+  routes,
+  usePolledView,
+  type PolledView,
+} from "../../app-shell/index.js";
 import { Icon, PersonAvatar, TypingDots } from "../../look/index.js";
 import { isAskRunning } from "../ask/ask-state.js";
 import { ASK_CARD_ANSWERS_MAX, firstSentence } from "./chat-words.js";
@@ -14,11 +20,17 @@ import { ASK_CARD_ANSWERS_MAX, firstSentence } from "./chat-words.js";
 // the friend when it can. Example: "Asking Mira's Meety".
 export function kindLabel(mode: AskMode, friendName: string | null | undefined): string {
   if (mode === "help") return "Finding who could help";
-  return friendName === null || friendName === undefined || friendName === "" ? "Asking a friend's Meety" : `Asking ${friendName}'s Meety`;
+  return friendName === null || friendName === undefined || friendName === ""
+    ? "Asking a friend's Meety"
+    : `Asking ${friendName}'s Meety`;
 }
 
 // The waiting line of each running state of an ask.
-const WAITING_LINES = { checking: "Checking the question", asking: "Their Meetys are answering", ranking: "Putting the answers in order" } as const;
+const WAITING_LINES = {
+  checking: "Checking the question",
+  asking: "Their Meetys are answering",
+  ranking: "Putting the answers in order",
+} as const;
 // The other lines of the card.
 const LOADING_LINE = "Loading the ask";
 const NO_ANSWERS_LINE = "No Meety had an answer this time.";
@@ -53,7 +65,11 @@ export const KindIcon = (props: { mode: AskMode }): ReactElement => {
 };
 
 // The top of a plan or an ask: the kind's icon and words, then the question in quotation marks.
-export const KindHead = (props: { mode: AskMode; question: string; friendName?: string | null | undefined }): ReactElement => {
+export const KindHead = (props: {
+  mode: AskMode;
+  question: string;
+  friendName?: string | null | undefined;
+}): ReactElement => {
   return (
     <>
       <p className="chat-card-head">
@@ -96,8 +112,12 @@ const AskAnswers = (props: { view: AskView }): ReactElement => {
 // What the card shows under its question for each state of the ask.
 const AskBody = (props: { view: AskView }): ReactElement => {
   const { view } = props;
-  if (view.state === "checking" || view.state === "asking" || view.state === "ranking") return <WaitLine text={WAITING_LINES[view.state]} />;
-  if (view.state === "refused") return <p className="chat-ask-line">{`This question was not allowed: ${view.refusedReason ?? REFUSED_FALLBACK}`}</p>;
+  if (view.state === "checking" || view.state === "asking" || view.state === "ranking")
+    return <WaitLine text={WAITING_LINES[view.state]} />;
+  if (view.state === "refused")
+    return (
+      <p className="chat-ask-line">{`This question was not allowed: ${view.refusedReason ?? REFUSED_FALLBACK}`}</p>
+    );
   if (view.state === "failed") return <p className="chat-ask-line">{FAILED_LINE}</p>;
   return <AskAnswers view={view} />;
 };
@@ -115,16 +135,33 @@ const ReadError = (props: { askId: string }): ReactElement => {
 const AskState = (props: { ask: PolledView<AskView>; askId: string }): ReactElement => {
   const view = props.ask.value;
   if (view !== null) return <AskBody view={view} />;
-  return props.ask.error === null ? <WaitLine text={LOADING_LINE} /> : <ReadError askId={props.askId} />;
+  return props.ask.error === null ? (
+    <WaitLine text={LOADING_LINE} />
+  ) : (
+    <ReadError askId={props.askId} />
+  );
 };
 
 // The ask card of a running or finished reply; mode, question and the friend's name come from the reply until the ask is read.
-export const AskCard = (props: { askId: string; mode: AskMode; question: string; friendName?: string | null }): ReactElement => {
-  const ask = usePolledView(() => apiFetch(routes.asks.readAsk, { params: { id: props.askId } }), { key: props.askId, intervalMs: ASK_POLL_MS, keepPolling: isAskRunning });
+export const AskCard = (props: {
+  askId: string;
+  mode: AskMode;
+  question: string;
+  friendName?: string | null;
+}): ReactElement => {
+  const ask = usePolledView(() => apiFetch(routes.asks.readAsk, { params: { id: props.askId } }), {
+    key: props.askId,
+    intervalMs: ASK_POLL_MS,
+    keepPolling: isAskRunning,
+  });
   const question = props.question === "" ? (ask.value?.text ?? "") : props.question;
   return (
     <section className="chat-card" aria-label="The ask">
-      <KindHead mode={ask.value?.mode ?? props.mode} question={question} friendName={ask.value?.aboutName ?? props.friendName} />
+      <KindHead
+        mode={ask.value?.mode ?? props.mode}
+        question={question}
+        friendName={ask.value?.aboutName ?? props.friendName}
+      />
       <AskState ask={ask} askId={props.askId} />
     </section>
   );

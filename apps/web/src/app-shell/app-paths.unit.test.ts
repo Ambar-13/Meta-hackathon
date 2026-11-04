@@ -1,13 +1,59 @@
 import { describe, expect, it } from "vitest";
-import { APP_PATHS, chatPathWithDraft, createPath, lobbyPathWithCard, meetingPathWithSide, pairPathWithCard, readCardQuery, readCreateKind, readFragmentToken, readSideQuery, ROUTE_PATTERNS } from "./app-paths.js";
+import {
+  APP_PATHS,
+  chatPathWithDraft,
+  createPath,
+  lobbyPathWithCard,
+  meetingPathWithSide,
+  pairPathWithCard,
+  readCardQuery,
+  readCreateKind,
+  readFragmentToken,
+  readSideQuery,
+  ROUTE_PATTERNS,
+} from "./app-paths.js";
 import { IDS } from "../testing/fixtures.js";
 
-const KEYS = ["welcome", "upload", "pair", "join", "claim", "settings", "namesReview", "card", "quiz", "lobby", "meeting", "brief", "comic", "consent", "sharePage", "directory", "help", "friends", "ask", "home", "explore", "me", "person", "meety", "search", "create", "privacy", "terms", "cookies"];
+const KEYS = [
+  "welcome",
+  "upload",
+  "pair",
+  "join",
+  "claim",
+  "settings",
+  "namesReview",
+  "card",
+  "quiz",
+  "lobby",
+  "meeting",
+  "brief",
+  "comic",
+  "consent",
+  "sharePage",
+  "directory",
+  "help",
+  "friends",
+  "ask",
+  "home",
+  "explore",
+  "me",
+  "person",
+  "meety",
+  "search",
+  "create",
+  "privacy",
+  "terms",
+  "cookies",
+];
 
 describe("client paths", () => {
   it("D32-T1: readFragmentToken returns the 32-hex token after the # and null for anything else", () => {
-    expect(readFragmentToken("#0123456789abcdef0123456789abcdef")).toBe("0123456789abcdef0123456789abcdef");
-    expect(readFragmentToken("0123456789abcdef0123456789abcdef")).toBe("0123456789abcdef0123456789abcdef");
+    expect(readFragmentToken("#0123456789abcdef0123456789abcdef")).toBe(
+      "0123456789abcdef0123456789abcdef",
+    );
+    expect(readFragmentToken("0123456789abcdef0123456789abcdef")).toBe(
+      "0123456789abcdef0123456789abcdef",
+    );
     expect(readFragmentToken("#0123")).toBeNull();
     expect(readFragmentToken("#0123456789ABCDEF0123456789ABCDEF")).toBeNull();
     expect(readFragmentToken("#token=0123456789abcdef0123456789abcdef")).toBeNull();
@@ -51,9 +97,13 @@ describe("client paths", () => {
   });
 
   it("W7-WEB-A-U1: chatPathWithDraft opens the chat with the words encoded in the draft query", () => {
-    expect(chatPathWithDraft("How would Mira react to ")).toBe("/meety?draft=How%20would%20Mira%20react%20to%20");
+    expect(chatPathWithDraft("How would Mira react to ")).toBe(
+      "/meety?draft=How%20would%20Mira%20react%20to%20",
+    );
     expect(chatPathWithDraft("a&b=c?")).toBe("/meety?draft=a%26b%3Dc%3F");
-    expect(new URLSearchParams(chatPathWithDraft("How would Mira react to ").split("?")[1]).get("draft")).toBe("How would Mira react to ");
+    expect(
+      new URLSearchParams(chatPathWithDraft("How would Mira react to ").split("?")[1]).get("draft"),
+    ).toBe("How would Mira react to ");
     expect(APP_PATHS.person(IDS.card)).toBe(`/people/${IDS.card}`);
   });
 

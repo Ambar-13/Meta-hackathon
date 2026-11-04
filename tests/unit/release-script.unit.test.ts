@@ -3,7 +3,15 @@
 // writes its arguments to a log file and answers the health check from a list of answers, so no
 // test makes a network call.
 import { spawnSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -14,10 +22,21 @@ const HOOK_WORKER = "https://hooks.test/worker?key=worker-key";
 const HOOK_ONE = "https://hooks.test/one?key=one-key";
 const ORIGIN = "https://app.test";
 // Everything a full run needs; the waits between health reads are 0 s here.
-const FULL_ENV = { RENDER_DEPLOY_HOOK_API: HOOK_API, RENDER_DEPLOY_HOOK_WORKER: HOOK_WORKER, APP_ORIGIN: ORIGIN, RELEASE_WAIT_SECONDS: "0" };
+const FULL_ENV = {
+  RENDER_DEPLOY_HOOK_API: HOOK_API,
+  RENDER_DEPLOY_HOOK_WORKER: HOOK_WORKER,
+  APP_ORIGIN: ORIGIN,
+  RELEASE_WAIT_SECONDS: "0",
+};
 const FIRST_MIGRATION = "packages/db/migrations/0001_foundation.sql";
 
-type Fixture = { base: string; repo: string; binDir: string; curlLog: string; healthAnswers: string };
+type Fixture = {
+  base: string;
+  repo: string;
+  binDir: string;
+  curlLog: string;
+  healthAnswers: string;
+};
 
 const fixtures: Fixture[] = [];
 
@@ -79,7 +98,18 @@ function commitFile(repo: string, name: string): void {
 
 // The bodies the fake health route gives, one per read, in order; null is a read that gets no answer (the api is not up).
 function answerHealth(fixture: Fixture, versions: Array<number | null>): void {
-  const lines = versions.map((version) => (version === null ? "" : JSON.stringify({ ok: false, db: true, worker: false, schemaVersion: version, diskPct: null, degraded: false })));
+  const lines = versions.map((version) =>
+    version === null
+      ? ""
+      : JSON.stringify({
+          ok: false,
+          db: true,
+          worker: false,
+          schemaVersion: version,
+          diskPct: null,
+          degraded: false,
+        }),
+  );
   writeFileSync(fixture.healthAnswers, `${lines.join("\n")}\n`);
 }
 
@@ -88,7 +118,11 @@ function runRelease(fixture: Fixture, args: string[], env: Record<string, string
   const result = spawnSync("bash", [RELEASE_SCRIPT, ...args], {
     cwd: fixture.repo,
     encoding: "utf8",
-    env: { PATH: `${fixture.binDir}:${process.env.PATH ?? ""}`, HOME: process.env.HOME ?? "", ...env },
+    env: {
+      PATH: `${fixture.binDir}:${process.env.PATH ?? ""}`,
+      HOME: process.env.HOME ?? "",
+      ...env,
+    },
   });
   return { status: result.status, stdout: result.stdout, stderr: result.stderr };
 }
@@ -119,7 +153,10 @@ describe("release script", () => {
     git(fixture.repo, ["tag", "v1.0.0"]);
 
     // The tag sits on main only, one commit ahead of the release branch.
-    const result = runRelease(fixture, ["v1.0.0"], { RENDER_DEPLOY_HOOK_API: HOOK_API, RENDER_DEPLOY_HOOK_WORKER: HOOK_WORKER });
+    const result = runRelease(fixture, ["v1.0.0"], {
+      RENDER_DEPLOY_HOOK_API: HOOK_API,
+      RENDER_DEPLOY_HOOK_WORKER: HOOK_WORKER,
+    });
 
     expect(result.status).toBe(2);
     expect(result.stderr).toContain("release_tag_not_on_release");
@@ -132,7 +169,10 @@ describe("release script", () => {
     git(fixture.repo, ["push", "-q", "origin", "main:release"]);
     git(fixture.repo, ["tag", "v1.0.0"]);
 
-    const onlyApi = runRelease(fixture, ["v1.0.0"], { RENDER_DEPLOY_HOOK_API: HOOK_API, APP_ORIGIN: ORIGIN });
+    const onlyApi = runRelease(fixture, ["v1.0.0"], {
+      RENDER_DEPLOY_HOOK_API: HOOK_API,
+      APP_ORIGIN: ORIGIN,
+    });
     expect(onlyApi.status).toBe(2);
     expect(onlyApi.stderr).toContain("release_hooks_missing");
     expect(curlLog(fixture)).toBe("");
@@ -163,7 +203,10 @@ describe("release script", () => {
     const tagObject = gitOutput(fixture.repo, ["rev-parse", "v1.0.0"]);
     // An annotated tag is its own object, so its id is not the commit's; only the commit id may reach the hooks.
     expect(tagObject).not.toBe(commit);
-    const hookLines = curlLog(fixture).trim().split("\n").filter((line) => line.includes("hooks.test"));
+    const hookLines = curlLog(fixture)
+      .trim()
+      .split("\n")
+      .filter((line) => line.includes("hooks.test"));
     expect(hookLines).toHaveLength(2);
     for (const line of hookLines) expect(line).toContain(`&ref=${commit}`);
     expect(curlLog(fixture)).not.toContain("ref=v1.0.0");
@@ -213,7 +256,10 @@ describe("release script", () => {
     git(fixture.repo, ["push", "-q", "origin", "main:release"]);
     git(fixture.repo, ["tag", "v1.0.0"]);
 
-    const noOrigin = runRelease(fixture, ["v1.0.0"], { RENDER_DEPLOY_HOOK_API: HOOK_API, RENDER_DEPLOY_HOOK_WORKER: HOOK_WORKER });
+    const noOrigin = runRelease(fixture, ["v1.0.0"], {
+      RENDER_DEPLOY_HOOK_API: HOOK_API,
+      RENDER_DEPLOY_HOOK_WORKER: HOOK_WORKER,
+    });
     expect(noOrigin.status).toBe(2);
     expect(noOrigin.stderr).toContain("release_origin_missing");
 

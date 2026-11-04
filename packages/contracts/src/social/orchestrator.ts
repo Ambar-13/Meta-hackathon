@@ -9,13 +9,19 @@ export const ORCHESTRATOR_MESSAGE_MAX_CHARS = 500;
 export const ORCHESTRATOR_THREAD_MAX = 60;
 
 // The body of POST /api/orchestrator: what the person asks.
-export const OrchestratorSend = z.object({ text: z.string().trim().min(1).max(ORCHESTRATOR_MESSAGE_MAX_CHARS) });
+export const OrchestratorSend = z.object({
+  text: z.string().trim().min(1).max(ORCHESTRATOR_MESSAGE_MAX_CHARS),
+});
 // The type of OrchestratorSend, read from the schema above.
 export type OrchestratorSend = z.infer<typeof OrchestratorSend>;
 
 // One friend as the orchestrator saw them when the person sent a message: orchestrator_messages.friends_snapshot holds a list of these,
 // and the orchestrate job checks the plan's friend against it, never against the model's word alone.
-export const OrchestratorFriend = z.object({ pairId: Uuid, displayName: z.string(), canAsk: z.boolean() });
+export const OrchestratorFriend = z.object({
+  pairId: Uuid,
+  displayName: z.string(),
+  canAsk: z.boolean(),
+});
 // The type of OrchestratorFriend, read from the schema above.
 export type OrchestratorFriend = z.infer<typeof OrchestratorFriend>;
 // The friends snapshot of one reply, in friend_list order: most recently joined first.

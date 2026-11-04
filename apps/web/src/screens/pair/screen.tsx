@@ -1,7 +1,14 @@
 import "./pair.css";
 import type { ReactElement } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ErrorNotice, lobbyPathWithCard, readApprovedCard, readCardQuery, ScreenFrame, CopyButton } from "../../app-shell/index.js";
+import {
+  ErrorNotice,
+  lobbyPathWithCard,
+  readApprovedCard,
+  readCardQuery,
+  ScreenFrame,
+  CopyButton,
+} from "../../app-shell/index.js";
 import { LoadingLine, NameTag } from "../../look/index.js";
 import { readAccessCode, withAccessCode } from "../welcome/index.js";
 import { qrPathFor, useCreatePair } from "./pair-state.js";
@@ -34,9 +41,17 @@ export const PairScreen = (): ReactElement => {
       {state.kind === "created" ? null : (
         <>
           <PairTags otherName="them" />
-          <p className="pair-lead">Make an invite for the person you want to meet. Show them the QR code or send them the link.</p>
+          <p className="pair-lead">
+            Make an invite for the person you want to meet. Show them the QR code or send them the
+            link.
+          </p>
           <div className="actions">
-            <button type="button" className="big" disabled={isSending} onClick={() => void create()}>
+            <button
+              type="button"
+              className="big"
+              disabled={isSending}
+              onClick={() => void create()}
+            >
               Make an invite
             </button>
           </div>
@@ -45,7 +60,9 @@ export const PairScreen = (): ReactElement => {
       )}
       {state.kind === "failed" ? <ErrorNotice error={state.error} /> : null}
       {cardId === null && state.kind === "created" ? (
-        <p className="muted">You can pair now. To start a meeting from this phone, approve your card first.</p>
+        <p className="muted">
+          You can pair now. To start a meeting from this phone, approve your card first.
+        </p>
       ) : null}
     </ScreenFrame>
   );
@@ -53,13 +70,22 @@ export const PairScreen = (): ReactElement => {
 
 // The invite on a white card: the QR code, a read-only link with a copy action, and the way to the lobby. The link carries
 // this browser's access code, so the friend who opens it never types it.
-const InviteView = (props: { inviteUrl: string; pairId: string; cardId: string | null }): ReactElement => {
+const InviteView = (props: {
+  inviteUrl: string;
+  pairId: string;
+  cardId: string | null;
+}): ReactElement => {
   const link = withAccessCode(props.inviteUrl, readAccessCode());
   const { path, size } = qrPathFor(link);
   return (
     <section className="invite-card" aria-label="Your invite">
       <div className="qr invite-qr">
-        <svg role="img" aria-label="QR code of the invite link" shapeRendering="crispEdges" viewBox={`0 0 ${String(size)} ${String(size)}`}>
+        <svg
+          role="img"
+          aria-label="QR code of the invite link"
+          shapeRendering="crispEdges"
+          viewBox={`0 0 ${String(size)} ${String(size)}`}
+        >
           <rect className="qr-paper" width={size} height={size} />
           <path className="qr-ink" d={path} />
         </svg>

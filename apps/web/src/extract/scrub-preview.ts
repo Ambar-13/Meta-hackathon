@@ -1,5 +1,10 @@
 import { CANONICAL_TEXT_MAX_BYTES, TURN_TEXT_MAX_CHARS, type Turn } from "@meet-first/contracts";
-import { countPlaceholders, findPlaceholders, makePlaceholderCounter, scrub } from "@meet-first/scrub";
+import {
+  countPlaceholders,
+  findPlaceholders,
+  makePlaceholderCounter,
+  scrub,
+} from "@meet-first/scrub";
 
 // The turns after the browser's scrub, and the count shown with the consent copy.
 export type ScrubPreview = { turns: Turn[]; previewRedactionCount: number };

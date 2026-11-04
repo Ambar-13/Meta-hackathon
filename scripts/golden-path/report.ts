@@ -14,7 +14,15 @@ export type Assertion = { name: string; expected: unknown; actual: unknown; pass
 // The outcome of a step as the runner prints it. A removed step prints "removed" and never fails.
 export type StepOutcome = "pass" | "fail" | "not-exercised" | "skipped" | "removed";
 // One step's result, as the runner prints it and the JSON report keeps it.
-export type StepResult = { number: number; name: string; result: StepOutcome; durationMs: number; detail: string; rows: string[]; assertions: Assertion[] };
+export type StepResult = {
+  number: number;
+  name: string;
+  result: StepOutcome;
+  durationMs: number;
+  detail: string;
+  rows: string[];
+  assertions: Assertion[];
+};
 // Thrown when a step's expectation does not hold. The runner turns it into a failed step with this message.
 export class StepFailure extends Error {
   constructor(message: string) {
@@ -91,30 +99,61 @@ export function check(name: string, expected: unknown, actual: unknown): Asserti
 
 // Returns the value a step needs from an earlier step, or fails the step when no earlier step set it.
 export function need<T>(value: T | undefined, what: string): T {
-  if (value === undefined) throw new StepFailure(`missing_fact: ${what} was not set by an earlier step.`);
+  if (value === undefined)
+    throw new StepFailure(`missing_fact: ${what} was not set by an earlier step.`);
   return value;
 }
 
 // The step result a step builds: pass when every check holds, not-exercised when the mode skips it, else fail.
-export function finishStep(number: number, name: string, parts: { rows: string[]; detail: string; assertions: Assertion[]; notExercised?: boolean }): StepResult {
+export function finishStep(
+  number: number,
+  name: string,
+  parts: { rows: string[]; detail: string; assertions: Assertion[]; notExercised?: boolean },
+): StepResult {
   const isAllPassing = parts.assertions.every((item) => item.pass);
   let result: StepOutcome = isAllPassing ? "pass" : "fail";
   if (parts.notExercised === true) result = "not-exercised";
-  return { number, name, result, durationMs: 0, detail: parts.detail, rows: parts.rows, assertions: parts.assertions };
+  return {
+    number,
+    name,
+    result,
+    durationMs: 0,
+    detail: parts.detail,
+    rows: parts.rows,
+    assertions: parts.assertions,
+  };
 }
 
 // One line per step with fixed columns, so grep works. Failed steps add their failed checks, indented.
 export function formatStepLine(step: StepResult): string {
   const seconds = (step.durationMs / 1000).toFixed(1);
   const head = `step ${String(step.number).padStart(2, "0")} ${step.name.padEnd(12)} ${step.result.padEnd(14)} ${seconds.padStart(6)} s  ${step.detail}`;
-  const failed = step.assertions.filter((item) => !item.pass).map((item) => `    ${item.name}: expected ${String(JSON.stringify(item.expected))} got ${String(JSON.stringify(item.actual))}`);
+  const failed = step.assertions
+    .filter((item) => !item.pass)
+    .map(
+      (item) =>
+        `    ${item.name}: expected ${String(JSON.stringify(item.expected))} got ${String(JSON.stringify(item.actual))}`,
+    );
   return [head, ...failed].join("\n");
 }
 
 // The counts printed at the end: how many steps passed, failed, skipped, were not exercised or were removed.
-export function countSteps(steps: readonly StepResult[]): { pass: number; fail: number; notExercised: number; skipped: number; removed: number } {
-  const count = (outcome: StepOutcome): number => steps.filter((step) => step.result === outcome).length;
-  return { pass: count("pass"), fail: count("fail"), notExercised: count("not-exercised"), skipped: count("skipped"), removed: count("removed") };
+export function countSteps(steps: readonly StepResult[]): {
+  pass: number;
+  fail: number;
+  notExercised: number;
+  skipped: number;
+  removed: number;
+} {
+  const count = (outcome: StepOutcome): number =>
+    steps.filter((step) => step.result === outcome).length;
+  return {
+    pass: count("pass"),
+    fail: count("fail"),
+    notExercised: count("not-exercised"),
+    skipped: count("skipped"),
+    removed: count("removed"),
+  };
 }
 
 // The one-line verdict: pass only when no step failed and none was skipped.
@@ -137,7 +176,11 @@ export function sleep(ms: number): Promise<void> {
 }
 
 // Reads a value again every intervalMs until isDone holds or timeoutMs runs out, and returns the last value read.
-export async function pollUntil<T>(read: () => Promise<T>, isDone: (value: T) => boolean, options: { timeoutMs: number; intervalMs: number }): Promise<T> {
+export async function pollUntil<T>(
+  read: () => Promise<T>,
+  isDone: (value: T) => boolean,
+  options: { timeoutMs: number; intervalMs: number },
+): Promise<T> {
   const deadline = Date.now() + options.timeoutMs;
   for (;;) {
     const value = await read();
@@ -160,7 +203,15 @@ export function readers(run: RunState): { a: EventStreamReader; b: EventStreamRe
 export function failedStep(slot: { number: number; name: string }, error: unknown): StepResult {
   const text = error instanceof Error ? error.message : "unknown error";
   const message = error instanceof StepFailure ? text : `unexpected_error: ${text}`;
-  return { number: slot.number, name: slot.name, result: "fail", durationMs: 0, detail: message.slice(0, 120), rows: [], assertions: [] };
+  return {
+    number: slot.number,
+    name: slot.name,
+    result: "fail",
+    durationMs: 0,
+    detail: message.slice(0, 120),
+    rows: [],
+    assertions: [],
+  };
 }
 
 // The short commit of the checkout, or "none" when git does not answer.
@@ -173,12 +224,20 @@ export function commitOf(): string {
 }
 
 // The lines the run prints at its end: the live proxy timing, the manual checks, and the verdict with its counts.
-function printEnd(run: RunState, summary: { verdict: "pass" | "fail"; counts: ReturnType<typeof countSteps>; notRun: number }): void {
+function printEnd(
+  run: RunState,
+  summary: { verdict: "pass" | "fail"; counts: ReturnType<typeof countSteps>; notRun: number },
+): void {
   const { verdict, counts, notRun } = summary;
   const proxy = { first: run.readerA?.firstByteAtMs, heartbeat: run.readerA?.firstHeartbeatAtMs };
-  if (run.options.mode === "live") console.log(`proxy: first byte ${String(proxy.first ?? "none")} ms, first heartbeat ${String(proxy.heartbeat ?? "none")} ms`);
+  if (run.options.mode === "live")
+    console.log(
+      `proxy: first byte ${String(proxy.first ?? "none")} ms, first heartbeat ${String(proxy.heartbeat ?? "none")} ms`,
+    );
   for (const line of run.manual) console.log(`manual: ${line}`);
-  console.log(`result: ${verdict}  (${String(counts.pass)} pass, ${String(counts.notExercised)} not-exercised, ${String(counts.fail)} fail, ${String(notRun)} not run)  report=${run.options.reportPath}`);
+  console.log(
+    `result: ${verdict}  (${String(counts.pass)} pass, ${String(counts.notExercised)} not-exercised, ${String(counts.fail)} fail, ${String(notRun)} not run)  report=${run.options.reportPath}`,
+  );
 }
 
 // Writes the JSON report, prints the end lines, and returns the exit code (0 pass, 1 fail).
@@ -186,10 +245,30 @@ export function finishRun(run: RunState, startedAt: string, totalSteps: number):
   const counts = countSteps(run.steps);
   const verdict = verdictOf(run.steps);
   const notRun = totalSteps - run.steps.filter((step) => step.number > 0).length;
-  const proxy = { firstByteMs: run.readerA?.firstByteAtMs, firstHeartbeatMs: run.readerA?.firstHeartbeatAtMs };
+  const proxy = {
+    firstByteMs: run.readerA?.firstByteAtMs,
+    firstHeartbeatMs: run.readerA?.firstHeartbeatAtMs,
+  };
   const ledger = { modes: run.facts.ledgerModes ?? [], callSites: run.facts.ledgerCallSites ?? [] };
-  const ids = { ...run.ids, askIds: [run.ids.reactAskId, run.ids.helpAskId].filter((id) => id !== undefined) };
-  writeReport(run.options.reportPath, { mode: run.options.mode, base: run.options.base, until: run.options.until ?? "all", startedAt, finishedAt: new Date().toISOString(), commit: commitOf(), ids, steps: run.steps, proxy, ledger, manual: run.manual, result: verdict, counts: { ...counts, notRun } });
+  const ids = {
+    ...run.ids,
+    askIds: [run.ids.reactAskId, run.ids.helpAskId].filter((id) => id !== undefined),
+  };
+  writeReport(run.options.reportPath, {
+    mode: run.options.mode,
+    base: run.options.base,
+    until: run.options.until ?? "all",
+    startedAt,
+    finishedAt: new Date().toISOString(),
+    commit: commitOf(),
+    ids,
+    steps: run.steps,
+    proxy,
+    ledger,
+    manual: run.manual,
+    result: verdict,
+    counts: { ...counts, notRun },
+  });
   printEnd(run, { verdict, counts, notRun });
   return verdict === "pass" ? 0 : 1;
 }

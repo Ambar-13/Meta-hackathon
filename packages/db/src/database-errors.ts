@@ -2,7 +2,29 @@ import { ContractError } from "@meet-first/contracts";
 
 // The stable codes the triggers and meeting_create put in front of their messages, the names check's code of
 // migration 0002, directory_meeting_create's four of migrations 0006 and 0007, and the friend request functions' six of migration 0008.
-export const TRIGGER_CODES = ["turn_text_frozen", "card_source_not_frozen", "card_item_foreign_turn", "claim_foreign_turn", "meeting_bad_transition", "prefix_frozen", "event_seq_gap", "pair_not_joined", "card_not_approved", "other_card_missing", "names_pass_running", "listing_not_found", "directory_self", "directory_daily_cap", "romance_not_open", "friend_request_self", "already_friends", "friend_request_pending", "friend_request_daily_cap", "friend_request_not_found", "friend_request_decided"] as const;
+export const TRIGGER_CODES = [
+  "turn_text_frozen",
+  "card_source_not_frozen",
+  "card_item_foreign_turn",
+  "claim_foreign_turn",
+  "meeting_bad_transition",
+  "prefix_frozen",
+  "event_seq_gap",
+  "pair_not_joined",
+  "card_not_approved",
+  "other_card_missing",
+  "names_pass_running",
+  "listing_not_found",
+  "directory_self",
+  "directory_daily_cap",
+  "romance_not_open",
+  "friend_request_self",
+  "already_friends",
+  "friend_request_pending",
+  "friend_request_daily_cap",
+  "friend_request_not_found",
+  "friend_request_decided",
+] as const;
 
 // One of the twenty-one codes above.
 export type TriggerCode = (typeof TRIGGER_CODES)[number];
@@ -12,11 +34,15 @@ export type DatabaseRefusal = { code: string; message: string };
 
 // Plain CHECK constraints a route can hit, by constraint name, with the refusal to return.
 export const CHECK_REFUSALS: Readonly<Record<string, DatabaseRefusal>> = {
-  quiz_items_check: { code: "persona_answer_missing", message: "Your Meety has not answered this question yet. Wait a moment and reload." },
+  quiz_items_check: {
+    code: "persona_answer_missing",
+    message: "Your Meety has not answered this question yet. Wait a moment and reload.",
+  },
 };
 
 // The sentence returned for any unique violation.
-export const DUPLICATE_SENTENCE = "This already exists. Use the one that is there instead of making another.";
+export const DUPLICATE_SENTENCE =
+  "This already exists. Use the one that is there instead of making another.";
 
 // Postgres's code for a unique violation; parseDatabaseError reads it as "duplicate".
 const UNIQUE_VIOLATION = "23505";
@@ -28,8 +54,10 @@ function checkRefusal(message: string, constraint: unknown): DatabaseRefusal | n
   const match = /^([a-z_]+): (.+)$/s.exec(message);
   const group = match?.[1];
   const rest = match?.[2];
-  if (group !== undefined && rest !== undefined && TRIGGER_CODES.some((known) => known === group)) return { code: group, message: rest };
-  if (typeof constraint === "string" && Object.hasOwn(CHECK_REFUSALS, constraint)) return CHECK_REFUSALS[constraint] ?? null;
+  if (group !== undefined && rest !== undefined && TRIGGER_CODES.some((known) => known === group))
+    return { code: group, message: rest };
+  if (typeof constraint === "string" && Object.hasOwn(CHECK_REFUSALS, constraint))
+    return CHECK_REFUSALS[constraint] ?? null;
   return null;
 }
 
@@ -39,7 +67,8 @@ export function parseDatabaseError(error: unknown): DatabaseRefusal | null {
   const code: unknown = Reflect.get(error, "code");
   const message: unknown = Reflect.get(error, "message");
   const constraint: unknown = Reflect.get(error, "constraint");
-  if (typeof code !== "string" || !/^[0-9A-Z]{5}$/.test(code) || typeof message !== "string") return null;
+  if (typeof code !== "string" || !/^[0-9A-Z]{5}$/.test(code) || typeof message !== "string")
+    return null;
   if (code === UNIQUE_VIOLATION) return { code: "duplicate", message: DUPLICATE_SENTENCE };
   if (code === CHECK_VIOLATION) return checkRefusal(message, constraint);
   return null;

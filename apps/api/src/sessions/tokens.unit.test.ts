@@ -25,7 +25,9 @@ it("D33-T3: newHexToken gives 64 hex characters for 32 bytes and 32 for 16 bytes
 });
 
 it("D33-T4: hashToken is the 32-byte sha256 of the token text", () => {
-  expect(hashToken("abc").toString("hex")).toBe("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+  expect(hashToken("abc").toString("hex")).toBe(
+    "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+  );
   expect(hashToken("abc").length).toBe(32);
 });
 

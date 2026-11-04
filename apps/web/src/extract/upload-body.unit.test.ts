@@ -22,7 +22,13 @@ const header: SourceHeader = {
 
 // Builds the turns a source holds from plain texts, numbered in order.
 function turnsOf(texts: string[]): Turn[] {
-  return texts.map((text, index) => ({ turnIndex: index, role: "user", text, lang: "en", sensitiveCategories: [] }));
+  return texts.map((text, index) => ({
+    turnIndex: index,
+    role: "user",
+    text,
+    lang: "en",
+    sensitiveCategories: [],
+  }));
 }
 
 // Gunzips a blob through the browser decompressor and returns its text.
@@ -55,7 +61,9 @@ describe("encodeUploadBody", () => {
   });
 
   it("D4-T3: more than 20,971,520 bytes of NDJSON is refused", async () => {
-    await expect(encodeUploadBody("a".repeat(20_971_521))).rejects.toMatchObject({ code: "upload_too_large" });
+    await expect(encodeUploadBody("a".repeat(20_971_521))).rejects.toMatchObject({
+      code: "upload_too_large",
+    });
   });
 
   it("D4-T4: a body over 8,388,608 bytes after gzip is refused", async () => {
@@ -92,7 +100,9 @@ describe("buildNdjson", () => {
 describe("the 400 MB export", () => {
   it("R1.4-T1: 400 MB of own turns gives a gzip body under 2 MiB (generated, 60 s timeout)", async () => {
     const bases = Array.from({ length: 50 }, (entry, index) =>
-      `I walked to the market on day ${String(index)} and bought bread. `.repeat(500).slice(0, 20_000),
+      `I walked to the market on day ${String(index)} and bought bread. `
+        .repeat(500)
+        .slice(0, 20_000),
     );
     const raw = Array.from({ length: 20_000 }, (entry, index) => {
       const text = itemAt(bases, index % 50);
@@ -102,10 +112,18 @@ describe("the 400 MB export", () => {
     expect(kept.length).toBe(104);
     expect(itemAt(kept, 0).exportOrder).toBe(19_896);
     const preview = scrubForUpload(
-      kept.map((turn, index) => ({ turnIndex: index, role: "user", text: turn.canonical, lang: "en", sensitiveCategories: [] })),
+      kept.map((turn, index) => ({
+        turnIndex: index,
+        role: "user",
+        text: turn.canonical,
+        lang: "en",
+        sensitiveCategories: [],
+      })),
       [],
     );
-    const encoded = await encodeUploadBody(buildNdjson({ ...header, turnCount: preview.turns.length }, preview.turns));
+    const encoded = await encodeUploadBody(
+      buildNdjson({ ...header, turnCount: preview.turns.length }, preview.turns),
+    );
     expect(encoded.encodedBytes).toBeLessThan(2_097_152);
   }, 60_000);
 });

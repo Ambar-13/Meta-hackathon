@@ -1,14 +1,38 @@
 import { useEffect, useState } from "react";
 import { CARD_POLL_MS, type CardItem, type CardView } from "@meet-first/contracts";
-import { apiFetch, asApiError, ApiError, APP_PATHS, rememberApprovedCard, routes, usePolledView, type PolledView } from "../../app-shell/index.js";
+import {
+  apiFetch,
+  asApiError,
+  ApiError,
+  APP_PATHS,
+  rememberApprovedCard,
+  routes,
+  usePolledView,
+  type PolledView,
+} from "../../app-shell/index.js";
 
 // The label of each item kind (drafted copy).
-export const KIND_LABELS: Record<CardItem["kind"], string> = { value: "Value", preference: "Preference", habit: "Habit", boundary: "Boundary", goal: "Goal" };
+export const KIND_LABELS: Record<CardItem["kind"], string> = {
+  value: "Value",
+  preference: "Preference",
+  habit: "Habit",
+  boundary: "Boundary",
+  goal: "Goal",
+};
 // Where the approve, quiz and rebuild calls stand.
-export type CardActionState = { kind: "idle" } | { kind: "sending" } | { kind: "approved" } | { kind: "failed"; error: ApiError };
+export type CardActionState =
+  | { kind: "idle" }
+  | { kind: "sending" }
+  | { kind: "approved" }
+  | { kind: "failed"; error: ApiError };
 
 // The approve, quiz and rebuild actions of the card page; go navigates after a quiz or a rebuild.
-function useCardActions(options: { cardId: string; sourceId: string; reload: () => void; go: (path: string) => void }): {
+function useCardActions(options: {
+  cardId: string;
+  sourceId: string;
+  reload: () => void;
+  go: (path: string) => void;
+}): {
   action: CardActionState;
   approve: (itemIds: string[], isRecallAllowed: boolean) => Promise<void>;
   startQuiz: () => Promise<void>;
@@ -20,7 +44,10 @@ function useCardActions(options: { cardId: string; sourceId: string; reload: () 
   const approve = async (itemIds: string[], isRecallAllowed: boolean): Promise<void> => {
     setAction({ kind: "sending" });
     try {
-      await apiFetch(routes.cards.approveCard, { params: { id: cardId }, body: { itemIds, recallAllowed: isRecallAllowed } });
+      await apiFetch(routes.cards.approveCard, {
+        params: { id: cardId },
+        body: { itemIds, recallAllowed: isRecallAllowed },
+      });
       rememberApprovedCard(cardId);
       setAction({ kind: "approved" });
       reload();
@@ -76,7 +103,12 @@ export function useCardScreen(
   const [firstServerNow, setFirstServerNow] = useState<string | null>(null);
   const [ticked, setTicked] = useState<ReadonlySet<string>>(new Set());
   const [isRecallAllowed, setRecallAllowedState] = useState(false);
-  const actions = useCardActions({ cardId, sourceId: polled.value?.sourceId ?? "", reload: polled.reload, go });
+  const actions = useCardActions({
+    cardId,
+    sourceId: polled.value?.sourceId ?? "",
+    reload: polled.reload,
+    go,
+  });
 
   useEffect(() => {
     if (firstServerNow === null && polled.value !== null) setFirstServerNow(polled.value.serverNow);
@@ -95,7 +127,9 @@ export function useCardScreen(
 
   const approveCard = async (): Promise<void> => {
     if (ticked.size === 0) return;
-    const itemIds = (polled.value?.items ?? []).filter((item) => ticked.has(item.id)).map((item) => item.id);
+    const itemIds = (polled.value?.items ?? [])
+      .filter((item) => ticked.has(item.id))
+      .map((item) => item.id);
     await actions.approve(itemIds, isRecallAllowed);
   };
 

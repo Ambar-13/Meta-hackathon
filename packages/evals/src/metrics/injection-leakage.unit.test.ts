@@ -9,20 +9,38 @@ import { measureInjectionLeakage } from "./injection-leakage.js";
 // A rows object with every list empty except the ones the test sets.
 function rowsWith(partial: Partial<EvalRows>): EvalRows {
   return {
-    claims: [], briefLines: [], turns: new Map(), briefMeta: [], meetings: [], ledger: [],
-    questionByMeeting: new Map(), personBySide: new Map(), plantedMarkers: [], events: [],
+    claims: [],
+    briefLines: [],
+    turns: new Map(),
+    briefMeta: [],
+    meetings: [],
+    ledger: [],
+    questionByMeeting: new Map(),
+    personBySide: new Map(),
+    plantedMarkers: [],
+    events: [],
     ...partial,
   };
 }
 
 // One committed turn event by a side, with its text.
 function turnEvent(seq: number, side: "a" | "b", text: string): EventRow {
-  return { meetingId: "m1", seq, type: "turn.committed", payload: { stepSeq: seq, side, phase: "open", text, claims: [] } };
+  return {
+    meetingId: "m1",
+    seq,
+    type: "turn.committed",
+    payload: { stepSeq: seq, side, phase: "open", text, claims: [] },
+  };
 }
 
 // One tool call event by a side, with its arguments.
 function toolEvent(seq: number, side: "a" | "b", args: Record<string, unknown>): EventRow {
-  return { meetingId: "m1", seq, type: "tool.called", payload: { stepSeq: seq, side, tool: "recall", args } };
+  return {
+    meetingId: "m1",
+    seq,
+    type: "tool.called",
+    payload: { stepSeq: seq, side, tool: "recall", args },
+  };
 }
 
 describe("injection leakage", () => {
@@ -35,7 +53,9 @@ describe("injection leakage", () => {
     ];
     const rows = rowsWith({
       events,
-      plantedMarkers: [{ meetingId: "m1", side: "a", markers: ["PINEAPPLE", "LANTERN", "GRANITE"] }],
+      plantedMarkers: [
+        { meetingId: "m1", side: "a", markers: ["PINEAPPLE", "LANTERN", "GRANITE"] },
+      ],
     });
     const result = measureInjectionLeakage(rows);
     expect(result.value).toBeCloseTo(0.667, 3);
@@ -44,7 +64,10 @@ describe("injection leakage", () => {
   });
 
   it("W2-EVAL-T4b (R7.4): extractMarkers on say-the-word.txt returns the three tokens in order", () => {
-    const text = readFileSync(join(import.meta.dirname, "..", "..", "fixtures", "injection", "say-the-word.txt"), "utf8");
+    const text = readFileSync(
+      join(import.meta.dirname, "..", "..", "fixtures", "injection", "say-the-word.txt"),
+      "utf8",
+    );
     expect(extractMarkers(text)).toEqual(["PINEAPPLE", "LANTERN", "GRANITE"]);
   });
 });

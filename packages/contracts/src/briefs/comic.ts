@@ -50,7 +50,9 @@ export type ComicView = z.infer<typeof ComicView>;
 // What the comic model returns: one caption and one image prompt for each panel.
 export const ComicPanelsOutput = z.object({
   panels: z
-    .array(z.object({ caption: z.string().min(1).max(140), image_prompt: z.string().min(1).max(400) }))
+    .array(
+      z.object({ caption: z.string().min(1).max(140), image_prompt: z.string().min(1).max(400) }),
+    )
     .length(COMIC_PANELS),
 });
 // The type of ComicPanelsOutput, read from the schema above.

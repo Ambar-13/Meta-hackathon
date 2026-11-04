@@ -15,7 +15,15 @@ import { applyDelta, type PartialTurn } from "./partial-text.js";
 export type Side = Claim["side"];
 // One line of the meeting as the screen shows it, in seq order.
 export type TimelineItem =
-  | { kind: "turn"; seq: number; stepSeq: number; side: Side; phase: Phase; text: string; claims: Claim[] }
+  | {
+      kind: "turn";
+      seq: number;
+      stepSeq: number;
+      side: Side;
+      phase: Phase;
+      text: string;
+      claims: Claim[];
+    }
   | { kind: "phase"; seq: number; phase: Phase }
   | { kind: "recall"; seq: number; side: Side; query: string }
   | { kind: "recall_result"; seq: number; side: Side; found: number }
@@ -26,7 +34,12 @@ export type MeetingFoldState = {
   meetingId: string;
   lastSeq: number; // highest committed seq applied; 0 before any
   lastCommittedStepSeq: number; // highest stepSeq with a turn.committed; 0 before any
-  started: { startedAt: string; endsAt: string; question: string; members: Array<{ side: Side; displayName: string }> } | null;
+  started: {
+    startedAt: string;
+    endsAt: string;
+    question: string;
+    members: Array<{ side: Side; displayName: string }>;
+  } | null;
   phase: Phase | null;
   timeline: TimelineItem[];
   partial: PartialTurn | null;
@@ -37,9 +50,17 @@ export type MeetingFoldState = {
   resyncRequested: boolean;
 };
 // A poll reply after the lenient parse of poll-fallback.ts.
-export type PollReply = { v: number; events: unknown[]; partial: PartialTurn | null; serverNow: string };
+export type PollReply = {
+  v: number;
+  events: unknown[];
+  partial: PartialTurn | null;
+  serverNow: string;
+};
 // What one raw event is: readable, from a newer version that needs a refresh, or something to ignore.
-export type EventReading = { kind: "event"; event: MeetingEvent } | { kind: "refresh" } | { kind: "ignored" };
+export type EventReading =
+  | { kind: "event"; event: MeetingEvent }
+  | { kind: "refresh" }
+  | { kind: "ignored" };
 
 // How long a running meeting may be silent before the screen says it is still thinking (20 s).
 export const THINKING_AFTER_MS = 20_000;
@@ -66,7 +87,8 @@ export function emptyMeetingState(meetingId: string): MeetingFoldState {
 export function readMeetingEvent(raw: unknown): EventReading {
   if (typeof raw !== "object" || raw === null) return { kind: "ignored" };
   const version: unknown = "v" in raw ? raw.v : undefined;
-  if (typeof version === "number" && Math.trunc(version) !== EVENT_VERSION) return { kind: "refresh" };
+  if (typeof version === "number" && Math.trunc(version) !== EVENT_VERSION)
+    return { kind: "refresh" };
   const parsed = MeetingEvent.safeParse(raw);
   return parsed.success ? { kind: "event", event: parsed.data } : { kind: "ignored" };
 }
@@ -104,15 +126,40 @@ function addLine(state: MeetingFoldState, item: TimelineItem): MeetingFoldState 
 function applyFirst(state: MeetingFoldState, event: CommittedEvent): MeetingFoldState {
   switch (event.type) {
     case "meeting.started":
-      return { ...state, started: { startedAt: event.startedAt, endsAt: event.endsAt, question: event.question, members: event.members } };
+      return {
+        ...state,
+        started: {
+          startedAt: event.startedAt,
+          endsAt: event.endsAt,
+          question: event.question,
+          members: event.members,
+        },
+      };
     case "phase.changed":
-      return { ...addLine(state, { kind: "phase", seq: event.seq, phase: event.phase }), phase: event.phase };
+      return {
+        ...addLine(state, { kind: "phase", seq: event.seq, phase: event.phase }),
+        phase: event.phase,
+      };
     case "turn.committed":
       return applyTurn(state, event);
     case "tool.called":
-      return event.tool === "recall" ? addLine(state, { kind: "recall", seq: event.seq, side: event.side, query: recallQuery(event.args) }) : state;
+      return event.tool === "recall"
+        ? addLine(state, {
+            kind: "recall",
+            seq: event.seq,
+            side: event.side,
+            query: recallQuery(event.args),
+          })
+        : state;
     case "tool.result":
-      return event.tool === "recall" ? addLine(state, { kind: "recall_result", seq: event.seq, side: event.side, found: recallFound(event.result) }) : state;
+      return event.tool === "recall"
+        ? addLine(state, {
+            kind: "recall_result",
+            seq: event.seq,
+            side: event.side,
+            found: recallFound(event.result),
+          })
+        : state;
     default:
       return applyLast(state, event);
   }
@@ -131,19 +178,44 @@ function recallFound(result: Record<string, unknown>): number {
 }
 
 // Folds a committed turn: it replaces the streamed text, and an older partial stays only when it is for a later step.
-function applyTurn(state: MeetingFoldState, event: Extract<CommittedEvent, { type: "turn.committed" }>): MeetingFoldState {
-  const next = addLine(state, { kind: "turn", seq: event.seq, stepSeq: event.stepSeq, side: event.side, phase: event.phase, text: event.text, claims: event.claims });
+function applyTurn(
+  state: MeetingFoldState,
+  event: Extract<CommittedEvent, { type: "turn.committed" }>,
+): MeetingFoldState {
+  const next = addLine(state, {
+    kind: "turn",
+    seq: event.seq,
+    stepSeq: event.stepSeq,
+    side: event.side,
+    phase: event.phase,
+    text: event.text,
+    claims: event.claims,
+  });
   const isKeepingPartial = next.partial !== null && next.partial.stepSeq > event.stepSeq;
-  return { ...next, lastCommittedStepSeq: Math.max(next.lastCommittedStepSeq, event.stepSeq), partial: isKeepingPartial ? next.partial : null };
+  return {
+    ...next,
+    lastCommittedStepSeq: Math.max(next.lastCommittedStepSeq, event.stepSeq),
+    partial: isKeepingPartial ? next.partial : null,
+  };
 }
 
 // Folds the remaining events: the lines of concede and hold, the end of a meeting, and the brief and comic results.
 function applyLast(state: MeetingFoldState, event: CommittedEvent): MeetingFoldState {
   switch (event.type) {
     case "concede":
-      return addLine(state, { kind: "concede", seq: event.seq, side: event.side, reason: event.reason });
+      return addLine(state, {
+        kind: "concede",
+        seq: event.seq,
+        side: event.side,
+        reason: event.reason,
+      });
     case "hold":
-      return addLine(state, { kind: "hold", seq: event.seq, side: event.side, reason: event.reason });
+      return addLine(state, {
+        kind: "hold",
+        seq: event.seq,
+        side: event.side,
+        reason: event.reason,
+      });
     case "meeting.ended":
       return { ...state, ended: { reason: event.reason, endedAt: event.endedAt }, partial: null };
     case "brief.ready":
@@ -171,7 +243,8 @@ function committedFrom(raw: unknown): CommittedEvent | null {
 
 // Folds a poll reply: its events after lastSeq in seq order, its partial in place of ours, and the resync request cleared.
 export function foldPollReply(state: MeetingFoldState, reply: PollReply): MeetingFoldState {
-  if (Math.trunc(reply.v) !== EVENT_VERSION) return { ...state, needsRefresh: true, resyncRequested: false };
+  if (Math.trunc(reply.v) !== EVENT_VERSION)
+    return { ...state, needsRefresh: true, resyncRequested: false };
   const readings = reply.events.map(readMeetingEvent);
   const needsRefresh = state.needsRefresh || readings.some((reading) => reading.kind === "refresh");
   const committed = reply.events
@@ -181,8 +254,14 @@ export function foldPollReply(state: MeetingFoldState, reply: PollReply): Meetin
     })
     .filter((event) => event.seq > state.lastSeq)
     .sort((first, second) => first.seq - second.seq);
-  const applied = committed.reduce((next, event) => applyCommitted({ ...next, lastSeq: event.seq }, event), { ...state, needsRefresh });
-  const partial = reply.partial !== null && reply.partial.stepSeq > applied.lastCommittedStepSeq ? reply.partial : null;
+  const applied = committed.reduce(
+    (next, event) => applyCommitted({ ...next, lastSeq: event.seq }, event),
+    { ...state, needsRefresh },
+  );
+  const partial =
+    reply.partial !== null && reply.partial.stepSeq > applied.lastCommittedStepSeq
+      ? reply.partial
+      : null;
   return { ...applied, partial, resyncRequested: false };
 }
 
@@ -197,6 +276,12 @@ export function claimNeedsMark(claim: Claim): boolean {
 }
 
 // True when the meeting has started and not ended, and nothing arrived for THINKING_AFTER_MS.
-export function isThinking(state: MeetingFoldState, lastActivityMs: number, nowMs: number): boolean {
-  return state.started !== null && state.ended === null && nowMs - lastActivityMs >= THINKING_AFTER_MS;
+export function isThinking(
+  state: MeetingFoldState,
+  lastActivityMs: number,
+  nowMs: number,
+): boolean {
+  return (
+    state.started !== null && state.ended === null && nowMs - lastActivityMs >= THINKING_AFTER_MS
+  );
 }

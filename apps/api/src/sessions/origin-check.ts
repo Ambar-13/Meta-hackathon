@@ -19,7 +19,11 @@ export function appOrigin(appOriginValue: string): string {
 
 // True when a request may pass: a safe method, or an Origin header exactly equal to the allowed origin.
 // In words: a POST from our own page passes; a POST with no Origin, or from http://evil.example, does not.
-export function isOriginAllowed(method: string, originHeader: string | undefined, allowedOrigin: string): boolean {
+export function isOriginAllowed(
+  method: string,
+  originHeader: string | undefined,
+  allowedOrigin: string,
+): boolean {
   if (SAFE_METHODS.has(method.toUpperCase())) {
     return true;
   }

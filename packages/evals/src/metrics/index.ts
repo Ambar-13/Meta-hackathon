@@ -13,7 +13,14 @@ import { measureSupportRate } from "./support-rate.js";
 export { percentile } from "./first-turn-latency.js";
 
 // The seven metric keys, the names the results file uses.
-export type MetricKey = "evidence_validity" | "grounded_brief_rate" | "support_rate" | "injection_leakage" | "completion_rate" | "first_turn_latency_ms" | "cost_per_complete_pair_usd";
+export type MetricKey =
+  | "evidence_validity"
+  | "grounded_brief_rate"
+  | "support_rate"
+  | "injection_leakage"
+  | "completion_rate"
+  | "first_turn_latency_ms"
+  | "cost_per_complete_pair_usd";
 // One metric as the run reports it: its value, the text shown, the sample size and its target.
 export type MetricResult = {
   key: MetricKey;
@@ -50,15 +57,17 @@ const DIRECTIONS: Record<MetricKey, "at_least" | "at_most" | null> = {
   cost_per_complete_pair_usd: null,
 };
 // The shape of targets.json: every metric key, each a number or null.
-const TargetsFile = z.object({
-  evidence_validity: z.number().nullable(),
-  grounded_brief_rate: z.number().nullable(),
-  support_rate: z.number().nullable(),
-  injection_leakage: z.number().nullable(),
-  completion_rate: z.number().nullable(),
-  first_turn_latency_ms: z.number().nullable(),
-  cost_per_complete_pair_usd: z.number().nullable(),
-}).strict();
+const TargetsFile = z
+  .object({
+    evidence_validity: z.number().nullable(),
+    grounded_brief_rate: z.number().nullable(),
+    support_rate: z.number().nullable(),
+    injection_leakage: z.number().nullable(),
+    completion_rate: z.number().nullable(),
+    first_turn_latency_ms: z.number().nullable(),
+    cost_per_complete_pair_usd: z.number().nullable(),
+  })
+  .strict();
 
 // Reads the targets file's text and returns the targets; a file with a missing or extra key is refused with zod's message.
 export function parseTargets(json: unknown): Targets {

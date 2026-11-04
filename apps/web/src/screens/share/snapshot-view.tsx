@@ -121,16 +121,25 @@ const BriefSection = (props: { snapshot: ShareSnapshot }): ReactElement => {
         The brief, lines the support check backed <Sticker name="quote" />
       </h2>
       {BRIEF_SECTIONS.map((section) => (
-        <div key={section} className={`colour-panel ${SECTION_COLOUR[section]} share-part share-part-${section}`}>
+        <div
+          key={section}
+          className={`colour-panel ${SECTION_COLOUR[section]} share-part share-part-${section}`}
+        >
           <h3>{BRIEF_SECTION_LABELS[snapshot.questionKind][section]}</h3>
-          {snapshot.brief[section].length === 0 ? <p className="share-none">{SNAPSHOT_COPY.noLines}</p> : null}
+          {snapshot.brief[section].length === 0 ? (
+            <p className="share-none">{SNAPSHOT_COPY.noLines}</p>
+          ) : null}
           <ul className="share-lines">
             {snapshot.brief[section].map((line, index) => (
               <li key={`${section}-${String(index)}`}>
                 <p>{line.text}</p>
                 <div className="share-receipts">
                   {line.quotes.map((quote, quoteIndex) => (
-                    <Receipt key={`${section}-${String(index)}-${String(quoteIndex)}`} quote={quote.text} source={`From ${nameOf(snapshot, quote.side)}'s side`} />
+                    <Receipt
+                      key={`${section}-${String(index)}-${String(quoteIndex)}`}
+                      quote={quote.text}
+                      source={`From ${nameOf(snapshot, quote.side)}'s side`}
+                    />
                   ))}
                 </div>
               </li>

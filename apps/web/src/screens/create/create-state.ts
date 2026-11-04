@@ -15,7 +15,12 @@ const CREATE_SENTENCES = {
 // current kind, and the address that shows that JPEG.
 export type ChosenPhoto = { file: Blob; jpeg: Blob; url: string };
 // Where a share stands: drawing the photo, sending, refused before any request with its sentence, or failed with the api's error.
-export type ShareState = { kind: "idle" } | { kind: "drawing" } | { kind: "sending" } | { kind: "refused"; sentence: string } | { kind: "failed"; error: ApiError };
+export type ShareState =
+  | { kind: "idle" }
+  | { kind: "drawing" }
+  | { kind: "sending" }
+  | { kind: "refused"; sentence: string }
+  | { kind: "failed"; error: ApiError };
 // Whether the person is in Explore, which decides who sees a post: unknown while it is read, and unknown when the read fails.
 export type Listed = "unknown" | "listed" | "not-listed";
 
@@ -75,9 +80,12 @@ export function useCreate(initialKind: PostKind): CreateModel {
   const [state, setState] = useState<ShareState>({ kind: "idle" });
   const listed = useListed();
   const shown = useRef<string | null>(null);
-  useEffect(() => () => {
-    if (shown.current !== null) URL.revokeObjectURL(shown.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (shown.current !== null) URL.revokeObjectURL(shown.current);
+    },
+    [],
+  );
   const show = (next: ChosenPhoto | null): void => {
     if (shown.current !== null) URL.revokeObjectURL(shown.current);
     shown.current = next?.url ?? null;
@@ -90,7 +98,11 @@ export function useCreate(initialKind: PostKind): CreateModel {
       show({ file, jpeg, url: URL.createObjectURL(jpeg) });
       setState({ kind: "idle" });
     } catch (thrown: unknown) {
-      setState({ kind: "refused", sentence: thrown instanceof PhotoFileError ? photoSentence(thrown) : CREATE_SENTENCES.notPicture });
+      setState({
+        kind: "refused",
+        sentence:
+          thrown instanceof PhotoFileError ? photoSentence(thrown) : CREATE_SENTENCES.notPicture,
+      });
     }
   };
   const setKind = (next: PostKind): void => {
@@ -105,7 +117,11 @@ export function useCreate(initialKind: PostKind): CreateModel {
     }
     setState({ kind: "sending" });
     try {
-      const body = { kind, text: text.trim(), photo: photo === null ? null : await base64Of(photo.jpeg) };
+      const body = {
+        kind,
+        text: text.trim(),
+        photo: photo === null ? null : await base64Of(photo.jpeg),
+      };
       const created = await apiFetch(routes.social.createPost, { body });
       setState({ kind: "idle" });
       return created;
@@ -114,5 +130,18 @@ export function useCreate(initialKind: PostKind): CreateModel {
       return null;
     }
   };
-  return { kind, setKind, photo, pickPhoto: (file) => draw(kind, file), removePhoto: () => { show(null); }, text, setText, state, listed, share };
+  return {
+    kind,
+    setKind,
+    photo,
+    pickPhoto: (file) => draw(kind, file),
+    removePhoto: () => {
+      show(null);
+    },
+    text,
+    setText,
+    state,
+    listed,
+    share,
+  };
 }

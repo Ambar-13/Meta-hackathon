@@ -5,12 +5,18 @@ import { APP_PATHS, ScreenFrame } from "../../app-shell/index.js";
 import { Avatar, EmptyState, KIND_LOOK, LoadingLine } from "../../look/index.js";
 import { BriefSection } from "./brief-sections.js";
 import { QuoteSheet } from "./quote-sheet.js";
-import { splitBriefForDisplay, useBriefState, type BriefScreenHook, type OpenQuote } from "./brief-state.js";
+import {
+  splitBriefForDisplay,
+  useBriefState,
+  type BriefScreenHook,
+  type OpenQuote,
+} from "./brief-state.js";
 import "./brief.css";
 
 // The one line under the title: the rate as a rate, or the note that the check did not run.
 export function supportLine(brief: Brief): string {
-  if (brief.supportReliable !== true || brief.supportRate === null) return "The support check did not run. Every line is marked weak quote.";
+  if (brief.supportReliable !== true || brief.supportRate === null)
+    return "The support check did not run. Every line is marked weak quote.";
   const lines = [...brief.agree, ...brief.clash, ...brief.decideFirst];
   const withQuote = lines.filter((point) => point.quotes.length > 0);
   const supported = withQuote.filter((point) => point.supported === true).length;
@@ -42,7 +48,12 @@ const PullQuote = (props: { quote: Quote | null }): ReactElement | null => {
 };
 
 // The sections, the featured quote, the quote sheet and the two next steps of a finished brief.
-const BriefBody = (props: { brief: Brief; meetingId: string; hook: BriefScreenHook; sheetQuote: OpenQuote | null }): ReactElement => {
+const BriefBody = (props: {
+  brief: Brief;
+  meetingId: string;
+  hook: BriefScreenHook;
+  sheetQuote: OpenQuote | null;
+}): ReactElement => {
   const sections = splitBriefForDisplay(props.brief);
   // The headings follow the question: "where you'd click" for getting along, "where you agree" for a deal.
   const labels = BRIEF_SECTION_LABELS[props.brief.questionKind];
@@ -50,17 +61,46 @@ const BriefBody = (props: { brief: Brief; meetingId: string; hook: BriefScreenHo
   return (
     <>
       <div className="brief-lead">
-        <span className={`pill ${kind.colour}`}><span className="dot" />{kind.label}</span>
+        <span className={`pill ${kind.colour}`}>
+          <span className="dot" />
+          {kind.label}
+        </span>
         <p className="brief-support">{supportLine(props.brief)}</p>
       </div>
-      <BriefSection title={labels.agree} points={sections.agree} onQuote={props.hook.showQuote} tone="agree" />
-      <BriefSection title={labels.clash} points={sections.clash} onQuote={props.hook.showQuote} tone="clash" />
-      <BriefSection title={labels.decideFirst} points={sections.decideFirst} onQuote={props.hook.showQuote} tone="first" />
-      {sections.setAside.length > 0 ? <BriefSection title="Set aside" points={sections.setAside} onQuote={props.hook.showQuote} tone="aside" /> : null}
+      <BriefSection
+        title={labels.agree}
+        points={sections.agree}
+        onQuote={props.hook.showQuote}
+        tone="agree"
+      />
+      <BriefSection
+        title={labels.clash}
+        points={sections.clash}
+        onQuote={props.hook.showQuote}
+        tone="clash"
+      />
+      <BriefSection
+        title={labels.decideFirst}
+        points={sections.decideFirst}
+        onQuote={props.hook.showQuote}
+        tone="first"
+      />
+      {sections.setAside.length > 0 ? (
+        <BriefSection
+          title="Set aside"
+          points={sections.setAside}
+          onQuote={props.hook.showQuote}
+          tone="aside"
+        />
+      ) : null}
       <PullQuote quote={featuredQuote(props.brief)} />
       <nav className="actions brief-next" aria-label="Next steps">
-        <Link className="btn" to={APP_PATHS.comic(props.meetingId)}>Draw the comic</Link>
-        <Link className="btn quiet" to={APP_PATHS.consent(props.meetingId)}>Share this meeting</Link>
+        <Link className="btn" to={APP_PATHS.comic(props.meetingId)}>
+          Draw the comic
+        </Link>
+        <Link className="btn quiet" to={APP_PATHS.consent(props.meetingId)}>
+          Share this meeting
+        </Link>
       </nav>
       <QuoteSheet sheet={props.sheetQuote} onClose={props.hook.hideQuote} />
     </>
@@ -74,10 +114,33 @@ export const BriefScreen = (): ReactElement => {
   return (
     <ScreenFrame title="Your brief">
       {hook.kind === "loading" ? <LoadingLine text="Opening your brief." /> : null}
-      {hook.kind === "waiting" ? <LoadingLine text="Writing your brief. This takes about a minute." /> : null}
-      {hook.kind === "gone" ? <EmptyState sticker="poof" title="This meeting is gone." action={<Link className="btn" to={APP_PATHS.home}>Go home</Link>} /> : null}
-      {hook.kind === "error" ? <p role="alert" className="notice">This brief could not be loaded. Reload the page to try again.</p> : null}
-      {hook.kind === "ready" ? <BriefBody brief={hook.brief} meetingId={meetingId} hook={hook} sheetQuote={hook.openQuote} /> : null}
+      {hook.kind === "waiting" ? (
+        <LoadingLine text="Writing your brief. This takes about a minute." />
+      ) : null}
+      {hook.kind === "gone" ? (
+        <EmptyState
+          sticker="poof"
+          title="This meeting is gone."
+          action={
+            <Link className="btn" to={APP_PATHS.home}>
+              Go home
+            </Link>
+          }
+        />
+      ) : null}
+      {hook.kind === "error" ? (
+        <p role="alert" className="notice">
+          This brief could not be loaded. Reload the page to try again.
+        </p>
+      ) : null}
+      {hook.kind === "ready" ? (
+        <BriefBody
+          brief={hook.brief}
+          meetingId={meetingId}
+          hook={hook}
+          sheetQuote={hook.openQuote}
+        />
+      ) : null}
     </ScreenFrame>
   );
 };

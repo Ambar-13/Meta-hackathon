@@ -26,7 +26,18 @@ describe("golden path flags", () => {
   it("golden-path-T3 (design section 9): the directory, friend ask and help steps come after the share step, and the deletion is last", () => {
     const names = selectSteps(undefined).map((step) => step.name);
     expect(names).toHaveLength(24);
-    expect(names.slice(14)).toEqual(["share", "sharing", "directory", "dir-decide", "dir-brief", "friend-ask", "help", "friend-request", "orchestrator", "delete"]);
+    expect(names.slice(14)).toEqual([
+      "share",
+      "sharing",
+      "directory",
+      "dir-decide",
+      "dir-brief",
+      "friend-ask",
+      "help",
+      "friend-request",
+      "orchestrator",
+      "delete",
+    ]);
   });
 
   it("golden-path-T2: --live with --mock exits 2", () => {
@@ -53,7 +64,9 @@ describe("database reads", () => {
     const db = makeDatabase("postgres://app_worker:unused@localhost:5432/meet_first_unit", 1);
     const sql = placeholderCountQuery(db, "0f8c7a52-4d3e-4b8a-9c1e-2a3b4c5d6e7f").compile().sql;
     // The marker is passed as a bound value, so the compiled text differs from the spec's literal form only in those values.
-    expect(sql).toBe('select coalesce(sum((length("text") - length(replace("text", $1, $2))) / length($3)), 0) as "count" from "turns" where "source_id" = $4');
+    expect(sql).toBe(
+      'select coalesce(sum((length("text") - length(replace("text", $1, $2))) / length($3)), 0) as "count" from "turns" where "source_id" = $4',
+    );
     void db.destroy();
   });
 });

@@ -2,17 +2,30 @@
 import "./settings.css";
 import { useRef, useState, type ReactElement } from "react";
 import { type TransferResponse } from "@meet-first/contracts";
-import { apiFetch, asApiError, ApiError, CopyButton, ErrorNotice, ScreenFrame, routes } from "../../app-shell/index.js";
+import {
+  apiFetch,
+  asApiError,
+  ApiError,
+  CopyButton,
+  ErrorNotice,
+  ScreenFrame,
+  routes,
+} from "../../app-shell/index.js";
 import { LoadingLine, Sticker } from "../../look/index.js";
 import { DeleteAccountDialog } from "./delete-account-dialog.js";
 import { SESSION_ENDED_CODE, useDeleteAccount, type DeleteFlowState } from "./settings-state.js";
 
 // The transfer link state: idle, sending, created with the link, or failed.
-type TransferState = { kind: "idle" } | { kind: "sending" } | { kind: "created"; url: string } | { kind: "failed"; error: ApiError };
+type TransferState =
+  | { kind: "idle" }
+  | { kind: "sending" }
+  | { kind: "created"; url: string }
+  | { kind: "failed"; error: ApiError };
 
 // The delete section copy and the notice shown after the request is accepted, byte for byte as the settings spec gives them.
 const SECTION_BODY = "Removes everything we hold about you from our database.";
-const DELETED_NOTICE = "Your account is being deleted. Everything is removed within a few minutes. You can close this tab.";
+const DELETED_NOTICE =
+  "Your account is being deleted. Everything is removed within a few minutes. You can close this tab.";
 // The sentence for a session the server no longer accepts, and the app's general sentence for any other failure.
 const SESSION_ENDED = "Your session has ended. Open the app again to continue.";
 const GENERAL_FAILURE = "The server could not finish this. Try again in a minute.";
@@ -29,7 +42,8 @@ function failureText(flow: DeleteFlowState): string | null {
 const DeleteAccountSection = (): ReactElement => {
   const flow = useDeleteAccount();
   const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const isDialogOpen = flow.kind === "confirming" || flow.kind === "deleting" || flow.kind === "error";
+  const isDialogOpen =
+    flow.kind === "confirming" || flow.kind === "deleting" || flow.kind === "error";
   // Closes the dialog and returns the focus to the button that opened it.
   const cancel = (): void => {
     flow.cancel();
@@ -45,12 +59,22 @@ const DeleteAccountSection = (): ReactElement => {
           <p role="status">{DELETED_NOTICE}</p>
         </div>
       ) : (
-        <button ref={triggerRef} type="button" className="quiet settings-delete-trigger" onClick={flow.open}>
+        <button
+          ref={triggerRef}
+          type="button"
+          className="quiet settings-delete-trigger"
+          onClick={flow.open}
+        >
           Delete my account
         </button>
       )}
       {isDialogOpen ? (
-        <DeleteAccountDialog isBusy={flow.kind === "deleting"} errorText={failureText(flow)} onCancel={cancel} onConfirm={() => void flow.confirm()} />
+        <DeleteAccountDialog
+          isBusy={flow.kind === "deleting"}
+          errorText={failureText(flow)}
+          onCancel={cancel}
+          onConfirm={() => void flow.confirm()}
+        />
       ) : null}
     </section>
   );
@@ -73,7 +97,12 @@ export const SettingsScreen = (): ReactElement => {
       <section className="settings-section" aria-labelledby="transfer-title">
         <h2 id="transfer-title">Open this profile in Safari</h2>
         <p>Opened inside another app? Make a one-time link, then open it in Safari.</p>
-        <button type="button" className="settings-main" disabled={state.kind === "sending"} onClick={() => void makeLink()}>
+        <button
+          type="button"
+          className="settings-main"
+          disabled={state.kind === "sending"}
+          onClick={() => void makeLink()}
+        >
           Make a Safari link
         </button>
         {state.kind === "sending" ? <LoadingLine text={MAKING_LINK_LINE} /> : null}

@@ -17,7 +17,9 @@ describe("replaceCodeFences", () => {
   });
 
   it("D13-T2: an unclosed fence runs to the end of the text", () => {
-    expect(joined(replaceCodeFences("Look:\n```\nSECRET=1\nmore"))).toBe("Look:\n[code: text, 2 lines]");
+    expect(joined(replaceCodeFences("Look:\n```\nSECRET=1\nmore"))).toBe(
+      "Look:\n[code: text, 2 lines]",
+    );
   });
 
   it("D13-T3: a tilde fence closes only with at least as many tildes", () => {
@@ -30,7 +32,9 @@ describe("replaceCodeFences", () => {
   });
 
   it("D13-T5: four spaces of indent is no fence, and tildes do not close backticks", () => {
-    expect(replaceCodeFences("    ```\n    x")).toEqual([{ text: "    ```\n    x", isProtected: false, category: null }]);
+    expect(replaceCodeFences("    ```\n    x")).toEqual([
+      { text: "    ```\n    x", isProtected: false, category: null },
+    ]);
     expect(joined(replaceCodeFences("```\nx\n~~~\ny\n```"))).toBe("[code: text, 3 lines]");
   });
 });

@@ -4,11 +4,20 @@ import { Link, useParams } from "react-router-dom";
 import { APP_PATHS, ErrorNotice, ScreenFrame } from "../../app-shell/index.js";
 import { EmptyState, LoadingLine } from "../../look/index.js";
 import { AvatarPicker } from "./avatar-picker.js";
-import { BRIEF_NOT_READY_COPY, RENDERING_COPY, SKIP_COPY, SKIP_COPY_OTHER, useComicState, type ComicHook, type ComicSkipReason } from "./comic-state.js";
+import {
+  BRIEF_NOT_READY_COPY,
+  RENDERING_COPY,
+  SKIP_COPY,
+  SKIP_COPY_OTHER,
+  useComicState,
+  type ComicHook,
+  type ComicSkipReason,
+} from "./comic-state.js";
 import { DrawingFrames, PanelGrid } from "./panel-grid.js";
 
 // The sentence that says what the comic is, above the picker (comic spec 4.8).
-export const COMIC_INTRO_COPY = "Six panels drawn from the lines the support check backed. Two cartoon characters stand in for you both; no faces, no names.";
+export const COMIC_INTRO_COPY =
+  "Six panels drawn from the lines the support check backed. Two cartoon characters stand in for you both; no faces, no names.";
 
 // The one sentence for a skipped comic, from the reason when the view carries one; no retry is offered (one comic per meeting).
 export const SkippedNotice = (props: { reason: ComicSkipReason | null }): ReactElement => {
@@ -39,7 +48,12 @@ const ComicBody = (props: { comic: ComicHook; meetingId: string }): ReactElement
     return (
       <>
         <p className="comic-intro">{COMIC_INTRO_COPY}</p>
-        <AvatarPicker selected={comic.avatar} isSending={comic.isSending} onPick={comic.pick} onDraw={() => void comic.request()} />
+        <AvatarPicker
+          selected={comic.avatar}
+          isSending={comic.isSending}
+          onPick={comic.pick}
+          onDraw={() => void comic.request()}
+        />
         {comic.isSending ? <LoadingLine text="Asking for your comic." /> : null}
         {comic.requestError === null ? null : <ErrorNotice error={comic.requestError} />}
       </>
@@ -63,7 +77,15 @@ const ComicBody = (props: { comic: ComicHook; meetingId: string }): ReactElement
   }
   if (comic.kind === "brief_not_ready") {
     return (
-      <EmptyState sticker="cup" title="Waiting for the brief" action={<Link className="btn" to={APP_PATHS.brief(props.meetingId)}>Back to the brief</Link>}>
+      <EmptyState
+        sticker="cup"
+        title="Waiting for the brief"
+        action={
+          <Link className="btn" to={APP_PATHS.brief(props.meetingId)}>
+            Back to the brief
+          </Link>
+        }
+      >
         {BRIEF_NOT_READY_COPY}
       </EmptyState>
     );

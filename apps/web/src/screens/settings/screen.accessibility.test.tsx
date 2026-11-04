@@ -10,9 +10,11 @@ import { SettingsScreen } from "./screen.js";
 const DELETION_ID = "00000000-0000-4000-8000-000000000301";
 // The dialog copy, byte for byte as the settings spec gives it.
 const DIALOG_TITLE = "Delete everything we hold about you?";
-const DIALOG_BODY = "This removes your uploaded excerpts, your card, your quizzes, your meetings, briefs, comics and any share page from our database. Anyone you met keeps their own excerpts and card, and loses the shared meeting, brief and share page. Your recovery code stops working. This cannot be undone.";
+const DIALOG_BODY =
+  "This removes your uploaded excerpts, your card, your quizzes, your meetings, briefs, comics and any share page from our database. Anyone you met keeps their own excerpts and card, and loses the shared meeting, brief and share page. Your recovery code stops working. This cannot be undone.";
 const DELETING = "Deleting. This takes a few seconds.";
-const DELETED_NOTICE = "Your account is being deleted. Everything is removed within a few minutes. You can close this tab.";
+const DELETED_NOTICE =
+  "Your account is being deleted. Everything is removed within a few minutes. You can close this tab.";
 const SESSION_ENDED = "Your session has ended. Open the app again to continue.";
 
 afterEach(() => {
@@ -39,10 +41,16 @@ async function settle(): Promise<void> {
 describe("settings screen", () => {
   it("R9.2-T4: Settings makes a one-time Safari link and shows it with a copy action", async () => {
     const url = `http://localhost:3000/claim#${TRANSFER_TOKEN}`;
-    stubRoute(routes.people.transfer, { status: 200, body: { url, expiresAt: "2026-10-27T10:10:00.000Z" } });
+    stubRoute(routes.people.transfer, {
+      status: 200,
+      body: { url, expiresAt: "2026-10-27T10:10:00.000Z" },
+    });
     renderScreen(<SettingsScreen />, { pattern: ROUTE_PATTERNS.settings, url: APP_PATHS.settings });
     fireEvent.click(screen.getByRole("button", { name: "Make a Safari link" }));
-    expect(await screen.findByRole("textbox", { name: "One-time link" })).toHaveProperty("value", url);
+    expect(await screen.findByRole("textbox", { name: "One-time link" })).toHaveProperty(
+      "value",
+      url,
+    );
     expect(screen.getByText("The link works once, for 10 minutes.")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Copy link" })).toBeTruthy();
     expect(requestsTo(routes.people.transfer)).toHaveLength(1);
@@ -56,7 +64,13 @@ describe("settings screen", () => {
   });
 
   it("R9.2-T5: every control on Settings has an accessible name at 375 px", async () => {
-    stubRoute(routes.people.transfer, { status: 200, body: { url: `http://localhost:3000/claim#${TRANSFER_TOKEN}`, expiresAt: "2026-10-27T10:10:00.000Z" } });
+    stubRoute(routes.people.transfer, {
+      status: 200,
+      body: {
+        url: `http://localhost:3000/claim#${TRANSFER_TOKEN}`,
+        expiresAt: "2026-10-27T10:10:00.000Z",
+      },
+    });
     renderScreen(<SettingsScreen />, { pattern: ROUTE_PATTERNS.settings, url: "/settings" });
     expect(unlabelledControls(document.body)).toEqual([]);
     fireEvent.click(screen.getByRole("button", { name: "Make a Safari link" }));
@@ -84,7 +98,11 @@ describe("settings screen", () => {
   });
 
   it("W2-DEL-T14: confirm calls DELETE /api/people/me once, shows the deleting copy, then the deleted notice on 202", async () => {
-    stubRoute(routes.people.deleteMe, { status: 202, body: { deletionId: DELETION_ID }, delayMs: 100 });
+    stubRoute(routes.people.deleteMe, {
+      status: 202,
+      body: { deletionId: DELETION_ID },
+      delayMs: 100,
+    });
     const dialog = openDialog(renderSettings());
     fireEvent.click(within(dialog).getByRole("button", { name: "Delete my account" }));
 
@@ -95,7 +113,10 @@ describe("settings screen", () => {
   });
 
   it("W2-DEL-T15: a 401 shows the session-ended sentence and no retry loop", async () => {
-    stubRoute(routes.people.deleteMe, { status: 401, body: { code: "unauthorized", message: "The session has ended." } });
+    stubRoute(routes.people.deleteMe, {
+      status: 401,
+      body: { code: "unauthorized", message: "The session has ended." },
+    });
     const dialog = openDialog(renderSettings());
     fireEvent.click(within(dialog).getByRole("button", { name: "Delete my account" }));
 

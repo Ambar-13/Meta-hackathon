@@ -3,8 +3,20 @@ import { Uuid } from "../primitives.js";
 
 // Every background job name.
 export const JOB_NAMES = [
-  "scrub_names", "build_card", "check_question", "answer_quiz", "judge_quiz", "meeting_step",
-  "write_briefs", "render_comic", "delete_person", "sweep_stalled", "purge_expired", "run_ask", "orchestrate", "check_summary",
+  "scrub_names",
+  "build_card",
+  "check_question",
+  "answer_quiz",
+  "judge_quiz",
+  "meeting_step",
+  "write_briefs",
+  "render_comic",
+  "delete_person",
+  "sweep_stalled",
+  "purge_expired",
+  "run_ask",
+  "orchestrate",
+  "check_summary",
 ] as const;
 // One job name, checked against the list above.
 export const JobName = z.enum(JOB_NAMES);
@@ -31,7 +43,11 @@ export const JobPayloads = {
 // The parsed payload of one job, by job name.
 export type JobPayload<N extends JobName> = z.infer<(typeof JobPayloads)[N]>;
 // Adds one job. Both apps implement it the same way: JOB_MAX_ATTEMPTS[name] always, and no job key on any job.
-export type Enqueue = <N extends JobName>(name: N, payload: JobPayload<N>, options?: { runAt?: Date }) => Promise<void>;
+export type Enqueue = <N extends JobName>(
+  name: N,
+  payload: JobPayload<N>,
+  options?: { runAt?: Date },
+) => Promise<void>;
 // How many times each job may run before it fails. Every enqueue passes this value.
 export const JOB_MAX_ATTEMPTS = {
   scrub_names: 2,

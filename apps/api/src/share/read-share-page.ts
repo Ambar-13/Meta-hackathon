@@ -12,14 +12,23 @@ const SlugParams = z.object({ slug: z.string() });
 
 // The answer for an unknown, unpublished, revoked or malformed slug: the same sentence for each, so a slug tells nothing (404).
 export function shareNotFound(): ContractError {
-  return new ContractError("share_not_found", "No page here. It may have been taken down.", HTTP.notFound);
+  return new ContractError(
+    "share_not_found",
+    "No page here. It may have been taken down.",
+    HTTP.notFound,
+  );
 }
 
 // Reads a published page by slug through share_read, which returns nothing once either consent is withdrawn or revoked_at is set.
 // A malformed slug returns null before any query runs. A stored snapshot that no longer parses also returns null, so nothing leaks.
-export async function readSharePage(db: Kysely<Database>, slug: string): Promise<ShareSnapshot | null> {
+export async function readSharePage(
+  db: Kysely<Database>,
+  slug: string,
+): Promise<ShareSnapshot | null> {
   if (!SLUG_PATTERN.test(slug)) return null;
-  const row = await db.selectNoFrom((eb) => eb.fn<unknown>("share_read", [eb.val(slug)]).as("snapshot")).executeTakeFirst();
+  const row = await db
+    .selectNoFrom((eb) => eb.fn<unknown>("share_read", [eb.val(slug)]).as("snapshot"))
+    .executeTakeFirst();
   if (row === undefined || row.snapshot === null) return null;
   const parsed = ShareSnapshot.safeParse(row.snapshot);
   return parsed.success ? parsed.data : null;

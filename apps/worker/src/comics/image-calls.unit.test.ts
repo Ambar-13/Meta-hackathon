@@ -10,7 +10,9 @@ const MEETING_ID = "00000000-0000-4000-8000-000000000501";
 
 // A flat colour square as a PNG, the kind of image the model returns.
 async function flatPng(): Promise<Uint8Array> {
-  const pipeline = sharp({ create: { width: 1024, height: 1024, channels: 3, background: "#e8c547" } }).png() as unknown as EncodedPipeline;
+  const pipeline = sharp({
+    create: { width: 1024, height: 1024, channels: 3, background: "#e8c547" },
+  }).png() as unknown as EncodedPipeline;
   return pipeline.toBuffer();
 }
 
@@ -22,7 +24,9 @@ async function noisePng(): Promise<Uint8Array> {
     seed = (seed * 1103515245 + 12345) & 0x7fffffff;
     raw[index] = seed & 0xff;
   }
-  const pipeline = sharp(raw, { raw: { width: 1024, height: 1024, channels: 3 } }).png() as unknown as EncodedPipeline;
+  const pipeline = sharp(raw, {
+    raw: { width: 1024, height: 1024, channels: 3 },
+  }).png() as unknown as EncodedPipeline;
   return pipeline.toBuffer();
 }
 
@@ -59,9 +63,13 @@ describe("comic image calls", () => {
         return { webp: flat, ledgerId: "fake-ledger" };
       },
     };
-    const ready = await renderPanels(slowFake, PROMPTS, { signal: new AbortController().signal, meetingId: MEETING_ID });
+    const ready = await renderPanels(slowFake, PROMPTS, {
+      signal: new AbortController().signal,
+      meetingId: MEETING_ID,
+    });
     expect(ready.kind).toBe("ready");
-    if (ready.kind === "ready") expect(ready.panels.map((panel) => panel.position)).toEqual([1, 2, 3, 4, 5, 6]);
+    if (ready.kind === "ready")
+      expect(ready.panels.map((panel) => panel.position)).toEqual([1, 2, 3, 4, 5, 6]);
     expect(peak).toBe(6);
     expect(total).toBe(6);
 
@@ -73,7 +81,10 @@ describe("comic image calls", () => {
         return Promise.resolve({ webp: flat, ledgerId: "fake-ledger" });
       },
     };
-    const failed = await renderPanels(oneFails, PROMPTS, { signal: new AbortController().signal, meetingId: MEETING_ID });
+    const failed = await renderPanels(oneFails, PROMPTS, {
+      signal: new AbortController().signal,
+      meetingId: MEETING_ID,
+    });
     expect(failed).toEqual({ kind: "failed", reason: "render_failed" });
     expect(failTotal).toBe(6);
   });
@@ -82,7 +93,10 @@ describe("comic image calls", () => {
     const busy = {
       image: () => Promise.reject(new LimiterBusy(0)),
     };
-    const outcome = await renderPanels(busy, PROMPTS, { signal: new AbortController().signal, meetingId: MEETING_ID });
+    const outcome = await renderPanels(busy, PROMPTS, {
+      signal: new AbortController().signal,
+      meetingId: MEETING_ID,
+    });
     expect(outcome).toEqual({ kind: "limiter_busy" });
   });
 });

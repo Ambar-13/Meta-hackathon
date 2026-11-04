@@ -2,15 +2,32 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import type { Kysely } from "kysely";
 import { afterAll, beforeAll, expect, it } from "vitest";
-import { AVATARS, COMIC_PANELS, ConsentResponse, ConsentWithdrawResponse, ErrorBody, EVENT_VERSION, eventToPayload, routes, ShareSnapshot, type BriefReady } from "@meet-first/contracts";
+import {
+  AVATARS,
+  COMIC_PANELS,
+  ConsentResponse,
+  ConsentWithdrawResponse,
+  ErrorBody,
+  EVENT_VERSION,
+  eventToPayload,
+  routes,
+  ShareSnapshot,
+  type BriefReady,
+} from "@meet-first/contracts";
 import { makeDatabase, withMeeting, type Database } from "@meet-first/db";
-import { createPairedMeeting, createTestPerson, readTestDatabaseUrls } from "@meet-first/db/testing";
+import {
+  createPairedMeeting,
+  createTestPerson,
+  readTestDatabaseUrls,
+} from "@meet-first/db/testing";
 import { buildTestApp } from "../testing/index.js";
 import { sessionHeader } from "../testing/cookie-jar.js";
 import { registerShareRoutes } from "./index.js";
 
 // The takedown script and the local tsx runner, both at the repository root.
-const TAKEDOWN_SCRIPT = fileURLToPath(new URL("../../../../scripts/share-takedown.ts", import.meta.url));
+const TAKEDOWN_SCRIPT = fileURLToPath(
+  new URL("../../../../scripts/share-takedown.ts", import.meta.url),
+);
 const TSX_RUNNER = fileURLToPath(new URL("../../../../node_modules/.bin/tsx", import.meta.url));
 // The fixed time the seeded brief.ready event carries.
 const EVENT_AT = "2026-10-26T12:00:00.000Z";
@@ -37,13 +54,38 @@ async function meetingFor(options: { ended: boolean; withBrief: boolean }): Prom
   const seeded = await createPairedMeeting(kit.db, { questionId: 3 });
   if (!options.ended) return seeded;
   await withMeeting(workerDb, seeded.meetingId, async (trx) => {
-    await trx.updateTable("meetings").set({ state: "running", started_at: new Date(), ends_at: new Date() }).where("id", "=", seeded.meetingId).execute();
-    await trx.updateTable("meetings").set({ state: "ended", ended_at: new Date(), end_reason: "decided" }).where("id", "=", seeded.meetingId).execute();
+    await trx
+      .updateTable("meetings")
+      .set({ state: "running", started_at: new Date(), ends_at: new Date() })
+      .where("id", "=", seeded.meetingId)
+      .execute();
+    await trx
+      .updateTable("meetings")
+      .set({ state: "ended", ended_at: new Date(), end_reason: "decided" })
+      .where("id", "=", seeded.meetingId)
+      .execute();
   });
   if (options.withBrief) {
-    const briefReady: BriefReady = { v: EVENT_VERSION, meetingId: seeded.meetingId, at: EVENT_AT, seq: 1, type: "brief.ready", supportRate: { a: null, b: null } };
+    const briefReady: BriefReady = {
+      v: EVENT_VERSION,
+      meetingId: seeded.meetingId,
+      at: EVENT_AT,
+      seq: 1,
+      type: "brief.ready",
+      supportRate: { a: null, b: null },
+    };
     await withMeeting(workerDb, seeded.meetingId, (trx) =>
-      trx.insertInto("meeting_events").values({ meeting_id: seeded.meetingId, seq: 1, type: "brief.ready", v: EVENT_VERSION, payload: JSON.stringify(eventToPayload(briefReady)), created_at: EVENT_AT }).execute(),
+      trx
+        .insertInto("meeting_events")
+        .values({
+          meeting_id: seeded.meetingId,
+          seq: 1,
+          type: "brief.ready",
+          v: EVENT_VERSION,
+          payload: JSON.stringify(eventToPayload(briefReady)),
+          created_at: EVENT_AT,
+        })
+        .execute(),
     );
   }
   return seeded;
@@ -52,9 +94,31 @@ async function meetingFor(options: { ended: boolean; withBrief: boolean }): Prom
 // Writes a ready comic with six small panels for the meeting, as the comic job does.
 async function addReadyComic(meetingId: string, requestedBy: string): Promise<void> {
   await withMeeting(workerDb, meetingId, async (trx) => {
-    const comic = await trx.insertInto("comics").values({ meeting_id: meetingId, requested_by: requestedBy, state: "ready", avatar_a: AVATARS[0], avatar_b: AVATARS[1], prompt_version: "test", purge_after: new Date(Date.now() + 30 * 86_400_000) }).returning("id").executeTakeFirstOrThrow();
+    const comic = await trx
+      .insertInto("comics")
+      .values({
+        meeting_id: meetingId,
+        requested_by: requestedBy,
+        state: "ready",
+        avatar_a: AVATARS[0],
+        avatar_b: AVATARS[1],
+        prompt_version: "test",
+        purge_after: new Date(Date.now() + 30 * 86_400_000),
+      })
+      .returning("id")
+      .executeTakeFirstOrThrow();
     for (let position = 1; position <= COMIC_PANELS; position += 1) {
-      await trx.insertInto("comic_panels").values({ comic_id: comic.id, meeting_id: meetingId, position, caption: `Panel ${String(position)} caption`, image_prompt: "test prompt", image: Buffer.from("RIFF test panel") }).execute();
+      await trx
+        .insertInto("comic_panels")
+        .values({
+          comic_id: comic.id,
+          meeting_id: meetingId,
+          position,
+          caption: `Panel ${String(position)} caption`,
+          image_prompt: "test prompt",
+          image: Buffer.from("RIFF test panel"),
+        })
+        .execute();
     }
   });
 }
@@ -62,23 +126,46 @@ async function addReadyComic(meetingId: string, requestedBy: string): Promise<vo
 // The share page row of a meeting, read through the worker connection.
 async function pageRow(meetingId: string) {
   return withMeeting(workerDb, meetingId, (trx) =>
-    trx.selectFrom("share_pages").select(["slug", "consent_a", "consent_b", "published", "snapshot", "published_at", "revoked_at"]).where("meeting_id", "=", meetingId).executeTakeFirstOrThrow(),
+    trx
+      .selectFrom("share_pages")
+      .select([
+        "slug",
+        "consent_a",
+        "consent_b",
+        "published",
+        "snapshot",
+        "published_at",
+        "revoked_at",
+      ])
+      .where("meeting_id", "=", meetingId)
+      .executeTakeFirstOrThrow(),
   );
 }
 
 // One consent request by a person, and its reply.
 function consent(meetingId: string, sessionToken: string) {
-  return kit.app.inject({ method: "POST", url: routes.briefs.consent.path.replace(":id", meetingId), headers: sessionHeader(sessionToken) });
+  return kit.app.inject({
+    method: "POST",
+    url: routes.briefs.consent.path.replace(":id", meetingId),
+    headers: sessionHeader(sessionToken),
+  });
 }
 
 // One withdrawal by a person, and its reply.
 function withdraw(meetingId: string, sessionToken: string) {
-  return kit.app.inject({ method: "DELETE", url: routes.briefs.withdrawConsent.path.replace(":id", meetingId), headers: sessionHeader(sessionToken) });
+  return kit.app.inject({
+    method: "DELETE",
+    url: routes.briefs.withdrawConsent.path.replace(":id", meetingId),
+    headers: sessionHeader(sessionToken),
+  });
 }
 
 // One public read of a slug, and its reply.
 function readPublic(slug: string) {
-  return kit.app.inject({ method: "GET", url: routes.briefs.readShare.path.replace(":slug", slug) });
+  return kit.app.inject({
+    method: "GET",
+    url: routes.briefs.readShare.path.replace(":slug", slug),
+  });
 }
 
 // The JSON body of a reply, as unknown until a schema reads it.
@@ -194,8 +281,16 @@ it("W2-SHARE-T8: consent before brief.ready is 409 brief_not_ready; a non-member
 
   const once = await consent(seeded.meetingId, seeded.a.sessionToken);
   const twice = await consent(seeded.meetingId, seeded.a.sessionToken);
-  expect(ConsentResponse.parse(bodyOf(once))).toEqual({ consentA: true, consentB: false, published: false });
-  expect(ConsentResponse.parse(bodyOf(twice))).toEqual({ consentA: true, consentB: false, published: false });
+  expect(ConsentResponse.parse(bodyOf(once))).toEqual({
+    consentA: true,
+    consentB: false,
+    published: false,
+  });
+  expect(ConsentResponse.parse(bodyOf(twice))).toEqual({
+    consentA: true,
+    consentB: false,
+    published: false,
+  });
 });
 
 it("W2-SHARE-T9 (D67): the snapshot carries six data:image/webp panels when the comic is ready and no comic field otherwise", async () => {
@@ -218,7 +313,10 @@ it("W2-SHARE-T10: two second-consents racing fill the snapshot once", async () =
   const seeded = await meetingFor({ ended: true, withBrief: true });
   const first = await consent(seeded.meetingId, seeded.a.sessionToken);
   expect(first.statusCode).toBe(200);
-  const [left, right] = await Promise.all([consent(seeded.meetingId, seeded.b.sessionToken), consent(seeded.meetingId, seeded.b.sessionToken)]);
+  const [left, right] = await Promise.all([
+    consent(seeded.meetingId, seeded.b.sessionToken),
+    consent(seeded.meetingId, seeded.b.sessionToken),
+  ]);
   expect(ConsentResponse.parse(bodyOf(left)).published).toBe(true);
   expect(ConsentResponse.parse(bodyOf(right)).published).toBe(true);
   const row = await pageRow(seeded.meetingId);

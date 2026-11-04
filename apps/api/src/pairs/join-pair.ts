@@ -10,11 +10,18 @@ import type { RouteDeps } from "../app-types.js";
 import { hashToken, requirePerson } from "../sessions/index.js";
 
 // The sentence for an invite that was used, expired, or is the caller's own.
-export const PAIR_UNAVAILABLE_SENTENCE = "This invite was already used, has expired, or is your own. Ask for a new link.";
+export const PAIR_UNAVAILABLE_SENTENCE =
+  "This invite was already used, has expired, or is your own. Ask for a new link.";
 
 // Joins the pair the token names as this person; null when pairs_join changed no row.
-export async function joinPairByToken(db: Kysely<Database>, token: string, personId: string): Promise<string | null> {
-  const result = await sql<{ pair_id: string | null }>`SELECT pairs_join(${hashToken(token)}, ${personId}) AS pair_id`.execute(db);
+export async function joinPairByToken(
+  db: Kysely<Database>,
+  token: string,
+  personId: string,
+): Promise<string | null> {
+  const result = await sql<{
+    pair_id: string | null;
+  }>`SELECT pairs_join(${hashToken(token)}, ${personId}) AS pair_id`.execute(db);
   return result.rows[0]?.pair_id ?? null;
 }
 
