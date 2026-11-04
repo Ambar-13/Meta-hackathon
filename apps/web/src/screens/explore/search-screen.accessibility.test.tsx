@@ -102,7 +102,7 @@ const MIRA = listing(LISTING_IDS.mira, "Mira", true);
 const RAVI = listing(LISTING_IDS.ravi, "Ravi", false);
 
 describe("Search, against the MSW route stubs (a fake server)", () => {
-  it("W7-SEARCH-T1: each person is a row linking to their profile with their line, first claim and dating words, never an id or a number, and Add friend sends a friend request", async () => {
+  it("W7-SEARCH-T1: each person is a row linking to their profile with their line and first claim, never the dating switch, an id or a number, and Add friend sends a friend request", async () => {
     stubRoute(routes.social.sendFriendRequest, {
       status: 201,
       body: { requestId: LISTING_IDS.request },
@@ -113,8 +113,7 @@ describe("Search, against the MSW route stubs (a fake server)", () => {
     expect(mira.getAttribute("href")).toBe(`/people/${LISTING_IDS.mira}`);
     expect(within(mira).getByText("Mira builds small tools")).toBeTruthy();
     expect(within(mira).getByText("Mira starts work early")).toBeTruthy();
-    expect(within(mira).getByText("Open to dating questions")).toBeTruthy();
-    expect(within(await personLinkOf("Ravi")).queryByText("Open to dating questions")).toBeNull();
+    expect(mira.textContent).not.toMatch(/dating/i);
     expect(mira.textContent).not.toMatch(/[0-9]/);
     expect(document.body.textContent).not.toContain(LISTING_IDS.mira);
     fireEvent.click(screen.getByRole("button", { name: "Add Ravi as a friend" }));

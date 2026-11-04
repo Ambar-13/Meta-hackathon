@@ -138,13 +138,12 @@ const RAVI = listing(LISTING_IDS.ravi, "Ravi", false);
 const SAMPLE_RAVI = { ...RAVI, isSample: true };
 
 describe("Home, the feed, against the MSW route stubs (a fake server)", () => {
-  it("W6-DWEB-T24, moved to Home: a suggested card shows the name, the line and the dating words only when open, never an id or a number, and See all opens Search", async () => {
+  it("W6-DWEB-T24, moved to Home: a suggested card shows the name and the line, never the dating switch, an id or a number, and See all opens Search", async () => {
     renderFeed([page(0, [MIRA, RAVI], false)]);
     const miraCard = await personLinkOf("Mira");
 
     expect(within(miraCard).getByText("Mira builds small tools")).toBeTruthy();
-    expect(within(miraCard).getByText("Open to dating questions")).toBeTruthy();
-    expect(within(await personLinkOf("Ravi")).queryByText("Open to dating questions")).toBeNull();
+    expect(miraCard.textContent).not.toMatch(/dating/i);
     expect(miraCard.textContent).not.toMatch(/[0-9]/);
     expect(document.body.textContent).not.toContain(LISTING_IDS.mira);
     const suggested = screen.getByRole("region", { name: "Suggested for you" });

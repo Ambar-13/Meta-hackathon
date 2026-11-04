@@ -6,6 +6,7 @@ import { checkArchitectureDocs } from "./architecture-docs.js";
 import { checkBannedFileNames } from "./banned-file-names.js";
 import { type Finding } from "./finding.js";
 import { checkMigrations } from "./migrations.js";
+import { checkMinTextSize } from "./min-text-size.js";
 import { noEmDash } from "./no-em-dash.js";
 import { checkPlainWords } from "./plain-words.js";
 import { checkReadmeHeadings } from "./readme-headings.js";
@@ -18,6 +19,7 @@ const checks: readonly ((root: string) => Finding[])[] = [
   checkReadmeHeadings,
   checkArchitectureDocs,
   checkMigrations,
+  checkMinTextSize,
 ];
 const findings = checks.flatMap((check) => check(root));
 for (const finding of findings) {

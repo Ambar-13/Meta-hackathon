@@ -5,7 +5,7 @@
 /* ---------- tokens ---------- */
 :root {
   color-scheme: light;
-  --paper: oklch(99.75% 0.002 78.3); /* #fffefd, the same off-white as the signed-in app */
+  --paper: oklch(99.9% 0.0008 78.3); /* #fffffe, the same off-white as the signed-in app */
   --ink: oklch(20% 0.05 266);
   --ink-2: oklch(39% 0.04 266);
   --ink-3: oklch(52% 0.03 266);
@@ -121,7 +121,7 @@ legend { padding: 0 8px; margin-left: -8px; font: 800 20px/1.1 var(--display); l
 .c-lilac { --c: var(--lilac-deep); --k: var(--lilac); --k-soft: var(--lilac-soft); }
 .c-yellow { --c: var(--yellow-deep); --k: var(--yellow); --k-soft: var(--yellow-soft); }
 .muted { color: var(--ink-2); }
-.mark { display: inline-flex; align-items: center; gap: 5px; margin-left: 6px; padding: 3px 9px; border-radius: 999px; background: var(--yellow); font: 700 12.5px/1.2 var(--sans); color: var(--ink); vertical-align: 0.1em; }
+.mark { display: inline-flex; align-items: center; gap: 5px; margin-left: 6px; padding: 3px 9px; border-radius: 999px; background: var(--yellow); font: 700 13px/1.2 var(--sans); color: var(--ink); vertical-align: 0.1em; }
 .mark.weak { background: var(--paper); border: 1.5px dashed var(--ink); }
 
 /* ---------- surfaces ---------- */
@@ -190,9 +190,9 @@ legend { padding: 0 8px; margin-left: -8px; font: 800 20px/1.1 var(--display); l
 button.receipt { min-height: 0; border: 0; font: inherit; cursor: pointer; }
 .receipt .stk { font-size: 20px; margin-top: 2px; }
 .receipt q { display: block; font: 600 15px/1.35 var(--sans); quotes: "\201C" "\201D"; }
-.receipt small { display: block; margin-top: 3px; font: 500 12.5px/1.3 var(--sans); color: var(--ink-2); }
+.receipt small { display: block; margin-top: 3px; font: 500 13px/1.3 var(--sans); color: var(--ink-2); }
 .msg.b .receipt { --t: 0.5deg; }
-.flag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 999px; background: var(--yellow); font: 700 12.5px/1.15 var(--sans); }
+.flag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 999px; background: var(--yellow); font: 700 13px/1.15 var(--sans); }
 .flag.weak { background: var(--paper); border: 1.5px dashed var(--ink); }
 .flag-more { margin-left: -6px; font-weight: 600; }
 .typing { display: inline-flex; gap: 5px; padding: 16px 18px; }

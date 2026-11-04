@@ -28,8 +28,8 @@
   .social-pages.tab-bar a[aria-current="page"] { background: none; box-shadow: none; color: var(--ui-blue); }
   .social-pages.tab-bar .page-icon { width: 44px; height: 29px; border-radius: 14px; }
   .social-pages.tab-bar a[aria-current="page"] .page-icon { background: var(--ui-blue-soft); }
-  .social-pages .page-word { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; clip-path: none; font-size: 11px; line-height: 14px; font-weight: 600; }
-  .social-pages.tab-bar .count-pill { top: -3px; right: 0; min-width: 17px; height: 17px; padding: 0 4px; font-size: 11px; }
+  .social-pages .page-word { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; clip-path: none; font-size: 13px; line-height: 16px; font-weight: 600; }
+  .social-pages.tab-bar .count-pill { top: -4px; right: 0; min-width: 20px; height: 20px; padding: 0 5px; font-size: 13px; }
 }
 
 /* ---------- 768px and wider: the rail on the left ---------- */

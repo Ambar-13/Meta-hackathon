@@ -299,4 +299,28 @@ describe("repo checks", () => {
     },
     TEST_TIMEOUT_MS,
   );
+
+  it(
+    "W7-CHECKS-T1: pnpm checks fails on web text under 13px, in font-size, rem or the font shorthand",
+    () => {
+      const run = runChecks({
+        files: {
+          "apps/web/src/screens/feed.css": [
+            ".feed-tab { font-size: 11px; }",
+            ".feed-name { font: 600 12.5px/16px var(--ui-font); }",
+            ".feed-badge { font-size: 0.75rem; }",
+            ".feed-body { font: 400 13px/1.4 var(--ui-font); --a-font: 26px; }",
+            "",
+          ].join("\n"),
+        },
+      });
+
+      expect(run.status).not.toBe(0);
+      expect(run.output).toContain("apps/web/src/screens/feed.css:1 ");
+      expect(run.output).toContain("apps/web/src/screens/feed.css:2 ");
+      expect(run.output).toContain("apps/web/src/screens/feed.css:3 ");
+      expect(run.output).not.toContain("apps/web/src/screens/feed.css:4 ");
+    },
+    TEST_TIMEOUT_MS,
+  );
 });

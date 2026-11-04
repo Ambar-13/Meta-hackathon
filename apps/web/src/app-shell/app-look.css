@@ -3,14 +3,14 @@
 
 .social-frame {
   --ui-font: "Hanken Grotesk Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --ui-bg: oklch(99.75% 0.002 78.3); /* #fffefd; 0.002 is the most warmth sRGB holds this light */
+  --ui-bg: oklch(99.9% 0.0008 78.3); /* #fffffe; 0.0008 is the most warmth sRGB holds this light */
   --ui-ink: oklch(20% 0.01 70);
   --ui-ink-2: oklch(50% 0.012 70); /* 5.9:1 on the ground, 5.3:1 on --ui-soft */
   /* The fills and lines take the ground's hue at a low chroma, so on the near-white ground they read as grey, not beige. */
   --ui-line: oklch(90% 0.006 78.3);
   --ui-soft: oklch(95.8% 0.005 78.3);
   --ui-hover: oklch(93.5% 0.006 78.3);
-  /* The warm card of the "Other" concept (its #eee9df), for a post of words alone and the card on what your Meety does. */
+  /* The warm card of the "Other" concept (its #eee9df), for a story of words alone and a post of words in a profile's grid. */
   --ui-sand: oklch(93.8% 0.013 84);
   --ui-blue: oklch(51% 0.23 264);
   --ui-blue-hover: oklch(45% 0.22 264);

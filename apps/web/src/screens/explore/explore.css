@@ -3,10 +3,11 @@
    the sample people faces, each with the orange made-up mark. Left out of the concept: capitals, type under 13px, made-up counts, green.
    Home follows the concept's measures: on a laptop a small grey line over a large light title with today's date at the right (a phone
    leaves the title out, as Instagram does), a row of round faces as Instagram's stories, then the posts with a hairline between them. A
-   post has its writer's picture, name, age and line in a header; its photo first, then its actions and caption, or alone and large on a warm card; a soft
-   strip with their own words from what they shared; and Ask NAME's Meety and Posts. On a phone the photos and the faces run to the
-   screen's edges and the people Explore suggests are a row of cards inside the feed; on a laptop they sit in a right-hand column under
-   the warm card on what your Meety does. Search is the grey search field, the people as rows with Add friend, and the photos as
+   post has its writer's picture, name, age and line in a header; its photo, then its actions, then its caption led by the writer's
+   name, or its words alone and large on a lilac card; a soft strip with their own words from what they shared; and Ask NAME's Meety
+   and Posts. On a phone the photos and the faces run to the screen's edges and the people Explore suggests are a row of cards inside
+   the feed; on a laptop they sit in a right-hand column under the peach card on what your Meety does. Search is the grey search
+   field, the people as rows with Add friend, and the photos as
    Instagram's Explore grid of tall tiles. Spacing is on a 4px grid. */
 
 /* ---------- the page: one column, and on a laptop the right-hand column beside it ---------- */
@@ -51,14 +52,13 @@ main.screen.wide:has(.explore), main.screen.wide:has(.search-page) { max-width: 
 .explore-posts-failed { margin: 16px 0 0; font-size: 14px; color: var(--ui-ink-2); }
 .explore-more { display: flex; margin: 16px auto 0; }
 
-/* ---------- shared: a heading with its words button, Add friend, where a request stands, the dating words ---------- */
+/* ---------- shared: a heading with its words button, Add friend, where a request stands ---------- */
 .explore-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 :is(.explore, .search-page) .explore-head h2 { margin: 0; font: 600 16px/24px var(--ui-font); letter-spacing: 0; }
 :is(.explore, .search-page) .explore-head-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--ui-blue); font: 600 13px/20px var(--ui-font); }
 :is(.explore, .search-page) button.text-button { font-size: 14px; }
 .friend-state { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 4px; color: var(--ui-ink-2); font: 500 14px/20px var(--ui-font); white-space: nowrap; }
 :is(.explore, .search-page) .friend-add { flex: none; white-space: nowrap; }
-:is(.explore, .search-page) .listing-open { color: var(--ui-ink-2); font: 400 13px/16px var(--ui-font); }
 
 /* ---------- the row of stories: Your story, then each person with a story, a round picture in a ring with the name under it: a warm gradient
    ring while a story is new to you, a hairline once you have watched them all ---------- */
@@ -97,7 +97,7 @@ main.screen.wide:has(.explore), main.screen.wide:has(.search-page) { max-width: 
 .feed-post { padding: 16px 0 24px; }
 
 /* ---------- the feed's honest end: "You're all caught up" between your friends' posts and everyone else's, as Instagram's,
-   a check in an ink ring, then Suggested posts; Show more posts while more pages exist; a line at the very end ---------- */
+   a check in a pink ring, then Suggested posts; Show more posts while more pages exist; a line at the very end ---------- */
 .feed-caught-up { padding: 28px 0 4px; }
 .caught-up { display: grid; justify-items: center; gap: 6px; padding: 4px 0 28px; text-align: center; }
 .caught-up-check { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--ui-pink); color: var(--ui-pink); background: var(--ui-peach); }
@@ -125,7 +125,7 @@ main.screen.wide:has(.explore), main.screen.wide:has(.search-page) { max-width: 
   .feed-photo { margin-inline: -16px; }
 }
 
-/* A post of words alone, as the concept's open thought: large words on a warm card. */
+/* A post of words alone, as the concept's open thought: large words on a lilac card. */
 :is(.explore, .search-page) .feed-quote { margin: 14px 0 0; padding: 28px; border-radius: 12px; background: var(--ui-lilac); }
 :is(.explore, .search-page) .feed-quote p { margin: 0; color: var(--ui-ink); font: 500 24px/34px var(--ui-font); letter-spacing: -0.02em; white-space: pre-wrap; overflow-wrap: anywhere; }
 :is(.explore, .search-page) .feed-quote.is-long p { font: 400 18px/28px var(--ui-font); letter-spacing: -0.01em; }
@@ -145,7 +145,7 @@ main.screen.wide:has(.explore), main.screen.wide:has(.search-page) { max-width: 
 .feed-note-words q { display: block; color: var(--ui-ink-2); font: 400 14px/20px var(--ui-font); quotes: "\201C" "\201D"; }
 .feed-note-go { flex: none; color: var(--ui-ink); }
 
-/* Like, Ask NAME's Meety and Posts, as icon and word buttons in a row under the post; Ask in ink, as the post's one action, and a liked
+/* Like, Ask NAME's Meety and Posts, as icon and word buttons in a row under the post; Ask in blue, as the post's one action, and a liked
    heart filled red, as Instagram's. Delete on your own post asks once more before it deletes. */
 .feed-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0 4px; margin: 4px 0 0 -10px; }
 :is(.explore, .search-page) .feed-action { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 10px; border: 0; border-radius: 12px; background: none;
@@ -195,7 +195,7 @@ main.screen.wide:has(.explore), main.screen.wide:has(.search-page) { max-width: 
 .person-card .friend-state { min-height: 40px; }
 .person-card.is-more { justify-content: center; align-items: center; border-color: transparent; }
 
-/* ---------- the right-hand column on a laptop: the warm card with its slow circles, then people you might click with ---------- */
+/* ---------- the right-hand column on a laptop: the peach card with its slow circles, then people you might click with ---------- */
 .rail-meety { position: relative; overflow: hidden; padding: 24px 24px 20px; border-radius: 16px; background: var(--ui-peach); }
 :is(.explore, .search-page) .rail-meety-label { margin: 0; color: var(--ui-ink-2); font: 500 13px/16px var(--ui-font); letter-spacing: 0.01em; }
 :is(.explore, .search-page) .rail-meety h2 { max-width: 200px; margin: 16px 0 0; font: 600 24px/29px var(--ui-font); letter-spacing: -0.035em; }
@@ -294,4 +294,3 @@ main.screen.wide:has(.explore), main.screen.wide:has(.search-page) { max-width: 
 .search-page .person-row-link { align-items: center; }
 .search-page .person-row-line { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; color: var(--ui-ink-2); font-size: 13px; line-height: 18px; }
 .search-page .person-row-claim { display: none; }
-.search-page .person-row .listing-open { font-size: 12px; }

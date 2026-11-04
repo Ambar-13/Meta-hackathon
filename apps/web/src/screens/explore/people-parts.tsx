@@ -8,9 +8,6 @@ import { PersonAvatar, photoOf, SampleChip } from "../../look/index.js";
 import type { AddState } from "../chat/index.js";
 import type { ExploreFriends } from "./explore-state.js";
 
-// The words a listing open to dating questions shows, as the directory showed them.
-const OPEN_TO_ROMANCE_COPY = "Open to dating questions";
-
 // The line under a person's name: their own line, or in its place the sentence of a friend request
 // the server refused.
 export function lineFor(line: string, state: AddState): string {
@@ -45,8 +42,8 @@ export const FriendControl = (props: {
 };
 
 // One person Explore suggests, as a card in Instagram's "Suggested for you" row: their picture,
-// name, Sample mark, line, and the dating words when open, as one link to their profile, with the
-// Add friend button under it.
+// name, Sample mark and line, as one link to their profile, with the Add friend button under it.
+// Whether they are open to dating questions is never shown.
 export const PersonCard = (props: {
   listing: DirectoryListing;
   friends: ExploreFriends;
@@ -66,17 +63,14 @@ export const PersonCard = (props: {
         <p className="person-card-line">
           {lineFor(listing.line, friends.adds.stateOf(listing.listingId))}
         </p>
-        {listing.openToRomance ? (
-          <span className="listing-open">{OPEN_TO_ROMANCE_COPY}</span>
-        ) : null}
       </Link>
       <FriendControl listing={listing} friends={friends} look="card" />
     </li>
   );
 };
 
-// One person in a list: their picture, name, Sample mark, line, first public item's claim, and the
-// dating words when open, as one link to their profile, with Add friend at the end of the row.
+// One person in a list: their picture, name, Sample mark, line and first public item's claim, as one
+// link to their profile, with Add friend at the end of the row.
 export const PersonRow = (props: {
   listing: DirectoryListing;
   friends: ExploreFriends;
@@ -100,9 +94,6 @@ export const PersonRow = (props: {
             {lineFor(listing.line, friends.adds.stateOf(listing.listingId))}
           </p>
           {first === undefined ? null : <p className="person-row-claim">{first.claim}</p>}
-          {listing.openToRomance ? (
-            <span className="listing-open">{OPEN_TO_ROMANCE_COPY}</span>
-          ) : null}
         </div>
       </Link>
       <FriendControl listing={listing} friends={friends} look="row" />

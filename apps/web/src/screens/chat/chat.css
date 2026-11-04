@@ -111,7 +111,7 @@ main.screen:has(.chat) { padding-bottom: calc(var(--tab-bar, 62px) + 12px + env(
 .home-stories ul { display: flex; gap: 12px; list-style: none; margin: 0; padding: 6px 2px 8px; overflow-x: auto; scrollbar-width: none; }
 .home-stories ul::-webkit-scrollbar { display: none; }
 .home-stories li { flex: none; }
-.home-stories .story { display: grid; justify-items: center; gap: 6px; width: 68px; color: var(--ui-ink); font-weight: 400; text-decoration: none; }
+.home-stories .story { display: grid; justify-items: center; gap: 6px; width: 72px; color: var(--ui-ink); font-weight: 400; text-decoration: none; }
 .home-stories .story:hover { text-decoration: none; }
 .home-stories .story-ring { display: grid; place-items: center; width: 64px; height: 64px; padding: 0; border: 0; border-radius: 50%; background: var(--ui-line); }
 .home-stories .story-ring.is-on { background: var(--ui-story); }
@@ -158,4 +158,3 @@ main.screen:has(.chat) { padding-bottom: calc(var(--tab-bar, 62px) + 12px + env(
 }
 
 .chat.is-empty .chat-who { display: none; }
-.home-stories .story-name { font-size: 12px; }
