@@ -9,14 +9,12 @@ export const PersonCreate = z.object({
   // The access code, which the server checks only when the site sets ACCESS_CODE.
   accessCode: z.string().trim().min(1).max(100).optional(),
 });
-// The type of PersonCreate, read from the schema above.
 export type PersonCreate = z.infer<typeof PersonCreate>;
 // What POST /api/people returns: the new person and their recovery code, shown once.
 export const PersonCreateResponse = z.object({
   personId: Uuid,
   recoveryCode: z.string().length(32),
 });
-// The type of PersonCreateResponse, read from the schema above.
 export type PersonCreateResponse = z.infer<typeof PersonCreateResponse>;
 // Length of the recovery code in characters.
 export const RECOVERY_CODE_LENGTH = 32;

@@ -14,15 +14,12 @@ export const PairCreateResponse = z.object({
   inviteUrl: z.string().url(),
   expiresAt: IsoTime,
 });
-// The type of PairCreateResponse, read from the schema above.
 export type PairCreateResponse = z.infer<typeof PairCreateResponse>;
 // The body of POST /api/pairs/join: the invite token as 32 lower-case hex characters.
 export const PairJoin = z.object({ token: z.string().regex(/^[0-9a-f]{32}$/) });
-// The type of PairJoin, read from the schema above.
 export type PairJoin = z.infer<typeof PairJoin>;
 // What joining a pair returns.
 export const PairJoinResponse = z.object({ pairId: Uuid });
-// The type of PairJoinResponse, read from the schema above.
 export type PairJoinResponse = z.infer<typeof PairJoinResponse>;
 // One meeting row in the lobby: its state and its question.
 export const PairMeetingRow = z.object({
@@ -32,7 +29,6 @@ export const PairMeetingRow = z.object({
   queuePosition: z.number().int().optional(),
   createdAt: IsoTime,
 });
-// The type of PairMeetingRow, read from the schema above.
 export type PairMeetingRow = z.infer<typeof PairMeetingRow>;
 // What GET /api/pairs/:id returns to the lobby.
 export const PairView = z.object({
@@ -43,5 +39,4 @@ export const PairView = z.object({
   expiresAt: IsoTime,
   serverNow: IsoTime,
 });
-// The type of PairView, read from the schema above.
 export type PairView = z.infer<typeof PairView>;

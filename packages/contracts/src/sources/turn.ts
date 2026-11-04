@@ -19,7 +19,6 @@ export const SOURCES_PER_PERSON_MAX = 3;
 export const PERSONA_SIGNAL_LOW = 0.15;
 // Where a source came from.
 export const SourceKind = z.enum(["chatgpt", "claude", "notes", "paste"]);
-// The type of SourceKind, read from the schema above.
 export type SourceKind = z.infer<typeof SourceKind>;
 // One of the person's own messages, as it arrives in the NDJSON body.
 export const Turn = z.object({
@@ -29,7 +28,6 @@ export const Turn = z.object({
   lang: z.string().min(2).max(35).optional(),
   sensitiveCategories: z.array(Category),
 });
-// The type of Turn, read from the schema above.
 export type Turn = z.infer<typeof Turn>;
 // The first line of an upload: where the turns came from and which rules cleaned them.
 export const SourceHeader = z.object({
@@ -40,7 +38,6 @@ export const SourceHeader = z.object({
   attested: z.literal(true),
   turnCount: z.number().int().min(1).max(TURNS_PER_SOURCE_MAX),
 });
-// The type of SourceHeader, read from the schema above.
 export type SourceHeader = z.infer<typeof SourceHeader>;
 // What POST /api/sources returns. A repeat upload returns the first id with duplicate set.
 export const SourceCreateResponse = z.object({
@@ -49,5 +46,4 @@ export const SourceCreateResponse = z.object({
   redactionCount: z.number().int(),
   duplicate: z.boolean(),
 });
-// The type of SourceCreateResponse, read from the schema above.
 export type SourceCreateResponse = z.infer<typeof SourceCreateResponse>;

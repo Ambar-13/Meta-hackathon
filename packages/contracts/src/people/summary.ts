@@ -14,11 +14,9 @@ export const SUMMARY_KINDS = [
 ] as const;
 // One kind of summary point.
 export const SummaryKind = z.enum(SUMMARY_KINDS);
-// The type of SummaryKind, read from the schema above.
 export type SummaryKind = z.infer<typeof SummaryKind>;
 // How strongly the person holds a point, as their AI judged it.
 export const SummaryStrength = z.enum(["strong", "moderate", "mild"]);
-// The type of SummaryStrength, read from the schema above.
 export type SummaryStrength = z.infer<typeof SummaryStrength>;
 
 // Most points a summary keeps; the rest are dropped.
@@ -39,7 +37,6 @@ export const SummaryPoint = z.object({
   strength: SummaryStrength,
   quotes: z.array(z.string().min(1).max(SUMMARY_LINE_MAX_CHARS)).max(SUMMARY_QUOTES_MAX),
 });
-// The type of SummaryPoint, read from the schema above.
 export type SummaryPoint = z.infer<typeof SummaryPoint>;
 
 // Longest summary a person may paste, in characters.
@@ -54,11 +51,9 @@ export const SummaryFound = z.object({
   turnIndex: z.number().int().min(0),
   turnId: z.string().uuid(),
 });
-// The type of SummaryFound, read from the schema above.
 export type SummaryFound = z.infer<typeof SummaryFound>;
 // One point as the person sees it: the point, and where its quote was found in their messages, or null when it was not.
 export const SummaryPointView = SummaryPoint.extend({ found: SummaryFound.nullable() });
-// The type of SummaryPointView, read from the schema above.
 export type SummaryPointView = z.infer<typeof SummaryPointView>;
 // A person's summary as they see it: checking until the names check and the quote lookups finish, then ready (or failed), with its
 // points, whether friends' asks may use it, and when it was last saved.
@@ -68,12 +63,10 @@ export const SummaryView = z.object({
   friendsCanAsk: z.boolean(),
   updatedAt: z.string(),
 });
-// The type of SummaryView, read from the schema above.
 export type SummaryView = z.infer<typeof SummaryView>;
 // The body of PUT /api/people/me/summary: the pasted text, trimmed and not empty, and whether friends' asks may use it.
 export const SummarySave = z.object({
   text: z.string().trim().min(1).max(SUMMARY_MAX_CHARS),
   friendsCanAsk: z.boolean(),
 });
-// The type of SummarySave, read from the schema above.
 export type SummarySave = z.infer<typeof SummarySave>;

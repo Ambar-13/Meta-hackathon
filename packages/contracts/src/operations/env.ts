@@ -32,7 +32,6 @@ export const workerEnv = z.object({
 export const migrateEnv = z.object({ DATABASE_URL_MIGRATE: z.string().url() });
 // The three ways model calls run: live, record to fixtures, or replay recorded fixtures.
 export const LlmMode = z.enum(["live", "record", "replay"]);
-// The type of LlmMode, read from the schema above.
 export type LlmMode = z.infer<typeof LlmMode>;
 // Production refuses to boot in replay mode, so a demo can never run on recorded replies.
 export const isProductionRefusingReplay = true;

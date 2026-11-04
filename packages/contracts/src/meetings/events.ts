@@ -36,7 +36,6 @@ export const MeetingStarted = z.object({
   question: z.string(),
   members: z.array(z.object({ side: Side, displayName: z.string() })).length(2),
 });
-// The type of MeetingStarted, read from the schema above.
 export type MeetingStarted = z.infer<typeof MeetingStarted>;
 // The meeting moved to a new phase.
 export const PhaseChanged = z.object({
@@ -45,7 +44,6 @@ export const PhaseChanged = z.object({
   phase: Phase,
   stepSeq: z.number().int(),
 });
-// The type of PhaseChanged, read from the schema above.
 export type PhaseChanged = z.infer<typeof PhaseChanged>;
 // A slice of a turn still being written. It is not stored and has no seq, so a reconnect never replays it.
 export const TurnDelta = z.object({
@@ -57,7 +55,6 @@ export const TurnDelta = z.object({
   offset: z.number().int().min(0),
   text: z.string(),
 });
-// The type of TurnDelta, read from the schema above.
 export type TurnDelta = z.infer<typeof TurnDelta>;
 // One finished turn with its claims, written in the same transaction as the step's done state.
 export const TurnCommitted = z.object({
@@ -69,7 +66,6 @@ export const TurnCommitted = z.object({
   text: z.string(),
   claims: z.array(Claim),
 });
-// The type of TurnCommitted, read from the schema above.
 export type TurnCommitted = z.infer<typeof TurnCommitted>;
 // A persona called a tool.
 export const ToolCalled = z.object({
@@ -80,7 +76,6 @@ export const ToolCalled = z.object({
   tool: ToolName,
   args: z.record(z.unknown()),
 });
-// The type of ToolCalled, read from the schema above.
 export type ToolCalled = z.infer<typeof ToolCalled>;
 // The result of a tool call.
 export const ToolResult = z.object({
@@ -91,7 +86,6 @@ export const ToolResult = z.object({
   tool: ToolName,
   result: z.record(z.unknown()),
 });
-// The type of ToolResult, read from the schema above.
 export type ToolResult = z.infer<typeof ToolResult>;
 // A persona accepted the other side's claim.
 export const Concede = z.object({
@@ -102,7 +96,6 @@ export const Concede = z.object({
   claimId: Uuid,
   reason: z.string(),
 });
-// The type of Concede, read from the schema above.
 export type Concede = z.infer<typeof Concede>;
 // A persona kept its position.
 export const Hold = z.object({
@@ -112,7 +105,6 @@ export const Hold = z.object({
   side: Side,
   reason: z.string(),
 });
-// The type of Hold, read from the schema above.
 export type Hold = z.infer<typeof Hold>;
 // The meeting is over: decided, out of token budget, or deleted.
 export const MeetingEnded = z.object({
@@ -121,7 +113,6 @@ export const MeetingEnded = z.object({
   reason: z.enum(["decided", "budget", "deleted"]),
   endedAt: IsoTime,
 });
-// The type of MeetingEnded, read from the schema above.
 export type MeetingEnded = z.infer<typeof MeetingEnded>;
 // The two briefs are written. The support rate of each side is null when it could not be judged.
 export const BriefReady = z.object({
@@ -129,11 +120,9 @@ export const BriefReady = z.object({
   type: z.literal("brief.ready"),
   supportRate: z.object({ a: z.number().nullable(), b: z.number().nullable() }),
 });
-// The type of BriefReady, read from the schema above.
 export type BriefReady = z.infer<typeof BriefReady>;
 // The comic is ready to view.
 export const ComicReady = z.object({ ...committed, type: z.literal("comic.ready"), comicId: Uuid });
-// The type of ComicReady, read from the schema above.
 export type ComicReady = z.infer<typeof ComicReady>;
 // The comic was not made, with the reason.
 export const ComicSkipped = z.object({
@@ -142,7 +131,6 @@ export const ComicSkipped = z.object({
   comicId: Uuid,
   reason: z.string(),
 });
-// The type of ComicSkipped, read from the schema above.
 export type ComicSkipped = z.infer<typeof ComicSkipped>;
 // Any committed event, told apart by its type.
 export const CommittedEvent = z.discriminatedUnion("type", [
@@ -158,11 +146,9 @@ export const CommittedEvent = z.discriminatedUnion("type", [
   ComicReady,
   ComicSkipped,
 ]);
-// The type of CommittedEvent, read from the schema above.
 export type CommittedEvent = z.infer<typeof CommittedEvent>;
 // Any event that can reach the browser, committed or a delta.
 export const MeetingEvent = z.union([CommittedEvent, TurnDelta]);
-// The type of MeetingEvent, read from the schema above.
 export type MeetingEvent = z.infer<typeof MeetingEvent>;
 // The 11 committed type names, for the CHECK list in 0001.
 export const COMMITTED_EVENT_TYPES = CommittedEvent.options.map(
@@ -212,7 +198,6 @@ export const PollResponse = z.object({
     .nullable(),
   serverNow: IsoTime,
 });
-// The type of PollResponse, read from the schema above.
 export type PollResponse = z.infer<typeof PollResponse>;
 // The words a person sees when the model refused to answer, kept word for word.
 export const REFUSAL_TEXT = "I'd rather my human speak to this";

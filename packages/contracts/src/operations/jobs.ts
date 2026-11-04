@@ -20,7 +20,6 @@ export const JOB_NAMES = [
 ] as const;
 // One job name, checked against the list above.
 export const JobName = z.enum(JOB_NAMES);
-// The type of JobName, read from the schema above.
 export type JobName = z.infer<typeof JobName>;
 // The payload each job takes, by job name. Each carries the id its context needs before the first read:
 // personId for the jobs that run as one person, meetingId for the jobs that run inside one meeting.

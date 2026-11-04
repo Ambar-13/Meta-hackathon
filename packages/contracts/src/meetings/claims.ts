@@ -15,7 +15,6 @@ export const Claim = z.object({
   flagged: z.boolean(),
   evidenceValid: z.boolean(),
 });
-// The type of Claim, read from the schema above.
 export type Claim = z.infer<typeof Claim>;
 // What the receipts model returns for one turn: its claims with their quotes and turn labels (meeting-receipts prompt).
 export const ReceiptsOutput = z.object({
@@ -31,7 +30,6 @@ export const ReceiptsOutput = z.object({
     )
     .max(8),
 });
-// The type of ReceiptsOutput, read from the schema above.
 export type ReceiptsOutput = z.infer<typeof ReceiptsOutput>;
 // Most claims one turn may carry. This bounds the receipts output and is picked here.
 export const CLAIMS_PER_TURN_MAX = 8;

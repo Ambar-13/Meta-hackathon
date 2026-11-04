@@ -2,7 +2,8 @@
 import tseslint from "typescript-eslint";
 import vitest from "eslint-plugin-vitest";
 
-// A local rule: every export has a plain comment on the line directly above it.
+// A local rule: every export has a plain comment on the line directly above it, except a type read straight from the zod schema of
+// the same name (export type X = z.infer<typeof X>), which the schema's own comment already explains.
 const exportCommentPlugin = {
   rules: {
     "above-every-export": {
@@ -15,7 +16,17 @@ const exportCommentPlugin = {
       },
       create(context) {
         const sourceCode = context.sourceCode;
+        const isInferredFromSchema = (node) => {
+          const alias = node.declaration;
+          if (alias?.type !== "TSTypeAliasDeclaration") return false;
+          const annotation = alias.typeAnnotation;
+          const name = annotation.typeName;
+          const isInfer = annotation.type === "TSTypeReference" && name?.type === "TSQualifiedName" && name.left.name === "z" && name.right.name === "infer";
+          const argument = (annotation.typeArguments ?? annotation.typeParameters)?.params?.[0];
+          return isInfer && argument?.type === "TSTypeQuery" && argument.exprName?.name === alias.id.name;
+        };
         const reportIfBare = (node) => {
+          if (isInferredFromSchema(node)) return;
           const exportLine = node.loc.start.line;
           const hasCommentAbove = sourceCode
             .getAllComments()

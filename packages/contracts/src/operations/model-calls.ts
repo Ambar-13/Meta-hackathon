@@ -33,11 +33,9 @@ export const CALL_SITES = [
 ] as const;
 // One call site, checked against the list above.
 export const CallSite = z.enum(CALL_SITES);
-// The type of CallSite, read from the schema above.
 export type CallSite = z.infer<typeof CallSite>;
 // How hard the model thinks on one call: minimal, low or medium.
 export const Effort = z.enum(["minimal", "low", "medium"]);
-// The type of Effort, read from the schema above.
 export type Effort = z.infer<typeof Effort>;
 // One model call as it is stored in a fixture: the request, the reply and the usage.
 // request is { callSite, promptVersion, body } as sent; requestHash is the hash of request.body alone.
@@ -57,7 +55,6 @@ export const RecordedCall = z.object({
   recordedAt: IsoTime.nullable(),
   handWritten: z.boolean().optional(),
 });
-// The type of RecordedCall, read from the schema above.
 export type RecordedCall = z.infer<typeof RecordedCall>;
 // Deepest nesting the Meta strict mode accepts, counted in container levels.
 const MAX_SCHEMA_NESTING = 10;

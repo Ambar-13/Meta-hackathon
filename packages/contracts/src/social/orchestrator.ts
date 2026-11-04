@@ -12,7 +12,6 @@ export const ORCHESTRATOR_THREAD_MAX = 60;
 export const OrchestratorSend = z.object({
   text: z.string().trim().min(1).max(ORCHESTRATOR_MESSAGE_MAX_CHARS),
 });
-// The type of OrchestratorSend, read from the schema above.
 export type OrchestratorSend = z.infer<typeof OrchestratorSend>;
 
 // One friend as the orchestrator saw them when the person sent a message: orchestrator_messages.friends_snapshot holds a list of these,
@@ -22,32 +21,26 @@ export const OrchestratorFriend = z.object({
   displayName: z.string(),
   canAsk: z.boolean(),
 });
-// The type of OrchestratorFriend, read from the schema above.
 export type OrchestratorFriend = z.infer<typeof OrchestratorFriend>;
 // The friends snapshot of one reply, in friend_list order: most recently joined first.
 export const OrchestratorFriends = z.array(OrchestratorFriend);
-// The type of OrchestratorFriends, read from the schema above.
 export type OrchestratorFriends = z.infer<typeof OrchestratorFriends>;
 
 // What POST /api/orchestrator returns: the person's message and the orchestrator's reply, which is thinking until the worker plans it.
 export const OrchestratorSendResponse = z.object({ messageId: Uuid, replyId: Uuid });
-// The type of OrchestratorSendResponse, read from the schema above.
 export type OrchestratorSendResponse = z.infer<typeof OrchestratorSendResponse>;
 
 // Who wrote a message: the person, or their orchestrator.
 export const OrchestratorRole = z.enum(["you", "agent"]);
-// The type of OrchestratorRole, read from the schema above.
 export type OrchestratorRole = z.infer<typeof OrchestratorRole>;
 
 // Where a message stands. The person's own messages are done. A reply is thinking, then planned (an ask is ready to run), running (the
 // ask is out), done, or failed.
 export const OrchestratorState = z.enum(["thinking", "planned", "running", "done", "failed"]);
-// The type of OrchestratorState, read from the schema above.
 export type OrchestratorState = z.infer<typeof OrchestratorState>;
 
 // The one thing a reply does: start a help search, start a friend ask, or only answer in words.
 export const OrchestratorAction = z.enum(["help", "react", "reply"]);
-// The type of OrchestratorAction, read from the schema above.
 export type OrchestratorAction = z.infer<typeof OrchestratorAction>;
 
 // One message of the thread. A reply's action fields say what it will ask or asked; askId links the ask once it runs.
@@ -62,12 +55,10 @@ export const OrchestratorMessage = z.object({
   askId: Uuid.nullable(),
   createdAt: IsoTime,
 });
-// The type of OrchestratorMessage, read from the schema above.
 export type OrchestratorMessage = z.infer<typeof OrchestratorMessage>;
 
 // What GET /api/orchestrator returns: the latest messages of the person's one thread, oldest first.
 export const OrchestratorThread = z.object({ messages: z.array(OrchestratorMessage) });
-// The type of OrchestratorThread, read from the schema above.
 export type OrchestratorThread = z.infer<typeof OrchestratorThread>;
 
 // What the orchestrator model returns for one message (prompt orchestrator v1): one action, the friend it is about for a react ("" for
@@ -79,5 +70,4 @@ export const OrchestratorPlanOutput = z.object({
   question: z.string(),
   reply: z.string().min(1).max(600),
 });
-// The type of OrchestratorPlanOutput, read from the schema above.
 export type OrchestratorPlanOutput = z.infer<typeof OrchestratorPlanOutput>;

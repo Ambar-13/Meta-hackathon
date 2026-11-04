@@ -10,7 +10,6 @@ export const RECALL_TOP_K = 5;
 export const RECALL_SNIPPET_CHARS = 600;
 // The tools a persona may call. The meeting runs persona to persona with nobody online, so no tool reaches a person.
 export const ToolName = z.enum(["recall", "concede", "hold"]);
-// The type of ToolName, read from the schema above.
 export type ToolName = z.infer<typeof ToolName>;
 // Arguments of the recall tool: a short query over the speaker's own scrubbed notes.
 export const recallArgs = z.object({ query: z.string().min(1).max(200) });

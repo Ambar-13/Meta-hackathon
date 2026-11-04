@@ -14,12 +14,10 @@ export const HomeSource = z.object({
   namesPassDone: z.boolean(),
   namesReviewed: z.boolean(),
 });
-// The type of HomeSource, read from the schema above.
 export type HomeSource = z.infer<typeof HomeSource>;
 
 // One item on the home name tag: its kind, its one-line claim and the quote it rests on.
 export const HomeCardItem = z.object({ kind: ItemKind, claim: z.string(), quote: z.string() });
-// The type of HomeCardItem, read from the schema above.
 export type HomeCardItem = z.infer<typeof HomeCardItem>;
 
 // The person's newest card: its id, state, how many items it has, and its first approved items (all items while it is not approved).
@@ -29,7 +27,6 @@ export const HomeCard = z.object({
   itemCount: z.number().int().min(0),
   items: z.array(HomeCardItem).max(HOME_CARD_ITEMS_MAX),
 });
-// The type of HomeCard, read from the schema above.
 export type HomeCard = z.infer<typeof HomeCard>;
 
 // One meeting the person is a member of: the question, its kind, where it is, the other person's display name, and whether
@@ -43,7 +40,6 @@ export const HomeMeetingRow = z.object({
   isBriefReady: z.boolean(),
   createdAt: IsoTime,
 });
-// The type of HomeMeetingRow, read from the schema above.
 export type HomeMeetingRow = z.infer<typeof HomeMeetingRow>;
 
 // One pair the person made or joined that has not expired: who else is in it, if anyone, and when it expires.
@@ -53,7 +49,6 @@ export const HomePairRow = z.object({
   createdAt: IsoTime,
   expiresAt: IsoTime,
 });
-// The type of HomePairRow, read from the schema above.
 export type HomePairRow = z.infer<typeof HomePairRow>;
 
 // What GET /api/home returns: everything the home screen shows to the signed-in person, and nothing about anyone else
@@ -68,5 +63,4 @@ export const HomeView = z.object({
   pairs: z.array(HomePairRow).max(HOME_LIST_MAX), // newest first, by createdAt; expired pairs are left out
   serverNow: IsoTime,
 });
-// The type of HomeView, read from the schema above.
 export type HomeView = z.infer<typeof HomeView>;

@@ -12,7 +12,6 @@ export const NameRow = z.object({
   context: z.string(),
   keep: z.boolean(),
 });
-// The type of NameRow, read from the schema above.
 export type NameRow = z.infer<typeof NameRow>;
 // What GET /api/sources/:id returns: the counts, the review state and one page of names.
 export const SourceView = z.object({
@@ -32,7 +31,6 @@ export const SourceView = z.object({
   }),
   serverNow: IsoTime,
 });
-// The type of SourceView, read from the schema above.
 export type SourceView = z.infer<typeof SourceView>;
 // The person's answers in the names review, sent to POST /api/sources/:id/names-review.
 // The 10,000 bound on decisions is a parse bound picked here.
@@ -40,12 +38,10 @@ export const NamesReview = z.object({
   decisions: z.array(z.object({ text: z.string().min(1), keep: z.boolean() })).max(10_000),
   sensitiveOptIn: z.array(Category),
 });
-// The type of NamesReview, read from the schema above.
 export type NamesReview = z.infer<typeof NamesReview>;
 // What the names review returns once the source is frozen.
 export const NamesReviewResponse = z.object({
   frozenAt: IsoTime,
   redactionCount: z.number().int(),
 });
-// The type of NamesReviewResponse, read from the schema above.
 export type NamesReviewResponse = z.infer<typeof NamesReviewResponse>;

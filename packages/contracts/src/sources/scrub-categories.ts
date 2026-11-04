@@ -30,11 +30,9 @@ export const Redaction = z.object({
   category: Category,
   placeholderId: z.string().regex(/^[0-9a-f]{8}$/),
 });
-// The type of Redaction, read from the schema above.
 export type Redaction = z.infer<typeof Redaction>;
 // The scrubbed text of one turn with the redactions it made.
 export const ScrubResult = z.object({ text: z.string(), redactions: z.array(Redaction) });
-// The type of ScrubResult, read from the schema above.
 export type ScrubResult = z.infer<typeof ScrubResult>;
 // Finds every placeholder in text. Its parts are the category and the eight hex characters.
 export const PLACEHOLDER_PATTERN = /\[redacted:([a-z_]+):([0-9a-f]{8})\]/g;
@@ -48,7 +46,6 @@ export const NamesPassOutput = z.object({
     .array(z.object({ text: z.string().min(1).max(120), role: z.string().min(1).max(40) }))
     .max(500),
 });
-// The type of NamesPassOutput, read from the schema above.
 export type NamesPassOutput = z.infer<typeof NamesPassOutput>;
 // The stand-in for a person's name in the text, such as [person:mother].
 export const ROLE_TOKEN = (role: string): string => `[person:${role}]`;

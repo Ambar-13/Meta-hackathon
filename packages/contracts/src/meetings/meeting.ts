@@ -24,15 +24,12 @@ export const QuestionKind = z.enum([
   "debate",
   "romance",
 ]);
-// The type of QuestionKind, read from the schema above.
 export type QuestionKind = z.infer<typeof QuestionKind>;
 // Where a meeting is in its life, from ready to ended or deleted.
 export const MeetingState = z.enum(["ready", "queued", "running", "ended", "deleted"]);
-// The type of MeetingState, read from the schema above.
 export type MeetingState = z.infer<typeof MeetingState>;
 // The phases of a meeting.
 export const Phase = z.enum(["open", "explore", "decide", "close"]);
-// The type of Phase, read from the schema above.
 export type Phase = z.infer<typeof Phase>;
 // How many curated questions there are; their ids run from 1 to this number.
 export const CURATED_QUESTION_COUNT = 20;
@@ -49,11 +46,9 @@ export const MeetingCreate = z.intersection(
   ]),
   z.object({ cardId: Uuid }),
 );
-// The type of MeetingCreate, read from the schema above.
 export type MeetingCreate = z.infer<typeof MeetingCreate>;
 // What POST /api/pairs/:id/meetings returns.
 export const MeetingCreateResponse = z.object({ meetingId: Uuid });
-// The type of MeetingCreateResponse, read from the schema above.
 export type MeetingCreateResponse = z.infer<typeof MeetingCreateResponse>;
 // One of the two people in a meeting as the lobby and the meeting screen show them.
 export const MeetingMember = z.object({
@@ -62,7 +57,6 @@ export const MeetingMember = z.object({
   ready: z.boolean(), // the person gave their go-ahead; when both have, the meeting starts with nobody online
   connected: z.boolean(), // watching now (seen in the last 30 seconds); shown only, never a condition to start
 });
-// The type of MeetingMember, read from the schema above.
 export type MeetingMember = z.infer<typeof MeetingMember>;
 // What GET /api/meetings/:id returns.
 export const MeetingView = z.object({
@@ -79,18 +73,15 @@ export const MeetingView = z.object({
   queuePosition: z.number().int().optional(),
   serverNow: IsoTime,
 });
-// The type of MeetingView, read from the schema above.
 export type MeetingView = z.infer<typeof MeetingView>;
 // What POST /api/meetings/:id/ready returns.
 export const MeetingReadyResponse = z.object({ ready: z.literal(true) });
-// The type of MeetingReadyResponse, read from the schema above.
 export type MeetingReadyResponse = z.infer<typeof MeetingReadyResponse>;
 // What POST /api/meetings/:id/start returns: running now, or queued behind other meetings.
 export const MeetingStartResponse = z.object({
   state: z.enum(["running", "queued"]),
   queuePosition: z.number().int().optional(),
 });
-// The type of MeetingStartResponse, read from the schema above.
 export type MeetingStartResponse = z.infer<typeof MeetingStartResponse>;
 // What the question check model returns: whether the question may be used, why, which kind it is, and whether any part of it is romantic.
 //The kind matters only when the question is allowed. romantic is asked apart from the kind, so a mixed question cannot pass a
@@ -101,7 +92,6 @@ export const QuestionCheckOutput = z.object({
   kind: QuestionKind,
   romantic: z.boolean(),
 });
-// The type of QuestionCheckOutput, read from the schema above.
 export type QuestionCheckOutput = z.infer<typeof QuestionCheckOutput>;
 // The 20 curated meeting questions in five groups of 4 as the lobby shows them: getting along or clashing (1 to 4), help (5 to 8),
 // deals (9 to 12, where 12 is a decision), debates and views (13 to 16, where 15 and 16 are situations), and getting on as a couple

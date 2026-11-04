@@ -9,7 +9,6 @@ export const Quote = z.object({
   turnId: Uuid,
   verified: z.boolean(),
 });
-// The type of Quote, read from the schema above.
 export type Quote = z.infer<typeof Quote>;
 // One line of a brief, with up to three quotes. supported is null when the support judge could not decide.
 export const BriefPoint = z.object({
@@ -18,7 +17,6 @@ export const BriefPoint = z.object({
   supported: z.boolean().nullable(),
   supportReason: z.string().optional(),
 });
-// The type of BriefPoint, read from the schema above.
 export type BriefPoint = z.infer<typeof BriefPoint>;
 // What GET /api/meetings/:id/brief returns: three agreements, three clashes and three things to decide first.
 export const Brief = z.object({
@@ -29,7 +27,6 @@ export const Brief = z.object({
   supportReliable: z.boolean().nullable(),
   questionKind: QuestionKind,
 });
-// The type of Brief, read from the schema above.
 export type Brief = z.infer<typeof Brief>;
 // A quote as the brief model writes it, with its turn label.
 const outputQuote = z.object({
@@ -48,7 +45,6 @@ export const BriefOutput = z.object({
   clash: z.array(outputPoint).length(3),
   decide_first: z.array(outputPoint).length(3),
 });
-// The type of BriefOutput, read from the schema above.
 export type BriefOutput = z.infer<typeof BriefOutput>;
 // What the support judge returns: one verdict for each of the nine lines, in index order.
 export const BriefSupportJudgeOutput = z.object({
@@ -62,7 +58,6 @@ export const BriefSupportJudgeOutput = z.object({
     )
     .length(9),
 });
-// The type of BriefSupportJudgeOutput, read from the schema above.
 export type BriefSupportJudgeOutput = z.infer<typeof BriefSupportJudgeOutput>;
 // The label shown when a line has a quote the judge did not support.
 export const WEAK_RECEIPT_COPY = "weak quote";

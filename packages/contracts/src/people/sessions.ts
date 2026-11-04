@@ -20,21 +20,16 @@ export const COOKIE_ATTRIBUTES = {
 } as const;
 // The body of POST /api/sessions/recover: the 32-character recovery code.
 export const Recover = z.object({ code: z.string().length(32) });
-// The type of Recover, read from the schema above.
 export type Recover = z.infer<typeof Recover>;
 // What a successful recovery returns; the cookie is set on the same response.
 export const RecoverResponse = z.object({ personId: Uuid });
-// The type of RecoverResponse, read from the schema above.
 export type RecoverResponse = z.infer<typeof RecoverResponse>;
 // What POST /api/sessions/transfer returns: a link and when it stops working.
 export const TransferResponse = z.object({ url: z.string().url(), expiresAt: IsoTime });
-// The type of TransferResponse, read from the schema above.
 export type TransferResponse = z.infer<typeof TransferResponse>;
 // The body of POST /api/sessions/claim. The token is 16 random bytes as 32 lower-case hex characters.
 export const TransferClaim = z.object({ token: z.string().regex(/^[0-9a-f]{32}$/) });
-// The type of TransferClaim, read from the schema above.
 export type TransferClaim = z.infer<typeof TransferClaim>;
 // What a successful claim returns; the new session cookie is set on the same response.
 export const TransferClaimResponse = z.object({ personId: Uuid });
-// The type of TransferClaimResponse, read from the schema above.
 export type TransferClaimResponse = z.infer<typeof TransferClaimResponse>;

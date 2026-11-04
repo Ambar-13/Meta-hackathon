@@ -67,7 +67,6 @@ const IdClaims = z.object({
   name: z.string().optional(),
   given_name: z.string().optional(),
 });
-// The type of IdClaims, read from the schema above.
 export type IdClaims = z.infer<typeof IdClaims>;
 // The query Google sends the callback: the code and the state, or an error when the person said no.
 const CallbackQuery = z.object({

@@ -35,7 +35,6 @@ export const ShareSnapshot = z
     comic: z.array(z.object({ caption: z.string(), imageUrl: z.string() })).optional(),
   })
   .strict();
-// The type of ShareSnapshot, read from the schema above.
 export type ShareSnapshot = z.infer<typeof ShareSnapshot>;
 // What the consent route returns: each side's consent, whether the page is live, and its slug once it is.
 export const ConsentResponse = z.object({
@@ -44,11 +43,9 @@ export const ConsentResponse = z.object({
   published: z.boolean(),
   slug: z.string().optional(),
 });
-// The type of ConsentResponse, read from the schema above.
 export type ConsentResponse = z.infer<typeof ConsentResponse>;
 // What withdrawing consent returns: the page is no longer published.
 export const ConsentWithdrawResponse = z.object({ published: z.literal(false) });
-// The type of ConsentWithdrawResponse, read from the schema above.
 export type ConsentWithdrawResponse = z.infer<typeof ConsentWithdrawResponse>;
 // Random bytes in a share slug: 128 bits, which is 22 URL-safe base64 characters.
 export const SHARE_SLUG_BYTES = 16;

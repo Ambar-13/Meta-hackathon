@@ -11,7 +11,6 @@ export const Health = z.object({
   diskPct: z.number().min(0).max(100).nullable(),
   degraded: z.boolean(),
 });
-// The type of Health, read from the schema above.
 export type Health = z.infer<typeof Health>;
 // Disk use above this percentage marks the service as degraded.
 export const DISK_DEGRADED_PCT = 80;
@@ -21,9 +20,7 @@ export const ReplayExport = z.object({
   exportedAt: IsoTime,
   events: z.array(CommittedEvent),
 });
-// The type of ReplayExport, read from the schema above.
 export type ReplayExport = z.infer<typeof ReplayExport>;
 // What DELETE /api/people/me returns: the id of the deletion record.
 export const DeletionResponse = z.object({ deletionId: Uuid });
-// The type of DeletionResponse, read from the schema above.
 export type DeletionResponse = z.infer<typeof DeletionResponse>;

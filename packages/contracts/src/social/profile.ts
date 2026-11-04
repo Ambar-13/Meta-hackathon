@@ -4,7 +4,6 @@ import { PhotoKey, Uuid } from "../primitives.js";
 
 // How the caller stands with the person behind a profile: it is them, friends, a request they sent, a request they received, or none.
 export const Friendship = z.enum(["self", "friends", "requested", "incoming", "none"]);
-// The type of Friendship, read from the schema above.
 export type Friendship = z.infer<typeof Friendship>;
 
 // What GET /api/directory/:id returns: one person in Explore as the caller sees them. requestId is set for requested and incoming,
@@ -23,5 +22,4 @@ export const ProfileView = z.object({
   // The face of a sample person; null for everyone else.
   photo: PhotoKey.nullable().optional(),
 });
-// The type of ProfileView, read from the schema above.
 export type ProfileView = z.infer<typeof ProfileView>;
