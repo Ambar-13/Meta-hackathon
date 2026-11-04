@@ -44,4 +44,13 @@ describe("environment schemas", () => {
     expect(worker.LOG_LEVEL).toBe("info");
     expect(api.MAX_CONCURRENT_MEETINGS).toBe(40);
   });
+
+  it("R12.5-T8: apiEnv's DATABASE_DISK_BYTES defaults to the free plan's 1 GB, reads a set size and refuses 0", () => {
+    const paidPlan = { ...API_ENV, DATABASE_DISK_BYTES: "16000000000" };
+    const noDisk = { ...API_ENV, DATABASE_DISK_BYTES: "0" };
+
+    expect(apiEnv.parse(API_ENV).DATABASE_DISK_BYTES).toBe(1_000_000_000);
+    expect(apiEnv.parse(paidPlan).DATABASE_DISK_BYTES).toBe(16_000_000_000);
+    expect(failedPaths(apiEnv.safeParse(noDisk))).toEqual(["DATABASE_DISK_BYTES"]);
+  });
 });

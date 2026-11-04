@@ -5,7 +5,7 @@ import { afterAll, beforeAll, expect, it } from "vitest";
 import { Health } from "@meet-first/contracts";
 import { buildTestApp } from "../testing/app-factory.js";
 import type { RoutePlugin } from "../app-types.js";
-import { registerWebPages } from "./index.js";
+import { registerWebPages, registerWebPagesRoutes } from "./index.js";
 
 const INDEX_HTML =
   '<!doctype html><html><head><title>Meet First</title></head><body><div id="root"></div></body></html>';
@@ -134,4 +134,19 @@ it("R12.5-T3: a database at 80% or more of the plan's disk is degraded and not o
   expect(body.diskPct).toBe(100);
   expect(body.degraded).toBe(true);
   expect(body.ok).toBe(false);
+});
+
+it("R12.5-T7: the deployed health route measures the database against DATABASE_DISK_BYTES", async () => {
+  const t3 = await buildTestApp({
+    routes: [registerWebPagesRoutes],
+    env: { DATABASE_DISK_BYTES: 1_000_000 },
+  });
+  try {
+    const body = Health.parse((await t3.app.inject({ method: "GET", url: "/api/health" })).json());
+
+    expect(body.diskPct).toBe(100);
+    expect(body.degraded).toBe(true);
+  } finally {
+    await t3.close();
+  }
 });

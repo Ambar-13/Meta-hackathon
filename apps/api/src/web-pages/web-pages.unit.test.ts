@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { diskPercent, DISK_PLAN_BYTES, isDiskDegraded, isWorkerFresh, toHealth } from "./health.js";
+import { diskPercent, isDiskDegraded, isWorkerFresh, toHealth } from "./health.js";
 import { isApiPath } from "./spa-fallback.js";
 
 it("R12.5-T4: diskPercent rounds to one decimal and caps at 100, and 80 is degraded while 79.9 is not", () => {
@@ -10,7 +10,6 @@ it("R12.5-T4: diskPercent rounds to one decimal and caps at 100, and 80 is degra
   expect(diskPercent(20_000_000_000, 10_000_000_000)).toBe(100);
   expect(diskPercent(1, 3)).toBe(33.3);
   expect(isDiskDegraded(null)).toBe(false);
-  expect(DISK_PLAN_BYTES).toBe(16_000_000_000);
 });
 
 it("R12.5-T5: isWorkerFresh is true under 120 s and false at 120 s or with no heartbeat", () => {

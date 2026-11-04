@@ -43,6 +43,8 @@ services:
         value: "111"         # at most $111 of the Meta credit in all
       - key: MAX_CONCURRENT_MEETINGS
         value: "5"           # D57, lowered: both processes share 512 MB, and one meeting took them to 368 MB together (28 Oct)
+      - key: DATABASE_DISK_BYTES
+        value: "1000000000"  # the free database's 1 GB, which /api/health measures against; a paid database needs its own size here
       - key: SEED_SAMPLES
         value: "1"           # the six sample people of Explore, added once by the start script; "0" stops adding them
       - key: LOG_LEVEL
@@ -51,6 +53,6 @@ services:
         value: production
 databases:
   - name: meet-first-db
-    plan: free               # 1 GB, expires 30 days after it is made; 0.1c-256mb ($6 a month) keeps it
+    plan: free               # 1 GB (DATABASE_DISK_BYTES above), expires 30 days after it is made; 0.1c-256mb ($6 a month) keeps it
     postgresMajorVersion: "16"
     region: singapore

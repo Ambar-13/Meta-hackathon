@@ -10,6 +10,10 @@ export const apiEnv = z.object({
   APP_ORIGIN: z.string().url(),
   PORT: z.coerce.number().int().default(3000),
   MAX_CONCURRENT_MEETINGS: z.coerce.number().int().default(40),
+  // The database plan's disk in bytes, which /api/health measures the database against: the free
+  // plan's 1 GB unless the host sets a paid plan's size. Decimal GB is the smaller reading, so
+  // degraded comes early, not late.
+  DATABASE_DISK_BYTES: z.coerce.number().int().positive().default(1_000_000_000),
   // The code a person gives to sign up, or empty for open sign-up. The deployed site sets one, so a
   // script cannot make accounts and spend the model budget through them.
   ACCESS_CODE: z.string().trim().default(""),

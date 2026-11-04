@@ -45,7 +45,7 @@ An anonymous session cannot be recovered once device and recovery code are both 
 - Render body limit: a request over the platform's body limit is detected, not prevented.
 - Authorship: a report that someone else wrote the chats is detected after the fact; the attestation tick is the person's own word.
 - Marker repetition under injection: repeated markers are detected, not stopped.
-- Postgres disk: a full disk is detected, not prevented.
+- Postgres disk: a full disk is detected, not prevented. /api/health reports degraded at 80% of DATABASE_DISK_BYTES, the database plan's disk (1 GB on the free plan), so a move to a paid database needs its size set there.
 - Backups: backups belong to the hosting platform, and this product does not test a restore.
 
 ## Operational limits
