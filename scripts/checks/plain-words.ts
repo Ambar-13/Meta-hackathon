@@ -72,15 +72,16 @@ function escapeForPattern(phrase: string): string {
   return phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// "Overall" is banned as an empty opener, written with a comma after it, and not as a plain adjective ("the overall
-// budget").
+// "Overall" is banned as an empty opener, written with a comma after it, and not as a plain
+// adjective ("the overall budget").
 const PATTERNS: readonly { phrase: string; pattern: RegExp }[] = [
   ...BANNED_PHRASES.map((phrase) => ({
     phrase,
     pattern: new RegExp(`\\b${escapeForPattern(phrase)}\\b`, "i"),
   })),
   { phrase: "overall,", pattern: /\boverall,/i },
-  // Emphasis words are banned as sentence openers (followed by a comma); say why the thing matters instead.
+  // Emphasis words are banned as sentence openers (followed by a comma); say why the thing matters
+  // instead.
   ...["importantly", "crucially", "notably", "interestingly"].map((word) => ({
     phrase: `${word},`,
     pattern: new RegExp(`\\b${word},`, "i"),

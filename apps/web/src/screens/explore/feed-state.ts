@@ -2,12 +2,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { FeedCursor, FeedScope, Post } from "@meet-first/contracts";
 import { apiFetch, asApiError, routes, type ApiError } from "../../app-shell/index.js";
 
-// Which part of the feed loads next: your friends' posts and your own, then everyone else's, then nothing, at the end.
+// Which part of the feed loads next: your friends' posts and your own, then everyone else's, then
+// nothing, at the end.
 export type FeedPart = FeedScope | "end";
 
-// Home's endless, honest feed: your friends' posts and your own as they load, everyone
-// else's after them, which part loads next, whether a page is on its way, the last error, whether the first page has answered, and the
-// two things a reader does to it: ask for the next page, and take away a post they deleted.
+// Home's endless, honest feed: your friends' posts and your own as they load, everyone else's after
+// them, which part loads next, whether a page is on its way, the last error, whether the first page
+// has answered, and the two things a reader does to it: ask for the next page, and take away a post
+// they deleted.
 export type EndlessFeed = {
   friends: readonly Post[];
   others: readonly Post[];
@@ -48,7 +50,8 @@ function queryOf(part: FeedScope, cursor: FeedCursor | null): Record<string, str
     : { scope: part, before: cursor.before, beforeId: cursor.beforeId };
 }
 
-// The state after one page of a part: its posts added, and, after its last page, the next part from its start.
+// The state after one page of a part: its posts added, and, after its last page, the next part from
+// its start.
 function withPage(
   state: FeedState,
   part: FeedScope,
@@ -69,10 +72,11 @@ function withPage(
   };
 }
 
-// Reads Home's feed a page at a time (GET /api/feed): the first page of your friends' posts when Home opens, and each next page when
-// loadMore runs, which the page calls as the reader nears the end. When your friends' posts run out it goes on with everyone else's,
-// at once when there were none of your friends' at all, so the feed never opens empty. A failed page keeps what loaded and can be asked
-// again.
+// Reads Home's feed a page at a time (GET /api/feed): the first page of your friends' posts when
+// Home opens, and each next page when loadMore runs, which the page calls as the reader nears the
+// end. When your friends' posts run out it goes on with everyone else's, at once when there were
+// none of your friends' at all, so the feed never opens empty. A failed page keeps what loaded and
+// can be asked again.
 export function useEndlessFeed(): EndlessFeed {
   const [state, setState] = useState<FeedState>(START);
   const latest = useRef(state);

@@ -1,7 +1,8 @@
 import { ContractError } from "@meet-first/contracts";
 
-// The stable codes the triggers and meeting_create put in front of their messages, the names check's code of
-// migration 0002, directory_meeting_create's four of migrations 0006 and 0007, and the friend request functions' six of migration 0008.
+// The stable codes the triggers and meeting_create put in front of their messages, the names
+// check's code of migration 0002, directory_meeting_create's four of migrations 0006 and 0007, and
+// the friend request functions' six of migration 0008.
 export const TRIGGER_CODES = [
   "turn_text_frozen",
   "card_source_not_frozen",
@@ -49,7 +50,8 @@ const UNIQUE_VIOLATION = "23505";
 // Postgres's code for a check violation, which every RAISE in the migrations uses.
 const CHECK_VIOLATION = "23514";
 
-// Reads a trigger code and its sentence out of a check violation, or the entry of CHECK_REFUSALS for its constraint.
+// Reads a trigger code and its sentence out of a check violation, or the entry of CHECK_REFUSALS
+// for its constraint.
 function checkRefusal(message: string, constraint: unknown): DatabaseRefusal | null {
   const match = /^([a-z_]+): (.+)$/s.exec(message);
   const group = match?.[1];
@@ -61,7 +63,8 @@ function checkRefusal(message: string, constraint: unknown): DatabaseRefusal | n
   return null;
 }
 
-// Reads a refusal off a Postgres error, or returns null for anything that is not one, which the caller throws again.
+// Reads a refusal off a Postgres error, or returns null for anything that is not one, which the
+// caller throws again.
 export function parseDatabaseError(error: unknown): DatabaseRefusal | null {
   if (typeof error !== "object" || error === null) return null;
   const code: unknown = Reflect.get(error, "code");

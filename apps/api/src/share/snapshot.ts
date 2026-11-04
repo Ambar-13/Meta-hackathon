@@ -11,7 +11,8 @@ import {
 } from "@meet-first/contracts";
 import type { DatabaseTransaction } from "@meet-first/db";
 
-// Random bytes in a share slug, from the contracts: 16 bytes, which is 22 URL-safe base64 characters.
+// Random bytes in a share slug, from the contracts: 16 bytes, which is 22 URL-safe base64
+// characters.
 export const SLUG_BYTES = SHARE_SLUG_BYTES;
 
 // The side letter of a member, as ShareSnapshot spells it.
@@ -27,7 +28,8 @@ type BriefRow = { person_id: string; agree: unknown; clash: unknown; decide_firs
 // The three sections of a brief, by their column names.
 type Section = "agree" | "clash" | "decide_first";
 
-// The sentence for a snapshot that failed its own check; nothing is stored when it is raised (share_snapshot_invalid).
+// The sentence for a snapshot that failed its own check; nothing is stored when it is raised
+// (share_snapshot_invalid).
 function snapshotInvalid(): ContractError {
   return new ContractError(
     "share_snapshot_invalid",
@@ -41,8 +43,8 @@ export function makeSlug(): string {
   return randomBytes(SLUG_BYTES).toString("base64url");
 }
 
-// Walks every key of a value and throws share_snapshot_forbidden_key when one of FORBIDDEN_SHARE_KEYS appears at any depth.
-// Values may contain those words; only keys are checked.
+// Walks every key of a value and throws share_snapshot_forbidden_key when one of
+// FORBIDDEN_SHARE_KEYS appears at any depth. Values may contain those words; only keys are checked.
 export function assertNoForbiddenKeys(value: unknown): void {
   if (Array.isArray(value)) {
     value.forEach((item: unknown) => {
@@ -63,7 +65,8 @@ export function assertNoForbiddenKeys(value: unknown): void {
   }
 }
 
-// Returns true when a brief line may be shared: the support judge said yes and every quote was found in its turn.
+// Returns true when a brief line may be shared: the support judge said yes and every quote was
+// found in its turn.
 export function isShareableLine(point: BriefPoint): boolean {
   return (
     point.supported === true &&
@@ -72,7 +75,8 @@ export function isShareableLine(point: BriefPoint): boolean {
   );
 }
 
-// Reads the question the meeting was asked and its kind, which picks the public page's section labels.
+// Reads the question the meeting was asked and its kind, which picks the public page's section
+// labels.
 async function readQuestion(
   trx: DatabaseTransaction,
   meetingId: string,
@@ -85,7 +89,8 @@ async function readQuestion(
   return { text: meeting.question_text, kind: meeting.question_kind };
 }
 
-// Reads both members with their sides and display names; the names come from people, which the meeting context may read.
+// Reads both members with their sides and display names; the names come from people, which the
+// meeting context may read.
 async function readMembers(trx: DatabaseTransaction, meetingId: string): Promise<Member[]> {
   const rows = await trx
     .selectFrom("meeting_members as mm")
@@ -101,8 +106,8 @@ async function readMembers(trx: DatabaseTransaction, meetingId: string): Promise
   }));
 }
 
-// Reads the approved, verified card items of both sides, in side order and then in card position order; a listed persona met through the
-// directory shows only its public items.
+// Reads the approved, verified card items of both sides, in side order and then in card position
+// order; a listed persona met through the directory shows only its public items.
 async function readItems(
   trx: DatabaseTransaction,
   meetingId: string,
@@ -171,7 +176,8 @@ async function readBriefs(
   );
 }
 
-// Reads the comic panels when the comic is ready; null when it is not, so the snapshot has no comic field.
+// Reads the comic panels when the comic is ready; null when it is not, so the snapshot has no comic
+// field.
 async function readComic(trx: DatabaseTransaction, meetingId: string): Promise<ComicLine[] | null> {
   const comic = await trx
     .selectFrom("comics")
@@ -191,7 +197,8 @@ async function readComic(trx: DatabaseTransaction, meetingId: string): Promise<C
   }));
 }
 
-// Reads the stored lines of one brief section; a line that does not parse as a BriefPoint is left out.
+// Reads the stored lines of one brief section; a line that does not parse as a BriefPoint is left
+// out.
 function parsedPoints(stored: unknown): BriefPoint[] {
   if (!Array.isArray(stored)) return [];
   return stored.flatMap((line: unknown) => {
@@ -208,7 +215,8 @@ function toSharedLine(point: BriefPoint): SharedLine {
   };
 }
 
-// The shareable lines of one section across both briefs, deduplicated by exact text, side a's brief first.
+// The shareable lines of one section across both briefs, deduplicated by exact text, side a's brief
+// first.
 function sharedSection(briefs: readonly BriefRow[], section: Section): SharedLine[] {
   const seen = new Set<string>();
   const lines: SharedLine[] = [];
@@ -222,7 +230,8 @@ function sharedSection(briefs: readonly BriefRow[], section: Section): SharedLin
   return lines;
 }
 
-// Parses the candidate as ShareSnapshot and checks its keys; any failure is share_snapshot_invalid, so nothing is stored.
+// Parses the candidate as ShareSnapshot and checks its keys; any failure is share_snapshot_invalid,
+// so nothing is stored.
 function checkedSnapshot(candidate: unknown): ShareSnapshot {
   const parsed = ShareSnapshot.safeParse(candidate);
   if (!parsed.success) throw snapshotInvalid();
@@ -235,8 +244,9 @@ function checkedSnapshot(candidate: unknown): ShareSnapshot {
   return parsed.data;
 }
 
-// Builds the public snapshot inside the meeting context, so both members' rows and briefs are visible; the caller has
-// already proved membership in withPerson. Every field of the public page is read here and nowhere else.
+// Builds the public snapshot inside the meeting context, so both members' rows and briefs are
+// visible; the caller has already proved membership in withPerson. Every field of the public page
+// is read here and nowhere else.
 export async function buildShareSnapshot(
   trx: DatabaseTransaction,
   meetingId: string,

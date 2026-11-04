@@ -1,5 +1,6 @@
-// Test data for the chat page, shared by its accessibility tests and its gallery views: messages in every state, a home view with and
-// without an approved card, friends, and asks in every state. Every object is checked against its contracts schema.
+// Test data for the chat page, shared by its accessibility tests and its gallery views: messages in
+// every state, a home view with and without an approved card, friends, and asks in every state.
+// Every object is checked against its contracts schema.
 import {
   AskView,
   FriendsView,

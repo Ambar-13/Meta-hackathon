@@ -1,6 +1,7 @@
 import { CODEX_FILE_NAME, isCodexLineWanted } from "@meet-first/parsers";
 
-// Gathers the bytes of one file as they arrive and gives back the text the parser reads once the last chunk is in.
+// Gathers the bytes of one file as they arrive and gives back the text the parser reads once the
+// last chunk is in.
 export type TextCollector = { push: (chunk: Uint8Array) => void; finish: () => string };
 
 // Keeps every byte of a file and reads them as UTF-8 text at the end.
@@ -22,9 +23,9 @@ function everyByte(): TextCollector {
   };
 }
 
-// Keeps only the wanted lines of a file, judging each line as soon as its line break arrives, so the rest of a large file is never
-// held. A line split across chunks, or a character split between its bytes, is joined before it is judged. The kept lines come back
-// joined by "\n".
+// Keeps only the wanted lines of a file, judging each line as soon as its line break arrives, so
+// the rest of a large file is never held. A line split across chunks, or a character split between
+// its bytes, is joined before it is judged. The kept lines come back joined by "\n".
 export function wantedLines(isWanted: (line: string) => boolean): TextCollector {
   const decoder = new TextDecoder("utf-8");
   const kept: string[] = [];
@@ -52,8 +53,9 @@ export function wantedLines(isWanted: (line: string) => boolean): TextCollector 
   };
 }
 
-// The collector for one file: the lines the Codex reader wants from a Codex session log (.jsonl), every byte of anything else. One
-// Codex session can run to hundreds of megabytes, almost all of it tool output and the agent's own work.
+// The collector for one file: the lines the Codex reader wants from a Codex session log (.jsonl),
+// every byte of anything else. One Codex session can run to hundreds of megabytes, almost all of it
+// tool output and the agent's own work.
 export function collectorFor(name: string): TextCollector {
   return CODEX_FILE_NAME.test(name) ? wantedLines(isCodexLineWanted) : everyByte();
 }

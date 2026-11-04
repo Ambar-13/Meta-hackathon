@@ -1,5 +1,5 @@
-// Steps 16 to 21: B shares three items, turns on friend asks and lists in the directory; A meets B's listed persona on a debate,
-// asks how B would probably react, and asks the directory for help.
+// Steps 16 to 21: B shares three items, turns on friend asks and lists in the directory; A meets
+// B's listed persona on a debate, asks how B would probably react, and asks the directory for help.
 import {
   CURATED_QUESTIONS,
   DIRECTORY_SWITCH_COPY,
@@ -44,7 +44,8 @@ const MEETING_POLL_MS = 2_000;
 // Both briefs may take 300 s after the meeting ends (step 13).
 const BRIEF_WAIT_MS = 300_000;
 const BRIEF_POLL_MS = 3_000;
-// An ask may take 180 s: the question check, up to 20 persona calls through the limiter, then the support check.
+// An ask may take 180 s: the question check, up to 20 persona calls through the limiter, then the
+// support check.
 const ASK_WAIT_MS = 180_000;
 const ASK_POLL_MS = 3_000;
 // The states an ask stops in.
@@ -71,7 +72,8 @@ function curatedText(questionId: number): string {
   return question.text;
 }
 
-// The words of a text, lower case, four letters or more, so short common words do not count as a match.
+// The words of a text, lower case, four letters or more, so short common words do not count as a
+// match.
 function matchWordsOf(text: string): Set<string> {
   return new Set(
     text
@@ -81,8 +83,9 @@ function matchWordsOf(text: string): Set<string> {
   );
 }
 
-// The shareable item a card offers for the help search: the one sharing the most words with the help question, the lowest position
-// on a tie. A real model words B's notes its own way, so a replay of its recording picks the item the recording run picked.
+// The shareable item a card offers for the help search: the one sharing the most words with the
+// help question, the lowest position on a tie. A real model words B's notes its own way, so a
+// replay of its recording picks the item the recording run picked.
 function closestHelpItem(shareable: readonly CardItem[]): CardItem | undefined {
   const asked = matchWordsOf(HELP_ASK_TEXT);
   const scored = shareable.map((item) => ({
@@ -98,8 +101,9 @@ function closestHelpItem(shareable: readonly CardItem[]): CardItem | undefined {
   return best?.item;
 }
 
-// The items B makes public: the item the help search must find, and the first others in position order, three in all. The help item
-// is the one that quotes HELP_ITEM_WORDS when the card has it, else the item closest to the help question, under --mock as on a live run.
+// The items B makes public: the item the help search must find, and the first others in position
+// order, three in all. The help item is the one that quotes HELP_ITEM_WORDS when the card has it,
+// else the item closest to the help question, under --mock as on a live run.
 function publicItemsOf(items: readonly CardItem[]): CardItem[] {
   const shareable = items.filter((item) => item.approved && item.verified && !item.sensitive);
   const helpItem =
@@ -175,7 +179,8 @@ export async function step16Sharing(run: RunState): Promise<StepResult> {
   });
 }
 
-// The checks on B's listing as A finds it: B's name and line, exactly the public items, and no field beyond the listing's own.
+// The checks on B's listing as A finds it: B's name and line, exactly the public items, and no
+// field beyond the listing's own.
 function listingChecks(
   run: RunState,
   listing:
@@ -205,8 +210,9 @@ function listingChecks(
   ];
 }
 
-// Step 17: A browses the directory, finds B's listing, is refused a dating question, and starts a meeting with B's listed persona on
-// curated question 13. The meeting starts by itself, with B's side speaking from public items only.
+// Step 17: A browses the directory, finds B's listing, is refused a dating question, and starts a
+// meeting with B's listed persona on curated question 13. The meeting starts by itself, with B's
+// side speaking from public items only.
 export async function step17Directory(run: RunState): Promise<StepResult> {
   const cardA = need(run.ids.cardA, "cardA");
   const listingB = need(run.ids.listingB, "listingB");
@@ -330,8 +336,8 @@ function quotesOf(brief: Brief, side: "a" | "b"): Array<{ turnId: string }> {
     .filter((quote) => quote.side === side);
 }
 
-// Step 19: A and B each have a brief of the debate; every quote of B in either brief comes from a turn behind one of B's public items,
-// and B's listed meetings show the meeting with A.
+// Step 19: A and B each have a brief of the debate; every quote of B in either brief comes from a
+// turn behind one of B's public items, and B's listed meetings show the meeting with A.
 export async function step19DirectoryBrief(run: RunState): Promise<StepResult> {
   const meetingId = need(run.ids.directoryMeetingId, "directoryMeetingId");
   const publicTurns = need(run.facts.publicTurnIdsB, "publicTurnIdsB");
@@ -384,7 +390,8 @@ export async function step19DirectoryBrief(run: RunState): Promise<StepResult> {
       { otherDisplayName: meeting?.otherDisplayName, questionText: meeting?.questionText },
     ),
   ];
-  // How many lines the support judge backs is the model's choice; the recorded judge left several unsupported, so no run counts them.
+  // How many lines the support judge backs is the model's choice; the recorded judge left several
+  // unsupported, so no run counts them.
   run.manual.push(
     "the directory brief reads the debate labels: where you agree, where you split, the strongest point on each side",
   );
@@ -430,8 +437,8 @@ async function readCopiesOfB(
   }));
 }
 
-// Step 20: A finds B among their friends by the invite pair alone, asks how B would probably react, and gets B's persona's answer
-// with a verified quote. B gets a copy with A's name.
+// Step 20: A finds B among their friends by the invite pair alone, asks how B would probably react,
+// and gets B's persona's answer with a verified quote. B gets a copy with A's name.
 export async function step20FriendAsk(run: RunState): Promise<StepResult> {
   const pairId = need(run.ids.pairId, "pairId");
   const friends = await run.a.json({
@@ -491,8 +498,9 @@ export async function step20FriendAsk(run: RunState): Promise<StepResult> {
   });
 }
 
-// Step 21: A asks the directory for help. B's persona, the only listing, answers from public items only; a signed answer is placed
-// first with a verified, supported quote. B's copies now hold both answers.
+// Step 21: A asks the directory for help. B's persona, the only listing, answers from public items
+// only; a signed answer is placed first with a verified, supported quote. B's copies now hold both
+// answers.
 export async function step21Help(run: RunState): Promise<StepResult> {
   const personA = need(run.ids.personA, "personA");
   const publicTurns = need(run.facts.publicTurnIdsB, "publicTurnIdsB");
@@ -531,8 +539,9 @@ export async function step21Help(run: RunState): Promise<StepResult> {
       copies.map((copy) => [copy.mode, copy.askerName]).sort(),
     ),
   ];
-  // Whether B's persona signs its answer is the model's choice. The recorded persona said B's public items show nothing on the question,
-  // so --mock tolerates an unsigned answer as a live run does; a signed answer must still lead and offer a meeting.
+  // Whether B's persona signs its answer is the model's choice. The recorded persona said B's
+  // public items show nothing on the question, so --mock tolerates an unsigned answer as a live run
+  // does; a signed answer must still lead and offer a meeting.
   const notes: string[] = [];
   if (answer?.hasSign === true) {
     assertions.push(

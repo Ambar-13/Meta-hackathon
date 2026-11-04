@@ -1,4 +1,5 @@
-// Turns the people fixtures into the gzip NDJSON body the browser posts, and reads the planted markers and planted secrets.
+// Turns the people fixtures into the gzip NDJSON body the browser posts, and reads the planted
+// markers and planted secrets.
 import { existsSync, readFileSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 import { join } from "node:path";
@@ -11,7 +12,8 @@ import { REPO_ROOT } from "./eval-flags.js";
 export const PEOPLE_FOLDER = join(REPO_ROOT, "packages", "evals", "fixtures", "people");
 // The folder the injection fixtures live in.
 export const INJECTION_FOLDER = join(REPO_ROOT, "packages", "evals", "fixtures", "injection");
-// One people fixture: the file name, the kind, its path, and the injection file appended to it when there is one.
+// One people fixture: the file name, the kind, its path, and the injection file appended to it when
+// there is one.
 export type PersonFixture = {
   name: string;
   kind: "chatgpt" | "claude" | "paste";
@@ -28,14 +30,16 @@ export function extractMarkers(text: string): string[] {
   );
 }
 
-// The text the upload is read from: the fixture, with its injection file appended as its own blocks when it has one.
+// The text the upload is read from: the fixture, with its injection file appended as its own blocks
+// when it has one.
 function textOf(fixture: PersonFixture): string {
   const base = readFileSync(fixture.path, "utf8");
   if (fixture.injectionPath === undefined) return base;
   return `${base}\n\n${readFileSync(fixture.injectionPath, "utf8")}`;
 }
 
-// Builds the gzip NDJSON body the way the browser does: the header line, then one line per turn, with the preview's redaction count.
+// Builds the gzip NDJSON body the way the browser does: the header line, then one line per turn,
+// with the preview's redaction count.
 export function buildSourceBody(
   fixture: PersonFixture,
 ): Promise<{ gzip: Uint8Array; turnCount: number; previewRedactions: number }> {
@@ -63,7 +67,8 @@ export function buildSourceBody(
   });
 }
 
-// Counts the planted secrets the scrub lets through: a line survives when its expected category is not among the redactions.
+// Counts the planted secrets the scrub lets through: a line survives when its expected category is
+// not among the redactions.
 export function countPlantedSurvivors(ndjsonPath: string): { survivors: number; total: number } {
   const lines = readFileSync(ndjsonPath, "utf8")
     .split("\n")
@@ -80,7 +85,8 @@ export function countPlantedSurvivors(ndjsonPath: string): { survivors: number; 
   return { survivors, total: planted.length };
 }
 
-// Finds one people fixture by file name, or undefined when the file is not in the folder. The kind follows the file extension.
+// Finds one people fixture by file name, or undefined when the file is not in the folder. The kind
+// follows the file extension.
 export function findPersonFixture(name: string): PersonFixture | undefined {
   const path = join(PEOPLE_FOLDER, name);
   if (!existsSync(path)) return undefined;

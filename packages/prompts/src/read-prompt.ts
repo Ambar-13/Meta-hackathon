@@ -5,7 +5,8 @@ import { ContractError } from "@meet-first/contracts";
 import { z } from "zod";
 import { currentVersion, type PromptName } from "./current.js";
 
-// One prompt as the code sends it: the folder name, the version folder, the text of prompt.md, and schema.json when the folder has one.
+// One prompt as the code sends it: the folder name, the version folder, the text of prompt.md, and
+// schema.json when the folder has one.
 export type Prompt = {
   name: PromptName;
   version: string;
@@ -51,7 +52,8 @@ function readSchema(schemaPath: string): Record<string, unknown> | null {
   return parsed.data;
 }
 
-// Reads the current version of one prompt at call time, so a version change in current.ts reaches the next call.
+// Reads the current version of one prompt at call time, so a version change in current.ts reaches
+// the next call.
 export function readPrompt(name: PromptName): Prompt {
   const version = currentVersion(name);
   const mdPath = promptFilePath(name, version, "prompt.md");

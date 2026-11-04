@@ -9,9 +9,11 @@ import {
   type PolledView,
 } from "../../app-shell/index.js";
 
-// How often the page reads the comic while it is drawing, in milliseconds: the card screen's interval.
+// How often the page reads the comic while it is drawing, in milliseconds: the card screen's
+// interval.
 export const COMIC_POLL_MS = 3_000;
-// The reasons a comic was not drawn that the copy names. A failed comic is always render_failed; a skipped one has no reason on its view.
+// The reasons a comic was not drawn that the copy names. A failed comic is always render_failed; a
+// skipped one has no reason on its view.
 export type ComicSkipReason =
   | "deadline"
   | "prompt_blocked"

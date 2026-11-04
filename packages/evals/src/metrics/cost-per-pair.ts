@@ -1,9 +1,11 @@
-// Cost per complete pair: for each completed meeting, the sum of its ledger rows plus the card rows of its two members, averaged.
+// Cost per complete pair: for each completed meeting, the sum of its ledger rows plus the card rows
+// of its two members, averaged.
 import type { EvalRows, LedgerRow } from "../collect-rows.js";
 import type { MetricResult } from "./index.js";
 import { isCompleted } from "./completion-rate.js";
 
-// The dollars of one ledger row, zero when the row has none. A row without dollars is counted in the returned flag.
+// The dollars of one ledger row, zero when the row has none. A row without dollars is counted in
+// the returned flag.
 function dollarsOf(row: LedgerRow): { usd: number; isMissing: boolean } {
   return row.usd === null ? { usd: 0, isMissing: true } : { usd: row.usd, isMissing: false };
 }
@@ -24,7 +26,8 @@ function costOf(meetingId: string, rows: EvalRows): { usd: number; missing: numb
   };
 }
 
-// Reads the completed meetings and returns the mean cost per completed meeting, with the rows that had no dollars counted in detail.
+// Reads the completed meetings and returns the mean cost per completed meeting, with the rows that
+// had no dollars counted in detail.
 export function measureCostPerPair(rows: EvalRows): MetricResult {
   const completed = rows.meetings.filter(
     (meeting) => meeting.startedAt !== null && isCompleted(meeting),

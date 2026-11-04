@@ -11,7 +11,8 @@ type SourceState =
   | { kind: "loaded"; source: CardItemSource }
   | { kind: "failed"; error: ApiError };
 
-// The message with the quote marked: the text before the highlight, the highlight, and the text after it.
+// The message with the quote marked: the text before the highlight, the highlight, and the text
+// after it.
 const MessageText = (props: { source: CardItemSource }): ReactElement => {
   const { text, highlight } = props.source;
   if (highlight === null) return <p className="source-message">{text}</p>;
@@ -26,7 +27,8 @@ const MessageText = (props: { source: CardItemSource }): ReactElement => {
   );
 };
 
-// The tapped quote in a sheet over the page that holds focus until Close, showing the message it came from with the quote marked.
+// The tapped quote in a sheet over the page that holds focus until Close, showing the message it
+// came from with the quote marked.
 export const QuoteSheet = (props: {
   cardId: string;
   item: CardItem;
@@ -82,7 +84,8 @@ export const QuoteSheet = (props: {
   );
 };
 
-// The colour of each item kind's chip. Coral and blue are the two voices of a meeting, so they go to the kinds seen least.
+// The colour of each item kind's chip. Coral and blue are the two voices of a meeting, so they go
+// to the kinds seen least.
 const KIND_COLOUR: Record<CardItem["kind"], string> = {
   value: "c-green",
   preference: "c-lilac",
@@ -103,7 +106,8 @@ const QuoteMark = (props: { item: CardItem }): ReactElement => {
   );
 };
 
-// The foot of one row: In your card once approved, or the box that keeps it, which only a checked quote may tick.
+// The foot of one row: In your card once approved, or the box that keeps it, which only a checked
+// quote may tick.
 const UseBox = (props: {
   item: CardItem;
   isTicked: boolean;
@@ -124,7 +128,8 @@ const UseBox = (props: {
   );
 };
 
-// One item: its kind as a chip, the claim, an English gloss when needed, the quote that opens its message, its mark and its box.
+// One item: its kind as a chip, the claim, an English gloss when needed, the quote that opens its
+// message, its mark and its box.
 const CardItemRow = (props: {
   item: CardItem;
   isTicked: boolean;

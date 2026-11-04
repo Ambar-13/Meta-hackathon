@@ -3,13 +3,15 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { ContractError, RecordedCall, type CallSite, type LlmMode } from "@meet-first/contracts";
 
-// One model request as the worker sends it. body is the chat completions request, exactly as it goes out.
+// One model request as the worker sends it. body is the chat completions request, exactly as it
+// goes out.
 export type LlmRequest = {
   callSite: CallSite;
   promptVersion: string;
   body: Record<string, unknown>;
 };
-// What a model call returns. httpStatus is null for a replay, because a stored reply has no status to return.
+// What a model call returns. httpStatus is null for a replay, because a stored reply has no status
+// to return.
 export type LlmReply = {
   response: Record<string, unknown>;
   usage: RecordedCall["usage"];
@@ -22,7 +24,8 @@ export type LiveCaller = (request: LlmRequest, signal: AbortSignal) => Promise<L
 export const FIXTURE_ROOT = "packages/evals/fixtures/model-replies";
 // Characters per slice when a replayed streaming reply is sent in pieces. Picked here.
 export const REPLAY_STREAM_SLICE_CHARS = 20;
-// Milliseconds between two replayed slices, so the streaming path runs at a visible pace. The spec gives this value.
+// Milliseconds between two replayed slices, so the streaming path runs at a visible pace. The spec
+// gives this value.
 export const REPLAY_STREAM_SLICE_MS = 10;
 
 // Sorts every object key at every depth, so the same body always gives the same text.
@@ -40,7 +43,8 @@ function sortedJson(value: unknown): string {
   return text ?? "null";
 }
 
-// sha256 hex of the request body with keys sorted, so the same request always maps to one fixture file.
+// sha256 hex of the request body with keys sorted, so the same request always maps to one fixture
+// file.
 export function requestHash(body: Record<string, unknown>): string {
   return createHash("sha256").update(sortedJson(body)).digest("hex");
 }
@@ -78,7 +82,8 @@ async function recordReply(file: string, request: LlmRequest, reply: LlmReply): 
   await writeFile(file, `${JSON.stringify(recorded, null, 2)}\n`);
 }
 
-// Runs one call in the current mode: live calls the API; record calls it and writes the fixture; replay reads the fixture and never calls.
+// Runs one call in the current mode: live calls the API; record calls it and writes the fixture;
+// replay reads the fixture and never calls.
 export async function runInMode(args: {
   mode: LlmMode;
   fixtureRoot: string;

@@ -17,7 +17,8 @@ import { scrubForUpload } from "./scrub-preview.js";
 import { buildNdjson, encodeUploadBody } from "./upload-body.js";
 import { FILE_UNREADABLE_SENTENCE, INFLATED_MAX_BYTES, readPickedFile } from "./zip-stream.js";
 
-// What the page sends the worker: one input, the allowlist, and the summary's quotes and topics to keep first when there is one.
+// What the page sends the worker: one input, the allowlist, and the summary's quotes and topics to
+// keep first when there is one.
 export type WorkerRequest = { input: UploadInput; allowlist: string[]; priority?: SummaryPriority };
 // What the worker sends back: any number of progress messages, then exactly one done message.
 export type WorkerMessage =
@@ -40,7 +41,8 @@ function isWorkerRefusalCode(code: string): code is UploadRefusalCode {
   return (WORKER_REFUSAL_CODES as readonly string[]).includes(code);
 }
 
-// Turns any thrown value into the refusal the screen shows; anything unexpected becomes file_unreadable.
+// Turns any thrown value into the refusal the screen shows; anything unexpected becomes
+// file_unreadable.
 export function toRefusal(error: unknown): UploadRefused {
   if (error instanceof ContractError && isWorkerRefusalCode(error.code)) {
     return { ok: false, code: error.code, message: error.message };
@@ -48,7 +50,8 @@ export function toRefusal(error: unknown): UploadRefused {
   return { ok: false, code: "file_unreadable", message: FILE_UNREADABLE_SENTENCE };
 }
 
-// Reads the picked input into parser inputs, reporting each step of inflation as it passes another 16 MiB.
+// Reads the picked input into parser inputs, reporting each step of inflation as it passes another
+// 16 MiB.
 async function readInputs(
   input: UploadInput,
   onProgress: (progress: UploadProgress) => void,
@@ -67,7 +70,8 @@ async function readInputs(
   });
 }
 
-// The whole preparation in order: read, extract, scrub for the preview, compress. Throws on a refusal, and the caller turns it into one.
+// The whole preparation in order: read, extract, scrub for the preview, compress. Throws on a
+// refusal, and the caller turns it into one.
 async function prepare(
   request: WorkerRequest,
   onProgress: (progress: UploadProgress) => void,
@@ -111,7 +115,8 @@ async function prepare(
   };
 }
 
-// Read, extract, scrub for the preview, and compress, in that order; resolves once with the prepared upload or a refusal, never rejects.
+// Read, extract, scrub for the preview, and compress, in that order; resolves once with the
+// prepared upload or a refusal, never rejects.
 export async function prepareInWorker(
   request: WorkerRequest,
   onProgress: (progress: UploadProgress) => void,
@@ -129,7 +134,8 @@ type WorkerScope = {
   onmessage: ((event: MessageEvent<WorkerRequest>) => void) | null;
 };
 
-// Installs the message handler when this module runs inside a Web Worker, and does nothing on the page or in Node.
+// Installs the message handler when this module runs inside a Web Worker, and does nothing on the
+// page or in Node.
 export function installWorkerHandler(): void {
   const globals = globalThis as unknown as Record<string, unknown>;
   if (typeof globals.WorkerGlobalScope !== "function") return;

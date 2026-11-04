@@ -65,7 +65,8 @@ function post(n: number, writer: "Mira" | "Ravi", hoursAgo: number): PostsView["
   };
 }
 
-// One story by a person, hoursAgo hours old: Ravi and Mira by their listings, yours with no listing.
+// One story by a person, hoursAgo hours old: Ravi and Mira by their listings, yours with no
+// listing.
 function story(n: number, writer: "Mira" | "Ravi" | "You", hoursAgo: number): Story {
   const listingId = { Mira: LISTING_IDS.mira, Ravi: LISTING_IDS.ravi, You: null }[writer];
   return {
@@ -83,8 +84,9 @@ function story(n: number, writer: "Mira" | "Ravi" | "You", hoursAgo: number): St
   };
 }
 
-// What the feed's other reads answer in a test: the pages of everyone else's posts (posts), or every reply of GET /api/feed in order
-// (feed), the replies of GET /api/stories, the friends list, and whether the card is approved.
+// What the feed's other reads answer in a test: the pages of everyone else's posts (posts), or
+// every reply of GET /api/feed in order (feed), the replies of GET /api/stories, the friends list,
+// and whether the card is approved.
 type OtherReads = {
   posts?: StubInput[];
   feed?: StubInput[];
@@ -93,13 +95,15 @@ type OtherReads = {
   hasCard?: boolean;
 };
 
-// One page of everyone else's posts as GET /api/feed answers it, the last page; an error reply as it is.
+// One page of everyone else's posts as GET /api/feed answers it, the last page; an error reply as
+// it is.
 function feedReply(reply: StubInput): StubInput {
   return "status" in reply ? reply : { posts: (reply as { posts: unknown[] }).posts, next: null };
 }
 
-// Renders Home, the feed, with these replies for GET /api/directory; no posts, no stories, no friends and an approved card unless given.
-// Unless feed is given, the feed answers no posts of friends, then the posts given, as everyone else's.
+// Renders Home, the feed, with these replies for GET /api/directory; no posts, no stories, no
+// friends and an approved card unless given. Unless feed is given, the feed answers no posts of
+// friends, then the posts given, as everyone else's.
 function renderFeed(pages: StubInput[], others: OtherReads = {}): void {
   stubRoute(
     routes.social.listFeed,
@@ -112,7 +116,8 @@ function renderFeed(pages: StubInput[], others: OtherReads = {}): void {
   renderScreen(<FeedScreen />, { pattern: ROUTE_PATTERNS.home, url: APP_PATHS.home });
 }
 
-// The link of the person with this name: the link that holds their name heading, a card in the feed or a row in a list.
+// The link of the person with this name: the link that holds their name heading, a card in the feed
+// or a row in a list.
 async function personLinkOf(name: string): Promise<HTMLElement> {
   const link = (await screen.findByRole("heading", { name })).closest("a");
   if (link === null) throw new Error(`the name of ${name} is not in a link`);

@@ -2,7 +2,8 @@ import type { ColumnType, Generated, JSONColumnType } from "kysely";
 
 type Timestamp = ColumnType<Date, Date | string, Date | string>;
 type NullableTimestamp = ColumnType<Date | null, Date | string | null, Date | string | null>;
-// A timestamp the database fills in when a row is inserted. Kysely 0.27 would wrap a ColumnType inside Generated<>, so the alias spells out the same select, insert and update types.
+// A timestamp the database fills in when a row is inserted. Kysely 0.27 would wrap a ColumnType
+// inside Generated<>, so the alias spells out the same select, insert and update types.
 type GeneratedTimestamp = ColumnType<Date, Date | string | undefined, Date | string>;
 type Bytes = ColumnType<Buffer, Buffer, Buffer>;
 
@@ -425,7 +426,8 @@ export interface FriendRequestsTable {
   created_at: GeneratedTimestamp;
   decided_at: NullableTimestamp;
 }
-// One row of the orchestrator_messages table, as migration 0008 defines it; friends_snapshot is jsonb.
+// One row of the orchestrator_messages table, as migration 0008 defines it; friends_snapshot is
+// jsonb.
 export interface OrchestratorMessagesTable {
   id: Generated<string>;
   person_id: string;
@@ -441,7 +443,8 @@ export interface OrchestratorMessagesTable {
   reply_to: string | null;
   created_at: GeneratedTimestamp;
 }
-// One row of the posts table, as migrations 0009 and 0013 define it: a post or a story, with its photo as JPEG bytes.
+// One row of the posts table, as migrations 0009 and 0013 define it: a post or a story, with its
+// photo as JPEG bytes.
 export interface PostsTable {
   id: Generated<string>;
   person_id: string;
@@ -451,13 +454,15 @@ export interface PostsTable {
   photo: ColumnType<Buffer | null, Buffer | null | undefined, Buffer | null>;
   expires_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
 }
-// One row of the google_accounts table, as migration 0015 defines it: the Google account a person signs in with, by its subject only.
+// One row of the google_accounts table, as migration 0015 defines it: the Google account a person
+// signs in with, by its subject only.
 export interface GoogleAccountsTable {
   google_sub: string;
   person_id: string;
   created_at: GeneratedTimestamp;
 }
-// One row of the person_summaries table, as migration 0016 defines it: the summary a person's own AI wrote; points is jsonb.
+// One row of the person_summaries table, as migration 0016 defines it: the summary a person's own
+// AI wrote; points is jsonb.
 export interface PersonSummariesTable {
   person_id: string;
   text: string;
@@ -473,7 +478,8 @@ export interface PostLikesTable {
   person_id: string;
   created_at: GeneratedTimestamp;
 }
-// One row of the profile_photos table, as migration 0012 defines it: a person's own photo as JPEG bytes.
+// One row of the profile_photos table, as migration 0012 defines it: a person's own photo as JPEG
+// bytes.
 export interface ProfilePhotosTable {
   id: Generated<string>;
   person_id: string;
@@ -490,7 +496,8 @@ export interface RecallCorpusView {
   card_id: string;
 }
 
-// Every table and view of migrations 0001 to 0015, by its SQL name. Add a row here in the same change that adds a migration.
+// Every table and view of migrations 0001 to 0015, by its SQL name. Add a row here in the same
+// change that adds a migration.
 export interface Database {
   people: PeopleTable;
   sessions: SessionsTable;

@@ -4,7 +4,8 @@ import { APP_PATHS } from "../../app-shell/index.js";
 import { Cloud, NameTag, Sticker, type StickerName } from "../../look/index.js";
 import { RecoverForm } from "./welcome-forms.js";
 
-// The end of the welcome page: the three steps, the promises, the last call, the way back in with a code, and the footer.
+// The end of the welcome page: the three steps, the promises, the last call, the way back in with a
+// code, and the footer.
 
 // One step of the first run: its colour, sticker, words and the time it takes.
 type Step = { colour: string; sticker: StickerName; title: string; text: string; time: string };
@@ -57,7 +58,8 @@ export const ThreeSteps = (): ReactElement => {
 
 // One promise: a sticker, a short heading and one line.
 type PromiseCard = { sticker: StickerName; title: string; text: string };
-// The four promises, each true of the build: probable reactions, no scores, scrubbing in the browser, deletion.
+// The four promises, each true of the build: probable reactions, no scores, scrubbing in the
+// browser, deletion.
 const PROMISES: readonly PromiseCard[] = [
   {
     sticker: "spark",
@@ -149,7 +151,8 @@ export const BackAgain = (props: { onDone: () => void }): ReactElement => {
   );
 };
 
-// The footer on navy: the name, the line, the puffy links, the last word, and the three policy pages.
+// The footer on navy: the name, the line, the puffy links, the last word, and the three policy
+// pages.
 export const WelcomeFooter = (): ReactElement => {
   return (
     <footer className="wl-foot">

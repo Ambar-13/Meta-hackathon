@@ -1,7 +1,8 @@
-// Asks each pending answer's persona once and stores the checked reply. A request holds only what its subject
-// allowed: public items for a help search; approved, verified items and, when the subject switched recall on, recall results for
-// a friend or self ask, searched with the words the search-words call gives; the summary's points for a self ask, and for a friend ask
-// when the subject's summary switch is on; and the subject's quiz misses as do-not-guess topics.
+// Asks each pending answer's persona once and stores the checked reply. A request holds only what
+// its subject allowed: public items for a help search; approved, verified items and, when the
+// subject switched recall on, recall results for a friend or self ask, searched with the words the
+// search-words call gives; the summary's points for a self ask, and for a friend ask when the
+// subject's summary switch is on; and the subject's quiz misses as do-not-guess topics.
 import type { Kysely } from "kysely";
 import { ContractError, PersonaAnswerOutput, RECALL_TOP_K } from "@meet-first/contracts";
 import {
@@ -34,7 +35,8 @@ import {
 import { searchQueryOf, searchWordsCall } from "./search-words.js";
 import { readSummaryMaterial, readUsablePoints, type SummaryMaterial } from "./summary-material.js";
 
-// What one persona call ended with: a stored answer, a failed answer, or a full token window that leaves the answer pending.
+// What one persona call ended with: a stored answer, a failed answer, or a full token window that
+// leaves the answer pending.
 type AnswerOutcome = "answered" | "failed" | "limited";
 // The two prompts every persona_answer request of one run joins, read at call time.
 type AnswerPrompts = { personaAnswer: Prompt; untrustedRules: Prompt };
@@ -53,7 +55,8 @@ type SubjectMaterial = {
   summaryOnly: string[];
   turns: Map<number, CitableTurn>;
 };
-// What the material is read from: the items with their turns, the recall results, the quiz misses and the summary.
+// What the material is read from: the items with their turns, the recall results, the quiz misses
+// and the summary.
 type MaterialParts = {
   items: readonly ItemWithTurn[];
   recall: readonly RecallWithTurn[];
@@ -61,11 +64,13 @@ type MaterialParts = {
   summary: SummaryMaterial;
   labelOf: LabelOf;
 };
-// The number a request shows for one message: its place in one numbering of all the subject's uploads.
+// The number a request shows for one message: its place in one numbering of all the subject's
+// uploads.
 type LabelOf = (sourceId: string, turnIndex: number) => number;
 
-// Asks every pending answer's persona at the same time, at most HELP_SHORTLIST_MAX of them, and stores each reply as it arrives.
-// "limited" when any call met a full token window; those answers stay pending for the next run.
+// Asks every pending answer's persona at the same time, at most HELP_SHORTLIST_MAX of them, and
+// stores each reply as it arrives. "limited" when any call met a full token window; those answers
+// stay pending for the next run.
 export async function answerPending(
   context: JobContext,
   ask: AskRow,
@@ -83,8 +88,8 @@ export async function answerPending(
   return outcomes.includes("limited") ? "limited" : "settled";
 }
 
-// One persona: read its material, call the model, check the reply's quotes, store the answer. A failed call or a reply that breaks
-// the schema fails this answer only, and the others go on.
+// One persona: read its material, call the model, check the reply's quotes, store the answer. A
+// failed call or a reply that breaks the schema fails this answer only, and the others go on.
 async function answerOne(context: JobContext, scope: AnswerScope): Promise<AnswerOutcome> {
   const { ask, row, prompts } = scope;
   const query = await recallQueryFor(context, ask, row);
@@ -156,9 +161,10 @@ async function failAnswer(
   return "failed";
 }
 
-// The recall query of a friend or self ask whose card allows recall: the words the search-words call gives for the ask and the subject's
-// summary topics, or the ask's own text when that call fails. Any other ask searches nothing, so it gets the ask's text without a
-// call. Null when the token window is full, so the answer stays pending for the next run.
+// The recall query of a friend or self ask whose card allows recall: the words the search-words
+// call gives for the ask and the subject's summary topics, or the ask's own text when that call
+// fails. Any other ask searches nothing, so it gets the ask's text without a call. Null when the
+// token window is full, so the answer stays pending for the next run.
 async function recallQueryFor(
   context: JobContext,
   ask: AskRow,
@@ -201,11 +207,13 @@ async function recallQueryFor(
   }
 }
 
-// Reads one subject's material in the subject's own context, and only reads. Null when a help answer's listing is gone, names another
-// card or, for a romance ask, has its dating switch off; when the subject's account deletion has started; when the card
-// is gone or no longer approved; and, for a friend ask, when the friend has turned friend asks off since the answer row was written.
-// A help answer never reads recall or the summary; a friend or self ask searches recall with the query. A subject with no approved
-// card has no card to read, and the material is their summary alone.
+// Reads one subject's material in the subject's own context, and only reads. Null when a help
+// answer's listing is gone, names another card or, for a romance ask, has its dating switch off;
+// when the subject's account deletion has started; when the card is gone or no longer approved;
+// and, for a friend ask, when the friend has turned friend asks off since the answer row was
+// written. A help answer never reads recall or the summary; a friend or self ask searches recall
+// with the query. A subject with no approved card has no card to read, and the material is their
+// summary alone.
 async function readSubjectMaterial(
   db: Kysely<Database>,
   subject: { ask: AskRow; row: AnswerRow; query: string },
@@ -236,9 +244,10 @@ async function readSubjectMaterial(
   });
 }
 
-// One numbering of all the subject's messages: uploads in the order they came, each starting after the last message of the one
-// before, so a later upload's messages get higher numbers than an earlier upload's and the prompt's "higher number is later" holds
-// across uploads. Within one upload the number is the message's own place, as before.
+// One numbering of all the subject's messages: uploads in the order they came, each starting after
+// the last message of the one before, so a later upload's messages get higher numbers than an
+// earlier upload's and the prompt's "higher number is later" holds across uploads. Within one
+// upload the number is the message's own place, as before.
 async function readLabels(trx: DatabaseTransaction, personId: string): Promise<LabelOf> {
   const sources = await trx
     .selectFrom("sources")
@@ -256,8 +265,9 @@ async function readLabels(trx: DatabaseTransaction, personId: string): Promise<L
   return (sourceId, turnIndex) => (starts.get(sourceId) ?? 0) + turnIndex;
 }
 
-// Whether the friend of a friend ask, chosen while they had no approved card, has approved one since. Once there is a card, the card's
-// own switch decides, as in friend_list(), so the summary must not answer. Their own ask never needs this.
+// Whether the friend of a friend ask, chosen while they had no approved card, has approved one
+// since. Once there is a card, the card's own switch decides, as in friend_list(), so the summary
+// must not answer. Their own ask never needs this.
 async function hasCardSince(
   trx: DatabaseTransaction,
   ask: AskRow,
@@ -273,9 +283,10 @@ async function hasCardSince(
   return card !== undefined;
 }
 
-// The material of an answer whose subject has no approved card: their summary alone, for their own ask, or for a friend's ask while
-// the summary's friends switch is on (readUsablePoints gives nothing when it is off, and the answer then fails as a gone subject). A
-// help answer always has a card, so it gets null.
+// The material of an answer whose subject has no approved card: their summary alone, for their own
+// ask, or for a friend's ask while the summary's friends switch is on (readUsablePoints gives
+// nothing when it is off, and the answer then fails as a gone subject). A help answer always has a
+// card, so it gets null.
 function summaryOnlyMaterial(
   ask: AskRow,
   summary: SummaryMaterial,
@@ -286,7 +297,8 @@ function summaryOnlyMaterial(
   return materialOf({ items: [], recall: [], misses: [], summary, labelOf });
 }
 
-// The subject's card as this ask may use it, or null when it is gone, no longer approved, or, for a friend ask, has friend asks off.
+// The subject's card as this ask may use it, or null when it is gone, no longer approved, or, for a
+// friend ask, has friend asks off.
 async function readUsableCard(
   trx: DatabaseTransaction,
   ask: AskRow,
@@ -306,7 +318,8 @@ async function readUsableCard(
   return card;
 }
 
-// Whether a help answer's listing still exists with the same card, and is open to dating questions when the ask is a romance one.
+// Whether a help answer's listing still exists with the same card, and is open to dating questions
+// when the ask is a romance one.
 async function isListingCurrent(
   trx: DatabaseTransaction,
   ask: AskRow,
@@ -323,7 +336,8 @@ async function isListingCurrent(
   return ask.questionKind !== "romance" || listing.open_to_romance;
 }
 
-// The card's approved, verified items in position order with the turns they quote; public ones only for a help answer.
+// The card's approved, verified items in position order with the turns they quote; public ones only
+// for a help answer.
 async function readItems(
   trx: DatabaseTransaction,
   cardId: string,
@@ -360,8 +374,8 @@ async function readItems(
   }));
 }
 
-// A friend's recall results for the ask's text, each turn once, in the search's order: the snippet the request shows, and the
-// whole turn the quote check reads.
+// A friend's recall results for the ask's text, each turn once, in the search's order: the snippet
+// the request shows, and the whole turn the quote check reads.
 async function readRecall(
   trx: DatabaseTransaction,
   cardId: string,
@@ -397,9 +411,11 @@ async function readRecall(
   return results;
 }
 
-// The request's material and the turns its claims may cite: every item's turn, then every found summary point's turn, then every recall
-// turn, each numbered by readLabels, so the numbers never repeat across uploads and a higher number is a later message. A message whose
-// number another message already holds is left out, as a guard: a claim citing that number would be checked against the wrong one.
+// The request's material and the turns its claims may cite: every item's turn, then every found
+// summary point's turn, then every recall turn, each numbered by readLabels, so the numbers never
+// repeat across uploads and a higher number is a later message. A message whose number another
+// message already holds is left out, as a guard: a claim citing that number would be checked
+// against the wrong one.
 function materialOf(parts: MaterialParts): SubjectMaterial {
   const numbered = (entry: { turn: CitableTurn; sourceId: string }): CitableTurn => ({
     ...entry.turn,

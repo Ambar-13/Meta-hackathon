@@ -49,7 +49,8 @@ const ViewOnRoute = (props: { view: GalleryView }): ReactElement => {
 const viewName = new URLSearchParams(window.location.search).get("view");
 const view = ALL_VIEWS.find((candidate) => candidate.name === viewName);
 if (view !== undefined) installFetchStub(view.stubs ?? []);
-// Each view starts with nothing kept in the browser, so a story watched in one view still shows as new in the next.
+// Each view starts with nothing kept in the browser, so a story watched in one view still shows as
+// new in the next.
 window.localStorage.clear();
 const root = document.getElementById("root");
 if (root !== null) {

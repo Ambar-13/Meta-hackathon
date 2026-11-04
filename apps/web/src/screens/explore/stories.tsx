@@ -41,7 +41,8 @@ const STORY_COPY = {
 // How long one story shows before the next, as Instagram's.
 const STORY_SHOW_MS = 5_000;
 
-// True when the person asked their system for less motion; then stories wait for a tap instead of moving on by themselves.
+// True when the person asked their system for less motion; then stories wait for a tap instead of
+// moving on by themselves.
 function prefersLessMotion(): boolean {
   return (
     typeof window.matchMedia === "function" &&
@@ -49,7 +50,8 @@ function prefersLessMotion(): boolean {
   );
 }
 
-// One person's face in the row: a dark ring while one of their stories is new to you, a hairline once you have watched them all.
+// One person's face in the row: a dark ring while one of their stories is new to you, a hairline
+// once you have watched them all.
 const StoryFace = (props: { group: StoryGroup; onOpen: () => void }): ReactElement => {
   const { group } = props;
   const name = group.isMine ? STORY_COPY.yours : group.displayName;
@@ -73,9 +75,10 @@ const StoryFace = (props: { group: StoryGroup; onOpen: () => void }): ReactEleme
   );
 };
 
-// The row of faces: Your story first, which opens Create ready for a story while you have none and your stories once you do; then each
-// person with a story, new ones first. The viewer opens over the page on the face tapped and keeps the row's order as it was then, so
-// watching a story never moves the person under it.
+// The row of faces: Your story first, which opens Create ready for a story while you have none and
+// your stories once you do; then each person with a story, new ones first. The viewer opens over
+// the page on the face tapped and keeps the row's order as it was then, so watching a story never
+// moves the person under it.
 export const StoriesRow = (props: {
   stories: PolledView<StoriesView>;
   me: { name: string; photo: string | null } | null;
@@ -142,7 +145,8 @@ export const StoriesRow = (props: {
 // Where the viewer is: which person, and which of their stories.
 type ViewerPlace = { group: number; story: number };
 
-// The next place after this one: the person's next story, else the next person's first, else null after the last.
+// The next place after this one: the person's next story, else the next person's first, else null
+// after the last.
 function nextPlace(groups: readonly StoryGroup[], place: ViewerPlace): ViewerPlace | null {
   const group = groups[place.group];
   if (group !== undefined && place.story + 1 < group.stories.length)
@@ -150,7 +154,8 @@ function nextPlace(groups: readonly StoryGroup[], place: ViewerPlace): ViewerPla
   return place.group + 1 < groups.length ? { group: place.group + 1, story: 0 } : null;
 }
 
-// The place before this one: the person's story before, else the person before's first story, else this same story again.
+// The place before this one: the person's story before, else the person before's first story, else
+// this same story again.
 function previousPlace(place: ViewerPlace): ViewerPlace {
   if (place.story > 0) return { group: place.group, story: place.story - 1 };
   return place.group > 0 ? { group: place.group - 1, story: 0 } : place;
@@ -199,7 +204,8 @@ const DeleteStory = (props: { storyId: string; onDeleted: () => void }): ReactEl
   );
 };
 
-// The foot of the viewer: Delete story on your own, Add to your story beside it, and See profile on someone else's.
+// The foot of the viewer: Delete story on your own, Add to your story beside it, and See profile on
+// someone else's.
 const ViewerFoot = (props: {
   group: StoryGroup;
   storyId: string;
@@ -226,7 +232,8 @@ const ViewerFoot = (props: {
   );
 };
 
-// The keys the viewer answers: the arrows move, Escape closes, the space bar pauses, and Tab stays inside the viewer.
+// The keys the viewer answers: the arrows move, Escape closes, the space bar pauses, and Tab stays
+// inside the viewer.
 function onViewerKey(
   event: KeyboardEvent<HTMLDivElement>,
   actions: { next: () => void; previous: () => void; close: () => void; togglePause: () => void },
@@ -245,7 +252,8 @@ function onViewerKey(
   if (event.key !== "Tab") event.preventDefault();
 }
 
-// Keeps Tab and Shift+Tab inside the viewer, from its last control back to its first and the other way.
+// Keeps Tab and Shift+Tab inside the viewer, from its last control back to its first and the other
+// way.
 function keepFocusInside(event: KeyboardEvent<HTMLDivElement>): void {
   const controls = [...event.currentTarget.querySelectorAll<HTMLElement>("button, a[href]")];
   const first = controls[0];
@@ -260,8 +268,9 @@ function keepFocusInside(event: KeyboardEvent<HTMLDivElement>): void {
   }
 }
 
-// Runs the viewer's clock: each story moves on after STORY_SHOW_MS of showing, counting only the time it was not paused, so Pause and
-// Play pick up where the story was. moveOn is read when the time runs out, so it always moves from where the viewer is then.
+// Runs the viewer's clock: each story moves on after STORY_SHOW_MS of showing, counting only the
+// time it was not paused, so Pause and Play pick up where the story was. moveOn is read when the
+// time runs out, so it always moves from where the viewer is then.
 function useStoryClock(storyId: string | undefined, isPaused: boolean, moveOn: () => void): void {
   const shown = useRef({ storyId: "", elapsedMs: 0 });
   const latest = useRef(moveOn);
@@ -284,7 +293,8 @@ function useStoryClock(storyId: string | undefined, isPaused: boolean, moveOn: (
   }, [storyId, isPaused]);
 }
 
-// While the viewer is open: the page under it does not scroll, the focus starts on Close, and it goes back where it was on closing.
+// While the viewer is open: the page under it does not scroll, the focus starts on Close, and it
+// goes back where it was on closing.
 function useViewerFocus(closeRef: { current: HTMLButtonElement | null }): void {
   useEffect(() => {
     const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -298,7 +308,8 @@ function useViewerFocus(closeRef: { current: HTMLButtonElement | null }): void {
   }, [closeRef]);
 }
 
-// A bar for each of the person's stories: full for the ones watched, filling for the one showing, which stops while paused.
+// A bar for each of the person's stories: full for the ones watched, filling for the one showing,
+// which stops while paused.
 const StoryBars = (props: { group: StoryGroup; at: number; isPaused: boolean }): ReactElement => {
   return (
     <div className="story-bars" aria-hidden="true">
@@ -313,8 +324,8 @@ const StoryBars = (props: { group: StoryGroup; at: number; isPaused: boolean }):
   );
 };
 
-// The head of the viewer: the person's face and name, how long ago the story went up (Sample person for a sample's), Pause or Play, and
-// Close.
+// The head of the viewer: the person's face and name, how long ago the story went up (Sample person
+// for a sample's), Pause or Play, and Close.
 const ViewerHead = (props: {
   group: StoryGroup;
   story: Story;
@@ -357,9 +368,10 @@ const ViewerHead = (props: {
   );
 };
 
-// The viewer, over the whole page on a phone and as a tall card on a dark ground on a laptop: the bars, the head, the picture with
-// Previous on its left third and Next on the rest, then the foot. A story moves on after STORY_SHOW_MS unless paused or the person
-// prefers less motion, and the viewer closes after the last one.
+// The viewer, over the whole page on a phone and as a tall card on a dark ground on a laptop: the
+// bars, the head, the picture with Previous on its left third and Next on the rest, then the foot.
+// A story moves on after STORY_SHOW_MS unless paused or the person prefers less motion, and the
+// viewer closes after the last one.
 const StoryViewer = (props: {
   groups: StoryGroup[];
   startAt: number;

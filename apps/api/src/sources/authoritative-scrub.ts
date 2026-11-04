@@ -13,7 +13,8 @@ import { findPlaceholders, makePlaceholderCounter, scrub } from "@meet-first/scr
 import { normQuote } from "@meet-first/receipts";
 import { makePayloadInvalidError } from "../route-errors.js";
 
-// The sentence for a placeholder the app did not write, such as a redaction mark with an unknown category.
+// The sentence for a placeholder the app did not write, such as a redaction mark with an unknown
+// category.
 const PLACEHOLDER_INVALID_SENTENCE =
   "The upload has a redaction mark the app did not write. Upload the original file again.";
 // The sentence for a message that the scrub made longer than the turn limit.
@@ -26,7 +27,8 @@ const SOURCE_TOO_LARGE_SENTENCE =
 const TOO_MANY_TURNS_SENTENCE =
   "The upload has more than 10,000 messages. Upload again from the app, which keeps the 10,000 most useful ones.";
 
-// One turn as it will be stored: canonical, scrubbed, its norm text for quote checks, and its redactions.
+// One turn as it will be stored: canonical, scrubbed, its norm text for quote checks, and its
+// redactions.
 export type StoredTurn = {
   turnIndex: number;
   text: string;
@@ -34,7 +36,8 @@ export type StoredTurn = {
   lang: string | null;
   redactions: Redaction[];
 };
-// The authoritative pass over a whole upload: the turns to store, their content hash, and the sizes the checks need.
+// The authoritative pass over a whole upload: the turns to store, their content hash, and the sizes
+// the checks need.
 export type AuthoritativeScrub = {
   turns: StoredTurn[];
   contentHash: Buffer;
@@ -45,12 +48,14 @@ export type AuthoritativeScrub = {
 // A turn with its canonical text, made before any scrub runs so the size checks can read it.
 type CanonicalTurn = { turn: Turn; canonical: string };
 
-// sha256 of JSON.stringify of the stored texts in turn order, so the same text always gives the same hash.
+// sha256 of JSON.stringify of the stored texts in turn order, so the same text always gives the
+// same hash.
 export function contentHashOf(texts: readonly string[]): Buffer {
   return createHash("sha256").update(JSON.stringify(texts), "utf8").digest();
 }
 
-// Refuses an upload with too many turns, or with more canonical text than one source may hold, before any turn is scrubbed.
+// Refuses an upload with too many turns, or with more canonical text than one source may hold,
+// before any turn is scrubbed.
 function refuseOversized(turns: readonly Turn[]): CanonicalTurn[] {
   if (turns.length > TURNS_PER_SOURCE_MAX)
     throw new ContractError("source_too_many_turns", TOO_MANY_TURNS_SENTENCE, HTTP.payloadTooLarge);
@@ -61,7 +66,8 @@ function refuseOversized(turns: readonly Turn[]): CanonicalTurn[] {
   return canonicalTurns;
 }
 
-// Scrubs one canonical turn with the source's shared counter, refusing a placeholder it cannot read or a turn that grew too long.
+// Scrubs one canonical turn with the source's shared counter, refusing a placeholder it cannot read
+// or a turn that grew too long.
 function storedTurnOf(
   entry: CanonicalTurn,
   allowlist: readonly string[],
@@ -88,8 +94,9 @@ function storedTurnOf(
   };
 }
 
-// Canonicalises and scrubs every turn again with one placeholder counter for the source, so ids run from 00000001 in turn order.
-// The turn count and the canonical total are checked before the first turn is scrubbed, so an oversized upload costs no scrub work.
+// Canonicalises and scrubs every turn again with one placeholder counter for the source, so ids run
+// from 00000001 in turn order. The turn count and the canonical total are checked before the first
+// turn is scrubbed, so an oversized upload costs no scrub work.
 export function authoritativeScrub(
   turns: readonly Turn[],
   allowlist: readonly string[],

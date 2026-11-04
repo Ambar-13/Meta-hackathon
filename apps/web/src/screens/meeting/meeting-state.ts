@@ -16,7 +16,8 @@ export const POLLING_COPY =
 // The status line while the feed waits to reconnect (drafted copy).
 export const RECONNECTING_COPY = "Connection lost. Reconnecting.";
 
-// The meeting screen's model: the meeting view, the folded events, the feed status, when something last arrived, and a stop error.
+// The meeting screen's model: the meeting view, the folded events, the feed status, when something
+// last arrived, and a stop error.
 export type MeetingScreenModel = {
   view: PolledView<MeetingView>;
   fold: MeetingFoldState;

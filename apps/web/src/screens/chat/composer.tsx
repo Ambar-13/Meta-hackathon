@@ -1,6 +1,7 @@
-// The box at the foot of the chat, a filled pill as Instagram's message box: a text box that grows to six lines, a round blue Send button
-// with an arrow inside it (grey until there is something to send), the characters left near the limit, and the line that says nothing
-// goes out until a reply's button is pressed.
+// The box at the foot of the chat, a filled pill as Instagram's message box: a text box that grows
+// to six lines, a round blue Send button with an arrow inside it (grey until there is something to
+// send), the characters left near the limit, and the line that says nothing goes out until a
+// reply's button is pressed.
 import { useEffect, useId, useRef, type KeyboardEvent, type ReactElement } from "react";
 import { ORCHESTRATOR_MESSAGE_MAX_CHARS } from "@meet-first/contracts";
 import { ErrorNotice } from "../../app-shell/index.js";
@@ -16,12 +17,14 @@ const MAX_ROWS = 6;
 // The line under the box.
 const SAFETY_LINE = "Nothing goes to anyone's Meety until you press the button on a reply.";
 
-// The rows the box asks for, from the lines its text holds, for browsers that cannot size a text box to its content.
+// The rows the box asks for, from the lines its text holds, for browsers that cannot size a text
+// box to its content.
 function rowsOf(text: string): number {
   return Math.min(MAX_ROWS, Math.max(1, text.split("\n").length));
 }
 
-// Enter sends, Shift and Enter makes a new line, and Enter does nothing while an input method is composing a character.
+// Enter sends, Shift and Enter makes a new line, and Enter does nothing while an input method is
+// composing a character.
 function onEnter(event: KeyboardEvent<HTMLTextAreaElement>, send: () => void): void {
   if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
   event.preventDefault();

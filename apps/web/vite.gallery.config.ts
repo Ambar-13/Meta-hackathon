@@ -1,5 +1,6 @@
-// Builds the screen gallery (gallery.html) into apps/web/dist-gallery, a page that shows every screen and state from test data.
-// It is a development tool: the production build (vite.config.ts) never includes it.
+// Builds the screen gallery (gallery.html) into apps/web/dist-gallery, a page that shows every
+// screen and state from test data. It is a development tool: the production build (vite.config.ts)
+// never includes it.
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 

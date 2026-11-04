@@ -6,7 +6,8 @@ import { buildTestApp } from "../testing/index.js";
 import { registerSourcesRoutes } from "./index.js";
 import { authoritativeScrub } from "./authoritative-scrub.js";
 
-// Counts the calls the scrubber gets in this file. The spy passes every call on to the real scrubber, so only the count is new.
+// Counts the calls the scrubber gets in this file. The spy passes every call on to the real
+// scrubber, so only the count is new.
 const scrubCalls = vi.hoisted(() => ({ count: 0 }));
 
 vi.mock("@meet-first/scrub", async (importOriginal) => {

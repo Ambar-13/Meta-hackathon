@@ -1,11 +1,12 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { scrub } from "./scrub.js";
 
-// How many times a timed scrub runs. The fastest run is kept, because other test files share the CPU while these run, and a
-// slow run tells nothing about the scrubber itself.
+// How many times a timed scrub runs. The fastest run is kept, because other test files share the
+// CPU while these run, and a slow run tells nothing about the scrubber itself.
 const TIMED_RUNS = 3;
 
-// One scrub of a text: the scrubbed text, its redactions, and the fastest of TIMED_RUNS scrubs in milliseconds.
+// One scrub of a text: the scrubbed text, its redactions, and the fastest of TIMED_RUNS scrubs in
+// milliseconds.
 function scrubTimed(text: string): {
   text: string;
   redactions: Array<{ category: string; placeholderId: string }>;
@@ -58,7 +59,8 @@ describe("URL passwords with punctuation", () => {
 });
 
 describe("slow inputs stay fast", () => {
-  // The first scrub of a process pays for the regular expressions' setup, so it is made before any timing.
+  // The first scrub of a process pays for the regular expressions' setup, so it is made before any
+  // timing.
   beforeAll(() => {
     scrub("warm up", { allowlist: [] });
   });

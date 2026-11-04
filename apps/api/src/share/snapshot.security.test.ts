@@ -51,7 +51,8 @@ let seeded: SeededMeeting;
 let meetingId: string;
 let slug: string;
 
-// The fields of one brief point in this file: its text, the side and turn of its one quote, its verdict, and whether the quote was found.
+// The fields of one brief point in this file: its text, the side and turn of its one quote, its
+// verdict, and whether the quote was found.
 type PointInput = {
   text: string;
   side: "a" | "b";
@@ -82,7 +83,8 @@ function firstTurn(side: SeededMeeting["a"]): string {
   return turnId;
 }
 
-// The four committed turns, with two claims each (one verified, one flagged), then phase, end and brief.ready at seq 7.
+// The four committed turns, with two claims each (one verified, one flagged), then phase, end and
+// brief.ready at seq 7.
 function seedEvents(seed: SeededMeeting): CommittedEvent[] {
   const turns = [seed.a.turnIds, seed.b.turnIds];
   const sides = ["a", "b", "a", "b"] as const;
@@ -193,7 +195,8 @@ async function writeEvents(seed: SeededMeeting): Promise<void> {
   });
 }
 
-// Writes both briefs: side a's has a supported line, an unsupported line, a null line and an unverified quote; side b's shares one line with side a.
+// Writes both briefs: side a's has a supported line, an unsupported line, a null line and an
+// unverified quote; side b's shares one line with side a.
 async function writeBriefs(seed: SeededMeeting): Promise<void> {
   const turnA = firstTurn(seed.a);
   const turnB = firstTurn(seed.b);
@@ -247,7 +250,8 @@ async function writeBriefs(seed: SeededMeeting): Promise<void> {
   });
 }
 
-// Writes one unverified card item for side a: approved but not verified, so the snapshot must leave it out.
+// Writes one unverified card item for side a: approved but not verified, so the snapshot must leave
+// it out.
 async function writeUnverifiedItem(seed: SeededMeeting): Promise<void> {
   await withPerson(workerDb, seed.a.personId, async (trx) => {
     const position = 7;

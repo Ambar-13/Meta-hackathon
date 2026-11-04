@@ -2,15 +2,18 @@ import { ErrorBody, routes, SourceCreateResponse, type MyPhoto } from "@meet-fir
 import { z } from "zod";
 import { setServerOffsetOnce } from "./server-clock.js";
 
-// The one route map the app calls, from contracts: routes.people, routes.sources, routes.cards, routes.meetings and routes.briefs.
+// The one route map the app calls, from contracts: routes.people, routes.sources, routes.cards,
+// routes.meetings and routes.briefs.
 export { routes };
 
 // The base type of every route schema, as parseReply and apiFetch read it.
 export type AnySchema = z.ZodType<unknown, z.ZodTypeDef, unknown>;
-// The shape of every contracts route entry: method, a path with :id, :slug or :position parts, and the two schemas.
+// The shape of every contracts route entry: method, a path with :id, :slug or :position parts, and
+// the two schemas.
 export type ApiRoute = { method: string; path: string; request: AnySchema; response: AnySchema };
 
-// A failed call: the HTTP status (0 when no reply arrived), a stable code, the sentence a screen shows, and the reply body.
+// A failed call: the HTTP status (0 when no reply arrived), a stable code, the sentence a screen
+// shows, and the reply body.
 export class ApiError extends Error {
   readonly status: number;
   readonly code: string;
@@ -25,7 +28,8 @@ export class ApiError extends Error {
   }
 }
 
-// What one call needs besides its route: path values, query values, a JSON body, a reply schema used instead of the route's, and test inputs.
+// What one call needs besides its route: path values, query values, a JSON body, a reply schema
+// used instead of the route's, and test inputs.
 export type ApiFetchOptions<S extends AnySchema = AnySchema> = {
   params?: Readonly<Record<string, string>>;
   query?: Readonly<Record<string, string | number>>;
@@ -36,7 +40,8 @@ export type ApiFetchOptions<S extends AnySchema = AnySchema> = {
   signal?: AbortSignal;
 };
 
-// The sentence for each error code the browser makes itself, and for each status with no server sentence.
+// The sentence for each error code the browser makes itself, and for each status with no server
+// sentence.
 const CODE_SENTENCES: Readonly<Record<string, string>> = {
   network_failed: "The server could not be reached. Check your connection and try again.",
   request_cancelled: "The request was stopped.",
@@ -68,7 +73,8 @@ function fallbackFor(status: number): { code: string; message: string } {
   return { code, message: sentenceFor(code) };
 }
 
-// The error for a reply that is not 2xx: the server's ErrorBody when it sent one, else the fallback for the status.
+// The error for a reply that is not 2xx: the server's ErrorBody when it sent one, else the fallback
+// for the status.
 function errorFor(status: number, json: unknown): ApiError {
   const found = ErrorBody.safeParse(json);
   if (found.success)
@@ -82,7 +88,8 @@ function pageOrigin(): string {
   return typeof window === "undefined" ? "http://localhost" : window.location.origin;
 }
 
-// Fills the :name parts of a contracts path and adds the query, so no file writes an /api path by hand.
+// Fills the :name parts of a contracts path and adds the query, so no file writes an /api path by
+// hand.
 export function buildApiPath(
   path: string,
   params: Readonly<Record<string, string>>,
@@ -133,7 +140,8 @@ async function readJson(response: Response): Promise<unknown> {
   }
 }
 
-// Reads a reply that is not 2xx into an ApiError: the server's ErrorBody when it sent one, else the fallback for the status.
+// Reads a reply that is not 2xx into an ApiError: the server's ErrorBody when it sent one, else the
+// fallback for the status.
 export async function errorFromResponse(response: Response): Promise<ApiError> {
   const text = await response.text();
   let json: unknown = undefined;
@@ -169,7 +177,8 @@ function parseReply<S extends AnySchema>(schema: S, json: unknown, status: numbe
   return parsed.data;
 }
 
-// Builds the request settings for one call; a body is checked against the route's request schema before any fetch.
+// Builds the request settings for one call; a body is checked against the route's request schema
+// before any fetch.
 function requestFor(route: ApiRoute, options: ApiFetchOptions): RequestInit {
   const headers: Record<string, string> = { Accept: "application/json" };
   const init: RequestInit = {
@@ -217,7 +226,8 @@ export async function apiFetch<R extends ApiRoute, S extends AnySchema = R["resp
   return parseReply(schema, json, response.status);
 }
 
-// Posts the prepared NDJSON body to POST /api/sources with its content headers, and parses the reply.
+// Posts the prepared NDJSON body to POST /api/sources with its content headers, and parses the
+// reply.
 export async function apiUpload(
   upload: { body: Blob; contentEncoding: "gzip" | null },
   options: Pick<ApiFetchOptions, "fetchImpl" | "origin"> = {},
@@ -241,7 +251,8 @@ export async function apiUpload(
   return parseReply(routes.sources.createSource.response, json, response.status);
 }
 
-// Puts up a profile photo with PUT /api/people/me/photo: the JPEG bytes the browser drew, sent as image/jpeg.
+// Puts up a profile photo with PUT /api/people/me/photo: the JPEG bytes the browser drew, sent as
+// image/jpeg.
 export async function apiPhotoUpload(
   photo: Blob,
   options: Pick<ApiFetchOptions, "fetchImpl" | "origin"> = {},

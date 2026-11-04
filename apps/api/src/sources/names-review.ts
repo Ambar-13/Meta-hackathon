@@ -15,9 +15,11 @@ import { makeNotFoundError, makePayloadInvalidError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
 import { SourceParams } from "./read-source.js";
 
-// One name the names pass found and the person may keep: its text, its role token and the placeholder ids of its redactions.
+// One name the names pass found and the person may keep: its text, its role token and the
+// placeholder ids of its redactions.
 export type VisibleName = { text: string; roleToken: string; placeholderIds: string[] };
-// What a review changes: the kept names to put back into the text, and the sensitive categories to keep in.
+// What a review changes: the kept names to put back into the text, and the sensitive categories to
+// keep in.
 export type ReviewPlan = {
   keptNames: VisibleName[];
   sensitiveOptIn: NamesReview["sensitiveOptIn"];
@@ -64,7 +66,8 @@ function checkDecisionsUnique(decisions: NamesReview["decisions"]): void {
   if (new Set(texts).size !== texts.length) throw makePayloadInvalidError();
 }
 
-// Refuses a decision for a name the pass did not find for this source, or for a minor's name, which is never listed.
+// Refuses a decision for a name the pass did not find for this source, or for a minor's name, which
+// is never listed.
 function checkDecisionsVisible(
   decisions: NamesReview["decisions"],
   visibleNames: readonly VisibleName[],
@@ -75,7 +78,8 @@ function checkDecisionsVisible(
   }
 }
 
-// Checks a review against the names the pass found, refusing unknown names and categories outside the sensitive list.
+// Checks a review against the names the pass found, refusing unknown names and categories outside
+// the sensitive list.
 export function planReview(review: NamesReview, visibleNames: readonly VisibleName[]): ReviewPlan {
   const sensitiveOptIn = sensitiveOptInOf(review.sensitiveOptIn);
   checkDecisionsUnique(review.decisions);
@@ -86,7 +90,8 @@ export function planReview(review: NamesReview, visibleNames: readonly VisibleNa
   return { keptNames: visibleNames.filter((name) => keptTexts.has(name.text)), sensitiveOptIn };
 }
 
-// Puts each kept name back in place of its role token, in every turn of the source, and drops the redactions those names made.
+// Puts each kept name back in place of its role token, in every turn of the source, and drops the
+// redactions those names made.
 async function putBackNames(
   trx: DatabaseTransaction,
   sourceId: string,
@@ -126,7 +131,8 @@ async function putBackNames(
   }
 }
 
-// Applies a planned review in the caller's transaction: kept names go back, their redaction rows go, and the source freezes.
+// Applies a planned review in the caller's transaction: kept names go back, their redaction rows
+// go, and the source freezes.
 export async function applyReview(
   trx: DatabaseTransaction,
   input: { sourceId: string; plan: ReviewPlan },
@@ -152,7 +158,8 @@ export async function applyReview(
   return { frozenAt: now, redactionCount: Number(counted.count) };
 }
 
-// Reads the names of a source the review may act on, and refuses the review when the source is missing, frozen or not yet checked.
+// Reads the names of a source the review may act on, and refuses the review when the source is
+// missing, frozen or not yet checked.
 async function reviewableNames(trx: DatabaseTransaction, sourceId: string): Promise<VisibleName[]> {
   const source = await trx
     .selectFrom("sources")
@@ -183,7 +190,8 @@ async function reviewableNames(trx: DatabaseTransaction, sourceId: string): Prom
   }));
 }
 
-// Registers POST /api/sources/:id/names-review: 200 NamesReviewResponse; 400, 404, 409 or 422 when it is refused.
+// Registers POST /api/sources/:id/names-review: 200 NamesReviewResponse; 400, 404, 409 or 422 when
+// it is refused.
 export function registerNamesReviewRoute(app: FastifyInstance, deps: RouteDeps): void {
   app.post(routes.sources.namesReview.path, async (request, reply) => {
     const personId = requirePerson(request);

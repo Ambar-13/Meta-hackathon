@@ -46,7 +46,8 @@ describe("config", () => {
   });
 
   it("W3-LLM-T1: the speech and card calls measured on the live API cost their prompt and completion tokens at CHAT_PRICE, and reasoning adds nothing", () => {
-    // Speech, 27 Oct 2026: 11,048 x 1.25 + 1,294 x 4.25 per million is 0.0193095, rounded to 0.01931.
+    // Speech, 27 Oct 2026: 11,048 x 1.25 + 1,294 x 4.25 per million is 0.0193095, rounded to
+    // 0.01931.
     const speech = {
       promptTokens: 11_048,
       cachedTokens: 0,

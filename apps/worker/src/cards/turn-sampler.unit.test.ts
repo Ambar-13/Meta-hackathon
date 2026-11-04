@@ -22,14 +22,16 @@ function turn(index: number, text: string): SampledTurn {
   };
 }
 
-// The words of one diversity turn: turns 0 and 4 add new keywords, the rest repeat the same three words.
+// The words of one diversity turn: turns 0 and 4 add new keywords, the rest repeat the same three
+// words.
 function diversityBase(index: number): string {
   if (index === 0) return "orchid lantern harbor alpha beta gamma";
   if (index === 4) return "violin meadow quartz alpha beta gamma";
   return "alpha beta gamma";
 }
 
-// Ten turns of 94 characters each, so every block costs 102 with its separator. Turns 0 and 4 add new keywords.
+// Ten turns of 94 characters each, so every block costs 102 with its separator. Turns 0 and 4 add
+// new keywords.
 const DIVERSITY_SET: SampledTurn[] = Array.from({ length: 10 }, (unused, index) => {
   return turn(index, diversityBase(index).padEnd(94, "."));
 });

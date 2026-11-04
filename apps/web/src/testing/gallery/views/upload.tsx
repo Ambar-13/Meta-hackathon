@@ -17,7 +17,8 @@ const NO_ACTIONS: UploadActions = {
   onUpload: () => undefined,
 };
 
-// A prepared upload as the extraction worker would hand it back: 42 messages found, 38 kept, 3 details hidden.
+// A prepared upload as the extraction worker would hand it back: 42 messages found, 38 kept, 3
+// details hidden.
 function ready(isLowSignal: boolean): UploadReady {
   return {
     ok: true,
@@ -39,7 +40,8 @@ function ready(isLowSignal: boolean): UploadReady {
   };
 }
 
-// The sentences the worker sends back for each refusal shown here, word for word from the extraction code.
+// The sentences the worker sends back for each refusal shown here, word for word from the
+// extraction code.
 const TOO_BIG =
   "This file is over 150 MB, more than a phone browser can read. Export a shorter date range, or paste your notes instead.";
 const NOT_AN_EXPORT =

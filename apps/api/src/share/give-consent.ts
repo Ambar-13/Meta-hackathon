@@ -6,7 +6,8 @@ import type { RouteDeps } from "../app-types.js";
 import { requirePerson } from "../sessions/index.js";
 import { buildShareSnapshot, makeSlug } from "./snapshot.js";
 
-// The result of one consent: both flags, whether the page is live, its slug only while it is live, and whether the snapshot still needs building.
+// The result of one consent: both flags, whether the page is live, its slug only while it is live,
+// and whether the snapshot still needs building.
 export type GiveConsentResult = {
   consentA: boolean;
   consentB: boolean;
@@ -33,7 +34,8 @@ export function meetingIdOfParams(params: unknown): string {
   return parsed.data.id;
 }
 
-// The side this person holds in the meeting, or meeting_not_found (404) when they hold none. The lookup runs under their own person context.
+// The side this person holds in the meeting, or meeting_not_found (404) when they hold none. The
+// lookup runs under their own person context.
 export async function sideOfMember(
   trx: DatabaseTransaction,
   meetingId: string,
@@ -49,7 +51,8 @@ export async function sideOfMember(
   return row.side;
 }
 
-// Refuses consent until the meeting has ended and its brief.ready event is stored, because the snapshot needs both briefs (409).
+// Refuses consent until the meeting has ended and its brief.ready event is stored, because the
+// snapshot needs both briefs (409).
 async function assertBriefReady(trx: DatabaseTransaction, meetingId: string): Promise<void> {
   const meeting = await trx
     .selectFrom("meetings")
@@ -71,8 +74,8 @@ async function assertBriefReady(trx: DatabaseTransaction, meetingId: string): Pr
   }
 }
 
-// Writes this side's flag and sets published to the other side's flag in the same statement, so published equals consent_a AND consent_b.
-// A repeated consent by the same person changes nothing.
+// Writes this side's flag and sets published to the other side's flag in the same statement, so
+// published equals consent_a AND consent_b. A repeated consent by the same person changes nothing.
 async function recordConsent(
   trx: DatabaseTransaction,
   input: { meetingId: string; side: "a" | "b"; slug: string },
@@ -100,7 +103,8 @@ async function recordConsent(
     .executeTakeFirstOrThrow();
 }
 
-// Records one member's consent and flips published when both stand. Returns the flags, and the slug only while the page is live.
+// Records one member's consent and flips published when both stand. Returns the flags, and the slug
+// only while the page is live.
 export async function giveConsent(
   trx: DatabaseTransaction,
   input: { meetingId: string; personId: string; slug: string },
@@ -117,8 +121,9 @@ export async function giveConsent(
   };
 }
 
-// Builds the snapshot inside the meeting context and stores it once. The UPDATE finds the snapshot already set when the other
-// member's second consent got there first, so the snapshot is filled once.
+// Builds the snapshot inside the meeting context and stores it once. The UPDATE finds the snapshot
+// already set when the other member's second consent got there first, so the snapshot is filled
+// once.
 async function publishSnapshot(
   deps: RouteDeps,
   target: { meetingId: string; personId: string },
@@ -137,7 +142,8 @@ async function publishSnapshot(
   );
 }
 
-// Registers POST /api/meetings/:id/consent: 200 ConsentResponse; 404 meeting_not_found; 409 brief_not_ready; 500 share_snapshot_invalid.
+// Registers POST /api/meetings/:id/consent: 200 ConsentResponse; 404 meeting_not_found; 409
+// brief_not_ready; 500 share_snapshot_invalid.
 export function registerGiveConsent(app: FastifyInstance, deps: RouteDeps): Promise<void> {
   app.post(routes.briefs.consent.path, async (request, reply) => {
     const personId = requirePerson(request);

@@ -7,8 +7,9 @@ import { Icon, Sticker } from "../look/index.js";
 
 // How long the copy button says Copied, 2 s.
 export const COPIED_MS = 2_000;
-// The pages a visitor may open before they have a session: the start page, the claim page and the join page. The session cookie is
-// HttpOnly, so the browser cannot tell whether a session exists, and the frame goes by the page instead.
+// The pages a visitor may open before they have a session: the start page, the claim page and the
+// join page. The session cookie is HttpOnly, so the browser cannot tell whether a session exists,
+// and the frame goes by the page instead.
 const NO_SESSION_PATHS: readonly string[] = [
   APP_PATHS.welcome,
   APP_PATHS.claim,
@@ -18,7 +19,8 @@ const NO_SESSION_PATHS: readonly string[] = [
   APP_PATHS.cookies,
 ];
 
-// True on every page except the ones above and the public share pages, which anyone with the link may open.
+// True on every page except the ones above and the public share pages, which anyone with the link
+// may open.
 function showsAppLinks(pathname: string): boolean {
   return !NO_SESSION_PATHS.includes(pathname) && !pathname.startsWith(APP_PATHS.sharePage(""));
 }
@@ -26,7 +28,8 @@ function showsAppLinks(pathname: string): boolean {
 // The Settings link, the one link in the Pages nav of a page without a session.
 const SETTINGS_LINK = { label: "Settings", to: APP_PATHS.settings } as const;
 
-// The frame of a page without a session: the top bar with the logo, the content, and Settings as one chip.
+// The frame of a page without a session: the top bar with the logo, the content, and Settings as
+// one chip.
 const OpenFrame = (props: {
   main: ReactElement;
   hasSettingsLink: boolean;
@@ -56,8 +59,9 @@ const OpenFrame = (props: {
   );
 };
 
-// The frame of a signed-in page: the phone's top bar as Instagram's, Create at its left end (the + that shares a post or a story; Create
-// links to Invite a friend), the logo in the middle and Settings at its right end, then the rail or tab bar and the content column.
+// The frame of a signed-in page: the phone's top bar as Instagram's, Create at its left end (the +
+// that shares a post or a story; Create links to Invite a friend), the logo in the middle and
+// Settings at its right end, then the rail or tab bar and the content column.
 const SignedInFrame = (props: {
   main: ReactElement;
   hasSettingsLink: boolean;
@@ -85,8 +89,9 @@ const SignedInFrame = (props: {
   );
 };
 
-// What a screen passes to the frame: one h1 title (or hasOwnHeading when the screen draws its own h1), the content, and its options.
-// isWide lets a screen use the laptop's width; titleAside sits beside the h1, for a name tag or a status.
+// What a screen passes to the frame: one h1 title (or hasOwnHeading when the screen draws its own
+// h1), the content, and its options. isWide lets a screen use the laptop's width; titleAside sits
+// beside the h1, for a name tag or a status.
 type FrameProps = {
   title: string;
   children: ReactNode;
@@ -108,8 +113,9 @@ const FrameTitle = (props: FrameProps): ReactElement | null => {
   );
 };
 
-// The frame of every screen. A signed-in page gets the rail on a laptop and the tab bar on a phone (Chat, Explore, Friends, Me, and
-// Settings unless the screen is Settings itself). The start, claim and join pages and the public share pages keep the plain frame.
+// The frame of every screen. A signed-in page gets the rail on a laptop and the tab bar on a phone
+// (Chat, Explore, Friends, Me, and Settings unless the screen is Settings itself). The start, claim
+// and join pages and the public share pages keep the plain frame.
 export const ScreenFrame = (props: FrameProps): ReactElement => {
   const location = useLocation();
   const hasAppLinks = showsAppLinks(location.pathname);
@@ -130,7 +136,8 @@ export const ScreenFrame = (props: FrameProps): ReactElement => {
   );
 };
 
-// Shows one ApiError: its sentence, plus a link to the start page when the session is missing (status 401).
+// Shows one ApiError: its sentence, plus a link to the start page when the session is missing
+// (status 401).
 export const ErrorNotice = (props: { error: ApiError }): ReactElement => {
   return (
     <div className="notice" role="alert">
@@ -143,7 +150,8 @@ export const ErrorNotice = (props: { error: ApiError }): ReactElement => {
 // The words the copy button shows for each state.
 const COPY_FAILED = "Copy failed. Select the text and copy it by hand.";
 
-// Copies one text to the clipboard and says so for COPIED_MS; tells the person to copy by hand when the clipboard is missing or refuses.
+// Copies one text to the clipboard and says so for COPIED_MS; tells the person to copy by hand when
+// the clipboard is missing or refuses.
 export const CopyButton = (props: { text: string; label: string }): ReactElement => {
   const [status, setStatus] = useState<"rest" | "copied" | "failed">("rest");
 

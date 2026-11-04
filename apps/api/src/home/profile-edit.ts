@@ -1,7 +1,8 @@
-// Instagram's Edit profile for the signed-in person: a new
-// display name, and a profile photo put up, replaced or taken down. The browser draws the photo itself as a square JPEG, which drops
-// any camera or location data, and sends the bytes; the api checks they are a JPEG of a sane size and stores them. GET /api/photos/:id
-// serves a photo, a profile's or a post's, to anyone signed in who was shown its id, and a new photo always gets a new id.
+// Instagram's Edit profile for the signed-in person: a new display name, and a profile photo put
+// up, replaced or taken down. The browser draws the photo itself as a square JPEG, which drops any
+// camera or location data, and sends the bytes; the api checks they are a JPEG of a sane size and
+// stores them. GET /api/photos/:id serves a photo, a profile's or a post's, to anyone signed in who
+// was shown its id, and a new photo always gets a new id.
 import type { FastifyInstance } from "fastify";
 import { sql } from "kysely";
 import { z } from "zod";
@@ -36,7 +37,8 @@ export function isJpeg(bytes: Buffer): boolean {
   );
 }
 
-// Registers PUT /api/people/me/name: 200 NameUpdated with the name as saved, trimmed; 400 for an empty or too long name.
+// Registers PUT /api/people/me/name: 200 NameUpdated with the name as saved, trimmed; 400 for an
+// empty or too long name.
 function registerNameUpdate(app: FastifyInstance, deps: RouteDeps): void {
   app.put(routes.people.updateName.path, async (request, reply) => {
     const personId = requirePerson(request);
@@ -54,9 +56,10 @@ function registerNameUpdate(app: FastifyInstance, deps: RouteDeps): void {
   });
 }
 
-// Registers PUT and DELETE /api/people/me/photo. PUT takes the JPEG bytes as image/jpeg, at most PROFILE_PHOTO_MAX_BYTES (a larger body
-// is 413 before it is read), replaces any earlier photo with a new row, and answers 200 MyPhoto with the new key; a body that is not a
-// JPEG is 400. DELETE takes the photo down and answers 200 MyPhoto with null, also when there was none.
+// Registers PUT and DELETE /api/people/me/photo. PUT takes the JPEG bytes as image/jpeg, at most
+// PROFILE_PHOTO_MAX_BYTES (a larger body is 413 before it is read), replaces any earlier photo with
+// a new row, and answers 200 MyPhoto with the new key; a body that is not a JPEG is 400. DELETE
+// takes the photo down and answers 200 MyPhoto with null, also when there was none.
 function registerPhotoUpdate(app: FastifyInstance, deps: RouteDeps): void {
   app.addContentTypeParser(
     "image/jpeg",
@@ -92,9 +95,10 @@ function registerPhotoUpdate(app: FastifyInstance, deps: RouteDeps): void {
   });
 }
 
-// Registers GET /api/photos/:id: 200 with the JPEG, kept by the browser for a year since an id never changes its image. The id is a
-// profile photo's, or since migration 0013 a post's or a story's, whose photo shows while the story has not expired. 404 for an id that
-// is not a photo of an active person, or not an id at all.
+// Registers GET /api/photos/:id: 200 with the JPEG, kept by the browser for a year since an id
+// never changes its image. The id is a profile photo's, or since migration 0013 a post's or a
+// story's, whose photo shows while the story has not expired. 404 for an id that is not a photo of
+// an active person, or not an id at all.
 function registerPhotoRead(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.people.readPhoto.path, async (request, reply) => {
     const personId = requirePerson(request);

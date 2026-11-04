@@ -9,13 +9,15 @@ import {
   type PolledView,
 } from "../../app-shell/index.js";
 
-// The browser's own list of the stories this person has watched, so a ring stops showing as new; it never leaves the browser.
+// The browser's own list of the stories this person has watched, so a ring stops showing as new; it
+// never leaves the browser.
 const SEEN_KEY = "meet-first-stories-seen";
-// The most watched stories the list keeps, newest last; a story lasts a day, so older ones no longer matter.
+// The most watched stories the list keeps, newest last; a story lasts a day, so older ones no
+// longer matter.
 const SEEN_MAX = 300;
 
-// One person's stories as the row shows them: who they are, their stories oldest first, as Instagram plays them, and whether every one
-// of them has been watched.
+// One person's stories as the row shows them: who they are, their stories oldest first, as
+// Instagram plays them, and whether every one of them has been watched.
 export type StoryGroup = {
   key: string;
   listingId: string | null;
@@ -27,7 +29,8 @@ export type StoryGroup = {
   isSeen: boolean;
 };
 
-// The stories the browser remembers this person watched; an empty list when the browser keeps none or cannot be read.
+// The stories the browser remembers this person watched; an empty list when the browser keeps none
+// or cannot be read.
 export function readSeen(): Set<string> {
   try {
     const parsed: unknown = JSON.parse(window.localStorage.getItem(SEEN_KEY) ?? "[]");
@@ -39,7 +42,8 @@ export function readSeen(): Set<string> {
   }
 }
 
-// Remembers one watched story, keeping the newest SEEN_MAX; a browser that keeps nothing forgets it.
+// Remembers one watched story, keeping the newest SEEN_MAX; a browser that keeps nothing forgets
+// it.
 export function rememberSeen(storyId: string): void {
   try {
     const kept = [...readSeen()].filter((id) => id !== storyId);
@@ -49,9 +53,10 @@ export function rememberSeen(storyId: string): void {
   }
 }
 
-// The stories by person, in the row's order: your own first, then people with a story you have not watched before people whose stories
-// you have, friends first within each, and sample people after real ones. Each person's stories play oldest first.
-// Example: your story, Maya (sample, new) and Jun (a friend, watched) give you, Maya, Jun when Jun's are watched.
+// The stories by person, in the row's order: your own first, then people with a story you have not
+// watched before people whose stories you have, friends first within each, and sample people after
+// real ones. Each person's stories play oldest first. Example: your story, Maya (sample, new) and
+// Jun (a friend, watched) give you, Maya, Jun when Jun's are watched.
 export function storyGroups(
   stories: readonly Story[],
   isFriend: (listingId: string) => boolean,
@@ -91,7 +96,8 @@ export function storyGroups(
     .map((entry) => entry.group);
 }
 
-// The stories that show now (GET /api/stories), read once when Home opens; a failed read is tried again after 30 s.
+// The stories that show now (GET /api/stories), read once when Home opens; a failed read is tried
+// again after 30 s.
 export function useStories(): PolledView<StoriesView> {
   return usePolledView(() => apiFetch(routes.social.listStories, {}), {
     key: "stories",
@@ -100,15 +106,16 @@ export function useStories(): PolledView<StoriesView> {
   });
 }
 
-// Where a like stands for one post, as this page last set it: the server's word until the person taps the heart.
+// Where a like stands for one post, as this page last set it: the server's word until the person
+// taps the heart.
 export type LikesModel = {
   isLiked: (post: Post) => boolean;
   toggle: (post: Post) => Promise<void>;
   error: ApiError | null;
 };
 
-// The hearts of the feed: a tap fills or empties the heart at once and sends PUT or DELETE /api/posts/:id/like; when the api refuses, the
-// heart goes back and the error shows.
+// The hearts of the feed: a tap fills or empties the heart at once and sends PUT or DELETE
+// /api/posts/:id/like; when the api refuses, the heart goes back and the error shows.
 export function useLikes(): LikesModel {
   const [overrides, setOverrides] = useState<ReadonlyMap<string, boolean>>(new Map());
   const [error, setError] = useState<ApiError | null>(null);
@@ -132,7 +139,8 @@ export function useLikes(): LikesModel {
   return { isLiked, toggle, error };
 }
 
-// Deletes one of your own posts or stories (DELETE /api/posts/:id), then runs onDeleted so the page reads again.
+// Deletes one of your own posts or stories (DELETE /api/posts/:id), then runs onDeleted so the page
+// reads again.
 export async function deleteShare(postId: string, onDeleted: () => void): Promise<void> {
   await apiFetch(routes.social.deletePost, { params: { id: postId } });
   onDeleted();

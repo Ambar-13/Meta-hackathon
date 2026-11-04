@@ -8,11 +8,14 @@ import { MEETING_TURNS_MAX, type StepPhase } from "./agenda.js";
 export const REQUEST_TOKEN_CAP = 60_000;
 // At most this many prior committed turns enter a request.
 export const PRIOR_TURNS_MAX = 10;
-// The fewest characters the moderator and speech prompts together may hold, so every prefix is above 4,000 tokens at 4 characters per token, the vendor's minimum cached prefix as far as it is known.
+// The fewest characters the moderator and speech prompts together may hold, so every prefix is
+// above 4,000 tokens at 4 characters per token, the vendor's minimum cached prefix as far as it is
+// known.
 export const PREFIX_MIN_CHARS = 16_000;
 // Hex characters of the prefix hash kept in the prompt cache key.
 export const CACHE_KEY_HASH_CHARS = 32;
-// The front of every claim label. A label has the shape of a uuid, so concedeArgs accepts it, and holds only the step and the position, so a request never carries a database id.
+// The front of every claim label. A label has the shape of a uuid, so concedeArgs accepts it, and
+// holds only the step and the position, so a request never carries a database id.
 export const CLAIM_LABEL_PREFIX = "00000000-0000-4000-8000-";
 
 // The three prompt texts every prefix starts with, read by readPrompt.
@@ -62,7 +65,8 @@ export type MeetingPrompts = {
   untrustedRules: LoadedPrompt;
 };
 
-// The byte-identical system prefix of one side, built once before the meeting starts and stored in meeting_members.frozen_prefix.
+// The byte-identical system prefix of one side, built once before the meeting starts and stored in
+// meeting_members.frozen_prefix.
 export function buildFrozenPrefix(input: PrefixInput): string {
   const sections = [
     input.texts.moderator.trimEnd(),
@@ -90,7 +94,8 @@ export function buildFrozenPrefix(input: PrefixInput): string {
   return sections.join("\n\n") + "\n";
 }
 
-// The prompt cache key of one side: a hash of its prefix, so the same prefix always gives the same key and a replayed request finds its fixture.
+// The prompt cache key of one side: a hash of its prefix, so the same prefix always gives the same
+// key and a replayed request finds its fixture.
 export function promptCacheKey(frozenPrefix: string, side: "a" | "b"): string {
   const hash = createHash("sha256")
     .update(frozenPrefix, "utf8")
@@ -99,7 +104,8 @@ export function promptCacheKey(frozenPrefix: string, side: "a" | "b"): string {
   return "meeting:" + hash + ":" + side;
 }
 
-// The user message after the prefix: the meeting state, the transcript inside untrusted tags, and the other side's claims in decide.
+// The user message after the prefix: the meeting state, the transcript inside untrusted tags, and
+// the other side's claims in decide.
 export function buildVariablePart(input: VariableInput): string {
   const parts = [stateBlock(input), transcriptBlock(input)];
   if (input.phase === "decide" && input.otherClaims.length > 0)
@@ -108,7 +114,8 @@ export function buildVariablePart(input: VariableInput): string {
   return parts.join("\n\n");
 }
 
-// Keeps the last 10 turns, then drops the oldest explore turns, then the oldest open turns, until the request is at or under 60,000 estimated tokens.
+// Keeps the last 10 turns, then drops the oldest explore turns, then the oldest open turns, until
+// the request is at or under 60,000 estimated tokens.
 export function capTurns(
   prefix: string,
   input: VariableInput,
@@ -126,7 +133,8 @@ export function capTurns(
   };
 }
 
-// The first two messages of every speech request of a step: the frozen prefix as the system message, then the variable part.
+// The first two messages of every speech request of a step: the frozen prefix as the system
+// message, then the variable part.
 export function initialMessages(prefix: string, variablePart: string): ChatMessage[] {
   return [
     { role: "system", content: prefix },
@@ -134,7 +142,8 @@ export function initialMessages(prefix: string, variablePart: string): ChatMessa
   ];
 }
 
-// The label a turn has in every prompt: t: and its turn_index inside its source, the same short form as the card build's [t:1234] labels.
+// The label a turn has in every prompt: t: and its turn_index inside its source, the same short
+// form as the card build's [t:1234] labels.
 export function turnLabel(turnIndex: number): string {
   return "t:" + String(turnIndex);
 }
@@ -154,7 +163,8 @@ export function parseClaimLabel(label: string): { stepSeq: number; position: num
   return { stepSeq, position };
 }
 
-// The LlmClient arguments of one speech request, without the two hooks. The job and the fixture writer both use it, so a fixture's body is the job's body.
+// The LlmClient arguments of one speech request, without the two hooks. The job and the fixture
+// writer both use it, so a fixture's body is the job's body.
 export function speechCallArgs(input: {
   meetingId: string;
   promptVersion: string;
@@ -198,7 +208,8 @@ export function forbiddenTexts(question: string, prompts: MeetingPrompts): strin
   ];
 }
 
-// The item block of the prefix: the approved items in position order, or a line saying there are none.
+// The item block of the prefix: the approved items in position order, or a line saying there are
+// none.
 function renderItems(items: readonly PrefixItem[]): string {
   if (items.length === 0) return "(no approved items)";
   return [...items]
@@ -226,7 +237,8 @@ function stateBlock(input: VariableInput): string {
   ].join("\n");
 }
 
-// The transcript block: the earlier-turns note, then each committed turn in step order, tagged by side.
+// The transcript block: the earlier-turns note, then each committed turn in step order, tagged by
+// side.
 function transcriptBlock(input: VariableInput): string {
   const lines: string[] = [];
   if (input.droppedTurns > 0)
@@ -240,7 +252,8 @@ function transcriptBlock(input: VariableInput): string {
   return "<transcript>\n" + lines.join("\n") + "\n</transcript>";
 }
 
-// One committed turn: a turn of the speaking side is your_turn, a turn of the other side is other_persona.
+// One committed turn: a turn of the speaking side is your_turn, a turn of the other side is
+// other_persona.
 function turnBlock(row: PromptTurn, speakingSide: "a" | "b"): string {
   const tag = row.side === speakingSide ? "your_turn" : "other_persona";
   return (
@@ -292,7 +305,8 @@ function keepRecentTurns(input: VariableInput): VariableInput {
   };
 }
 
-// The input with one more turn left out: the explore turn with the lowest step, or else the open turn with the lowest step; decide turns stay.
+// The input with one more turn left out: the explore turn with the lowest step, or else the open
+// turn with the lowest step; decide turns stay.
 function dropOneTurn(input: VariableInput): VariableInput | null {
   const explore = sortedByStep(input.turns.filter((row) => row.phase === "explore"));
   const open = sortedByStep(input.turns.filter((row) => row.phase === "open"));
@@ -305,19 +319,22 @@ function dropOneTurn(input: VariableInput): VariableInput | null {
   };
 }
 
-// The estimated size of the request in tokens: the prefix and the variable part, at the given characters per token.
+// The estimated size of the request in tokens: the prefix and the variable part, at the given
+// characters per token.
 function tokenSize(prefix: string, input: VariableInput, charsPerToken: number): number {
   return Math.ceil((prefix.length + buildVariablePart(input).length) / charsPerToken);
 }
 
-// Escapes the three characters that could open or close a block tag. It is used on text another person can write: the
-// question, the turns and the other side's claims (the quiz uses the same rule). A persona's own card items are not
-// escaped, because its quotes must match its own turns exactly for the receipts check.
+// Escapes the three characters that could open or close a block tag. It is used on text another
+// person can write: the question, the turns and the other side's claims (the quiz uses the same
+// rule). A persona's own card items are not escaped, because its quotes must match its own turns
+// exactly for the receipts check.
 export function escapeBlockText(text: string): string {
   return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 
-// A display name on one line with no tag characters, so a name cannot add a line or a tag to the people block.
+// A display name on one line with no tag characters, so a name cannot add a line or a tag to the
+// people block.
 function promptName(name: string): string {
   return name
     .replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, " ")

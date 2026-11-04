@@ -11,7 +11,8 @@ import { EmptyState, LoadingLine, Sticker } from "../../look/index.js";
 import { WelcomeForm } from "../welcome/index.js";
 import { useJoinPair } from "./pair-state.js";
 
-// The /join page an invite link opens: accept the invite, creating a profile first when there is none.
+// The /join page an invite link opens: accept the invite, creating a profile first when there is
+// none.
 export const JoinScreen = (): ReactElement => {
   const navigate = useNavigate();
   const { state, join, profileCreated } = useJoinPair();

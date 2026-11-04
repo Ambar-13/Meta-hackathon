@@ -139,7 +139,8 @@ export function registerReadCard(app: FastifyInstance, deps: RouteDeps): Promise
   return Promise.resolve();
 }
 
-// Where an item's quote sits in its turn's original text, through the receipts offset map; null when the quote is not in the turn.
+// Where an item's quote sits in its turn's original text, through the receipts offset map; null
+// when the quote is not in the turn.
 export function highlightFor(turnText: string, quote: string): CardItemSource["highlight"] {
   const map = buildOffsetMap(turnText);
   const needle = normQuote(quote);

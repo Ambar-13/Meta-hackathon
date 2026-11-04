@@ -29,11 +29,14 @@ import { registerAsksRoutes } from "./asks/index.js";
 import { registerSocialRoutes } from "./social/index.js";
 import { addContentSecurityPolicy, registerWebPagesRoutes } from "./web-pages/index.js";
 
-// Connections in the api's Kysely pool (10 for the api). The LISTEN connection is one more client, owned by meeting-stream.
+// Connections in the api's Kysely pool (10 for the api). The LISTEN connection is one more client,
+// owned by meeting-stream.
 export const API_POOL_SIZE = 10;
-// Fastify's default body limit, written out: 1 MiB for every JSON route. POST /api/sources sets its own route limit of UPLOAD_BODY_LIMIT_BYTES.
+// Fastify's default body limit, written out: 1 MiB for every JSON route. POST /api/sources sets its
+// own route limit of UPLOAD_BODY_LIMIT_BYTES.
 export const JSON_BODY_LIMIT_BYTES = 1_048_576;
-// The address the server listens on: every interface, because Render's proxy reaches the container from outside it.
+// The address the server listens on: every interface, because Render's proxy reaches the container
+// from outside it.
 export const LISTEN_HOST = "0.0.0.0";
 // Log fields that could carry a secret; pino replaces their values before a line is written.
 export const LOG_REDACT_PATHS: string[] = [
@@ -47,10 +50,12 @@ export const LOG_REDACT_PATHS: string[] = [
 // The text that replaces a hidden log value.
 export const LOG_REDACT_CENSOR = "[hidden]";
 
-// What buildApp registers: every slot in order ("all"), or the given route plugins in the given order (tests).
+// What buildApp registers: every slot in order ("all"), or the given route plugins in the given
+// order (tests).
 export type BuildAppOptions = { routes: RoutePlugin[] | "all"; logStream?: NodeJS.WritableStream };
 
-// Parses the api's env with the contracts schema; a missing or bad name stops boot with every bad name listed.
+// Parses the api's env with the contracts schema; a missing or bad name stops boot with every bad
+// name listed.
 export function readApiEnv(processEnv: NodeJS.ProcessEnv): ApiEnv {
   const parsed = apiEnv.safeParse(processEnv);
   if (parsed.success) {
@@ -66,7 +71,8 @@ export function readApiEnv(processEnv: NodeJS.ProcessEnv): ApiEnv {
   );
 }
 
-// The pino options for Fastify's logger: the env's level, the redaction above, and a test stream when one is given.
+// The pino options for Fastify's logger: the env's level, the redaction above, and a test stream
+// when one is given.
 export function loggerOptions(
   level: ApiEnv["LOG_LEVEL"],
   logStream?: NodeJS.WritableStream,
@@ -78,12 +84,14 @@ export function loggerOptions(
   };
 }
 
-// Builds the app: logger, body limit, JSON parser, hooks, error and not-found handlers, then the routes.
+// Builds the app: logger, body limit, JSON parser, hooks, error and not-found handlers, then the
+// routes.
 export async function buildApp(
   deps: RouteDeps,
   options: BuildAppOptions,
 ): Promise<FastifyInstance> {
-  // One trusted hop, Render's proxy: request.ip is then the address that proxy appended, never a value the client sent.
+  // One trusted hop, Render's proxy: request.ip is then the address that proxy appended, never a
+  // value the client sent.
   const app = fastify({
     logger: loggerOptions(deps.env.LOG_LEVEL, options.logStream),
     trustProxy: 1,
@@ -126,7 +134,8 @@ export async function registerAllRoutes(app: FastifyInstance, deps: RouteDeps): 
   await registerWebPagesRoutes(app, deps);
 }
 
-// Boots the api: env, database, job queue, app, listen; SIGTERM or SIGINT ends the streams, closes the server and the pools, then exits 0.
+// Boots the api: env, database, job queue, app, listen; SIGTERM or SIGINT ends the streams, closes
+// the server and the pools, then exits 0.
 export async function startServer(processEnv: NodeJS.ProcessEnv): Promise<void> {
   try {
     const env = readApiEnv(processEnv);
@@ -160,7 +169,8 @@ export async function startServer(processEnv: NodeJS.ProcessEnv): Promise<void> 
   }
 }
 
-// Starts the api when this file is the process entry (pnpm --filter @meet-first/api start); importing it for tests starts nothing.
+// Starts the api when this file is the process entry (pnpm --filter @meet-first/api start);
+// importing it for tests starts nothing.
 const isEntryPoint =
   process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isEntryPoint) {

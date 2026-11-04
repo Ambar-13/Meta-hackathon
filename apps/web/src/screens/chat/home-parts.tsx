@@ -1,6 +1,7 @@
 // The home page's Instagram parts around Meety's chat: your friends as a row of circles across the
-// top, as Instagram shows stories, and on a wide screen a right-hand column with you, your friends and people Explore suggests, as
-// Instagram shows "Suggested for you". A ring in the app's two colours means that friend's agent can be asked.
+// top, as Instagram shows stories, and on a wide screen a right-hand column with you, your friends
+// and people Explore suggests, as Instagram shows "Suggested for you". A ring in the app's two
+// colours means that friend's agent can be asked.
 import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import type { DirectoryListing, Friend, HomeView } from "@meet-first/contracts";
@@ -25,7 +26,8 @@ export function suggestedPeople(
   return listings.filter((listing) => !known.has(listing.listingId)).slice(0, SIDE_ROWS_MAX);
 }
 
-// Your friends as circles with their names under them, after a first circle that finds more people in Search.
+// Your friends as circles with their names under them, after a first circle that finds more people
+// in Search.
 export const FriendsRow = (props: { friends: readonly Friend[] }): ReactElement => {
   return (
     <nav className="home-stories" aria-label="Friends">
@@ -97,7 +99,8 @@ const SideHead = (props: {
   );
 };
 
-// Your friends in the column: each with an Ask button that puts "How would NAME react to " in Meety's box, when their agent can be asked.
+// Your friends in the column: each with an Ask button that puts "How would NAME react to " in
+// Meety's box, when their agent can be asked.
 const SideFriends = (props: {
   friends: readonly Friend[];
   onAsk: (name: string) => void;
@@ -150,7 +153,8 @@ const SideFriends = (props: {
   );
 };
 
-// People Explore suggests, each with Add friend, which sends a friend request at once, and the Sample mark on a sample person.
+// People Explore suggests, each with Add friend, which sends a friend request at once, and the
+// Sample mark on a sample person.
 const SideSuggestions = (props: {
   people: readonly DirectoryListing[];
   adds: AddsModel;
@@ -196,7 +200,8 @@ const SideSuggestions = (props: {
   );
 };
 
-// The right-hand column: you at the top with a link to your profile, then your friends, then the people Explore suggests.
+// The right-hand column: you at the top with a link to your profile, then your friends, then the
+// people Explore suggests.
 export const HomeSide = (props: {
   home: HomeView | null;
   friends: readonly Friend[] | null;

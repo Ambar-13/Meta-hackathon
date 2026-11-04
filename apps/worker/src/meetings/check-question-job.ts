@@ -24,12 +24,14 @@ import {
 } from "./prompt-builder.js";
 import { loadMeetingPrompts } from "./step-job.js";
 
-// The refusal stored when the question check's reply does not match its schema. The question fails closed here; a thrown parse
-// error would send the job back to Graphile, which runs the paid call again.
+// The refusal stored when the question check's reply does not match its schema. The question fails
+// closed here; a thrown parse error would send the job back to Graphile, which runs the paid call
+// again.
 export const QUESTION_CHECK_UNREADABLE_REASON =
   "The question check sent back an answer that could not be read, so this question is not accepted.";
 
-// The check_question job: the free-text check when the question is unchecked, then both frozen prefixes.
+// The check_question job: the free-text check when the question is unchecked, then both frozen
+// prefixes.
 export const runCheckQuestion: JobTask<"check_question"> = async (payload, context) => {
   const meetingId = payload.meetingId;
   const prompts = loadMeetingPrompts();
@@ -72,7 +74,8 @@ type QuestionRequest = { meetingId: string; checkPrompt: LoadedPrompt; questionT
 // What the writes after the verdict need: the job context, the meeting and the prompts.
 type VerdictScope = { context: JobContext; meetingId: string; prompts: MeetingPrompts };
 
-// The messages of the question check: the question-check prompt as the system message, the question inside meeting_question tags as the user message.
+// The messages of the question check: the question-check prompt as the system message, the question
+// inside meeting_question tags as the user message.
 export function questionCheckMessages(promptText: string, questionText: string): ChatMessage[] {
   return [
     { role: "system", content: promptText },
@@ -125,7 +128,8 @@ export async function storeFrozenPrefixes(
     if (member.frozen_prefix !== null) continue;
     const other = members.find((candidate) => candidate.side !== member.side);
     if (other === undefined) continue;
-    // A listed persona met through the directory speaks only from the items its owner marked public.
+    // A listed persona met through the directory speaks only from the items its owner marked
+    // public.
     const items = await trx
       .selectFrom("card_items as ci")
       .innerJoin("turns as t", "t.id", "ci.turn_id")
@@ -171,8 +175,9 @@ export async function storeFrozenPrefixes(
   return written;
 }
 
-// The question check's model call: one minimal call, re-queued when the limiter is full. Returns the verdict, "limited", or
-// "unreadable" when the reply does not match the schema; that reply is refused and never thrown, so Graphile does not pay again.
+// The question check's model call: one minimal call, re-queued when the limiter is full. Returns
+// the verdict, "limited", or "unreadable" when the reply does not match the schema; that reply is
+// refused and never thrown, so Graphile does not pay again.
 async function checkQuestion(
   context: JobContext,
   request: QuestionRequest,
@@ -220,8 +225,8 @@ function toPrefixItem(item: {
   };
 }
 
-// The writes after the verdict, in one transaction: the verdict, both prefixes, then the start if both go-aheads are in.
-// An unreadable reply fails closed: the question is refused.
+// The writes after the verdict, in one transaction: the verdict, both prefixes, then the start if
+// both go-aheads are in. An unreadable reply fails closed: the question is refused.
 async function applyVerdict(
   trx: Transaction<Database>,
   scope: VerdictScope,
@@ -238,8 +243,8 @@ async function applyVerdict(
     return refuseQuestion(trx, meetingId, QUESTION_CHECK_UNREADABLE_REASON);
   if (verdict !== undefined && !verdict.allowed)
     return refuseQuestion(trx, meetingId, verdict.reason);
-  // A question with any romantic part, to a listed persona whose owner has not switched on dating questions, is refused, whatever kind
-  // the check gave it.
+  // A question with any romantic part, to a listed persona whose owner has not switched on dating
+  // questions, is refused, whatever kind the check gave it.
   if (verdict !== undefined && (verdict.romantic || verdict.kind === "romance")) {
     const meeting = await trx
       .selectFrom("meetings")
@@ -249,7 +254,8 @@ async function applyVerdict(
     if (!meeting.romance_allowed) return refuseQuestion(trx, meetingId, ROMANCE_NOT_OPEN_REASON);
   }
   if (verdict !== undefined) {
-    // The kind is written before the prefixes below are built, so both personas read the kind the check gave.
+    // The kind is written before the prefixes below are built, so both personas read the kind the
+    // check gave.
     await trx
       .updateTable("meetings")
       .set({ question_checked_at: context.now(), question_kind: verdict.kind })
@@ -265,7 +271,8 @@ async function applyVerdict(
   });
 }
 
-// Stores the reason a question is refused, so the meeting never starts and the job never checks it again.
+// Stores the reason a question is refused, so the meeting never starts and the job never checks it
+// again.
 async function refuseQuestion(
   trx: Transaction<Database>,
   meetingId: string,

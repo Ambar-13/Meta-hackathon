@@ -1,4 +1,5 @@
-// Reads the plain rows the seven metrics need for the driven pairs: meeting rows under withMeeting, card ledger rows under withPerson.
+// Reads the plain rows the seven metrics need for the driven pairs: meeting rows under withMeeting,
+// card ledger rows under withPerson.
 import type { Kysely } from "kysely";
 import { BriefPoint, type Quote } from "@meet-first/contracts";
 import {
@@ -103,7 +104,8 @@ async function readClaims(trx: DatabaseTransaction, meetingId: string): Promise<
   }));
 }
 
-// Reads the brief rows of one meeting: the lines of each section, parsed with BriefPoint, and each brief's support judgement.
+// Reads the brief rows of one meeting: the lines of each section, parsed with BriefPoint, and each
+// brief's support judgement.
 async function readBriefs(
   trx: DatabaseTransaction,
   meetingId: string,
@@ -132,7 +134,8 @@ async function readBriefs(
   return { lines, meta };
 }
 
-// Reads the turns that the brief quotes point at, from both members (the meeting context sees both).
+// Reads the turns that the brief quotes point at, from both members (the meeting context sees
+// both).
 async function readCitedTurns(
   trx: DatabaseTransaction,
   lines: BriefLineRow[],
@@ -196,7 +199,8 @@ function toLedgerRow(row: {
   };
 }
 
-// Adds one driven pair's meeting rows to the collection: its claims, briefs, turns, events, meeting row and ledger rows.
+// Adds one driven pair's meeting rows to the collection: its claims, briefs, turns, events, meeting
+// row and ledger rows.
 async function addMeetingRows(
   db: Kysely<Database>,
   pair: DrivenPair,
@@ -234,7 +238,8 @@ async function addMeetingRows(
   });
 }
 
-// Reads one person's card build rows: the ledger rows of their card calls, under their own person context.
+// Reads one person's card build rows: the ledger rows of their card calls, under their own person
+// context.
 async function addCardRows(db: Kysely<Database>, personId: string, rows: EvalRows): Promise<void> {
   const cards = await withPerson(db, personId, (trx) =>
     trx
@@ -247,7 +252,8 @@ async function addCardRows(db: Kysely<Database>, personId: string, rows: EvalRow
   rows.ledger.push(...cards.map(toLedgerRow));
 }
 
-// Reads every row the metrics need for the driven pairs. Nothing is read outside withMeeting or withPerson.
+// Reads every row the metrics need for the driven pairs. Nothing is read outside withMeeting or
+// withPerson.
 export async function collectRows(
   db: Kysely<Database>,
   pairs: readonly DrivenPair[],

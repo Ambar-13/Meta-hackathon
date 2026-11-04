@@ -1,4 +1,5 @@
-// The briefs folder for the worker: the write_briefs task list, the two call settings and the score the evals read.
+// The briefs folder for the worker: the write_briefs task list, the two call settings and the score
+// the evals read.
 import type { TaskList } from "../job-context.js";
 import { writeBriefsTask } from "./write-briefs-job.js";
 

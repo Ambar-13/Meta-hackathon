@@ -9,16 +9,18 @@ export type StubReply = { status: number; body: unknown; delayMs?: number };
 // What a test may pass to stubRoute: a full reply, or a body that is answered with status 200.
 export type StubInput = StubReply | object;
 
-// Reads one stubRoute argument: a { status, body } reply as it is, or any other value as a 200 reply with that body.
+// Reads one stubRoute argument: a { status, body } reply as it is, or any other value as a 200
+// reply with that body.
 function asStubReply(input: StubInput): StubReply {
   if ("status" in input && "body" in input && typeof input.status === "number")
     return { ...input, status: input.status, body: input.body };
   return { status: 200, body: input };
 }
 
-// The answers every screen gets for the signed-in rail's two reads unless a test stubs them: no friends and no friend requests; and
-// for the reads of the home page, Explore and profiles: no listings and no posts.
-// server.resetHandlers keeps these, and a test's own stubRoute goes in front of them.
+// The answers every screen gets for the signed-in rail's two reads unless a test stubs them: no
+// friends and no friend requests; and for the reads of the home page, Explore and profiles: no
+// listings and no posts. server.resetHandlers keeps these, and a test's own stubRoute goes in front
+// of them.
 const RAIL_DEFAULTS = [
   http.get(new URL("/api/friends", window.location.origin).href, () =>
     HttpResponse.json({ friends: [] }),
@@ -26,7 +28,8 @@ const RAIL_DEFAULTS = [
   http.get(new URL("/api/friend-requests", window.location.origin).href, () =>
     HttpResponse.json({ incoming: [], outgoing: [] }),
   ),
-  // The home page's suggestions read the first page of Explore; a test that needs listings stubs its own.
+  // The home page's suggestions read the first page of Explore; a test that needs listings stubs
+  // its own.
   http.get(new URL("/api/directory", window.location.origin).href, () =>
     HttpResponse.json({ listings: [], page: 0, hasMore: false }),
   ),
@@ -61,7 +64,8 @@ async function readBody(request: Request): Promise<unknown> {
   }
 }
 
-// Answers one contracts route from the MSW server; with a list, the replies are served in order and the last one repeats.
+// Answers one contracts route from the MSW server; with a list, the replies are served in order and
+// the last one repeats.
 export function stubRoute(
   route: { method: string; path: string },
   replies: StubInput | StubInput[],

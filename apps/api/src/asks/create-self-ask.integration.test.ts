@@ -18,7 +18,8 @@ afterAll(async () => {
   await t.close();
 });
 
-// Sends POST /api/asks as the person with this session token and returns the status and the parsed body.
+// Sends POST /api/asks as the person with this session token and returns the status and the parsed
+// body.
 async function sendAsk(
   token: string,
   payload: unknown,

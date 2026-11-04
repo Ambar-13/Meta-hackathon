@@ -68,7 +68,8 @@ async function send(
   };
 }
 
-// The meeting's brief.ready event and both brief rows, written as the worker writes them (briefs spec 4.1).
+// The meeting's brief.ready event and both brief rows, written as the worker writes them (briefs
+// spec 4.1).
 async function markBriefReady(meetingId: string, personIds: string[]): Promise<void> {
   await withMeeting(workerDb, meetingId, async (trx) => {
     for (const personId of personIds) {

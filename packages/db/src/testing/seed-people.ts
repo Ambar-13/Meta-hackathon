@@ -15,7 +15,8 @@ import { withPerson } from "../transaction.js";
 import type { Database } from "../types.js";
 import { readTestDatabaseUrls } from "./fresh-database.js";
 
-// The owner of each source a test made with createFrozenSource, so createApprovedCard can find it without a context.
+// The owner of each source a test made with createFrozenSource, so createApprovedCard can find it
+// without a context.
 const sourceOwners = new Map<string, string>();
 
 // Returns the item at index, and throws when the list is shorter.
@@ -37,7 +38,8 @@ function newRecoveryCode(): string {
   ).join("");
 }
 
-// Creates a person and a first session through auth_create_person, and returns the raw token and recovery code a test can send.
+// Creates a person and a first session through auth_create_person, and returns the raw token and
+// recovery code a test can send.
 export async function createTestPerson(
   db: Kysely<Database>,
   displayName: string,
@@ -59,7 +61,8 @@ export async function createTestPerson(
   return { personId, sessionToken, recoveryCode };
 }
 
-// Writes the names pass row of one source through the worker, as the names check does, so the freeze may proceed (migration 0002).
+// Writes the names pass row of one source through the worker, as the names check does, so the
+// freeze may proceed (migration 0002).
 async function writeNamesPass(personId: string, sourceId: string): Promise<void> {
   const worker = makeDatabase(readTestDatabaseUrls(process.env).workerUrl, 1);
   try {
@@ -127,7 +130,8 @@ export async function createFrozenSource(
   };
 }
 
-// Creates an approved card on a source made by createFrozenSource, with items quoting its turns in order.
+// Creates an approved card on a source made by createFrozenSource, with items quoting its turns in
+// order.
 export async function createApprovedCard(
   db: Kysely<Database>,
   sourceId: string,

@@ -68,7 +68,8 @@ function lobby(name: string, title: string, stubs: readonly GalleryStub[]): Gall
   };
 }
 
-// The lobby in each of its states: loading, error, waiting, expired, picking, ready, queued, starting, and with past meetings.
+// The lobby in each of its states: loading, error, waiting, expired, picking, ready, queued,
+// starting, and with past meetings.
 export const views: readonly GalleryView[] = [
   lobby("lobby-loading", "Lobby, loading", [
     {

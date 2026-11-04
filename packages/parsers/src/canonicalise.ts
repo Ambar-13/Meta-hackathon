@@ -1,8 +1,10 @@
-// A byte order mark at the start of the text. Write it in code as the escape /^﻿/, never as the invisible character.
+// A byte order mark at the start of the text. Write it in code as the escape /^﻿/, never as the
+// invisible character.
 export const BOM = /^﻿/;
 // A Windows line ending (CR then LF) or a lone CR; both become LF.
 export const CRLF = /\r\n?/g;
-// In words: every character in the Unicode categories "format" and "control", except the line feed (U+000A) and the tab (U+0009).
+// In words: every character in the Unicode categories "format" and "control", except the line feed
+// (U+000A) and the tab (U+0009).
 export const FORMAT_AND_CONTROL = /(?![\n\t])[\p{Cf}\p{Cc}]/gu;
 
 // The fewest letters a text needs before guessLang names a script (the language label of a turn).
@@ -12,7 +14,8 @@ const UNDETERMINED = "und";
 // One letter, for counting letters in a text.
 const LETTER = /\p{L}/u;
 
-// The script buckets of guessLang, in tie-break order. Japanese holds the kana; Han letters join it when kana is present.
+// The script buckets of guessLang, in tie-break order. Japanese holds the kana; Han letters join it
+// when kana is present.
 const SCRIPT_BUCKETS: ReadonlyArray<{ tag: string; pattern: RegExp }> = [
   { tag: "en", pattern: /\p{Script=Latin}/u },
   { tag: "hi", pattern: /\p{Script=Devanagari}/u },
@@ -25,13 +28,15 @@ const SCRIPT_BUCKETS: ReadonlyArray<{ tag: string; pattern: RegExp }> = [
   { tag: "bn", pattern: /\p{Script=Bengali}/u },
 ];
 
-// Strips the BOM, turns CRLF into LF, normalises to NFC, and removes every Unicode format (Cf) and control (Cc) character except
-// line feed and tab. The result is the text that is hashed, stored, scrubbed and quoted; offsets are UTF-16 code units of it.
+// Strips the BOM, turns CRLF into LF, normalises to NFC, and removes every Unicode format (Cf) and
+// control (Cc) character except line feed and tab. The result is the text that is hashed, stored,
+// scrubbed and quoted; offsets are UTF-16 code units of it.
 export function canonicalise(text: string): string {
   return text.replace(BOM, "").replace(CRLF, "\n").normalize("NFC").replace(FORMAT_AND_CONTROL, "");
 }
 
-// Counts the letters of a text in each script bucket, with Han letters moved into Japanese when kana is present.
+// Counts the letters of a text in each script bucket, with Han letters moved into Japanese when
+// kana is present.
 function bucketCounts(letters: string[]): Map<string, number> {
   const counts = new Map<string, number>();
   for (const bucket of SCRIPT_BUCKETS) {
@@ -45,7 +50,8 @@ function bucketCounts(letters: string[]): Map<string, number> {
   return counts;
 }
 
-// A cheap language guess for `turns.lang`: the script of the majority of letters, mapped to a BCP 47 tag; "und" when under 20 letters.
+// A cheap language guess for `turns.lang`: the script of the majority of letters, mapped to a BCP
+// 47 tag; "und" when under 20 letters.
 export function guessLang(text: string): string {
   const letters = [...text].filter((ch) => LETTER.test(ch));
   if (letters.length < LANG_MIN_LETTERS) return UNDETERMINED;

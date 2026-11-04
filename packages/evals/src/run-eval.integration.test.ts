@@ -1,5 +1,6 @@
-// Integration tests for pnpm eval. T13 and T14 drive a running replay stack, so they run only when EVAL_BASE_URL names one: scripts/check-wave-2.sh
-// sets it to the api and worker of its row 09. A plain vitest run has no api or worker, and CI starts none. T15 always runs.
+// Integration tests for pnpm eval. T13 and T14 drive a running replay stack, so they run only when
+// EVAL_BASE_URL names one: scripts/check-wave-2.sh sets it to the api and worker of its row 09. A
+// plain vitest run has no api or worker, and CI starts none. T15 always runs.
 import { execSync, spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -21,7 +22,8 @@ const LABELS = [
 const hasStack =
   process.env.EVAL_BASE_URL !== undefined && process.env.DATABASE_URL_WORKER !== undefined;
 
-// Runs the eval command with the arguments, from the package folder, and returns its exit code and output.
+// Runs the eval command with the arguments, from the package folder, and returns its exit code and
+// output.
 function runEval(args: string[]): { status: number | null; stdout: string; stderr: string } {
   const result = spawnSync("pnpm", ["exec", "tsx", "src/run-eval.ts", ...args], {
     cwd: PACKAGE_DIR,

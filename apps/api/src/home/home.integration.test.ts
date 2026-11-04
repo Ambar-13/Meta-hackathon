@@ -55,7 +55,8 @@ async function getHome(token: string): Promise<HomeView> {
   return HomeView.parse(JSON.parse(response.body));
 }
 
-// A source that is uploaded but not yet through the names pass or the review, created at the given time.
+// A source that is uploaded but not yet through the names pass or the review, created at the given
+// time.
 async function insertOpenSource(personId: string, createdAt: Date): Promise<string> {
   return asPerson(t.db, personId, async (trx) => {
     const row = await trx
@@ -78,7 +79,8 @@ async function insertOpenSource(personId: string, createdAt: Date): Promise<stri
   });
 }
 
-// A card in the given state on a frozen source, with items whose approved flags follow the list, in positions 1, 2, 3 and on.
+// A card in the given state on a frozen source, with items whose approved flags follow the list, in
+// positions 1, 2, 3 and on.
 async function insertCard(
   personId: string,
   input: { sourceId: string; state: "ready" | "approved"; approved: boolean[]; createdAt: Date },
@@ -128,7 +130,8 @@ async function insertCard(
   });
 }
 
-// Another meeting in the seeded pair through meeting_create, made by side a and stamped with the given creation time.
+// Another meeting in the seeded pair through meeting_create, made by side a and stamped with the
+// given creation time.
 async function addMeeting(seeded: SeededMeeting, createdAt: Date): Promise<string> {
   const result = await sql<{
     id: string | null;

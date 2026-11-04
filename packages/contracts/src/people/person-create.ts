@@ -18,7 +18,8 @@ export const PersonCreateResponse = z.object({
 export type PersonCreateResponse = z.infer<typeof PersonCreateResponse>;
 // Length of the recovery code in characters.
 export const RECOVERY_CODE_LENGTH = 32;
-// Characters a recovery code may use: 31 symbols with no 0, o, 1, l or i, so a code is easy to read aloud. Picked here.
+// Characters a recovery code may use: 31 symbols with no 0, o, 1, l or i, so a code is easy to read
+// aloud. Picked here.
 export const RECOVERY_CODE_ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789";
 // Person creations allowed per IP address per hour.
 export const PERSON_CREATE_RATE_LIMIT = { max: 10, windowMs: 3_600_000 };

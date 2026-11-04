@@ -1,7 +1,9 @@
-// What exists: the api keeps one orchestrator thread per person, plans each message in the worker, and runs a plan when asked.
-// The problem: the page must show a message at once, follow a thinking reply until it is planned, and start a plan only on a press.
-// The step: these hooks read the thread (again every THREAD_POLL_MS while a reply thinks), the home view and the friends list, and
-// hold the composer's text, the send and the plan runs. What it does not do: show anything; screen.tsx and its parts do.
+// What exists: the api keeps one orchestrator thread per person, plans each message in the worker,
+// and runs a plan when asked. The problem: the page must show a message at once, follow a thinking
+// reply until it is planned, and start a plan only on a press. The step: these hooks read the
+// thread (again every THREAD_POLL_MS while a reply thinks), the home view and the friends list, and
+// hold the composer's text, the send and the plan runs. What it does not do: show anything;
+// screen.tsx and its parts do.
 import { useState } from "react";
 import {
   ORCHESTRATOR_MESSAGE_MAX_CHARS,
@@ -31,8 +33,9 @@ export function readDraftQuery(search: string): string | null {
   return value.slice(0, ORCHESTRATOR_MESSAGE_MAX_CHARS);
 }
 
-// The composer: its text, a count that goes up each time the page puts words in it (the box then takes the focus with the caret at
-// the end), whether a send is out, the last send error, and the actions.
+// The composer: its text, a count that goes up each time the page puts words in it (the box then
+// takes the focus with the caret at the end), whether a send is out, the last send error, and the
+// actions.
 export type ComposerModel = {
   text: string;
   fillCount: number;
@@ -44,15 +47,16 @@ export type ComposerModel = {
   resend: (text: string) => Promise<void>;
 };
 
-// Where one suggested person's friend request stands on the home page: not sent, being sent, sent, already friends, or refused with the
-// api's sentence.
+// Where one suggested person's friend request stands on the home page: not sent, being sent, sent,
+// already friends, or refused with the api's sentence.
 export type AddState =
   | { kind: "idle" }
   | { kind: "sending" }
   | { kind: "requested" }
   | { kind: "friends" }
   | { kind: "refused"; sentence: string };
-// The friend requests the home page's suggestions send: each listing's state, and the action of its Add friend button.
+// The friend requests the home page's suggestions send: each listing's state, and the action of its
+// Add friend button.
 export type AddsModel = {
   stateOf: (listingId: string) => AddState;
   add: (listing: DirectoryListing) => Promise<void>;
@@ -61,7 +65,8 @@ export type AddsModel = {
 // One plan run as the page follows it: whether its request is out, and the error it came back with.
 export type RunStatus = { isRunning: boolean; error: ApiError | null };
 
-// The chat page's model: the polled thread, the messages as shown, the person's home view and friends, the composer and the plan runs.
+// The chat page's model: the polled thread, the messages as shown, the person's home view and
+// friends, the composer and the plan runs.
 export type ChatModel = {
   thread: PolledView<OrchestratorThread>;
   messages: OrchestratorMessage[];
@@ -74,12 +79,14 @@ export type ChatModel = {
   runPlan: (replyId: string) => Promise<void>;
 };
 
-// Home and friends are read once when the page opens; a failed read is tried again after 30 s, as the polling hook does for any error.
+// Home and friends are read once when the page opens; a failed read is tried again after 30 s, as
+// the polling hook does for any error.
 const READ_ONCE = { intervalMs: 30_000, keepPolling: (): boolean => false } as const;
 // The status of a plan that has not been pressed.
 const IDLE_RUN: RunStatus = { isRunning: false, error: null };
 
-// The two messages a 202 stands for, shown before the next thread read: the person's own, and the reply that is thinking.
+// The two messages a 202 stands for, shown before the next thread read: the person's own, and the
+// reply that is thinking.
 function sentPair(
   text: string,
   reply: { messageId: string; replyId: string },
@@ -98,8 +105,8 @@ function sentPair(
   ];
 }
 
-// The composer's text and the send: POST /api/orchestrator, then the two messages at once, an empty box and a fresh thread read; an
-// error keeps the text in the box.
+// The composer's text and the send: POST /api/orchestrator, then the two messages at once, an empty
+// box and a fresh thread read; an error keeps the text in the box.
 function useComposer(
   draft: string | null,
   onSent: (messages: OrchestratorMessage[]) => void,
@@ -132,9 +139,10 @@ function useComposer(
   return { text, fillCount, isSending, sendError, setText, fill, send, resend };
 }
 
-// The suggestions' Add friend buttons: POST /api/friend-requests with the listing. A request already waiting reads as sent, and an
-// existing friendship as friends, so the button never offers what the api would refuse. A sample person accepts at once (migration
-// 0009), so adding one reads as friends and onFriends reads the friends list again.
+// The suggestions' Add friend buttons: POST /api/friend-requests with the listing. A request
+// already waiting reads as sent, and an existing friendship as friends, so the button never offers
+// what the api would refuse. A sample person accepts at once (migration 0009), so adding one reads
+// as friends and onFriends reads the friends list again.
 export function useAdds(onFriends: () => void): AddsModel {
   const [states, setStates] = useState<Readonly<Record<string, AddState>>>({});
   const set = (listingId: string, state: AddState): void => {
@@ -159,7 +167,8 @@ export function useAdds(onFriends: () => void): AddsModel {
   return { stateOf: (listingId) => states[listingId] ?? { kind: "idle" }, add };
 }
 
-// The plan runs: POST /api/orchestrator/:id/run, keeping the reply it returns so the card under it turns into the ask card or the refusal.
+// The plan runs: POST /api/orchestrator/:id/run, keeping the reply it returns so the card under it
+// turns into the ask card or the refusal.
 function usePlanRuns(): {
   ran: ReadonlyMap<string, OrchestratorMessage>;
   runStatus: (replyId: string) => RunStatus;
@@ -182,9 +191,9 @@ function usePlanRuns(): {
   return { ran, runStatus: (replyId) => runs[replyId] ?? IDLE_RUN, runPlan };
 }
 
-// Reads the thread (again every THREAD_POLL_MS while a reply is thinking), the home view, the friends list and the first page of
-// Explore for the suggestions, and holds the composer, the Add friend buttons
-// and the plan runs; draft is the text the composer starts with.
+// Reads the thread (again every THREAD_POLL_MS while a reply is thinking), the home view, the
+// friends list and the first page of Explore for the suggestions, and holds the composer, the Add
+// friend buttons and the plan runs; draft is the text the composer starts with.
 export function useChatScreen(draft: string | null): ChatModel {
   const thread = usePolledView(() => apiFetch(routes.social.readThread, {}), {
     key: "chat-thread",

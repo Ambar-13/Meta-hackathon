@@ -10,10 +10,12 @@ import {
   type StickerName,
 } from "../../look/index.js";
 
-// The welcome page below the first screen: what it does, a sample meeting, the kinds of question, the three steps, the
-// promises and the last call. Mira and Jonah are made up, and the page says so; nothing here is a real person's data.
+// The welcome page below the first screen: what it does, a sample meeting, the kinds of question,
+// the three steps, the promises and the last call. Mira and Jonah are made up, and the page says
+// so; nothing here is a real person's data.
 
-// The paragraph that says what Meety does, with small stickers inside the sentence (Lofty Lab's "who we are").
+// The paragraph that says what Meety does, with small stickers inside the sentence (Lofty Lab's
+// "who we are").
 export const WhatItDoes = (): ReactElement => {
   return (
     <section className="wl-mission" id="how" aria-labelledby="wl-mission-title">
@@ -34,7 +36,8 @@ export const WhatItDoes = (): ReactElement => {
   );
 };
 
-// One line of the sample meeting: who says it, what they say, and its quote or its missing-quote flag.
+// One line of the sample meeting: who says it, what they say, and its quote or its missing-quote
+// flag.
 type SampleLine = { side: "a" | "b"; text: string; quote?: { text: string; source: string } };
 // The sample meeting, word for word: a get-along question between two made-up people.
 const SAMPLE_LINES: readonly SampleLine[] = [
@@ -83,7 +86,8 @@ const SampleBubble = (props: { line: SampleLine }): ReactElement => {
   );
 };
 
-// The sample meeting on a pale sky band: the question, the four lines, the typing dots, then the brief it ends in.
+// The sample meeting on a pale sky band: the question, the four lines, the typing dots, then the
+// brief it ends in.
 export const SampleMeeting = (): ReactElement => {
   return (
     <section className="wl-meet" aria-labelledby="wl-meet-title">
@@ -147,7 +151,8 @@ const SampleBrief = (): ReactElement => {
   );
 };
 
-// One kind of question: its colour, its sticker, a curated question, and one probable line from each agent.
+// One kind of question: its colour, its sticker, a curated question, and one probable line from
+// each agent.
 type KindPanel = {
   kind: QuestionKind;
   label: string;
@@ -157,7 +162,8 @@ type KindPanel = {
   lines: readonly [string, string];
   note?: string;
 };
-// The five kinds the page shows, each with a curated question from the lobby and the brief labels of its kind.
+// The five kinds the page shows, each with a curated question from the lobby and the brief labels
+// of its kind.
 const KIND_PANELS: readonly KindPanel[] = [
   {
     kind: "get_along",
@@ -217,7 +223,8 @@ const KIND_PANELS: readonly KindPanel[] = [
   },
 ];
 
-// One tilted colour panel: the kind, the question, the brief's three parts for that kind, and a two-line sample.
+// One tilted colour panel: the kind, the question, the brief's three parts for that kind, and a
+// two-line sample.
 const KindCard = (props: { panel: KindPanel; index: number }): ReactElement => {
   const { panel } = props;
   const labels = BRIEF_SECTION_LABELS[panel.kind];
@@ -274,7 +281,8 @@ export const QuestionKinds = (): ReactElement => {
   );
 };
 
-// The beat between the kinds and the steps: the line, on a coral ribbon with the two name tags and a coffee cup.
+// The beat between the kinds and the steps: the line, on a coral ribbon with the two name tags and
+// a coffee cup.
 export const FirstCoffee = (): ReactElement => {
   return (
     <section className="wl-coffee" aria-labelledby="wl-coffee-title">

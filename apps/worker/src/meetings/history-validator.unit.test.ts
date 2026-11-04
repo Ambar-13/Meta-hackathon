@@ -18,7 +18,8 @@ function tool(id: string): ChatMessage {
   return { role: "tool", tool_call_id: id, content: "r" };
 }
 
-// Runs the history check on these messages and returns the ContractError it throws; fails the test when it does not throw one.
+// Runs the history check on these messages and returns the ContractError it throws; fails the test
+// when it does not throw one.
 function errorOf(messages: readonly ChatMessage[]): ContractError {
   try {
     assertValidHistory(messages);

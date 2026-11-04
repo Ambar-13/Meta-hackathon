@@ -16,7 +16,8 @@ export const Claim = z.object({
   evidenceValid: z.boolean(),
 });
 export type Claim = z.infer<typeof Claim>;
-// What the receipts model returns for one turn: its claims with their quotes and turn labels (meeting-receipts prompt).
+// What the receipts model returns for one turn: its claims with their quotes and turn labels
+// (meeting-receipts prompt).
 export const ReceiptsOutput = z.object({
   claims: z
     .array(

@@ -33,10 +33,11 @@ export const CardItem = z.object({
   sensitive: z.boolean(),
 });
 export type CardItem = z.infer<typeof CardItem>;
-// The source message of one card item, for its owner's card screen: tapping a quote shows the message it came from
-// with the quote marked. highlight is the quote's range in text, found through the receipts offset map, or null
-// when the quote is not in the message (a flagged item). Only the card's owner reads this. A meeting citation shows the
-// quote alone, because approving an item lets the persona quote it, not show the whole message.
+// The source message of one card item, for its owner's card screen: tapping a quote shows the
+// message it came from with the quote marked. highlight is the quote's range in text, found through
+// the receipts offset map, or null when the quote is not in the message (a flagged item). Only the
+// card's owner reads this. A meeting citation shows the quote alone, because approving an item lets
+// the persona quote it, not show the whole message.
 export const CardItemSource = z.object({
   turnIndex: z.number().int(),
   text: z.string(),
@@ -72,8 +73,8 @@ export type CardRequestResponse = z.infer<typeof CardRequestResponse>;
 // The words shown next to the recall switch, kept word for word.
 export const RECALL_SWITCH_COPY =
   "Let my Meety search my notes during meetings, with names hidden and secrets removed. The other person may see quotes from them.";
-// What the card model returns: items with a kind, a claim, a language, a gloss, a turn label and a quote.
-// The per-field maximums bound parsing and are picked here.
+// What the card model returns: items with a kind, a claim, a language, a gloss, a turn label and a
+// quote. The per-field maximums bound parsing and are picked here.
 export const CardBuildOutput = z.object({
   items: z
     .array(

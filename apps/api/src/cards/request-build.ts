@@ -19,17 +19,20 @@ import type { RouteDeps } from "../app-types.js";
 import { makeNotFoundError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
 
-// What cards.model and cards.prompt_version hold until the job builds the card, because apps/api imports neither packages/llm nor packages/prompts.
+// What cards.model and cards.prompt_version hold until the job builds the card, because apps/api
+// imports neither packages/llm nor packages/prompts.
 export const CARD_PENDING_LABEL = "pending";
 // The :id of POST /api/sources/:id/cards: a uuid, or the source cannot exist.
 const RouteParams = z.object({ id: Uuid });
 
-// The UTC midnight before now, where the 2-builds-a-day count restarts (the same boundary as the dollar caps of packages/llm).
+// The UTC midnight before now, where the 2-builds-a-day count restarts (the same boundary as the
+// dollar caps of packages/llm).
 export function utcDayStart(now: Date): Date {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 }
 
-// Refuses a card request: no such source for this person, a source not yet frozen, or 2 builds today already.
+// Refuses a card request: no such source for this person, a source not yet frozen, or 2 builds
+// today already.
 export function assertCanRequestCard(
   source: { frozen_at: Date | null } | undefined,
   buildsToday: number,
@@ -50,7 +53,8 @@ export function assertCanRequestCard(
   }
 }
 
-// Inserts the card in state building and returns its id; the job writes the model and the prompt version when it builds.
+// Inserts the card in state building and returns its id; the job writes the model and the prompt
+// version when it builds.
 export async function insertBuildingCard(
   trx: DatabaseTransaction | Transaction<Database>,
   args: { sourceId: string; personId: string },
@@ -69,7 +73,8 @@ export async function insertBuildingCard(
   return row.id;
 }
 
-// Registers POST /api/sources/:id/cards: 202 CardRequestResponse; 404 not_found; 409 source_not_frozen; 429 card_daily_cap.
+// Registers POST /api/sources/:id/cards: 202 CardRequestResponse; 404 not_found; 409
+// source_not_frozen; 429 card_daily_cap.
 export function registerRequestBuild(app: FastifyInstance, deps: RouteDeps): Promise<void> {
   app.post(routes.sources.requestCard.path, async (request, reply) => {
     const personId = requirePerson(request);
@@ -77,7 +82,8 @@ export function registerRequestBuild(app: FastifyInstance, deps: RouteDeps): Pro
     if (!params.success) throw makeNotFoundError();
     const sourceId = params.data.id;
     const cardId = await withPerson(deps.db, personId, async (trx) => {
-      // The source row is locked first, so requests for one source take turns and the daily count cannot be passed by sending several at once.
+      // The source row is locked first, so requests for one source take turns and the daily count
+      // cannot be passed by sending several at once.
       const source = await trx
         .selectFrom("sources")
         .select(["id", "frozen_at"])

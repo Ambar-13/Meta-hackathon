@@ -23,7 +23,8 @@ import {
 import { withMeeting, withPerson, type DatabaseTransaction } from "./transaction.js";
 import type { Database } from "./types.js";
 
-// The user-data tables; names_passes and source_names come from migration 0002, the directory's three from 0006, friend_requests and orchestrator_messages from 0008, and posts from 0009.
+// The user-data tables; names_passes and source_names come from migration 0002, the directory's
+// three from 0006, friend_requests and orchestrator_messages from 0008, and posts from 0009.
 const USER_DATA_TABLES = [
   "people",
   "sessions",
@@ -140,7 +141,8 @@ let t: TestDatabase;
 let worker: Kysely<Database>;
 let seed: { x: SeededMeeting; y: SeededMeeting };
 
-// Writes the person-keyed rows of one seeded meeting: the API's rows through the owner, the ledger and names through the worker.
+// Writes the person-keyed rows of one seeded meeting: the API's rows through the owner, the ledger
+// and names through the worker.
 async function seedPersonRows(s: SeededMeeting): Promise<void> {
   const aId = s.a.personId;
   await asPerson(t.db, aId, async (trx) => {
@@ -478,7 +480,8 @@ describe("schema security", () => {
   });
 
   it("R9.1-T6: after the rebuild app_migrate is no longer a member of app_definer", async () => {
-    // Held under the rebuild lock: another worktree's rebuild grants the membership for its own run, cluster-wide.
+    // Held under the rebuild lock: another worktree's rebuild grants the membership for its own
+    // run, cluster-wide.
     const rows = await withRebuildLock(readTestDatabaseUrls(process.env).adminUrl, () =>
       catalog<{ n: string }>(
         `SELECT count(*) AS n FROM pg_auth_members m JOIN pg_roles r ON r.oid = m.roleid JOIN pg_roles u ON u.oid = m.member WHERE r.rolname = 'app_definer' AND u.rolname = 'app_migrate'`,

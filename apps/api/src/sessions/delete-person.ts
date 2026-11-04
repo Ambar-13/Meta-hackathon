@@ -7,8 +7,9 @@ import { clearSessionCookie, requirePerson } from "./cookie.js";
 // What startDeletion wrote, so the undo can find exactly those rows again.
 type DeletionWrite = { personId: string; deletionId: string; now: Date };
 
-// Undoes what startDeletion wrote, after its job failed to enqueue: the person is active again, their sessions are
-// live again, and the deletions row is gone. Only the rows this call changed are touched, found by their id and time.
+// Undoes what startDeletion wrote, after its job failed to enqueue: the person is active again,
+// their sessions are live again, and the deletions row is gone. Only the rows this call changed are
+// touched, found by their id and time.
 async function undoDeletion(
   deps: RouteDeps,
   write: DeletionWrite,
@@ -35,9 +36,9 @@ async function undoDeletion(
   }
 }
 
-// Marks the person deleted, revokes every session and writes the deletions row in one transaction, then enqueues
-// delete_person after that transaction has committed. If the enqueue throws, the rows are undone and the error is
-// thrown on, so the person can try again.
+// Marks the person deleted, revokes every session and writes the deletions row in one transaction,
+// then enqueues delete_person after that transaction has committed. If the enqueue throws, the rows
+// are undone and the error is thrown on, so the person can try again.
 export async function startDeletion(
   deps: RouteDeps,
   personId: string,

@@ -1,5 +1,6 @@
-// One person in Explore as the caller sees them: the listing's public side and how the caller stands with its person, so the profile
-// shows the right buttons. directory_profile (migration 0008) reads it in one call and never returns a person id.
+// One person in Explore as the caller sees them: the listing's public side and how the caller
+// stands with its person, so the profile shows the right buttons. directory_profile (migration
+// 0008) reads it in one call and never returns a person id.
 import type { FastifyInstance } from "fastify";
 import { sql } from "kysely";
 import { z } from "zod";
@@ -10,7 +11,8 @@ import { makeNotFoundError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
 import { personPhoto, readListingPhotos } from "../home/person-photos.js";
 
-// The :id of GET /api/directory/:id: a listing id. One that is not a uuid is not_found, so a bad id tells nothing.
+// The :id of GET /api/directory/:id: a listing id. One that is not a uuid is not_found, so a bad id
+// tells nothing.
 const ListingParams = z.object({ id: Uuid });
 
 // One row of directory_profile by its SQL names (migration 0009).
@@ -27,7 +29,8 @@ export type ProfileRow = {
   can_ask: boolean;
 };
 
-// The profile view of one directory_profile row, with the photo id of its person when they put up a photo.
+// The profile view of one directory_profile row, with the photo id of its person when they put up a
+// photo.
 export function toProfileView(row: ProfileRow, photoId?: string): ProfileView {
   return ProfileView.parse({
     listingId: row.listing_id,
@@ -44,7 +47,9 @@ export function toProfileView(row: ProfileRow, photoId?: string): ProfileView {
   });
 }
 
-// Registers GET /api/directory/:id: 200 ProfileView; 404 not_found for a bad id and listing_not_found for a listing Explore does not show. Never cached, because a request or an answer changes the buttons.
+// Registers GET /api/directory/:id: 200 ProfileView; 404 not_found for a bad id and
+// listing_not_found for a listing Explore does not show. Never cached, because a request or an
+// answer changes the buttons.
 export function registerReadProfile(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.social.readProfile.path, async (request, reply) => {
     const personId = requirePerson(request);

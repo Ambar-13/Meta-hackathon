@@ -50,7 +50,8 @@ export const INVITE_TOKEN = "0123456789abcdef0123456789abcdef";
 // A 32 hex character transfer token.
 export const TRANSFER_TOKEN = "fedcba9876543210fedcba9876543210";
 
-// The quiz question text for position n, read from the quiz bank; throws when the bank has no such entry.
+// The quiz question text for position n, read from the quiz bank; throws when the bank has no such
+// entry.
 function bankText(n: number): string {
   const entry = QUIZ_BANK[n - 1];
   if (entry === undefined) throw new Error(`the quiz bank has no question ${String(n)}`);
@@ -173,7 +174,8 @@ export function pairView(options: { hasJoiner: boolean; meetings: PairMeetingRow
   });
 }
 
-// A MeetingView for IDS.meeting with the given fields replaced; the viewer is side a unless told otherwise.
+// A MeetingView for IDS.meeting with the given fields replaced; the viewer is side a unless told
+// otherwise.
 export function meetingView(overrides: Partial<MeetingView>): MeetingView {
   return MeetingView.parse({
     id: IDS.meeting,
@@ -232,7 +234,8 @@ export function phaseChanged(seq: number, phase: Phase, stepSeq: number): Commit
   return CommittedEvent.parse({ ...committedBase(seq), type: "phase.changed", phase, stepSeq });
 }
 
-// The turn.delta frame for a slice of a turn that is still being written. Takes one object so the call stays within three parameters.
+// The turn.delta frame for a slice of a turn that is still being written. Takes one object so the
+// call stays within three parameters.
 export function turnDelta(slot: {
   stepSeq: number;
   attempt: number;
@@ -249,7 +252,8 @@ export function turnDelta(slot: {
   });
 }
 
-// The turn.committed event with its claims, in the open phase. Takes one object so the call stays within three parameters.
+// The turn.committed event with its claims, in the open phase. Takes one object so the call stays
+// within three parameters.
 export function turnCommitted(slot: {
   seq: number;
   stepSeq: number;
@@ -304,7 +308,8 @@ export function replayExport(events: CommittedEvent[]): ReplayExport {
   return ReplayExport.parse({ meetingId: IDS.meeting, exportedAt: SERVER_NOW, events });
 }
 
-// The listing ids of Mira (open to dating questions) and Ravi (not), shared by the Explore, profile and Me tests.
+// The listing ids of Mira (open to dating questions) and Ravi (not), shared by the Explore, profile
+// and Me tests.
 export const LISTING_IDS = {
   mira: `${UUID_PREFIX}000000000511`,
   ravi: `${UUID_PREFIX}000000000512`,
@@ -312,7 +317,8 @@ export const LISTING_IDS = {
   request: `${UUID_PREFIX}000000000531`,
 } as const;
 
-// A ProfileView of Mira, as a person with no friendship to her sees it; tests replace the fields they need.
+// A ProfileView of Mira, as a person with no friendship to her sees it; tests replace the fields
+// they need.
 export function profileView(overrides: Partial<ProfileView>): ProfileView {
   return ProfileView.parse({
     listingId: LISTING_IDS.mira,

@@ -1,11 +1,13 @@
-// Grounded brief rate: the share of brief lines whose every quote passes the quote check again inside the right side's turn.
-// The stored verified flag is read, but the quote is checked again with verifyQuote, so an altered quote fails.
+// Grounded brief rate: the share of brief lines whose every quote passes the quote check again
+// inside the right side's turn. The stored verified flag is read, but the quote is checked again
+// with verifyQuote, so an altered quote fails.
 import { verifyQuote } from "@meet-first/receipts";
 import type { Quote } from "@meet-first/contracts";
 import type { BriefLineRow, EvalRows, TurnTextRow } from "../collect-rows.js";
 import type { MetricResult } from "./index.js";
 
-// Whether one quote holds: verified, found in the named turn, and that turn belongs to the person on the quote's side.
+// Whether one quote holds: verified, found in the named turn, and that turn belongs to the person
+// on the quote's side.
 function quoteHolds(
   quote: Quote,
   context: {
@@ -36,7 +38,8 @@ function isGrounded(line: BriefLineRow, rows: EvalRows): boolean {
   );
 }
 
-// Reads the brief lines of the driven meetings and returns the grounded share, or no value when there are no lines.
+// Reads the brief lines of the driven meetings and returns the grounded share, or no value when
+// there are no lines.
 export function measureGroundedBriefRate(rows: EvalRows): MetricResult {
   const total = rows.briefLines.length;
   const grounded = rows.briefLines.filter((line) => isGrounded(line, rows)).length;

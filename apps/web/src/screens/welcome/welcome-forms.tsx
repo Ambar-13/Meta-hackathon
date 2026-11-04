@@ -13,7 +13,8 @@ const GOOGLE_COPY = {
   cancelled: "Google sign-in was cancelled. Try again whenever you like.",
 } as const;
 
-// Google's own G, in its own four colours, as Google's sign-in guidelines ask; the one place green shows in the app.
+// Google's own G, in its own four colours, as Google's sign-in guidelines ask; the one place green
+// shows in the app.
 const GoogleMark = (): ReactElement => {
   return (
     <svg
@@ -44,8 +45,8 @@ const GoogleMark = (): ReactElement => {
   );
 };
 
-// Continue with Google, when the site offers it: Google's G and
-// the words on a light pill, a plain link to the api, which sends the browser to Google and back signed in; then the line that leads
+// Continue with Google, when the site offers it: Google's G and the words on a light pill, a plain
+// link to the api, which sends the browser to Google and back signed in; then the line that leads
 // to the name tag form. A sign-in that came back unfinished says so above it.
 export const GoogleSignIn = (): ReactElement | null => {
   const isOn = useGoogleSignIn();
@@ -113,9 +114,10 @@ const GroupsField = (): ReactElement => {
   );
 };
 
-// The create-profile form, drawn as a blank name tag you write your name on; after creating it shows the recovery code once,
-// and onDone runs when the person continues. The access code field appears only when the link carried a code or the server
-// asked for one, so a site without a code shows no extra field.
+// The create-profile form, drawn as a blank name tag you write your name on; after creating it
+// shows the recovery code once, and onDone runs when the person continues. The access code field
+// appears only when the link carried a code or the server asked for one, so a site without a code
+// shows no extra field.
 export const WelcomeForm = (props: { onDone: () => void }): ReactElement => {
   const { state, create, forgetCode } = useCreatePerson();
   const linkCode = accessCodeIn(useLocation().search);

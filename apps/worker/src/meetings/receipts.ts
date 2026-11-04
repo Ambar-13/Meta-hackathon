@@ -3,9 +3,11 @@ import { verifyQuote } from "@meet-first/receipts";
 import type { ChatMessage } from "@meet-first/llm";
 import { turnLabel } from "./prompt-builder.js";
 
-// One turn of the speaking side that a claim may cite: shown to the model as a card quote or a recall result.
+// One turn of the speaking side that a claim may cite: shown to the model as a card quote or a
+// recall result.
 export type CitableTurn = { turnId: string; turnIndex: number; text: string; normText: string };
-// What the receipts request shows: the speech, the card quotes and this step's recall results of the speaking side.
+// What the receipts request shows: the speech, the card quotes and this step's recall results of
+// the speaking side.
 export type ReceiptsInput = {
   side: "a" | "b";
   speechText: string;
@@ -34,7 +36,8 @@ export type StoredClaim = {
   isVerified: boolean;
   isRegenerated: boolean;
 };
-// The injected receipts call: sends the messages with the strict receipts schema and returns the parsed JSON.
+// The injected receipts call: sends the messages with the strict receipts schema and returns the
+// parsed JSON.
 export type ReceiptsCallFn = (messages: ChatMessage[]) => Promise<unknown>;
 
 // One failed claim as the regeneration message names it: its 0-based index and why it failed.
@@ -51,7 +54,8 @@ const FAILURE_WORDS: Readonly<Record<ClaimFailure | "schema", string>> = {
   schema: "the reply did not match the claims schema",
 };
 
-// The first messages of the receipts call: the receipts prompt as the system message and the speech with its citable turns as one user message.
+// The first messages of the receipts call: the receipts prompt as the system message and the speech
+// with its citable turns as one user message.
 export function buildReceiptsMessages(promptText: string, input: ReceiptsInput): ChatMessage[] {
   const content = [
     '<speech side="' + input.side + '">\n' + input.speechText + "\n</speech>",
@@ -74,7 +78,8 @@ export function parseTurnLabel(label: string): number | null {
   return /^\d{1,9}$/.test(text) ? Number(text) : null;
 }
 
-// Checks each claim inside the one turn its label names, among the speaking side's citable turns only.
+// Checks each claim inside the one turn its label names, among the speaking side's citable turns
+// only.
 export function checkClaims(
   output: unknown,
   turns: ReadonlyMap<number, CitableTurn>,
@@ -97,7 +102,8 @@ export function regenerationMessage(failed: ReadonlyArray<FailedClaim>): string 
   );
 }
 
-// Runs the receipts call, regenerates it once when any claim failed, and returns the claims to store plus the count of claims dropped.
+// Runs the receipts call, regenerates it once when any claim failed, and returns the claims to
+// store plus the count of claims dropped.
 export async function runReceipts(args: {
   messages: ChatMessage[];
   call: ReceiptsCallFn;
@@ -115,7 +121,8 @@ export async function runReceipts(args: {
   return { ...storeChosen(second, true), callCount: 2 };
 }
 
-// Checks one claim against the turn its label names: an unknown label, or the quote check inside that one turn.
+// Checks one claim against the turn its label names: an unknown label, or the quote check inside
+// that one turn.
 function checkOneClaim(
   claim: ReceiptsOutput["claims"][number],
   turns: ReadonlyMap<number, CitableTurn>,
@@ -140,7 +147,8 @@ function checkOneClaim(
   return { ...kept, turnId: turn.turnId, failure: result.ok ? null : result.reason };
 }
 
-// The regeneration call: the first messages, the first reply and the list of failures. Undefined when the call threw; null when its reply broke the schema.
+// The regeneration call: the first messages, the first reply and the list of failures. Undefined
+// when the call threw; null when its reply broke the schema.
 async function regenerate(
   args: {
     messages: ChatMessage[];
@@ -163,7 +171,8 @@ async function regenerate(
   }
 }
 
-// The run when the second call threw: the first reply's claims, or none when that reply broke the schema.
+// The run when the second call threw: the first reply's claims, or none when that reply broke the
+// schema.
 function fallbackRun(checked: CheckedClaim[] | null): ReceiptsRun {
   if (checked === null) return { claims: [], droppedCount: 0, callCount: 2 };
   return { ...storeChosen(checked, false), callCount: 2 };
@@ -177,7 +186,8 @@ function failuresOf(checked: CheckedClaim[] | null): FailedClaim[] {
   );
 }
 
-// The claims to store from one checked reply: a claim without a turn is dropped and counted; the rest are stored with their checks.
+// The claims to store from one checked reply: a claim without a turn is dropped and counted; the
+// rest are stored with their checks.
 function storeChosen(
   checked: CheckedClaim[],
   isRegenerated: boolean,

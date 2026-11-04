@@ -1,5 +1,5 @@
-// The sessions folder: who a request acts for, the five routes that make, recover, move and end a session, and
-// sign in with Google.
+// The sessions folder: who a request acts for, the five routes that make, recover, move and end a
+// session, and sign in with Google.
 import type { RoutePlugin } from "../app-types.js";
 import { registerClaim } from "./claim.js";
 import { registerCreatePerson } from "./create-person.js";
@@ -8,8 +8,8 @@ import { registerGoogleSignIn } from "./google-sign-in.js";
 import { registerRecover } from "./recover.js";
 import { registerTransfer } from "./transfer.js";
 
-// The sessions routes as one plugin for server.ts slot 1, in this order: create person, recover, transfer, claim, delete me,
-// then sign in with Google.
+// The sessions routes as one plugin for server.ts slot 1, in this order: create person, recover,
+// transfer, claim, delete me, then sign in with Google.
 export const registerSessionsRoutes: RoutePlugin = (app, deps) => {
   registerCreatePerson(app, deps);
   registerRecover(app, deps);
@@ -20,7 +20,8 @@ export const registerSessionsRoutes: RoutePlugin = (app, deps) => {
   return Promise.resolve();
 };
 
-// The session hook, the person check, and the cookie and token functions that server.ts and the pairs folder use.
+// The session hook, the person check, and the cookie and token functions that server.ts and the
+// pairs folder use.
 export {
   addSessionHook,
   clearSessionCookie,

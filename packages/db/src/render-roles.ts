@@ -8,10 +8,11 @@ import { ContractError } from "@meet-first/contracts";
 import { describeError } from "./database-errors.js";
 import { migrateDatabase, type MigrationReport } from "./migrate.js";
 
-// The one-time role setup on Render. Render's database comes with one default user that owns the database and is not a
-// superuser. Run once from this machine as that user, this command makes the four roles migration 0001 expects, gives
-// app_migrate the rights it has in a local rebuild, applies every migration, and writes the three role URLs to git-ignored
-// files to paste into the Render dashboard. It prints no password and no URL. A second run gives the three login roles new
+// The one-time role setup on Render. Render's database comes with one default user that owns the
+// database and is not a superuser. Run once from this machine as that user, this command makes the
+// four roles migration 0001 expects, gives app_migrate the rights it has in a local rebuild,
+// applies every migration, and writes the three role URLs to git-ignored files to paste into the
+// Render dashboard. It prints no password and no URL. A second run gives the three login roles new
 // passwords and writes the files again.
 
 // The repository root, where .env.render is read and the three files are written.
@@ -25,12 +26,14 @@ export type RolePasswords = Record<LoginRole, string>;
 // One role's name and password, which make the user part of its URL.
 type Login = { role: LoginRole; password: string };
 
-// How the setup's connections use TLS. verify (the default) checks the server's certificate against this machine's trusted
-// authorities. encrypt-only, chosen with RENDER_DB_TLS=encrypt-only, encrypts without checking, the way the psql command on the
-// database's Info page connects. plain, chosen with sslmode=disable on the external URL, is for a Postgres on this machine only.
+// How the setup's connections use TLS. verify (the default) checks the server's certificate against
+// this machine's trusted authorities. encrypt-only, chosen with RENDER_DB_TLS=encrypt-only,
+// encrypts without checking, the way the psql command on the database's Info page connects. plain,
+// chosen with sslmode=disable on the external URL, is for a Postgres on this machine only.
 export type TlsMode = "verify" | "encrypt-only" | "plain";
 
-// What the operator copies into .env.render: the two URLs on the database's Info page, and the api service's address.
+// What the operator copies into .env.render: the two URLs on the database's Info page, and the api
+// service's address.
 export type RenderInputs = {
   externalUrl: string;
   internalUrl: string;
@@ -41,7 +44,8 @@ export type RenderInputs = {
 // The hosts plain connections may go to.
 const LOCAL_HOSTS: readonly string[] = ["localhost", "127.0.0.1"];
 
-// Node's codes for a certificate the client could not check, which verify turns into a refusal that names encrypt-only.
+// Node's codes for a certificate the client could not check, which verify turns into a refusal that
+// names encrypt-only.
 const CERTIFICATE_CODES = new Set([
   "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
   "UNABLE_TO_GET_ISSUER_CERT",
@@ -53,33 +57,37 @@ const CERTIFICATE_CODES = new Set([
   "ERR_TLS_CERT_ALTNAME_INVALID",
 ]);
 
-// What one run did: the files it wrote, and the migrations it applied with the schema version they reached.
+// What one run did: the files it wrote, and the migrations it applied with the schema version they
+// reached.
 export type RenderSetupReport = { files: string[]; migration: MigrationReport };
 
 // The database names the setup accepts, the same rule as a local rebuild (fresh.ts).
 const NAME_PATTERN = /^[a-z][a-z0-9_]{0,62}$/;
 
-// The attributes each login role is made with: those of a local rebuild (fresh.ts), except that app_migrate gets no CREATEROLE.
-// Every role exists before the first migration, so 0001 makes none, and CREATEROLE together with the admin grant on app_definer
-// below would let app_migrate give app_definer a password.
+// The attributes each login role is made with: those of a local rebuild (fresh.ts), except that
+// app_migrate gets no CREATEROLE. Every role exists before the first migration, so 0001 makes none,
+// and CREATEROLE together with the admin grant on app_definer below would let app_migrate give
+// app_definer a password.
 const LOGIN_ATTRIBUTES: Record<LoginRole, string> = {
   app_migrate: "LOGIN NOBYPASSRLS NOCREATEDB NOCREATEROLE",
   app_api: "LOGIN NOBYPASSRLS NOINHERIT NOCREATEDB NOCREATEROLE",
   app_worker: "LOGIN NOBYPASSRLS NOINHERIT NOCREATEDB NOCREATEROLE",
 };
 
-// The rights app_migrate needs on Render, where the default user owns the database and its public schema. In a local rebuild
-// app_migrate owns the database, and through it the public schema, so it has all of them by ownership.
-// CREATE on the database: migrate.ts makes the graphile_worker schema.
-// The extensions, before public changes hands: Render adds one through CREATE EXTENSION by the default user
-// (render.com/docs/postgresql-extensions), and 0001's CREATE EXTENSION IF NOT EXISTS then finds them.
-// public owned by app_migrate: 0007 drops functions that 0006 handed to app_definer, which only their owner or the schema's
-// owner may do, and the migrations give rights on public to the other roles. Handing a schema to a role needs SET on that role
-// (PostgreSQL 16), which the default user grants itself for the handover and takes back after it. A second run finds
-// app_migrate already the owner, and PostgreSQL then changes nothing.
-// app_definer with ADMIN and SET: 0001 grants app_definer to its own runner, which needs ADMIN, and each handover needs SET. A
-// local rebuild takes this membership back after migrating (fresh.ts); here it stays, because the api's pre-deploy command
-// migrates on every deploy. INHERIT FALSE keeps app_definer's rights out of app_migrate's own queries.
+// The rights app_migrate needs on Render, where the default user owns the database and its public
+// schema. In a local rebuild app_migrate owns the database, and through it the public schema, so it
+// has all of them by ownership. CREATE on the database: migrate.ts makes the graphile_worker
+// schema. The extensions, before public changes hands: Render adds one through CREATE EXTENSION by
+// the default user (render.com/docs/postgresql-extensions), and 0001's CREATE EXTENSION IF NOT
+// EXISTS then finds them. public owned by app_migrate: 0007 drops functions that 0006 handed to
+// app_definer, which only their owner or the schema's owner may do, and the migrations give rights
+// on public to the other roles. Handing a schema to a role needs SET on that role (PostgreSQL 16),
+// which the default user grants itself for the handover and takes back after it. A second run finds
+// app_migrate already the owner, and PostgreSQL then changes nothing. app_definer with ADMIN and
+// SET: 0001 grants app_definer to its own runner, which needs ADMIN, and each handover needs SET. A
+// local rebuild takes this membership back after migrating (fresh.ts); here it stays, because the
+// api's pre-deploy command migrates on every deploy. INHERIT FALSE keeps app_definer's rights out
+// of app_migrate's own queries.
 const DATABASE_GRANTS = [
   "GRANT CONNECT, CREATE ON DATABASE %I TO app_migrate",
   "GRANT CONNECT ON DATABASE %I TO app_api, app_worker",
@@ -148,7 +156,8 @@ export function readRenderInputs(env: Record<string, string | undefined>): Rende
   };
 }
 
-// Refuses two database URLs that are not the External and Internal Database URLs of one database's default user.
+// Refuses two database URLs that are not the External and Internal Database URLs of one database's
+// default user.
 function checkDatabaseUrls(external: URL, internal: URL): void {
   for (const url of [external, internal]) {
     if (url.protocol !== "postgres:" && url.protocol !== "postgresql:")
@@ -185,7 +194,8 @@ function checkDatabaseUrls(external: URL, internal: URL): void {
     );
 }
 
-// The TLS mode for the external URL and the RENDER_DB_TLS setting; plain is refused for a host that is not this machine.
+// The TLS mode for the external URL and the RENDER_DB_TLS setting; plain is refused for a host that
+// is not this machine.
 function tlsModeOf(external: URL, setting: string): TlsMode {
   if (external.searchParams.get("sslmode") === "disable") {
     if (!LOCAL_HOSTS.includes(external.hostname))
@@ -203,8 +213,9 @@ function tlsModeOf(external: URL, setting: string): TlsMode {
   );
 }
 
-// The problems with the four roles as they stand, none when each has the attributes the migrations and the row policies rely
-// on. A role that already existed with other attributes is reported, never changed.
+// The problems with the four roles as they stand, none when each has the attributes the migrations
+// and the row policies rely on. A role that already existed with other attributes is reported,
+// never changed.
 export function roleProblems(rows: readonly RoleRow[]): string[] {
   return [...LOGIN_ROLES, "app_definer"].flatMap((name) => {
     const row = rows.find((candidate) => candidate.rolname === name);
@@ -224,8 +235,9 @@ function problemsOfRole(name: string, row: RoleRow): string[] {
   return problems;
 }
 
-// The SCRAM-SHA-256 secret Postgres stores for a password (RFC 5802, RFC 7677). It is made here so that the password itself
-// never reaches the server or its logs; 4096 iterations is Postgres's default.
+// The SCRAM-SHA-256 secret Postgres stores for a password (RFC 5802, RFC 7677). It is made here so
+// that the password itself never reaches the server or its logs; 4096 iterations is Postgres's
+// default.
 export function scramSecret(password: string, salt: Buffer = randomBytes(16)): string {
   const iterations = 4096;
   const salted = pbkdf2Sync(password, salt, iterations, 32, "sha256");
@@ -235,7 +247,8 @@ export function scramSecret(password: string, salt: Buffer = randomBytes(16)): s
   return `SCRAM-SHA-256$${String(iterations)}:${salt.toString("base64")}$${storedKey.toString("base64")}:${serverKey.toString("base64")}`;
 }
 
-// The URL one role logs in with: the host, port and database of base, the role's name and password, and the given query.
+// The URL one role logs in with: the host, port and database of base, the role's name and password,
+// and the given query.
 function roleUrl(base: string, login: Login, query: string): string {
   const url = new URL(base);
   url.username = login.role;
@@ -244,8 +257,9 @@ function roleUrl(base: string, login: Login, query: string): string {
   return url.toString();
 }
 
-// The three git-ignored files the setup writes: each service's variables for Render, on the internal host (Render's private
-// network), and .env.wave3 for scripts/check-wave-3.sh, on the external host, where psql encrypts with sslmode=require.
+// The three git-ignored files the setup writes: each service's variables for Render, on the
+// internal host (Render's private network), and .env.wave3 for scripts/check-wave-3.sh, on the
+// external host, where psql encrypts with sslmode=require.
 export function renderFiles(
   inputs: RenderInputs,
   passwords: RolePasswords,
@@ -264,8 +278,8 @@ export function renderFiles(
   };
 }
 
-// The pg TLS option of each mode, and the query that gives a connection string the same TLS, for code that takes only a
-// connection string (migrate.ts).
+// The pg TLS option of each mode, and the query that gives a connection string the same TLS, for
+// code that takes only a connection string (migrate.ts).
 const TLS_OPTION: Record<TlsMode, pg.ClientConfig["ssl"]> = {
   verify: true,
   "encrypt-only": { rejectUnauthorized: false },
@@ -277,7 +291,8 @@ const TLS_QUERY: Record<TlsMode, string> = {
   plain: "?sslmode=disable",
 };
 
-// Opens a connection to one URL with the given TLS mode; a certificate that verify cannot check is refused with the way out.
+// Opens a connection to one URL with the given TLS mode; a certificate that verify cannot check is
+// refused with the way out.
 async function connectTo(url: string, tls: TlsMode): Promise<pg.Client> {
   const target = new URL(url);
   target.search = "";
@@ -297,7 +312,8 @@ async function connectTo(url: string, tls: TlsMode): Promise<pg.Client> {
   return client;
 }
 
-// Runs one format statement on the owner's connection; format quotes each value, so no text is pasted into SQL by hand.
+// Runs one format statement on the owner's connection; format quotes each value, so no text is
+// pasted into SQL by hand.
 async function runFormatted(owner: pg.Client, template: string, values: string[]): Promise<void> {
   const placeholders = values.map((value, index) => `$${String(index + 2)}::text`).join(", ");
   const built = await owner.query<{ statement: string }>(
@@ -337,7 +353,8 @@ async function assertPostgres16(owner: pg.Client): Promise<void> {
     );
 }
 
-// Makes the roles, checks them, and grants app_migrate's rights, in one transaction, so a failed run changes nothing.
+// Makes the roles, checks them, and grants app_migrate's rights, in one transaction, so a failed
+// run changes nothing.
 async function setUpRoles(
   owner: pg.Client,
   databaseName: string,
@@ -365,7 +382,8 @@ async function setUpRoles(
   }
 }
 
-// Logs in once as a role through the external address, so a wrong password shows here and not in a Render deploy.
+// Logs in once as a role through the external address, so a wrong password shows here and not in a
+// Render deploy.
 async function assertLogin(url: string, role: LoginRole, tls: TlsMode): Promise<void> {
   const client = await connectTo(url, tls);
   try {
@@ -390,8 +408,9 @@ function writeFiles(folder: string, files: Record<string, string>): string[] {
   return Object.keys(files);
 }
 
-// Sets up the roles, writes the three files into folder (before anything else can fail, so the new passwords are never lost),
-// checks that the two runtime roles can log in through the external address, and applies every migration as app_migrate.
+// Sets up the roles, writes the three files into folder (before anything else can fail, so the new
+// passwords are never lost), checks that the two runtime roles can log in through the external
+// address, and applies every migration as app_migrate.
 export async function setUpRenderRoles(
   inputs: RenderInputs,
   folder: string,
@@ -423,7 +442,8 @@ export async function setUpRenderRoles(
   return { files, migration };
 }
 
-// The private command body: reads .env.render when it is there, runs the setup, and prints what it did with no password or URL.
+// The private command body: reads .env.render when it is there, runs the setup, and prints what it
+// did with no password or URL.
 async function main(): Promise<void> {
   const envFile = join(REPO_ROOT, ".env.render");
   if (existsSync(envFile)) loadEnvFile(envFile);

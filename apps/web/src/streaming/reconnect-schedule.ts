@@ -1,9 +1,11 @@
 import { RECONNECT } from "@meet-first/contracts";
 
-// How much shorter than the base delay a reconnect may be, at random, so many phones do not reconnect at the same moment (golden-path.md uses jitter up to 20%).
+// How much shorter than the base delay a reconnect may be, at random, so many phones do not
+// reconnect at the same moment (golden-path.md uses jitter up to 20%).
 export const JITTER_FRACTION = 0.2;
 
-// The wait before reconnect number attempt (0 first): RECONNECT.firstMs doubled per attempt, capped at RECONNECT.capMs, then cut by up to 20% at random.
+// The wait before reconnect number attempt (0 first): RECONNECT.firstMs doubled per attempt, capped
+// at RECONNECT.capMs, then cut by up to 20% at random.
 export function reconnectDelayMs(attempt: number, random: () => number): number {
   const base = Math.min(
     RECONNECT.capMs,
@@ -20,7 +22,8 @@ export type VisibilitySource = {
   removeEventListener: (type: "visibilitychange", listener: () => void) => void;
 };
 
-// Calls onVisible each time the page turns visible again, so a phone back from the background reconnects at once; returns the stop function.
+// Calls onVisible each time the page turns visible again, so a phone back from the background
+// reconnects at once; returns the stop function.
 export function watchVisibility(
   source: VisibilitySource | null,
   onVisible: () => void,

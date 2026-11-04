@@ -12,12 +12,14 @@ import {
 } from "../../app-shell/index.js";
 import { readListingOrNull } from "../card/index.js";
 
-// Where the last friend request action stands: nothing sent, one on its way, or refused with the api's own sentence.
+// Where the last friend request action stands: nothing sent, one on its way, or refused with the
+// api's own sentence.
 export type ProfileActionState =
   | { kind: "idle" }
   | { kind: "sending" }
   | { kind: "failed"; error: ApiError };
-// One profile with its friend request actions; each action reads the profile again once the api has answered.
+// One profile with its friend request actions; each action reads the profile again once the api has
+// answered.
 export type ProfileModel = {
   profile: PolledView<ProfileView>;
   action: ProfileActionState;
@@ -26,8 +28,8 @@ export type ProfileModel = {
   decline: (requestId: string) => Promise<void>;
 };
 
-// The words of a Posts tab with no posts (once anyone could share): on your own profile, where your posts show and that your
-// Meety reads them; on someone else's, that they have not shared one yet.
+// The words of a Posts tab with no posts (once anyone could share): on your own profile, where your
+// posts show and that your Meety reads them; on someone else's, that they have not shared one yet.
 export function postsEmptyCopy(name: string | null): { heading: string; body: string } {
   if (name === null) {
     return {
@@ -42,8 +44,8 @@ const MINUTE_MS = 60_000;
 const HOUR_MS = 60 * MINUTE_MS;
 const DAY_MS = 24 * HOUR_MS;
 
-// How long ago a post went up, in words: "A moment ago", "5 minutes ago", "3 hours ago", "2 days ago", then the day, as "Oct 28".
-// A time ahead of this clock reads as a moment ago.
+// How long ago a post went up, in words: "A moment ago", "5 minutes ago", "3 hours ago", "2 days
+// ago", then the day, as "Oct 28". A time ahead of this clock reads as a moment ago.
 export function postAgeWords(createdAt: string, now: Date): string {
   const age = now.getTime() - new Date(createdAt).getTime();
   const count = (unit: number, word: string): string => {
@@ -57,7 +59,8 @@ export function postAgeWords(createdAt: string, now: Date): string {
   return new Date(createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-// One profile's posts (GET /api/directory/:id/posts), read once when the profile opens; a failed read is tried again after 30 s.
+// One profile's posts (GET /api/directory/:id/posts), read once when the profile opens; a failed
+// read is tried again after 30 s.
 export function useListingPosts(listingId: string): PolledView<PostsView> {
   return usePolledView(
     () => apiFetch(routes.social.listListingPosts, { params: { id: listingId } }),
@@ -65,7 +68,8 @@ export function useListingPosts(listingId: string): PolledView<PostsView> {
   );
 }
 
-// Reads one profile (GET /api/directory/:id) and sends, accepts or declines the friend request on it.
+// Reads one profile (GET /api/directory/:id) and sends, accepts or declines the friend request on
+// it.
 export function useProfile(listingId: string): ProfileModel {
   const profile = usePolledView(
     () => apiFetch(routes.social.readProfile, { params: { id: listingId } }),
@@ -93,8 +97,9 @@ export function useProfile(listingId: string): ProfileModel {
   };
 }
 
-// The card a meeting with a friend's agent speaks from: the card in the address, else the card this tab approved, else the card of
-// the person's own listing, read only when isNeeded. Null while unknown; a failed read leaves it null.
+// The card a meeting with a friend's agent speaks from: the card in the address, else the card this
+// tab approved, else the card of the person's own listing, read only when isNeeded. Null while
+// unknown; a failed read leaves it null.
 export function useMeetingCard(search: string, isNeeded: boolean): string | null {
   const known = readCardQuery(search) ?? readApprovedCard();
   const [listedCardId, setListedCardId] = useState<string | null>(null);

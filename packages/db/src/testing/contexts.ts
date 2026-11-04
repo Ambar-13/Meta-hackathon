@@ -21,7 +21,8 @@ export function asMeeting<T>(
   return withMeeting(db, meetingId, run);
 }
 
-// Runs run in a transaction with both settings set to empty, so every policy sees no person and no meeting.
+// Runs run in a transaction with both settings set to empty, so every policy sees no person and no
+// meeting.
 export async function withNoContext<T>(
   db: Kysely<Database>,
   run: (trx: DatabaseTransaction) => Promise<T>,

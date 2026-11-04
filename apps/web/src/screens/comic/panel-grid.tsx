@@ -2,7 +2,8 @@ import { useEffect, useState, type ReactElement } from "react";
 import type { ComicView } from "@meet-first/contracts";
 import { Sticker } from "../../look/index.js";
 
-// The width from which the grid shows two columns: 640 px, the same breakpoint the upload screen uses (comic spec 4.8).
+// The width from which the grid shows two columns: 640 px, the same breakpoint the upload screen
+// uses (comic spec 4.8).
 export const TWO_COLUMN_QUERY = "(min-width: 640px)";
 // The pixel size of each panel, which the image elements declare so the layout does not jump.
 const PANEL_PX = 1024;
@@ -25,7 +26,8 @@ export function useColumnCount(): 1 | 2 {
   return isWide ? 2 : 1;
 }
 
-// One panel in its frame: the image with its caption as alt text, or, when the image does not load, a note in its place.
+// One panel in its frame: the image with its caption as alt text, or, when the image does not load,
+// a note in its place.
 const Panel = (props: { panel: ComicView["panels"][number] }): ReactElement => {
   const [hasFailed, setFailed] = useState(false);
   return (
@@ -52,8 +54,9 @@ const Panel = (props: { panel: ComicView["panels"][number] }): ReactElement => {
   );
 };
 
-// The six panels in reading order as tilted photo frames: each image has its caption as its alt text, and no name or badge.
-// The column count and the image width stay as style properties because the comic tests read them there (requests/design-pair-001.md).
+// The six panels in reading order as tilted photo frames: each image has its caption as its alt
+// text, and no name or badge. The column count and the image width stay as style properties because
+// the comic tests read them there (requests/design-pair-001.md).
 export const PanelGrid = (props: { panels: ComicView["panels"] }): ReactElement => {
   const columns = useColumnCount();
   return (

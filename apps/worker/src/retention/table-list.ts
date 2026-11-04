@@ -15,7 +15,8 @@ export type PersonTable =
 // The tables that are counted: every table here except the record of the deletion.
 type CountableTable = Exclude<PersonTable, { reach: "record" }>;
 
-// Every table that holds a person's rows, and how each is reached. The coverage test fails when a table with a person_id is missing here.
+// Every table that holds a person's rows, and how each is reached. The coverage test fails when a
+// table with a person_id is missing here.
 export const PERSON_TABLES: readonly PersonTable[] = [
   { table: "sessions", reach: "person_id" },
   { table: "transfer_links", reach: "person_id" },
@@ -61,11 +62,14 @@ export const PERSON_TABLES: readonly PersonTable[] = [
   { table: "people", reach: "person_id" },
 ];
 
-// What one count needs: the transaction, the person and the ids of the person's meetings, read once.
+// What one count needs: the transaction, the person and the ids of the person's meetings, read
+// once.
 type CountScope = { trx: DatabaseTransaction; personId: string; meetingIds: string[] };
 
-// Counts the rows each table will lose for this person, inside the person's own transaction. Joint tables count every row of the person's meetings, because those rows go for both members,
-// except briefs: the person's transaction sees only their own brief, so the other member's brief goes with the meeting without being counted here.
+// Counts the rows each table will lose for this person, inside the person's own transaction. Joint
+// tables count every row of the person's meetings, because those rows go for both members, except
+// briefs: the person's transaction sees only their own brief, so the other member's brief goes with
+// the meeting without being counted here.
 export async function countPersonRows(
   trx: DatabaseTransaction,
   personId: string,
@@ -120,7 +124,8 @@ function personCondition(personId: string, table: string): RawBuilder<unknown> {
   return table === "people" ? sql`id = ${personId}::uuid` : sql`person_id = ${personId}::uuid`;
 }
 
-// The rows of the person's meetings, by meeting_id (meetings by id); null when the person has no meetings.
+// The rows of the person's meetings, by meeting_id (meetings by id); null when the person has no
+// meetings.
 function meetingCondition(meetingIds: string[], table: string): RawBuilder<unknown> | null {
   if (meetingIds.length === 0) return null;
   return table === "meetings"
@@ -128,13 +133,15 @@ function meetingCondition(meetingIds: string[], table: string): RawBuilder<unkno
     : sql`meeting_id = ANY(${meetingIds}::uuid[])`;
 }
 
-// The comic panels of the person's meetings, through their comics; null when the person has no meetings.
+// The comic panels of the person's meetings, through their comics; null when the person has no
+// meetings.
 function comicCondition(meetingIds: string[]): RawBuilder<unknown> | null {
   if (meetingIds.length === 0) return null;
   return sql`comic_id IN (SELECT id FROM comics WHERE meeting_id = ANY(${meetingIds}::uuid[]))`;
 }
 
-// The ledger rows that name the person or one of the person's meetings; the rows stay, the ids go null.
+// The ledger rows that name the person or one of the person's meetings; the rows stay, the ids go
+// null.
 function ledgerCondition(scope: CountScope): RawBuilder<unknown> {
   const own = sql`person_id = ${scope.personId}::uuid`;
   if (scope.meetingIds.length === 0) return own;

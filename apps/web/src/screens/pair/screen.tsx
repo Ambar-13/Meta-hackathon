@@ -68,8 +68,8 @@ export const PairScreen = (): ReactElement => {
   );
 };
 
-// The invite on a white card: the QR code, a read-only link with a copy action, and the way to the lobby. The link carries
-// this browser's access code, so the friend who opens it never types it.
+// The invite on a white card: the QR code, a read-only link with a copy action, and the way to the
+// lobby. The link carries this browser's access code, so the friend who opens it never types it.
 const InviteView = (props: {
   inviteUrl: string;
   pairId: string;

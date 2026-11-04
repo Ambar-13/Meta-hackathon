@@ -39,7 +39,8 @@ export type JudgeVerdict = {
   reason: string;
   judgeRaw: QuizJudgeRaw;
 };
-// The result of judging one quiz: verdicts with the calibration record, or a stop because a judge reply could not be read.
+// The result of judging one quiz: verdicts with the calibration record, or a stop because a judge
+// reply could not be read.
 export type JudgeOutcome =
   | {
       kind: "judged";
@@ -51,10 +52,12 @@ export type JudgeOutcome =
   | { kind: "unreadable"; calibration: QuizCalibrationRun[] };
 // What every judge call of one quiz shares: the person, the quiz and the prompt.
 export type JudgeBase = { personId: string; quizId: string; prompt: QuizPrompt };
-// What the job reads before it calls the model: skip the quiz, stop it as broken, or judge these items.
+// What the job reads before it calls the model: skip the quiz, stop it as broken, or judge these
+// items.
 type JudgePlan = { kind: "skip" } | { kind: "broken" } | { kind: "judge"; items: JudgeItem[] };
 
-// Runs one judge call, holding no transaction open. The output is null when the reply does not parse as QuizJudgeOutput.
+// Runs one judge call, holding no transaction open. The output is null when the reply does not
+// parse as QuizJudgeOutput.
 export async function judgeOnce(
   context: JobContext,
   base: JudgeBase,
@@ -68,7 +71,8 @@ export async function judgeOnce(
   return { output: parsed.success ? parsed.data : null, ledgerId: reply.ledgerId };
 }
 
-// Runs the two calibration pairs of one run: the identical pair must agree and the contradicting pair must not.
+// Runs the two calibration pairs of one run: the identical pair must agree and the contradicting
+// pair must not.
 async function calibrate(
   context: JobContext,
   base: JudgeBase,
@@ -88,7 +92,8 @@ async function calibrate(
   return checkCalibrationRun({ run, entryIndex: entry.index, results: [identical, contradicting] });
 }
 
-// Judges the ten items in position order for one run. Returns null at the first unreadable reply, so no further call is made in that run.
+// Judges the ten items in position order for one run. Returns null at the first unreadable reply,
+// so no further call is made in that run.
 async function judgeItems(
   context: JobContext,
   base: JudgeBase,
@@ -118,7 +123,8 @@ async function judgeItems(
   return verdicts;
 }
 
-// Judges the ten items: calibration first, the items when it passes, and one rerun with the other order and the next calibration entry when it does not.
+// Judges the ten items: calibration first, the items when it passes, and one rerun with the other
+// order and the next calibration entry when it does not.
 export async function runJudge(
   context: JobContext,
   base: JudgeBase,
@@ -151,7 +157,8 @@ export async function runJudge(
   };
 }
 
-// Reads the quiz and its ten items in one committed read, and says whether the job should judge them.
+// Reads the quiz and its ten items in one committed read, and says whether the job should judge
+// them.
 async function readJudgePlan(trx: Transaction<Database>, quizId: string): Promise<JudgePlan> {
   const quiz = await trx
     .selectFrom("quizzes")
@@ -191,7 +198,8 @@ async function readJudgePlan(trx: Transaction<Database>, quizId: string): Promis
   return { kind: "judge", items };
 }
 
-// Stores the verdicts and the count in one transaction. Only a quiz still being judged changes, and only once.
+// Stores the verdicts and the count in one transaction. Only a quiz still being judged changes, and
+// only once.
 async function storeJudgement(
   trx: Transaction<Database>,
   args: { quizId: string; outcome: Extract<JudgeOutcome, { kind: "judged" }>; judgedAt: Date },

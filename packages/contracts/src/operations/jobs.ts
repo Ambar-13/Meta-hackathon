@@ -21,8 +21,9 @@ export const JOB_NAMES = [
 // One job name, checked against the list above.
 export const JobName = z.enum(JOB_NAMES);
 export type JobName = z.infer<typeof JobName>;
-// The payload each job takes, by job name. Each carries the id its context needs before the first read:
-// personId for the jobs that run as one person, meetingId for the jobs that run inside one meeting.
+// The payload each job takes, by job name. Each carries the id its context needs before the first
+// read: personId for the jobs that run as one person, meetingId for the jobs that run inside one
+// meeting.
 export const JobPayloads = {
   scrub_names: z.object({ sourceId: Uuid, personId: Uuid }),
   build_card: z.object({ cardId: Uuid, personId: Uuid }),
@@ -41,7 +42,8 @@ export const JobPayloads = {
 } as const;
 // The parsed payload of one job, by job name.
 export type JobPayload<N extends JobName> = z.infer<(typeof JobPayloads)[N]>;
-// Adds one job. Both apps implement it the same way: JOB_MAX_ATTEMPTS[name] always, and no job key on any job.
+// Adds one job. Both apps implement it the same way: JOB_MAX_ATTEMPTS[name] always, and no job key
+// on any job.
 export type Enqueue = <N extends JobName>(
   name: N,
   payload: JobPayload<N>,

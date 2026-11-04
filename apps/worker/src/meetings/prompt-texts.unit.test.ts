@@ -39,7 +39,8 @@ function noteLines(): string[] {
   return [...fixtures, ...SEED_TURNS_A, ...SEED_TURNS_B].filter((line) => line.trim() !== "");
 }
 
-// The longest run of whole words of a line, at least QUOTE_MIN_CHARS long, that some normalised text contains; null when none does.
+// The longest run of whole words of a line, at least QUOTE_MIN_CHARS long, that some normalised
+// text contains; null when none does.
 function sharedRun(line: string, texts: readonly string[]): string | null {
   const words = normQuote(line).split(" ");
   for (let start = 0; start < words.length; start += 1) {

@@ -5,7 +5,8 @@ import { decideRetry, needsLengthRetry, withTransportRetries } from "./retries.j
 
 const half = (): number => 0.5;
 
-// Builds an error that passes instanceof openai.APIError and carries status and headers, as the SDK does.
+// Builds an error that passes instanceof openai.APIError and carries status and headers, as the SDK
+// does.
 function apiError(
   status: number,
   headers: Record<string, string>,

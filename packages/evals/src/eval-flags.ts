@@ -1,13 +1,16 @@
-// Parses the command line of pnpm eval into one typed object, and holds the failure type the entry point exits with.
+// Parses the command line of pnpm eval into one typed object, and holds the failure type the entry
+// point exits with.
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// The repository root, found from this file (packages/evals/src), so the defaults work from any folder.
+// The repository root, found from this file (packages/evals/src), so the defaults work from any
+// folder.
 export const REPO_ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 // The default time one meeting may take before the run gives up on it: 15 minutes.
 export const MEETING_TIMEOUT_MS = 900_000;
-// The pair list of a replay run: one pair of pairs.json, recorded on its own, because replay answers only recorded requests. It shares no
-// person with the golden path, whose recordings would otherwise answer its first calls and lead it off its own recording.
+// The pair list of a replay run: one pair of pairs.json, recorded on its own, because replay
+// answers only recorded requests. It shares no person with the golden path, whose recordings would
+// otherwise answer its first calls and lead it off its own recording.
 const REPLAY_PAIRS = "packages/evals/fixtures/pairs.replay.json";
 // The pair list of a live run: the eight fresh pairs of the eval.
 const LIVE_PAIRS = "packages/evals/fixtures/pairs.json";
@@ -16,7 +19,8 @@ const TARGETS = "packages/evals/fixtures/expected/targets.json";
 // Where the results file goes by default, at the repository root.
 const RESULTS_FILE = "eval/results.json";
 
-// The four ways the command runs: a replay or a live run of the pairs, the human table, or the README block.
+// The four ways the command runs: a replay or a live run of the pairs, the human table, or the
+// README block.
 export type EvalMode = "replay" | "live" | "human" | "write-readme";
 // Everything the run reads from the command line and the environment.
 export type EvalFlags = {
@@ -30,7 +34,8 @@ export type EvalFlags = {
   timeoutMs: number;
 };
 
-// A stopped run: a stable code, a sentence that says what to do next, and the exit code the process ends with.
+// A stopped run: a stable code, a sentence that says what to do next, and the exit code the process
+// ends with.
 export class EvalFailure extends Error {
   readonly code: string;
   readonly exitCode: number;
@@ -53,7 +58,8 @@ const MODE_FLAGS: Record<string, EvalMode> = {
   "--write-readme": "write-readme",
 };
 
-// Reads the flags into a map from name to value (or "" for a switch), refusing any name the command does not know.
+// Reads the flags into a map from name to value (or "" for a switch), refusing any name the command
+// does not know.
 function readArguments(argv: readonly string[]): Map<string, string> {
   const values = new Map<string, string>();
   for (let index = 0; index < argv.length; index += 1) {
@@ -88,13 +94,15 @@ function modeOf(values: Map<string, string>): EvalMode {
   return MODE_FLAGS[flag] ?? "replay";
 }
 
-// A path the user passed is read from the folder the command runs in; a default path is read from the repository root.
+// A path the user passed is read from the folder the command runs in; a default path is read from
+// the repository root.
 function pathFlag(values: Map<string, string>, flag: string, fallback: string): string {
   const given = values.get(flag);
   return given === undefined ? resolve(REPO_ROOT, fallback) : resolve(process.cwd(), given);
 }
 
-// Parses the command line and the environment into the flags of one run. Exits 2 with eval_bad_flags on a bad command.
+// Parses the command line and the environment into the flags of one run. Exits 2 with
+// eval_bad_flags on a bad command.
 export function parseEvalFlags(argv: readonly string[], env: NodeJS.ProcessEnv): EvalFlags {
   const values = readArguments(argv);
   const mode = modeOf(values);

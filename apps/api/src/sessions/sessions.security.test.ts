@@ -21,7 +21,8 @@ const TOKEN_PATTERN = /^[0-9a-f]{64}$/;
 let t: Awaited<ReturnType<typeof buildTestApp>>;
 let appUnderTest: FastifyInstance;
 
-// Signs up one person through POST /api/people, from its own address so the account limit never trips.
+// Signs up one person through POST /api/people, from its own address so the account limit never
+// trips.
 function signUp(n: number, displayName: string): Promise<LightMyRequestResponse> {
   return appUnderTest.inject({
     method: "POST",

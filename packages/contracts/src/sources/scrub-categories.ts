@@ -22,8 +22,8 @@ export const CATEGORIES = [
 ] as const;
 // One redaction category, checked against the 17 names above.
 export const Category = z.enum(CATEGORIES);
-// The categories the person must opt into before they reach a card or recall.
-// Email and phone are always redacted, so the "contacts" group of sensitive categories is not listed here.
+// The categories the person must opt into before they reach a card or recall. Email and phone are
+// always redacted, so the "contacts" group of sensitive categories is not listed here.
 export const SENSITIVE_CATEGORIES = ["health", "minor", "address", "identifier"] as const;
 // One thing the scrubber replaced: its category and its eight hex placeholder id.
 export const Redaction = z.object({

@@ -15,8 +15,8 @@ const OWNER_PASSWORD = "owner-secret";
 const ORIGIN = "https://meet-first-api.onrender.com";
 const PASSWORDS = { app_migrate: "migrate-pw", app_api: "api-pw", app_worker: "worker-pw" };
 
-// A database URL as Render shows one, built through the URL API so that no text in this file pairs a user with a password
-// (the secrets job flags such a connection string).
+// A database URL as Render shows one, built through the URL API so that no text in this file pairs
+// a user with a password (the secrets job flags such a connection string).
 function dbUrl(
   host: string,
   options: { user?: string; password?: string; database?: string; query?: string } = {},
@@ -226,7 +226,8 @@ describe("render role setup", () => {
     const storedKey = Buffer.from(match?.[2] ?? "", "base64");
     const serverKey = Buffer.from(match?.[3] ?? "", "base64");
 
-    // The server's check (RFC 5802 section 3): the client key recovered from the proof must hash to the stored key.
+    // The server's check (RFC 5802 section 3): the client key recovered from the proof must hash to
+    // the stored key.
     const clientSignature = createHmac("sha256", storedKey).update(authMessage).digest();
     const clientKey = Buffer.from(
       clientProof.map((byte, index) => byte ^ (clientSignature[index] ?? 0)),

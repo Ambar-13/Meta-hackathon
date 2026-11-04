@@ -31,8 +31,8 @@ afterAll(async () => {
   await t.close();
 });
 
-// One request: method, URL, the session token of the person making it (none for a request without a session), a JSON payload or a
-// raw string payload, and whether to leave out the Origin header.
+// One request: method, URL, the session token of the person making it (none for a request without a
+// session), a JSON payload or a raw string payload, and whether to leave out the Origin header.
 type Call = {
   method: "GET" | "POST";
   url: string;
@@ -47,7 +47,8 @@ function payloadText(payload: unknown): string | undefined {
   return typeof payload === "string" ? payload : JSON.stringify(payload);
 }
 
-// Makes one request through the app's injector and returns the status, the headers and the parsed body.
+// Makes one request through the app's injector and returns the status, the headers and the parsed
+// body.
 async function send(
   call: Call,
 ): Promise<{ statusCode: number; headers: Record<string, unknown>; body: unknown }> {
@@ -73,7 +74,8 @@ const REACT_TEXT = "Our demo breaks an hour before judging.";
 // The reply to every pair that is refused.
 const NOT_FOUND = { code: "not_found", message: "This no longer exists or is not yours." };
 
-// Turns one side's friend-ask switch on or off on its approved card, as the card page's sharing part would.
+// Turns one side's friend-ask switch on or off on its approved card, as the card page's sharing
+// part would.
 async function setFriendsCanAsk(input: { side: SeededMeeting["a"]; isOn: boolean }): Promise<void> {
   await withPerson(t.db, input.side.personId, (trx) =>
     trx
@@ -84,7 +86,8 @@ async function setFriendsCanAsk(input: { side: SeededMeeting["a"]; isOn: boolean
   );
 }
 
-// Makes one more invite pair from creator to joiner and joins it, as POST /api/pairs and the join link would, and returns its id.
+// Makes one more invite pair from creator to joiner and joins it, as POST /api/pairs and the join
+// link would, and returns its id.
 async function joinNewPair(input: { creatorId: string; joinerId: string }): Promise<string> {
   const token = randomBytes(PAIR_TOKEN_BYTES).toString("hex");
   const pair = await withPerson(t.db, input.creatorId, (trx) =>
@@ -120,7 +123,8 @@ async function makeUnjoinedPair(creatorId: string): Promise<string> {
   return pair.id;
 }
 
-// Lists side b with its first two items public, starts a directory meeting from side a, and returns that meeting's pair id.
+// Lists side b with its first two items public, starts a directory meeting from side a, and returns
+// that meeting's pair id.
 async function makeDirectoryPair(m: SeededMeeting): Promise<string> {
   const listing = await withPerson(t.db, m.b.personId, async (trx) => {
     await trx
@@ -349,7 +353,8 @@ describe("POST /api/asks, friend asks", () => {
 });
 
 describe("POST /api/asks, a friend with a summary and no card", () => {
-  // A friend with no card and a ready summary whose friends switch is on or off, joined with a new asker; returns both and the pair.
+  // A friend with no card and a ready summary whose friends switch is on or off, joined with a new
+  // asker; returns both and the pair.
   async function summaryOnlyFriend(
     isOn: boolean,
   ): Promise<{ askerToken: string; pairId: string; friendName: string }> {

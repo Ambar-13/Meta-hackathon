@@ -40,7 +40,8 @@ afterEach(() => {
   cleanup();
 });
 
-// The approved fixture card with item 2 left out of the card and item 3 unverified, so items 1, 4, 5 and 6 can be public.
+// The approved fixture card with item 2 left out of the card and item 3 unverified, so items 1, 4,
+// 5 and 6 can be public.
 function sharingCard(): CardView {
   const view = cardView("approved");
   view.items = view.items.map((item) => {

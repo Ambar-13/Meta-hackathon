@@ -1,5 +1,6 @@
-// What the run_ask job sends to the model, built without the database, and the checks that read what comes back: an ask's question
-// check, one persona's answer request, the support check of the answers' quotes, and the quote check of each claim.
+// What the run_ask job sends to the model, built without the database, and the checks that read
+// what comes back: an ask's question check, one persona's answer request, the support check of the
+// answers' quotes, and the quote check of each claim.
 import {
   BriefSupportJudgeOutput,
   PersonaAnswerOutput,
@@ -19,14 +20,18 @@ import { parseTurnLabel, type CitableTurn } from "../meetings/receipts.js";
 
 // The fields of an ask its question check reads.
 export type AskForCheck = { mode: AskMode; text: string; aboutName: string | null };
-// What every model call of the job carries besides its messages: the asker, whose ledger row the call writes, and the prompt version.
+// What every model call of the job carries besides its messages: the asker, whose ledger row the
+// call writes, and the prompt version.
 export type AskCallInput = { askerId: string; promptVersion: string; messages: ChatMessage[] };
-// One approved, verified card item as a persona request shows it; turnIndex is turns.turn_index of the item's turn.
+// One approved, verified card item as a persona request shows it; turnIndex is turns.turn_index of
+// the item's turn.
 export type PersonaItem = { turnIndex: number; kind: string; claim: string; quote: string };
-// One recall result as a persona request shows it: the turn's index and the snippet the search returned.
+// One recall result as a persona request shows it: the turn's index and the snippet the search
+// returned.
 export type RecallLine = { turnIndex: number; text: string };
-// Everything the user message of one persona_answer call holds. summaryFound are the subject's summary points found in their own
-// messages, shown like card items; summaryOnly are the texts of the points that were not found.
+// Everything the user message of one persona_answer call holds. summaryFound are the subject's
+// summary points found in their own messages, shown like card items; summaryOnly are the texts of
+// the points that were not found.
 export type PersonaAnswerInput = {
   mode: AskMode;
   askText: string;
@@ -52,8 +57,9 @@ export type StoredAnswerClaim = {
 // One verified claim as the support check reads it.
 export type JudgeClaim = { text: string; quote: string; turnId: string };
 
-// The user message of an ask's question check: the ask inside ask_question tags, escaped, with the friend's name in the about
-// attribute of a react ask, escaped and with every double quote removed. A missing name is empty.
+// The user message of an ask's question check: the ask inside ask_question tags, escaped, with the
+// friend's name in the about attribute of a react ask, escaped and with every double quote removed.
+// A missing name is empty.
 export function askCheckUserText(ask: AskForCheck): string {
   const text = escapeBlockText(ask.text);
   if (ask.mode === "help") return '<ask_question for="help">' + text + "</ask_question>";
@@ -61,7 +67,8 @@ export function askCheckUserText(ask: AskForCheck): string {
   return '<ask_question for="react" about="' + name + '">' + text + "</ask_question>";
 }
 
-// The two messages of an ask's question check: the question-check prompt as the system message, then the ask.
+// The two messages of an ask's question check: the question-check prompt as the system message,
+// then the ask.
 export function askCheckMessages(promptText: string, ask: AskForCheck): ChatMessage[] {
   return [
     { role: "system", content: promptText },
@@ -80,15 +87,17 @@ export function askCheckCallArgs(input: AskCallInput): CompleteArgs {
   };
 }
 
-// The kind an allowed ask is stored with: romance when the check marked the ask romantic or gave the kind romance, else the
-// check's own kind.
+// The kind an allowed ask is stored with: romance when the check marked the ask romantic or gave
+// the kind romance, else the check's own kind.
 export function askKindOf(verdict: QuestionCheckOutput): QuestionKind {
   return verdict.romantic || verdict.kind === "romance" ? "romance" : verdict.kind;
 }
 
-// A display name on one line with no tag characters: the rule of promptName in meetings/prompt-builder.ts, which that file does not export.
-// In words: control characters and line or paragraph breaks become a space, every <, > and & is removed, runs of spaces become one, and
-// the ends are trimmed. The result holds no <, > or &, so escapeBlockText would change nothing in it and is not called.
+// A display name on one line with no tag characters: the rule of promptName in
+// meetings/prompt-builder.ts, which that file does not export. In words: control characters and
+// line or paragraph breaks become a space, every <, > and & is removed, runs of spaces become one,
+// and the ends are trimmed. The result holds no <, > or &, so escapeBlockText would change nothing
+// in it and is not called.
 export function promptLine(name: string): string {
   return name
     .replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, " ")
@@ -98,8 +107,9 @@ export function promptLine(name: string): string {
 }
 
 // The user message of one persona_answer call, line by line. The ask text and the names are
-// escaped; item quotes, claims and recall texts are not, because each quote must match its turn exactly, as in the meeting prefix.
-// The summary's texts were written by the subject's own AI, so they are escaped; a found point's quote is not, for the same reason.
+// escaped; item quotes, claims and recall texts are not, because each quote must match its turn
+// exactly, as in the meeting prefix. The summary's texts were written by the subject's own AI, so
+// they are escaped; a found point's quote is not, for the same reason.
 export function personaAnswerUserText(input: PersonaAnswerInput): string {
   const lines = [
     '<ask kind="' + input.mode + '">' + escapeBlockText(input.askText) + "</ask>",
@@ -132,8 +142,8 @@ export function personaAnswerUserText(input: PersonaAnswerInput): string {
   return lines.join("\n");
 }
 
-// The two messages of one persona_answer call: the persona-answer prompt, a blank line and the untrusted-data rules as the system
-// message, then the data blocks as the user message.
+// The two messages of one persona_answer call: the persona-answer prompt, a blank line and the
+// untrusted-data rules as the system message, then the data blocks as the user message.
 export function personaAnswerMessages(
   texts: PersonaPromptTexts,
   input: PersonaAnswerInput,
@@ -155,14 +165,16 @@ export function personaAnswerCallArgs(input: AskCallInput): CompleteArgs {
   };
 }
 
-// The ask's words for directory_shortlist. They are split by the same rule as the recall search (queryWords in packages/db), so a word
-// matches the same way in both: lower case, letters, marks and digits, no word "or", and at most 20 words.
+// The ask's words for directory_shortlist. They are split by the same rule as the recall search
+// (queryWords in packages/db), so a word matches the same way in both: lower case, letters, marks
+// and digits, no word "or", and at most 20 words.
 export function shortlistWords(text: string): string[] {
   return queryWords(text);
 }
 
-// Checks each claim's quote inside the one turn its turn_id names, among the turns the request showed; a label naming no such turn
-// leaves the claim unverified. The forbidden texts are the ask and the two prompts, so a quote cannot repeat them.
+// Checks each claim's quote inside the one turn its turn_id names, among the turns the request
+// showed; a label naming no such turn leaves the claim unverified. The forbidden texts are the ask
+// and the two prompts, so a quote cannot repeat them.
 export function checkAnswerClaims(
   claims: PersonaAnswerOutput["claims"],
   turns: ReadonlyMap<number, CitableTurn>,
@@ -195,12 +207,13 @@ export function checkAnswerClaims(
   });
 }
 
-// The user message of one support-check call: one item per claim, indexed from 0 in the order given, in the brief check's format. The
-// brief check's per-item order swap applies: the quote comes first when isFlippedLine says so. The
-// items keep the order given and are not shuffled.
+// The user message of one support-check call: one item per claim, indexed from 0 in the order
+// given, in the brief check's format. The brief check's per-item order swap applies: the quote
+// comes first when isFlippedLine says so. The items keep the order given and are not shuffled.
 export function askJudgeUserText(claims: readonly JudgeClaim[]): string {
   const blocks = claims.flatMap((claim, index) => {
-    // Both are escaped, as every block text is, so a statement or a quote cannot close its item and open another.
+    // Both are escaped, as every block text is, so a statement or a quote cannot close its item and
+    // open another.
     const statement = "<statement>" + escapeBlockText(claim.text) + "</statement>";
     const quote = '<quote>"' + escapeBlockText(claim.quote) + '"</quote>';
     const body = isFlippedLine(judgePointOf(claim)) ? [quote, statement] : [statement, quote];
@@ -209,7 +222,8 @@ export function askJudgeUserText(claims: readonly JudgeClaim[]): string {
   return ["<items>", ...blocks, "</items>"].join("\n");
 }
 
-// The two messages of one support-check call: the brief-support-judge prompt without its first-line status comment, then the items.
+// The two messages of one support-check call: the brief-support-judge prompt without its first-line
+// status comment, then the items.
 export function askJudgeMessages(promptText: string, claims: readonly JudgeClaim[]): ChatMessage[] {
   return [
     { role: "system", content: promptBodyOf(promptText) },
@@ -259,8 +273,8 @@ function summaryPointLine(point: PersonaItem): string {
   );
 }
 
-// A claim in the shape isFlippedLine reads. It reads only the text and the quote; side and verified are filled because the
-// BriefPoint type requires them.
+// A claim in the shape isFlippedLine reads. It reads only the text and the quote; side and verified
+// are filled because the BriefPoint type requires them.
 function judgePointOf(claim: JudgeClaim): BriefPoint {
   return {
     text: claim.text,

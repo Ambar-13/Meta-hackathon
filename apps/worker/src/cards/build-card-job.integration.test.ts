@@ -46,7 +46,8 @@ afterEach(async () => {
 // The ids a seeded card case gives its person, its source, its turns and its building card.
 type Seeded = { personId: string; sourceId: string; turnIds: string[]; cardId: string };
 
-// Writes ledger rows for the person through the worker, with the dollars and the start the test gives.
+// Writes ledger rows for the person through the worker, with the dollars and the start the test
+// gives.
 async function insertLedgerRows(
   personId: string,
   rows: Array<{ estTokens: number; usd?: number; startedAt?: Date }>,
@@ -71,7 +72,8 @@ async function insertLedgerRows(
   );
 }
 
-// Seeds one card case: the person, a frozen source with the case's turns, the sensitive tags, the opt-ins and a building card.
+// Seeds one card case: the person, a frozen source with the case's turns, the sensitive tags, the
+// opt-ins and a building card.
 async function seedCardCase(fixtureCase: CardFixtureCase): Promise<Seeded> {
   const person = await createTestPerson(fresh.db, fixtureCase.displayName);
   const source = await createFrozenSource(fresh.db, person.personId, [...fixtureCase.turns]);
@@ -309,7 +311,8 @@ describe("the card build job", () => {
   it("W3-WORK-T7: a regeneration call that fails is logged, and the card is built from the first reply's verified items", async () => {
     const seeded = await seedCardCase(cardCase("card-regenerate"));
     const { context } = makeTestJobContext({ db: workerDb, now: () => NOW });
-    // A fake client: the first card call is the replayed fixture, the second (the regeneration) times out.
+    // A fake client: the first card call is the replayed fixture, the second (the regeneration)
+    // times out.
     let calls = 0;
     const llm: LlmClient = {
       ...context.llm,

@@ -1,7 +1,7 @@
 // The stickers, the sheet they are drawn from, and the drifting cloud of the sky grounds.
 export { Sticker, StickerSheet, Cloud, type StickerName } from "./stickers.js";
-// The name tag, the initial avatars, the quote card, the receipt flag, the typing dots, the empty and loading states, and each
-// question kind's colour and sticker.
+// The name tag, the initial avatars, the quote card, the receipt flag, the typing dots, the empty
+// and loading states, and each question kind's colour and sticker.
 export {
   NameTag,
   Avatar,
@@ -16,7 +16,8 @@ export {
   type TagColour,
   type VoiceSide,
 } from "./look-parts.js";
-// The signed-in app's line icons, round person pictures, post photos, a story's picture, the Sample mark and Meety's mark.
+// The signed-in app's line icons, round person pictures, post photos, a story's picture, the Sample
+// mark and Meety's mark.
 export {
   Icon,
   PersonAvatar,

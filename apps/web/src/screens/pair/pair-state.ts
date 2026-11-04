@@ -63,7 +63,8 @@ export function useCreatePair(): { state: CreatePairState; create: () => Promise
   return { state, create };
 }
 
-// Joining from an invite link: reads the token from the fragment once, removes it from the address bar, joins on request, and asks for a profile on a 401.
+// Joining from an invite link: reads the token from the fragment once, removes it from the address
+// bar, joins on request, and asks for a profile on a 401.
 export function useJoinPair(): {
   state: JoinState;
   join: () => Promise<void>;

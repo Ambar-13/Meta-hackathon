@@ -1,7 +1,8 @@
 import type { ReactElement } from "react";
 import { PolicyPage, PolicySections, type PolicySection } from "./policy-page.js";
 
-// One thing Meety keeps in the browser: its name as the browser shows it, what it is for, and how long it stays.
+// One thing Meety keeps in the browser: its name as the browser shows it, what it is for, and how
+// long it stays.
 type BrowserItem = { name: string; purpose: string; stays: string };
 
 // The two cookies, both set by Meety's server and both needed to sign in (apps/api/src/sessions).
@@ -70,7 +71,8 @@ const ItemList = (props: { title: string; items: readonly BrowserItem[] }): Reac
   );
 };
 
-// /cookies: the two cookies and the two notes, why there is nothing to accept, and how to remove them.
+// /cookies: the two cookies and the two notes, why there is nothing to accept, and how to remove
+// them.
 export const CookiesScreen = (): ReactElement => {
   return (
     <PolicyPage title="Cookies" changed="3 November 2026">

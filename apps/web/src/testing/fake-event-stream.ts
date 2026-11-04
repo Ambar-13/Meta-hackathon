@@ -3,7 +3,8 @@ import { emptyMeetingState, type MeetingFoldState } from "../transcript/event-fo
 import type { FeedStatus, MeetingFeed, MeetingFeedOptions } from "../streaming/sse-client.js";
 import { IDS } from "./fixtures.js";
 
-// One scripted stream connection: frames that then end or hang, a silent stream, or an error status.
+// One scripted stream connection: frames that then end or hang, a silent stream, or an error
+// status.
 export type FakeStream =
   | { kind: "frames"; chunks: string[]; then: "end" | "hang" }
   | { kind: "silent" }
@@ -42,7 +43,8 @@ function streamResponse(script: FakeStream | undefined, signal: AbortSignal | nu
   return new Response(body, { status: 200, headers: { "Content-Type": "text/event-stream" } });
 }
 
-// Builds the fake server: stream opens take the next script in order (the last repeats); polls take the next reply in order (the last repeats).
+// Builds the fake server: stream opens take the next script in order (the last repeats); polls take
+// the next reply in order (the last repeats).
 export function fakeMeetingServer(streams: FakeStream[], polls: unknown[]): FakeMeetingServer {
   const streamRequests: FakeMeetingServer["streamRequests"] = [];
   const pollRequests: FakeMeetingServer["pollRequests"] = [];
@@ -73,7 +75,8 @@ export function fakeMeetingServer(streams: FakeStream[], polls: unknown[]): Fake
   return { fetchImpl, streamRequests, pollRequests };
 }
 
-// One SSE frame as the api writes it: id, event and data lines for a committed event; event and data only for turn.delta.
+// One SSE frame as the api writes it: id, event and data lines for a committed event; event and
+// data only for turn.delta.
 export function sseFrame(event: MeetingEvent): string {
   if (event.type === "turn.delta") return `event: turn.delta\ndata: ${JSON.stringify(event)}\n\n`;
   return `id: ${String(event.seq)}\nevent: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`;

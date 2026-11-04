@@ -4,13 +4,16 @@ import { Avatar, EmptyState, NameTag, Receipt, Sticker } from "../../look/index.
 import { KIND_LABELS } from "../card/index.js";
 import { SafeMarkdown } from "../../transcript/index.js";
 
-// The three sections of the brief, in the order the page shows them; each one's heading follows the meeting's question kind.
+// The three sections of the brief, in the order the page shows them; each one's heading follows the
+// meeting's question kind.
 const BRIEF_SECTIONS = ["agree", "clash", "decideFirst"] as const;
-// The colour of each brief section's panel: green where you agree, yellow where you clash, lilac for what to settle first.
+// The colour of each brief section's panel: green where you agree, yellow where you clash, lilac
+// for what to settle first.
 const SECTION_COLOUR = { agree: "c-green", clash: "c-yellow", decideFirst: "c-lilac" } as const;
 
-// The style of one panel image: never wider than its column, so the page has no sideways scroll at 375 px. The share test reads
-// this inline max-width (W2-SHARE-T15), so it stays; share.css sets the same rule.
+// The style of one panel image: never wider than its column, so the page has no sideways scroll at
+// 375 px. The share test reads this inline max-width (W2-SHARE-T15), so it stays; share.css sets
+// the same rule.
 const PANEL_IMAGE_STYLE = { maxWidth: "100%" } as const;
 
 // The words of the page.
@@ -76,7 +79,8 @@ const PeopleSection = (props: { snapshot: ShareSnapshot }): ReactElement => {
   );
 };
 
-// The turns in order as two voices: side a in coral on the left, side b in blue on the right, each turn with its verified claims.
+// The turns in order as two voices: side a in coral on the left, side b in blue on the right, each
+// turn with its verified claims.
 const TurnsSection = (props: { snapshot: ShareSnapshot }): ReactElement => {
   const { snapshot } = props;
   return (
@@ -112,7 +116,8 @@ const TurnsSection = (props: { snapshot: ShareSnapshot }): ReactElement => {
   );
 };
 
-// The brief: three colour panels of supported lines, each line with its quotes. The snapshot already holds only shareable lines.
+// The brief: three colour panels of supported lines, each line with its quotes. The snapshot
+// already holds only shareable lines.
 const BriefSection = (props: { snapshot: ShareSnapshot }): ReactElement => {
   const { snapshot } = props;
   return (
@@ -172,7 +177,8 @@ const ComicSection = (props: { snapshot: ShareSnapshot }): ReactElement | null =
   );
 };
 
-// The public snapshot below the question heading: people, turns, brief and comic. It shows display names only.
+// The public snapshot below the question heading: people, turns, brief and comic. It shows display
+// names only.
 export const SnapshotView = (props: { snapshot: ShareSnapshot }): ReactElement => {
   return (
     <>

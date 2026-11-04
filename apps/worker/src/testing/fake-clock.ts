@@ -21,7 +21,8 @@ export function fakeSleep(): { sleep: (ms: number) => Promise<void>; waits: numb
   };
 }
 
-// A fake random source that returns the given values in turn and then the last one again. Tests that use it say "fake random".
+// A fake random source that returns the given values in turn and then the last one again. Tests
+// that use it say "fake random".
 export function fakeRandom(values: readonly number[]): () => number {
   let index = 0;
   return () => {

@@ -7,7 +7,8 @@ import { EmptyState, LoadingLine } from "../../look/index.js";
 import { NamesModeChoice, NamesPager, OptInChoices, RoleGroups } from "./name-rows.js";
 import { useNamesReview, type SaveState } from "./names-review-state.js";
 
-// The line the screen shows while the names check is still running, before and after the first names arrive.
+// The line the screen shows while the names check is still running, before and after the first
+// names arrive.
 const LOOKING_WORDS = "Looking for names in your notes.";
 
 // The count line under the title, with the right word for each count.
@@ -37,7 +38,8 @@ const FrozenBody = (props: { save: SaveState; onBuild: () => void }): ReactEleme
   );
 };
 
-// The save button and its messages: the hint while the names check runs, and the errors of a failed save. On a phone it is a dock.
+// The save button and its messages: the hint while the names check runs, and the errors of a failed
+// save. On a phone it is a dock.
 const SaveBlock = (props: {
   isStable: boolean;
   save: SaveState;
@@ -123,7 +125,8 @@ const ReviewBody = (props: {
   );
 };
 
-// The first load failed: the error in one sentence, and a button that asks for the names again (the poll's own reload).
+// The first load failed: the error in one sentence, and a button that asks for the names again (the
+// poll's own reload).
 const FailedBody = (props: {
   error: ApiError;
   isLoading: boolean;
@@ -150,8 +153,9 @@ const FailedBody = (props: {
   );
 };
 
-// The names review: see the names found, keep any you choose, opt in to sensitive kinds, save and build the card.
-// Three states before the review: looking (first load out), failed (first load refused, with a retry that polls again), found.
+// The names review: see the names found, keep any you choose, opt in to sensitive kinds, save and
+// build the card. Three states before the review: looking (first load out), failed (first load
+// refused, with a retry that polls again), found.
 export const NamesReviewScreen = (): ReactElement => {
   const navigate = useNavigate();
   const sourceId = useParams()["sourceId"] ?? "";

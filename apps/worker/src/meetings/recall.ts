@@ -5,14 +5,16 @@ import { searchRecallCorpus, type Database } from "@meet-first/db";
 import { turnLabel } from "./prompt-builder.js";
 import type { CitableTurn } from "./receipts.js";
 
-// One recall as the round records it: the event result, the model's tool message text, and each turn twice: the snippet the model saw and the whole turn the receipts check reads.
+// One recall as the round records it: the event result, the model's tool message text, and each
+// turn twice: the snippet the model saw and the whole turn the receipts check reads.
 export type RecallRun = {
   result: z.infer<typeof recallResult>;
   messageText: string;
   turns: Array<CitableTurn & { snippet: string }>;
 };
 
-// Runs one recall inside the round's transaction, over the speaking side's card only; an empty corpus gives no turns.
+// Runs one recall inside the round's transaction, over the speaking side's card only; an empty
+// corpus gives no turns.
 export async function runRecall(
   trx: Transaction<Database>,
   args: { cardId: string; query: string },
@@ -54,12 +56,14 @@ export async function runRecall(
   return { result, messageText, turns };
 }
 
-// The recall a listed persona met through the directory gets: no turns, because strangers see only its owner's public items.
+// The recall a listed persona met through the directory gets: no turns, because strangers see only
+// its owner's public items.
 export function noRecall(): RecallRun {
   return { result: { turns: [] }, messageText: formatRecallMessage([]), turns: [] };
 }
 
-// The tool message the model reads: the turns as labelled lines inside recall_result tags, declared data.
+// The tool message the model reads: the turns as labelled lines inside recall_result tags, declared
+// data.
 export function formatRecallMessage(
   turns: ReadonlyArray<{ turnIndex: number; text: string }>,
 ): string {
@@ -70,7 +74,8 @@ export function formatRecallMessage(
   return "<recall_result>\n" + body + "\n</recall_result>";
 }
 
-// Cuts text to at most maxUnits UTF-16 code units without splitting a surrogate pair (600 characters each).
+// Cuts text to at most maxUnits UTF-16 code units without splitting a surrogate pair (600
+// characters each).
 export function truncateUtf16(text: string, maxUnits: number): string {
   if (text.length <= maxUnits) return text;
   const cut = text.slice(0, maxUnits);

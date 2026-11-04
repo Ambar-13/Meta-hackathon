@@ -1,7 +1,8 @@
-// Builds the screen gallery (apps/web/gallery.html) and saves a screenshot of every view at phone and laptop width.
-// Each view gets <name>-390.png and <name>-1280.png (the first screen), plus -full.png when the page is taller than one screen.
-// Usage: pnpm exec tsx scripts/screen-gallery.ts [--only home,card] [--out <folder>] [--scale 2] [--no-build]
-// Needs Google Chrome; set CHROME_PATH when it is not in the usual macOS place.
+// Builds the screen gallery (apps/web/gallery.html) and saves a screenshot of every view at phone
+// and laptop width. Each view gets <name>-390.png and <name>-1280.png (the first screen), plus
+// -full.png when the page is taller than one screen. Usage: pnpm exec tsx scripts/screen-gallery.ts
+// [--only home,card] [--out <folder>] [--scale 2] [--no-build] Needs Google Chrome; set CHROME_PATH
+// when it is not in the usual macOS place.
 import { execFileSync, spawn } from "node:child_process";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -52,7 +53,8 @@ function sleep(ms: number): Promise<void> {
 // Starts headless Chrome on a debugging port and connects to it over the DevTools protocol.
 async function openChrome(port: number): Promise<Cdp> {
   const profile = join(tmpdir(), `meet-first-gallery-${String(port)}`);
-  // Tabs opened in the background are throttled by default (slow timers, no painting); these flags keep every tab at full speed.
+  // Tabs opened in the background are throttled by default (slow timers, no painting); these flags
+  // keep every tab at full speed.
   const unthrottled = [
     "--disable-background-timer-throttling",
     "--disable-renderer-backgrounding",
@@ -148,7 +150,8 @@ async function capture(cdp: Cdp, sessionId: string, file: string): Promise<void>
   writeFileSync(file, Buffer.from(String(shot.result?.["data"]), "base64"));
 }
 
-// Shoots one view at one size: the first screen, then the whole page when it is taller than a screen.
+// Shoots one view at one size: the first screen, then the whole page when it is taller than a
+// screen.
 async function shootView(
   cdp: Cdp,
   shot: { name: string; size: (typeof SIZES)[number] },

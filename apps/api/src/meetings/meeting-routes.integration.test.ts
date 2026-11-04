@@ -55,7 +55,8 @@ afterAll(async () => {
   await kit.close();
 });
 
-// The headers of one request made as this person: the session cookie, the app's origin and the JSON content type.
+// The headers of one request made as this person: the session cookie, the app's origin and the JSON
+// content type.
 function headersOf(person: Person): Record<string, string> {
   return {
     cookie: SESSION_COOKIE + "=" + person.sessionToken,
@@ -82,7 +83,8 @@ async function request(call: Call) {
   });
 }
 
-// Makes a meeting ready for a start: the prefixes stored and both go-aheads recorded, with nobody online.
+// Makes a meeting ready for a start: the prefixes stored and both go-aheads recorded, with nobody
+// online.
 async function prepare(meetingId: string): Promise<void> {
   const now = new Date();
   await withMeeting(workerDb, meetingId, (trx) =>
@@ -315,7 +317,8 @@ it("D60-T7: a meeting request waits while another transaction holds the creator'
   const held = new Promise<void>((resolve) => {
     release = resolve;
   });
-  // FOR NO KEY UPDATE: the membership insert's foreign-key check does not wait on it, so only the route's own lock can.
+  // FOR NO KEY UPDATE: the membership insert's foreign-key check does not wait on it, so only the
+  // route's own lock can.
   const holder = asPerson(kit.db, m.a.personId, async (trx) => {
     await trx
       .selectFrom("people")

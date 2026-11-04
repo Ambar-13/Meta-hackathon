@@ -12,7 +12,8 @@ import { recordedReplyPath } from "./recorded-replies.js";
 
 // The one third-party name of A's paste, the golden path's FIXTURE_NAME.
 export const GOLDEN_PATH_NAME = "Rohan Mehta";
-// The phrase that marks a third-party name in B's export: "my" or "My", a relation word, then one or two capitalised words.
+// The phrase that marks a third-party name in B's export: "my" or "My", a relation word, then one
+// or two capitalised words.
 export const THIRD_PARTY_PATTERN =
   /\b[Mm]y (friend|colleague|manager|boss|sister|brother|partner|teammate|mentor) (\p{Lu}\p{Ll}+(?: \p{Lu}\p{Ll}+)?)/gu;
 // The kinds given to the golden path's card items, in order.
@@ -44,7 +45,8 @@ const MESSAGES = z.array(
   z.object({ role: z.string(), content: z.string().nullable() }).passthrough(),
 );
 
-// The usage a rule-made reply reports: 4 characters per token for the prompt (an estimate) and the given completion tokens.
+// The usage a rule-made reply reports: 4 characters per token for the prompt (an estimate) and the
+// given completion tokens.
 function usageFor(
   request: LlmRequest,
   completionTokens: number,
@@ -62,7 +64,8 @@ function usageFor(
   };
 }
 
-// The names A and B get: A's one name by rule, or every marked name in the turns of B, each written once (golden path steps 2.5 and 4.3).
+// The names A and B get: A's one name by rule, or every marked name in the turns of B, each written
+// once (golden path steps 2.5 and 4.3).
 function namesFor(user: string): Array<{ text: string; role: string }> {
   const turnsText = user.slice(Math.max(0, user.indexOf("<source_turns>")));
   if (turnsText.includes(GOLDEN_PATH_NAME)) return [{ text: GOLDEN_PATH_NAME, role: "colleague" }];
@@ -77,7 +80,8 @@ function namesFor(user: string): Array<{ text: string; role: string }> {
   return found;
 }
 
-// The items a card gets by rule: the start of each turn's first line that is long enough and not in the prompt (golden path steps 3 and 4).
+// The items a card gets by rule: the start of each turn's first line that is long enough and not in
+// the prompt (golden path steps 3 and 4).
 function cardItemsFor(system: string, user: string, request: LlmRequest): GoldenPathReply {
   const kept: Array<{ label: string; quote: string }> = [];
   const seen = new Set<string>();
@@ -128,7 +132,8 @@ export function goldenPathReply(request: LlmRequest): GoldenPathReply {
   return { ok: false, reason: `no golden path rule for call site ${request.callSite}` };
 }
 
-// Writes a hand-written fixture for every miss file that has none yet; stops at the first request no rule answers.
+// Writes a hand-written fixture for every miss file that has none yet; stops at the first request
+// no rule answers.
 export function writeGoldenPathFixtures(missRoot: string): {
   written: string[];
   stoppedAt: string | null;
@@ -165,7 +170,8 @@ export function writeGoldenPathFixtures(missRoot: string): {
   return { written, stoppedAt: null };
 }
 
-// The command line: `golden-fixture clear` empties the miss folder, `golden-fixture write` writes the fixtures the rules answer.
+// The command line: `golden-fixture clear` empties the miss folder, `golden-fixture write` writes
+// the fixtures the rules answer.
 if (process.argv[1] !== undefined && pathToFileURL(process.argv[1]).href === import.meta.url) {
   const root = join(tmpdir(), "meet-first-replay-misses");
   const command = process.argv[2];

@@ -69,8 +69,8 @@ const WORDS = replied(chatId(23), {
   text: "Meet First lets your agent answer for you from what you chose to share.\nAsk me who could help with something, or how a friend would probably react.",
 });
 
-// The first page of Explore the right-hand column suggests people from: three people who are not friends yet, two of them sample
-// people as on the live site.
+// The first page of Explore the right-hand column suggests people from: three people who are not
+// friends yet, two of them sample people as on the live site.
 const SUGGESTED = {
   listings: [
     {
@@ -102,7 +102,8 @@ const SUGGESTED = {
   hasMore: false,
 };
 
-// The three reads of the page: the thread, the home view and the friends list, plus any other stubs.
+// The three reads of the page: the thread, the home view and the friends list, plus any other
+// stubs.
 function reads(
   thread: OrchestratorMessage[],
   extra: GalleryStub[] = [],
@@ -141,7 +142,8 @@ function chatView(
   };
 }
 
-// Twelve messages with every kind of reply: words, an answered help search, a planned friend ask, a refusal, a failure and a thinking one.
+// Twelve messages with every kind of reply: words, an answered help search, a planned friend ask, a
+// refusal, a failure and a thinking one.
 const LONG_THREAD: OrchestratorMessage[] = [
   youSaid(chatId(30), "What is this page for?"),
   WORDS,
@@ -157,7 +159,8 @@ const LONG_THREAD: OrchestratorMessage[] = [
   replied(chatId(25), { state: "thinking" }),
 ];
 
-// The chat page: the empty thread with and without a card, each kind of reply, the daily cap, and the loading and error states.
+// The chat page: the empty thread with and without a card, each kind of reply, the daily cap, and
+// the loading and error states.
 export const views: readonly GalleryView[] = [
   chatView(
     { name: "chat-empty", title: "Chat, the empty thread with the greeting and chips" },

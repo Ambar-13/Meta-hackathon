@@ -24,7 +24,8 @@ import { runMeetingStep } from "../meetings/step-job.js";
 import { deletePersonTask } from "./delete-person-job.js";
 import { countPersonRows } from "./table-list.js";
 
-// The superuser connection to the test database. It sees every row, so the checks are not limited by row security.
+// The superuser connection to the test database. It sees every row, so the checks are not limited
+// by row security.
 function superUser(): Kysely<Database> {
   const urls = readTestDatabaseUrls(process.env);
   const url = new URL(urls.adminUrl);
@@ -56,7 +57,8 @@ const TURNS_B = [
 
 // One person of the seeded scenario, with the ids the rows of their own side point at.
 type SeededSide = { personId: string; sourceId: string; turnIds: string[]; cardId: string };
-// The seeded scenario: two people, one pair, one ended meeting, and the ledger ids the checks read back.
+// The seeded scenario: two people, one pair, one ended meeting, and the ledger ids the checks read
+// back.
 type Scenario = {
   a: SeededSide;
   b: SeededSide;
@@ -69,7 +71,8 @@ let database: TestDatabase;
 let workerDb: Kysely<Database>;
 let owner: Kysely<Database>;
 
-// Creates one person with a frozen four-turn source, a six-item approved card and the rows the person owns alone.
+// Creates one person with a frozen four-turn source, a six-item approved card and the rows the
+// person owns alone.
 async function seedSide(db: Kysely<Database>, name: string, turns: string[]): Promise<SeededSide> {
   const person = await createTestPerson(db, name);
   const source = await createFrozenSource(db, person.personId, turns);
@@ -190,7 +193,8 @@ async function setRunning(db: Kysely<Database>, meetingId: string): Promise<void
   );
 }
 
-// Writes the rows of the meeting both sides share: steps, events, claims, briefs, a comic with six panels and a published share page.
+// Writes the rows of the meeting both sides share: steps, events, claims, briefs, a comic with six
+// panels and a published share page.
 async function writeMeetingRows(
   db: Kysely<Database>,
   meetingId: string,
@@ -337,7 +341,8 @@ async function writeMeetingRows(
   });
 }
 
-// Builds one full scenario: two people, a joined pair, an ended meeting with its rows, six ledger rows and a deletions row for a.
+// Builds one full scenario: two people, a joined pair, an ended meeting with its rows, six ledger
+// rows and a deletions row for a.
 async function freshScenario(): Promise<Scenario> {
   const a = await seedSide(database.db, "Test A", TURNS_A);
   const b = await seedSide(database.db, "Test B", TURNS_B);
@@ -440,8 +445,9 @@ const ZERO_COUNTS = {
   person_summaries: 0,
 };
 
-// The counts the record of a's deletion must hold, as the seed gives them (T3 in table-list.integration.test.ts).
-// briefs is 1: the person's own transaction sees only their own brief.
+// The counts the record of a's deletion must hold, as the seed gives them (T3 in
+// table-list.integration.test.ts). briefs is 1: the person's own transaction sees only their own
+// brief.
 const SEEDED_COUNTS = {
   sources: 1,
   turns: 4,

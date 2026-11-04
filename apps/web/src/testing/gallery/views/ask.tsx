@@ -90,7 +90,8 @@ function reactView(overrides: Partial<AskView>): AskView {
   });
 }
 
-// One view of the answers page reading this ask; withCard adds the card query so Start a meeting shows.
+// One view of the answers page reading this ask; withCard adds the card query so Start a meeting
+// shows.
 function askPage(
   head: { name: string; title: string },
   stubs: GalleryStub[],
@@ -105,7 +106,8 @@ function read(view: AskView): GalleryStub[] {
   return [{ route: routes.asks.readAsk, replies: { status: 200, body: view } }];
 }
 
-// The answers page: the persona writing, a friend's answer with its receipts, the help results, refused, failed, loading and error.
+// The answers page: the persona writing, a friend's answer with its receipts, the help results,
+// refused, failed, loading and error.
 export const views: readonly GalleryView[] = [
   askPage(
     { name: "ask-react-writing", title: "Answers, a friend's persona writing" },

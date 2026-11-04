@@ -14,7 +14,8 @@ import { registerSourcesRoutes } from "./index.js";
 // The origin every request of this file carries, the same one the test app allows.
 const ORIGIN = "http://localhost:3000";
 
-// One name the names pass writes for a test: its text, its role token and whether it is a minor's name.
+// One name the names pass writes for a test: its text, its role token and whether it is a minor's
+// name.
 type NameInput = { text: string; roleToken: string; isMinor?: boolean };
 
 let testApp: Awaited<ReturnType<typeof buildTestApp>>;
@@ -67,8 +68,9 @@ async function insertSource(personId: string, texts: string[]): Promise<string> 
   });
 }
 
-// Writes the rows the names pass leaves for a source, as the worker's job does (ingest spec 4.3.7): each name is replaced with its
-// role token in every turn, one redaction is written per occurrence, one names row per name, and the names_passes row last.
+// Writes the rows the names pass leaves for a source, as the worker's job does (ingest spec 4.3.7):
+// each name is replaced with its role token in every turn, one redaction is written per occurrence,
+// one names row per name, and the names_passes row last.
 async function writeNamesPassRows(
   personId: string,
   sourceId: string,

@@ -27,8 +27,9 @@ function snippetOf(text: string): string {
   return cut;
 }
 
-// The full-text step: a turn matches when it shares a word with the query, and more shared words rank first.
-// Equal ranks keep the turns' order in the person's file. A turn's id is random, so ordering by it gave another list on each rebuild.
+// The full-text step: a turn matches when it shares a word with the query, and more shared words
+// rank first. Equal ranks keep the turns' order in the person's file. A turn's id is random, so
+// ordering by it gave another list on each rebuild.
 async function fullTextRows(
   trx: Transaction<Database>,
   search: { cardId: string; words: string[]; limit: number },
@@ -44,7 +45,8 @@ async function fullTextRows(
   return result.rows;
 }
 
-// The trigram step: turns close to the query, most similar first, none under the floor, equal scores in file order.
+// The trigram step: turns close to the query, most similar first, none under the floor, equal
+// scores in file order.
 async function trigramRows(
   trx: Transaction<Database>,
   search: { cardId: string; words: string[]; limit: number },

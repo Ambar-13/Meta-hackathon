@@ -12,7 +12,8 @@ import { NamesPassOutput } from "../sources/scrub-categories.js";
 import { IsoTime } from "../primitives.js";
 import { ContractError } from "./errors.js";
 
-// The call sites that reach the model. The ledger CHECK in 0001, widened in 0006 and 0016, lists the same names.
+// The call sites that reach the model. The ledger CHECK in 0001, widened in 0006 and 0016, lists
+// the same names.
 export const CALL_SITES = [
   "scrub_names",
   "question_check",
@@ -37,8 +38,8 @@ export type CallSite = z.infer<typeof CallSite>;
 // How hard the model thinks on one call: minimal, low or medium.
 export const Effort = z.enum(["minimal", "low", "medium"]);
 export type Effort = z.infer<typeof Effort>;
-// One model call as it is stored in a fixture: the request, the reply and the usage.
-// request is { callSite, promptVersion, body } as sent; requestHash is the hash of request.body alone.
+// One model call as it is stored in a fixture: the request, the reply and the usage. request is {
+// callSite, promptVersion, body } as sent; requestHash is the hash of request.body alone.
 // recordedAt is null on a hand-written fixture. handWritten is true on fixtures written by hand.
 export const RecordedCall = z.object({
   callSite: CallSite,
@@ -77,7 +78,8 @@ function isJsonObject(value: unknown): value is JsonObject {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-// Copies a schema, drops the keys strict mode rejects, and makes every object strict with every property required.
+// Copies a schema, drops the keys strict mode rejects, and makes every object strict with every
+// property required.
 function makeStrict(node: unknown): unknown {
   if (Array.isArray(node)) return node.map(makeStrict);
   if (!isJsonObject(node)) return node;
@@ -110,7 +112,8 @@ function childSchemas(node: JsonObject): JsonObject[] {
   return children;
 }
 
-// The most container levels nested below a schema. A container is an object or array schema that has children.
+// The most container levels nested below a schema. A container is an object or array schema that
+// has children.
 function nestingDepth(node: JsonObject): number {
   return childSchemas(node)
     .filter((child) => childSchemas(child).length > 0)
@@ -134,7 +137,8 @@ export function toStrictJsonSchema(
   return { name, strict: true, schema: strict };
 }
 
-// Every model output schema, by prompt folder name, so the boot self-test and the contracts test read one list.
+// Every model output schema, by prompt folder name, so the boot self-test and the contracts test
+// read one list.
 export const MODEL_OUTPUT_SCHEMAS = {
   dossier: CardBuildOutput,
   "scrub-names": NamesPassOutput,

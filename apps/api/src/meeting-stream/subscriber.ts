@@ -16,15 +16,18 @@ export const SSE_HEADERS = {
   "cache-control": "no-cache, no-transform",
   "x-accel-buffering": "no",
 } as const;
-// One comment line of exactly SSE_PADDING_BYTES (2,048) bytes, written first so a proxy that holds back the first
-// 2 KB lets the stream through: a colon, 2,045 spaces, and the blank line that ends a frame.
+// One comment line of exactly SSE_PADDING_BYTES (2,048) bytes, written first so a proxy that holds
+// back the first 2 KB lets the stream through: a colon, 2,045 spaces, and the blank line that ends
+// a frame.
 export const SSE_PADDING = `:${" ".repeat(SSE_PADDING_BYTES - 3)}\n\n`;
 // The heartbeat comment, written every HEARTBEAT_MS, 15 s.
 export const HEARTBEAT_LINE = ":hb\n\n";
-// How often a stream writes the heartbeat, how often it re-reads on its own, and how often it re-checks its session.
+// How often a stream writes the heartbeat, how often it re-reads on its own, and how often it
+// re-checks its session.
 export type StreamTiming = { heartbeatMs: number; safetyPollMs: number; sessionCheckMs: number };
-// The timing every real stream uses: the 15 s heartbeat, the 10 s safety poll, and a session re-check
-// at the heartbeat interval by default, so a signed-out session ends its stream within one heartbeat.
+// The timing every real stream uses: the 15 s heartbeat, the 10 s safety poll, and a session
+// re-check at the heartbeat interval by default, so a signed-out session ends its stream within one
+// heartbeat.
 export const STREAM_TIMING: StreamTiming = {
   heartbeatMs: HEARTBEAT_MS,
   safetyPollMs: SERVER_SAFETY_POLL_MS,
@@ -40,8 +43,9 @@ export type Subscriber = {
   end: () => void;
   whenIdle: () => Promise<void>;
 };
-// What a subscriber needs; write and end are the HTTP response's. sessionStillValid answers whether the session and the
-// membership that opened the stream still hold; a false answer, or a failed check, ends the stream.
+// What a subscriber needs; write and end are the HTTP response's. sessionStillValid answers whether
+// the session and the membership that opened the stream still hold; a false answer, or a failed
+// check, ends the stream.
 export type SubscriberOptions = {
   personId: string;
   meetingId: string;
@@ -62,7 +66,8 @@ export type ConnectionLimit<T> = {
   count: (key: string) => number;
 };
 
-// A committed event as one SSE frame: its seq as the id, its type as the event name, the whole event as JSON.
+// A committed event as one SSE frame: its seq as the id, its type as the event name, the whole
+// event as JSON.
 export function formatCommittedEvent(event: CommittedEvent): string {
   return `id: ${String(event.seq)}\nevent: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`;
 }
@@ -89,7 +94,8 @@ export function nextDelta(
   return null;
 }
 
-// True when a delta payload may carry text this stream has not sent; false lets the stream skip the read.
+// True when a delta payload may carry text this stream has not sent; false lets the stream skip the
+// read.
 export function isDeltaNews(
   sent: SentDelta | null,
   payload: { stepSeq: number; attempt: number; len: number },
@@ -159,7 +165,8 @@ class StreamSubscriber implements Subscriber {
     this.lastSentSeq = options.lastSeq;
   }
 
-  // Starts the replay, the running partial and the presence stamp, then the heartbeat and the safety poll.
+  // Starts the replay, the running partial and the presence stamp, then the heartbeat and the
+  // safety poll.
   start(): void {
     this.enqueue(() => this.pumpEvents());
     this.enqueue(() => this.pumpPartial());
@@ -177,13 +184,15 @@ class StreamSubscriber implements Subscriber {
     }, this.options.timing.sessionCheckMs);
   }
 
-  // Queues one session check behind the reads already waiting, so it never runs beside a frame being written.
+  // Queues one session check behind the reads already waiting, so it never runs beside a frame
+  // being written.
   private checkSession(): void {
     this.enqueue(() => this.verifySession());
   }
 
-  // Ends the stream when the session or the membership no longer holds. A check that cannot be made counts as a
-  // failure, so the stream fails closed rather than keep sending events it cannot vouch for.
+  // Ends the stream when the session or the membership no longer holds. A check that cannot be made
+  // counts as a failure, so the stream fails closed rather than keep sending events it cannot vouch
+  // for.
   private async verifySession(): Promise<void> {
     let isStillValid = false;
     try {
@@ -203,7 +212,8 @@ class StreamSubscriber implements Subscriber {
     }
   }
 
-  // Writes the heartbeat comment and stamps presence, so the other member sees this person as watching.
+  // Writes the heartbeat comment and stamps presence, so the other member sees this person as
+  // watching.
   private heartbeat(): void {
     if (this.isStopped) {
       return;
@@ -214,7 +224,8 @@ class StreamSubscriber implements Subscriber {
     );
   }
 
-  // Reacts to one notice: an event newer than the last sent seq, a delta with new text, or a poll that reads both.
+  // Reacts to one notice: an event newer than the last sent seq, a delta with new text, or a poll
+  // that reads both.
   wake(signal: WakeSignal): void {
     if (this.isStopped) {
       return;
@@ -235,7 +246,8 @@ class StreamSubscriber implements Subscriber {
     this.enqueue(() => this.pumpPartial());
   }
 
-  // Adds one read to the end of the chain. A failed read is logged, and the next wake or poll tries again.
+  // Adds one read to the end of the chain. A failed read is logged, and the next wake or poll tries
+  // again.
   private enqueue(work: () => Promise<void>): void {
     this.chain = this.chain
       .then(async () => {
@@ -270,7 +282,8 @@ class StreamSubscriber implements Subscriber {
     }
   }
 
-  // Sends the running step's partial text as a turn.delta, but only the part this stream has not sent yet.
+  // Sends the running step's partial text as a turn.delta, but only the part this stream has not
+  // sent yet.
   private async pumpPartial(): Promise<void> {
     const partial = await this.options.reads.readRunningPartial(
       this.options.personId,
@@ -328,7 +341,8 @@ class StreamSubscriber implements Subscriber {
   }
 }
 
-// Builds one stream: replay, partial, heartbeat, safety poll and wakes, each read run one at a time in order.
+// Builds one stream: replay, partial, heartbeat, safety poll and wakes, each read run one at a time
+// in order.
 export function createSubscriber(options: SubscriberOptions): Subscriber {
   return new StreamSubscriber(options);
 }

@@ -1,8 +1,10 @@
-// First-turn latency: the time from a meeting's start to its first model token, as nearest-rank percentiles in milliseconds.
+// First-turn latency: the time from a meeting's start to its first model token, as nearest-rank
+// percentiles in milliseconds.
 import type { EvalRows } from "../collect-rows.js";
 import type { MetricResult } from "./index.js";
 
-// The nearest-rank percentile: sort ascending and take the value at index ceil(p * n) - 1. Empty input gives null.
+// The nearest-rank percentile: sort ascending and take the value at index ceil(p * n) - 1. Empty
+// input gives null.
 export function percentile(values: number[], p: number): number | null {
   if (values.length === 0) return null;
   const sorted = [...values].sort((first, second) => first - second);
@@ -17,7 +19,8 @@ function withCommas(value: number): string {
     .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-// Reads the meetings with both times and returns the p50 in detail as the value and the p90 in detail.
+// Reads the meetings with both times and returns the p50 in detail as the value and the p90 in
+// detail.
 export function measureFirstTurnLatency(rows: EvalRows): MetricResult {
   const latencies = rows.meetings.flatMap((meeting) => {
     if (meeting.startedAt === null || meeting.firstTokenAt === null) return [];

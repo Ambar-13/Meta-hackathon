@@ -1,7 +1,7 @@
-// POST /api/pairs/join: the invited person posts the token from the link's fragment.
-// pairs_join is one conditional UPDATE that sets the joiner only when nobody joined yet, the pair is unexpired
-// and the joiner is not the creator, so a second join, an expired invite and joining your own invite all find
-// nothing and answer 409 pair_unavailable.
+// POST /api/pairs/join: the invited person posts the token from the link's fragment. pairs_join is
+// one conditional UPDATE that sets the joiner only when nobody joined yet, the pair is unexpired
+// and the joiner is not the creator, so a second join, an expired invite and joining your own
+// invite all find nothing and answer 409 pair_unavailable.
 import type { FastifyInstance } from "fastify";
 import { sql, type Kysely } from "kysely";
 import { ContractError, HTTP, PairJoin, PairJoinResponse, routes } from "@meet-first/contracts";

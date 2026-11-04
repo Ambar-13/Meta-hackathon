@@ -2,13 +2,16 @@ import type { ReactElement, ReactNode } from "react";
 import { NO_RECEIPT_COPY, WEAK_RECEIPT_COPY, type QuestionKind } from "@meet-first/contracts";
 import { Sticker, type StickerName } from "./stickers.js";
 
-// The colours a name tag band can take: coral and blue are the two people in a meeting, green and lilac mark everyone else.
+// The colours a name tag band can take: coral and blue are the two people in a meeting, green and
+// lilac mark everyone else.
 export type TagColour = "coral" | "blue" | "green" | "lilac";
-// A meeting side as the voices use it: side a speaks in coral, side b in blue (docs/DESIGN.md "Two voices").
+// A meeting side as the voices use it: side a speaks in coral, side b in blue (docs/DESIGN.md "Two
+// voices").
 export type VoiceSide = "a" | "b";
 
-// The "Hello, my name is" sticker with one name written on it. Size and tilt come from a class the screen sets on it. The band's
-// words come from the stylesheet, so the tag adds no text a test or a screen reader could trip on.
+// The "Hello, my name is" sticker with one name written on it. Size and tilt come from a class the
+// screen sets on it. The band's words come from the stylesheet, so the tag adds no text a test or a
+// screen reader could trip on.
 export const NameTag = (props: {
   name: string;
   colour?: TagColour;
@@ -29,7 +32,8 @@ export const NameTag = (props: {
   );
 };
 
-// How each kind of question looks wherever it is named: its words, its colour class and its sticker (docs/DESIGN.md "Colour").
+// How each kind of question looks wherever it is named: its words, its colour class and its sticker
+// (docs/DESIGN.md "Colour").
 export const KIND_LOOK: Record<
   QuestionKind,
   { label: string; colour: string; sticker: StickerName }
@@ -66,7 +70,8 @@ export const Avatar = (props: {
   );
 };
 
-// One quote a line rests on, with where it came from. With onOpen it is a button that opens the source; without, plain text.
+// One quote a line rests on, with where it came from. With onOpen it is a button that opens the
+// source; without, plain text.
 export const Receipt = (props: {
   quote: string;
   source: string;
@@ -89,7 +94,8 @@ export const Receipt = (props: {
   );
 };
 
-// The flag for a line with no quote, or with a quote the check did not support; the words come from contracts.
+// The flag for a line with no quote, or with a quote the check did not support; the words come from
+// contracts.
 export const ReceiptFlag = (props: { isWeak: boolean }): ReactElement => {
   if (props.isWeak) {
     return (
@@ -107,7 +113,8 @@ export const ReceiptFlag = (props: { isWeak: boolean }): ReactElement => {
   );
 };
 
-// Three slow dots in a bubble, for a persona that is writing; the label says who, for screen readers.
+// Three slow dots in a bubble, for a persona that is writing; the label says who, for screen
+// readers.
 export const TypingDots = (props: { label: string }): ReactElement => {
   return (
     <span className="typing" role="status" aria-label={props.label}>
@@ -118,7 +125,8 @@ export const TypingDots = (props: { label: string }): ReactElement => {
   );
 };
 
-// A screen or list with nothing in it yet: one sticker, one heading, one or two lines, and the next step.
+// A screen or list with nothing in it yet: one sticker, one heading, one or two lines, and the next
+// step.
 export const EmptyState = (props: {
   sticker: StickerName;
   title: string;

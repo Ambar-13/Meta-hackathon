@@ -6,7 +6,8 @@ import { emptyMeetingState, foldEvent, type MeetingFoldState } from "../../../tr
 import { IDS, meetingView, SERVER_NOW } from "../../fixtures.js";
 import type { GalleryView } from "../gallery-views.js";
 
-// The meeting page in each of its states, with two named people and a feed that sends one folded state when it opens.
+// The meeting page in each of its states, with two named people and a feed that sends one folded
+// state when it opens.
 
 const QUESTION = "Would we enjoy a 10-day hackathon together?";
 const MEMBERS = [
@@ -159,8 +160,8 @@ function meetingAt(slot: {
   };
 }
 
-// The meeting page: waiting, queued, live with a turn being written, slow network, ended while the brief is written, ended with
-// the brief ready, and a meeting that could not be loaded.
+// The meeting page: waiting, queued, live with a turn being written, slow network, ended while the
+// brief is written, ended with the brief ready, and a meeting that could not be loaded.
 export const views: readonly GalleryView[] = [
   meetingAt({
     name: "meeting-waiting",

@@ -1,7 +1,9 @@
-// pnpm db:seed-samples: writes the sample people of sample-people.ts that Explore does not list yet, through the app's own roles and
-// rules, the way a person is made: a person whose session and recovery code are random and never kept, so nobody can sign in as
-// them; notes frozen after a names pass by the worker; an approved card whose items quote the notes word for word; the listing; the
-// posts. The start script runs it after the migrations when SEED_SAMPLES is 1 (render.yaml). A second run adds nothing.
+// pnpm db:seed-samples: writes the sample people of sample-people.ts that Explore does not list
+// yet, through the app's own roles and rules, the way a person is made: a person whose session and
+// recovery code are random and never kept, so nobody can sign in as them; notes frozen after a
+// names pass by the worker; an approved card whose items quote the notes word for word; the
+// listing; the posts. The start script runs it after the migrations when SEED_SAMPLES is 1
+// (render.yaml). A second run adds nothing.
 import { createHash, randomBytes } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { sql, type Kysely } from "kysely";
@@ -13,26 +15,30 @@ import { withPerson } from "../transaction.js";
 import type { Database } from "../types.js";
 import { SAMPLE_PEOPLE, type SamplePerson } from "./sample-people.js";
 
-// The advisory lock a seed holds while it writes, so a sample person is never written twice. A seed that finds it taken adds nothing
-// rather than waiting, so a stuck lock can never hold up the start script. Any fixed number works.
+// The advisory lock a seed holds while it writes, so a sample person is never written twice. A seed
+// that finds it taken adds nothing rather than waiting, so a stuck lock can never hold up the start
+// script. Any fixed number works.
 const SEED_LOCK = 9_003_011;
 // One connection holds the lock while the other writes.
 const SEED_POOL_SIZE = 2;
 const HOUR_MS = 3_600_000;
 const MINUTE_MS = 60_000;
 
-// What one run did: the sample people it added, the ones Explore already listed, and whether another seed held the lock, in which case
-// this one added nothing.
+// What one run did: the sample people it added, the ones Explore already listed, and whether
+// another seed held the lock, in which case this one added nothing.
 export type SeedReport = { added: string[]; present: string[]; wasBusy: boolean };
-// The two clients the seed writes through: app_api, with a pool of at least two connections so one can hold the lock, and app_worker.
+// The two clients the seed writes through: app_api, with a pool of at least two connections so one
+// can hold the lock, and app_worker.
 export type SeedClients = { api: Kysely<Database>; worker: Kysely<Database> };
 
-// sha256 of 32 random bytes nobody keeps: the session and recovery code of a sample person, which no one can ever send.
+// sha256 of 32 random bytes nobody keeps: the session and recovery code of a sample person, which
+// no one can ever send.
 function unusableHash(): Buffer {
   return createHash("sha256").update(randomBytes(32)).digest();
 }
 
-// The card item rows of one sample person, each quote checked against its note as the card job checks the model's.
+// The card item rows of one sample person, each quote checked against its note as the card job
+// checks the model's.
 function itemRows(
   person: SamplePerson,
   ids: { personId: string; cardId: string },
@@ -190,8 +196,9 @@ async function addSamplePerson(
   });
 }
 
-// Adds every sample person Explore does not list yet, under the seed lock; the tests pass their own people and clock. Each listing is
-// a minute older than the one before it, so Explore, newest first, shows them in the order of the list.
+// Adds every sample person Explore does not list yet, under the seed lock; the tests pass their own
+// people and clock. Each listing is a minute older than the one before it, so Explore, newest
+// first, shows them in the order of the list.
 export async function seedSamplePeople(
   clients: SeedClients,
   options: { people?: readonly SamplePerson[]; now?: Date } = {},

@@ -6,7 +6,8 @@ import { readPrompt } from "@meet-first/prompts";
 export const NAMES_CHUNK_MAX_CHARS = 100_000;
 // Two turn blocks are joined with one blank line.
 export const TURN_BLOCK_SEPARATOR = "\n\n";
-// One model call as a job builds it, before the ledger is added; the fixture test hashes exactly this.
+// One model call as a job builds it, before the ledger is added; the fixture test hashes exactly
+// this.
 export type ModelCall = {
   callSite: CallSite;
   promptVersion: string;
@@ -19,7 +20,8 @@ export function formatTurnBlock(turn: { turnIndex: number; text: string }): stri
   return `[t:${String(turn.turnIndex)}] ${turn.text}`;
 }
 
-// Splits turns into chunks of whole turns whose joined blocks are at most NAMES_CHUNK_MAX_CHARS; a turn is never split.
+// Splits turns into chunks of whole turns whose joined blocks are at most NAMES_CHUNK_MAX_CHARS; a
+// turn is never split.
 export function chunkTurnsForNames(
   turns: ReadonlyArray<{ turnIndex: number; text: string }>,
 ): Array<{ turnIndexes: number[]; text: string }> {
@@ -43,7 +45,8 @@ export function chunkTurnsForNames(
   return chunks;
 }
 
-// The names-pass call for one chunk: the scrub-names prompt and the untrusted-data rules as the system message, the allowlist and the chunk as the user message.
+// The names-pass call for one chunk: the scrub-names prompt and the untrusted-data rules as the
+// system message, the allowlist and the chunk as the user message.
 export function namesPassCall(input: {
   allowlist: readonly string[];
   chunkText: string;

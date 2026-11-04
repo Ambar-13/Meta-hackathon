@@ -1,4 +1,5 @@
-// One simulated person: a cookie jar, the Origin header on every write, and typed calls to the api over HTTP.
+// One simulated person: a cookie jar, the Origin header on every write, and typed calls to the api
+// over HTTP.
 import { gzipSync } from "node:zlib";
 import { Health, SESSION_COOKIE, SourceCreateResponse, routes } from "@meet-first/contracts";
 import type { ZodType, ZodTypeDef } from "zod";
@@ -6,7 +7,8 @@ import { ExitError, StepFailure } from "./report.js";
 
 // The fetch the client calls. The tests pass a fake that records the requests.
 export type FetchLike = (url: string, init: RequestInit) => Promise<Response>;
-// One JSON call: the method, the path, an optional body, the status it must return, its reply schema, and whether to leave Origin off.
+// One JSON call: the method, the path, an optional body, the status it must return, its reply
+// schema, and whether to leave Origin off.
 export type JsonRequest<T> = {
   method: "GET" | "POST" | "PUT" | "DELETE";
   path: string;
@@ -22,7 +24,8 @@ const REQUEST_TIMEOUT_MS = 30_000;
 const UPLOAD_TIMEOUT_MS = 60_000;
 // The health read gives up after 10 seconds, so a dead api stops the run early.
 const HEALTH_TIMEOUT_MS = 10_000;
-// The most characters of a response body that may reach a message (bodies are data, never instructions).
+// The most characters of a response body that may reach a message (bodies are data, never
+// instructions).
 const BODY_CHARS = 300;
 // The text printed when this address has created too many accounts. The script never retries it.
 const RATE_LIMIT_MESSAGE =
@@ -37,7 +40,8 @@ function parseBody(text: string): unknown {
   }
 }
 
-// One simulated person. Each person keeps the newest session cookie the api sent and sends it back on every later call.
+// One simulated person. Each person keeps the newest session cookie the api sent and sends it back
+// on every later call.
 export class PersonClient {
   private token: string | undefined;
   private lastCookie: string | undefined;
@@ -49,7 +53,8 @@ export class PersonClient {
     private readonly fetchImpl: FetchLike = (url, init) => fetch(url, init),
   ) {}
 
-  // Sends one JSON call and parses the reply with the schema. A 429 on account creation exits 3 and is never retried.
+  // Sends one JSON call and parses the reply with the schema. A 429 on account creation exits 3 and
+  // is never retried.
   async json<T>(request: JsonRequest<T>): Promise<JsonReply<T>> {
     this.refuseWhenDeleted();
     const hasBody = request.body !== undefined;
@@ -77,7 +82,8 @@ export class PersonClient {
     return { status: response.status, headers: response.headers, body: parsed.data };
   }
 
-  // Uploads one NDJSON source as gzip. The api answers 201 for a new source and for a repeat, so 201 is the only status accepted.
+  // Uploads one NDJSON source as gzip. The api answers 201 for a new source and for a repeat, so
+  // 201 is the only status accepted.
   async uploadSource(
     ndjson: string,
   ): Promise<{ status: number; body: SourceCreateResponse; compressedBytes: number }> {
@@ -108,7 +114,8 @@ export class PersonClient {
     return { status: response.status, body: parsed.data, compressedBytes: gzipped.length };
   }
 
-  // Opens the event stream of one meeting. Last-Event-ID is sent only after the reader has seen an event.
+  // Opens the event stream of one meeting. Last-Event-ID is sent only after the reader has seen an
+  // event.
   openStream(path: string, lastEventId: number, signal: AbortSignal): Promise<Response> {
     this.refuseWhenDeleted();
     const headers: Record<string, string> = {
@@ -119,7 +126,8 @@ export class PersonClient {
     return this.fetchImpl(this.base + path, { method: "GET", headers, signal });
   }
 
-  // Sends a GET and returns the status, the content type and the bytes, for pages and images that are not JSON.
+  // Sends a GET and returns the status, the content type and the bytes, for pages and images that
+  // are not JSON.
   async getRaw(path: string): Promise<{
     status: number;
     contentType: string;
@@ -141,12 +149,14 @@ export class PersonClient {
     };
   }
 
-  // The raw Set-Cookie line of the last response that carried the session cookie, or undefined when it carried none.
+  // The raw Set-Cookie line of the last response that carried the session cookie, or undefined when
+  // it carried none.
   lastSetCookie(): string | undefined {
     return this.lastCookie;
   }
 
-  // The session token this person holds now, for the one check that it never appears in a body. It is never printed.
+  // The session token this person holds now, for the one check that it never appears in a body. It
+  // is never printed.
   currentToken(): string | undefined {
     return this.token;
   }
@@ -168,7 +178,8 @@ export class PersonClient {
     return this.token === undefined ? {} : { cookie: `${SESSION_COOKIE}=${this.token}` };
   }
 
-  // Sends one request with a time limit. A request past the limit fails the step with its method, its path and the limit.
+  // Sends one request with a time limit. A request past the limit fails the step with its method,
+  // its path and the limit.
   private async send(call: {
     path: string;
     init: RequestInit;
@@ -206,7 +217,8 @@ export class PersonClient {
     this.token = isCleared ? undefined : value;
   }
 
-  // Refuses every call from a person whose account was deleted, so a later step cannot act as them by mistake.
+  // Refuses every call from a person whose account was deleted, so a later step cannot act as them
+  // by mistake.
   private refuseWhenDeleted(): void {
     if (this.isDeleted)
       throw new StepFailure(
@@ -214,7 +226,8 @@ export class PersonClient {
       );
   }
 
-  // Refuses the rate-limited reply on account creation. Any other status goes to the caller's check.
+  // Refuses the rate-limited reply on account creation. Any other status goes to the caller's
+  // check.
   private refuseRateLimit<T>(request: JsonRequest<T>, status: number): void {
     const isCreate = request.method === "POST" && request.path === routes.people.createPerson.path;
     if (status === 429 && isCreate) throw new ExitError(3, RATE_LIMIT_MESSAGE);

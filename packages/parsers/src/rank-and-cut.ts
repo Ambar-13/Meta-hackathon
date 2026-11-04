@@ -13,12 +13,14 @@ type Ranked = RawTurn & { canonical: string };
 // Long turns are cut at a line break rather than mid-line.
 export const isCutAtLineBreak = true; // a single long turn is cut at a line break where it can be
 
-// True when a UTF-16 code unit is the first half of a surrogate pair, so cutting after it would split an emoji.
+// True when a UTF-16 code unit is the first half of a surrogate pair, so cutting after it would
+// split an emoji.
 function isHighSurrogate(code: number): boolean {
   return code >= 0xd800 && code <= 0xdbff;
 }
 
-// Cuts one canonical text to 20,000 code units at the last line break, or else mid-text without splitting an emoji.
+// Cuts one canonical text to 20,000 code units at the last line break, or else mid-text without
+// splitting an emoji.
 function cutTurnText(text: string): string {
   if (text.length <= TURN_TEXT_MAX_CHARS) return text;
   const lineBreak = text.lastIndexOf("\n", TURN_TEXT_MAX_CHARS);
@@ -27,7 +29,8 @@ function cutTurnText(text: string): string {
   return text.slice(0, isSplitEmoji ? TURN_TEXT_MAX_CHARS - 1 : TURN_TEXT_MAX_CHARS);
 }
 
-// Recency order: newer createTime first, turns without a time after every timed turn, then the later export position first.
+// Recency order: newer createTime first, turns without a time after every timed turn, then the
+// later export position first.
 function byRecency(a: Ranked, b: Ranked): number {
   if (a.createTime !== null && b.createTime !== null && a.createTime !== b.createTime)
     return b.createTime - a.createTime;
@@ -36,7 +39,8 @@ function byRecency(a: Ranked, b: Ranked): number {
   return b.exportOrder - a.exportOrder;
 }
 
-// Keeps turns in rank order while the count and the character total stay within the caps, and stops at the first turn that breaks one.
+// Keeps turns in rank order while the count and the character total stay within the caps, and stops
+// at the first turn that breaks one.
 function takeWithinCaps(ranked: Ranked[]): Ranked[] {
   const kept: Ranked[] = [];
   let totalChars = 0;
@@ -52,7 +56,8 @@ function takeWithinCaps(ranked: Ranked[]): Ranked[] {
 // Shortest summary quote that counts, once folded; a shorter one would match too many messages.
 const PRIORITY_QUOTE_MIN_CHARS = 20;
 
-// The matchers a summary gives: its folded quotes that are long enough, and a whole-word pattern per topic.
+// The matchers a summary gives: its folded quotes that are long enough, and a whole-word pattern
+// per topic.
 type PriorityMatchers = { quotes: string[]; topics: RegExp[] };
 
 // Text folded for finding a summary quote in it: lower case, no quote marks, runs of space as one.
@@ -64,7 +69,8 @@ function foldForMatch(text: string): string {
     .trim();
 }
 
-// A pattern that finds a topic as a whole word, in any case: "Rentably" matches "rentably's plan", not "rentablyish".
+// A pattern that finds a topic as a whole word, in any case: "Rentably" matches "rentably's plan",
+// not "rentablyish".
 function topicPattern(topic: string): RegExp {
   const escaped = topic.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return new RegExp(`(^|[^\\p{L}\\p{N}])${escaped}($|[^\\p{L}\\p{N}])`, "iu");
@@ -81,7 +87,8 @@ function matchersOf(priority: SummaryPriority | undefined): PriorityMatchers {
   };
 }
 
-// How a summary ranks one turn: 2 when it holds one of the summary's quotes, 1 when it names one of its topics, else 0.
+// How a summary ranks one turn: 2 when it holds one of the summary's quotes, 1 when it names one of
+// its topics, else 0.
 function priorityTier(canonical: string, matchers: PriorityMatchers): number {
   if (matchers.quotes.length > 0) {
     const folded = foldForMatch(canonical);
@@ -90,9 +97,10 @@ function priorityTier(canonical: string, matchers: PriorityMatchers): number {
   return matchers.topics.some((pattern) => pattern.test(canonical)) ? 1 : 0;
 }
 
-// Ranks turns and cuts to the size caps: at most 10,000 turns, 20,000 characters each, 2 MiB in all. With a summary, turns that hold
-// one of its quotes come first, then turns that name one of its topics; then personaScore, then recency. A turn longer than
-// 20,000 characters is cut at the last line break before 20,000, so a quote never starts mid-line.
+// Ranks turns and cuts to the size caps: at most 10,000 turns, 20,000 characters each, 2 MiB in
+// all. With a summary, turns that hold one of its quotes come first, then turns that name one of
+// its topics; then personaScore, then recency. A turn longer than 20,000 characters is cut at the
+// last line break before 20,000, so a quote never starts mid-line.
 export function rankAndCut(
   turns: Array<RawTurn & { canonical: string }>,
   priority?: SummaryPriority,

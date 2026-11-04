@@ -1,16 +1,20 @@
-// Turns a meeting's turns, claims and approved items into the brief prompt, and the model's lines into checked brief points.
+// Turns a meeting's turns, claims and approved items into the brief prompt, and the model's lines
+// into checked brief points.
 import type { QuestionKind, BriefOutput, BriefPoint, Claim } from "@meet-first/contracts";
 import type { ChatMessage } from "@meet-first/llm";
 import { verifyQuote } from "@meet-first/receipts";
 
 // The number of lines in each of the three sections of a brief.
 export const LINES_PER_SECTION = 3;
-// The id a quote carries when the turn it names is not in the notes. The screen treats it as no receipt.
+// The id a quote carries when the turn it names is not in the notes. The screen treats it as no
+// receipt.
 export const UNKNOWN_TURN_ID = "00000000-0000-0000-0000-000000000000";
 
-// One side of the meeting as the brief sees it: the side letter, the owner, the name shown and the card.
+// One side of the meeting as the brief sees it: the side letter, the owner, the name shown and the
+// card.
 export type BriefSide = { side: "a" | "b"; personId: string; displayName: string; cardId: string };
-// One turn of a person's notes, as a brief quote names it: its id, its side, its index in the notes and its text.
+// One turn of a person's notes, as a brief quote names it: its id, its side, its index in the notes
+// and its text.
 export type SourceTurn = {
   id: string;
   side: "a" | "b";
@@ -38,7 +42,8 @@ export type TranscriptTurn = {
   text: string;
   claims: Claim[];
 };
-// One quote the brief may copy: the side and turn it names, its text, and whether it came from a claim or an item.
+// One quote the brief may copy: the side and turn it names, its text, and whether it came from a
+// claim or an item.
 export type CitableQuote = {
   side: "a" | "b";
   turnId: string;
@@ -60,7 +65,8 @@ export type BriefPromptInput = {
 // The three sections of one brief, each a list of points.
 export type BriefSections = { agree: BriefPoint[]; clash: BriefPoint[]; decideFirst: BriefPoint[] };
 
-// The label a note turn has in the prompt: t: and its index in the notes, the same short form as the meeting turn labels.
+// The label a note turn has in the prompt: t: and its index in the notes, the same short form as
+// the meeting turn labels.
 export function sourceTurnLabel(turnIndex: number): string {
   return `t:${String(turnIndex)}`;
 }
@@ -71,7 +77,8 @@ export function parseSourceTurnLabel(label: string): number | null {
   return /^\d{1,9}$/.test(text) ? Number(text) : null;
 }
 
-// The prompt text without the status comment on its first line, which speaks to the people who keep the prompt, not the model.
+// The prompt text without the status comment on its first line, which speaks to the people who keep
+// the prompt, not the model.
 export function promptBodyOf(text: string): string {
   return text.replace(/^<!--[^\n]*-->\n?/, "");
 }
@@ -79,7 +86,8 @@ export function promptBodyOf(text: string): string {
 // What the prompt lines need to name a note turn and to collect the quotes the brief may copy.
 type PromptContext = { turnIndexById: Map<string, number>; citable: CitableQuote[] };
 
-// The lines of one card: one line per verified item that names a turn in the notes, in position order.
+// The lines of one card: one line per verified item that names a turn in the notes, in position
+// order.
 function cardLines(side: "a" | "b", items: ApprovedItem[], context: PromptContext): string[] {
   const lines = [`<card side="${side}">`];
   for (const item of items
@@ -96,7 +104,8 @@ function cardLines(side: "a" | "b", items: ApprovedItem[], context: PromptContex
   return lines;
 }
 
-// The lines of the transcript: each turn, then its claims. A claim is citable only when its quote verified.
+// The lines of the transcript: each turn, then its claims. A claim is citable only when its quote
+// verified.
 function transcriptLines(transcript: TranscriptTurn[], context: PromptContext): string[] {
   const lines = ["<transcript>"];
   for (const turn of [...transcript].sort((x, y) => x.stepSeq - y.stepSeq)) {
@@ -111,7 +120,8 @@ function transcriptLines(transcript: TranscriptTurn[], context: PromptContext): 
   return lines;
 }
 
-// One claim line of the transcript, and the citable entry when the claim verified inside a known note.
+// One claim line of the transcript, and the citable entry when the claim verified inside a known
+// note.
 function claimLine(stepSeq: number, claim: Claim, context: PromptContext): string {
   const index = context.turnIndexById.get(claim.turnId);
   const isCitable = claim.verified && index !== undefined;
@@ -159,7 +169,8 @@ export function buildBriefPromptInput(input: BriefPromptInput): {
   };
 }
 
-// What a quote check needs: the notes by side and index, the owners by side, and the question the quote must not copy.
+// What a quote check needs: the notes by side and index, the owners by side, and the question the
+// quote must not copy.
 type CheckContext = {
   notes: Map<string, SourceTurn>;
   personBySide: Record<"a" | "b", string>;
@@ -189,7 +200,8 @@ function checkQuote(
   };
 }
 
-// Turns the model's three sections into brief points, each quote checked inside its named note. Nothing else changes.
+// Turns the model's three sections into brief points, each quote checked inside its named note.
+// Nothing else changes.
 export function verifyBriefQuotes(input: {
   output: BriefOutput;
   sourceTurns: SourceTurn[];

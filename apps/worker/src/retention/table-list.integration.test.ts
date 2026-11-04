@@ -20,7 +20,8 @@ import {
 } from "@meet-first/db/testing";
 import { countPersonRows, PERSON_TABLES } from "./table-list.js";
 
-// The superuser connection to the test database. It sees every row, so the coverage reads are not limited by row security.
+// The superuser connection to the test database. It sees every row, so the coverage reads are not
+// limited by row security.
 function superUser(): Kysely<Database> {
   const urls = readTestDatabaseUrls(process.env);
   const url = new URL(urls.adminUrl);
@@ -52,7 +53,8 @@ const TURNS_B = [
 
 // One person of the seeded scenario, with the ids the rows of their own side point at.
 type SeededSide = { personId: string; sourceId: string; turnIds: string[]; cardId: string };
-// The seeded scenario: two people, one pair, one ended meeting, and the ledger ids the tests read back.
+// The seeded scenario: two people, one pair, one ended meeting, and the ledger ids the tests read
+// back.
 type Scenario = {
   a: SeededSide;
   b: SeededSide;
@@ -66,7 +68,8 @@ let workerDb: Kysely<Database>;
 let owner: Kysely<Database>;
 let scenario: Scenario;
 
-// Creates one person with a frozen four-turn source, a six-item approved card and the rows the person owns alone.
+// Creates one person with a frozen four-turn source, a six-item approved card and the rows the
+// person owns alone.
 async function seedSide(db: Kysely<Database>, name: string, turns: string[]): Promise<SeededSide> {
   const person = await createTestPerson(db, name);
   const source = await createFrozenSource(db, person.personId, turns);
@@ -134,7 +137,8 @@ async function seedSide(db: Kysely<Database>, name: string, turns: string[]): Pr
   };
 }
 
-// Writes the rows of the meeting that both sides share: steps, events, claims, briefs, a comic with six panels and a published share page.
+// Writes the rows of the meeting that both sides share: steps, events, claims, briefs, a comic with
+// six panels and a published share page.
 async function writeMeetingRows(
   db: Kysely<Database>,
   meetingId: string,
@@ -281,7 +285,8 @@ async function writeMeetingRows(
   });
 }
 
-// Builds the whole scenario the coverage and count tests read: two people, a joined pair, an ended meeting and its rows.
+// Builds the whole scenario the coverage and count tests read: two people, a joined pair, an ended
+// meeting and its rows.
 async function seedScenario(db: Kysely<Database>, worker: Kysely<Database>): Promise<Scenario> {
   const a = await seedSide(db, "Test A", TURNS_A);
   const b = await seedSide(db, "Test B", TURNS_B);
@@ -382,7 +387,8 @@ afterAll(async () => {
   await database.drop();
 });
 
-// The row counts of the seeded person a that the deletion must clear, keyed as countPersonRows keys them. briefs is 1: the person's own transaction sees only their own brief.
+// The row counts of the seeded person a that the deletion must clear, keyed as countPersonRows keys
+// them. briefs is 1: the person's own transaction sees only their own brief.
 const EXPECTED_COUNTS = {
   sources: 1,
   turns: 4,
@@ -419,7 +425,8 @@ const EXPECTED_COUNTS = {
   person_summaries: 0,
 };
 
-// The names of the base tables (not views, which hold no rows) that have a column with the given name, read from the catalog as the superuser.
+// The names of the base tables (not views, which hold no rows) that have a column with the given
+// name, read from the catalog as the superuser.
 async function tablesWithColumn(columnName: string): Promise<string[]> {
   const rows = await sql<{
     table_name: string;

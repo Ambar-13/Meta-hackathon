@@ -32,7 +32,8 @@ function realCard(state: CardView["state"]): CardView {
   return view;
 }
 
-// A ready card with every kind of row: item 3 in another language with its gloss, item 4 with no quote found, item 5 with a weak one.
+// A ready card with every kind of row: item 3 in another language with its gloss, item 4 with no
+// quote found, item 5 with a weak one.
 function mixedCard(): CardView {
   const view = realCard("ready");
   view.items = view.items.map((item) => {

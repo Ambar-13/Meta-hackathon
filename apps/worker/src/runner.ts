@@ -41,7 +41,8 @@ export const TASKS: TaskList = {
   ...summaryTasks,
 };
 
-// Wraps every task of the list for Graphile, in JOB_NAMES order, so each payload is parsed before its job runs.
+// Wraps every task of the list for Graphile, in JOB_NAMES order, so each payload is parsed before
+// its job runs.
 export function graphileTaskList(tasks: TaskList, context: JobContext): Record<string, Task> {
   const list: Record<string, Task> = {};
   for (const name of JOB_NAMES) {
@@ -51,7 +52,8 @@ export function graphileTaskList(tasks: TaskList, context: JobContext): Record<s
   return list;
 }
 
-// The crontab lines of contracts whose task is in the list, so a cron never names a task that is not registered yet.
+// The crontab lines of contracts whose task is in the list, so a cron never names a task that is
+// not registered yet.
 export function crontabForTasks(tasks: TaskList): string {
   return CRONTAB.split("\n")
     .filter((line) => {
@@ -61,7 +63,8 @@ export function crontabForTasks(tasks: TaskList): string {
     .join("\n");
 }
 
-// The one line printed when the worker cannot start: the env names that failed, or the error code and sentence.
+// The one line printed when the worker cannot start: the env names that failed, or the error code
+// and sentence.
 export function describeBootError(error: unknown): string {
   if (error instanceof ZodError)
     return `env_invalid: ${error.issues.map((issue) => issue.path.join(".")).join(", ")}`;
@@ -69,7 +72,8 @@ export function describeBootError(error: unknown): string {
   return String(error);
 }
 
-// Boot order: parse env, refuse replay in production, check the schema version, run the self-test, then start Graphile.
+// Boot order: parse env, refuse replay in production, check the schema version, run the self-test,
+// then start Graphile.
 export async function startWorker(processEnv: NodeJS.ProcessEnv): Promise<Runner> {
   const env = workerEnv.parse(processEnv);
   assertWorkerModeAllowed(env, processEnv.NODE_ENV);
@@ -97,7 +101,8 @@ export async function startWorker(processEnv: NodeJS.ProcessEnv): Promise<Runner
   });
 }
 
-// Starts the worker when this file is the process entry (pnpm start); importing it for tests starts nothing.
+// Starts the worker when this file is the process entry (pnpm start); importing it for tests starts
+// nothing.
 if (process.argv[1] !== undefined && pathToFileURL(process.argv[1]).href === import.meta.url) {
   startWorker(process.env).catch((error: unknown) => {
     console.error(describeBootError(error));

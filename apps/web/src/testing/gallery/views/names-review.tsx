@@ -38,7 +38,8 @@ const CONTEXTS: Record<string, string> = {
   "[person:manager]": "[person:manager] wants the deck by Monday",
 };
 
-// One page of a source with `total` names, the rows given real first names; the check is done unless isLooking.
+// One page of a source with `total` names, the rows given real first names; the check is done
+// unless isLooking.
 function namesView(page: number, total: number, isLooking = false): SourceView {
   const base = sourceView(page, total);
   const rows = base.names.rows.map((row, index) => {
@@ -64,7 +65,8 @@ function namesGalleryView(
   };
 }
 
-// Every state of the names check: looking, failed, found (with the check still running, many pages, none), and already reviewed.
+// Every state of the names check: looking, failed, found (with the check still running, many pages,
+// none), and already reviewed.
 export const views: readonly GalleryView[] = [
   namesGalleryView("names-looking", "Names check, looking for names", {
     status: 200,

@@ -32,7 +32,8 @@ afterEach(() => {
 // The cap sentence the api sends with a 429 on POST /api/orchestrator.
 const CAP_SENTENCE = "You have sent today's messages to Meety. Try again tomorrow.";
 
-// Stubs the three reads of the page: the thread (a list is served in order), the home view and the friends list.
+// Stubs the three reads of the page: the thread (a list is served in order), the home view and the
+// friends list.
 function stubReads(input: {
   thread: OrchestratorMessage[][];
   hasCard?: boolean;

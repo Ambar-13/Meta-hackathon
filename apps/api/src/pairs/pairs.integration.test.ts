@@ -27,7 +27,8 @@ function tokenOfInvite(url: string): string {
   return new URL(url).hash.slice(1);
 }
 
-// Makes a second meeting in a pair, on the curated question 2, through meeting_create (granted to app_api).
+// Makes a second meeting in a pair, on the curated question 2, through meeting_create (granted to
+// app_api).
 async function secondMeeting(m: {
   pairId: string;
   a: { personId: string; cardId: string };

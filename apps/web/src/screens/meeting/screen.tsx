@@ -82,7 +82,8 @@ const Notices = (props: {
   );
 };
 
-// The card at the foot of the screen: watching live while it runs, then the reason it ended and the way to the brief.
+// The card at the foot of the screen: watching live while it runs, then the reason it ended and the
+// way to the brief.
 const MeetingDock = (props: { meetingId: string; fold: MeetingFoldState }): ReactElement | null => {
   const { ended } = props.fold;
   if (ended === null) {
@@ -125,13 +126,15 @@ function sideNames(fold: MeetingFoldState, view: MeetingView | null): { a: strin
   return { a: nameOf("a"), b: nameOf("b") };
 }
 
-// The class of one phase chip: on for the current part, done for the parts before it, none for the parts still to come.
+// The class of one phase chip: on for the current part, done for the parts before it, none for the
+// parts still to come.
 function phaseClass(index: number, current: number): string {
   if (index === current) return "on";
   return index < current ? "done" : "";
 }
 
-// The four parts of the talk as chips, the current one filled; the words for the screen reader come from PHASE_LABELS.
+// The four parts of the talk as chips, the current one filled; the words for the screen reader come
+// from PHASE_LABELS.
 const PhaseChips = (props: { phase: Phase | null }): ReactElement | null => {
   if (props.phase === null) return null;
   const current = PHASES.indexOf(props.phase);
@@ -150,7 +153,8 @@ const PhaseChips = (props: { phase: Phase | null }): ReactElement | null => {
   );
 };
 
-// The sky at the top: the way home, whether it is live, the two name tags, the question, and which part of the talk this is.
+// The sky at the top: the way home, whether it is live, the two name tags, the question, and which
+// part of the talk this is.
 const MeetingStage = (props: {
   fold: MeetingFoldState;
   view: MeetingView | null;
@@ -185,7 +189,8 @@ const MeetingStage = (props: {
   );
 };
 
-// The sticky note a laptop shows beside the talk: how to read the colours, the quotes and the flags.
+// The sticky note a laptop shows beside the talk: how to read the colours, the quotes and the
+// flags.
 const ReadingNote = (props: { names: { a: string; b: string } }): ReactElement => {
   return (
     <aside className="sticky-note meeting-legend" aria-label="How to read it">

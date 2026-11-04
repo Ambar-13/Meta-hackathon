@@ -18,7 +18,8 @@ import {
 const REPO_ROOT = fileURLToPath(new URL("../../../../../", import.meta.url));
 // The folder of the recorded replies, relative to the repository root.
 const FIXTURE_DIR = join(REPO_ROOT, "packages/evals/fixtures/model-replies");
-// The fixed captions and image prompts of the golden comic: plain sentences, no name, no email, no run of digits.
+// The fixed captions and image prompts of the golden comic: plain sentences, no name, no email, no
+// run of digits.
 const GOLDEN_PANELS = [
   {
     caption: "A and B sit down to talk about the work.",
@@ -55,10 +56,12 @@ const PANEL_COLOURS = ["#d1495b", "#2e86ab", "#f2a541", "#3a7d44", "#7b5ea7", "#
 // The usage of a scripted call: all zeros, as every hand-written fixture has.
 const NO_USAGE = { promptTokens: 0, cachedTokens: 0, completionTokens: 0, reasoningTokens: 0 };
 
-// What the golden command needs: the worker's database URL, the meeting, and the folder to write into.
+// What the golden command needs: the worker's database URL, the meeting, and the folder to write
+// into.
 export type GoldenComicOptions = { workerUrl: string; meetingId: string; fixtureRoot?: string };
 
-// A flat colour square with one coloured circle, as a 1024 by 1024 webp under 150 KB, for a panel position.
+// A flat colour square with one coloured circle, as a 1024 by 1024 webp under 150 KB, for a panel
+// position.
 async function panelWebp(position: number): Promise<Uint8Array> {
   const colour = PANEL_COLOURS[position - 1] ?? PANEL_COLOURS[0] ?? "#d1495b";
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024"><circle cx="512" cy="512" r="300" fill="${colour}"/></svg>`;
@@ -110,7 +113,8 @@ async function scriptedReply(
   return response;
 }
 
-// Clears the comic back to rendering with its panels gone, runs render_comic in-process with the scripted client, and returns the fixture paths written.
+// Clears the comic back to rendering with its panels gone, runs render_comic in-process with the
+// scripted client, and returns the fixture paths written.
 export async function writeComicFixtures(options: GoldenComicOptions): Promise<string[]> {
   const folder = options.fixtureRoot ?? FIXTURE_DIR;
   const db: Kysely<Database> = makeDatabase(options.workerUrl, 4);
@@ -158,7 +162,8 @@ export async function writeComicFixtures(options: GoldenComicOptions): Promise<s
   }
 }
 
-// The command entry: "meeting <id>" writes the comic fixtures, with an optional --fixture-root folder. Each path is printed on its own line.
+// The command entry: "meeting <id>" writes the comic fixtures, with an optional --fixture-root
+// folder. Each path is printed on its own line.
 async function main(argv: readonly string[]): Promise<string[]> {
   const meetingId = argv[1];
   if (argv[0] !== "meeting" || meetingId === undefined)

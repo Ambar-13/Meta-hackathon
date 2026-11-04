@@ -12,14 +12,16 @@ import { makeNotFoundError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
 import { enqueueAfterStart, meetingIdOf, tryStart } from "./start.js";
 
-// True when a member's last lobby poll or stream heartbeat is at most 30 s old: "watching now", shown only and never a condition to start.
+// True when a member's last lobby poll or stream heartbeat is at most 30 s old: "watching now",
+// shown only and never a condition to start.
 export function isMemberConnected(lastSeenAt: Date | null, now: Date): boolean {
   return (
     lastSeenAt !== null && now.getTime() - lastSeenAt.getTime() <= PRESENCE_WINDOW_SECONDS * 1000
   );
 }
 
-// Registers POST /api/meetings/:id/ready: 200 {ready: true}; 404 not_found; 409 meeting_already_started.
+// Registers POST /api/meetings/:id/ready: 200 {ready: true}; 404 not_found; 409
+// meeting_already_started.
 export function registerReady(app: FastifyInstance, deps: RouteDeps): void {
   app.post(routes.meetings.ready.path, async (request, reply) => {
     const personId = requirePerson(request);

@@ -19,9 +19,11 @@ import {
 
 // A seq as text: 0, or a whole number with no leading zero, at most ten digits.
 export const SEQ_TEXT_PATTERN = /^(0|[1-9][0-9]{0,9})$/;
-// The :id parameter of the stream. A value that is not a uuid is not_found; the schema is local because contracts has no params schemas.
+// The :id parameter of the stream. A value that is not a uuid is not_found; the schema is local
+// because contracts has no params schemas.
 export const MeetingParams = z.object({ id: z.string().uuid() });
-// The query: ?after=n switches the route to the JSON poll. A repeated after is an array, which fails this schema.
+// The query: ?after=n switches the route to the JSON poll. A repeated after is an array, which
+// fails this schema.
 export const EventsQuery = z.object({ after: z.string().optional() });
 // The parts one process shares across its streams.
 export type StreamParts = {
@@ -36,7 +38,8 @@ export function readSeqText(text: string): number | null {
   return SEQ_TEXT_PATTERN.test(text) && Number(text) <= MAX_INT_COLUMN ? Number(text) : null;
 }
 
-// Reads Last-Event-ID: absent is 0, so the stream replays from the start; a seq is that seq; anything else is last_event_id_invalid.
+// Reads Last-Event-ID: absent is 0, so the stream replays from the start; a seq is that seq;
+// anything else is last_event_id_invalid.
 export function readLastEventId(header: string | string[] | undefined): number {
   if (header === undefined) {
     return 0;
@@ -73,9 +76,9 @@ type StreamInput = {
   sessionHash: Buffer;
 };
 
-// True while the session that opened the stream still belongs to this person, and the person is still in a meeting
-// that is not deleted. Two reads: the session hash through auth_person_for_session, and the
-// membership and the meeting's state in withPerson.
+// True while the session that opened the stream still belongs to this person, and the person is
+// still in a meeting that is not deleted. Two reads: the session hash through
+// auth_person_for_session, and the membership and the meeting's state in withPerson.
 async function stillAllowed(input: {
   deps: RouteDeps;
   parts: StreamParts;
@@ -91,8 +94,8 @@ async function stillAllowed(input: {
   return membership !== null && membership.state !== "deleted";
 }
 
-// Writes the padding and wires the subscriber to the response, the fan-out, the connection limit and the session
-// re-check.
+// Writes the padding and wires the subscriber to the response, the fan-out, the connection limit
+// and the session re-check.
 function openStream(input: StreamInput): void {
   const { request, reply, parts, deps, meetingId, personId, lastSeq, sessionHash } = input;
   reply.hijack();
@@ -104,7 +107,8 @@ function openStream(input: StreamInput): void {
     }
   };
   const key = connectionKey(personId, meetingId);
-  // end runs only after the subscriber below exists, because it is called by a check or by the connection limit.
+  // end runs only after the subscriber below exists, because it is called by a check or by the
+  // connection limit.
   const end = (): void => {
     if (!reply.raw.writableEnded) {
       reply.raw.end();

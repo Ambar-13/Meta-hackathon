@@ -5,7 +5,8 @@ import { Side } from "../primitives.js";
 
 // Keys a share page must never send, because they would reveal who the people are.
 export const FORBIDDEN_SHARE_KEYS = ["person_id", "email", "pair_id"] as const;
-// One supported brief point as the public page shows it: the text and its quotes, with no turn ids (share_read never returns ids).
+// One supported brief point as the public page shows it: the text and its quotes, with no turn ids
+// (share_read never returns ids).
 const SharedPoint = z.object({
   text: z.string(),
   quotes: z
@@ -36,7 +37,8 @@ export const ShareSnapshot = z
   })
   .strict();
 export type ShareSnapshot = z.infer<typeof ShareSnapshot>;
-// What the consent route returns: each side's consent, whether the page is live, and its slug once it is.
+// What the consent route returns: each side's consent, whether the page is live, and its slug once
+// it is.
 export const ConsentResponse = z.object({
   consentA: z.boolean(),
   consentB: z.boolean(),

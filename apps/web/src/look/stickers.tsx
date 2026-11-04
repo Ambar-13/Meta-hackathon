@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 
-// Every sticker the app draws. Each one is a small piece of drawn art with a navy outline, in the palette of docs/DESIGN.md.
+// Every sticker the app draws. Each one is a small piece of drawn art with a navy outline, in the
+// palette of docs/DESIGN.md.
 export type StickerName =
   | "chat"
   | "tags"
@@ -23,7 +24,8 @@ export type StickerName =
   | "ask"
   | "coins";
 
-// One sticker, drawn from the sheet below. It is decoration, so screen readers skip it unless a label is given.
+// One sticker, drawn from the sheet below. It is decoration, so screen readers skip it unless a
+// label is given.
 export const Sticker = (props: {
   name: StickerName;
   label?: string;
@@ -245,7 +247,8 @@ export const StickerSheet = (): ReactElement => {
   );
 };
 
-// One drifting cloud for the sky grounds; each place that uses it sets its size and position with a class.
+// One drifting cloud for the sky grounds; each place that uses it sets its size and position with a
+// class.
 export const Cloud = (props: { className: string }): ReactElement => {
   return (
     <svg className={`cloud ${props.className}`} aria-hidden="true" focusable="false">

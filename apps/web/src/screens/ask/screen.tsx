@@ -1,7 +1,8 @@
-// What exists: an ask runs in the worker, and its answers arrive in persona_answers. The problem: the asker needs
-// to see the answers as soon as the ask ends, with their receipts, and to meet a helper from the results. The step: this page reads
-// the ask until it ends, then shows a help search's results or a friend ask's one answer. What it does not do: show a position, a
-// count or a rank, or any number about a person.
+// What exists: an ask runs in the worker, and its answers arrive in persona_answers. The problem:
+// the asker needs to see the answers as soon as the ask ends, with their receipts, and to meet a
+// helper from the results. The step: this page reads the ask until it ends, then shows a help
+// search's results or a friend ask's one answer. What it does not do: show a position, a count or a
+// rank, or any number about a person.
 import "./ask.css";
 import type { ReactElement } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
@@ -57,7 +58,8 @@ const AskedBubble = (props: { view: AskView }): ReactElement => {
   );
 };
 
-// The ask while it runs: a blue bubble with typing dots from the friend, or from the personas of a help search, and the step it is on.
+// The ask while it runs: a blue bubble with typing dots from the friend, or from the personas of a
+// help search, and the step it is on.
 const WaitingBubble = (props: { view: AskView; line: string }): ReactElement => {
   const { view } = props;
   return (
@@ -81,7 +83,8 @@ const WaitingBubble = (props: { view: AskView; line: string }): ReactElement => 
   );
 };
 
-// A refused or failed ask: the sentence in the notice, then the way back to where the question was asked.
+// A refused or failed ask: the sentence in the notice, then the way back to where the question was
+// asked.
 const EndedNotice = (props: { view: AskView; line: string }): ReactElement => {
   const again = AGAIN_LINKS[props.view.mode];
   return (
@@ -92,7 +95,8 @@ const EndedNotice = (props: { view: AskView; line: string }): ReactElement => {
   );
 };
 
-// The finished help search: the placed answers under the results heading, then the answers that showed no clear sign.
+// The finished help search: the placed answers under the results heading, then the answers that
+// showed no clear sign.
 const HelpResults = (props: {
   view: AskView;
   cardId: string | null;
@@ -133,7 +137,8 @@ const HelpResults = (props: {
   );
 };
 
-// The finished friend ask, or self ask: how the person would react, as their blue bubble with its quotes under it.
+// The finished friend ask, or self ask: how the person would react, as their blue bubble with its
+// quotes under it.
 const ReactResult = (props: { view: AskView }): ReactElement => {
   const answer = props.view.answers[0];
   const name = props.view.aboutName ?? FRIEND_FALLBACK_NAME;
@@ -161,7 +166,8 @@ const ReactResult = (props: { view: AskView }): ReactElement => {
   );
 };
 
-// The part under the question: the waiting bubble, the refusal, the failure, or the finished answers.
+// The part under the question: the waiting bubble, the refusal, the failure, or the finished
+// answers.
 const AskBody = (props: {
   view: AskView;
   cardId: string | null;
@@ -177,8 +183,9 @@ const AskBody = (props: {
   return <HelpResults view={view} cardId={props.cardId} model={props.model} />;
 };
 
-// The /asks/:askId page: reads the ask every ASK_POLL_MS until it ends, then shows its answers with their receipts.
-// The card for a meeting is the card query of this address, else the card this tab approved, as on the lobby page.
+// The /asks/:askId page: reads the ask every ASK_POLL_MS until it ends, then shows its answers with
+// their receipts. The card for a meeting is the card query of this address, else the card this tab
+// approved, as on the lobby page.
 export const AskScreen = (): ReactElement => {
   const navigate = useNavigate();
   const location = useLocation();

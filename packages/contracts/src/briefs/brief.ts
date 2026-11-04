@@ -10,7 +10,8 @@ export const Quote = z.object({
   verified: z.boolean(),
 });
 export type Quote = z.infer<typeof Quote>;
-// One line of a brief, with up to three quotes. supported is null when the support judge could not decide.
+// One line of a brief, with up to three quotes. supported is null when the support judge could not
+// decide.
 export const BriefPoint = z.object({
   text: z.string(),
   quotes: z.array(Quote).min(1).max(3),
@@ -18,7 +19,8 @@ export const BriefPoint = z.object({
   supportReason: z.string().optional(),
 });
 export type BriefPoint = z.infer<typeof BriefPoint>;
-// What GET /api/meetings/:id/brief returns: three agreements, three clashes and three things to decide first.
+// What GET /api/meetings/:id/brief returns: three agreements, three clashes and three things to
+// decide first.
 export const Brief = z.object({
   agree: z.array(BriefPoint).length(3),
   clash: z.array(BriefPoint).length(3),
@@ -63,8 +65,9 @@ export type BriefSupportJudgeOutput = z.infer<typeof BriefSupportJudgeOutput>;
 export const WEAK_RECEIPT_COPY = "weak quote";
 // The label shown when a line has no quote at all.
 export const NO_RECEIPT_COPY = "no quote";
-// The three section headings of a brief for each kind of question. The data stays agree, clash and decideFirst; only the words
-// change, so a get-along brief reads "where you'd click" and a deal reads "where you agree". The brief screen and the share page read it.
+// The three section headings of a brief for each kind of question. The data stays agree, clash and
+// decideFirst; only the words change, so a get-along brief reads "where you'd click" and a deal
+// reads "where you agree". The brief screen and the share page read it.
 export const BRIEF_SECTION_LABELS: Record<
   QuestionKind,
   { agree: string; clash: string; decideFirst: string }

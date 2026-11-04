@@ -69,14 +69,16 @@ const PREVIEW_MEMBERS = [
 // The brief line of the fixture that passed the support check, with its quote.
 const BACKED_LINE = "Both like clear deadlines";
 const BACKED_QUOTE = "Deadlines matter to me";
-// Lines the support check did not back, could not decide, or whose quote was not found; none of them may be previewed.
+// Lines the support check did not back, could not decide, or whose quote was not found; none of
+// them may be previewed.
 const HELD_BACK_LINES = [
   "Plans differ on lead time",
   "Pick the deadline first",
   "Both like a quiet room",
 ];
 
-// One brief line on side a's quote; supported and verified say how the support check and the quote check went.
+// One brief line on side a's quote; supported and verified say how the support check and the quote
+// check went.
 function briefPoint(
   text: string,
   quote: string,
@@ -89,7 +91,8 @@ function briefPoint(
   };
 }
 
-// A brief with one backed line and three held back; isAllUnsupported turns the backed line into one the check refused too.
+// A brief with one backed line and three held back; isAllUnsupported turns the backed line into one
+// the check refused too.
 function briefFixture(options: { isAllUnsupported: boolean }): Brief {
   const filler = (index: number): BriefPoint =>
     briefPoint(`Filler line ${String(index)}`, "Filler quote", {
@@ -130,7 +133,8 @@ function briefFixture(options: { isAllUnsupported: boolean }): Brief {
   });
 }
 
-// Renders the consent screen on an ended meeting between Mira and Jonah, with the brief reply given.
+// Renders the consent screen on an ended meeting between Mira and Jonah, with the brief reply
+// given.
 function renderConsentWithBrief(brief: Parameters<typeof stubRoute>[1]): void {
   stubRoute(
     routes.meetings.readMeeting,

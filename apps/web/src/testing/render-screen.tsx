@@ -59,7 +59,8 @@ function isLabelled(control: Element): boolean {
   return hasLabels || ariaLabel !== "" || control.getAttribute("aria-labelledby") !== null;
 }
 
-// Every input, textarea, select, button and link in a container that has no accessible name; [] means every control is labelled.
+// Every input, textarea, select, button and link in a container that has no accessible name; []
+// means every control is labelled.
 export function unlabelledControls(container: ParentNode): string[] {
   const controls = Array.from(
     container.querySelectorAll("input, textarea, select, button, a[href]"),

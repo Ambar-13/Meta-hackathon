@@ -14,7 +14,8 @@ import {
 import { makeTestJobContext } from "../testing/index.js";
 import { purgeExpiredTask } from "./purge-expired-job.js";
 
-// The superuser connection to the test database. It sees every row, so the checks are not limited by row security.
+// The superuser connection to the test database. It sees every row, so the checks are not limited
+// by row security.
 function superUser(): Kysely<Database> {
   const urls = readTestDatabaseUrls(process.env);
   const url = new URL(urls.adminUrl);
@@ -42,7 +43,8 @@ type PurgeSeed = {
   futureComicId: string;
 };
 
-// Writes two transfer links for the person: one expired eleven minutes ago, one live for five more minutes.
+// Writes two transfer links for the person: one expired eleven minutes ago, one live for five more
+// minutes.
 async function seedLinks(
   db: Kysely<Database>,
   personId: string,
@@ -68,7 +70,8 @@ async function seedLinks(
   return { expiredLinkId: rows[0]?.id ?? "", liveLinkId: rows[1]?.id ?? "" };
 }
 
-// Writes two pairs the person created, both 25 hours old and past their 24-hour window: one nobody joined, one joined.
+// Writes two pairs the person created, both 25 hours old and past their 24-hour window: one nobody
+// joined, one joined.
 async function seedPairs(
   db: Kysely<Database>,
   personId: string,
@@ -100,7 +103,8 @@ async function seedPairs(
   return { unjoinedPairId: rows[0]?.id ?? "", joinedPairId: rows[1]?.id ?? "" };
 }
 
-// Writes one comic with six panels on a meeting of the joined pair, with its purge date and an optional published share page.
+// Writes one comic with six panels on a meeting of the joined pair, with its purge date and an
+// optional published share page.
 async function seedComic(
   db: Kysely<Database>,
   args: { personId: string; pairId: string; purgeAfter: Date; published: boolean },
@@ -161,7 +165,8 @@ async function seedComic(
   return comic.id;
 }
 
-// Writes the rows the purge test needs: transfer links, old pairs, and three comics (one unshared and past its date, one shared and past its date, one not yet due).
+// Writes the rows the purge test needs: transfer links, old pairs, and three comics (one unshared
+// and past its date, one shared and past its date, one not yet due).
 async function seedPurgeRows(db: Kysely<Database>): Promise<PurgeSeed> {
   const person = await createTestPerson(db, "Test Purge");
   const partner = await createTestPerson(db, "Test Partner");

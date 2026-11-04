@@ -1,4 +1,5 @@
-// Unit tests for the golden path: the command-line flags and step selection, and the database read that compiles a placeholder count.
+// Unit tests for the golden path: the command-line flags and step selection, and the database read
+// that compiles a placeholder count.
 import { describe, expect, it } from "vitest";
 import { makeDatabase } from "@meet-first/db";
 import { parseFlags, selectSteps } from "./flags.js";
@@ -63,7 +64,8 @@ describe("database reads", () => {
   it("R2.5-T1: countPlaceholders SQL counts two placeholders in one turn", () => {
     const db = makeDatabase("postgres://app_worker:unused@localhost:5432/meet_first_unit", 1);
     const sql = placeholderCountQuery(db, "0f8c7a52-4d3e-4b8a-9c1e-2a3b4c5d6e7f").compile().sql;
-    // The marker is passed as a bound value, so the compiled text differs from the spec's literal form only in those values.
+    // The marker is passed as a bound value, so the compiled text differs from the spec's literal
+    // form only in those values.
     expect(sql).toBe(
       'select coalesce(sum((length("text") - length(replace("text", $1, $2))) / length($3)), 0) as "count" from "turns" where "source_id" = $4',
     );

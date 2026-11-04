@@ -54,7 +54,8 @@ export function makeJobContext(deps: {
   };
 }
 
-// Wraps a Graphile task so the payload is parsed with its zod schema before the job sees it; a bad payload fails permanently, not after 25 retries.
+// Wraps a Graphile task so the payload is parsed with its zod schema before the job sees it; a bad
+// payload fails permanently, not after 25 retries.
 export function definePayloadTask<N extends JobName>(
   name: N,
   task: JobTask<N>,

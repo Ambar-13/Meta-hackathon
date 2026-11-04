@@ -26,8 +26,8 @@ function reads(
   ];
 }
 
-// One view of the profile on its route, with no posts unless given; the card in the address lets a friend's profile offer Meet
-// their agent, and search adds to the address.
+// One view of the profile on its route, with no posts unless given; the card in the address lets a
+// friend's profile offer Meet their agent, and search adds to the address.
 function personView(
   head: { name: string; title: string },
   profile: ProfileView | { status: number; body: unknown },
@@ -42,7 +42,8 @@ function personView(
   };
 }
 
-// Maya, the first sample person, as her profile shows her, with her face and her two posts, the first with a photo.
+// Maya, the first sample person, as her profile shows her, with her face and her two posts, the
+// first with a photo.
 const MAYA = SAMPLE_LISTINGS[0];
 const MAYA_PROFILE = profileView({
   listingId: LISTING,

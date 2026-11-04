@@ -21,14 +21,16 @@ export const SUMMARY_PROMPT = promptMarkdown.replace(/^<version>[\s\S]*?<\/versi
 // How often the page reads the summary again while it is being checked.
 const CHECKING_POLL_MS = 3_000;
 
-// Where the copy button stands: not pressed, copied, or refused by the browser, which then shows the prompt to copy by hand.
+// Where the copy button stands: not pressed, copied, or refused by the browser, which then shows
+// the prompt to copy by hand.
 export type CopyState = "idle" | "copied" | "refused";
 // Where a save or a delete stands.
 export type SendState =
   | { kind: "idle" }
   | { kind: "sending" }
   | { kind: "failed"; error: ApiError };
-// Everything the summary section shows and does. The page that holds it passes priority to the file check.
+// Everything the summary section shows and does. The page that holds it passes priority to the file
+// check.
 export type SummaryHook = {
   view: PolledView<SummaryView | null>;
   draft: string;
@@ -58,7 +60,8 @@ async function readSavedSummary(): Promise<SummaryView | null> {
   }
 }
 
-// The paste box and the points read from it, less the ones the person removed; a new paste brings every point back.
+// The paste box and the points read from it, less the ones the person removed; a new paste brings
+// every point back.
 function useDraft(): Pick<SummaryHook, "draft" | "points" | "setDraft" | "removePoint"> {
   const [draft, setDraftText] = useState("");
   const [points, setPoints] = useState<SummaryPoint[]>([]);
@@ -72,7 +75,8 @@ function useDraft(): Pick<SummaryHook, "draft" | "points" | "setDraft" | "remove
   return { draft, points, setDraft, removePoint };
 }
 
-// Puts the prompt on the clipboard; a browser that refuses, or has no clipboard, shows the prompt to copy by hand.
+// Puts the prompt on the clipboard; a browser that refuses, or has no clipboard, shows the prompt
+// to copy by hand.
 function useCopyPrompt(): Pick<SummaryHook, "copy" | "copyPrompt"> {
   const [copy, setCopy] = useState<CopyState>("idle");
   const copyPrompt = async (): Promise<void> => {
@@ -86,8 +90,9 @@ function useCopyPrompt(): Pick<SummaryHook, "copy" | "copyPrompt"> {
   return { copy, copyPrompt };
 }
 
-// The section's state: the saved summary, read again every 3 seconds while it is checked; the paste box, the switch, and save and
-// delete, each of which reads the summary again. Until the check stores points, the priority comes from the points saved last.
+// The section's state: the saved summary, read again every 3 seconds while it is checked; the paste
+// box, the switch, and save and delete, each of which reads the summary again. Until the check
+// stores points, the priority comes from the points saved last.
 export function useSummary(): SummaryHook {
   const view = usePolledView(readSavedSummary, {
     key: "summary",

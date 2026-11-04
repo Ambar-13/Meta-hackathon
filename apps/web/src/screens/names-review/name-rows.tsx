@@ -50,7 +50,8 @@ function groupRows(rows: NameRow[]): Array<{ roleToken: string; rows: NameRow[] 
   return groups;
 }
 
-// The names of one page, grouped by role token, each with its context and, in choose mode, a keep box.
+// The names of one page, grouped by role token, each with its context and, in choose mode, a keep
+// box.
 export const RoleGroups = (props: {
   rows: NameRow[];
   mode: "replace_all" | "choose";

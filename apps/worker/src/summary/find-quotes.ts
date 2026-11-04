@@ -8,11 +8,13 @@ import { PROTECTED_TOKEN } from "../cards/index.js";
 type TurnRow = { id: string; turn_index: number; text: string; norm_text: string };
 // How many messages holding a quote's longest piece are tried for the rest of its pieces.
 const PIECE_CANDIDATES_MAX = 20;
-// The most characters a message's own role token or placeholder may take between two pieces of a quote.
+// The most characters a message's own role token or placeholder may take between two pieces of a
+// quote.
 const TOKEN_GAP_MAX = 100;
 
-// The messages of the person's names-checked uploads, newest upload first, whose folded text holds the folded text; at most limit.
-// Only frozen uploads count, so a found quote never carries a name the names check has not replaced.
+// The messages of the person's names-checked uploads, newest upload first, whose folded text holds
+// the folded text; at most limit. Only frozen uploads count, so a found quote never carries a name
+// the names check has not replaced.
 async function turnsHolding(
   trx: DatabaseTransaction,
   personId: string,
@@ -25,8 +27,9 @@ async function turnsHolding(
   return result.rows;
 }
 
-// The pieces of a quote around its role tokens and placeholders, each folded. A name in the summary and the same name in a message
-// are replaced by tokens that need not match, so only the pieces between them are compared.
+// The pieces of a quote around its role tokens and placeholders, each folded. A name in the summary
+// and the same name in a message are replaced by tokens that need not match, so only the pieces
+// between them are compared.
 function quotePieces(quote: string): string[] {
   return quote
     .split(PROTECTED_TOKEN)
@@ -34,7 +37,8 @@ function quotePieces(quote: string): string[] {
     .filter((piece) => piece !== "");
 }
 
-// Where the pieces sit in one folded message, in order, each within TOKEN_GAP_MAX characters of the one before; null when they do not.
+// Where the pieces sit in one folded message, in order, each within TOKEN_GAP_MAX characters of the
+// one before; null when they do not.
 function piecesSpan(
   normText: string,
   pieces: readonly string[],
@@ -58,7 +62,8 @@ function piecesSpan(
   return null;
 }
 
-// The found record of one message for this folded text, as the message has it; null when the text is too short or not in it.
+// The found record of one message for this folded text, as the message has it; null when the text
+// is too short or not in it.
 function foundIn(turn: TurnRow, folded: string): SummaryFound | null {
   const check = verifyQuote({
     quote: folded,
@@ -75,8 +80,9 @@ function foundIn(turn: TurnRow, folded: string): SummaryFound | null {
     : null;
 }
 
-// Where one quote stands in the person's own messages: the message's own words for it, with the message's index and id; null for a
-// quote too short to prove anything or found in no message. A quote with role tokens or placeholders is found piece by piece.
+// Where one quote stands in the person's own messages: the message's own words for it, with the
+// message's index and id; null for a quote too short to prove anything or found in no message. A
+// quote with role tokens or placeholders is found piece by piece.
 async function findQuote(
   trx: DatabaseTransaction,
   personId: string,

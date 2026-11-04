@@ -17,7 +17,8 @@ import { storeUpload } from "./upload.js";
 
 // The origin every request of this file carries, the same one the test app allows.
 const ORIGIN = "http://localhost:3000";
-// The synthetic ChatGPT 2024 mapping export, read once: posted raw as a body it must be refused (D1-T9).
+// The synthetic ChatGPT 2024 mapping export, read once: posted raw as a body it must be refused
+// (D1-T9).
 const chatgptRaw = await readFile(
   new URL("../../../../packages/parsers/fixtures/chatgpt-2024-mapping.json", import.meta.url),
   "utf8",

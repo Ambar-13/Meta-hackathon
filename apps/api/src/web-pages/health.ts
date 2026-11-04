@@ -9,7 +9,9 @@ import {
 import type { Database } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 
-// The Postgres plan's disk in bytes: 16 GB, the size the design sized every cap for (design field 10, the plan is unverified) (decimal GB is the smaller reading, so degraded comes early, not late).
+// The Postgres plan's disk in bytes: 16 GB, the size the design sized every cap for (design field
+// 10, the plan is unverified) (decimal GB is the smaller reading, so degraded comes early, not
+// late).
 export const DISK_PLAN_BYTES = 16_000_000_000;
 // What health read from the database; a null field means that read gave nothing.
 export type HealthReads = {
@@ -61,7 +63,8 @@ export function toHealth(reads: HealthReads | null, now: Date, planBytes: number
   });
 }
 
-// Reads the schema version, the worker heartbeat and the database size; null when the first two reads fail.
+// Reads the schema version, the worker heartbeat and the database size; null when the first two
+// reads fail.
 export async function readHealthNumbers(db: Kysely<Database>): Promise<HealthReads | null> {
   let schemaVersion: number | null;
   let workerSeenAt: Date | null;

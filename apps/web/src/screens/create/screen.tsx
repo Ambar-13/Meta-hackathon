@@ -36,8 +36,9 @@ const CREATE_COPY = {
 // From how many characters on the box shows how many are left.
 const COUNT_FROM_CHARS = 500;
 
-// Where Create goes once something is shared: a story to Home, where Your story leads the row; a post to Home, where the feed shows it,
-// unless you are known not to be in Explore, when it goes to your own Posts tab, the one place it shows until you join.
+// Where Create goes once something is shared: a story to Home, where Your story leads the row; a
+// post to Home, where the feed shows it, unless you are known not to be in Explore, when it goes to
+// your own Posts tab, the one place it shows until you join.
 function afterShare(kind: PostKind, listed: CreateModel["listed"]): string {
   if (kind === "post" && listed === "not-listed")
     return `${APP_PATHS.me}?${PROFILE_TAB_QUERY}=posts`;
@@ -66,7 +67,8 @@ const KindSwitch = (props: { model: CreateModel }): ReactElement => {
   );
 };
 
-// A file picker that looks like the words it holds: the input fills the label, so a tap anywhere on it opens the photos or the camera.
+// A file picker that looks like the words it holds: the input fills the label, so a tap anywhere on
+// it opens the photos or the camera.
 const PhotoPicker = (props: {
   model: CreateModel;
   className: string;
@@ -91,8 +93,9 @@ const PhotoPicker = (props: {
   );
 };
 
-// The photo: before one is chosen, the large place to choose it, which also says words alone are fine; once chosen, the photo as it
-// will show, square for a post and whole on its blurred copy for a story, with Change photo and Remove photo under it.
+// The photo: before one is chosen, the large place to choose it, which also says words alone are
+// fine; once chosen, the photo as it will show, square for a post and whole on its blurred copy for
+// a story, with Change photo and Remove photo under it.
 const PhotoPart = (props: { model: CreateModel }): ReactElement => {
   const { model } = props;
   if (model.photo === null) {
@@ -145,9 +148,10 @@ const ShareLine = (props: { model: CreateModel }): ReactElement | null => {
   return null;
 };
 
-// Create, as Instagram's: Post or Story, the photo, the words, then Share, the page's one blue button. Above Share, a line says your
-// Meety learns from what you share, and, while you are not in Explore, that only you see your posts. On a laptop the photo sits left of
-// the words. Since the phone's + opens this page, Invite a friend is the last link.
+// Create, as Instagram's: Post or Story, the photo, the words, then Share, the page's one blue
+// button. Above Share, a line says your Meety learns from what you share, and, while you are not in
+// Explore, that only you see your posts. On a laptop the photo sits left of the words. Since the
+// phone's + opens this page, Invite a friend is the last link.
 export const CreateScreen = (): ReactElement => {
   const location = useLocation();
   const navigate = useNavigate();

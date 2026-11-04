@@ -4,7 +4,8 @@ import { ContractError, apiEnv, migrateEnv, workerEnv } from "@meet-first/contra
 import { describeError } from "./database-errors.js";
 import { migrateDatabase, type MigrationReport } from "./migrate.js";
 
-// The four connection strings a rebuild needs: a superuser on this machine, and the three app roles on the target database.
+// The four connection strings a rebuild needs: a superuser on this machine, and the three app roles
+// on the target database.
 export type RebuildUrls = {
   adminUrl: string;
   migrateUrl: string;
@@ -15,7 +16,8 @@ export type RebuildUrls = {
 // The hosts a rebuild may touch; any other host is refused before a statement runs.
 export const LOCAL_HOSTS: readonly string[] = ["localhost", "127.0.0.1"];
 
-// The database names a rebuild accepts: lower-case letters, digits and underscores, starting with a letter.
+// The database names a rebuild accepts: lower-case letters, digits and underscores, starting with a
+// letter.
 const NAME_PATTERN = /^[a-z][a-z0-9_]{0,62}$/;
 
 // Throws the refusal for a rebuild that would touch a host or a name it must not.
@@ -92,7 +94,8 @@ async function connectTo(url: string): Promise<pg.Client> {
   return client;
 }
 
-// Creates a role when it is missing; the attributes are the ones migration 0001 expects, and app_migrate may create roles.
+// Creates a role when it is missing; the attributes are the ones migration 0001 expects, and
+// app_migrate may create roles.
 async function createRoleIfMissing(
   admin: pg.Client,
   role: string,
@@ -126,7 +129,8 @@ async function createMissingRoles(admin: pg.Client): Promise<void> {
   );
 }
 
-// Sets one role's password from its URL when the URL carries one; format quotes the value, so no text is pasted into SQL by hand.
+// Sets one role's password from its URL when the URL carries one; format quotes the value, so no
+// text is pasted into SQL by hand.
 async function setPasswordFromUrl(admin: pg.Client, url: string, role: string): Promise<void> {
   const password = decodeURIComponent(new URL(url).password);
   if (password === "") return;
@@ -159,7 +163,8 @@ function urlForDatabase(url: string, name: string): string {
   return target.toString();
 }
 
-// Creates the four roles when missing, sets their passwords from the URLs, recreates the target database empty, and lets app_migrate act as app_definer until the returned function runs.
+// Creates the four roles when missing, sets their passwords from the URLs, recreates the target
+// database empty, and lets app_migrate act as app_definer until the returned function runs.
 export async function prepareEmptyDatabase(urls: RebuildUrls): Promise<() => Promise<void>> {
   const name = checkRebuildUrls(urls);
   const admin = await connectTo(urls.adminUrl);
@@ -175,7 +180,8 @@ export async function prepareEmptyDatabase(urls: RebuildUrls): Promise<() => Pro
     } finally {
       await target.end();
     }
-    // INHERIT FALSE: during the run app_migrate may become app_definer to hand it functions, but never reads through its policies.
+    // INHERIT FALSE: during the run app_migrate may become app_definer to hand it functions, but
+    // never reads through its policies.
     await admin.query(
       "GRANT app_definer TO app_migrate WITH ADMIN OPTION, INHERIT FALSE, SET TRUE",
     );
@@ -185,7 +191,8 @@ export async function prepareEmptyDatabase(urls: RebuildUrls): Promise<() => Pro
   return () => releaseGrants(urls, name);
 }
 
-// Takes back the two grants prepareEmptyDatabase made for one run, so app_migrate stays filtered afterwards.
+// Takes back the two grants prepareEmptyDatabase made for one run, so app_migrate stays filtered
+// afterwards.
 async function releaseGrants(urls: RebuildUrls, name: string): Promise<void> {
   const admin = await connectTo(urls.adminUrl);
   try {
@@ -222,13 +229,14 @@ export async function dropDatabase(adminUrl: string, databaseName: string): Prom
   }
 }
 
-// The advisory lock every rebuild on this Postgres takes on the admin database. The grant and the release of app_definer
-// are cluster-wide, so a second rebuild running at the same time (another worktree's tests) could take the grant away
-// halfway through the first one's migrations; one rebuild at a time keeps both correct.
+// The advisory lock every rebuild on this Postgres takes on the admin database. The grant and the
+// release of app_definer are cluster-wide, so a second rebuild running at the same time (another
+// worktree's tests) could take the grant away halfway through the first one's migrations; one
+// rebuild at a time keeps both correct.
 const REBUILD_LOCK_KEY = 4_171_026;
 
-// Runs one step while holding the rebuild lock, so no other rebuild on this Postgres is halfway through. Ending the
-// connection releases the lock, also when the step throws.
+// Runs one step while holding the rebuild lock, so no other rebuild on this Postgres is halfway
+// through. Ending the connection releases the lock, also when the step throws.
 export async function withRebuildLock<T>(adminUrl: string, run: () => Promise<T>): Promise<T> {
   const lock = await connectTo(adminUrl);
   try {
@@ -239,7 +247,8 @@ export async function withRebuildLock<T>(adminUrl: string, run: () => Promise<T>
   }
 }
 
-// Rebuilds the target database from nothing and applies every migration; pnpm db:fresh and freshTestDatabase both call it.
+// Rebuilds the target database from nothing and applies every migration; pnpm db:fresh and
+// freshTestDatabase both call it.
 export async function recreateDatabase(urls: RebuildUrls): Promise<MigrationReport> {
   return withRebuildLock(urls.adminUrl, async () => {
     const releaseGrants = await prepareEmptyDatabase(urls);

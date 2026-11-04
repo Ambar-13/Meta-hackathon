@@ -1,5 +1,6 @@
-// The caller's own place in the directory: reading, joining or changing the listing, leaving it, and the meetings the listed
-// persona was in. The listing row is the consent to be met, and deleting it leaves the directory at once.
+// The caller's own place in the directory: reading, joining or changing the listing, leaving it,
+// and the meetings the listed persona was in. The listing row is the consent to be met, and
+// deleting it leaves the directory at once.
 import type { FastifyInstance } from "fastify";
 import { sql, type Transaction } from "kysely";
 import {
@@ -34,7 +35,8 @@ export type ListingRow = {
   created_at: Date;
 };
 
-// Reads a card's public items in position order. The database lets only approved items whose quote was found be public.
+// Reads a card's public items in position order. The database lets only approved items whose quote
+// was found be public.
 export function readPublicItems(trx: Transaction<Database>, cardId: string): Promise<PublicItem[]> {
   return trx
     .selectFrom("card_items")
@@ -80,7 +82,8 @@ export function registerReadMyListing(app: FastifyInstance, deps: RouteDeps): vo
   });
 }
 
-// Registers PUT /api/directory/me: 200 MyListing; 400 payload_invalid; 409 card_not_approved when the card is not the caller's approved card, listing_needs_public_item when it has no public item.
+// Registers PUT /api/directory/me: 200 MyListing; 400 payload_invalid; 409 card_not_approved when
+// the card is not the caller's approved card, listing_needs_public_item when it has no public item.
 export function registerUpsertMyListing(app: FastifyInstance, deps: RouteDeps): void {
   app.put(routes.directory.upsertMyListing.path, async (request, reply) => {
     const personId = requirePerson(request);
@@ -121,7 +124,8 @@ export function registerUpsertMyListing(app: FastifyInstance, deps: RouteDeps): 
   });
 }
 
-// Registers DELETE /api/directory/me: 204 whether or not the caller was listed. Leaving takes effect at once, and help answers made from the listing keep no link to it.
+// Registers DELETE /api/directory/me: 204 whether or not the caller was listed. Leaving takes
+// effect at once, and help answers made from the listing keep no link to it.
 export function registerLeaveDirectory(app: FastifyInstance, deps: RouteDeps): void {
   app.delete(routes.directory.leave.path, async (request, reply) => {
     const personId = requirePerson(request);
@@ -132,7 +136,8 @@ export function registerLeaveDirectory(app: FastifyInstance, deps: RouteDeps): v
   });
 }
 
-// The display name of a directory pair's creator. directory_meeting_create makes the person who asked for the meeting the creator, so for the listed side the creator is always the other person.
+// The display name of a directory pair's creator. directory_meeting_create makes the person who
+// asked for the meeting the creator, so for the listed side the creator is always the other person.
 async function readCreatorName(trx: Transaction<Database>, pairId: string): Promise<string> {
   const names = await sql<{
     creator_display_name: string;
@@ -147,8 +152,10 @@ async function readCreatorName(trx: Transaction<Database>, pairId: string): Prom
   return row.creator_display_name;
 }
 
-// Reads the meetings where the caller is the listed, public-only side, newest first, at most LISTED_MEETINGS_MAX, each with the other person's display name.
-// In words: the caller's own member rows with public_only true, joined to their meetings, ordered by the meeting's created_at, newest first, ties by meeting id.
+// Reads the meetings where the caller is the listed, public-only side, newest first, at most
+// LISTED_MEETINGS_MAX, each with the other person's display name. In words: the caller's own member
+// rows with public_only true, joined to their meetings, ordered by the meeting's created_at, newest
+// first, ties by meeting id.
 export async function readListedMeetings(
   trx: Transaction<Database>,
   personId: string,
@@ -176,7 +183,8 @@ export async function readListedMeetings(
   return ListedMeetingsView.parse({ meetings });
 }
 
-// Registers GET /api/directory/me/meetings: 200 ListedMeetingsView, the directory meetings the caller's listed persona was in.
+// Registers GET /api/directory/me/meetings: 200 ListedMeetingsView, the directory meetings the
+// caller's listed persona was in.
 export function registerListedMeetings(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.directory.listedMeetings.path, async (request, reply) => {
     const personId = requirePerson(request);

@@ -62,7 +62,8 @@ const PublicItemBoxes = (props: {
   );
 };
 
-// The directory switch, the line field and the dating switch. The line and the dating switch work only while the directory switch is on.
+// The directory switch, the line field and the dating switch. The line and the dating switch work
+// only while the directory switch is on.
 const DirectoryControls = (props: { draft: SharingDraft; hook: SharingHook }): ReactElement => {
   const { draft, hook } = props;
   return (
@@ -96,7 +97,8 @@ const DirectoryControls = (props: { draft: SharingDraft; hook: SharingHook }): R
   );
 };
 
-// The line under the save button: saved, the refusal, or the server's error, and nothing while idle or sending.
+// The line under the save button: saved, the refusal, or the server's error, and nothing while idle
+// or sending.
 const SaveStatus = (props: { status: SharingStatus }): ReactElement | null => {
   const { status } = props;
   if (status.kind === "saved")
@@ -115,7 +117,8 @@ const SaveStatus = (props: { status: SharingStatus }): ReactElement | null => {
   return null;
 };
 
-// The controls of a loaded Sharing section, the save button, and the link to the directory with this card.
+// The controls of a loaded Sharing section, the save button, and the link to the directory with
+// this card.
 const SharingForm = (props: {
   cardId: string;
   items: CardItem[];
@@ -153,8 +156,8 @@ const SharingForm = (props: {
   );
 };
 
-// The Sharing section of an approved card: the friends switch, the public items, the directory switch with its line, and the dating
-// switch, each off until the person turns it on.
+// The Sharing section of an approved card: the friends switch, the public items, the directory
+// switch with its line, and the dating switch, each off until the person turns it on.
 export const SharingSection = (props: { cardId: string; items: CardItem[] }): ReactElement => {
   const hook = useSharing(props.cardId);
   const { load } = hook;

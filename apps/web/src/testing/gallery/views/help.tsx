@@ -4,11 +4,12 @@ import { HelpScreen } from "../../../screens/help/index.js";
 import { FOREVER_MS } from "../fetch-stub.js";
 import type { GalleryView } from "../gallery-views.js";
 
-// One step a gallery view takes for the person after the screen loads: press the button or radio with these words, or type into
-// the field with this label.
+// One step a gallery view takes for the person after the screen loads: press the button or radio
+// with these words, or type into the field with this label.
 export type PressStep = { press: string } | { type: string; into: string };
 
-// How long each step waits before it runs, in ms, so the stubbed replies of the step before have arrived.
+// How long each step waits before it runs, in ms, so the stubbed replies of the step before have
+// arrived.
 const STEP_WAIT_MS = 300;
 
 // The first button, link or label on the page whose words or accessible name are these words.
@@ -43,7 +44,8 @@ function runStep(step: PressStep): void {
   typeInto(step.into, step.type);
 }
 
-// Wraps a screen and takes the given steps after it loads, so the gallery can show a state that only a tap reaches.
+// Wraps a screen and takes the given steps after it loads, so the gallery can show a state that
+// only a tap reaches.
 export const AfterSteps = (props: {
   steps: readonly PressStep[];
   children: ReactNode;
@@ -74,7 +76,8 @@ const SEND_STEPS: readonly PressStep[] = [
   { press: "Find who could help" },
 ];
 
-// The Find help page: the empty problem box, a problem that is too short, the search being sent, and the daily limit reached.
+// The Find help page: the empty problem box, a problem that is too short, the search being sent,
+// and the daily limit reached.
 export const views: readonly GalleryView[] = [
   {
     name: "help-ready",

@@ -18,7 +18,8 @@ export type VerifiedItem = {
   turn: SampledTurn;
   normQuote: string;
 };
-// An item that failed, with its 1-based position in the reply and the reason the regeneration message names.
+// An item that failed, with its 1-based position in the reply and the reason the regeneration
+// message names.
 export type FailedItem = {
   ok: false;
   position: number;
@@ -91,7 +92,8 @@ function quoteKey(check: VerifiedItem): string {
   return `${String(check.turn.turnIndex)}|${check.normQuote}`;
 }
 
-// The first call's verified items in order, then the second call's verified items not already present, at most 40.
+// The first call's verified items in order, then the second call's verified items not already
+// present, at most 40.
 export function mergeVerified(
   first: readonly ItemCheck[],
   second: readonly ItemCheck[],

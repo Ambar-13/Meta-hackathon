@@ -27,7 +27,8 @@ export type MemberViewRow = {
   last_seen_at: Date | null;
 };
 
-// Shapes the MeetingView: members in side order with their names, connected when seen within 30 s (watching now, shown only), the caller's side, optional fields left out when null.
+// Shapes the MeetingView: members in side order with their names, connected when seen within 30 s
+// (watching now, shown only), the caller's side, optional fields left out when null.
 export function toMeetingView(
   meeting: MeetingViewRow,
   people: {

@@ -1,4 +1,5 @@
-// The shapes that a step and the run share, and the writers for the step lines, the JSON report and the manual checks.
+// The shapes that a step and the run share, and the writers for the step lines, the JSON report and
+// the manual checks.
 import { execFileSync } from "node:child_process";
 import { isDeepStrictEqual } from "node:util";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -23,14 +24,16 @@ export type StepResult = {
   rows: string[];
   assertions: Assertion[];
 };
-// Thrown when a step's expectation does not hold. The runner turns it into a failed step with this message.
+// Thrown when a step's expectation does not hold. The runner turns it into a failed step with this
+// message.
 export class StepFailure extends Error {
   constructor(message: string) {
     super(message);
     this.name = "StepFailure";
   }
 }
-// Ends the run with an exit code: 2 for flags and environment, 3 for a rate limit on account creation.
+// Ends the run with an exit code: 2 for flags and environment, 3 for a rate limit on account
+// creation.
 export class ExitError extends Error {
   readonly exitCode: number;
   constructor(exitCode: number, message: string) {
@@ -92,19 +95,22 @@ export type RunState = {
   readerB?: EventStreamReader;
 };
 
-// One check: the expected value, the seen value, and whether they are equal. Values are ids, counts and flags only.
+// One check: the expected value, the seen value, and whether they are equal. Values are ids, counts
+// and flags only.
 export function check(name: string, expected: unknown, actual: unknown): Assertion {
   return { name, expected, actual, pass: isDeepStrictEqual(expected, actual) };
 }
 
-// Returns the value a step needs from an earlier step, or fails the step when no earlier step set it.
+// Returns the value a step needs from an earlier step, or fails the step when no earlier step set
+// it.
 export function need<T>(value: T | undefined, what: string): T {
   if (value === undefined)
     throw new StepFailure(`missing_fact: ${what} was not set by an earlier step.`);
   return value;
 }
 
-// The step result a step builds: pass when every check holds, not-exercised when the mode skips it, else fail.
+// The step result a step builds: pass when every check holds, not-exercised when the mode skips it,
+// else fail.
 export function finishStep(
   number: number,
   name: string,
@@ -124,7 +130,8 @@ export function finishStep(
   };
 }
 
-// One line per step with fixed columns, so grep works. Failed steps add their failed checks, indented.
+// One line per step with fixed columns, so grep works. Failed steps add their failed checks,
+// indented.
 export function formatStepLine(step: StepResult): string {
   const seconds = (step.durationMs / 1000).toFixed(1);
   const head = `step ${String(step.number).padStart(2, "0")} ${step.name.padEnd(12)} ${step.result.padEnd(14)} ${seconds.padStart(6)} s  ${step.detail}`;
@@ -137,7 +144,8 @@ export function formatStepLine(step: StepResult): string {
   return [head, ...failed].join("\n");
 }
 
-// The counts printed at the end: how many steps passed, failed, skipped, were not exercised or were removed.
+// The counts printed at the end: how many steps passed, failed, skipped, were not exercised or were
+// removed.
 export function countSteps(steps: readonly StepResult[]): {
   pass: number;
   fail: number;
@@ -175,7 +183,8 @@ export function sleep(ms: number): Promise<void> {
   });
 }
 
-// Reads a value again every intervalMs until isDone holds or timeoutMs runs out, and returns the last value read.
+// Reads a value again every intervalMs until isDone holds or timeoutMs runs out, and returns the
+// last value read.
 export async function pollUntil<T>(
   read: () => Promise<T>,
   isDone: (value: T) => boolean,
@@ -199,7 +208,8 @@ export function readers(run: RunState): { a: EventStreamReader; b: EventStreamRe
   return { a: need(run.readerA, "the reader for A"), b: need(run.readerB, "the reader for B") };
 }
 
-// A step that threw: a StepFailure keeps its message, and any other error is named as unexpected. The detail is cut to 120 characters.
+// A step that threw: a StepFailure keeps its message, and any other error is named as unexpected.
+// The detail is cut to 120 characters.
 export function failedStep(slot: { number: number; name: string }, error: unknown): StepResult {
   const text = error instanceof Error ? error.message : "unknown error";
   const message = error instanceof StepFailure ? text : `unexpected_error: ${text}`;
@@ -223,7 +233,8 @@ export function commitOf(): string {
   }
 }
 
-// The lines the run prints at its end: the live proxy timing, the manual checks, and the verdict with its counts.
+// The lines the run prints at its end: the live proxy timing, the manual checks, and the verdict
+// with its counts.
 function printEnd(
   run: RunState,
   summary: { verdict: "pass" | "fail"; counts: ReturnType<typeof countSteps>; notRun: number },

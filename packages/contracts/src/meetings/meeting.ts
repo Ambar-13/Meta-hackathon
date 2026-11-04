@@ -33,12 +33,12 @@ export const Phase = z.enum(["open", "explore", "decide", "close"]);
 export type Phase = z.infer<typeof Phase>;
 // How many curated questions there are; their ids run from 1 to this number.
 export const CURATED_QUESTION_COUNT = 20;
-// The reason a directory meeting's question is refused when it is a romance question and the listed person has not switched on dating
-// questions.
+// The reason a directory meeting's question is refused when it is a romance question and the listed
+// person has not switched on dating questions.
 export const ROMANCE_NOT_OPEN_REASON =
   "This person has not opened their Meety to dating questions.";
-// The body of POST /api/pairs/:id/meetings: a curated question or free text, plus the card to speak from.
-// This is a route schema, not a model output, so the union is allowed here.
+// The body of POST /api/pairs/:id/meetings: a curated question or free text, plus the card to speak
+// from. This is a route schema, not a model output, so the union is allowed here.
 export const MeetingCreate = z.intersection(
   z.union([
     z.object({ questionId: z.number().int().min(1).max(CURATED_QUESTION_COUNT) }),
@@ -83,7 +83,8 @@ export const MeetingStartResponse = z.object({
   queuePosition: z.number().int().optional(),
 });
 export type MeetingStartResponse = z.infer<typeof MeetingStartResponse>;
-// What the question check model returns: whether the question may be used, why, which kind it is, and whether any part of it is romantic.
+// What the question check model returns: whether the question may be used, why, which kind it is,
+// and whether any part of it is romantic.
 //The kind matters only when the question is allowed. romantic is asked apart from the kind, so a mixed question cannot pass a
 // closed dating switch under another kind.
 export const QuestionCheckOutput = z.object({
@@ -93,9 +94,10 @@ export const QuestionCheckOutput = z.object({
   romantic: z.boolean(),
 });
 export type QuestionCheckOutput = z.infer<typeof QuestionCheckOutput>;
-// The 20 curated meeting questions in five groups of 4 as the lobby shows them: getting along or clashing (1 to 4), help (5 to 8),
-// deals (9 to 12, where 12 is a decision), debates and views (13 to 16, where 15 and 16 are situations), and getting on as a couple
-// (17 to 20). Each is about the two people only.
+// The 20 curated meeting questions in five groups of 4 as the lobby shows them: getting along or
+// clashing (1 to 4), help (5 to 8), deals (9 to 12, where 12 is a decision), debates and views (13
+// to 16, where 15 and 16 are situations), and getting on as a couple (17 to 20). Each is about the
+// two people only.
 export const CURATED_QUESTIONS: ReadonlyArray<{ id: number; text: string; kind: QuestionKind }> = [
   { id: 1, text: "Would we enjoy a 10-day hackathon together?", kind: "get_along" },
   { id: 2, text: "Would we get along on a small team, day to day?", kind: "get_along" },

@@ -15,7 +15,8 @@ function assertUuid(id: string, label: "person" | "meeting"): void {
   );
 }
 
-// Refuses a transaction that would carry both settings or neither; a programming error, caught before any row is read.
+// Refuses a transaction that would carry both settings or neither; a programming error, caught
+// before any row is read.
 export async function assertOneContext(trx: DatabaseTransaction): Promise<void> {
   const result = await sql<{ person: string | null; meeting: string | null }>`
     SELECT nullif(current_setting('app.person_id', true), '') AS person,
@@ -35,7 +36,8 @@ export async function assertOneContext(trx: DatabaseTransaction): Promise<void> 
     );
 }
 
-// Runs run inside one transaction as this person: BEGIN; SET LOCAL app.person_id; run; COMMIT. A throw rolls back.
+// Runs run inside one transaction as this person: BEGIN; SET LOCAL app.person_id; run; COMMIT. A
+// throw rolls back.
 export async function withPerson<T>(
   db: Kysely<Database>,
   personId: string,
@@ -49,7 +51,8 @@ export async function withPerson<T>(
   });
 }
 
-// Runs run inside one transaction as this meeting: BEGIN; SET LOCAL app.meeting_id; run; COMMIT. Meeting jobs use this, never withPerson.
+// Runs run inside one transaction as this meeting: BEGIN; SET LOCAL app.meeting_id; run; COMMIT.
+// Meeting jobs use this, never withPerson.
 export async function withMeeting<T>(
   db: Kysely<Database>,
   meetingId: string,

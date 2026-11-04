@@ -14,7 +14,8 @@ import {
 } from "./apply-role-tokens.js";
 import { chunkTurnsForNames, namesPassCall } from "./name-chunks.js";
 
-// One names pass as the job found it in the database: the source, its pass row, the person, and the turns.
+// One names pass as the job found it in the database: the source, its pass row, the person, and the
+// turns.
 type NamesInput = {
   source: { id: string; frozen_at: Date | null } | undefined;
   pass: { source_id: string } | undefined;
@@ -31,7 +32,8 @@ export function namesPassRetryAt(now: Date): Date {
   return new Date(startOfUtcDay(now).getTime() + 86_400_000 + 60_000);
 }
 
-// The names pass for one uploaded source: other people's names become role tokens, and the names review gets one row per name.
+// The names pass for one uploaded source: other people's names become role tokens, and the names
+// review gets one row per name.
 export const scrubNamesTask: JobTask<"scrub_names"> = async (payload, context) => {
   const input = await readNamesInput(context.db, payload);
   if (input.source === undefined || input.person === undefined) {
@@ -69,7 +71,8 @@ export const scrubNamesTask: JobTask<"scrub_names"> = async (payload, context) =
     );
 };
 
-// Reads the source, its pass row, the person and the turns in one transaction; the transaction ends before any model call.
+// Reads the source, its pass row, the person and the turns in one transaction; the transaction ends
+// before any model call.
 async function readNamesInput(
   db: Kysely<Database>,
   payload: JobPayload<"scrub_names">,
@@ -100,7 +103,8 @@ async function readNamesInput(
   });
 }
 
-// Finds the names in every chunk, one call per chunk with no transaction open. A cap stops the pass here and is handled.
+// Finds the names in every chunk, one call per chunk with no transaction open. A cap stops the pass
+// here and is handled.
 async function findNamesOrStop(
   context: JobContext,
   payload: JobPayload<"scrub_names">,
@@ -155,7 +159,8 @@ async function findNames(
   return names;
 }
 
-// Writes the whole names pass in one transaction, guarded against a source that changed meanwhile; returns the counts, or undefined when nothing was written.
+// Writes the whole names pass in one transaction, guarded against a source that changed meanwhile;
+// returns the counts, or undefined when nothing was written.
 async function writeNamesPass(
   context: JobContext,
   payload: JobPayload<"scrub_names">,
@@ -209,7 +214,8 @@ async function placeholderCounterFor(
   return makePlaceholderCounter(highest + 1);
 }
 
-// Writes the new text and the new tags of every turn the pass changed (turns of an unfrozen source may change).
+// Writes the new text and the new tags of every turn the pass changed (turns of an unfrozen source
+// may change).
 async function writeTurnRewrites(
   trx: DatabaseTransaction,
   rewrites: readonly TurnRewrite[],
@@ -235,7 +241,8 @@ async function writeTurnRewrites(
   }
 }
 
-// Writes one redaction row for each occurrence the pass wrote, in turn order and then name order; returns the ids of each name.
+// Writes one redaction row for each occurrence the pass wrote, in turn order and then name order;
+// returns the ids of each name.
 async function writeRedactions(
   trx: DatabaseTransaction,
   args: { payload: JobPayload<"scrub_names">; plan: NamesPlan; nextId: () => string },

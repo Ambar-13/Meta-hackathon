@@ -35,7 +35,8 @@ import {
   type AskTestContext,
 } from "./testing/index.js";
 
-// The help search the base tests send: its words match Kai's and Lena's public items and lines, and Ana's, whom the shortlist leaves out.
+// The help search the base tests send: its words match Kai's and Lena's public items and lines, and
+// Ana's, whom the shortlist leaves out.
 const ML_ASK = "My model training stalls and validation looks wrong, who knows gradient norms?";
 // The fake clock's start, so the runAt of a re-queued job is exact.
 const CLOCK_START = new Date("2026-10-27T09:00:00.000Z");

@@ -107,6 +107,7 @@ export const socialRoutes = {
     request: z.undefined(),
     response: StoriesView,
   },
-  // Home's feed a page at a time (FeedQuery in the query string): your friends' posts and your own first, then everyone else's.
+  // Home's feed a page at a time (FeedQuery in the query string): your friends' posts and your own
+  // first, then everyone else's.
   listFeed: { method: "GET", path: "/api/feed", request: z.undefined(), response: FeedPage },
 } as const;

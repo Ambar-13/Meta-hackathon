@@ -1,9 +1,11 @@
 import { z } from "zod";
 
-// A message before canonicalisation: the text and the position it had in the export, so recency ranking has an order.
+// A message before canonicalisation: the text and the position it had in the export, so recency
+// ranking has an order.
 export type RawTurn = { text: string; exportOrder: number; createTime: number | null };
 
-// One node of the 2024 mapping. Every field is optional because real exports have nodes without a message.
+// One node of the 2024 mapping. Every field is optional because real exports have nodes without a
+// message.
 const ChatGptMappingNode = z.object({
   id: z.string().optional(),
   message: z
@@ -37,14 +39,16 @@ type NodeFacts = {
 // A user node the walk did not reach, with what the branch sort needs.
 type Branch = { key: string; text: string; createTime: number | null };
 
-// The conversations of a root value: an array as it is, one object as a one-element array, anything else as none.
+// The conversations of a root value: an array as it is, one object as a one-element array, anything
+// else as none.
 function conversationsOf(root: unknown): unknown[] {
   if (Array.isArray(root)) return root;
   if (typeof root === "object" && root !== null) return [root];
   return [];
 }
 
-// True when a value is an object with a key that holds an object, the test for a mapping conversation.
+// True when a value is an object with a key that holds an object, the test for a mapping
+// conversation.
 function isMappingConversation(value: unknown): value is { mapping: Record<string, unknown> } {
   if (typeof value !== "object" || value === null) return false;
   const mapping = (value as { mapping?: unknown }).mapping;
@@ -65,7 +69,8 @@ function numbered(turns: RawTurn[]): RawTurn[] {
   return turns.map((turn, index) => ({ ...turn, exportOrder: index }));
 }
 
-// Text out of a ChatGPT content object: `parts` string elements joined by "\n"; a non-string part becomes "[image]"; `text` or `content` strings pass through.
+// Text out of a ChatGPT content object: `parts` string elements joined by "\n"; a non-string part
+// becomes "[image]"; `text` or `content` strings pass through.
 export function contentText(content: unknown): string | null {
   if (typeof content === "string") return content;
   if (typeof content !== "object" || content === null) return null;
@@ -93,7 +98,8 @@ function factsOf(value: unknown): NodeFacts | null {
   };
 }
 
-// Keys on the path from the current node back to the root, in walk order, stopping at a missing key, a null parent or a repeat.
+// Keys on the path from the current node back to the root, in walk order, stopping at a missing
+// key, a null parent or a repeat.
 function pathFrom(nodes: Map<string, NodeFacts>, current: string | undefined): string[] {
   const seen = new Set<string>();
   let key: string | null = current ?? null;
@@ -104,7 +110,8 @@ function pathFrom(nodes: Map<string, NodeFacts>, current: string | undefined): s
   return [...seen];
 }
 
-// Orders branch nodes by create_time ascending, missing times last, then by node key in code-unit order.
+// Orders branch nodes by create_time ascending, missing times last, then by node key in code-unit
+// order.
 function compareBranches(a: Branch, b: Branch): number {
   if (a.createTime !== b.createTime) {
     if (a.createTime === null) return 1;
@@ -136,7 +143,8 @@ function turnOf(facts: NodeFacts | undefined): RawTurn[] {
   return [{ text: facts.text, exportOrder: 0, createTime: facts.createTime }];
 }
 
-// The user turns of one 2024 conversation: the path from current_node in chronological order, then the branches.
+// The user turns of one 2024 conversation: the path from current_node in chronological order, then
+// the branches.
 function turnsOfMapping(mapping: Record<string, unknown>, currentNode: unknown): RawTurn[] {
   const nodes = nodesOf(mapping);
   const path = pathFrom(nodes, typeof currentNode === "string" ? currentNode : undefined).reverse();
@@ -158,9 +166,10 @@ function turnsOfMapping(mapping: Record<string, unknown>, currentNode: unknown):
   ];
 }
 
-// The 2024 export: an array of conversations, each with `mapping` (node id to node) and `current_node`. Walks from current_node
-// through `parent` to the root, keeps nodes whose author.role is "user", reverses to chronological order, then adds any user node
-// not reached by the walk (branches), ordered by create_time.
+// The 2024 export: an array of conversations, each with `mapping` (node id to node) and
+// `current_node`. Walks from current_node through `parent` to the root, keeps nodes whose
+// author.role is "user", reverses to chronological order, then adds any user node not reached by
+// the walk (branches), ordered by create_time.
 export function parseChatGptMapping(root: unknown): RawTurn[] | null {
   const shaped = conversationsOf(root).filter(isMappingConversation);
   if (shaped.length === 0) return null;
@@ -171,7 +180,8 @@ export function parseChatGptMapping(root: unknown): RawTurn[] | null {
   return numbered(turns);
 }
 
-// The role and text of one 2026 message, or null when the message does not parse or is not a user message.
+// The role and text of one 2026 message, or null when the message does not parse or is not a user
+// message.
 function messageTurn(message: unknown): RawTurn | null {
   const parsed = ChatGptMessage.safeParse(message);
   if (!parsed.success) return null;
@@ -183,7 +193,8 @@ function messageTurn(message: unknown): RawTurn | null {
   return { text, exportOrder: 0, createTime };
 }
 
-// The 2026 export: each conversation has `messages: [{ role, content }]` or `[{ author: { role }, content }]`; keeps role "user".
+// The 2026 export: each conversation has `messages: [{ role, content }]` or `[{ author: { role },
+// content }]`; keeps role "user".
 export function parseChatGptMessages(root: unknown): RawTurn[] | null {
   const shaped = conversationsOf(root).filter(isMessagesConversation);
   if (shaped.length === 0) return null;

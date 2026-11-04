@@ -48,7 +48,8 @@ export type SeededMeeting = {
   b: SeededSide;
 };
 
-// Creates two people with frozen sources and approved cards (recall on for a, off for b), a joined pair and a ready meeting on a curated question.
+// Creates two people with frozen sources and approved cards (recall on for a, off for b), a joined
+// pair and a ready meeting on a curated question.
 export async function createPairedMeetingWithTurns(
   db: Kysely<Database>,
   options: { questionId?: number } = {},
@@ -96,7 +97,8 @@ export async function createPairedMeetingWithTurns(
   const meetingId = created.rows[0]?.meeting_id;
   if (meetingId === null || meetingId === undefined)
     throw new Error("meeting_create returned no id. Check that migration 0001 ran.");
-  // The route writes a curated question's kind after meeting_create; the seed does the same, so seeded meetings match real ones.
+  // The route writes a curated question's kind after meeting_create; the seed does the same, so
+  // seeded meetings match real ones.
   await withPerson(db, a.personId, (trx) =>
     trx
       .updateTable("meetings")

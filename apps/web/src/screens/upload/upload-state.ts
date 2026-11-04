@@ -48,8 +48,8 @@ export function useIsNarrowScreen(): boolean {
   return isNarrowNow;
 }
 
-// Drives the flow: prepareUpload with the summary's quotes and topics to keep first when there is a summary, the attestation, the
-// upload, then onUploaded with the new source id.
+// Drives the flow: prepareUpload with the summary's quotes and topics to keep first when there is a
+// summary, the attestation, the upload, then onUploaded with the new source id.
 export function useUploadFlow(
   prepare: typeof prepareUpload,
   onUploaded: (sourceId: string) => void,

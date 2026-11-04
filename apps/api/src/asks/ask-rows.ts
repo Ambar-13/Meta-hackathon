@@ -1,7 +1,9 @@
-// What exists: the run_ask job writes one persona_answers row for each persona it asks, with that answer's claims as jsonb.
-// The problem: the asker reads these rows as results, and the person a persona speaks for reads them as copies; neither may see
-// a number about a person or an id of the other person. The step: every row becomes a contracts view here, in one place, so the
-// read routes and the meeting route apply the same rules. What this file does not do: read or write the database.
+// What exists: the run_ask job writes one persona_answers row for each persona it asks, with that
+// answer's claims as jsonb. The problem: the asker reads these rows as results, and the person a
+// persona speaks for reads them as copies; neither may see a number about a person or an id of the
+// other person. The step: every row becomes a contracts view here, in one place, so the read routes
+// and the meeting route apply the same rules. What this file does not do: read or write the
+// database.
 import { z } from "zod";
 import {
   AnswerClaim,
@@ -15,8 +17,9 @@ import {
   type AskSummary,
 } from "@meet-first/contracts";
 
-// The stored claims of one answer. Each is {text, quote, turnId, verified, supported}; parsing with AnswerClaim keeps the four
-// fields the views carry and drops turnId, because a turn id belongs to the other person's notes.
+// The stored claims of one answer. Each is {text, quote, turnId, verified, supported}; parsing with
+// AnswerClaim keeps the four fields the views carry and drops turnId, because a turn id belongs to
+// the other person's notes.
 const StoredClaims = z.array(AnswerClaim);
 
 // The columns of one persona_answers row that the ask view reads.
@@ -47,8 +50,9 @@ export type AskRow = { id: string; mode: AskMode; text: string; state: AskState;
 // The parts of an answer that decide its place in the view.
 type PlacedRow = Pick<AnswerRow, "id" | "position" | "shortlist_rank">;
 
-// The claims of one stored answer as the views show them. Claims that no longer parse are answer_row_invalid (500), so a broken
-// row fails on the server, where it is logged, and is never shown half read.
+// The claims of one stored answer as the views show them. Claims that no longer parse are
+// answer_row_invalid (500), so a broken row fails on the server, where it is logged, and is never
+// shown half read.
 export function parseStoredClaims(claims: unknown): AnswerClaim[] {
   const parsed = StoredClaims.safeParse(claims);
   if (!parsed.success)
@@ -60,8 +64,9 @@ export function parseStoredClaims(claims: unknown): AnswerClaim[] {
   return parsed.data;
 }
 
-// True when the asker may start a full meeting from this answer: the ask is a help search in state done, and the answer is answered,
-// placed 1 to HELP_MEETABLE_TOP (3), and its listing still exists. The read route and the meeting route both use it.
+// True when the asker may start a full meeting from this answer: the ask is a help search in state
+// done, and the answer is answered, placed 1 to HELP_MEETABLE_TOP (3), and its listing still
+// exists. The read route and the meeting route both use it.
 export function isMeetableAnswer(
   ask: { mode: AskMode; state: AskState },
   answer: { state: AnswerRow["state"]; position: number | null; listing_id: string | null },
@@ -72,8 +77,9 @@ export function isMeetableAnswer(
   );
 }
 
-// Compares two answers for the view. In words: placed answers first by position, an answer with no position after every placed one,
-// then the smaller shortlist rank, then the id, so two reads of the same rows always give the same order.
+// Compares two answers for the view. In words: placed answers first by position, an answer with no
+// position after every placed one, then the smaller shortlist rank, then the id, so two reads of
+// the same rows always give the same order.
 function compareAnswers(first: PlacedRow, second: PlacedRow): number {
   const firstPlace = first.position ?? Number.MAX_SAFE_INTEGER;
   const secondPlace = second.position ?? Number.MAX_SAFE_INTEGER;
@@ -90,8 +96,8 @@ export function sortAnswersForView<T extends Pick<AnswerRow, "id" | "position" |
   return [...rows].sort(compareAnswers);
 }
 
-// One answered row as the asker sees it. It never carries the subject's person id, card id or listing id, the support count or the
-// shortlist rank.
+// One answered row as the asker sees it. It never carries the subject's person id, card id or
+// listing id, the support count or the shortlist rank.
 export function toAskAnswer(ask: { mode: AskMode; state: AskState }, row: AnswerRow): AskAnswer {
   return {
     answerId: row.id,
@@ -105,8 +111,8 @@ export function toAskAnswer(ask: { mode: AskMode; state: AskState }, row: Answer
   };
 }
 
-// One answer the caller's persona gave, as the caller's copy: what was asked, the asker's display name, and the answer with its
-// claims. It never carries the asker's person id.
+// One answer the caller's persona gave, as the caller's copy: what was asked, the asker's display
+// name, and the answer with its claims. It never carries the asker's person id.
 export function toAboutMeAnswer(row: CopyRow): AboutMeAnswer {
   return {
     answerId: row.id,

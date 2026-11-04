@@ -12,7 +12,8 @@ import {
   type PersonaCardItem,
 } from "./quiz-requests.js";
 
-// The text of the user message of a call, which the persona and judge calls always send as a string.
+// The text of the user message of a call, which the persona and judge calls always send as a
+// string.
 function userContentOf(call: { messages: ReadonlyArray<{ content: string | null }> }): string {
   const content = requireElement(call.messages, 1).content;
   if (content === null) throw new Error("the user message has no text");

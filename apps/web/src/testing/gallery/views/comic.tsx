@@ -27,7 +27,8 @@ const CAPTIONS = [
 // The ground colour of each drawn panel.
 const PANEL_GROUNDS = ["#f7b39b", "#9cc3f5", "#9fe0bf", "#f7ec9a", "#e6c2ec", "#9cc3f5"];
 
-// A simple drawn panel as an SVG data address: a coloured ground with two round figures, so the frames show a picture.
+// A simple drawn panel as an SVG data address: a coloured ground with two round figures, so the
+// frames show a picture.
 function panelImage(index: number): string {
   const ground = PANEL_GROUNDS[index] ?? "#9cc3f5";
   const shift = String(index * 18);
@@ -35,7 +36,8 @@ function panelImage(index: number): string {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
-// A comic view in one state; ready carries six drawn panels, and a broken one has a panel whose image does not load.
+// A comic view in one state; ready carries six drawn panels, and a broken one has a panel whose
+// image does not load.
 function comicIn(state: ComicView["state"], hasBrokenPanel = false): ComicView {
   if (state !== "ready") return { state, panels: [] };
   return {
@@ -65,7 +67,8 @@ function comic(name: string, title: string, stubs: readonly GalleryStub[]): Gall
   };
 }
 
-// The comic page: loading, error, the avatar picker, waiting for the brief, drawing, the finished strip, a broken panel, and not drawn.
+// The comic page: loading, error, the avatar picker, waiting for the brief, drawing, the finished
+// strip, a broken panel, and not drawn.
 export const views: readonly GalleryView[] = [
   comic("comic-loading", "Comic, loading", [
     readComic({ status: 200, body: comicIn("rendering"), delayMs: FOREVER_MS }),

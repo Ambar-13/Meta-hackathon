@@ -19,14 +19,16 @@ export const PHASE_LABELS: Record<Phase, string> = {
   close: "Closing",
 };
 
-// A side's display name from meeting.started, or the side letter in capitals when the meeting has not started.
+// A side's display name from meeting.started, or the side letter in capitals when the meeting has
+// not started.
 export function speakerName(fold: MeetingFoldState, side: Side): string {
   return (
     fold.started?.members.find((member) => member.side === side)?.displayName ?? side.toUpperCase()
   );
 }
 
-// One timeline line for the items that are not turns: a phase change, a look in the notes, a point accepted or kept.
+// One timeline line for the items that are not turns: a phase change, a look in the notes, a point
+// accepted or kept.
 function renderLine(
   fold: MeetingFoldState,
   item: Exclude<TimelineItem, { kind: "turn" }>,
@@ -49,7 +51,8 @@ function renderLine(
   );
 }
 
-// One quote a persona leaned on: the quote card, and the no-receipt flag when it was not found in the person's own words.
+// One quote a persona leaned on: the quote card, and the no-receipt flag when it was not found in
+// the person's own words.
 const ClaimReceipt = (props: { claim: Claim; name: string }): ReactElement => {
   return (
     <>
@@ -59,7 +62,8 @@ const ClaimReceipt = (props: { claim: Claim; name: string }): ReactElement => {
   );
 };
 
-// One finished turn as a bubble in its side's colour, with the persona's name, the text, and each quote under it.
+// One finished turn as a bubble in its side's colour, with the persona's name, the text, and each
+// quote under it.
 function renderTurn(
   fold: MeetingFoldState,
   item: Extract<TimelineItem, { kind: "turn" }>,
@@ -103,7 +107,8 @@ const PartialTurn = (props: { fold: MeetingFoldState }): ReactElement | null => 
   );
 };
 
-// The meeting's lines in seq order, the turn being written, and the thinking line; follows new lines only for a reader at the bottom.
+// The meeting's lines in seq order, the turn being written, and the thinking line; follows new
+// lines only for a reader at the bottom.
 export const TranscriptView = (props: {
   fold: MeetingFoldState;
   isThinkingNow: boolean;

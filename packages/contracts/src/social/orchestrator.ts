@@ -14,8 +14,9 @@ export const OrchestratorSend = z.object({
 });
 export type OrchestratorSend = z.infer<typeof OrchestratorSend>;
 
-// One friend as the orchestrator saw them when the person sent a message: orchestrator_messages.friends_snapshot holds a list of these,
-// and the orchestrate job checks the plan's friend against it, never against the model's word alone.
+// One friend as the orchestrator saw them when the person sent a message:
+// orchestrator_messages.friends_snapshot holds a list of these, and the orchestrate job checks the
+// plan's friend against it, never against the model's word alone.
 export const OrchestratorFriend = z.object({
   pairId: Uuid,
   displayName: z.string(),
@@ -26,7 +27,8 @@ export type OrchestratorFriend = z.infer<typeof OrchestratorFriend>;
 export const OrchestratorFriends = z.array(OrchestratorFriend);
 export type OrchestratorFriends = z.infer<typeof OrchestratorFriends>;
 
-// What POST /api/orchestrator returns: the person's message and the orchestrator's reply, which is thinking until the worker plans it.
+// What POST /api/orchestrator returns: the person's message and the orchestrator's reply, which is
+// thinking until the worker plans it.
 export const OrchestratorSendResponse = z.object({ messageId: Uuid, replyId: Uuid });
 export type OrchestratorSendResponse = z.infer<typeof OrchestratorSendResponse>;
 
@@ -34,8 +36,8 @@ export type OrchestratorSendResponse = z.infer<typeof OrchestratorSendResponse>;
 export const OrchestratorRole = z.enum(["you", "agent"]);
 export type OrchestratorRole = z.infer<typeof OrchestratorRole>;
 
-// Where a message stands. The person's own messages are done. A reply is thinking, then planned (an ask is ready to run), running (the
-// ask is out), done, or failed.
+// Where a message stands. The person's own messages are done. A reply is thinking, then planned (an
+// ask is ready to run), running (the ask is out), done, or failed.
 export const OrchestratorState = z.enum(["thinking", "planned", "running", "done", "failed"]);
 export type OrchestratorState = z.infer<typeof OrchestratorState>;
 
@@ -43,7 +45,8 @@ export type OrchestratorState = z.infer<typeof OrchestratorState>;
 export const OrchestratorAction = z.enum(["help", "react", "reply"]);
 export type OrchestratorAction = z.infer<typeof OrchestratorAction>;
 
-// One message of the thread. A reply's action fields say what it will ask or asked; askId links the ask once it runs.
+// One message of the thread. A reply's action fields say what it will ask or asked; askId links the
+// ask once it runs.
 export const OrchestratorMessage = z.object({
   id: Uuid,
   role: OrchestratorRole,
@@ -61,9 +64,10 @@ export type OrchestratorMessage = z.infer<typeof OrchestratorMessage>;
 export const OrchestratorThread = z.object({ messages: z.array(OrchestratorMessage) });
 export type OrchestratorThread = z.infer<typeof OrchestratorThread>;
 
-// What the orchestrator model returns for one message (prompt orchestrator v1): one action, the friend it is about for a react ("" for
-// help and reply), the question the ask will carry ("" for reply), and the words shown to the person. No field is nullable, because a
-// strict schema with null types is not shown to work on the Meta Model API.
+// What the orchestrator model returns for one message (prompt orchestrator v1): one action, the
+// friend it is about for a react ("" for help and reply), the question the ask will carry ("" for
+// reply), and the words shown to the person. No field is nullable, because a strict schema with
+// null types is not shown to work on the Meta Model API.
 export const OrchestratorPlanOutput = z.object({
   action: OrchestratorAction,
   friend: z.string(),

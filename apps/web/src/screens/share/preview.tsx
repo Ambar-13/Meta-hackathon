@@ -37,7 +37,8 @@ const PreviewLine = (props: { point: BriefPoint; meeting: MeetingView }): ReactE
   );
 };
 
-// The brief lines that would be published, by section, or the empty state when none passed, or the error when the brief failed.
+// The brief lines that would be published, by section, or the empty state when none passed, or the
+// error when the brief failed.
 const PreviewBrief = (props: { lines: PreviewLines; meeting: MeetingView }): ReactElement => {
   if (props.lines.kind === "failed") return <ErrorNotice error={props.lines.error} />;
   const { sections } = props.lines;
@@ -70,8 +71,9 @@ const PreviewBrief = (props: { lines: PreviewLines; meeting: MeetingView }): Rea
   );
 };
 
-// The preview above the consent button: the two names and the question as the page heads them, then the brief lines that passed
-// the support check with their quotes, then one line for what the routes here cannot read (design fix 2 of the brief).
+// The preview above the consent button: the two names and the question as the page heads them, then
+// the brief lines that passed the support check with their quotes, then one line for what the
+// routes here cannot read (design fix 2 of the brief).
 export const PublishPreviewPanel = (props: { preview: PublishPreview }): ReactElement | null => {
   const { preview } = props;
   if (preview.kind === "none") return null;

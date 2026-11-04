@@ -31,7 +31,8 @@ export const MEETING_STATE_LABELS: Record<MeetingState, string> = {
 // A picked question: one of the 12 curated ids, or free text.
 export type QuestionPick = { kind: "curated"; questionId: number } | { kind: "free"; text: string };
 
-// The meeting the lobby works on: the newest row of PairView.meetings that is ready, queued or running, or null (the list is newest first).
+// The meeting the lobby works on: the newest row of PairView.meetings that is ready, queued or
+// running, or null (the list is newest first).
 export function currentMeetingRow(pair: PairView): PairMeetingRow | null {
   return (
     pair.meetings.find(
@@ -40,7 +41,8 @@ export function currentMeetingRow(pair: PairView): PairMeetingRow | null {
   );
 }
 
-// The MeetingCreate body for a pick and a card, or null when free text is not 5 to 300 characters after trimming.
+// The MeetingCreate body for a pick and a card, or null when free text is not 5 to 300 characters
+// after trimming.
 export function meetingCreateBody(pick: QuestionPick, cardId: string): MeetingCreate | null {
   if (pick.kind === "curated") return MeetingCreate.parse({ questionId: pick.questionId, cardId });
   const text = pick.text.trim();

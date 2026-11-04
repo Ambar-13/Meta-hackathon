@@ -1,8 +1,10 @@
-// Support rate: the mean support rate over briefs the judge could judge reliably. The unreliable count is shown beside it.
+// Support rate: the mean support rate over briefs the judge could judge reliably. The unreliable
+// count is shown beside it.
 import type { EvalRows } from "../collect-rows.js";
 import type { MetricResult } from "./index.js";
 
-// Reads the brief support rows and returns the mean over reliable briefs, with the count of unreliable ones in detail.
+// Reads the brief support rows and returns the mean over reliable briefs, with the count of
+// unreliable ones in detail.
 export function measureSupportRate(rows: EvalRows): MetricResult {
   const reliable = rows.briefMeta.filter(
     (brief) => brief.supportReliable === true && brief.supportRate !== null,

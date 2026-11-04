@@ -13,7 +13,8 @@ export type UploadProgress = {
   keptTurns: number;
 };
 
-// The prepared upload: the NDJSON body plus the numbers the upload screen shows before the person attests.
+// The prepared upload: the NDJSON body plus the numbers the upload screen shows before the person
+// attests.
 export type UploadReady = {
   ok: true;
   header: SourceHeader; // the first NDJSON line, with attested: true
@@ -38,12 +39,13 @@ export type UploadRefusalCode =
   | "upload_too_large"
   | "upload_cancelled";
 
-// The sentence for an upload the person stopped before it finished (the upload_cancelled row of the table in 4.4).
+// The sentence for an upload the person stopped before it finished (the upload_cancelled row of the
+// table in 4.4).
 const UPLOAD_CANCELLED_SENTENCE =
   "The upload was stopped before it finished. Pick the file again to start over.";
 
-// Runs extraction, ranking (the summary's quotes and topics first, when there is one), the scrub preview and compression inside the Web
-// Worker; resolves once, never rejects.
+// Runs extraction, ranking (the summary's quotes and topics first, when there is one), the scrub
+// preview and compression inside the Web Worker; resolves once, never rejects.
 export function prepareUpload(
   input: UploadInput,
   options: {

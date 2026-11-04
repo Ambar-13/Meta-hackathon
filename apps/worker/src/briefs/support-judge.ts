@@ -1,4 +1,5 @@
-// The blind, order-flipped support check: builds the judge's input, maps its verdicts back by index, and gives the support rate.
+// The blind, order-flipped support check: builds the judge's input, maps its verdicts back by
+// index, and gives the support rate.
 import { createHash } from "node:crypto";
 import type { BriefPoint, BriefSupportJudgeOutput } from "@meet-first/contracts";
 import type { ChatMessage } from "@meet-first/llm";
@@ -12,7 +13,8 @@ const SECTION_KEYS = ["agree", "clash", "decideFirst"] as const;
 // Decimal places the support rate keeps.
 const RATE_SCALE = 1000;
 
-// One line as the judge sees it: its original index, whether its quote comes before its statement, and the line itself.
+// One line as the judge sees it: its original index, whether its quote comes before its statement,
+// and the line itself.
 type JudgeSlot = { index: number; isFlipped: boolean; point: BriefPoint };
 
 // The points of a brief in index order: agree 0 to 2, clash 3 to 5, decide first 6 to 8.
@@ -20,7 +22,8 @@ export function pointsInIndexOrder(sections: BriefSections): BriefPoint[] {
   return [...sections.agree, ...sections.clash, ...sections.decideFirst];
 }
 
-// The seeded random source: mulberry32 over the first 32 bits of sha256(seed). The same seed always gives the same numbers.
+// The seeded random source: mulberry32 over the first 32 bits of sha256(seed). The same seed always
+// gives the same numbers.
 export function makeSeededRandom(seed: string): () => number {
   const digest = createHash("sha256").update(seed).digest();
   let state = digest.readUInt32BE(0);
@@ -33,7 +36,8 @@ export function makeSeededRandom(seed: string): () => number {
   };
 }
 
-// Whether one line's quote comes before its statement to the judge: the first byte of sha256(line text, newline, quote text) is odd.
+// Whether one line's quote comes before its statement to the judge: the first byte of sha256(line
+// text, newline, quote text) is odd.
 export function isFlippedLine(point: BriefPoint): boolean {
   const quoteText = point.quotes.map((quote) => quote.text).join("\n");
   const digest = createHash("sha256").update(`${point.text}\n${quoteText}`).digest();
@@ -52,8 +56,8 @@ function shuffledIndexes(count: number, random: () => number): number[] {
   return order;
 }
 
-// The judge's text for one line: the statement and its quotes, in the order the flip gives. Both are escaped, as every block text
-// is, so a line or a quote cannot close its item and open another.
+// The judge's text for one line: the statement and its quotes, in the order the flip gives. Both
+// are escaped, as every block text is, so a line or a quote cannot close its item and open another.
 function slotBlock(slot: JudgeSlot): string[] {
   const quotes = slot.point.quotes.map(
     (quote) => `<quote>"${escapeBlockText(quote.text)}"</quote>`,
@@ -63,7 +67,8 @@ function slotBlock(slot: JudgeSlot): string[] {
   return [`<item index="${String(slot.index)}">`, ...body, "</item>"];
 }
 
-// The seed of one brief's shuffle: its side and the words of its nine lines. No id or clock goes in, so the same lines always give the same request.
+// The seed of one brief's shuffle: its side and the words of its nine lines. No id or clock goes
+// in, so the same lines always give the same request.
 export function judgeSeedOf(side: "a" | "b", points: BriefSections): string {
   const lines = pointsInIndexOrder(points).map(
     (point) => `${point.text}\n${point.quotes.map((quote) => quote.text).join("\n")}`,
@@ -71,7 +76,8 @@ export function judgeSeedOf(side: "a" | "b", points: BriefSections): string {
   return `${side}\n${lines.join("\n")}`;
 }
 
-// Builds the judge's messages for one brief: nine lines, shuffled and flipped by seeded rules, with no section names.
+// Builds the judge's messages for one brief: nine lines, shuffled and flipped by seeded rules, with
+// no section names.
 export function buildJudgeInput(input: {
   side: "a" | "b";
   points: BriefSections;
@@ -100,7 +106,8 @@ export function buildJudgeInput(input: {
   };
 }
 
-// Writes the judge's verdicts onto the points by their original index. Unknown indexes are dropped; for a repeated index the last verdict wins.
+// Writes the judge's verdicts onto the points by their original index. Unknown indexes are dropped;
+// for a repeated index the last verdict wins.
 export function applyJudgeOutput(
   sections: BriefSections,
   output: BriefSupportJudgeOutput,
@@ -119,7 +126,8 @@ export function applyJudgeOutput(
 // One verdict as the judge gives it, with the index of the line it judges.
 type Verdict = { index: number; supported: boolean; reason: string };
 
-// Sets one line's verdict and reason, or returns the sections unchanged when the index names no line.
+// Sets one line's verdict and reason, or returns the sections unchanged when the index names no
+// line.
 function setVerdict(sections: BriefSections, verdict: Verdict): BriefSections {
   const key = SECTION_KEYS[Math.floor(verdict.index / LINES_PER_SECTION)];
   const position = verdict.index % LINES_PER_SECTION;
@@ -134,7 +142,8 @@ function setVerdict(sections: BriefSections, verdict: Verdict): BriefSections {
   return { ...sections, [key]: updated };
 }
 
-// The support rate: supported lines over the lines that carry a quote, to three decimals; null when no line has a quote.
+// The support rate: supported lines over the lines that carry a quote, to three decimals; null when
+// no line has a quote.
 export function computeSupportRate(sections: BriefSections): number | null {
   const withQuote = pointsInIndexOrder(sections).filter((point) => point.quotes.length > 0);
   if (withQuote.length === 0) return null;

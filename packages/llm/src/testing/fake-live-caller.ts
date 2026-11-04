@@ -3,7 +3,8 @@ import type { z } from "zod";
 import { workerEnv, type LlmMode } from "@meet-first/contracts";
 import type { LiveCaller, LlmRequest } from "../modes.js";
 
-// One scripted answer of a fake live caller: a status, optional headers and body, a delay, and the usage it reports.
+// One scripted answer of a fake live caller: a status, optional headers and body, a delay, and the
+// usage it reports.
 export type ScriptedReply = {
   status: number;
   headers?: Record<string, string>;
@@ -51,7 +52,8 @@ function statusError(status: number, headers: Record<string, string>): Error {
   );
 }
 
-// A fake LiveCaller that answers from a script, in order, and records every request it saw. Tests that use it say "fake" in their name.
+// A fake LiveCaller that answers from a script, in order, and records every request it saw. Tests
+// that use it say "fake" in their name.
 export function fakeLiveCaller(script: ScriptedReply[]): { live: LiveCaller; calls: LlmRequest[] } {
   const calls: LlmRequest[] = [];
   const live: LiveCaller = async (request, signal) => {
@@ -71,7 +73,8 @@ export function fakeLiveCaller(script: ScriptedReply[]): { live: LiveCaller; cal
   return { live, calls };
 }
 
-// The worker's variables for a test in one mode, plus any overrides, so a worker test never names the mode variable.
+// The worker's variables for a test in one mode, plus any overrides, so a worker test never names
+// the mode variable.
 export function testWorkerVariables(
   mode: LlmMode,
   overrides: Record<string, string> = {},

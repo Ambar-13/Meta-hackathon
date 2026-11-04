@@ -1,4 +1,5 @@
-// Tests for the forbidden-imports workflow. The grep steps are read from the workflow file itself and run with bash -c inside a small temporary tree that holds one planted fault.
+// Tests for the forbidden-imports workflow. The grep steps are read from the workflow file itself
+// and run with bash -c inside a small temporary tree that holds one planted fault.
 import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -22,7 +23,8 @@ function workflowGreps(): string[] {
     .filter((run): run is string => run !== undefined);
 }
 
-// A temporary tree with the apps and packages folders the workflow greps, and the given files written into it.
+// A temporary tree with the apps and packages folders the workflow greps, and the given files
+// written into it.
 function makeTree(files: Record<string, string>): string {
   const root = mkdtempSync(join(tmpdir(), "w2-forbidden-"));
   folders.push(root);

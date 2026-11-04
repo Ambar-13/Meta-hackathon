@@ -33,13 +33,16 @@ export type ScriptedClient = LlmClient & {
 // The queues of one run: the replies still to send, per call site.
 type Queues = { speech: ScriptedSpeech[]; receipts: unknown[]; questionCheck: unknown[] };
 
-// Wraps a replay client so each missing fixture is written from the script right before the client reads it. killAfterReply makes the next times calls of one call site throw a plain error after the client returned, as a worker stopped between the reply and the commit would (a fake).
+// Wraps a replay client so each missing fixture is written from the script right before the client
+// reads it. killAfterReply makes the next times calls of one call site throw a plain error after
+// the client returned, as a worker stopped between the reply and the commit would (a fake).
 export function withScriptedReplies(
   client: LlmClient,
   script: ReplyScript,
   options: { fixtureRoot: string; killAfterReply?: { callSite: CallSite; times: number } },
 ): ScriptedClient {
-  // The queues are the script's own arrays, so a test may push a reply after the client exists and the next request reads it.
+  // The queues are the script's own arrays, so a test may push a reply after the client exists and
+  // the next request reads it.
   const queues: Queues = script;
   const written: string[] = [];
   const state = { counter: 1, killsLeft: options.killAfterReply?.times ?? 0 };
@@ -94,7 +97,8 @@ export function withScriptedReplies(
   };
 }
 
-// The stream replay layout of one scripted speech reply; tool call ids are call_<n> with n from the run's counter.
+// The stream replay layout of one scripted speech reply; tool call ids are call_<n> with n from the
+// run's counter.
 export function speechReplyLayout(
   reply: ScriptedSpeech,
   firstCallNumber: number,
@@ -127,7 +131,8 @@ export function speechReplyLayout(
   };
 }
 
-// The non-streamed reply layout of one scripted structured output: one choice whose content is the output as JSON.
+// The non-streamed reply layout of one scripted structured output: one choice whose content is the
+// output as JSON.
 export function structuredReplyLayout(output: unknown): Record<string, unknown> {
   return {
     choices: [
@@ -161,7 +166,8 @@ export function scriptedRecordedCall(
   });
 }
 
-// The request body the dossier client sends for these call arguments, so a fixture's hash is the hash of the job's request.
+// The request body the dossier client sends for these call arguments, so a fixture's hash is the
+// hash of the job's request.
 export function chatBodyFor(args: CompleteArgs, isStream: boolean): Record<string, unknown> {
   return buildChatRequest({
     callSite: args.callSite,
@@ -173,7 +179,8 @@ export function chatBodyFor(args: CompleteArgs, isStream: boolean): Record<strin
   });
 }
 
-// The next scripted reply of one call site, shaped as the client reads it; the speech counter moves by the tool calls it used.
+// The next scripted reply of one call site, shaped as the client reads it; the speech counter moves
+// by the tool calls it used.
 function nextResponse(
   queues: Queues,
   callSite: CallSite,

@@ -63,7 +63,8 @@ function refusedPoint(text: string, turnId: string): BriefPoint {
   };
 }
 
-// The brief of one side: three lines in each of the three groups, with the display names in the text.
+// The brief of one side: three lines in each of the three groups, with the display names in the
+// text.
 function briefOf(
   turnId: string,
   names: { mine: string; other: string },
@@ -87,14 +88,16 @@ function briefOf(
   };
 }
 
-// Seeds one ended meeting with both briefs and a rendering comic, and optionally the brief.ready event.
+// Seeds one ended meeting with both briefs and a rendering comic, and optionally the brief.ready
+// event.
 async function seedEndedMeeting(options: { withBriefReady: boolean }): Promise<Seed> {
   const meeting = await createPairedMeetingWithTurns(fresh.db);
   const now = new Date();
   const turnA = meeting.a.turnIds[0] ?? "";
   const turnB = meeting.b.turnIds[0] ?? "";
   const seed = await withMeeting(workerDb, meeting.meetingId, async (trx) => {
-    // A meeting moves ready, running, ended (migration 0001); the seed walks the same path the meeting engine does.
+    // A meeting moves ready, running, ended (migration 0001); the seed walks the same path the
+    // meeting engine does.
     const started = new Date(now.getTime() - 600_000);
     await trx
       .updateTable("meetings")
@@ -223,8 +226,8 @@ async function comicEvents(
   );
 }
 
-// A live caller for the job test: the recorded reply of every call, except the ones a test overrides.
-// Overrides return a reply, or "never" for a call that does not come back.
+// A live caller for the job test: the recorded reply of every call, except the ones a test
+// overrides. Overrides return a reply, or "never" for a call that does not come back.
 function replayingLive(
   override: (request: LlmRequest) => Record<string, unknown> | "never" | undefined,
 ): LiveCaller {

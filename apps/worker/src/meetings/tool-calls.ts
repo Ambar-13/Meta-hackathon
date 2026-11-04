@@ -66,7 +66,8 @@ export async function runRoundTransaction(
   });
 }
 
-// The tool message for a call that could not run, so the model reads why and the history stays valid.
+// The tool message for a call that could not run, so the model reads why and the history stays
+// valid.
 export function toolErrorMessage(toolCallId: string, sentence: string): ToolMessage {
   return {
     role: "tool",
@@ -75,7 +76,8 @@ export function toolErrorMessage(toolCallId: string, sentence: string): ToolMess
   };
 }
 
-// Runs one call by the rules in order: unknown name, not offered now, bad arguments, then the tool itself.
+// Runs one call by the rules in order: unknown name, not offered now, bad arguments, then the tool
+// itself.
 async function runOneCall(
   scope: Scope,
   call: ToolCall,
@@ -92,7 +94,8 @@ async function runOneCall(
   return runHoldCall(scope, call, holdArgs.safeParse(raw));
 }
 
-// The recall tool: search the speaker's notes, record the call and its result, and answer with the labelled turns.
+// The recall tool: search the speaker's notes, record the call and its result, and answer with the
+// labelled turns.
 async function runRecallCall(
   scope: Scope,
   call: ToolCall,
@@ -111,7 +114,8 @@ async function runRecallCall(
   };
 }
 
-// The concede tool: accept one of the other side's claims by its label, or record that the label named no such claim.
+// The concede tool: accept one of the other side's claims by its label, or record that the label
+// named no such claim.
 async function runConcedeCall(
   scope: Scope,
   call: ToolCall,

@@ -1,6 +1,6 @@
-// What the home screen shows the signed-in person: their name, newest source, newest card, meetings and live pairs.
-// Every read runs in the person's own context, and the only things about anyone else are the display names the lobby
-// and the meeting screen already show them.
+// What the home screen shows the signed-in person: their name, newest source, newest card, meetings
+// and live pairs. Every read runs in the person's own context, and the only things about anyone
+// else are the display names the lobby and the meeting screen already show them.
 import { sql } from "kysely";
 import {
   HOME_CARD_ITEMS_MAX,
@@ -18,7 +18,8 @@ import { readOwnPhoto } from "./person-photos.js";
 // The names pair_display_names returns for one pair the caller is in.
 type PairNames = { creator_display_name: string; joiner_display_name: string | null };
 
-// The person's newest source by creation time, or null. namesPassDone is the names_passes row GET /api/sources/:id reads.
+// The person's newest source by creation time, or null. namesPassDone is the names_passes row GET
+// /api/sources/:id reads.
 export async function readHomeSource(
   trx: DatabaseTransaction,
   personId: string,
@@ -44,8 +45,8 @@ export async function readHomeSource(
   };
 }
 
-// The person's newest card by creation time, or null: its state, its item count, and its first items in position order
-// (only approved items once the card is approved).
+// The person's newest card by creation time, or null: its state, its item count, and its first
+// items in position order (only approved items once the card is approved).
 export async function readHomeCard(
   trx: DatabaseTransaction,
   personId: string,
@@ -73,8 +74,9 @@ export async function readHomeCard(
   return { id: card.id, state: card.state, itemCount: Number(counted.count), items: rows };
 }
 
-// The meetings the person is a member of, newest first, at most HOME_LIST_MAX, deleted ones left out. The other member's
-// name comes from readMemberNames, the same read GET /api/meetings/:id uses; isBriefReady looks only at the person's own brief.
+// The meetings the person is a member of, newest first, at most HOME_LIST_MAX, deleted ones left
+// out. The other member's name comes from readMemberNames, the same read GET /api/meetings/:id
+// uses; isBriefReady looks only at the person's own brief.
 export async function readHomeMeetings(
   trx: DatabaseTransaction,
   personId: string,
@@ -117,7 +119,8 @@ export async function readHomeMeetings(
   return meetings;
 }
 
-// The other person's name in one pair, through pair_display_names as the lobby reads it; null while nobody has joined.
+// The other person's name in one pair, through pair_display_names as the lobby reads it; null while
+// nobody has joined.
 async function readOtherPairName(
   trx: DatabaseTransaction,
   pair: { id: string; creator_person_id: string; joiner_person_id: string | null },
@@ -135,7 +138,8 @@ async function readOtherPairName(
     : names.creator_display_name;
 }
 
-// The pairs the person made or joined whose expiry is later than now, newest first, at most HOME_LIST_MAX.
+// The pairs the person made or joined whose expiry is later than now, newest first, at most
+// HOME_LIST_MAX.
 export async function readHomePairs(
   trx: DatabaseTransaction,
   input: { personId: string; now: Date },

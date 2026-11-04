@@ -31,7 +31,8 @@ const GOOGLE_ISSUERS: ReadonlySet<string> = new Set([
   "https://accounts.google.com",
   "accounts.google.com",
 ]);
-// The cookie that carries a sign-in's state, nonce and verifier from the start to the callback; __Host- keeps it to this exact site.
+// The cookie that carries a sign-in's state, nonce and verifier from the start to the callback;
+// __Host- keeps it to this exact site.
 const GOOGLE_COOKIE = "__Host-google";
 // How long a sign-in may take at Google, in seconds.
 const GOOGLE_COOKIE_MAX_AGE_SECONDS = 600;
@@ -42,8 +43,9 @@ const NAME_FALLBACK = "New Meety";
 // Where a signed-in person lands.
 const HOME_PATH = "/home";
 
-// The callback's limit: 60 sign-ins per address per hour, so a room of people on one network can all sign in, while a script still cannot
-// make accounts at will, since each needs a Google account. Sign-up's own limit is 10 (rate-limit.ts).
+// The callback's limit: 60 sign-ins per address per hour, so a room of people on one network can
+// all sign in, while a script still cannot make accounts at will, since each needs a Google
+// account. Sign-up's own limit is 10 (rate-limit.ts).
 const GOOGLE_SIGN_IN_RATE_LIMIT = {
   max: 60,
   timeWindow: 3_600_000,
@@ -75,7 +77,8 @@ const CallbackQuery = z.object({
   error: z.string().max(200).optional(),
 });
 
-// One sign-in's secrets: the state that ties the callback to this browser, the nonce Google puts in the token, and the PKCE verifier.
+// One sign-in's secrets: the state that ties the callback to this browser, the nonce Google puts in
+// the token, and the PKCE verifier.
 export type PendingSignIn = { state: string; nonce: string; verifier: string };
 
 // A fresh sign-in's secrets, each random and URL-safe.
@@ -91,7 +94,8 @@ function newPending(): PendingSignIn {
 export function pendingText(pending: PendingSignIn): string {
   return `${pending.state}.${pending.nonce}.${pending.verifier}`;
 }
-// The cookie's text read back into a sign-in's secrets; null for a cookie that is missing or not one Meety wrote.
+// The cookie's text read back into a sign-in's secrets; null for a cookie that is missing or not
+// one Meety wrote.
 export function readPending(text: string | undefined): PendingSignIn | null {
   const parts = (text ?? "").split(".");
   const [state, nonce, verifier] = parts;
@@ -107,13 +111,14 @@ function isGoogleOn(deps: RouteDeps): boolean {
   return deps.env.GOOGLE_CLIENT_ID !== "" && deps.env.GOOGLE_CLIENT_SECRET !== "";
 }
 
-// The address Google sends the browser back to: the site's own origin and the callback path, as registered with the Google client.
+// The address Google sends the browser back to: the site's own origin and the callback path, as
+// registered with the Google client.
 export function callbackUrl(origin: string): string {
   return new URL(routes.people.googleCallback.path, origin).toString();
 }
 
-// Google's sign-in address for one sign-in: the code flow with PKCE, asking only for openid and profile (the name), never the email,
-// and letting the person pick an account.
+// Google's sign-in address for one sign-in: the code flow with PKCE, asking only for openid and
+// profile (the name), never the email, and letting the person pick an account.
 export function googleAuthUrl(input: {
   clientId: string;
   origin: string;
@@ -135,7 +140,8 @@ export function googleAuthUrl(input: {
   return url.toString();
 }
 
-// The claims of an ID token, read from its middle part; null when it is not a token or not one Meety can read.
+// The claims of an ID token, read from its middle part; null when it is not a token or not one
+// Meety can read.
 export function claimsOf(idToken: string): IdClaims | null {
   const payload = idToken.split(".")[1];
   if (payload === undefined) return null;
@@ -149,7 +155,8 @@ export function claimsOf(idToken: string): IdClaims | null {
   }
 }
 
-// True when the claims come from Google, are for this client, have not expired and carry this sign-in's nonce.
+// True when the claims come from Google, are for this client, have not expired and carry this
+// sign-in's nonce.
 export function areClaimsValid(
   claims: IdClaims,
   input: { clientId: string; nonce: string; nowSeconds: number },
@@ -162,7 +169,8 @@ export function areClaimsValid(
   );
 }
 
-// The display name from the claims: the full name, else the first name, else NAME_FALLBACK, cut to DISPLAY_NAME_MAX_CHARS characters.
+// The display name from the claims: the full name, else the first name, else NAME_FALLBACK, cut to
+// DISPLAY_NAME_MAX_CHARS characters.
 export function nameOf(claims: IdClaims): string {
   const name = (claims.name ?? claims.given_name ?? "").trim();
   return Array.from(name === "" ? NAME_FALLBACK : name)
@@ -170,8 +178,8 @@ export function nameOf(claims: IdClaims): string {
     .join("");
 }
 
-// Swaps the one-time code for the ID token's claims at Google's token endpoint; null when Google refuses it, cannot be reached in
-// TOKEN_TIMEOUT_MS, or answers something else.
+// Swaps the one-time code for the ID token's claims at Google's token endpoint; null when Google
+// refuses it, cannot be reached in TOKEN_TIMEOUT_MS, or answers something else.
 async function exchangeCode(
   deps: RouteDeps,
   input: { code: string; verifier: string },
@@ -204,8 +212,8 @@ function backToStart(reply: FastifyReply, result: GoogleSignInResult): FastifyRe
   return reply.redirect(`/?${GOOGLE_RESULT_QUERY}=${result}`, 303);
 }
 
-// The claims of a callback that checks out: the query names this sign-in's state and a code, and Google swaps that code for claims
-// that are valid; else why it did not finish.
+// The claims of a callback that checks out: the query names this sign-in's state and a code, and
+// Google swaps that code for claims that are valid; else why it did not finish.
 async function checkedClaims(
   deps: RouteDeps,
   query: z.infer<typeof CallbackQuery>,
@@ -224,9 +232,10 @@ async function checkedClaims(
   return isValid ? claims : "failed";
 }
 
-// Registers GET /api/auth/google/callback: with a code that checks out, the person behind the Google account, or a new person the first
-// time, gets a session cookie and 303 to Home; otherwise 303 to the start page with ?google=cancelled or ?google=failed. The sign-in's
-// cookie is spent either way. Counted by its own limit per address, looser than sign-up's.
+// Registers GET /api/auth/google/callback: with a code that checks out, the person behind the
+// Google account, or a new person the first time, gets a session cookie and 303 to Home; otherwise
+// 303 to the start page with ?google=cancelled or ?google=failed. The sign-in's cookie is spent
+// either way. Counted by its own limit per address, looser than sign-up's.
 function registerCallback(app: FastifyInstance, deps: RouteDeps): void {
   app.get(
     routes.people.googleCallback.path,
@@ -252,9 +261,9 @@ function registerCallback(app: FastifyInstance, deps: RouteDeps): void {
   );
 }
 
-// Registers the Google sign-in routes: GET /api/auth/options (200 AuthOptions, whether Continue with Google is on), GET /api/auth/google
-// (303 to Google with a fresh sign-in's cookie, or back to the start page with ?google=failed when the site has no Google client), and
-// the callback.
+// Registers the Google sign-in routes: GET /api/auth/options (200 AuthOptions, whether Continue
+// with Google is on), GET /api/auth/google (303 to Google with a fresh sign-in's cookie, or back to
+// the start page with ?google=failed when the site has no Google client), and the callback.
 export function registerGoogleSignIn(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.people.authOptions.path, async (request, reply) =>
     reply.code(200).send(AuthOptions.parse({ google: isGoogleOn(deps) })),

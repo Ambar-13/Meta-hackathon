@@ -37,7 +37,8 @@ const ANSWER_IDS = {
 } as const;
 // The text of the fixture ask.
 const ASK_TEXT = "Our deploys fail at night and nobody knows why.";
-// One claim of each receipt kind: backed, verified but not backed, verified and not checked, and not verified.
+// One claim of each receipt kind: backed, verified but not backed, verified and not checked, and
+// not verified.
 const BACKED: AnswerClaim = {
   text: "Reads the logs before guessing",
   quote: "I always read the logs before I guess at a cause.",
@@ -87,7 +88,8 @@ function helpAnswer(spec: {
   };
 }
 
-// The fixture ask with the given fields replaced: a done help search with no answers unless told otherwise.
+// The fixture ask with the given fields replaced: a done help search with no answers unless told
+// otherwise.
 function askView(overrides: Partial<AskView>): AskView {
   return AskView.parse({
     askId: ASK,
@@ -102,7 +104,8 @@ function askView(overrides: Partial<AskView>): AskView {
   });
 }
 
-// The four answers of a finished help search: Mira and Dev placed and meetable, Sol and Ana with no position.
+// The four answers of a finished help search: Mira and Dev placed and meetable, Sol and Ana with no
+// position.
 function fourAnswers(): AskAnswer[] {
   return [
     helpAnswer({
@@ -140,7 +143,8 @@ function fourAnswers(): AskAnswer[] {
   ];
 }
 
-// Renders the answers page at the given address: the fixture ask with no card query unless told otherwise.
+// Renders the answers page at the given address: the fixture ask with no card query unless told
+// otherwise.
 function renderAsk(url: string = APP_PATHS.ask(ASK)): void {
   renderScreen(<AskScreen />, { pattern: ROUTE_PATTERNS.ask, url });
 }

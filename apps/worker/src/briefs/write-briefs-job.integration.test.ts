@@ -265,7 +265,8 @@ describe("write_briefs job", () => {
   });
 });
 
-// How many briefs, committed events and model calls a meeting has, to check that a second run adds nothing.
+// How many briefs, committed events and model calls a meeting has, to check that a second run adds
+// nothing.
 async function countsOf(
   meetingId: string,
 ): Promise<{ briefs: number; events: number; ledger: number }> {

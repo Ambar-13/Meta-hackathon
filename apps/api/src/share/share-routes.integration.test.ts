@@ -49,7 +49,8 @@ afterAll(async () => {
   await kit.close();
 });
 
-// Creates a paired meeting. When ended is true it runs and ends, and when withBrief is true it also stores brief.ready at seq 1.
+// Creates a paired meeting. When ended is true it runs and ends, and when withBrief is true it also
+// stores brief.ready at seq 1.
 async function meetingFor(options: { ended: boolean; withBrief: boolean }): Promise<Seeded> {
   const seeded = await createPairedMeeting(kit.db, { questionId: 3 });
   if (!options.ended) return seeded;
@@ -187,7 +188,8 @@ async function consentBoth(seeded: Seeded): Promise<string> {
   return ConsentResponse.parse(bodyOf(second)).slug ?? "";
 }
 
-// Runs the takedown script on the test database with the given arguments, and returns its exit code and output.
+// Runs the takedown script on the test database with the given arguments, and returns its exit code
+// and output.
 function runTakedown(args: string[]): { status: number | null; stdout: string; stderr: string } {
   const result = spawnSync(TSX_RUNNER, [TAKEDOWN_SCRIPT, ...args], {
     encoding: "utf8",
@@ -324,7 +326,8 @@ it("W2-SHARE-T10: two second-consents racing fill the snapshot once", async () =
   expect(row.published_at).not.toBeNull();
 });
 
-// Creates one person with a session and returns the session token, for a request from outside the meeting.
+// Creates one person with a session and returns the session token, for a request from outside the
+// meeting.
 async function createTestPersonFor(name: string): Promise<string> {
   const person = await createTestPerson(kit.db, name);
   return person.sessionToken;

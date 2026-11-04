@@ -1,7 +1,8 @@
-// What exists: every claim of a persona answer has a quote, checked inside its named turn (verified) and, for verified claims, by
-// the support check (supported). The problem: a reader must see when a quote did not check out, without colour and without any
-// number about a person. The step: each claim shows its text, its quote and at most one receipt mark as text. What it does not do:
-// show a position, a count or a rank.
+// What exists: every claim of a persona answer has a quote, checked inside its named turn
+// (verified) and, for verified claims, by the support check (supported). The problem: a reader must
+// see when a quote did not check out, without colour and without any number about a person. The
+// step: each claim shows its text, its quote and at most one receipt mark as text. What it does not
+// do: show a position, a count or a rank.
 import type { ReactElement } from "react";
 import {
   NO_RECEIPT_COPY,
@@ -13,21 +14,24 @@ import { Avatar, Sticker } from "../../look/index.js";
 
 // The line for an answer that carries no claim.
 const NO_CLAIMS_LINE = "No quotes from their notes.";
-// The line in place of the meeting button when this phone knows no approved card; the lobby has the same limit.
+// The line in place of the meeting button when this phone knows no approved card; the lobby has the
+// same limit.
 const NO_CARD_LINE =
   "Open your approved card on this phone first, then come back here to start a meeting.";
 // The words of the meeting button.
 const MEET_LABEL = "Start a meeting";
 
-// The receipt mark of one claim: no receipt when its quote was not found in the named turn, weak receipt when the support check did
-// not back it or did not run, and none otherwise. An unverified claim gets only the no receipt mark.
+// The receipt mark of one claim: no receipt when its quote was not found in the named turn, weak
+// receipt when the support check did not back it or did not run, and none otherwise. An unverified
+// claim gets only the no receipt mark.
 export function receiptMarkFor(claim: AnswerClaim): string | null {
   if (!claim.verified) return NO_RECEIPT_COPY;
   if (claim.supported !== true) return WEAK_RECEIPT_COPY;
   return null;
 }
 
-// The flag of a claim whose quote is missing or weak: the receipt flag's look, with the mark as its only text and role note.
+// The flag of a claim whose quote is missing or weak: the receipt flag's look, with the mark as its
+// only text and role note.
 const ClaimFlag = (props: { mark: string }): ReactElement => {
   const isWeak = props.mark === WEAK_RECEIPT_COPY;
   return (
@@ -38,8 +42,9 @@ const ClaimFlag = (props: { mark: string }): ReactElement => {
   );
 };
 
-// One answer's claims: each claim's text, its quote as a receipt card, and its receipt mark as text with role note; or the line that
-// it has none. A flagged claim's quote card is dashed, so a claim without a backed quote looks different from one with it.
+// One answer's claims: each claim's text, its quote as a receipt card, and its receipt mark as text
+// with role note; or the line that it has none. A flagged claim's quote card is dashed, so a claim
+// without a backed quote looks different from one with it.
 export const AnswerClaims = (props: { claims: AnswerClaim[] }): ReactElement => {
   if (props.claims.length === 0) return <p className="muted ask-no-claims">{NO_CLAIMS_LINE}</p>;
   return (
@@ -64,7 +69,8 @@ export const AnswerClaims = (props: { claims: AnswerClaim[] }): ReactElement => 
   );
 };
 
-// The meeting control of a meetable answer: the button when this phone knows an approved card, else the line that says how to get one.
+// The meeting control of a meetable answer: the button when this phone knows an approved card, else
+// the line that says how to get one.
 const MeetControl = (props: {
   answerId: string;
   cardId: string | null;
@@ -87,8 +93,8 @@ const MeetControl = (props: {
   );
 };
 
-// One help answer: the persona's initial, display name and line, its answer in a blue bubble, its claims, and the meeting control when
-// canMeet is true.
+// One help answer: the persona's initial, display name and line, its answer in a blue bubble, its
+// claims, and the meeting control when canMeet is true.
 export const HelpAnswerItem = (props: {
   answer: AskAnswer;
   cardId: string | null;

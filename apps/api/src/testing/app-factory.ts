@@ -22,9 +22,10 @@ type Observed = { lines: string[]; jobs: EnqueuedJob[] };
 // The records of each test app, by app, so testLogLines and enqueuedJobs can read them.
 const records = new WeakMap<FastifyInstance, Observed>();
 
-// Apps alive in this test process. The seeds of @meet-first/db/testing write to the database named in DATABASE_URL_TEST,
-// so the first app uses that database; an app that starts while another is alive gets a database of its own, because
-// freshTestDatabase would otherwise rebuild the database the other app is using.
+// Apps alive in this test process. The seeds of @meet-first/db/testing write to the database named
+// in DATABASE_URL_TEST, so the first app uses that database; an app that starts while another is
+// alive gets a database of its own, because freshTestDatabase would otherwise rebuild the database
+// the other app is using.
 let liveApps = 0;
 
 // Rebuilds the database for one test app (see liveApps above).
@@ -43,7 +44,8 @@ async function freshDatabaseForApp(): Promise<TestDatabase> {
   }
 }
 
-// Builds the api on a fresh test database with the real hooks, the real job queue and the routes given; every slot when none are given.
+// Builds the api on a fresh test database with the real hooks, the real job queue and the routes
+// given; every slot when none are given.
 export async function buildTestApp(options?: {
   routes?: RoutePlugin[];
   env?: Partial<ApiEnv>;
@@ -77,7 +79,8 @@ export async function buildTestApp(options?: {
   await app.ready();
   records.set(app, { lines, jobs });
   const close = async (): Promise<void> => {
-    // A test's HTTP client can leave a socket open after its last response, and the server would then wait for it.
+    // A test's HTTP client can leave a socket open after its last response, and the server would
+    // then wait for it.
     app.server.closeAllConnections();
     try {
       await app.close();

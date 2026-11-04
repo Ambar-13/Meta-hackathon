@@ -1,8 +1,9 @@
-// What exists: the orchestrator plans one thing for each message, and the api runs that plan only when the person presses its button.
-// The problem: the signed-in home must feel like a chat, show what each reply will do before anything goes to another agent, and fill
-// in the ask as the agents answer. The step: this page is one centred column, the thread, then the big composer at the bottom; an
-// empty thread shows a greeting and three example chips. What it does not do: wire itself to /home (the integrator does) or draw the
-// rail and tabs (the frame does).
+// What exists: the orchestrator plans one thing for each message, and the api runs that plan only
+// when the person presses its button. The problem: the signed-in home must feel like a chat, show
+// what each reply will do before anything goes to another agent, and fill in the ask as the agents
+// answer. The step: this page is one centred column, the thread, then the big composer at the
+// bottom; an empty thread shows a greeting and three example chips. What it does not do: wire
+// itself to /home (the integrator does) or draw the rail and tabs (the frame does).
 import "./chat.css";
 import { useEffect, useRef, type ReactElement, type RefObject } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -24,7 +25,8 @@ const LOADING_LINE = "Loading your chat.";
 // The line under Meety's name at the top of the chat, as Instagram shows who you are talking to.
 const INTRO_LINE = "Your personal AI";
 
-// Today's next step while the person has no approved card: one line and its button, above the chat and the feed.
+// Today's next step while the person has no approved card: one line and its button, above the chat
+// and the feed.
 export const NextStep = (props: { home: HomeView }): ReactElement | null => {
   if (props.home.card?.state === "approved") return null;
   const step = nextStepOf(props.home);
@@ -41,7 +43,8 @@ export const NextStep = (props: { home: HomeView }): ReactElement | null => {
   );
 };
 
-// The top of the chat, as Instagram opens a chat with someone: Meety's picture, its name, and what it is.
+// The top of the chat, as Instagram opens a chat with someone: Meety's picture, its name, and what
+// it is.
 const Intro = (): ReactElement => {
   return (
     <div className="chat-intro">
@@ -52,8 +55,9 @@ const Intro = (): ReactElement => {
   );
 };
 
-// The empty thread: Meety's first message, its logo in line with its name over two grey bubbles from the left edge (the greeting with
-// the person's name in coral, then the line under it), then the example chips.
+// The empty thread: Meety's first message, its logo in line with its name over two grey bubbles
+// from the left edge (the greeting with the person's name in coral, then the line under it), then
+// the example chips.
 const Greeting = (props: { displayName: string | null; chips: ReactElement }): ReactElement => {
   const name = props.displayName?.trim() ?? "";
   const text = greetingOf(name);
@@ -78,8 +82,9 @@ const Greeting = (props: { displayName: string | null; chips: ReactElement }): R
   );
 };
 
-// The three example chips under the greeting, as quick replies, each with its kind's icon: the first finds who could help, the other two
-// ask a friend's Meety. Pressing one fills the box and never sends.
+// The three example chips under the greeting, as quick replies, each with its kind's icon: the
+// first finds who could help, the other two ask a friend's Meety. Pressing one fills the box and
+// never sends.
 const Chips = (props: { model: ChatModel }): ReactElement => {
   const texts = chipTexts(props.model.friends.value?.friends ?? null);
   return (
@@ -101,7 +106,8 @@ const Chips = (props: { model: ChatModel }): ReactElement => {
   );
 };
 
-// How long after the newest message changes the page keeps to the end while parts above it grow, such as an ask card filling in.
+// How long after the newest message changes the page keeps to the end while parts above it grow,
+// such as an ask card filling in.
 const KEEP_AT_END_MS = 1_500;
 
 // Scrolls the end of the chat into view; it jumps under reduced motion or when asked to.
@@ -111,8 +117,8 @@ function scrollToEnd(target: HTMLElement, isInstant: boolean): void {
   target.scrollIntoView({ block: "end", behavior: isReduced || isInstant ? "auto" : "smooth" });
 }
 
-// Scrolls to the end of the chat when the page loads (a jump), on a send and when a reply arrives, and keeps to the end for a moment
-// while cards above it fill in.
+// Scrolls to the end of the chat when the page loads (a jump), on a send and when a reply arrives,
+// and keeps to the end for a moment while cards above it fill in.
 function useScrollToNewest(key: string): RefObject<HTMLDivElement | null> {
   const end = useRef<HTMLDivElement>(null);
   const hasScrolled = useRef(false);
@@ -164,20 +170,23 @@ const ThreadState = (props: { model: ChatModel }): ReactElement | null => {
   return thread.value === null ? <LoadingLine text={LOADING_LINE} /> : null;
 };
 
-// The class of the page's root: chat, plus is-ready once the thread is read and is-empty when it holds nothing.
+// The class of the page's root: chat, plus is-ready once the thread is read and is-empty when it
+// holds nothing.
 function rootClass(isReady: boolean, isEmpty: boolean): string {
   return ["chat", isReady ? "is-ready" : "", isEmpty ? "is-empty" : ""]
     .filter((part) => part !== "")
     .join(" ");
 }
 
-// The key that changes when the newest message changes: on load, on a send and when a reply arrives.
+// The key that changes when the newest message changes: on load, on a send and when a reply
+// arrives.
 function newestKey(messages: ChatModel["messages"]): string {
   const last = messages.at(-1);
   return last === undefined ? "" : `${String(messages.length)}:${last.id}:${last.state}`;
 }
 
-// The chat itself: the next step while there is no approved card, the greeting or the thread, the box, and the chips.
+// The chat itself: the next step while there is no approved card, the greeting or the thread, the
+// box, and the chips.
 const ChatColumn = (props: {
   model: ChatModel;
   isEmpty: boolean;
@@ -202,7 +211,8 @@ const ChatColumn = (props: {
   );
 };
 
-// The chat page: the next step while there is no approved card, the greeting or the thread, the composer, and the chips.
+// The chat page: the next step while there is no approved card, the greeting or the thread, the
+// composer, and the chips.
 export const ChatScreen = (): ReactElement => {
   const location = useLocation();
   const model = useChatScreen(readDraftQuery(location.search));

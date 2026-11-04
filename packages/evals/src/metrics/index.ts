@@ -1,4 +1,5 @@
-// The seven metrics in their table order, the result shape they share, and the targets they are judged against.
+// The seven metrics in their table order, the result shape they share, and the targets they are
+// judged against.
 import { z } from "zod";
 import type { EvalRows } from "../collect-rows.js";
 import { measureCostPerPair } from "./cost-per-pair.js";
@@ -69,12 +70,14 @@ const TargetsFile = z
   })
   .strict();
 
-// Reads the targets file's text and returns the targets; a file with a missing or extra key is refused with zod's message.
+// Reads the targets file's text and returns the targets; a file with a missing or extra key is
+// refused with zod's message.
 export function parseTargets(json: unknown): Targets {
   return TargetsFile.parse(json);
 }
 
-// Runs the seven metrics over the rows in table order and attaches each target and direction from the targets file.
+// Runs the seven metrics over the rows in table order and attaches each target and direction from
+// the targets file.
 export function computeAllMetrics(rows: EvalRows, targets: Targets): MetricResult[] {
   return METRICS.map((measure) => {
     const result = measure(rows);

@@ -3,12 +3,14 @@ import { join } from "node:path";
 import { ContractError, type CallSite, RecordedCall } from "@meet-first/contracts";
 import { SCRIPTED_REPLIES_DIR } from "@meet-first/llm/testing";
 
-// The path of one scripted reply a test replays. Tests read the scripted replies, never the recordings of the real model.
+// The path of one scripted reply a test replays. Tests read the scripted replies, never the
+// recordings of the real model.
 export function recordedReplyPath(callSite: CallSite, requestHash: string): string {
   return join(SCRIPTED_REPLIES_DIR, callSite, `${requestHash}.json`);
 }
 
-// Reads one fixture and parses it with RecordedCall; a missing file throws replay_fixture_missing with the modes.ts sentence.
+// Reads one fixture and parses it with RecordedCall; a missing file throws replay_fixture_missing
+// with the modes.ts sentence.
 export function loadRecordedReply(callSite: CallSite, requestHash: string): RecordedCall {
   const path = recordedReplyPath(callSite, requestHash);
   if (!existsSync(path)) {

@@ -72,8 +72,9 @@ export const peopleRoutes = {
     request: z.undefined(),
     response: z.undefined(),
   },
-  // Instagram's Edit profile: a new display name, and a profile photo sent as the JPEG bytes themselves (image/jpeg), which
-  // GET /api/photos/:id sends back as image/jpeg to anyone signed in who was shown its id.
+  // Instagram's Edit profile: a new display name, and a profile photo sent as the JPEG bytes
+  // themselves (image/jpeg), which GET /api/photos/:id sends back as image/jpeg to anyone signed in
+  // who was shown its id.
   updateName: {
     method: "PUT",
     path: "/api/people/me/name",
@@ -105,8 +106,8 @@ export const peopleRoutes = {
     response: Health,
     public: true,
   },
-  // Sign in with Google: the ways to sign in, the start, which sends the browser to Google, and the callback, where Google
-  // sends it back; all three answer with no session.
+  // Sign in with Google: the ways to sign in, the start, which sends the browser to Google, and the
+  // callback, where Google sends it back; all three answer with no session.
   authOptions: {
     method: "GET",
     path: "/api/auth/options",

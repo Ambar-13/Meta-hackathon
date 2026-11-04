@@ -1,4 +1,5 @@
-// Steps 5 to 7: A's quiz, both people's approvals with the recall switch, and the pair with its meeting, started by both go-aheads.
+// Steps 5 to 7: A's quiz, both people's approvals with the recall switch, and the pair with its
+// meeting, started by both go-aheads.
 import {
   ErrorBody,
   MEETING_LENGTH_MINUTES,
@@ -70,7 +71,8 @@ export async function readMeetingView(client: PersonClient, meetingId: string) {
   return reply.body;
 }
 
-// The checks on one judged quiz: ten items, the answers and judgments on each, and the count line. A count of "%" is refused.
+// The checks on one judged quiz: ten items, the answers and judgments on each, and the count line.
+// A count of "%" is refused.
 function judgedChecks(view: QuizView): Assertion[] {
   const isJudged = view.items.every(
     (item) =>
@@ -93,8 +95,9 @@ function judgedChecks(view: QuizView): Assertion[] {
   ];
 }
 
-// Step 5: A takes the quiz. Under --mock the whole step is not exercised, because a judged quiz cannot be replayed. Under --record it is
-// skipped too: the quiz's misses go into A's meeting prompt, so a recording made with them would not replay under --mock.
+// Step 5: A takes the quiz. Under --mock the whole step is not exercised, because a judged quiz
+// cannot be replayed. Under --record it is skipped too: the quiz's misses go into A's meeting
+// prompt, so a recording made with them would not replay under --mock.
 export async function step05Quiz(run: RunState): Promise<StepResult> {
   if (run.options.mode === "mock") {
     return finishStep(5, "quiz", {
@@ -175,7 +178,8 @@ export async function step05Quiz(run: RunState): Promise<StepResult> {
   });
 }
 
-// Step 6: both people approve their items. A turns the recall switch on, B leaves it off, and B's recall corpus stays empty.
+// Step 6: both people approve their items. A turns the recall switch on, B leaves it off, and B's
+// recall corpus stays empty.
 export async function step06Approve(run: RunState): Promise<StepResult> {
   const personA = need(run.ids.personA, "personA");
   const personB = need(run.ids.personB, "personB");
@@ -226,7 +230,8 @@ export async function step06Approve(run: RunState): Promise<StepResult> {
   });
 }
 
-// Step 7: A creates the pair, B joins with the token from the link, both ask a question, and both say ready. The meeting then starts by itself.
+// Step 7: A creates the pair, B joins with the token from the link, both ask a question, and both
+// say ready. The meeting then starts by itself.
 export async function step07Pair(run: RunState): Promise<StepResult> {
   const cardA = need(run.ids.cardA, "cardA");
   const created = await run.a.json({
@@ -312,7 +317,8 @@ export async function step07Pair(run: RunState): Promise<StepResult> {
   return finishStep(7, "pair", { rows: ["R5.3", "R9.3"], detail, assertions });
 }
 
-// Asks the free-text question in a second meeting that is never readied or started, and checks that the question check allows it.
+// Asks the free-text question in a second meeting that is never readied or started, and checks that
+// the question check allows it.
 async function askFreeTextQuestion(
   run: RunState,
   call: { createPath: string; cardId: string },
@@ -357,7 +363,8 @@ async function startRefusals(run: RunState, meetingId: string): Promise<void> {
   });
 }
 
-// The database rows of a started meeting: state, times, one step, and a stored prompt prefix for both members.
+// The database rows of a started meeting: state, times, one step, and a stored prompt prefix for
+// both members.
 async function checkStartedRows(
   run: RunState,
   meetingId: string,
@@ -387,7 +394,8 @@ async function checkStartedRows(
   );
 }
 
-// Opens both readers. Reader A is cut at PLANNED_DISCONNECT_SEQ on purpose. Both must see meeting.started as the first event with seq 1.
+// Opens both readers. Reader A is cut at PLANNED_DISCONNECT_SEQ on purpose. Both must see
+// meeting.started as the first event with seq 1.
 async function openReaders(
   run: RunState,
   meetingId: string,

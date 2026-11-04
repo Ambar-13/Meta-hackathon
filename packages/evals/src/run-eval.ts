@@ -1,4 +1,5 @@
-// The entry point of pnpm eval: runs the pairs through the product, computes the metrics, prints the table, and sets the exit code.
+// The entry point of pnpm eval: runs the pairs through the product, computes the metrics, prints
+// the table, and sets the exit code.
 import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -23,7 +24,8 @@ import {
 } from "./results-writer.js";
 import { buildHumanTable } from "./human-table.js";
 
-// How many pairs run at once: the replay stack stays calm and the live run stays under the daily cap.
+// How many pairs run at once: the replay stack stays calm and the live run stays under the daily
+// cap.
 const PAIRS_IN_FLIGHT = 4;
 // The folder of the human response files, and the planted secrets file.
 const RESPONSES_DIR = join(REPO_ROOT, "packages", "evals", "fixtures", "human", "responses");
@@ -31,7 +33,8 @@ const PLANTED_FILE = join(REPO_ROOT, "packages", "evals", "fixtures", "secrets",
 // The longest the health read may take before the api counts as unreachable.
 const HEALTH_TIMEOUT_MS = 10_000;
 
-// The pair list as the file must hold it: at least one pair, each with its two people files and its question.
+// The pair list as the file must hold it: at least one pair, each with its two people files and its
+// question.
 const PairsFile = z
   .array(
     z
@@ -55,12 +58,14 @@ function commitHash(): string {
   return execFileSync("git", ["rev-parse", "HEAD"], { cwd: REPO_ROOT, encoding: "utf8" }).trim();
 }
 
-// The stable code of a failed pair: an EvalFailure keeps its own code; anything else is a request that failed.
+// The stable code of a failed pair: an EvalFailure keeps its own code; anything else is a request
+// that failed.
 function codeOf(error: unknown): string {
   return error instanceof EvalFailure ? error.code : "eval_request_failed";
 }
 
-// Checks that the api answers its health route before any pair runs. A worker heartbeat that is absent is only a warning.
+// Checks that the api answers its health route before any pair runs. A worker heartbeat that is
+// absent is only a warning.
 async function checkApi(flags: EvalFlags): Promise<void> {
   const reply = await fetch(flags.baseUrl + routes.people.health.path, {
     signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS),
@@ -88,7 +93,8 @@ async function loadPairs(path: string): Promise<PairSpec[]> {
   return parsed.data;
 }
 
-// Finds the people fixtures the pairs name. A missing file is left out here and reported per pair by drivePair.
+// Finds the people fixtures the pairs name. A missing file is left out here and reported per pair
+// by drivePair.
 function fixturesFor(specs: readonly PairSpec[]): Map<string, PersonFixture> {
   const fixtures = new Map<string, PersonFixture>();
   for (const name of specs.flatMap((spec) => [spec.a, spec.b])) {
@@ -98,7 +104,8 @@ function fixturesFor(specs: readonly PairSpec[]): Map<string, PersonFixture> {
   return fixtures;
 }
 
-// Runs the pairs with at most PAIRS_IN_FLIGHT in flight. A failed pair is recorded with its code, and the run goes on.
+// Runs the pairs with at most PAIRS_IN_FLIGHT in flight. A failed pair is recorded with its code,
+// and the run goes on.
 async function driveAll(
   specs: readonly PairSpec[],
   flags: EvalFlags,

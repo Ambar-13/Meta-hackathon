@@ -14,7 +14,8 @@ import { createApprovedCard, createFrozenSource, createTestPerson } from "@meet-
 import { buildTestApp } from "../testing/index.js";
 import { registerQuizRoutes } from "./index.js";
 
-// The origin every request of this file carries: the test app's own address (the APP_ORIGIN of .env.example).
+// The origin every request of this file carries: the test app's own address (the APP_ORIGIN of
+// .env.example).
 const TEST_ORIGIN = "http://localhost:3000";
 // The six turns every owner's source holds, so a card has enough turns to quote.
 const SIX_TURNS = [
@@ -95,7 +96,8 @@ async function startQuiz(owner: Person, cardId: string): Promise<string> {
   return QuizRequestResponse.parse(response.json()).quizId;
 }
 
-// Writes the persona answers and opens the quiz for the human, as the answer job would after its last call.
+// Writes the persona answers and opens the quiz for the human, as the answer job would after its
+// last call.
 async function fillPersonaAnswers(personId: string, quizId: string): Promise<void> {
   await withPerson(testApp.db, personId, async (trx) => {
     for (let position = 1; position <= 10; position += 1) {
@@ -114,7 +116,8 @@ async function fillPersonaAnswers(personId: string, quizId: string): Promise<voi
   });
 }
 
-// Writes both answers and the verdicts on every item, as the judge job would, and marks the quiz judged.
+// Writes both answers and the verdicts on every item, as the judge job would, and marks the quiz
+// judged.
 async function setJudged(
   personId: string,
   quizId: string,

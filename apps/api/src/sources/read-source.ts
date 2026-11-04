@@ -11,7 +11,8 @@ export const SourceParams = z.object({ id: Uuid });
 // The ?page= query: a whole number from 1 to 100,000, 1 when absent. No contracts schema names it.
 export const PageQuery = z.object({ page: z.coerce.number().int().min(1).max(100_000).default(1) });
 
-// One name the names pass found, as this module reads it: the text, and the role token that stands for it in the turns.
+// One name the names pass found, as this module reads it: the text, and the role token that stands
+// for it in the turns.
 type FoundName = { text: string; roleToken: string };
 
 // The words of a text, split on any whitespace and with the empty pieces dropped.
@@ -19,7 +20,8 @@ function wordsOf(text: string): string[] {
   return text.split(/\s+/).filter((word) => word !== "");
 }
 
-// Up to 3 words before and 3 after the first place a role token appears in the turns, with the token in the middle.
+// Up to 3 words before and 3 after the first place a role token appears in the turns, with the
+// token in the middle.
 export function nameContext(turnTexts: readonly string[], roleToken: string): string {
   for (const text of turnTexts) {
     const index = text.indexOf(roleToken);
@@ -31,7 +33,8 @@ export function nameContext(turnTexts: readonly string[], roleToken: string): st
   return roleToken;
 }
 
-// Orders names as the list groups them: by role token, then by name, comparing code units so every database orders them alike.
+// Orders names as the list groups them: by role token, then by name, comparing code units so every
+// database orders them alike.
 export function compareNames(
   a: { text: string; roleToken: string },
   b: { text: string; roleToken: string },
@@ -74,7 +77,8 @@ async function pageRows(
   }));
 }
 
-// Reads the source as the caller sees it: its numbers, whether the names pass has finished, and one page of names.
+// Reads the source as the caller sees it: its numbers, whether the names pass has finished, and one
+// page of names.
 async function sourceViewOf(
   trx: DatabaseTransaction,
   input: { sourceId: string; page: number; now: Date },
@@ -116,7 +120,8 @@ async function sourceViewOf(
   });
 }
 
-// Registers GET /api/sources/:id: 200 SourceView; 400 payload_invalid for a bad page, 404 not_found.
+// Registers GET /api/sources/:id: 200 SourceView; 400 payload_invalid for a bad page, 404
+// not_found.
 export function registerReadSourceRoute(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.sources.readSource.path, async (request, reply) => {
     const personId = requirePerson(request);

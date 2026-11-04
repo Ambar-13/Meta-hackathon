@@ -13,7 +13,8 @@ import { assertModeAllowed } from "./modes.js";
 
 // One zod schema of a model output, as the strict converter reads it.
 type SchemaOf = z.ZodType<unknown, z.ZodTypeDef, unknown>;
-// The outcome of one schema in the boot self-test: its name, whether the vendor accepted it, its HTTP status and what went wrong.
+// The outcome of one schema in the boot self-test: its name, whether the vendor accepted it, its
+// HTTP status and what went wrong.
 export type SelfTestResult = {
   name: string;
   ok: boolean;
@@ -30,7 +31,8 @@ function failureOf(name: string, error: unknown): SelfTestResult {
   return { name, ok: false, httpStatus: null, detail: String(error) };
 }
 
-// Sends one schema in a one-token strict call and reports the result; a schema that fails to convert is reported with no call.
+// Sends one schema in a one-token strict call and reports the result; a schema that fails to
+// convert is reported with no call.
 async function checkSchema(
   client: LlmClient,
   name: string,
@@ -56,7 +58,8 @@ async function checkSchema(
   }
 }
 
-// The same run over any map of schemas, so a test can plant a bad one. Every schema is tried, even after a failure.
+// The same run over any map of schemas, so a test can plant a bad one. Every schema is tried, even
+// after a failure.
 export async function runBootSelfTestOn(
   client: LlmClient,
   options: { schemas: Record<string, SchemaOf>; log: (line: string) => void },
@@ -74,7 +77,8 @@ export async function runBootSelfTestOn(
   return results;
 }
 
-// Sends each model output schema in a one-token strict call and reports per schema. Any 400 is a failure.
+// Sends each model output schema in a one-token strict call and reports per schema. Any 400 is a
+// failure.
 export function runBootSelfTest(
   client: LlmClient,
   log: (line: string) => void,
@@ -87,7 +91,8 @@ export function selfTestExitCode(results: readonly SelfTestResult[]): number {
   return results.some((result) => !result.ok) ? 1 : 0;
 }
 
-// Process entry for `pnpm --filter @meet-first/worker self-test`: exits 1 when any schema failed or the mode is refused.
+// Process entry for `pnpm --filter @meet-first/worker self-test`: exits 1 when any schema failed or
+// the mode is refused.
 export async function selfTestMain(env: NodeJS.ProcessEnv): Promise<number> {
   const parsed = workerEnv.safeParse(env);
   if (!parsed.success) {

@@ -1,4 +1,5 @@
-// Unit tests for the support rate: the mean over reliable briefs only, with the unreliable count beside it.
+// Unit tests for the support rate: the mean over reliable briefs only, with the unreliable count
+// beside it.
 import { describe, expect, it } from "vitest";
 import type { EvalRows } from "../collect-rows.js";
 import { measureSupportRate } from "./support-rate.js";

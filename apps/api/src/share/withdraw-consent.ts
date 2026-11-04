@@ -5,8 +5,9 @@ import type { RouteDeps } from "../app-types.js";
 import { requirePerson } from "../sessions/index.js";
 import { meetingIdOfParams, sideOfMember } from "./give-consent.js";
 
-// Withdraws the caller's consent, unpublishes the page and drops the stored snapshot. The row stays, so the slug stays reserved.
-// A row that does not exist yet is the same as not published, so the answer is the same either way.
+// Withdraws the caller's consent, unpublishes the page and drops the stored snapshot. The row
+// stays, so the slug stays reserved. A row that does not exist yet is the same as not published, so
+// the answer is the same either way.
 export async function withdrawConsent(
   trx: DatabaseTransaction,
   input: { meetingId: string; personId: string },

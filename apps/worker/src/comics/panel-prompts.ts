@@ -10,7 +10,8 @@ export const STYLE_PREFIX =
 const ONE_PERSON = "one person";
 const THE_OTHER_PERSON = "the other person";
 
-// Replaces each whole word equal to name, case-sensitive, with replacement; a name that is empty changes nothing.
+// Replaces each whole word equal to name, case-sensitive, with replacement; a name that is empty
+// changes nothing.
 function replaceWholeName(text: string, name: string, replacement: string): string {
   if (name === "") return text;
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -20,12 +21,14 @@ function replaceWholeName(text: string, name: string, replacement: string): stri
   );
 }
 
-// Removes the leading HTML comment line that owns a prompt file's header, so the header never reaches a model or an image.
+// Removes the leading HTML comment line that owns a prompt file's header, so the header never
+// reaches a model or an image.
 function withoutLeadingComment(text: string): string {
   return text.replace(/^<!--[\s\S]*?-->\s*/, "");
 }
 
-// The supported brief lines from both briefs, texts only, deduplicated, at most 18. Unsupported or unverified lines never enter the comic.
+// The supported brief lines from both briefs, texts only, deduplicated, at most 18. Unsupported or
+// unverified lines never enter the comic.
 export function pickHeadlines(
   briefs: { agree: BriefPoint[]; clash: BriefPoint[]; decideFirst: BriefPoint[] }[],
 ): string[] {
@@ -41,7 +44,8 @@ export function pickHeadlines(
   return headlines.slice(0, HEADLINES_MAX);
 }
 
-// The two messages for the comic-panels call: the system text, and a user message with the question, the two characters and the headlines. Display names become A and B.
+// The two messages for the comic-panels call: the system text, and a user message with the
+// question, the two characters and the headlines. Display names become A and B.
 export function buildPanelsPromptInput(input: {
   questionText: string;
   avatarA: Avatar;
@@ -67,7 +71,8 @@ export function buildPanelsPromptInput(input: {
   ];
 }
 
-// Fills the comic-image template once per panel: the style prefix, both avatar descriptors, the panel number and the panel's image prompt. Display names are replaced first.
+// Fills the comic-image template once per panel: the style prefix, both avatar descriptors, the
+// panel number and the panel's image prompt. Display names are replaced first.
 export function buildImagePrompts(input: {
   panels: { caption: string; image_prompt: string }[];
   avatarA: Avatar;

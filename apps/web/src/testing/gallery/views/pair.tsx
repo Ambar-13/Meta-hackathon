@@ -17,7 +17,8 @@ const INVITE = {
 const UNAVAILABLE =
   "This invite was already used, has expired, or is your own. Ask for a new link.";
 
-// Renders a screen, then taps each button or label whose words end with the given words, in order, to reach a state that needs taps.
+// Renders a screen, then taps each button or label whose words end with the given words, in order,
+// to reach a state that needs taps.
 export const Press = (props: { steps: readonly string[]; children: ReactNode }): ReactElement => {
   const stepsKey = props.steps.join("|");
   useEffect(() => {

@@ -12,7 +12,8 @@ const TRANSFER_REPLY = {
 };
 // The deletion id the delete route answers with.
 const DELETION_ID = "00000000-0000-4000-8000-000000000301";
-// The steps that open the delete dialog, and that confirm it; the dialog's button is the last one with these words.
+// The steps that open the delete dialog, and that confirm it; the dialog's button is the last one
+// with these words.
 const OPEN_DIALOG: readonly GalleryStep[] = [{ click: "Delete my account" }];
 const CONFIRM_DELETE: readonly GalleryStep[] = [
   { click: "Delete my account" },
@@ -39,7 +40,8 @@ function settingsView(
   };
 }
 
-// The settings page: at rest, the one-time link being made, made and failed, and the delete flow from the dialog to the notice.
+// The settings page: at rest, the one-time link being made, made and failed, and the delete flow
+// from the dialog to the notice.
 export const views: readonly GalleryView[] = [
   settingsView({ name: "settings-ready", title: "Settings, at rest" }, []),
   settingsView(

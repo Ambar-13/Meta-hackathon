@@ -24,7 +24,8 @@ export const GOLDEN_PATH_FREE_TEXT =
 const REPO_ROOT = fileURLToPath(new URL("../../../../../", import.meta.url));
 // The folder of the recorded replies, relative to the repository root.
 const FIXTURE_DIR = join(REPO_ROOT, "packages/evals/fixtures/model-replies");
-// The meeting id the question fixture's request names; the ledger id is not part of the request body.
+// The meeting id the question fixture's request names; the ledger id is not part of the request
+// body.
 const QUESTION_MEETING_ID = "00000000-0000-4000-8000-000000000000";
 
 // One approved item of a side as the golden script quotes it.
@@ -35,8 +36,8 @@ export function firstWords(text: string): string {
   return text.split(" ").slice(0, 4).join(" ");
 }
 
-// The words of one scripted meeting: the ten turns in speaking order (a, b, a, b and so on), and the reasons of the decide phase's
-// concede and holds.
+// The words of one scripted meeting: the ten turns in speaking order (a, b, a, b and so on), and
+// the reasons of the decide phase's concede and holds.
 type MeetingWords = { turns: readonly string[]; concede: string; holdA: string; holdB: string };
 
 // The words of the golden-path meeting on curated question 1.
@@ -59,9 +60,9 @@ const GOLDEN_WORDS: MeetingWords = {
   holdB: "My human would likely enjoy it if most evenings stay free after six.",
 };
 
-// The words of the directory meeting on curated question 13, a debate. They differ from GOLDEN_WORDS, so no
-// request of this meeting repeats one of the first meeting's: a repeated request reads the first meeting's reply, and the script
-// would then be one reply out of step.
+// The words of the directory meeting on curated question 13, a debate. They differ from
+// GOLDEN_WORDS, so no request of this meeting repeats one of the first meeting's: a repeated
+// request reads the first meeting's reply, and the script would then be one reply out of step.
 const DIRECTORY_WORDS: MeetingWords = {
   turns: [
     "My human would probably say yes, with a limit. They like to know the reason before they start anything, so a company started in school would need a clear why on day one. They keep a notebook of ideas and review it every Friday, so they would likely test an idea for weeks before calling it a company. What my human has not said is how they weigh grades against a first product.",
@@ -93,7 +94,8 @@ function turnOf(words: MeetingWords, index: number): string {
   return text;
 }
 
-// The replies of one scripted meeting, in call order, built from the two sides' approved items and the words.
+// The replies of one scripted meeting, in call order, built from the two sides' approved items and
+// the words.
 async function scriptFor(
   db: Kysely<Database>,
   meetingId: string,
@@ -138,7 +140,8 @@ async function scriptFor(
   return { speech, receipts, questionCheck: [] };
 }
 
-// The replies of the scripted golden-path meeting, in call order, built from the two sides' approved items.
+// The replies of the scripted golden-path meeting, in call order, built from the two sides'
+// approved items.
 export async function goldenPathScript(
   db: Kysely<Database>,
   meetingId: string,
@@ -146,7 +149,8 @@ export async function goldenPathScript(
   return scriptFor(db, meetingId, GOLDEN_WORDS);
 }
 
-// The replies of the golden path's directory meeting, in call order, with B's side quoting public items only.
+// The replies of the golden path's directory meeting, in call order, with B's side quoting public
+// items only.
 export async function directoryMeetingScript(
   db: Kysely<Database>,
   meetingId: string,
@@ -154,7 +158,8 @@ export async function directoryMeetingScript(
   return scriptFor(db, meetingId, DIRECTORY_WORDS);
 }
 
-// Writes the question_check fixture of GOLDEN_PATH_FREE_TEXT under the repository fixture root; needs no database. Returns the path.
+// Writes the question_check fixture of GOLDEN_PATH_FREE_TEXT under the repository fixture root;
+// needs no database. Returns the path.
 export async function writeQuestionCheckFixture(): Promise<string> {
   const prompt = readPrompt("question-check");
   const args = questionCheckCallArgs({
@@ -186,8 +191,9 @@ export async function writeQuestionCheckFixture(): Promise<string> {
   return path;
 }
 
-// Runs a stopped golden-path meeting to its end with the scripted replies and writes its fixtures; returns the paths. The script is
-// the first meeting's, or the directory meeting's when script is "directory".
+// Runs a stopped golden-path meeting to its end with the scripted replies and writes its fixtures;
+// returns the paths. The script is the first meeting's, or the directory meeting's when script is
+// "directory".
 export async function writeMeetingFixtures(options: {
   workerUrl: string;
   meetingId: string;
@@ -290,8 +296,8 @@ async function isEnded(db: Kysely<Database>, meetingId: string): Promise<boolean
   return row?.state === "ended";
 }
 
-// The command entry: "question" writes the question-check fixture; "meeting <id>" writes the first meeting's fixtures and "directory <id>"
-// the directory meeting's. Each prints its paths.
+// The command entry: "question" writes the question-check fixture; "meeting <id>" writes the first
+// meeting's fixtures and "directory <id>" the directory meeting's. Each prints its paths.
 async function main(argv: readonly string[]): Promise<string[]> {
   if (argv[0] === "question") return [await writeQuestionCheckFixture()];
   const meetingId = argv[1];

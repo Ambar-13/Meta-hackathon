@@ -7,8 +7,9 @@ import { cardView, IDS, itemId } from "../../testing/fixtures.js";
 import { RECALL_SWITCH_COPY } from "@meet-first/contracts";
 import { CardScreen } from "./screen.js";
 
-// An approved card shows the Sharing section, which reads the card's sharing settings and the person's listing; these two answers
-// keep the card tests below as they were: nothing shared, not listed.
+// An approved card shows the Sharing section, which reads the card's sharing settings and the
+// person's listing; these two answers keep the card tests below as they were: nothing shared, not
+// listed.
 beforeEach(() => {
   stubRoute(routes.directory.readSharing, { friendsCanAsk: false, publicPositions: [] });
   stubRoute(routes.directory.readMyListing, {

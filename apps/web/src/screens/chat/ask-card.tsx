@@ -1,7 +1,9 @@
-// The ask under a running reply: it reads the ask every ASK_POLL_MS until it is done, refused or failed, and fills in as the Meetys
-// answer. A read error is one quiet line with a link to the ask page, never a full error notice inside the thread. The card is drawn as
-// Instagram draws a shared post in a chat: a card with a hairline, the kind's icon on a round patch of its colour (yellow for finding who
-// could help, coral for a friend's Meety), the question, then the answers with a hairline between them.
+// The ask under a running reply: it reads the ask every ASK_POLL_MS until it is done, refused or
+// failed, and fills in as the Meetys answer. A read error is one quiet line with a link to the ask
+// page, never a full error notice inside the thread. The card is drawn as Instagram draws a shared
+// post in a chat: a card with a hairline, the kind's icon on a round patch of its colour (yellow
+// for finding who could help, coral for a friend's Meety), the question, then the answers with a
+// hairline between them.
 import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { ASK_POLL_MS, type AskMode, type AskView } from "@meet-first/contracts";
@@ -55,7 +57,8 @@ export function kindTint(mode: AskMode): string {
   return mode === "help" ? "c-yellow" : "c-coral";
 }
 
-// A kind's icon on a round patch of its colour: a magnifier for finding who could help, a speech bubble for a friend's Meety.
+// A kind's icon on a round patch of its colour: a magnifier for finding who could help, a speech
+// bubble for a friend's Meety.
 export const KindIcon = (props: { mode: AskMode }): ReactElement => {
   return (
     <span className={`chat-kind-icon ${kindTint(props.mode)}`} aria-hidden="true">
@@ -81,7 +84,8 @@ export const KindHead = (props: {
   );
 };
 
-// The finished ask: up to ASK_CARD_ANSWERS_MAX answers, each with the answerer's face, name and first sentence, then the link.
+// The finished ask: up to ASK_CARD_ANSWERS_MAX answers, each with the answerer's face, name and
+// first sentence, then the link.
 const AskAnswers = (props: { view: AskView }): ReactElement => {
   const shown = props.view.answers.slice(0, ASK_CARD_ANSWERS_MAX);
   return (
@@ -131,7 +135,8 @@ const ReadError = (props: { askId: string }): ReactElement => {
   );
 };
 
-// What the card shows under its question: the loading line, the ask by its state, or the read error.
+// What the card shows under its question: the loading line, the ask by its state, or the read
+// error.
 const AskState = (props: { ask: PolledView<AskView>; askId: string }): ReactElement => {
   const view = props.ask.value;
   if (view !== null) return <AskBody view={view} />;
@@ -142,7 +147,8 @@ const AskState = (props: { ask: PolledView<AskView>; askId: string }): ReactElem
   );
 };
 
-// The ask card of a running or finished reply; mode, question and the friend's name come from the reply until the ask is read.
+// The ask card of a running or finished reply; mode, question and the friend's name come from the
+// reply until the ask is read.
 export const AskCard = (props: {
   askId: string;
   mode: AskMode;

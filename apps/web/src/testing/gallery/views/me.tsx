@@ -16,8 +16,8 @@ import { AfterSteps } from "./help.js";
 // The person's listing id, and the meeting Priyanka started with Ana in Explore.
 const MINE = "00000000-0000-4000-8000-000000000501";
 const EXPLORE_MEETING = "00000000-0000-4000-8000-000000000521";
-// The person's home: an approved card, an ended meeting with its brief, the one Priyanka started in Explore (the home list holds it
-// too, as the server's does), and an open invite.
+// The person's home: an approved card, an ended meeting with its brief, the one Priyanka started in
+// Explore (the home list holds it too, as the server's does), and an open invite.
 const HOME: HomeView = {
   displayName: "Ana",
   source: { id: IDS.source, namesPassDone: true, namesReviewed: true },
@@ -108,7 +108,8 @@ function ok(body: unknown): GalleryReply {
   return { status: 200, body };
 }
 
-// The reads of /me. /api/directory/me is listed before /api/directory/:id, so it answers its own path.
+// The reads of /me. /api/directory/me is listed before /api/directory/:id, so it answers its own
+// path.
 function reads(listing: GalleryReply, meetings: unknown, home: HomeView = HOME): GalleryStub[] {
   return [
     ...railStubs(railFriends(3)),
@@ -182,7 +183,8 @@ function pasteSummary(): void {
   field.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
-// /me listed, its Meetings tab, and not listed; then your AI's summary with no chats, pasted, and checked.
+// /me listed, its Meetings tab, and not listed; then your AI's summary with no chats, pasted, and
+// checked.
 export const views: readonly GalleryView[] = [
   {
     name: "me-listed",

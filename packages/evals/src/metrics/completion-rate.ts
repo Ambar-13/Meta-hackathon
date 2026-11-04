@@ -7,7 +7,8 @@ export function isCompleted(meeting: MeetingRow): boolean {
   return meeting.state === "ended" && meeting.endReason === "decided" && meeting.briefCount === 2;
 }
 
-// Reads the meeting rows of the driven pairs and returns the completed share of the meetings that started.
+// Reads the meeting rows of the driven pairs and returns the completed share of the meetings that
+// started.
 export function measureCompletionRate(rows: EvalRows): MetricResult {
   const started = rows.meetings.filter((meeting) => meeting.startedAt !== null);
   const completed = started.filter(isCompleted).length;

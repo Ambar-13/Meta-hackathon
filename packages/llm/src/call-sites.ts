@@ -1,6 +1,7 @@
 import { type CallSite, type Effort } from "@meet-first/contracts";
 
-// The settings of one call site: effort, output limit, timeouts, retries, prompt folder and output shape.
+// The settings of one call site: effort, output limit, timeouts, retries, prompt folder and output
+// shape.
 export type CallSiteConfig = {
   effort: Effort;
   maxTokens: number;
@@ -12,11 +13,12 @@ export type CallSiteConfig = {
   structured: boolean;
   streams: boolean;
 };
-// The settings of every call site.
-// Muse Spark reasons inside max_tokens even at effort minimal, so a tight limit cuts the reply and the length retry redoes it at minimal
-// effort. Measured on the live API on 27 Oct 2026: the question check used 188 of 200 tokens reasoning, the brief support judge 1,821
-// of 2,000, and the brief 3,860 of 4,000 at effort medium; each was cut. The limits of question_check, quiz_judge, brief, both judges,
-// comic_panels and persona_answer were raised to leave room; a limit is a ceiling, so a reply costs only the tokens it uses.
+// The settings of every call site. Muse Spark reasons inside max_tokens even at effort minimal, so
+// a tight limit cuts the reply and the length retry redoes it at minimal effort. Measured on the
+// live API on 27 Oct 2026: the question check used 188 of 200 tokens reasoning, the brief support
+// judge 1,821 of 2,000, and the brief 3,860 of 4,000 at effort medium; each was cut. The limits of
+// question_check, quiz_judge, brief, both judges, comic_panels and persona_answer were raised to
+// leave room; a limit is a ceiling, so a reply costs only the tokens it uses.
 export const CALL_SITE_CONFIG: Record<CallSite, CallSiteConfig> = {
   scrub_names: {
     effort: "minimal",
@@ -64,8 +66,9 @@ export const CALL_SITE_CONFIG: Record<CallSite, CallSiteConfig> = {
     structured: true,
     streams: false,
   },
-  // The first plan was 20 s and 90 s. On the live API on 27 Oct 2026 a speech call at effort low (11,048 input tokens) sent its first content at 10.2 s,
-  // because Muse Spark streams nothing while it reasons, so the first-token gate is 45 s and the whole call 120 s.
+  // The first plan was 20 s and 90 s. On the live API on 27 Oct 2026 a speech call at effort low
+  // (11,048 input tokens) sent its first content at 10.2 s, because Muse Spark streams nothing
+  // while it reasons, so the first-token gate is 45 s and the whole call 120 s.
   speech: {
     effort: "low",
     maxTokens: 6_000,
@@ -171,10 +174,11 @@ export const CALL_SITE_CONFIG: Record<CallSite, CallSiteConfig> = {
 };
 // Ledger estimate for one image call, in tokens.
 export const IMAGE_CALL_EST_TOKENS = 1_000;
-// The retry settings for a reply that stopped at the length limit: minimal effort and at least 8,000 tokens.
+// The retry settings for a reply that stopped at the length limit: minimal effort and at least
+// 8,000 tokens.
 export const LENGTH_RETRY = { effort: "minimal", maxTokens: 8_000 } as const;
-// The length retry of one call site: minimal effort and the larger of 8,000 and the call site's own maxTokens, so a cut card (16,000) is
-// not retried with half the room it was cut with.
+// The length retry of one call site: minimal effort and the larger of 8,000 and the call site's own
+// maxTokens, so a cut card (16,000) is not retried with half the room it was cut with.
 export function lengthRetryFor(callSite: CallSite): { effort: Effort; maxTokens: number } {
   return {
     effort: LENGTH_RETRY.effort,

@@ -1,4 +1,5 @@
-// One frame item: an event with its id (null for a delta), its event name and its data, or a comment line such as the :hb heartbeat or the padding.
+// One frame item: an event with its id (null for a delta), its event name and its data, or a
+// comment line such as the :hb heartbeat or the padding.
 export type SseItem = { id: string | null; event: string; data: string } | { comment: string };
 
 // The fields one frame's lines carry, collected before the frame becomes an item.
@@ -25,7 +26,8 @@ function applyField(fields: FrameFields, field: string, value: string): void {
   if (field === "data") fields.data.push(value);
 }
 
-// Parses one frame (the text between two blank lines) into items: one item per comment line, then one event item when the frame has an id, event or data field.
+// Parses one frame (the text between two blank lines) into items: one item per comment line, then
+// one event item when the frame has an id, event or data field.
 export function parseSseFrame(frame: string): SseItem[] {
   const items: SseItem[] = [];
   const fields: FrameFields = { data: [] };
@@ -55,7 +57,8 @@ function reachesSeq(item: SseItem, untilSeq: number | undefined): boolean {
   return untilSeq !== undefined && "id" in item && item.id !== null && Number(item.id) >= untilSeq;
 }
 
-// Adds the chunk to the buffer, cuts every complete frame out of it, and says whether the wanted event has come.
+// Adds the chunk to the buffer, cuts every complete frame out of it, and says whether the wanted
+// event has come.
 function absorbChunk(state: ReadState, chunk: string, untilSeq: number | undefined): boolean {
   state.buffer += chunk;
   let cut = state.buffer.indexOf("\n\n");
@@ -73,7 +76,8 @@ function absorbChunk(state: ReadState, chunk: string, untilSeq: number | undefin
   return false;
 }
 
-// What one read loop needs: the reader and decoder, the timer, the state it fills, and the wanted seq.
+// What one read loop needs: the reader and decoder, the timer, the state it fills, and the wanted
+// seq.
 type ReadLoop = {
   reader: ReadableStreamDefaultReader<Uint8Array>;
   decoder: TextDecoder;
@@ -98,7 +102,8 @@ async function readUntilStop(loop: ReadLoop): Promise<StopReason> {
   }
 }
 
-// Reads an SSE body into frames, stopping at the first event whose id is untilSeq or more, at the end of the stream, or at timeoutMs.
+// Reads an SSE body into frames, stopping at the first event whose id is untilSeq or more, at the
+// end of the stream, or at timeoutMs.
 export async function readSse(
   response: ReadableStream<Uint8Array>,
   options: { untilSeq?: number; timeoutMs: number },

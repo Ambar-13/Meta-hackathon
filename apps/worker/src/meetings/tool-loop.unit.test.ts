@@ -43,7 +43,8 @@ function at<T>(items: readonly T[], index: number): T {
   return item;
 }
 
-// A fake speak function: returns its scripted results in order, or throws a scripted error, and records each request.
+// A fake speak function: returns its scripted results in order, or throws a scripted error, and
+// records each request.
 function fakeSpeak(script: ReadonlyArray<SpeakResult | Error>) {
   const queue = [...script];
   const requests: Recorded[] = [];
@@ -58,7 +59,8 @@ function fakeSpeak(script: ReadonlyArray<SpeakResult | Error>) {
   return { speak, requests };
 }
 
-// A fake round function: answers each tool call of the assistant message with a plain result, and counts its calls.
+// A fake round function: answers each tool call of the assistant message with a plain result, and
+// counts its calls.
 function fakeRound() {
   let calls = 0;
   const runRound = (round: { assistant: { tool_calls?: ToolCall[] | undefined } }) => {

@@ -35,10 +35,12 @@ export type AskCreate = z.infer<typeof AskCreate>;
 // What POST /api/asks returns.
 export const AskCreateResponse = z.object({ askId: Uuid });
 export type AskCreateResponse = z.infer<typeof AskCreateResponse>;
-// Where an ask is: the question check, the persona calls, the support check, then done; or refused by the check, or failed.
+// Where an ask is: the question check, the persona calls, the support check, then done; or refused
+// by the check, or failed.
 export const AskState = z.enum(["checking", "asking", "ranking", "done", "refused", "failed"]);
 export type AskState = z.infer<typeof AskState>;
-// One claim of an answer with its quote: verified when the quote was found in the named turn, supported when the support check backed it.
+// One claim of an answer with its quote: verified when the quote was found in the named turn,
+// supported when the support check backed it.
 export const AnswerClaim = z.object({
   text: z.string(),
   quote: z.string(),
@@ -46,8 +48,9 @@ export const AnswerClaim = z.object({
   supported: z.boolean().nullable(),
 });
 export type AnswerClaim = z.infer<typeof AnswerClaim>;
-// One persona's answer as the asker sees it. position is its place in the help results, null when it showed no sign; canMeet is true for the
-// first HELP_MEETABLE_TOP placed answers whose listing still exists.
+// One persona's answer as the asker sees it. position is its place in the help results, null when
+// it showed no sign; canMeet is true for the first HELP_MEETABLE_TOP placed answers whose listing
+// still exists.
 export const AskAnswer = z.object({
   answerId: Uuid,
   displayName: z.string(),
@@ -59,7 +62,8 @@ export const AskAnswer = z.object({
   canMeet: z.boolean(),
 });
 export type AskAnswer = z.infer<typeof AskAnswer>;
-// What GET /api/asks/:id returns to the asker. aboutName is the friend's display name for a react ask.
+// What GET /api/asks/:id returns to the asker. aboutName is the friend's display name for a react
+// ask.
 export const AskView = z.object({
   askId: Uuid,
   mode: AskMode,
@@ -80,7 +84,8 @@ export const AskSummary = z.object({
   createdAt: IsoTime,
 });
 export type AskSummary = z.infer<typeof AskSummary>;
-// One answer the caller's persona gave, as the caller's copy: what was asked, who asked, and the answer with its quotes.
+// One answer the caller's persona gave, as the caller's copy: what was asked, who asked, and the
+// answer with its quotes.
 export const AboutMeAnswer = z.object({
   answerId: Uuid,
   mode: AskMode,
@@ -91,14 +96,17 @@ export const AboutMeAnswer = z.object({
   createdAt: IsoTime,
 });
 export type AboutMeAnswer = z.infer<typeof AboutMeAnswer>;
-// What GET /api/asks returns: the caller's own asks, newest first, and every answer their persona gave, newest first.
+// What GET /api/asks returns: the caller's own asks, newest first, and every answer their persona
+// gave, newest first.
 export const AsksView = z.object({ asked: z.array(AskSummary), aboutMe: z.array(AboutMeAnswer) });
 export type AsksView = z.infer<typeof AsksView>;
-// The body of POST /api/asks/:id/answers/:answerId/meeting: the card to speak from in a full meeting with that helper.
+// The body of POST /api/asks/:id/answers/:answerId/meeting: the card to speak from in a full
+// meeting with that helper.
 export const AnswerMeetingCreate = z.object({ cardId: Uuid });
 export type AnswerMeetingCreate = z.infer<typeof AnswerMeetingCreate>;
-// What the persona-answer model returns: a hedged answer of at most 120 words, whether the person's material shows anything on the
-// question, and up to ANSWER_CLAIMS_MAX claims, each with an exact quote and its turn label (persona-answer prompt).
+// What the persona-answer model returns: a hedged answer of at most 120 words, whether the person's
+// material shows anything on the question, and up to ANSWER_CLAIMS_MAX claims, each with an exact
+// quote and its turn label (persona-answer prompt).
 export const PersonaAnswerOutput = z.object({
   answer: z.string().max(900),
   has_sign: z.boolean(),
@@ -115,8 +123,9 @@ export const PersonaAnswerOutput = z.object({
     .max(ANSWER_CLAIMS_MAX),
 });
 export type PersonaAnswerOutput = z.infer<typeof PersonaAnswerOutput>;
-// What the search-words model returns: 1 to 8 words or short phrases, each 1 to 40 characters, that the person would likely have used
-// in their own messages about what an ask is about (search-words prompt).
+// What the search-words model returns: 1 to 8 words or short phrases, each 1 to 40 characters, that
+// the person would likely have used in their own messages about what an ask is about (search-words
+// prompt).
 export const SearchWordsOutput = z.object({
   words: z.array(z.string().min(1).max(40)).min(1).max(8),
 });

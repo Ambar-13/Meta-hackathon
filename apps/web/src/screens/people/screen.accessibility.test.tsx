@@ -23,7 +23,8 @@ const OWN_POSTS = {
   body: "Your posts show here and, once you are in Explore, in everyone's feed. Your Meety reads them to learn what you are into.",
 } as const;
 
-// Renders the profile of one listing with these replies for GET /api/directory/:id; search is added to the address.
+// Renders the profile of one listing with these replies for GET /api/directory/:id; search is added
+// to the address.
 function renderProfile(
   replies: StubInput | StubInput[],
   options: { listingId?: string; search?: string } = {},

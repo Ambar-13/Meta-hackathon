@@ -29,14 +29,15 @@ const SEARCH_COPY = {
 // How many people Search suggests before See everyone.
 const SUGGESTED_MAX = 6;
 
-// The heading over the people: what a search found, everyone after See everyone, or the people Search suggests.
+// The heading over the people: what a search found, everyone after See everyone, or the people
+// Search suggests.
 function peopleTitle(isSearching: boolean, isEveryone: boolean): string {
   if (isSearching) return SEARCH_COPY.resultsTitle;
   return isEveryone ? SEARCH_COPY.everyoneTitle : SEARCH_COPY.suggestedTitle;
 }
 
-// The search box, as Instagram's: the grey field with its magnifier and a Search button. The words go to Explore from page 0; an empty
-// search goes back to the people Search suggests.
+// The search box, as Instagram's: the grey field with its magnifier and a Search button. The words
+// go to Explore from page 0; an empty search goes back to the people Search suggests.
 const SearchForm = (props: { onSearch: (query: string) => void }): ReactElement => {
   const [text, setText] = useState("");
   const onSubmit = (event: FormEvent<HTMLFormElement>): void => {
@@ -66,8 +67,8 @@ const SearchForm = (props: { onSearch: (query: string) => void }): ReactElement 
   );
 };
 
-// People as rows, each with Add friend, under a heading, with Show more while more pages exist; a cap shows only the first ones, with
-// See everyone under them.
+// People as rows, each with Add friend, under a heading, with Show more while more pages exist; a
+// cap shows only the first ones, with See everyone under them.
 const PeopleRows = (props: {
   title: string;
   browse: BrowseHook;
@@ -138,9 +139,9 @@ const SearchStatus = (props: { browse: BrowseHook }): ReactElement => {
   );
 };
 
-// Search, as Instagram's search tab: the search box at the top, with a way to ask Meety who could help; then the people a search found,
-// or with no search the people Search suggests (six, then See everyone), each with Add friend, and under them the photos of Explore as
-// Instagram's grid.
+// Search, as Instagram's search tab: the search box at the top, with a way to ask Meety who could
+// help; then the people a search found, or with no search the people Search suggests (six, then See
+// everyone), each with Add friend, and under them the photos of Explore as Instagram's grid.
 export const SearchScreen = (): ReactElement => {
   const browse = useDirectoryBrowse();
   const friends = useExploreFriends();

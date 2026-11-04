@@ -1,6 +1,6 @@
-// Tests for the checks in scripts/checks/. Each test writes a small temporary tree that passes every
-// check, changes one thing to break it, and runs `pnpm checks` (run-all.ts) inside that tree. The scripts
-// are read, never edited: the tests prove that each check catches what it is meant to.
+// Tests for the checks in scripts/checks/. Each test writes a small temporary tree that passes
+// every check, changes one thing to break it, and runs `pnpm checks` (run-all.ts) inside that tree.
+// The scripts are read, never edited: the tests prove that each check catches what it is meant to.
 import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -154,7 +154,8 @@ afterEach(() => {
   for (const folder of folders.splice(0)) rmSync(folder, { recursive: true, force: true });
 });
 
-// Writes the base tree with the changes applied, runs pnpm checks in it, and returns the exit code and output.
+// Writes the base tree with the changes applied, runs pnpm checks in it, and returns the exit code
+// and output.
 function runChecks(tree: Tree): Run {
   const root = mkdtempSync(join(tmpdir(), "w2-checks-"));
   folders.push(root);
@@ -252,7 +253,8 @@ describe("repo checks", () => {
           "",
         ].join("\n");
 
-      // A docs file of its own: OVERVIEW.md must also hold its sequence and data diagrams, which would fail the 15-box case for another reason.
+      // A docs file of its own: OVERVIEW.md must also hold its sequence and data diagrams, which
+      // would fail the 15-box case for another reason.
       const fifteen = runChecks({ files: { "docs/box-count.md": boxes(15) } });
       expect(fifteen.status).toBe(0);
 

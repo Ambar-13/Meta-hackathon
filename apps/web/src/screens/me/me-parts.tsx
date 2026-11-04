@@ -51,7 +51,8 @@ const SaveLine = (props: { state: ListingSaveState }): ReactElement | null => {
   return null;
 };
 
-// The line and the dating switch, with the button that joins Explore or saves; the consent words show above a join.
+// The line and the dating switch, with the button that joins Explore or saves; the consent words
+// show above a join.
 const ListingForm = (props: {
   cardId: string;
   listing: MyListing | null;
@@ -97,7 +98,8 @@ const ListingForm = (props: {
   );
 };
 
-// Your listing's controls, opened by Edit my listing: the line, the dating switch, and Leave, which deletes the listing at once.
+// Your listing's controls, opened by Edit my listing: the line, the dating switch, and Leave, which
+// deletes the listing at once.
 export const EditListing = (props: {
   listing: MyListing;
   yours: YourListingHook;
@@ -147,8 +149,8 @@ const EditLine = (props: { state: EditState }): ReactElement | null => {
   return null;
 };
 
-// Instagram's Edit profile: your picture with Change photo, which
-// opens your photos or camera, and Remove photo while you have one; then your name with Save name. The photo is drawn as a square.
+// Instagram's Edit profile: your picture with Change photo, which opens your photos or camera, and
+// Remove photo while you have one; then your name with Save name. The photo is drawn as a square.
 export const EditProfile = (props: {
   name: string;
   photo: string | null;
@@ -217,8 +219,9 @@ export const EditProfile = (props: {
   );
 };
 
-// The join controls for a person who is not in Explore, from their approved card: the line, the dating switch and Join. Before the
-// card is approved nothing shows here, since the next step under it already says what to do first.
+// The join controls for a person who is not in Explore, from their approved card: the line, the
+// dating switch and Join. Before the card is approved nothing shows here, since the next step under
+// it already says what to do first.
 export const JoinExplore = (props: {
   home: HomeView | null;
   yours: YourListingHook;
@@ -245,8 +248,8 @@ export const JoinExplore = (props: {
   );
 };
 
-// The one next step, flat between your profile and the tabs: what it is, why, its button (the page's one blue), and a second link
-// when there is a real choice.
+// The one next step, flat between your profile and the tabs: what it is, why, its button (the
+// page's one blue), and a second link when there is a real choice.
 export const MeNext = (props: { home: HomeView }): ReactElement => {
   const step = nextStepOf(props.home);
   return (
@@ -298,8 +301,9 @@ const OpenInvites = (props: { home: HomeView }): ReactElement | null => {
   );
 };
 
-// The Meetings tab: every meeting you are in, newest first, one list, each a row to its brief once ready or else to the meeting, with
-// where it stands, its day, and From Explore when someone met you there; then the invites still open.
+// The Meetings tab: every meeting you are in, newest first, one list, each a row to its brief once
+// ready or else to the meeting, with where it stands, its day, and From Explore when someone met
+// you there; then the invites still open.
 export const MeMeetings = (props: {
   home: HomeView;
   fromExplore: ReadonlySet<string>;

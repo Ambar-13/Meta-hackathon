@@ -19,7 +19,8 @@ import { DrawingFrames, PanelGrid } from "./panel-grid.js";
 export const COMIC_INTRO_COPY =
   "Six panels drawn from the lines the support check backed. Two cartoon characters stand in for you both; no faces, no names.";
 
-// The one sentence for a skipped comic, from the reason when the view carries one; no retry is offered (one comic per meeting).
+// The one sentence for a skipped comic, from the reason when the view carries one; no retry is
+// offered (one comic per meeting).
 export const SkippedNotice = (props: { reason: ComicSkipReason | null }): ReactElement => {
   return (
     <EmptyState sticker="poof" title="No comic for this meeting">

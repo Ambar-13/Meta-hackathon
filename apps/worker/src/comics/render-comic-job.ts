@@ -16,12 +16,14 @@ import { appendMeetingEvent } from "../meetings/index.js";
 import { raceWithDeadline, renderPanels, type PanelRender, type Raced } from "./image-calls.js";
 import { buildImagePrompts, buildPanelsPromptInput, pickHeadlines } from "./panel-prompts.js";
 
-// The whole comic has 60 s from job start; the brief is already on screen, so a slow comic is skipped, not waited for.
+// The whole comic has 60 s from job start; the brief is already on screen, so a slow comic is
+// skipped, not waited for.
 export const COMIC_DEADLINE_MS = 60_000;
 // Exactly six panels.
 export const PANEL_COUNT = 6;
 
-// Why a comic was not made, as comic.skipped gives it. render_failed ends the comic as failed; the others end it as skipped.
+// Why a comic was not made, as comic.skipped gives it. render_failed ends the comic as failed; the
+// others end it as skipped.
 export type SkipReason =
   | "deadline"
   | "prompt_blocked"
@@ -77,12 +79,14 @@ export const renderComicTask: JobTask<"render_comic"> = async (payload, context)
   }
 };
 
-// The code a failed step carries into the log, or a plain word when the error is not a ContractError.
+// The code a failed step carries into the log, or a plain word when the error is not a
+// ContractError.
 function errorCode(error: unknown): string {
   return error instanceof ContractError ? error.code : "render_error";
 }
 
-// Reads the comic, then draws it and either stores it, retries it later, or ends it with its reason.
+// Reads the comic, then draws it and either stores it, retries it later, or ends it with its
+// reason.
 async function renderComic(
   payload: JobPayload<"render_comic">,
   context: JobContext,
@@ -97,7 +101,8 @@ async function renderComic(
   return storeComic(context, payload, drawing.stored);
 }
 
-// The steps between the database read and the stored panels: headlines, the plan, the scrub, the six images.
+// The steps between the database read and the stored panels: headlines, the plan, the scrub, the
+// six images.
 async function draw(
   context: JobContext,
   payload: JobPayload<"render_comic">,
@@ -140,14 +145,16 @@ async function draw(
   return { kind: "skip", reason: "render_failed" };
 }
 
-// The drawing a failed plan call leads to: a full window retries, a missed deadline is skipped, anything else failed the comic.
+// The drawing a failed plan call leads to: a full window retries, a missed deadline is skipped,
+// anything else failed the comic.
 function drawingForPlanFailure(plan: Exclude<PlanResult, { kind: "ok" }>): Drawing {
   if (plan.kind === "limiter_busy") return { kind: "retry" };
   if (plan.kind === "deadline") return { kind: "skip", reason: "deadline" };
   return { kind: "skip", reason: "render_failed" };
 }
 
-// Reads the comic row, its meeting, the two names, both briefs and the brief.ready event in one meeting transaction.
+// Reads the comic row, its meeting, the two names, both briefs and the brief.ready event in one
+// meeting transaction.
 async function readComicInput(
   db: Kysely<Database>,
   payload: JobPayload<"render_comic">,
@@ -186,7 +193,8 @@ async function readComicInput(
       .select(["person_id", "agree", "clash", "decide_first"])
       .where("meeting_id", "=", payload.meetingId)
       .execute();
-    // Side a's brief comes first, so the headlines and the model request keep one order on every run.
+    // Side a's brief comes first, so the headlines and the model request keep one order on every
+    // run.
     const sideOf = (personId: string): number =>
       members.find((member) => member.person_id === personId)?.side === "a" ? 0 : 1;
     const briefs = [...rows]
@@ -209,7 +217,8 @@ async function readComicInput(
   });
 }
 
-// Asks the model for six captions and image prompts, checked against its schema. A full token window or a missed deadline is reported, never retried here.
+// Asks the model for six captions and image prompts, checked against its schema. A full token
+// window or a missed deadline is reported, never retried here.
 async function requestPlan(
   context: JobContext,
   payload: JobPayload<"render_comic">,
@@ -254,7 +263,8 @@ async function requestPlan(
   };
 }
 
-// Scrubs every final image prompt; one hit refuses the whole comic, and the scrubbed text is the only text ever sent.
+// Scrubs every final image prompt; one hit refuses the whole comic, and the scrubbed text is the
+// only text ever sent.
 export function checkPromptsWithScrubber(prompts: string[]): PromptCheck {
   const scrubbed = prompts.map((prompt) => scrub(prompt, { allowlist: [] }));
   const categories = scrubbed.flatMap((result) =>
@@ -313,7 +323,8 @@ async function storeComic(
   });
 }
 
-// Ends a comic that will not be drawn, with its reason in comic.skipped; render_failed ends it as failed, the rest as skipped.
+// Ends a comic that will not be drawn, with its reason in comic.skipped; render_failed ends it as
+// failed, the rest as skipped.
 async function finishNotReady(
   context: JobContext,
   payload: JobPayload<"render_comic">,

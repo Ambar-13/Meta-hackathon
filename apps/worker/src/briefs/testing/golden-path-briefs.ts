@@ -1,5 +1,6 @@
-// The golden path's brief writer, and the seeded ended meeting the brief tests use. The writer answers each brief and judge call
-// from the meeting's own rows, writes the reply as a recorded fixture, then lets the replay client answer from it.
+// The golden path's brief writer, and the seeded ended meeting the brief tests use. The writer
+// answers each brief and judge call from the meeting's own rows, writes the reply as a recorded
+// fixture, then lets the replay client answer from it.
 import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -40,7 +41,8 @@ const LINE_COUNT = 9;
 // The time the seeded meeting starts, fixed so the seed is the same on every run.
 const SEED_START = new Date("2026-10-26T10:00:00.000Z");
 
-// One step of the seeded transcript: whose turn it is, its phase, the words spoken and the two claims it makes.
+// One step of the seeded transcript: whose turn it is, its phase, the words spoken and the two
+// claims it makes.
 export type SeedStep = {
   side: "a" | "b";
   phase: "explore" | "decide";
@@ -99,7 +101,8 @@ async function appendSeedEvent(
   await withMeeting(db, meetingId, (trx) => appendMeetingEvent(trx, meetingId, event));
 }
 
-// Seeds a paired meeting with six committed turns, two claims each, and a start event; ends it unless end is false (then it stays running).
+// Seeds a paired meeting with six committed turns, two claims each, and a start event; ends it
+// unless end is false (then it stays running).
 export async function seedBriefMeeting(options: {
   appDb: Kysely<Database>;
   workerDb: Kysely<Database>;
@@ -197,16 +200,19 @@ export async function seedBriefMeeting(options: {
   return seeded;
 }
 
-// One verified quote a line can cite: the side, the note turn it names, its text and the line's text.
+// One verified quote a line can cite: the side, the note turn it names, its text and the line's
+// text.
 type Citation = { text: string; side: "a" | "b"; turnIndex: number; quote: string };
-// The rule-made replies of one ended meeting: each side's brief, each side's judge verdicts, and the first statement of each side.
+// The rule-made replies of one ended meeting: each side's brief, each side's judge verdicts, and
+// the first statement of each side.
 type ReplyPlan = {
   brief: Record<"a" | "b", Record<string, unknown>>;
   judge: Record<"a" | "b", Record<string, unknown>>;
   firstStatement: Record<"a" | "b", string>;
 };
 
-// The verified claims and approved verified items of one side, as citations, in transcript order and then position order.
+// The verified claims and approved verified items of one side, as citations, in transcript order
+// and then position order.
 function citationsOf(snapshot: BriefSnapshot, side: "a" | "b"): Citation[] {
   const turnIndexOf = (turnId: string): number | undefined =>
     snapshot.sourceTurns.find((turn) => turn.id === turnId)?.turnIndex;
@@ -232,8 +238,9 @@ function citationsOf(snapshot: BriefSnapshot, side: "a" | "b"): Citation[] {
   );
 }
 
-// The words each section's lines start with, so no line text repeats inside a brief even when a citation is used twice. The golden
-// path matches lines by text: a repeated text would put the one unsupported line's words on a supported line as well.
+// The words each section's lines start with, so no line text repeats inside a brief even when a
+// citation is used twice. The golden path matches lines by text: a repeated text would put the one
+// unsupported line's words on a supported line as well.
 const SECTION_LEADS = {
   agree: "On this you agree",
   clash: "On this you differ",
@@ -254,7 +261,8 @@ function lineOf(
   };
 }
 
-// The reply for one side's brief: three agree, three clash and three decide-first lines, nine citations in all.
+// The reply for one side's brief: three agree, three clash and three decide-first lines, nine
+// citations in all.
 function briefReplyOf(picked: Citation[]): {
   agree: Array<{ text: string }>;
   clash: unknown[];
@@ -267,8 +275,8 @@ function briefReplyOf(picked: Citation[]): {
   };
 }
 
-// The citations of one side with each text once, repeated until they fill the brief's nine lines; at least three distinct
-// texts are needed so that no section cites one twice.
+// The citations of one side with each text once, repeated until they fill the brief's nine lines;
+// at least three distinct texts are needed so that no section cites one twice.
 function nineCitations(citations: Citation[]): Citation[] {
   const distinct = citations.filter(
     (citation, index) => citations.findIndex((other) => other.text === citation.text) === index,
@@ -284,7 +292,8 @@ function nineCitations(citations: Citation[]): Citation[] {
   );
 }
 
-// The judge reply for one side: every line supported, except the first agree line of side a, which is the one unsupported line of the run.
+// The judge reply for one side: every line supported, except the first agree line of side a, which
+// is the one unsupported line of the run.
 function judgeReplyOf(side: "a" | "b"): Record<string, unknown> {
   return {
     lines: Array.from(Array(LINE_COUNT).keys(), (index) => ({
@@ -295,7 +304,8 @@ function judgeReplyOf(side: "a" | "b"): Record<string, unknown> {
   };
 }
 
-// The reply plan of one meeting: nine citations per side, or a refusal when a side has fewer than three distinct ones.
+// The reply plan of one meeting: nine citations per side, or a refusal when a side has fewer than
+// three distinct ones.
 function planFor(snapshot: BriefSnapshot): ReplyPlan {
   const brief = {
     a: briefReplyOf(nineCitations(citationsOf(snapshot, "a"))),
@@ -305,7 +315,8 @@ function planFor(snapshot: BriefSnapshot): ReplyPlan {
   return { brief, judge: { a: judgeReplyOf("a"), b: judgeReplyOf("b") }, firstStatement: first };
 }
 
-// The reply the plan gives a brief call: the brief of the side the call writes for, read from the call's system message.
+// The reply the plan gives a brief call: the brief of the side the call writes for, read from the
+// call's system message.
 function briefCallReply(args: CompleteArgs, plan: ReplyPlan): Record<string, unknown> {
   const side = /You write for the human on side ([ab])\./.exec(
     args.messages[0]?.content ?? "",
@@ -318,7 +329,8 @@ function briefCallReply(args: CompleteArgs, plan: ReplyPlan): Record<string, unk
   );
 }
 
-// The reply the plan gives a judge call: the verdicts of the side whose statements the call carries.
+// The reply the plan gives a judge call: the verdicts of the side whose statements the call
+// carries.
 function judgeCallReply(args: CompleteArgs, plan: ReplyPlan): Record<string, unknown> {
   const side = (args.messages[1]?.content ?? "").includes(
     `<statement>${plan.firstStatement.a}</statement>`,
@@ -339,7 +351,8 @@ function replyFor(args: CompleteArgs, plan: ReplyPlan): Record<string, unknown> 
   );
 }
 
-// What the recording client needs: the replay client that answers, the reply plan, the folder to write to, and the list of paths written.
+// What the recording client needs: the replay client that answers, the reply plan, the folder to
+// write to, and the list of paths written.
 type RecordingOptions = {
   replay: LlmClient;
   plan: ReplyPlan;
@@ -347,7 +360,8 @@ type RecordingOptions = {
   written: string[];
 };
 
-// A client that writes each request's reply as a fixture, then lets the replay client answer from that fixture.
+// A client that writes each request's reply as a fixture, then lets the replay client answer from
+// that fixture.
 function recordingClient(options: RecordingOptions): LlmClient {
   return {
     complete: async (args) => {
@@ -368,7 +382,8 @@ function recordingClient(options: RecordingOptions): LlmClient {
   };
 }
 
-// Writes the recorded replies of an ended meeting's two briefs and two judge calls, runs write_briefs on them, and returns the paths written.
+// Writes the recorded replies of an ended meeting's two briefs and two judge calls, runs
+// write_briefs on them, and returns the paths written.
 export async function writeBriefFixtures(options: {
   workerUrl: string;
   meetingId: string;
@@ -412,7 +427,8 @@ export async function writeBriefFixtures(options: {
   }
 }
 
-// The command entry: "meeting <id>" writes the meeting's brief fixtures into the repository folder, one path per line.
+// The command entry: "meeting <id>" writes the meeting's brief fixtures into the repository folder,
+// one path per line.
 async function main(argv: readonly string[]): Promise<string[]> {
   const meetingId = argv[1];
   if (argv[0] !== "meeting" || meetingId === undefined)

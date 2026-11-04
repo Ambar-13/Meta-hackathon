@@ -1,5 +1,5 @@
-// The parts of people the feed (Home) and Search show: Add friend and where a request stands, a person as a card and as a
-// row, and the photos as Instagram's Explore grid.
+// The parts of people the feed (Home) and Search show: Add friend and where a request stands, a
+// person as a card and as a row, and the photos as Instagram's Explore grid.
 import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import type { DirectoryListing, Post } from "@meet-first/contracts";
@@ -11,13 +11,15 @@ import type { ExploreFriends } from "./explore-state.js";
 // The words a listing open to dating questions shows, as the directory showed them.
 const OPEN_TO_ROMANCE_COPY = "Open to dating questions";
 
-// The line under a person's name: their own line, or in its place the sentence of a friend request the server refused.
+// The line under a person's name: their own line, or in its place the sentence of a friend request
+// the server refused.
 export function lineFor(line: string, state: AddState): string {
   return state.kind === "refused" ? state.sentence : line;
 }
 
-// Add friend for one person, or where their request stands: blue words in a post or a row, a blue button on a card. A post by someone
-// who was already a friend shows nothing, as a feed shows no Follow on the people you follow; someone added from this page shows Friends.
+// Add friend for one person, or where their request stands: blue words in a post or a row, a blue
+// button on a card. A post by someone who was already a friend shows nothing, as a feed shows no
+// Follow on the people you follow; someone added from this page shows Friends.
 export const FriendControl = (props: {
   listing: DirectoryListing;
   friends: ExploreFriends;
@@ -42,8 +44,9 @@ export const FriendControl = (props: {
   );
 };
 
-// One person Explore suggests, as a card in Instagram's "Suggested for you" row: their picture, name, Sample mark, line, and the dating
-// words when open, as one link to their profile, with the Add friend button under it.
+// One person Explore suggests, as a card in Instagram's "Suggested for you" row: their picture,
+// name, Sample mark, line, and the dating words when open, as one link to their profile, with the
+// Add friend button under it.
 export const PersonCard = (props: {
   listing: DirectoryListing;
   friends: ExploreFriends;
@@ -72,8 +75,8 @@ export const PersonCard = (props: {
   );
 };
 
-// One person in a list: their picture, name, Sample mark, line, first public item's claim, and the dating words when open, as one link
-// to their profile, with Add friend at the end of the row.
+// One person in a list: their picture, name, Sample mark, line, first public item's claim, and the
+// dating words when open, as one link to their profile, with Add friend at the end of the row.
 export const PersonRow = (props: {
   listing: DirectoryListing;
   friends: ExploreFriends;
@@ -107,9 +110,9 @@ export const PersonRow = (props: {
   );
 };
 
-// The photos as Instagram's Explore grid: every photo post of someone else as a tall tile with square corners, three to a row, newest
-// first, each opening its writer's Posts tab. On a laptop the writer's face and name show over the tile on hover. Nothing shows without
-// photos.
+// The photos as Instagram's Explore grid: every photo post of someone else as a tall tile with
+// square corners, three to a row, newest first, each opening its writer's Posts tab. On a laptop
+// the writer's face and name show over the tile on hover. Nothing shows without photos.
 export const PhotoGrid = (props: { posts: readonly Post[] }): ReactElement | null => {
   const photos = props.posts.filter((post) => post.isMine !== true && photoOf(post.photo) !== null);
   if (photos.length === 0) return null;

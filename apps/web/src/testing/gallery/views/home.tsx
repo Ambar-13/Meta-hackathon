@@ -5,7 +5,8 @@ import { IDS, SERVER_NOW } from "../../fixtures.js";
 import { FOREVER_MS, type GalleryReply } from "../fetch-stub.js";
 import type { GalleryView } from "../gallery-views.js";
 
-// Home at each stage of a person's first run, from no notes to a brief, plus loading and no session.
+// Home at each stage of a person's first run, from no notes to a brief, plus loading and no
+// session.
 
 const REVIEWED = { id: IDS.source, namesPassDone: true, namesReviewed: true };
 const CARD = {
@@ -57,7 +58,8 @@ function homeAt(slot: { name: string; title: string; reply: GalleryReply }): Gal
   };
 }
 
-// Home: new, names to check, card being written, card to approve, ready to meet, a meeting under way, a brief ready, loading, no session.
+// Home: new, names to check, card being written, card to approve, ready to meet, a meeting under
+// way, a brief ready, loading, no session.
 export const views: readonly GalleryView[] = [
   homeAt({
     name: "home-new",

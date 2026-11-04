@@ -98,7 +98,8 @@ export const PasteTab = (props: {
   );
 };
 
-// The file picker, which offers the five export types, .jsonl being a Codex session log; the picker's own button is the main action.
+// The file picker, which offers the five export types, .jsonl being a Codex session log; the
+// picker's own button is the main action.
 export const FileTab = (props: { isBusy: boolean; onPick: (file: File) => void }): ReactElement => {
   return (
     <div role="tabpanel" id="panel-file" aria-labelledby="tab-file" className="up-pane">
@@ -172,7 +173,8 @@ function redactionLine(count: number): string {
   return `${String(count)} private details will be hidden before upload.`;
 }
 
-// What will be sent: the counts, the consent copy, the low-signal note, the attestation box and the upload button.
+// What will be sent: the counts, the consent copy, the low-signal note, the attestation box and the
+// upload button.
 export const PreviewPanel = (props: {
   ready: UploadReady;
   isAttested: boolean;

@@ -37,7 +37,8 @@ export function registerPanelImage(app: FastifyInstance, deps: RouteDeps): Promi
         );
       return Buffer.from(row.image);
     });
-    // A stored panel never changes; the row is deleted, not edited, so a member's browser may keep it for a day.
+    // A stored panel never changes; the row is deleted, not edited, so a member's browser may keep
+    // it for a day.
     return reply
       .header("Content-Type", "image/webp")
       .header("Cache-Control", "private, max-age=86400")

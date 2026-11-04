@@ -1,7 +1,8 @@
 import type { ReactElement } from "react";
 import { AVATARS, type Avatar } from "@meet-first/contracts";
 
-// The props of the picker: the chosen avatar, whether a request is out, and what a pick or a draw does.
+// The props of the picker: the chosen avatar, whether a request is out, and what a pick or a draw
+// does.
 export type AvatarPickerProps = {
   selected: Avatar | null;
   isSending: boolean;

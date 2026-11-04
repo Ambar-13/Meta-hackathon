@@ -20,8 +20,8 @@ const FREE_TEXT_LABEL = "Your question";
 // The longest free-text question the picker accepts.
 const FREE_TEXT_MAX_CHARS = 300;
 
-// The five groups the picker shows the 20 curated questions in, by kind, each with its colour class; the decision sits with the deals
-// and the two situations with the debates.
+// The five groups the picker shows the 20 curated questions in, by kind, each with its colour
+// class; the decision sits with the deals and the two situations with the debates.
 const QUESTION_GROUPS: ReadonlyArray<{
   title: string;
   kinds: readonly QuestionKind[];
@@ -62,8 +62,9 @@ const QuestionOption = (props: {
   );
 };
 
-// The 20 curated questions in their five groups, and a free-text choice. A kind in leaveOutKinds is not offered, and a group
-// left with no question is not shown, so a listing closed to dating questions gets no couple group.
+// The 20 curated questions in their five groups, and a free-text choice. A kind in leaveOutKinds is
+// not offered, and a group left with no question is not shown, so a listing closed to dating
+// questions gets no couple group.
 export const QuestionPicker = (props: {
   isSending: boolean;
   error: string | null;
@@ -179,7 +180,8 @@ export const MeetingList = (props: { meetings: PairMeetingRow[] }): ReactElement
   );
 };
 
-// One row per member: the initial in the side's colour, then the name, whether they said ready, and whether they are watching now.
+// One row per member: the initial in the side's colour, then the name, whether they said ready, and
+// whether they are watching now.
 const MemberLines = (props: { meeting: MeetingView }): ReactElement => {
   return (
     <ul className="member-rows">
@@ -194,7 +196,8 @@ const MemberLines = (props: { meeting: MeetingView }): ReactElement => {
   );
 };
 
-// The line under the members while the meeting waits: both ready, or the other person still to say ready.
+// The line under the members while the meeting waits: both ready, or the other person still to say
+// ready.
 const ReadyNote = (props: { meeting: MeetingView }): ReactElement | null => {
   const isBothReady = props.meeting.members.every((member) => member.ready);
   if (props.meeting.state !== "ready") return null;

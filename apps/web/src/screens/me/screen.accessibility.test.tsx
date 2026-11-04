@@ -13,8 +13,8 @@ import { unlabelledControls } from "../../testing/render-screen.js";
 import { IDS, LISTING_IDS, profileView, SERVER_NOW } from "../../testing/fixtures.js";
 import { MeScreen } from "./screen.js";
 
-// The browser's drawing of a picture as a square JPEG, which jsdom cannot do: a picture file gives a small JPEG, any other file the
-// error the browser gives for a file it cannot draw.
+// The browser's drawing of a picture as a square JPEG, which jsdom cannot do: a picture file gives
+// a small JPEG, any other file the error the browser gives for a file it cannot draw.
 vi.mock("./photo-file.js", async (importOriginal) => {
   const original = await importOriginal<typeof import("./photo-file.js")>();
   return {
@@ -98,7 +98,8 @@ const MY_PROFILE = profileView({
   friendship: "self",
 });
 
-// Stubs the reads of /me. The profile route is stubbed first, so the more exact /api/directory/me stub answers its own path.
+// Stubs the reads of /me. The profile route is stubbed first, so the more exact /api/directory/me
+// stub answers its own path.
 function stubMeReads(replies: {
   listing?: StubInput;
   meetings?: StubInput;

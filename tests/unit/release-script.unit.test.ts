@@ -44,7 +44,8 @@ afterEach(() => {
   for (const fixture of fixtures.splice(0)) rmSync(fixture.base, { recursive: true, force: true });
 });
 
-// Runs one git command in the folder and stops the test when git fails, so a broken setup is never mistaken for a result.
+// Runs one git command in the folder and stops the test when git fails, so a broken setup is never
+// mistaken for a result.
 function git(cwd: string, args: string[]): void {
   const result = spawnSync("git", args, { cwd, encoding: "utf8" });
   if (result.status !== 0) throw new Error(`git ${args.join(" ")} failed: ${result.stderr}`);
@@ -57,8 +58,9 @@ function gitOutput(cwd: string, args: string[]): string {
   return result.stdout.trim();
 }
 
-// A repository with no commit yet, a bare origin, and a fake curl that logs its arguments. On a health read the fake
-// curl prints the first line of the answers file and removes it, so each read gets the next answer.
+// A repository with no commit yet, a bare origin, and a fake curl that logs its arguments. On a
+// health read the fake curl prints the first line of the answers file and removes it, so each read
+// gets the next answer.
 function makeFixture(): Fixture {
   const base = mkdtempSync(join(tmpdir(), "w2-release-"));
   const origin = join(base, "origin.git");
@@ -96,7 +98,8 @@ function commitFile(repo: string, name: string): void {
   git(repo, ["commit", "-q", "-m", `Add ${name}`]);
 }
 
-// The bodies the fake health route gives, one per read, in order; null is a read that gets no answer (the api is not up).
+// The bodies the fake health route gives, one per read, in order; null is a read that gets no
+// answer (the api is not up).
 function answerHealth(fixture: Fixture, versions: Array<number | null>): void {
   const lines = versions.map((version) =>
     version === null
@@ -177,7 +180,8 @@ describe("release script", () => {
     expect(onlyApi.stderr).toContain("release_hooks_missing");
     expect(curlLog(fixture)).toBe("");
 
-    // Both hooks set and the database already at the tag's schema version: the api hook, one health read, then the worker hook.
+    // Both hooks set and the database already at the tag's schema version: the api hook, one health
+    // read, then the worker hook.
     answerHealth(fixture, [1]);
     const both = runRelease(fixture, ["v1.0.0"], FULL_ENV);
     expect(both.status).toBe(0);
@@ -201,7 +205,8 @@ describe("release script", () => {
     expect(result.status).toBe(0);
     const commit = gitOutput(fixture.repo, ["rev-parse", "v1.0.0^{commit}"]);
     const tagObject = gitOutput(fixture.repo, ["rev-parse", "v1.0.0"]);
-    // An annotated tag is its own object, so its id is not the commit's; only the commit id may reach the hooks.
+    // An annotated tag is its own object, so its id is not the commit's; only the commit id may
+    // reach the hooks.
     expect(tagObject).not.toBe(commit);
     const hookLines = curlLog(fixture)
       .trim()
@@ -219,7 +224,8 @@ describe("release script", () => {
     commitFile(fixture.repo, "packages/db/migrations/0002_names_review.sql");
     git(fixture.repo, ["push", "-q", "origin", "main:release"]);
     git(fixture.repo, ["tag", "v1.0.0"]);
-    // The api is not up yet, then it answers on the old schema, then its pre-deploy migrations have run.
+    // The api is not up yet, then it answers on the old schema, then its pre-deploy migrations have
+    // run.
     answerHealth(fixture, [null, 1, 2]);
 
     const result = runRelease(fixture, ["v1.0.0"], FULL_ENV);
@@ -263,7 +269,8 @@ describe("release script", () => {
     expect(noOrigin.status).toBe(2);
     expect(noOrigin.stderr).toContain("release_origin_missing");
 
-    // Without a migration file the script cannot know the schema version the worker of this tag expects.
+    // Without a migration file the script cannot know the schema version the worker of this tag
+    // expects.
     const noMigrations = runRelease(fixture, ["v1.0.0"], FULL_ENV);
     expect(noMigrations.status).toBe(2);
     expect(noMigrations.stderr).toContain("release_schema_unknown");
@@ -280,7 +287,8 @@ describe("release script", () => {
 
     expect(result.status).toBe(0);
     const commit = gitOutput(fixture.repo, ["rev-parse", "v1.0.0^{commit}"]);
-    // The one service's start script migrates before either process starts, so no health read sits between hooks.
+    // The one service's start script migrates before either process starts, so no health read sits
+    // between hooks.
     const lines = curlLog(fixture).trim().split("\n");
     expect(lines).toHaveLength(1);
     expect(lines[0]).toContain(`${HOOK_ONE}&ref=${commit}`);

@@ -65,7 +65,8 @@ import {
 import type { AssistantMessage } from "./history-validator.js";
 import { isPublicOnlyCard } from "./public-items.js";
 
-// What the begin transaction decided: nothing to do, the token stop ended the meeting, or this runner holds the step.
+// What the begin transaction decided: nothing to do, the token stop ended the meeting, or this
+// runner holds the step.
 type BeginOutcome = { kind: "skip" } | { kind: "budget" } | { kind: "run"; plan: StepPlan };
 // Everything the speech and commit phases need, read in the begin transaction.
 type StepPlan = {
@@ -84,7 +85,8 @@ type ReceiptsSource = {
   turns: Map<number, CitableTurn>;
 };
 
-// The meeting_step job: claim the step, speak, check receipts, commit; a failure leaves the step pending or stalled for the sweeper.
+// The meeting_step job: claim the step, speak, check receipts, commit; a failure leaves the step
+// pending or stalled for the sweeper.
 export const runMeetingStep: JobTask<"meeting_step"> = async (payload, context) => {
   let held: HeldStep | null = null;
   try {
@@ -102,7 +104,8 @@ export const runMeetingStep: JobTask<"meeting_step"> = async (payload, context) 
   }
 };
 
-// Reads the four prompts through readPrompt. readPrompt is synchronous on main, so no await is needed.
+// Reads the four prompts through readPrompt. readPrompt is synchronous on main, so no await is
+// needed.
 export function loadMeetingPrompts(): MeetingPrompts {
   return {
     moderator: loadPrompt("meeting-moderator"),
@@ -118,7 +121,8 @@ function loadPrompt(name: PromptName): LoadedPrompt {
   return { text: prompt.text, version: prompt.version };
 }
 
-// The begin transaction: lock the step, check the token stop, build or reuse the messages, and store the partial text reset.
+// The begin transaction: lock the step, check the token stop, build or reuse the messages, and
+// store the partial text reset.
 async function beginStep(
   context: JobContext,
   payload: JobPayload<"meeting_step">,
@@ -146,7 +150,8 @@ async function beginInside(
   const tokens = await readMeetingTokens(trx, payload.meetingId);
   if (isOverTokenStop(tokens)) {
     await releaseStep(trx, ref, "stalled");
-    // A false end means another path ended the meeting first and queued its own briefs, so this runner queues none.
+    // A false end means another path ended the meeting first and queued its own briefs, so this
+    // runner queues none.
     const isEnded = await endMeeting(trx, { meetingId: payload.meetingId, reason: "budget", now });
     return isEnded ? { kind: "budget" } : { kind: "skip" };
   }
@@ -193,7 +198,8 @@ async function beginInside(
   };
 }
 
-// The first messages of a step: the frozen prefix and the variable part, capped to the request size.
+// The first messages of a step: the frozen prefix and the variable part, capped to the request
+// size.
 async function firstMessages(
   trx: Transaction<Database>,
   scope: { context: JobContext; held: HeldStep; prefix: string },
@@ -218,7 +224,8 @@ async function firstMessages(
   return initialMessages(prefix, buildVariablePart(capped.input));
 }
 
-// Resets the attempt's partial text to the saved base and tells the viewers to replace the old partial.
+// Resets the attempt's partial text to the saved base and tells the viewers to replace the old
+// partial.
 async function resetPartialText(
   trx: Transaction<Database>,
   ref: HeldRef,
@@ -283,7 +290,8 @@ async function speakAndCommit(
   });
 }
 
-// One speech request: the history check, the streamed call, the flush of its text and, for a side's first turn, the measured prompt size.
+// One speech request: the history check, the streamed call, the flush of its text and, for a side's
+// first turn, the measured prompt size.
 async function speakOnce(
   scope: SpeechScope,
   request: { messages: ChatMessage[]; tools: ToolDefinition[] | undefined; round: number },
@@ -307,7 +315,8 @@ async function speakOnce(
     toolCalls: result.toolCalls,
     finishReason: result.finishReason,
   };
-  // A round that called a tool is not part of the turn, so the words it streamed leave the screen as it ends (W3-SPEECH-T1).
+  // A round that called a tool is not part of the turn, so the words it streamed leave the screen
+  // as it ends (W3-SPEECH-T1).
   if (isToolRound(spoken, request.tools)) await writer.discardRound();
   else await writer.flush();
   writer.endRound();
@@ -316,7 +325,8 @@ async function speakOnce(
   return spoken;
 }
 
-// Runs one round's tool calls and keeps the step's messages in memory, so the commit sees every round.
+// Runs one round's tool calls and keeps the step's messages in memory, so the commit sees every
+// round.
 async function runAndRecord(
   context: JobContext,
   held: HeldStep,
@@ -344,7 +354,8 @@ async function storeMeasuredTokens(
   );
 }
 
-// What one speech request needs: the job context, the plan of the step, the prompts and the partial-text writer.
+// What one speech request needs: the job context, the plan of the step, the prompts and the
+// partial-text writer.
 type SpeechScope = {
   context: JobContext;
   plan: StepPlan;
@@ -352,7 +363,8 @@ type SpeechScope = {
   writer: PartialTextWriter;
 };
 
-// The receipts call of one turn. A model refusal, a timeout or a limit skips the receipts and the turn commits with no claims.
+// The receipts call of one turn. A model refusal, a timeout or a limit skips the receipts and the
+// turn commits with no claims.
 async function checkReceipts(
   context: JobContext,
   request: { plan: StepPlan; prompts: MeetingPrompts; speechText: string },
@@ -397,7 +409,8 @@ async function checkReceipts(
   }
 }
 
-// Reads the speaker's approved card quotes and this step's recall results, in one transaction, with the full turns they cite.
+// Reads the speaker's approved card quotes and this step's recall results, in one transaction, with
+// the full turns they cite.
 async function readReceiptsSource(db: Kysely<Database>, held: HeldStep): Promise<ReceiptsSource> {
   return withMeeting(db, held.meetingId, async (trx) => {
     const isPublicOnly = await isPublicOnlyCard(trx, held.meetingId, held.cardId);
@@ -441,7 +454,8 @@ async function readReceiptsSource(db: Kysely<Database>, held: HeldStep): Promise
   });
 }
 
-// The recall results of this step: each turn once, with the snippet the model saw and the whole turn.
+// The recall results of this step: each turn once, with the snippet the model saw and the whole
+// turn.
 async function recallSnippets(
   trx: Transaction<Database>,
   held: HeldStep,
@@ -482,7 +496,8 @@ async function recallSnippets(
   return { rows, snippets };
 }
 
-// Handles a failure of the step: a lost step or meeting writes nothing; a limit returns the step to pending or ends the meeting; anything else stalls the step.
+// Handles a failure of the step: a lost step or meeting writes nothing; a limit returns the step to
+// pending or ends the meeting; anything else stalls the step.
 async function handleStepFailure(
   context: JobContext,
   payload: JobPayload<"meeting_step">,
@@ -511,8 +526,9 @@ async function handleStepFailure(
   );
 }
 
-// A dollar cap ended the call: the step stalls and the meeting ends with reason budget, then the briefs are queued, but only when
-// this end ended the meeting; when another path ended it first, that path queued the briefs.
+// A dollar cap ended the call: the step stalls and the meeting ends with reason budget, then the
+// briefs are queued, but only when this end ended the meeting; when another path ended it first,
+// that path queued the briefs.
 async function stopForCap(
   context: JobContext,
   meetingId: string,
@@ -583,7 +599,8 @@ async function otherSideClaims(trx: Transaction<Database>, held: HeldStep): Prom
     );
 }
 
-// True when this step already has a concede or a hold event, so a resumed decide turn keeps its decision.
+// True when this step already has a concede or a hold event, so a resumed decide turn keeps its
+// decision.
 async function hasDecisionEvent(trx: Transaction<Database>, held: HeldStep): Promise<boolean> {
   const events = await readEvents(trx, held.meetingId, ["concede", "hold"]);
   return events.some(

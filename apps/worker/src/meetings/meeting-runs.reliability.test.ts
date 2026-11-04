@@ -98,7 +98,8 @@ function claimOf(item: Item): {
   };
 }
 
-// Opens a meeting test context over the shared worker database with this script and the given kill, if any.
+// Opens a meeting test context over the shared worker database with this script and the given kill,
+// if any.
 async function openTest(
   script: ReplyScript,
   killAfterReply?: { callSite: "receipts"; times: number },
@@ -177,7 +178,8 @@ async function readItems(side: "a" | "b"): Promise<Item[]> {
   return readSideItems(workerDb, m.meetingId, side);
 }
 
-// The state claim_meeting_slot gives a meeting, with the slot limit given (the function is the one place that counts running meetings).
+// The state claim_meeting_slot gives a meeting, with the slot limit given (the function is the one
+// place that counts running meetings).
 async function claimSlot(meetingId: string, maxRunning: number): Promise<string> {
   const rows = (
     await withMeeting(workerDb, meetingId, (trx) =>
@@ -203,7 +205,8 @@ async function endOf(meetingId: string): Promise<{ state: string; end_reason: st
   );
 }
 
-// The end time claim_meeting_slot gave a running meeting; a running meeting without one is a broken seed.
+// The end time claim_meeting_slot gave a running meeting; a running meeting without one is a broken
+// seed.
 async function endsAtOf(meetingId: string): Promise<Date> {
   const row = await withMeeting(workerDb, meetingId, (trx) =>
     trx
@@ -216,7 +219,8 @@ async function endsAtOf(meetingId: string): Promise<Date> {
   return row.ends_at;
 }
 
-// Moves the claim time of a meeting's step 1 to ms ago, as a runner that claimed it then would have left it.
+// Moves the claim time of a meeting's step 1 to ms ago, as a runner that claimed it then would have
+// left it.
 async function claimedAgo(meetingId: string, ms: number): Promise<void> {
   const past = new Date(Date.now() - ms);
   await withMeeting(workerDb, meetingId, (trx) =>
@@ -255,7 +259,8 @@ function briefsQueued(test: MeetingTestContext): MeetingTestContext["pending"] {
   return test.pending.filter((job) => job.name === "write_briefs");
 }
 
-// A promise and the function that resolves it, for a test that waits on another transaction's progress.
+// A promise and the function that resolves it, for a test that waits on another transaction's
+// progress.
 function signal(): { wait: Promise<void>; fire: () => void } {
   let fire: () => void = () => undefined;
   const wait = new Promise<void>((resolve) => {
@@ -288,7 +293,8 @@ it("R5.2-T1: a worker stopped between the model reply and the commit every time 
     { callSite: "receipts", times: 20 },
   );
   await startTestMeeting(t, m.meetingId);
-  // Each round runs the step job the last sweep queued, then sweeps as the minute cron does once the meeting is silent for 150 s.
+  // Each round runs the step job the last sweep queued, then sweeps as the minute cron does once
+  // the meeting is silent for 150 s.
   for (let round = 0; round < 21; round += 1) {
     await drainJobs(t, { limit: 1, names: ["meeting_step"] });
     await backdate(m.meetingId);
@@ -346,7 +352,8 @@ it("R5.4-T1: a step left running by a dead worker is marked stalled and re-enque
     1,
   );
   await withMeeting(workerDb, m.meetingId, (trx) => claimStep(trx, m.meetingId, 1));
-  // The dead worker claimed the step 7 minutes ago, past the 6 minutes a live runner keeps its claim.
+  // The dead worker claimed the step 7 minutes ago, past the 6 minutes a live runner keeps its
+  // claim.
   await claimedAgo(m.meetingId, 420_000);
   await backdate(m.meetingId);
   await runMeetingJob(t, "sweep_stalled", {});
@@ -364,7 +371,8 @@ it("R12.4-T1: after that sweep the dead runner's late commit is refused and the 
     1,
   );
   await withMeeting(workerDb, m.meetingId, (trx) => claimStep(trx, m.meetingId, 1));
-  // The dead worker claimed the step 7 minutes ago, past the 6 minutes a live runner keeps its claim.
+  // The dead worker claimed the step 7 minutes ago, past the 6 minutes a live runner keeps its
+  // claim.
   await claimedAgo(m.meetingId, 420_000);
   await backdate(m.meetingId);
   await runMeetingJob(t, "sweep_stalled", {});
@@ -630,7 +638,8 @@ it("W3-WORK-T4: a step whose token stop finds the meeting ended by another path 
   await startTestMeeting(t, m.meetingId);
   t.pending.splice(0);
   await reachTokenStop(m.meetingId);
-  // Another path ends the meeting and holds its row until the step's own end waits on it, then commits.
+  // Another path ends the meeting and holds its row until the step's own end waits on it, then
+  // commits.
   const isWritten = signal();
   const otherEnd = withMeeting(workerDb, m.meetingId, async (trx) => {
     await endMeeting(trx, { meetingId: m.meetingId, reason: "decided", now: t.clock.now() });
@@ -657,7 +666,8 @@ it("W3-WORK-T5: a step that hits the dollar cap after another path ended the mee
   const t = await openTest({ speech: [], receipts: [], questionCheck: [] });
   await startTestMeeting(t, m.meetingId);
   t.pending.splice(0);
-  // A fake speech call: while it runs another path ends the meeting, then the call stops at the daily cap.
+  // A fake speech call: while it runs another path ends the meeting, then the call stops at the
+  // daily cap.
   const capped: LlmClient = {
     ...t.client,
     stream: async () => {

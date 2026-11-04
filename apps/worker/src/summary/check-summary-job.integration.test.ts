@@ -21,7 +21,8 @@ afterAll(async () => {
   await fresh.drop();
 });
 
-// A fake model that answers every names call with these names, or fails every call when there are none to give.
+// A fake model that answers every names call with these names, or fails every call when there are
+// none to give.
 function namesModel(names: Array<{ text: string; role: string }> | "fails"): LiveCaller {
   return () => {
     if (names === "fails") return Promise.reject(new Error("the model is down"));
@@ -41,7 +42,8 @@ function namesModel(names: Array<{ text: string; role: string }> | "fails"): Liv
   };
 }
 
-// A person with a summary in checking state with this text and, when there are messages, one frozen source holding them in order.
+// A person with a summary in checking state with this text and, when there are messages, one frozen
+// source holding them in order.
 async function seedPerson(
   name: string,
   input: { messages: readonly string[]; summary: string },

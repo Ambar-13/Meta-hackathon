@@ -41,7 +41,8 @@ const CountedBody = z
   })
   .passthrough();
 
-// The request body for one call, built from CALL_SITE_CONFIG so effort, max_tokens and temperature cannot drift per caller.
+// The request body for one call, built from CALL_SITE_CONFIG so effort, max_tokens and temperature
+// cannot drift per caller.
 export function buildChatRequest(args: ChatRequestArgs): Record<string, unknown> {
   const config = CALL_SITE_CONFIG[args.callSite];
   const body: Record<string, unknown> = {
@@ -85,7 +86,8 @@ export function requestChars(body: Record<string, unknown>): number {
   return messageChars + toolChars;
 }
 
-// Tokens estimated before the call: chars divided by charsPerToken, default 1.33 because Tamil is three times English; never below 1.
+// Tokens estimated before the call: chars divided by charsPerToken, default 1.33 because Tamil is
+// three times English; never below 1.
 export function estimateTokens(chars: number, charsPerToken: number | null): number {
   return Math.max(1, Math.ceil(chars / (charsPerToken ?? DEFAULT_CHARS_PER_TOKEN)));
 }

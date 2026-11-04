@@ -324,7 +324,8 @@ describe("the request lists", () => {
 });
 
 describe("profile photos in the database", () => {
-  // A stand-in for a JPEG: the start and end marks around some bytes, which is all the table checks.
+  // A stand-in for a JPEG: the start and end marks around some bytes, which is all the table
+  // checks.
   const jpeg = Buffer.concat([
     Buffer.from([0xff, 0xd8, 0xff, 0xe0]),
     Buffer.alloc(120, 7),
@@ -452,7 +453,8 @@ describe("profile photos in the database", () => {
 });
 
 describe("posts, stories and likes in the database", () => {
-  // A stand-in for a JPEG: the start and end marks around some bytes, which is all the table checks.
+  // A stand-in for a JPEG: the start and end marks around some bytes, which is all the table
+  // checks.
   const jpeg = Buffer.concat([
     Buffer.from([0xff, 0xd8, 0xff, 0xe0]),
     Buffer.alloc(120, 5),
@@ -702,7 +704,8 @@ describe("posts, stories and likes in the database", () => {
 });
 
 describe("Google accounts in the database", () => {
-  // Signs in with a Google subject through the definer function, as the api does after checking Google's token; the person, or null.
+  // Signs in with a Google subject through the definer function, as the api does after checking
+  // Google's token; the person, or null.
   const signIn = async (sub: string, name: string): Promise<string | null> =>
     (
       await sql<{

@@ -1,4 +1,5 @@
-// Steps 13 to 15 and 22: the two briefs, the comic, the share page with its consent and withdrawal, and, last of all, the deletion of A.
+// Steps 13 to 15 and 22: the two briefs, the comic, the share page with its consent and withdrawal,
+// and, last of all, the deletion of A.
 import {
   ErrorBody,
   FORBIDDEN_SHARE_KEYS,
@@ -33,7 +34,8 @@ import {
 } from "./report.js";
 import { readCardView } from "./steps-people-and-sources.js";
 
-// The brief may take 300 s after the meeting ends (two brief calls and two judge calls, ARCHITECTURE 8).
+// The brief may take 300 s after the meeting ends (two brief calls and two judge calls,
+// ARCHITECTURE 8).
 const BRIEF_WAIT_MS = 300_000;
 // The comic may take 60 s, plus 10 s for its event to arrive.
 const COMIC_WAIT_MS = 70_000;
@@ -56,7 +58,8 @@ function forbiddenKeysIn(value: unknown): string[] {
   ]);
 }
 
-// Step 13: both briefs are read. Each side gets its own brief, every claim is verified or flagged, and under --mock both support judgments are reliable.
+// Step 13: both briefs are read. Each side gets its own brief, every claim is verified or flagged,
+// and under --mock both support judgments are reliable.
 export async function step13Brief(run: RunState): Promise<StepResult> {
   const { a } = readers(run);
   const meetingId = need(run.ids.meetingId, "meetingId");
@@ -122,9 +125,10 @@ export async function step13Brief(run: RunState): Promise<StepResult> {
       claims.verified + claims.flagged >= claims.total,
     ),
   ];
-  // How many lines the support judge backs, and where the unsupported ones sit, is the model's choice: the recorded judge left many
-  // lines unsupported, some in decide first, which the contract allows (decideFirst is always three lines) and the brief screen sets
-  // aside. So no run counts them. Under --mock the replayed judgments must still both be reliable.
+  // How many lines the support judge backs, and where the unsupported ones sit, is the model's
+  // choice: the recorded judge left many lines unsupported, some in decide first, which the
+  // contract allows (decideFirst is always three lines) and the brief screen sets aside. So no run
+  // counts them. Under --mock the replayed judgments must still both be reliable.
   if (run.options.mode === "mock")
     assertions.push(
       check(
@@ -143,7 +147,8 @@ export async function step13Brief(run: RunState): Promise<StepResult> {
   });
 }
 
-// The checks on a ready comic: six panels from one to six, and panel one is a webp image under 150 KB.
+// The checks on a ready comic: six panels from one to six, and panel one is a webp image under 150
+// KB.
 async function readyComicChecks(
   run: RunState,
   comicId: string,
@@ -171,7 +176,8 @@ async function readyComicChecks(
   ];
 }
 
-// The checks on the comic row: it is written after the brief, its state is final, and its panel count matches its state.
+// The checks on the comic row: it is written after the brief, its state is final, and its panel
+// count matches its state.
 function comicRowChecks(
   view: ComicView,
   row: { state: string; panels: number } | undefined,
@@ -192,12 +198,14 @@ function comicRowChecks(
   ];
 }
 
-// The reason a comic was skipped, as its event gives it, or a plain word when the event is not a skip.
+// The reason a comic was skipped, as its event gives it, or a plain word when the event is not a
+// skip.
 function skipReason(event: MeetingEvent): string {
   return event.type === "comic.skipped" ? event.reason : "no reason";
 }
 
-// Step 14: B asks for a comic. It is ready with six panels under --mock, or skipped with a reason under --live.
+// Step 14: B asks for a comic. It is ready with six panels under --mock, or skipped with a reason
+// under --live.
 export async function step14Comic(run: RunState): Promise<StepResult> {
   const { b } = readers(run);
   const meetingId = need(run.ids.meetingId, "meetingId");
@@ -235,7 +243,8 @@ export async function step14Comic(run: RunState): Promise<StepResult> {
   return finishStep(14, "comic", { rows: ["R11.1", "R11.2", "D64"], detail, assertions });
 }
 
-// Step 15: both consent, the share page opens for anyone with no cookie, shows names and supported lines only, and withdrawal takes it down.
+// Step 15: both consent, the share page opens for anyone with no cookie, shows names and supported
+// lines only, and withdrawal takes it down.
 export async function step15Share(run: RunState): Promise<StepResult> {
   const meetingId = need(run.ids.meetingId, "meetingId");
   const consentPath = routePath(routes.briefs.consent.path, { id: meetingId });
@@ -313,7 +322,8 @@ export async function step15Share(run: RunState): Promise<StepResult> {
   });
 }
 
-// The checks on the public snapshot: no forbidden key, two people by display name, no unsupported line, no flagged claim, no-store.
+// The checks on the public snapshot: no forbidden key, two people by display name, no unsupported
+// line, no flagged claim, no-store.
 function snapshotChecks(
   snapshot: ShareSnapshot,
   cacheControl: string | null,
@@ -349,7 +359,8 @@ function snapshotChecks(
   ];
 }
 
-// Withdraws consent (the page is gone, 404), checks the database, then gives consent again and the page returns.
+// Withdraws consent (the page is gone, 404), checks the database, then gives consent again and the
+// page returns.
 async function withdrawAndReturn(
   run: RunState,
   paths: { anon: PersonClient; consentPath: string; sharePath: string; meetingId: string },
@@ -380,7 +391,8 @@ async function withdrawAndReturn(
       schema: routes.briefs.readShare.response,
     });
   } catch (error) {
-    // The route may refuse consent after a withdrawal. The 404 above stays as the proof, and the return is marked not exercised.
+    // The route may refuse consent after a withdrawal. The 404 above stays as the proof, and the
+    // return is marked not exercised.
     if (!(error instanceof StepFailure)) throw error;
     run.manual.push(
       "re-consent after withdrawal was refused; the return is not exercised, the 404 above is the proof",
@@ -388,7 +400,8 @@ async function withdrawAndReturn(
   }
 }
 
-// The checks on what B keeps and loses when A is deleted, beyond the meeting: no copy of A's asks, no friend, and B's own listing.
+// The checks on what B keeps and loses when A is deleted, beyond the meeting: no copy of A's asks,
+// no friend, and B's own listing.
 async function directoryChecksAfterDeletion(run: RunState, personB: string): Promise<Assertion[]> {
   const asks = await run.b.json({
     method: "GET",
@@ -425,8 +438,8 @@ async function directoryChecksAfterDeletion(run: RunState, personB: string): Pro
   ];
 }
 
-// Step 22: A deletes the account. Every table clears for A, B keeps their source, card and listing, and A's meetings and asks are
-// gone for B.
+// Step 22: A deletes the account. Every table clears for A, B keeps their source, card and listing,
+// and A's meetings and asks are gone for B.
 export async function step24Delete(run: RunState): Promise<StepResult> {
   const personA = need(run.ids.personA, "personA");
   const personB = need(run.ids.personB, "personB");

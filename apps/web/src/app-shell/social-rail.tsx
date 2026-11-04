@@ -5,7 +5,8 @@ import { APP_PATHS } from "./app-paths.js";
 import { friendsLinkName, useRailData } from "./social-rail-state.js";
 import { Icon, MeetyMark, Sticker, type IconName } from "../look/index.js";
 
-// One page of the signed-in nav: its words, where it goes, its line icon, and whether only the laptop rail shows it.
+// One page of the signed-in nav: its words, where it goes, its line icon, and whether only the
+// laptop rail shows it.
 type RailPage = {
   label: string;
   to: string;
@@ -13,9 +14,10 @@ type RailPage = {
   isRailOnly?: boolean;
   isPhoneHidden?: boolean;
 };
-// The pages, in this order, as Instagram's: Home (the feed), Search, Meety (the chat, where Instagram has messages), Friends, Create,
-// which the phone keeps as the + of its top bar instead, Me, then Settings, which the laptop keeps at the sidebar's foot and the phone
-// keeps in the top bar instead.
+// The pages, in this order, as Instagram's: Home (the feed), Search, Meety (the chat, where
+// Instagram has messages), Friends, Create, which the phone keeps as the + of its top bar instead,
+// Me, then Settings, which the laptop keeps at the sidebar's foot and the phone keeps in the top
+// bar instead.
 const RAIL_PAGES: readonly RailPage[] = [
   { label: "Home", to: APP_PATHS.home, icon: "home" },
   { label: "Search", to: APP_PATHS.search, icon: "search" },
@@ -35,14 +37,16 @@ const RAIL_COPY = {
   meetyLine: "Shares only what you choose",
 } as const;
 
-// The class of one page link: rail-only for the one the laptop keeps at the sidebar's foot, phone-hidden for one the phone keeps elsewhere.
+// The class of one page link: rail-only for the one the laptop keeps at the sidebar's foot,
+// phone-hidden for one the phone keeps elsewhere.
 function pageClass(page: RailPage): string | undefined {
   if (page.isRailOnly === true) return "rail-only";
   return page.isPhoneHidden === true ? "phone-hidden" : undefined;
 }
 
-// One page link: its icon, with the request count on the Friends link, and its words, shown beside the icon in the laptop sidebar,
-// under it on a phone, and on hover in the narrow rail between the two.
+// One page link: its icon, with the request count on the Friends link, and its words, shown beside
+// the icon in the laptop sidebar, under it on a phone, and on hover in the narrow rail between the
+// two.
 const PageLink = (props: {
   page: RailPage;
   pathname: string;
@@ -72,10 +76,11 @@ const PageLink = (props: {
   );
 };
 
-// The signed-in nav. On a laptop a sidebar: the Meety mark and words, the
-// tagline, the pages with their words, Invite a friend, Settings at the foot, and a line on what your Meety shares. Between laptop and
-// phone a narrow rail of icons; on a phone a bottom bar of icons with their words. It is one Pages nav at every width; the stylesheet
-// moves it. hasSettingsLink is false on Settings itself.
+// The signed-in nav. On a laptop a sidebar: the Meety mark and words, the tagline, the pages with
+// their words, Invite a friend, Settings at the foot, and a line on what your Meety shares. Between
+// laptop and phone a narrow rail of icons; on a phone a bottom bar of icons with their words. It is
+// one Pages nav at every width; the stylesheet moves it. hasSettingsLink is false on Settings
+// itself.
 export const SocialRail = (props: { pathname: string; hasSettingsLink: boolean }): ReactElement => {
   const rail = useRailData();
   const pages = RAIL_PAGES.filter((page) => page.isRailOnly !== true);

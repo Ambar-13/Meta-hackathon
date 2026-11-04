@@ -8,14 +8,16 @@ import {
 import { numberFromPostgres } from "./client.js";
 import type { Database } from "./types.js";
 
-// A meeting event as a writer builds it before its seq is chosen: every variant of MeetingEvent without its seq field.
+// A meeting event as a writer builds it before its seq is chosen: every variant of MeetingEvent
+// without its seq field.
 export type EventWithoutSeq = MeetingEvent extends infer E
   ? E extends unknown
     ? Omit<E, "seq">
     : never
   : never;
 
-// The next seq of a meeting's event log, read after locking the meeting row so two writers in one meeting take turns.
+// The next seq of a meeting's event log, read after locking the meeting row so two writers in one
+// meeting take turns.
 export async function nextEventSeq(trx: Transaction<Database>, meetingId: string): Promise<number> {
   const meeting = await trx
     .selectFrom("meetings")
@@ -33,7 +35,8 @@ export async function nextEventSeq(trx: Transaction<Database>, meetingId: string
   return numberFromPostgres(result.rows[0]?.seq);
 }
 
-// Writes one committed event at the next seq, with the event's own version and time, and returns the seq it used.
+// Writes one committed event at the next seq, with the event's own version and time, and returns
+// the seq it used.
 export async function appendMeetingEvent(
   trx: Transaction<Database>,
   meetingId: string,

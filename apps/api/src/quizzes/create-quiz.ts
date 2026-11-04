@@ -14,12 +14,14 @@ import { parseDatabaseError, withPerson, type Database } from "@meet-first/db";
 import type { RouteDeps } from "../app-types.js";
 import { requirePerson } from "../sessions/index.js";
 
-// The card states a quiz may start from: built and not thin, approved or not (approving the card and taking the quiz may come in either order).
+// The card states a quiz may start from: built and not thin, approved or not (approving the card
+// and taking the quiz may come in either order).
 const QUIZ_READY_STATES = ["ready", "approved"] as const;
 // The :id of POST /api/cards/:id/quiz: a uuid, or the card cannot exist.
 const CardRouteParams = z.object({ id: Uuid });
 
-// Refuses the quiz when the card is missing, still building, failed, or thin (a thin card skips the quiz).
+// Refuses the quiz when the card is missing, still building, failed, or thin (a thin card skips the
+// quiz).
 export function assertCardCanQuiz(
   card: { state: string; thin: boolean } | undefined,
 ): asserts card is { state: "ready" | "approved"; thin: false } {
@@ -75,7 +77,8 @@ export async function insertQuiz(
   return quiz.id;
 }
 
-// Registers POST /api/cards/:id/quiz: 202 with the quiz id; 404 not_found; 409 card_thin, card_not_ready, quiz_exists.
+// Registers POST /api/cards/:id/quiz: 202 with the quiz id; 404 not_found; 409 card_thin,
+// card_not_ready, quiz_exists.
 export function registerCreateQuiz(app: FastifyInstance, deps: RouteDeps): void {
   app.post(routes.cards.requestQuiz.path, async (request, reply) => {
     const personId = requirePerson(request);
@@ -104,7 +107,8 @@ export function registerCreateQuiz(app: FastifyInstance, deps: RouteDeps): void 
         throw error;
       }
     });
-    // The job is queued after the rows above have committed, so the job never reads a quiz that is not visible yet.
+    // The job is queued after the rows above have committed, so the job never reads a quiz that is
+    // not visible yet.
     const payload = { quizId, personId };
     try {
       await deps.enqueue("answer_quiz", payload);

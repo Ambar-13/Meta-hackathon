@@ -14,7 +14,8 @@ import { CardItemList, RecallSwitch } from "./card-items.js";
 import { useCardScreen, type CardActionState } from "./card-state.js";
 import { SharingSection } from "./sharing-section.js";
 
-// The person's own name tag with one line beside it, when this tab knows the name typed at signup; the card itself carries no name.
+// The person's own name tag with one line beside it, when this tab knows the name typed at signup;
+// the card itself carries no name.
 const CardHello = (props: { children: ReactNode }): ReactElement => {
   const name = readAllowlist()[0] ?? "";
   return (
@@ -52,7 +53,8 @@ const FailedBody = (props: { action: CardActionState; onRebuild: () => void }): 
   );
 };
 
-// The approve bar, which stays in view at the bottom until the card is approved, with its hint while nothing is ticked.
+// The approve bar, which stays in view at the bottom until the card is approved, with its hint
+// while nothing is ticked.
 const ApproveBar = (props: {
   isNothingTicked: boolean;
   isSending: boolean;
@@ -113,7 +115,8 @@ const ThinNote = (props: { isThin: boolean }): ReactElement | null => {
   );
 };
 
-// A built card: the next step or the hello line, the items, the recall switch, then Sharing once approved or the approve bar before.
+// A built card: the next step or the hello line, the items, the recall switch, then Sharing once
+// approved or the approve bar before.
 const CardBody = (props: {
   card: CardView;
   screen: ReturnType<typeof useCardScreen>;
@@ -161,7 +164,8 @@ const CardBody = (props: {
   );
 };
 
-// The card page: watch it build, read and approve items, set the recall switch, then quiz, pair or choose what to share.
+// The card page: watch it build, read and approve items, set the recall switch, then quiz, pair or
+// choose what to share.
 export const CardScreen = (): ReactElement => {
   const navigate = useNavigate();
   const cardId = useParams()["cardId"] ?? "";

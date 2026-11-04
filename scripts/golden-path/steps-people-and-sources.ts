@@ -1,4 +1,5 @@
-// Steps 1 to 4: two people, A's pasted notes and B's ChatGPT export, each made into a source, redacted and given a card.
+// Steps 1 to 4: two people, A's pasted notes and B's ChatGPT export, each made into a source,
+// redacted and given a card.
 import {
   CARD_ITEMS_MIN,
   CardView,
@@ -34,7 +35,8 @@ const NAMES_POLL_MS = 3_000;
 // The names pass may take 60 s for the paste and 120 s for the export.
 const NAMES_PASTE_TIMEOUT_MS = 60_000;
 const NAMES_EXPORT_TIMEOUT_MS = 120_000;
-// The card is due within 60 s for the paste, and within 300 s for the export (the card call's timeout plus a margin).
+// The card is due within 60 s for the paste, and within 300 s for the export (the card call's
+// timeout plus a margin).
 const CARD_PASTE_TIMEOUT_MS = 60_000;
 const CARD_EXPORT_TIMEOUT_MS = 300_000;
 // The card poll interval.
@@ -71,7 +73,8 @@ export async function readCardView(client: PersonClient, cardId: string) {
   return reply.body;
 }
 
-// Sends the names review for a source and returns the reply. Every name in the list is kept or replaced by the decisions given.
+// Sends the names review for a source and returns the reply. Every name in the list is kept or
+// replaced by the decisions given.
 async function sendNamesReview(
   client: PersonClient,
   sourceId: string,
@@ -87,7 +90,8 @@ async function sendNamesReview(
   return reply.body;
 }
 
-// Asks for a card on a source, waits until it is no longer building, and returns the card with its id.
+// Asks for a card on a source, waits until it is no longer building, and returns the card with its
+// id.
 async function buildCard(client: PersonClient, sourceId: string, timeoutMs: number) {
   const requested = await client.json({
     method: "POST",
@@ -104,7 +108,8 @@ async function buildCard(client: PersonClient, sourceId: string, timeoutMs: numb
   return { cardId, card };
 }
 
-// The checks every ready card must pass: ready, at least six verified items, none flagged, each with a quote and a turn.
+// The checks every ready card must pass: ready, at least six verified items, none flagged, each
+// with a quote and a turn.
 function readyCardChecks(card: CardView, prefix: string): Assertion[] {
   const verified = card.items.filter((item) => item.verified).length;
   return [
@@ -129,13 +134,15 @@ function readyCardChecks(card: CardView, prefix: string): Assertion[] {
   ];
 }
 
-// The sign-up body for one display name, with the access code when the site asks for one (ACCESS_CODE in the shell).
+// The sign-up body for one display name, with the access code when the site asks for one
+// (ACCESS_CODE in the shell).
 export function signUpBody(displayName: string): { displayName: string; accessCode?: string } {
   const accessCode = (process.env.ACCESS_CODE ?? "").trim();
   return accessCode === "" ? { displayName } : { displayName, accessCode };
 }
 
-// Step 1: two people with cookies and recovery codes; the Origin refusal; the single-use recovery code.
+// Step 1: two people with cookies and recovery codes; the Origin refusal; the single-use recovery
+// code.
 export async function step01Person(run: RunState): Promise<StepResult> {
   const created = routes.people.createPerson;
   const reply = await run.a.json({
@@ -224,7 +231,8 @@ export async function step01Person(run: RunState): Promise<StepResult> {
   });
 }
 
-// Step 2: A's notes uploaded, the names pass finished, the review frozen, and the rows checked in the database.
+// Step 2: A's notes uploaded, the names pass finished, the review frozen, and the rows checked in
+// the database.
 export async function step02Paste(run: RunState): Promise<StepResult> {
   const paste = run.fixtures.paste;
   const personA = need(run.ids.personA, "personA");
@@ -291,7 +299,8 @@ export async function step02Paste(run: RunState): Promise<StepResult> {
   });
 }
 
-// Step 3: A's card is built from the paste. Every item is verified, and no item quotes a turn outside the source.
+// Step 3: A's card is built from the paste. Every item is verified, and no item quotes a turn
+// outside the source.
 export async function step03CardA(run: RunState): Promise<StepResult> {
   const personA = need(run.ids.personA, "personA");
   const sourceId = need(run.ids.sourceA, "sourceA");

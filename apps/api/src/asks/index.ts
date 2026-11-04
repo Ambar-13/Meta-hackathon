@@ -1,5 +1,5 @@
-// The ask routes as one plugin for apps/api/src/server.ts slot 12: create an ask, list asks and the caller's
-// copies, read one ask, and meet a helper from a help answer.
+// The ask routes as one plugin for apps/api/src/server.ts slot 12: create an ask, list asks and the
+// caller's copies, read one ask, and meet a helper from a help answer.
 import type { RoutePlugin } from "../app-types.js";
 import { registerCreateAsk } from "./create-ask.js";
 import { registerMeetHelper } from "./meet-helper.js";

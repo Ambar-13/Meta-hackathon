@@ -72,18 +72,23 @@ export const ROUTE_PATTERNS = {
   cookies: "/cookies",
 } as const;
 
-// The query name that carries the approved card a meeting is created with, so a reload keeps it (no contract field carries it).
+// The query name that carries the approved card a meeting is created with, so a reload keeps it (no
+// contract field carries it).
 export const CARD_QUERY = "card";
-// The query name that carries this browser's side in a meeting, so a reload keeps it (MeetingView has no viewer side).
+// The query name that carries this browser's side in a meeting, so a reload keeps it (MeetingView
+// has no viewer side).
 export const SIDE_QUERY = "side";
 
-// The query name that carries words for the chat composer, so a link can open the chat with a message started.
+// The query name that carries words for the chat composer, so a link can open the chat with a
+// message started.
 export const DRAFT_QUERY = "draft";
 
-// The query name that opens a profile on one of its tabs, so a post in the feed can open its person's Posts tab.
+// The query name that opens a profile on one of its tabs, so a post in the feed can open its
+// person's Posts tab.
 export const PROFILE_TAB_QUERY = "tab";
 
-// The query name that opens Create on a story rather than a post, so Your story can open it ready for a story.
+// The query name that opens Create on a story rather than a post, so Your story can open it ready
+// for a story.
 const CREATE_KIND_QUERY = "kind";
 
 // Create, ready for a post or for a story.

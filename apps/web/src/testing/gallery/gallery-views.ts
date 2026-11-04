@@ -1,9 +1,10 @@
 import type { ReactElement } from "react";
 import type { GalleryStub } from "./fetch-stub.js";
 
-// One screen in one state: a unique name, a title for the index, the route it renders on, the screen element, the stubbed
-// replies it reads, and an optional play step that acts on the page after it renders (for example filling and sending a form).
-// Each screen folder's views live in ./views/<screen>.tsx, which exports `views`.
+// One screen in one state: a unique name, a title for the index, the route it renders on, the
+// screen element, the stubbed replies it reads, and an optional play step that acts on the page
+// after it renders (for example filling and sending a form). Each screen folder's views live in
+// ./views/<screen>.tsx, which exports `views`.
 export type GalleryView = {
   name: string;
   title: string;
@@ -17,7 +18,8 @@ export type GalleryView = {
 // How long after the first render a view's play step runs, in ms.
 export const PLAY_AFTER_MS = 400;
 
-// Types a value into the field with this label text inside a form, the way a person would, for a play step.
+// Types a value into the field with this label text inside a form, the way a person would, for a
+// play step.
 export function typeInto(labelText: string, value: string): void {
   const label = Array.from(document.querySelectorAll("label")).find((element) =>
     (element.textContent ?? "").trim().startsWith(labelText),

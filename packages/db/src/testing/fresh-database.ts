@@ -4,7 +4,8 @@ import { makeDatabase, POOL_SIZE } from "../client.js";
 import { dropDatabase, recreateDatabase, type RebuildUrls } from "../fresh.js";
 import type { Database } from "../types.js";
 
-// What freshTestDatabase hands a test: a client as app_api, the three role URLs, and the function that drops the database.
+// What freshTestDatabase hands a test: a client as app_api, the three role URLs, and the function
+// that drops the database.
 export type TestDatabase = {
   db: Kysely<Database>;
   migrateUrl: string;
@@ -13,7 +14,8 @@ export type TestDatabase = {
   drop: () => Promise<void>;
 };
 
-// Reads DATABASE_URL_ADMIN and DATABASE_URL_TEST and works out the api and worker URLs from the test URL.
+// Reads DATABASE_URL_ADMIN and DATABASE_URL_TEST and works out the api and worker URLs from the
+// test URL.
 export function readTestDatabaseUrls(env: NodeJS.ProcessEnv): RebuildUrls {
   const adminUrl = env.DATABASE_URL_ADMIN;
   const testUrl = env.DATABASE_URL_TEST;
@@ -64,12 +66,14 @@ function withUser(url: string, role: string): string {
   return copy.toString();
 }
 
-// Vitest global setup: refuses to start the Postgres kinds when the two variables are missing or wrong.
+// Vitest global setup: refuses to start the Postgres kinds when the two variables are missing or
+// wrong.
 export function setup(): void {
   readTestDatabaseUrls(process.env);
 }
 
-// Rebuilds the test database from nothing, applies every migration, and returns a client as app_api.
+// Rebuilds the test database from nothing, applies every migration, and returns a client as
+// app_api.
 export async function freshTestDatabase(): Promise<TestDatabase> {
   const urls = readTestDatabaseUrls(process.env);
   await recreateDatabase(urls);

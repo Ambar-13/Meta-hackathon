@@ -1,5 +1,6 @@
-// What the orchestrate job sends to the model and the checks it runs on what comes back, built without the database. The model proposes
-// one action; the checks here decide it, so a plan never names a friend the person does not have or one whose switch is off.
+// What the orchestrate job sends to the model and the checks it runs on what comes back, built
+// without the database. The model proposes one action; the checks here decide it, so a plan never
+// names a friend the person does not have or one whose switch is off.
 import {
   AskCreate,
   OrchestratorPlanOutput,
@@ -11,13 +12,14 @@ import type { ChatMessage, CompleteArgs } from "@meet-first/llm";
 import { promptLine } from "../asks/ask-requests.js";
 import { escapeBlockText } from "../meetings/prompt-builder.js";
 
-// The most earlier messages of the thread the request shows, so a follow-up such as "and Jonah?" can be read, and a question corrected
-// in pieces ("no not the integral but sum of", "0 to pi") is still read with the message it corrects; at 4, a chat on 3 Nov lost it
-// by the third piece.
+// The most earlier messages of the thread the request shows, so a follow-up such as "and Jonah?"
+// can be read, and a question corrected in pieces ("no not the integral but sum of", "0 to pi") is
+// still read with the message it corrects; at 4, a chat on 3 Nov lost it by the third piece.
 export const RECENT_MESSAGES_MAX = 10;
 // The most characters of one earlier message the request shows.
 export const RECENT_MESSAGE_MAX_CHARS = 300;
-// The most characters of all the earlier messages together, each counted after its cut, so 8 messages of the full 300 fit.
+// The most characters of all the earlier messages together, each counted after its cut, so 8
+// messages of the full 300 fit.
 export const RECENT_CHARS_MAX = 2_400;
 
 // The sentence of a reply whose model call failed.
@@ -31,13 +33,15 @@ export const NO_FRIENDS_SENTENCE =
 
 // One earlier message of the thread as the request shows it.
 export type RecentMessage = { role: "you" | "agent"; text: string };
-// Everything one plan request holds: the person's new message, the friends they had when they sent it, and the messages before it, oldest first.
+// Everything one plan request holds: the person's new message, the friends they had when they sent
+// it, and the messages before it, oldest first.
 export type PlanInput = {
   text: string;
   friends: OrchestratorFriends;
   recent: readonly RecentMessage[];
 };
-// What the job writes for one reply after the checks: planned for an ask the person can run, done for words only.
+// What the job writes for one reply after the checks: planned for an ask the person can run, done
+// for words only.
 export type CheckedPlan = {
   state: "planned" | "done";
   action: OrchestratorAction;
@@ -47,9 +51,10 @@ export type CheckedPlan = {
   pairId: string | null;
 };
 
-// The earlier messages the request shows, oldest first: the newest RECENT_MESSAGES_MAX, each with line breaks as spaces and cut to
-// RECENT_MESSAGE_MAX_CHARS, while their characters together fit RECENT_CHARS_MAX. The first one that does not fit is left out with
-// every older one, so the request never skips a message in the middle of the thread.
+// The earlier messages the request shows, oldest first: the newest RECENT_MESSAGES_MAX, each with
+// line breaks as spaces and cut to RECENT_MESSAGE_MAX_CHARS, while their characters together fit
+// RECENT_CHARS_MAX. The first one that does not fit is left out with every older one, so the
+// request never skips a message in the middle of the thread.
 export function recentWindow(messages: readonly RecentMessage[]): RecentMessage[] {
   const kept: RecentMessage[] = [];
   let chars = 0;
@@ -70,8 +75,9 @@ function recentLine(message: RecentMessage): string {
   return (message.role === "you" ? "you: " : "meety: ") + escapeBlockText(message.text);
 }
 
-// The user message of one plan call: the earlier messages recentWindow keeps, the friend list and the new message, each in its own
-// block. Names go on one line with no tag characters, as promptLine makes them; the messages are escaped.
+// The user message of one plan call: the earlier messages recentWindow keeps, the friend list and
+// the new message, each in its own block. Names go on one line with no tag characters, as
+// promptLine makes them; the messages are escaped.
 export function planUserText(input: PlanInput): string {
   const friends =
     input.friends.length === 0
@@ -93,7 +99,8 @@ export function planUserText(input: PlanInput): string {
   return lines.join("\n");
 }
 
-// The two messages of one plan call: the orchestrator prompt as the system message, then the blocks.
+// The two messages of one plan call: the orchestrator prompt as the system message, then the
+// blocks.
 export function planMessages(promptText: string, input: PlanInput): ChatMessage[] {
   return [
     { role: "system", content: promptText },
@@ -116,12 +123,14 @@ export function planCallArgs(input: {
   };
 }
 
-// A name as the friend match compares it: case and spaces ignored. Example: " Mira Shah" and "mirashah" are the same key.
+// A name as the friend match compares it: case and spaces ignored. Example: " Mira Shah" and
+// "mirashah" are the same key.
 export function nameKey(name: string): string {
   return name.normalize("NFKC").toLowerCase().replace(/\s+/g, "");
 }
 
-// The question as an ask would carry it, or null when POST /api/asks would refuse it (5 to 300 characters after trimming).
+// The question as an ask would carry it, or null when POST /api/asks would refuse it (5 to 300
+// characters after trimming).
 export function askableQuestion(question: string): string | null {
   const parsed = AskCreate.safeParse({ mode: "help", text: question });
   return parsed.success && Array.from(parsed.data.text).length >= 5 ? parsed.data.text : null;
@@ -132,10 +141,12 @@ function wordsOnly(text: string): CheckedPlan {
   return { state: "done", action: "reply", text, question: null, friendName: null, pairId: null };
 }
 
-// The most friends the unknown-friend sentence names, so the reply stays short however many friends a person has.
+// The most friends the unknown-friend sentence names, so the reply stays short however many friends
+// a person has.
 export const NAMED_FRIENDS_MAX = 5;
 
-// The sentence when the plan's friend matches nobody: up to NAMED_FRIENDS_MAX of the person's friends by name, or how to get one.
+// The sentence when the plan's friend matches nobody: up to NAMED_FRIENDS_MAX of the person's
+// friends by name, or how to get one.
 export function unknownFriendSentence(friends: OrchestratorFriends): string {
   if (friends.length === 0) return NO_FRIENDS_SENTENCE;
   const names = friends
@@ -152,9 +163,10 @@ export function goneFriendSentence(name: string): string {
   return `You are no longer friends with ${promptLine(name)}, so I cannot ask their agent.`;
 }
 
-// Decides what one plan becomes, never trusting the model: a react needs the friend to match exactly one friend of the snapshot by
-// nameKey, with their switch on; help and react need a question that fits an ask. Anything else becomes words only, with a sentence
-// from here in place of the model's words, because those described an ask that will not start.
+// Decides what one plan becomes, never trusting the model: a react needs the friend to match
+// exactly one friend of the snapshot by nameKey, with their switch on; help and react need a
+// question that fits an ask. Anything else becomes words only, with a sentence from here in place
+// of the model's words, because those described an ask that will not start.
 export function checkPlan(plan: OrchestratorPlanOutput, friends: OrchestratorFriends): CheckedPlan {
   const reply = plan.reply.trim();
   if (plan.action === "reply") return wordsOnly(reply);
@@ -164,7 +176,8 @@ export function checkPlan(plan: OrchestratorPlanOutput, friends: OrchestratorFri
       ? wordsOnly(NO_QUESTION_SENTENCE)
       : { state: "planned", action: "help", text: reply, question, friendName: null, pairId: null };
   const key = nameKey(plan.friend);
-  // The model saw each name through promptLine, so a name is matched in that form and in its stored form.
+  // The model saw each name through promptLine, so a name is matched in that form and in its stored
+  // form.
   const matches =
     key === ""
       ? []

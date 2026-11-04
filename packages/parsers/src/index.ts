@@ -18,7 +18,8 @@ export {
   summaryPriority,
   type SummaryPriority,
 } from "./summary-format.js";
-// The file name of a Codex session log, and the lines of it the Codex reader needs, so the upload can stream a large log line by line.
+// The file name of a Codex session log, and the lines of it the Codex reader needs, so the upload
+// can stream a large log line by line.
 export { CODEX_FILE_NAME, isCodexLineWanted } from "./codex-shapes.js";
 // A message before canonicalisation, as the shape parsers return it.
 export type { RawTurn } from "./chatgpt-shapes.js";

@@ -3,7 +3,8 @@ import { ContractError, type RecordedCall } from "@meet-first/contracts";
 import { type ToolCall } from "./chat-request.js";
 import { REPLAY_STREAM_SLICE_CHARS, REPLAY_STREAM_SLICE_MS } from "./modes.js";
 
-// What one streamed reply came to: its text, its tool calls, why it stopped, its usage and when its first token came.
+// What one streamed reply came to: its text, its tool calls, why it stopped, its usage and when its
+// first token came.
 export type StreamOutcome = {
   text: string;
   toolCalls: ToolCall[];
@@ -11,7 +12,8 @@ export type StreamOutcome = {
   usage: RecordedCall["usage"] | null;
   firstTokenAt: Date | null;
 };
-// The hooks a stream calls as it is read: one per piece of text, one at the first token, and the clock.
+// The hooks a stream calls as it is read: one per piece of text, one at the first token, and the
+// clock.
 export type StreamHooks = {
   onDelta: (text: string) => Promise<void>;
   onFirstToken: () => Promise<void>;
@@ -59,7 +61,8 @@ const VendorUsage = z
   })
   .passthrough();
 
-// One tool call in the recorded layout: an id, the type, and a function with its complete arguments.
+// One tool call in the recorded layout: an id, the type, and a function with its complete
+// arguments.
 const ReplayToolCall = z
   .object({
     id: z.string().min(1),
@@ -96,9 +99,11 @@ export const ReplayResponse = z
     },
   );
 
-// One tool-call slot as the stream fills it: the id, the name and the arguments joined from its fragments.
+// One tool-call slot as the stream fills it: the id, the name and the arguments joined from its
+// fragments.
 type ToolSlot = { id: string | undefined; name: string; arguments: string };
-// The state of one read: the text so far, the last finish reason, the usage, the first-token time and the call slots.
+// The state of one read: the text so far, the last finish reason, the usage, the first-token time
+// and the call slots.
 type ReadState = {
   text: string;
   finish: string | undefined;
@@ -107,7 +112,8 @@ type ReadState = {
   slots: Map<number, ToolSlot>;
 };
 
-// Calls the first-token hook once, the first time any text or tool call arrives, and stamps the time.
+// Calls the first-token hook once, the first time any text or tool call arrives, and stamps the
+// time.
 async function markFirstToken(state: ReadState, hooks: StreamHooks): Promise<void> {
   if (state.firstTokenAt !== null) return;
   state.firstTokenAt = hooks.now();
@@ -123,7 +129,8 @@ function addFragment(state: ReadState, fragment: ToolFragmentValue): void {
   state.slots.set(fragment.index, slot);
 }
 
-// Reads the choice of one chunk: its text goes to the delta hook, its fragments to their slots, its finish reason is kept.
+// Reads the choice of one chunk: its text goes to the delta hook, its fragments to their slots, its
+// finish reason is kept.
 async function takeChoice(
   state: ReadState,
   choice: NonNullable<NonNullable<StreamChunkValue["choices"]>[number]>,
@@ -153,14 +160,16 @@ async function takeChunk(
   if (choice !== undefined) await takeChoice(state, choice, hooks);
 }
 
-// Maps the kept finish reason to the outcome's reason. A stream that ended with none was cut; content_filter maps to stop.
+// Maps the kept finish reason to the outcome's reason. A stream that ended with none was cut;
+// content_filter maps to stop.
 function outcomeReason(finish: string | undefined): StreamOutcome["finishReason"] {
   if (finish === undefined) return "cut";
   if (finish === "length" || finish === "tool_calls") return finish;
   return "stop";
 }
 
-// The tool calls in index order, only when the round ended in calls, so fragments of a cut call are dropped.
+// The tool calls in index order, only when the round ended in calls, so fragments of a cut call are
+// dropped.
 function completedCalls(state: ReadState, reason: StreamOutcome["finishReason"]): ToolCall[] {
   if (reason !== "tool_calls") return [];
   return [...state.slots.entries()]
@@ -174,7 +183,8 @@ function completedCalls(state: ReadState, reason: StreamOutcome["finishReason"])
     );
 }
 
-// Reads an SDK stream to the end. Tool call argument fragments are joined by index and only parsed by the caller after finish_reason tool_calls.
+// Reads an SDK stream to the end. Tool call argument fragments are joined by index and only parsed
+// by the caller after finish_reason tool_calls.
 export async function readChatStream(
   stream: AsyncIterable<unknown>,
   hooks: StreamHooks,
@@ -222,7 +232,8 @@ async function sendSlices(text: string, hooks: StreamHooks): Promise<void> {
   }
 }
 
-// Turns a recorded streamed reply into the same deltas a live stream would send, 20 characters every 10 ms, so replay runs the delta path.
+// Turns a recorded streamed reply into the same deltas a live stream would send, 20 characters
+// every 10 ms, so replay runs the delta path.
 export async function replayAsStream(
   response: Record<string, unknown>,
   hooks: StreamHooks,
@@ -271,7 +282,8 @@ export function replyLayoutFrom(outcome: StreamOutcome): ReplayReply {
   };
 }
 
-// Vendor usage in the openai-compatible shape, as RecordedCall usage; null when the reply carried none.
+// Vendor usage in the openai-compatible shape, as RecordedCall usage; null when the reply carried
+// none.
 export function usageFromVendor(raw: unknown): RecordedCall["usage"] | null {
   const parsed = VendorUsage.safeParse(raw);
   if (!parsed.success) return null;

@@ -31,8 +31,8 @@ export const PolicySections = (props: { sections: readonly PolicySection[] }): R
   );
 };
 
-// A policy page, which opens without a session: its title, the day it last changed, the page's own parts, then who to write to and
-// the links to the other two pages and back to the start page.
+// A policy page, which opens without a session: its title, the day it last changed, the page's own
+// parts, then who to write to and the links to the other two pages and back to the start page.
 export const PolicyPage = (props: {
   title: string;
   changed: string;

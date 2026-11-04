@@ -75,7 +75,8 @@ export function railStubs(friends: Friend[], incoming: FriendRequestView[] = [])
 // The gallery's fixed listing ids.
 const LISTING = (n: number): string =>
   `00000000-0000-4000-8000-${String(510 + n).padStart(12, "0")}`;
-// Six people in Explore: long and short names and lines, open and closed to dating questions, one with nothing public.
+// Six people in Explore: long and short names and lines, open and closed to dating questions, one
+// with nothing public.
 export const EXPLORE_LISTINGS: DirectoryListing[] = [
   {
     listingId: LISTING(1),
@@ -153,8 +154,9 @@ export const EXPLORE_LISTINGS: DirectoryListing[] = [
   },
 ].map((listing) => DirectoryListing.parse(listing));
 
-// Explore as the live site shows it after the seed: one real person first, then the six sample people with their faces,
-// lines, first public items and posts with their photos, as packages/db/src/samples/sample-people.ts writes them.
+// Explore as the live site shows it after the seed: one real person first, then the six sample
+// people with their faces, lines, first public items and posts with their photos, as
+// packages/db/src/samples/sample-people.ts writes them.
 const SAMPLE = (
   n: number,
   listing: { displayName: string; line: string; claim: string; quote: string },
@@ -207,7 +209,8 @@ export const SAMPLE_LISTINGS: DirectoryListing[] = [
     quote: "I never trust a result I have only run once",
   }),
 ];
-// The posts of Explore, newest first, dated back from the moment the gallery renders, since a post shows its age against the clock.
+// The posts of Explore, newest first, dated back from the moment the gallery renders, since a post
+// shows its age against the clock.
 const POST = (
   n: number,
   listing: DirectoryListing,
@@ -294,8 +297,8 @@ export const SAMPLE_POSTS: Post[] = [
   }),
 ];
 
-// The stories of Home, as the live site shows them after the seed: Mira's story of words an hour ago, then each sample
-// person's newest photo post as their story, as GET /api/stories gives them.
+// The stories of Home, as the live site shows them after the seed: Mira's story of words an hour
+// ago, then each sample person's newest photo post as their story, as GET /api/stories gives them.
 const MIRA_LISTING = EXPLORE_LISTINGS[0] as DirectoryListing;
 const STORIES: Story[] = [
   {
@@ -329,7 +332,8 @@ const STORIES: Story[] = [
       expiresAt: null,
     })),
 ];
-// Ana's home view with an approved card, so the feed shows no next step and Your story shows her initial.
+// Ana's home view with an approved card, so the feed shows no next step and Your story shows her
+// initial.
 const FEED_HOME: HomeView = {
   displayName: "Ana",
   source: { id: IDS.source, namesPassDone: true, namesReviewed: true },
@@ -349,7 +353,8 @@ function postsReply(posts: Post[]): GalleryReply {
   return { status: 200, body: PostsView.parse({ posts }) };
 }
 
-// The feed's two parts as GET /api/feed answers them, one page each: the friends' posts, then everyone else's.
+// The feed's two parts as GET /api/feed answers them, one page each: the friends' posts, then
+// everyone else's.
 function feedReplies(friendsPosts: Post[], otherPosts: Post[]): GalleryReply[] {
   return [friendsPosts, otherPosts].map((posts) => ({
     status: 200,
@@ -357,8 +362,9 @@ function feedReplies(friendsPosts: Post[], otherPosts: Post[]): GalleryReply[] {
   }));
 }
 
-// The page's reads: these Explore replies, these posts and stories (none unless given), the feed (Jun's posts as a friend's, then the
-// rest, unless given), these friends (the rail's five unless given), and Ana's home view.
+// The page's reads: these Explore replies, these posts and stories (none unless given), the feed
+// (Jun's posts as a friend's, then the rest, unless given), these friends (the rail's five unless
+// given), and Ana's home view.
 function reads(
   pages: GalleryReply | GalleryReply[],
   others: {
@@ -381,7 +387,8 @@ function reads(
   ];
 }
 
-// The rail's five friends and Jun, a sample person whose agent can be asked, so the feed shows Ask Meety on Jun's post.
+// The rail's five friends and Jun, a sample person whose agent can be asked, so the feed shows Ask
+// Meety on Jun's post.
 const FEED_FRIENDS: Friend[] = [
   ...railFriends(5),
   { pairId: LISTING(60), displayName: JUN.displayName, canAsk: true, listingId: JUN.listingId },
@@ -405,8 +412,9 @@ function searchView(
   return { ...head, pattern: ROUTE_PATTERNS.search, url: "/search", element, stubs };
 }
 
-// Home: the feed as the live site shows it, with one friend in it, loading, and a failed load. Search: the people it suggests over the
-// photos, everyone after See everyone, and a search that finds nobody.
+// Home: the feed as the live site shows it, with one friend in it, loading, and a failed load.
+// Search: the people it suggests over the photos, everyone after See everyone, and a search that
+// finds nobody.
 export const views: readonly GalleryView[] = [
   feedView(
     { name: "home-feed", title: "Home, the feed" },

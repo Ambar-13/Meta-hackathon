@@ -30,7 +30,8 @@ import {
 } from "../../look/index.js";
 import { postAgeWords, postsEmptyCopy } from "./people-state.js";
 
-// The tabs under a profile header, in order, with their icons; Meetings shows only on your own profile.
+// The tabs under a profile header, in order, with their icons; Meetings shows only on your own
+// profile.
 const TABS = [
   { key: "about", label: "About", icon: "about" },
   { key: "posts", label: "Posts", icon: "posts" },
@@ -42,9 +43,10 @@ export type TabKey = (typeof TABS)[number]["key"];
 const SAMPLE_NOTE =
   "A sample person, not a real one. Friend requests to them are accepted at once.";
 
-// The Instagram-style header of a profile: the person's round picture, then the name as the h1, the line, the sample note for a sample
-// person, and the buttons. No count of anything about the person shows here (PRODUCT.md principle 5). On a phone the picture sits left
-// of the name and the buttons go full width under them.
+// The Instagram-style header of a profile: the person's round picture, then the name as the h1, the
+// line, the sample note for a sample person, and the buttons. No count of anything about the person
+// shows here (PRODUCT.md principle 5). On a phone the picture sits left of the name and the buttons
+// go full width under them.
 export const ProfileHeader = (props: {
   name: string;
   line: string | null;
@@ -81,8 +83,8 @@ type ShownPost = Pick<Post, "postId" | "text" | "createdAt" | "photo" | "photoAl
 // What a Posts tab reads: its posts, newest first.
 type ShownPosts = { posts: readonly ShownPost[] };
 
-// The card of a Posts tab with no posts: on your own profile, where your posts show, that your Meety reads them, and New post; on
-// someone else's, that they have not shared one yet.
+// The card of a Posts tab with no posts: on your own profile, where your posts show, that your
+// Meety reads them, and New post; on someone else's, that they have not shared one yet.
 export const PostsEmptyCard = (props: { name: string | null }): ReactElement => {
   const copy = postsEmptyCopy(props.name);
   return (
@@ -101,8 +103,9 @@ export const PostsEmptyCard = (props: { name: string | null }): ReactElement => 
   );
 };
 
-// Delete on one of your own posts: the first press asks once more, the second deletes it (DELETE /api/posts/:id), then onDeleted runs
-// so the page reads again. buttonClass is the look of its buttons where it sits.
+// Delete on one of your own posts: the first press asks once more, the second deletes it (DELETE
+// /api/posts/:id), then onDeleted runs so the page reads again. buttonClass is the look of its
+// buttons where it sits.
 export const DeletePost = (props: {
   postId: string;
   onDeleted: () => void;
@@ -165,7 +168,8 @@ const AboutPanel = (props: { items: PublicItem[]; source: string }): ReactElemen
   );
 };
 
-// How the Posts tab shows the posts: a grid of square tiles, as Instagram shows a profile, or one under another.
+// How the Posts tab shows the posts: a grid of square tiles, as Instagram shows a profile, or one
+// under another.
 type PostsLook = "grid" | "list";
 // The two ways, with their words and icons, in the order of the switch.
 const POSTS_LOOKS = [
@@ -198,8 +202,8 @@ const LookSwitch = (props: {
   );
 };
 
-// The grid: three square tiles to a row with square corners, a photo post as its photo and a post of words as its words on a soft
-// ground. A tile opens its post in the list.
+// The grid: three square tiles to a row with square corners, a photo post as its photo and a post
+// of words as its words on a soft ground. A tile opens its post in the list.
 const PostGrid = (props: {
   posts: readonly ShownPost[];
   onOpen: (postId: string) => void;
@@ -235,8 +239,9 @@ const PostGrid = (props: {
   );
 };
 
-// The list: each post with its photo when it has one and how long ago it went up, and Delete on your own. The post opened from the grid
-// scrolls into view and takes the focus, so the reader lands on it.
+// The list: each post with its photo when it has one and how long ago it went up, and Delete on
+// your own. The post opened from the grid scrolls into view and takes the focus, so the reader
+// lands on it.
 const PostList = (props: {
   posts: readonly ShownPost[];
   openId: string | null;
@@ -279,9 +284,10 @@ const PostList = (props: {
   );
 };
 
-// The Posts tab: the person's posts, newest first. With a photo among them they open as the grid, with the switch to the list; posts
-// of words alone show as the list with no switch. The empty card shows when there are none. On your own, New post sits above them and
-// each post in the list has Delete.
+// The Posts tab: the person's posts, newest first. With a photo among them they open as the grid,
+// with the switch to the list; posts of words alone show as the list with no switch. The empty card
+// shows when there are none. On your own, New post sits above them and each post in the list has
+// Delete.
 const PostsPanel = (props: {
   posts: PolledView<ShownPosts> | null;
   name: string | null;
@@ -331,9 +337,10 @@ const PostsPanel = (props: {
   );
 };
 
-// What the tabs under a profile show: the public items with the words for their source, the Posts tab's name (null on your own
-// profile), posts (null where the page reads none) and what runs once one of your own is deleted, the tab it opens on, what follows the
-// items on About, and the Meetings panel, which only your own profile passes.
+// What the tabs under a profile show: the public items with the words for their source, the Posts
+// tab's name (null on your own profile), posts (null where the page reads none) and what runs once
+// one of your own is deleted, the tab it opens on, what follows the items on About, and the
+// Meetings panel, which only your own profile passes.
 type ProfileTabsProps = {
   items: PublicItem[];
   source: string;
@@ -365,8 +372,8 @@ function panelOf(key: TabKey, props: ProfileTabsProps): ReactNode {
   return props.meetings;
 }
 
-// The About and Posts tabs under a profile, and Meetings on your own: a real tab list, where the arrow keys move between the tabs and
-// each panel is labelled by its tab.
+// The About and Posts tabs under a profile, and Meetings on your own: a real tab list, where the
+// arrow keys move between the tabs and each panel is labelled by its tab.
 export const ProfileTabs = (props: ProfileTabsProps): ReactElement => {
   const tabs = TABS.filter((tab) => tab.key !== "meetings" || props.meetings !== undefined);
   const [selected, setSelected] = useState<TabKey>(props.firstTab ?? "about");

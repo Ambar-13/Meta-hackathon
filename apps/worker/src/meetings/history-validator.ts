@@ -11,8 +11,8 @@ type Fault = { reason: string; index: number };
 // The tool calls of the last assistant message and the ones already answered.
 type Pending = { open: Set<string>; answered: Set<string> };
 
-// Throws history_invalid unless the messages are: the system prefix, one user message, then assistant messages each
-// followed by exactly one tool message per tool call, in any order of ids.
+// Throws history_invalid unless the messages are: the system prefix, one user message, then
+// assistant messages each followed by exactly one tool message per tool call, in any order of ids.
 export function assertValidHistory(messages: readonly ChatMessage[]): void {
   const fault = prefixFault(messages) ?? walkFault(messages);
   if (fault === null) return;
@@ -34,7 +34,8 @@ function prefixFault(messages: readonly ChatMessage[]): Fault | null {
   return isPrefixOk ? null : { reason: "missing_prefix", index: 0 };
 }
 
-// The first fault after the prefix, walking the messages in order; a call still unanswered at the end is a fault too.
+// The first fault after the prefix, walking the messages in order; a call still unanswered at the
+// end is a fault too.
 function walkFault(messages: readonly ChatMessage[]): Fault | null {
   const pending: Pending = { open: new Set(), answered: new Set() };
   for (const [offset, message] of messages.slice(2).entries()) {

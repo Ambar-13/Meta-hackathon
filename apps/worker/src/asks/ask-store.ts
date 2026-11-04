@@ -1,5 +1,6 @@
-// Every read and write of the persona_asks and persona_answers rows the run_ask job makes. Each takes the transaction its caller opened in
-// the asker's own context, because only the asker's policies let the job write these rows (migration 0006); subjects are read elsewhere.
+// Every read and write of the persona_asks and persona_answers rows the run_ask job makes. Each
+// takes the transaction its caller opened in the asker's own context, because only the asker's
+// policies let the job write these rows (migration 0006); subjects are read elsewhere.
 import {
   ContractError,
   Uuid,
@@ -11,7 +12,8 @@ import { numberFromPostgres, type DatabaseTransaction } from "@meet-first/db";
 import { z } from "zod";
 import type { StoredAnswerClaim } from "./ask-requests.js";
 
-// One ask as the job reads it from persona_asks; questionKind is the kind the check gave, null until checked.
+// One ask as the job reads it from persona_asks; questionKind is the kind the check gave, null
+// until checked.
 export type AskRow = {
   id: string;
   personId: string;
@@ -22,7 +24,8 @@ export type AskRow = {
   aboutName: string | null;
   questionKind: QuestionKind | null;
 };
-// One answer row as the job reads it from persona_answers, with its claims checked against the stored shape.
+// One answer row as the job reads it from persona_answers, with its claims checked against the
+// stored shape.
 export type AnswerRow = {
   id: string;
   subjectPersonId: string;
@@ -35,7 +38,8 @@ export type AnswerRow = {
   hasSign: boolean | null;
   claims: StoredAnswerClaim[];
 };
-// One answer row to insert: who answers, from which card and listing, with the name and line copied at this moment.
+// One answer row to insert: who answers, from which card and listing, with the name and line copied
+// at this moment.
 export type NewAnswer = {
   subjectPersonId: string;
   subjectCardId: string | null;
@@ -44,7 +48,8 @@ export type NewAnswer = {
   subjectLine: string | null;
   shortlistRank: number;
 };
-// One state change of an ask. It happens only from the state the job read; a finished state stamps finished_at.
+// One state change of an ask. It happens only from the state the job read; a finished state stamps
+// finished_at.
 export type AskMove = {
   askId: string;
   from: AskState;
@@ -75,7 +80,8 @@ const StoredClaimList = z.array(
   }),
 );
 
-// Reads one ask; null when it is missing, which is also what row security shows for another person's ask.
+// Reads one ask; null when it is missing, which is also what row security shows for another
+// person's ask.
 export async function readAsk(trx: DatabaseTransaction, askId: string): Promise<AskRow | null> {
   const row = await trx
     .selectFrom("persona_asks")
@@ -95,7 +101,8 @@ export async function readAsk(trx: DatabaseTransaction, askId: string): Promise<
   };
 }
 
-// Moves an ask from the state the job read to the next one and says whether it moved; a run that lost a race moves nothing.
+// Moves an ask from the state the job read to the next one and says whether it moved; a run that
+// lost a race moves nothing.
 export async function moveAsk(trx: DatabaseTransaction, move: AskMove): Promise<boolean> {
   const isFinished = move.to === "done" || move.to === "refused" || move.to === "failed";
   const result = await trx
@@ -112,7 +119,8 @@ export async function moveAsk(trx: DatabaseTransaction, move: AskMove): Promise<
   return result.numUpdatedRows === 1n;
 }
 
-// Locks the ask row until the transaction ends, so two runs write its answer rows or its places one after the other; returns its state.
+// Locks the ask row until the transaction ends, so two runs write its answer rows or its places one
+// after the other; returns its state.
 export async function lockAsk(trx: DatabaseTransaction, askId: string): Promise<AskState | null> {
   const row = await trx
     .selectFrom("persona_asks")
@@ -133,8 +141,8 @@ export async function countAnswers(trx: DatabaseTransaction, askId: string): Pro
   return numberFromPostgres(row.total);
 }
 
-// One person's display name, read in that person's own context; null when the row is gone or the person is being deleted, so no
-// one is asked, and no ask goes on, once a deletion has started.
+// One person's display name, read in that person's own context; null when the row is gone or the
+// person is being deleted, so no one is asked, and no ask goes on, once a deletion has started.
 export async function readDisplayName(
   trx: DatabaseTransaction,
   personId: string,
@@ -148,8 +156,9 @@ export async function readDisplayName(
   return row === undefined ? null : row.display_name;
 }
 
-// Inserts the ask's answer rows in one statement, copying the ask's text and the asker's name onto each. A subject who already
-// has a row for this ask keeps it, by the unique key on (ask_id, subject_person_id).
+// Inserts the ask's answer rows in one statement, copying the ask's text and the asker's name onto
+// each. A subject who already has a row for this ask keeps it, by the unique key on (ask_id,
+// subject_person_id).
 export async function insertAnswers(
   trx: DatabaseTransaction,
   scope: { ask: AskRow; askerName: string; subjects: readonly NewAnswer[] },
@@ -265,7 +274,8 @@ export async function writePlacement(
     .execute();
 }
 
-// Checks a claims value read from the database against the stored shape; a broken row stops the job here instead of reaching a screen.
+// Checks a claims value read from the database against the stored shape; a broken row stops the job
+// here instead of reaching a screen.
 function parseClaims(value: unknown): StoredAnswerClaim[] {
   const parsed = StoredClaimList.safeParse(value);
   if (!parsed.success)

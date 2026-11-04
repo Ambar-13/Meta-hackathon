@@ -20,7 +20,8 @@ import {
   type SampledTurn,
 } from "../cards/index.js";
 
-// One scrub_names fixture case: the person, the turns of the unfrozen source, and the reply of each chunk in order.
+// One scrub_names fixture case: the person, the turns of the unfrozen source, and the reply of each
+// chunk in order.
 export type NamesFixtureCase = {
   name: string;
   displayName: string;
@@ -29,7 +30,8 @@ export type NamesFixtureCase = {
   replies: Array<z.infer<typeof NamesPassOutput>>;
   usage: RecordedCall["usage"];
 };
-// One build_card fixture case: the person, the turns of the frozen source, sensitive tags by turn index, opt-ins, the first reply and, when it has failures, the regeneration reply.
+// One build_card fixture case: the person, the turns of the frozen source, sensitive tags by turn
+// index, opt-ins, the first reply and, when it has failures, the regeneration reply.
 export type CardFixtureCase = {
   name: string;
   displayName: string;
@@ -92,7 +94,8 @@ export function cardCaseTurns(fixtureCase: CardFixtureCase): SampledTurn[] {
   return sampleTurns(sampled, CARD_INPUT_MAX_CHARS);
 }
 
-// The calls a card case makes: the first call and, when the first reply has failures, the regeneration (sections 4.15 and 4.16).
+// The calls a card case makes: the first call and, when the first reply has failures, the
+// regeneration (sections 4.15 and 4.16).
 export function cardCaseCalls(fixtureCase: CardFixtureCase): ModelCall[] {
   const turns = cardCaseTurns(fixtureCase);
   const first = cardCall(turns);
@@ -104,7 +107,8 @@ export function cardCaseCalls(fixtureCase: CardFixtureCase): ModelCall[] {
   return [first, cardRegenerationCall(first, JSON.stringify(fixtureCase.firstReply), failures)];
 }
 
-// The LlmRequest of one call, its body built as the client builds it, so its hash names the fixture file.
+// The LlmRequest of one call, its body built as the client builds it, so its hash names the fixture
+// file.
 export function fixtureRequest(call: ModelCall): LlmRequest {
   return {
     callSite: call.callSite,

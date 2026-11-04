@@ -24,7 +24,8 @@ import {
 import { firstWords } from "./testing/golden-path-meeting.js";
 import { type ReplyScript, type ScriptedSpeech } from "./testing/scripted-replies.js";
 
-// The speech of side a in its first turn, and of side b in its second: fixed texts the tests check for.
+// The speech of side a in its first turn, and of side b in its second: fixed texts the tests check
+// for.
 const S1 = "My human wants clear ownership of each part of the work.";
 const S2 = "My human agrees that ownership should be clear.";
 
@@ -103,7 +104,8 @@ function first(items: Item[]): Item {
   return item;
 }
 
-// Sets the recall flag of one person's card, as the owner (a meeting context reads cards and never writes them).
+// Sets the recall flag of one person's card, as the owner (a meeting context reads cards and never
+// writes them).
 async function allowRecall(personId: string, cardId: string, isAllowed: boolean): Promise<void> {
   await withPerson(workerDb, personId, (trx) =>
     trx.updateTable("cards").set({ recall_allowed: isAllowed }).where("id", "=", cardId).execute(),

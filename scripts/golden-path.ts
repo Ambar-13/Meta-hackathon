@@ -1,4 +1,5 @@
-// The end-to-end golden path: two simulated people driven through the HTTP routes, one line per step, and an exit code the checks read.
+// The end-to-end golden path: two simulated people driven through the HTTP routes, one line per
+// step, and an exit code the checks read.
 import {
   checkDatabase,
   openWorkerDatabase,
@@ -84,11 +85,13 @@ const RUNNERS = new Map<number, (run: RunState) => Promise<StepResult>>([
   [23, step23Orchestrator],
   [24, step24Delete],
 ]);
-// A step that fails here stops the run, because the steps after it need what it makes. The removed steps never stop.
+// A step that fails here stops the run, because the steps after it need what it makes. The removed
+// steps never stop.
 const PREREQUISITES = new Set([1, 2, 3, 4, 6, 7, 12, 13, 16, 17, 18]),
   REMOVED = new Set([9, 10]);
 
-// Runs one step, or marks it skipped when a prerequisite failed. An exit error from a step ends the whole run.
+// Runs one step, or marks it skipped when a prerequisite failed. An exit error from a step ends the
+// whole run.
 async function runOne(
   run: RunState,
   slot: StepSlot,
@@ -117,7 +120,8 @@ async function runOne(
   }
 }
 
-// Runs the selected steps in order and prints each line. A failed prerequisite marks the steps after it as skipped.
+// Runs the selected steps in order and prints each line. A failed prerequisite marks the steps
+// after it as skipped.
 async function runSteps(run: RunState, slots: readonly StepSlot[]): Promise<void> {
   let blockedBy: number | undefined;
   for (const slot of slots) {
@@ -128,7 +132,8 @@ async function runSteps(run: RunState, slots: readonly StepSlot[]): Promise<void
   }
 }
 
-// Reads the ledger modes and call sites now unless an earlier step cached them. False when the run stopped before its people existed.
+// Reads the ledger modes and call sites now unless an earlier step cached them. False when the run
+// stopped before its people existed.
 async function readLedgerNow(run: RunState): Promise<boolean> {
   if (run.facts.ledgerModes !== undefined) return true;
   const { meetingId, personA, personB } = run.ids;
@@ -139,14 +144,16 @@ async function readLedgerNow(run: RunState): Promise<boolean> {
   return true;
 }
 
-// The modes a run expects from the ledger: replay under --mock, live under --live, record under --record, and none otherwise.
+// The modes a run expects from the ledger: replay under --mock, live under --live, record under
+// --record, and none otherwise.
 function expectedModesOf(mode: RunMode): string[] | undefined {
   if (mode === "mock") return ["replay"];
   if (mode === "record") return ["record"];
   return mode === "live" ? ["live"] : undefined;
 }
 
-// The ledger check at the end. The modes and call sites are printed either way, and a run with a mode must match it.
+// The ledger check at the end. The modes and call sites are printed either way, and a run with a
+// mode must match it.
 async function endOfRun(run: RunState): Promise<StepResult | undefined> {
   if (!(await readLedgerNow(run))) return undefined;
   const modes = run.facts.ledgerModes ?? [];
@@ -163,7 +170,8 @@ async function endOfRun(run: RunState): Promise<StepResult | undefined> {
   return result;
 }
 
-// Checks the api and the database before any step, and loads the fixtures. A failure exits 2 before a step runs.
+// Checks the api and the database before any step, and loads the fixtures. A failure exits 2 before
+// a step runs.
 async function openRun(options: RunOptions): Promise<RunState> {
   const url = process.env.DATABASE_URL_WORKER;
   if (url === undefined || url === "")

@@ -1,6 +1,8 @@
-// The messages of the thread, as Instagram draws a direct chat: your blue bubbles on the right, Meety's grey bubbles on the left from the
-// edge, with its logo in line with its name over each run of its messages, a time line wherever the chat paused, and what each reply does by its state under its words: thinking
-// dots, a plan card with its one button, the ask card, or a way to try again.
+// The messages of the thread, as Instagram draws a direct chat: your blue bubbles on the right,
+// Meety's grey bubbles on the left from the edge, with its logo in line with its name over each run
+// of its messages, a time line wherever the chat paused, and what each reply does by its state
+// under its words: thinking dots, a plan card with its one button, the ask card, or a way to try
+// again.
 import { Fragment, type ReactElement } from "react";
 import { HELP_SEND_COPY, type OrchestratorMessage } from "@meet-first/contracts";
 import { MeetyMark } from "../../look/index.js";
@@ -10,23 +12,26 @@ import { joinsPrevious, startsTimeLine, timeLineOf } from "./chat-words.js";
 
 // The words of a reply that is still being planned.
 export const THINKING_LINE = "Working out what to do";
-// The line on a help search's card: the /help page's consent words, because pressing the button sends the question to up to 20 people,
-// each of whom gets a copy with the person's display name.
+// The line on a help search's card: the /help page's consent words, because pressing the button
+// sends the question to up to 20 people, each of whom gets a copy with the person's display name.
 const HELP_LINE = HELP_SEND_COPY;
 // The words of a help search's button, which say what pressing it does.
 const HELP_BUTTON = "Find who could help";
-// The line under a reply whose ask is gone, for example because the friend deleted their account after it ran.
+// The line under a reply whose ask is gone, for example because the friend deleted their account
+// after it ran.
 export const ASK_GONE_LINE = "This ask is no longer here. Send your message again to ask again.";
 // The name a friend ask uses when the reply did not name the friend.
 const FRIEND_FALLBACK = "your friend";
 
-// What a reply needs from the page: whether its plan is being started, and the actions of its buttons.
+// What a reply needs from the page: whether its plan is being started, and the actions of its
+// buttons.
 export type ReplyActions = {
   runStatus: (replyId: string) => RunStatus;
   runPlan: (replyId: string) => void;
   tryAgain: (replyId: string) => void;
 };
-// Where a bubble sits in its group: whether it joins the bubble before it and the one after it, so its joined corners tuck in.
+// Where a bubble sits in its group: whether it joins the bubble before it and the one after it, so
+// its joined corners tuck in.
 type GroupPlace = { joinsPrev: boolean; joinsNext: boolean };
 
 // A sentence with its first letter in upper case, for a line that starts with a name.
@@ -71,7 +76,8 @@ const YouBubble = (props: { message: OrchestratorMessage; place: GroupPlace }): 
   );
 };
 
-// A planned reply's card: the kind with its icon, the question in quotation marks, who it goes to, and the one button that starts it.
+// A planned reply's card: the kind with its icon, the question in quotation marks, who it goes to,
+// and the one button that starts it.
 const PlanCard = (props: {
   message: OrchestratorMessage;
   status: RunStatus;
@@ -109,7 +115,8 @@ const PlanCard = (props: {
   );
 };
 
-// Which part follows a reply's words: its plan card, its ask card, the line for an ask that is gone, Ask again, or nothing.
+// Which part follows a reply's words: its plan card, its ask card, the line for an ask that is
+// gone, Ask again, or nothing.
 type ReplyStage = "plan" | "ask" | "gone" | "failed" | "none";
 
 // The part that follows one reply, by its state and whether it still has its ask.
@@ -122,7 +129,8 @@ function replyStage(message: OrchestratorMessage): ReplyStage {
   return message.state === "failed" ? "failed" : "none";
 }
 
-// What follows a reply's words, by its stage: the plan card, the ask card, the line for an ask that is gone, or "Ask again".
+// What follows a reply's words, by its stage: the plan card, the ask card, the line for an ask that
+// is gone, or "Ask again".
 const ReplyExtra = (props: {
   message: OrchestratorMessage;
   actions: ReplyActions;
@@ -166,8 +174,8 @@ const ReplyExtra = (props: {
   return null;
 };
 
-// Meety's reply: its logo and name when the reply starts a run of its messages, its words in a grey bubble from the left edge (or the
-// thinking dots in one), then what the reply does.
+// Meety's reply: its logo and name when the reply starts a run of its messages, its words in a grey
+// bubble from the left edge (or the thinking dots in one), then what the reply does.
 const AgentReply = (props: {
   message: OrchestratorMessage;
   actions: ReplyActions;
@@ -189,7 +197,8 @@ const AgentReply = (props: {
   );
 };
 
-// The thread: every message in order, a time line wherever the chat paused, in a log that screen readers follow politely.
+// The thread: every message in order, a time line wherever the chat paused, in a log that screen
+// readers follow politely.
 export const Thread = (props: {
   messages: readonly OrchestratorMessage[];
   actions: ReplyActions;

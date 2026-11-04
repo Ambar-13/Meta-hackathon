@@ -11,7 +11,8 @@ function isUndefinedFunction(error: unknown): boolean {
   return typeof error === "object" && error !== null && Reflect.get(error, "code") === "42883";
 }
 
-// Runs the purge function of migration 0001 once and reads its (table_name, removed) rows. It runs as the owner, so no person or meeting context is needed.
+// Runs the purge function of migration 0001 once and reads its (table_name, removed) rows. It runs
+// as the owner, so no person or meeting context is needed.
 async function runPurge(context: JobContext): Promise<PurgeCounts> {
   try {
     const result = await sql<{
@@ -33,7 +34,8 @@ async function runPurge(context: JobContext): Promise<PurgeCounts> {
   }
 }
 
-// The hourly purge: expired transfer links, pairs nobody joined within 24 hours and comics past 30 days whose share page is not published.
+// The hourly purge: expired transfer links, pairs nobody joined within 24 hours and comics past 30
+// days whose share page is not published.
 export const purgeExpiredTask: JobTask<"purge_expired"> = async (payload, context) => {
   const counts = await runPurge(context);
   context.log.info(

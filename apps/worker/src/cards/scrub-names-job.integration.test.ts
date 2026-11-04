@@ -34,7 +34,8 @@ afterEach(async () => {
 // The ids a seeded names case gives its person, its source and its turns, in turn_index order.
 type Seeded = { personId: string; sourceId: string; turnIds: string[] };
 
-// Writes one ledger row per entry for the person, through the worker, with the dollars and the start the test gives.
+// Writes one ledger row per entry for the person, through the worker, with the dollars and the
+// start the test gives.
 async function insertLedgerRows(
   personId: string,
   rows: Array<{
@@ -64,7 +65,8 @@ async function insertLedgerRows(
   );
 }
 
-// Seeds one names case: the person, the affiliations, an unfrozen source with its turns and the redactions the upload left.
+// Seeds one names case: the person, the affiliations, an unfrozen source with its turns and the
+// redactions the upload left.
 async function seedNamesCase(
   fixtureCase: NamesFixtureCase,
   options: { isFrozen?: boolean } = {},
@@ -131,7 +133,8 @@ async function seedNamesCase(
   return { personId, sourceId: inserted.sourceId, turnIds: inserted.turnIds };
 }
 
-// Freezes a source the way the names review does: the names pass row first, through the worker, then the freeze, then the pass row is removed so the job sees a frozen source with no pass.
+// Freezes a source the way the names review does: the names pass row first, through the worker,
+// then the freeze, then the pass row is removed so the job sees a frozen source with no pass.
 async function freezeSource(personId: string, sourceId: string): Promise<void> {
   await withPerson(workerDb, personId, (trx) =>
     trx.insertInto("names_passes").values({ source_id: sourceId, person_id: personId }).execute(),

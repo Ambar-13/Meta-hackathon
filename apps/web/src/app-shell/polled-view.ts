@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, NETWORK_FAILED_SENTENCE } from "./api-fetch.js";
 
-// One view kept fresh by polling: the last good value, the last error, whether a request is out, and a reload.
+// One view kept fresh by polling: the last good value, the last error, whether a request is out,
+// and a reload.
 export type PolledView<T> = {
   value: T | null;
   error: ApiError | null;
@@ -21,7 +22,8 @@ function toApiError(thrown: unknown): ApiError {
   return new ApiError({ status: 0, code: "network_failed", message: NETWORK_FAILED_SENTENCE });
 }
 
-// Loads at once, then again intervalMs after each settled request while keepPolling(value) is true; key restarts it.
+// Loads at once, then again intervalMs after each settled request while keepPolling(value) is true;
+// key restarts it.
 export function usePolledView<T>(
   load: () => Promise<T>,
   options: { key: string; intervalMs: number; keepPolling: (value: T) => boolean },

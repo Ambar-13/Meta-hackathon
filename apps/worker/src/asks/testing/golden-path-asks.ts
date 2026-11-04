@@ -1,7 +1,8 @@
-// The golden path's ask writer. Run it once the golden path has stopped before step 20 (friend-ask): it reads the
-// run's people from the run's report, sends the same friend ask and help search the golden path sends, answers each model call by
-// rule, writes the reply as a recorded fixture, then lets the replay client answer from it. A request holds no id or time, so
-// the golden path's own asks later send the same requests and read these replies.
+// The golden path's ask writer. Run it once the golden path has stopped before step 20
+// (friend-ask): it reads the run's people from the run's report, sends the same friend ask and help
+// search the golden path sends, answers each model call by rule, writes the reply as a recorded
+// fixture, then lets the replay client answer from it. A request holds no id or time, so the golden
+// path's own asks later send the same requests and read these replies.
 import { readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -26,13 +27,16 @@ import {
 } from "../../meetings/testing/index.js";
 import { runAsk } from "../run-ask-job.js";
 
-// The friend ask of golden path step 20, as scripts/golden-path/fixtures.ts sends it (REACT_ASK_TEXT).
+// The friend ask of golden path step 20, as scripts/golden-path/fixtures.ts sends it
+// (REACT_ASK_TEXT).
 export const GOLDEN_REACT_TEXT =
   "How would you probably react if the team moved the demo day to a Saturday?";
-// The help search of golden path step 21, as scripts/golden-path/fixtures.ts sends it (HELP_ASK_TEXT).
+// The help search of golden path step 21, as scripts/golden-path/fixtures.ts sends it
+// (HELP_ASK_TEXT).
 export const GOLDEN_HELP_TEXT =
   "I keep getting stuck on one hard problem and go round in circles. Who could help me think it through?";
-// The friend's display name, as the golden path's step 1 creates it; the API copies it onto the friend ask.
+// The friend's display name, as the golden path's step 1 creates it; the API copies it onto the
+// friend ask.
 const FRIEND_NAME = "B";
 // The folder of the recorded replies, five levels above this file's folder.
 const FIXTURE_DIR = fileURLToPath(
@@ -43,7 +47,8 @@ const ReportIds = z.object({ ids: z.object({ personA: Uuid, personB: Uuid, pairI
 
 // The search words for the friend ask, by rule: the words of its subject.
 const GOLDEN_SEARCH_WORDS = { words: ["demo day", "Saturday", "weekend"] };
-// The question check's replies: a friend ask about a plan, and a help search about a problem; neither is about dating.
+// The question check's replies: a friend ask about a plan, and a help search about a problem;
+// neither is about dating.
 const REACT_CHECK = {
   allowed: true,
   reason: "An ask about how a friend would probably react to a change of plan.",
@@ -68,7 +73,8 @@ function userTextOf(messages: readonly ChatMessage[]): string {
   return user === undefined ? "" : user.content;
 }
 
-// The card lines of a persona request, in card order, read from its your_card block ("[t:N] kind | claim | \"quote\"").
+// The card lines of a persona request, in card order, read from its your_card block ("[t:N] kind |
+// claim | \"quote\"").
 function cardLinesOf(user: string): CardLine[] {
   const block = /<your_card>\n([\s\S]*?)\n<\/your_card>/.exec(user)?.[1] ?? "";
   return [...block.matchAll(/^\[t:(\d+)\] [^|]+ \| (.+) \| "(.*)"$/gm)].map((match) => ({
@@ -89,8 +95,9 @@ function closestLine(lines: readonly CardLine[], askText: string): CardLine | un
   );
 }
 
-// The persona reply by rule: a help answer rests on the card line closest to the ask, a friend answer on the first card line. Its one
-// claim quotes that line's quote in the turn the line names, so the quote check finds it.
+// The persona reply by rule: a help answer rests on the card line closest to the ask, a friend
+// answer on the first card line. Its one claim quotes that line's quote in the turn the line names,
+// so the quote check finds it.
 function personaReply(user: string): Record<string, unknown> {
   const mode = /^<ask kind="(help|react)">/.exec(user)?.[1];
   const askText = /^<ask kind="[a-z]+">(.*)<\/ask>$/m.exec(user)?.[1] ?? "";
@@ -121,7 +128,8 @@ function personaReply(user: string): Record<string, unknown> {
   };
 }
 
-// The support-check reply by rule: every item of the request is supported, one line per index from 0.
+// The support-check reply by rule: every item of the request is supported, one line per index from
+// 0.
 function judgeReply(user: string): Record<string, unknown> {
   const count = user.split('<item index="').length - 1;
   return {
@@ -148,7 +156,8 @@ function replyFor(args: CompleteArgs): Record<string, unknown> {
   );
 }
 
-// A client that writes each request's reply as a fixture, then lets the replay client answer from that fixture.
+// A client that writes each request's reply as a fixture, then lets the replay client answer from
+// that fixture.
 function recordingClient(options: {
   replay: LlmClient;
   fixtureRoot: string;
@@ -173,7 +182,8 @@ function recordingClient(options: {
   };
 }
 
-// Sends one ask as A, as POST /api/asks writes it, runs run_ask on it, and fails unless the ask ends done.
+// Sends one ask as A, as POST /api/asks writes it, runs run_ask on it, and fails unless the ask
+// ends done.
 async function sendAndRun(
   context: JobContext,
   ask: { personId: string; mode: "help" | "react"; text: string; pairId?: string },
@@ -207,7 +217,8 @@ async function sendAndRun(
     );
 }
 
-// Writes the recorded replies of the golden path's friend ask and help search for the people in the report; returns the paths written.
+// Writes the recorded replies of the golden path's friend ask and help search for the people in the
+// report; returns the paths written.
 export async function writeAskFixtures(options: {
   workerUrl: string;
   reportPath: string;
@@ -248,7 +259,8 @@ export async function writeAskFixtures(options: {
   }
 }
 
-// Runs the command when this file is the process entry, with the golden path's report as its one argument; importing it starts nothing.
+// Runs the command when this file is the process entry, with the golden path's report as its one
+// argument; importing it starts nothing.
 const isEntryPoint =
   process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isEntryPoint) {

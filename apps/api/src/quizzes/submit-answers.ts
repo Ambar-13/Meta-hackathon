@@ -56,7 +56,8 @@ async function writeOneAnswer(
   }
 }
 
-// Writes the ten answers and moves the quiz to judging in the given transaction. The quiz row is claimed first, so a second send waits on it.
+// Writes the ten answers and moves the quiz to judging in the given transaction. The quiz row is
+// claimed first, so a second send waits on it.
 export async function storeHumanAnswers(
   trx: Transaction<Database>,
   args: { quizId: string; answers: QuizAnswers["answers"]; now: Date },
@@ -94,7 +95,8 @@ export async function storeHumanAnswers(
   return "judging";
 }
 
-// Registers POST /api/quizzes/:id/answers: 202 with the new state; 400 payload_invalid; 404 not_found; 409 quiz_not_waiting, quiz_answers_incomplete.
+// Registers POST /api/quizzes/:id/answers: 202 with the new state; 400 payload_invalid; 404
+// not_found; 409 quiz_not_waiting, quiz_answers_incomplete.
 export function registerSubmitAnswers(app: FastifyInstance, deps: RouteDeps): void {
   app.post(routes.cards.answerQuiz.path, async (request, reply) => {
     const personId = requirePerson(request);
@@ -120,7 +122,8 @@ export function registerSubmitAnswers(app: FastifyInstance, deps: RouteDeps): vo
       assertQuizWaitingHuman(quiz);
       await storeHumanAnswers(trx, { quizId, answers: body.data.answers, now: deps.now() });
     });
-    // The job is queued after the answers have committed; if the queue refuses, the answers are cleared so they can be sent again.
+    // The job is queued after the answers have committed; if the queue refuses, the answers are
+    // cleared so they can be sent again.
     const payload = { quizId, personId };
     try {
       await deps.enqueue("judge_quiz", payload);

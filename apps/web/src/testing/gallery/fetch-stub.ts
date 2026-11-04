@@ -1,6 +1,8 @@
-// One reply the gallery gives for a stubbed route: a status, a JSON body (a string is sent as an event stream), and an optional wait.
+// One reply the gallery gives for a stubbed route: a status, a JSON body (a string is sent as an
+// event stream), and an optional wait.
 export type GalleryReply = { status: number; body: unknown; delayMs?: number };
-// One route the gallery answers, with its replies in order; the last reply repeats, like stubRoute in the accessibility tests.
+// One route the gallery answers, with its replies in order; the last reply repeats, like stubRoute
+// in the accessibility tests.
 export type GalleryStub = {
   route: { method: string; path: string };
   replies: GalleryReply | GalleryReply[];
@@ -8,7 +10,8 @@ export type GalleryStub = {
 // A wait long enough that a screen stays in its loading state for the whole screenshot.
 export const FOREVER_MS = 1_000_000_000;
 
-// One stub, ready to match: the method, the path as a pattern, the replies and how many have been served.
+// One stub, ready to match: the method, the path as a pattern, the replies and how many have been
+// served.
 type StubEntry = { method: string; pattern: RegExp; replies: GalleryReply[]; served: number };
 
 // A path like /api/cards/:id as a pattern that matches any one segment where a :name stands.
@@ -43,8 +46,8 @@ function responseOf(reply: GalleryReply): Response {
   });
 }
 
-// Replaces window.fetch with a table of stubbed routes; a route with no stub answers a plain 404, so a screen shows its error state
-// with the words a person would see in the app.
+// Replaces window.fetch with a table of stubbed routes; a route with no stub answers a plain 404,
+// so a screen shows its error state with the words a person would see in the app.
 export function installFetchStub(stubs: readonly GalleryStub[]): void {
   const table: StubEntry[] = stubs.map((stub) => ({
     method: stub.route.method,

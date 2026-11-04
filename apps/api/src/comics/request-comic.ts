@@ -16,14 +16,16 @@ import type { RouteDeps } from "../app-types.js";
 import { makeNotFoundError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
 
-// The prompt version a new comic is drawn with; the worker reads the same version from packages/prompts.
+// The prompt version a new comic is drawn with; the worker reads the same version from
+// packages/prompts.
 export const COMIC_PROMPT_VERSION = "v1";
 // Milliseconds in one day, for the purge date of a new comic.
 const DAY_MS = 86_400_000;
 // The :id of POST /api/meetings/:id/comic: a uuid, or the meeting cannot exist.
 const RouteParams = z.object({ id: Uuid });
 
-// The avatar the other side gets: the next descriptor in AVATARS order, wrapping, so two people never share one.
+// The avatar the other side gets: the next descriptor in AVATARS order, wrapping, so two people
+// never share one.
 export function otherAvatarOf(avatar: Avatar): Avatar {
   const index = AVATARS.indexOf(avatar);
   return AVATARS[(index + 1) % AVATARS.length] ?? avatar;
@@ -38,7 +40,8 @@ export function avatarsBySide(
   return side === "a" ? { avatarA: avatar, avatarB: other } : { avatarA: other, avatarB: avatar };
 }
 
-// Inside one person's transaction: checks membership and the brief, then inserts the comic row, or returns the one that exists.
+// Inside one person's transaction: checks membership and the brief, then inserts the comic row, or
+// returns the one that exists.
 async function insertComicRequest(
   trx: DatabaseTransaction,
   input: { meetingId: string; personId: string; avatar: Avatar; now: Date },
@@ -97,7 +100,8 @@ async function insertComicRequest(
   return { comicId: raced.id, isNew: false };
 }
 
-// Registers POST /api/meetings/:id/comic: 202 with the comic id; 404 meeting_not_found; 409 brief_not_ready; 400 comic_bad_avatar.
+// Registers POST /api/meetings/:id/comic: 202 with the comic id; 404 meeting_not_found; 409
+// brief_not_ready; 400 comic_bad_avatar.
 export function registerRequestComic(app: FastifyInstance, deps: RouteDeps): Promise<void> {
   app.post(routes.briefs.requestComic.path, async (request, reply) => {
     const personId = requirePerson(request);

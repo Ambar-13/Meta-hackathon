@@ -46,8 +46,9 @@ export const QUIZ_BANK: ReadonlyArray<{ id: number; text: string }> = [
 ];
 // How many bank questions one quiz asks.
 export const QUIZ_SAMPLE_SIZE = 10;
-// Picks 10 distinct bank ids for a card, seeded by the card id so the same card always gets the same 10.
-// The seed is the card id's text in lower case, as Postgres writes a uuid; seeded-sample.ts has the rule.
+// Picks 10 distinct bank ids for a card, seeded by the card id so the same card always gets the
+// same 10. The seed is the card id's text in lower case, as Postgres writes a uuid;
+// seeded-sample.ts has the rule.
 export function sampleQuiz(cardId: string): number[] {
   return seededSample(cardId.toLowerCase(), QUIZ_SAMPLE_SIZE, QUIZ_BANK.length);
 }

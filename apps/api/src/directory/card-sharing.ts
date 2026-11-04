@@ -1,5 +1,6 @@
-// The sharing settings of one card: which approved items the directory may show, and whether friends may ask the persona
-// how its person would probably react. Only the card's owner reads or changes them.
+// The sharing settings of one card: which approved items the directory may show, and whether
+// friends may ask the persona how its person would probably react. Only the card's owner reads or
+// changes them.
 import type { FastifyInstance } from "fastify";
 import type { Transaction } from "kysely";
 import { z } from "zod";
@@ -13,10 +14,12 @@ import { requirePerson } from "../sessions/index.js";
 const CardParams = z.object({ id: Uuid });
 // The sentence for a public position that is not an approved item whose quote was found.
 const POSITION_NOT_SHAREABLE_SENTENCE = "Only approved items with a found quote can be public.";
-// meeting_create's own sentence for card_not_approved, used for the same code here and on PUT /api/directory/me.
+// meeting_create's own sentence for card_not_approved, used for the same code here and on PUT
+// /api/directory/me.
 const CARD_NOT_APPROVED_SENTENCE = "approve your card before creating a meeting.";
 
-// What one sharing change is checked against: the caller's card, the positions that may be public, the positions asked for, and whether the caller's listing uses this card.
+// What one sharing change is checked against: the caller's card, the positions that may be public,
+// the positions asked for, and whether the caller's listing uses this card.
 export type SharingCheck = {
   card: { state: string } | undefined;
   shareablePositions: ReadonlySet<number>;
@@ -29,7 +32,8 @@ export function makeCardNotApprovedError(): ContractError {
   return new ContractError("card_not_approved", CARD_NOT_APPROVED_SENTENCE, HTTP.conflict);
 }
 
-// listing_needs_public_item, 409: a listed card keeps at least one public item, because strangers see only public items.
+// listing_needs_public_item, 409: a listed card keeps at least one public item, because strangers
+// see only public items.
 export function makeListingNeedsPublicItemError(): ContractError {
   return new ContractError(
     "listing_needs_public_item",
@@ -38,12 +42,14 @@ export function makeListingNeedsPublicItemError(): ContractError {
   );
 }
 
-// Locks the caller's people row before any check, so one person's sharing changes and listing changes take turns, and two requests sent at once cannot leave a listed card with no public item.
+// Locks the caller's people row before any check, so one person's sharing changes and listing
+// changes take turns, and two requests sent at once cannot leave a listed card with no public item.
 export async function lockPersonRow(trx: Transaction<Database>, personId: string): Promise<void> {
   await trx.selectFrom("people").select("id").where("id", "=", personId).forUpdate().execute();
 }
 
-// Refuses a sharing change, in this order: not the caller's card (404), a card not approved (409), a position that may not be public (400), a listed card left with no public item (409).
+// Refuses a sharing change, in this order: not the caller's card (404), a card not approved (409),
+// a position that may not be public (400), a listed card left with no public item (409).
 export function assertCanShare(check: SharingCheck): void {
   if (check.card === undefined) throw makeNotFoundError();
   if (check.card.state !== "approved") throw makeCardNotApprovedError();
@@ -54,7 +60,8 @@ export function assertCanShare(check: SharingCheck): void {
     throw makeListingNeedsPublicItemError();
 }
 
-// Reads one card's sharing settings as its owner: the friends switch and the public positions in position order; null when the card is not the caller's.
+// Reads one card's sharing settings as its owner: the friends switch and the public positions in
+// position order; null when the card is not the caller's.
 export async function readCardSharing(
   trx: Transaction<Database>,
   input: { cardId: string; personId: string },
@@ -79,8 +86,10 @@ export async function readCardSharing(
   });
 }
 
-// Writes a checked change: every item of the card that was not chosen becomes private, the chosen ones public, then the friends switch is set.
-// In words: an empty choice runs one UPDATE over the whole card, because a "position in" list may not be empty; otherwise two UPDATEs split the card by position.
+// Writes a checked change: every item of the card that was not chosen becomes private, the chosen
+// ones public, then the friends switch is set. In words: an empty choice runs one UPDATE over the
+// whole card, because a "position in" list may not be empty; otherwise two UPDATEs split the card
+// by position.
 export async function applySharing(
   trx: Transaction<Database>,
   change: { cardId: string; positions: readonly number[]; friendsCanAsk: boolean },
@@ -113,7 +122,8 @@ export async function applySharing(
     .execute();
 }
 
-// Registers GET /api/cards/:id/sharing: 200 CardSharing; 404 not_found when the card is not the caller's or the id is not a uuid.
+// Registers GET /api/cards/:id/sharing: 200 CardSharing; 404 not_found when the card is not the
+// caller's or the id is not a uuid.
 export function registerReadSharing(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.directory.readSharing.path, async (request, reply) => {
     const personId = requirePerson(request);
@@ -127,7 +137,8 @@ export function registerReadSharing(app: FastifyInstance, deps: RouteDeps): void
   });
 }
 
-// Registers PUT /api/cards/:id/sharing: 200 CardSharing; 400 payload_invalid; 404 not_found; 409 card_not_approved or listing_needs_public_item.
+// Registers PUT /api/cards/:id/sharing: 200 CardSharing; 400 payload_invalid; 404 not_found; 409
+// card_not_approved or listing_needs_public_item.
 export function registerUpdateSharing(app: FastifyInstance, deps: RouteDeps): void {
   app.put(routes.directory.updateSharing.path, async (request, reply) => {
     const personId = requirePerson(request);

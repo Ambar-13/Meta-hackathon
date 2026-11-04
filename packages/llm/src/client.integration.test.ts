@@ -57,7 +57,8 @@ function cardArgs(personId: string | null, meetingId: string | null = null): Com
   return { callSite: "card", promptVersion: "v1", messages, ledger: { personId, meetingId } };
 }
 
-// The arguments of one streamed speech call with the same 1,330 characters, whose hooks keep nothing.
+// The arguments of one streamed speech call with the same 1,330 characters, whose hooks keep
+// nothing.
 function speechArgs(personId: string): StreamArgs {
   return {
     ...cardArgs(personId),
@@ -449,7 +450,8 @@ describe("the client writes the ledger and retries", () => {
   });
 });
 
-// The worst case of the 1,330-character card call: 1,000 estimated prompt tokens and its max_tokens 16,000, at 1.25 and 4.25 dollars a million.
+// The worst case of the 1,330-character card call: 1,000 estimated prompt tokens and its max_tokens
+// 16,000, at 1.25 and 4.25 dollars a million.
 const CARD_WORST = {
   prompt_tokens: 1000,
   cached_tokens: 0,
@@ -457,7 +459,8 @@ const CARD_WORST = {
   reasoning_tokens: 0,
   usd: 0.06925,
 };
-// The worst case of the same text as a speech call: 1,000 estimated prompt tokens and its max_tokens 6,000.
+// The worst case of the same text as a speech call: 1,000 estimated prompt tokens and its
+// max_tokens 6,000.
 const SPEECH_WORST = {
   prompt_tokens: 1000,
   cached_tokens: 0,
@@ -482,7 +485,8 @@ const NO_CHARGE = {
   usd: null,
 };
 
-// The status, HTTP status, usage and dollars of each row, in order, with the dollars read as a number.
+// The status, HTTP status, usage and dollars of each row, in order, with the dollars read as a
+// number.
 function chargesOf(rows: Array<Record<string, unknown>>): unknown[] {
   return rows.map((row) => ({
     status: row.status,
@@ -692,7 +696,8 @@ describe("a failed attempt that Meta may have billed is counted", () => {
 
   it("W3-LLM-T9: a 200 reply with usage but no choices is an error row priced at the usage Meta billed (fake live caller)", async () => {
     const person = await createTestPerson(fresh.db, "Client Test");
-    // The card measured on the live API on 27 Oct 2026: 6,646 x 1.25 + 2,716 x 4.25 per million, rounded to 0.019851; reasoning sits inside completion.
+    // The card measured on the live API on 27 Oct 2026: 6,646 x 1.25 + 2,716 x 4.25 per million,
+    // rounded to 0.019851; reasoning sits inside completion.
     const usage = {
       promptTokens: 6646,
       cachedTokens: 0,

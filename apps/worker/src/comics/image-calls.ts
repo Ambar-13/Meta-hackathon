@@ -4,7 +4,8 @@ import sharp from "sharp";
 
 // One panel that was encoded and fits under the size cap.
 export type PanelRender = { position: number; bytes: Uint8Array; sizeBytes: number };
-// How the six image calls ended: all six panels, a reason they cannot be stored, the deadline, or a full token window.
+// How the six image calls ended: all six panels, a reason they cannot be stored, the deadline, or a
+// full token window.
 export type RenderOutcome =
   | { kind: "ready"; panels: PanelRender[] }
   | { kind: "failed"; reason: "render_failed" }
@@ -24,7 +25,8 @@ const FIRST_QUALITY = 80;
 // The webp quality of the second encode, used only when the first is over the cap.
 const SECOND_QUALITY = 60;
 
-// Resolves with the promise's value, or with deadline when the signal fires first. A late result is dropped, never returned.
+// Resolves with the promise's value, or with deadline when the signal fires first. A late result is
+// dropped, never returned.
 export function raceWithDeadline<T>(work: Promise<T>, signal: AbortSignal): Promise<Raced<T>> {
   if (signal.aborted) {
     work.catch(() => undefined);
@@ -48,7 +50,9 @@ export function raceWithDeadline<T>(work: Promise<T>, signal: AbortSignal): Prom
   });
 }
 
-// The one part of a sharp pipeline this file reads: its encoded bytes. sharp's typings name a Buffer type the workspace's @types/node does not declare, so the output is read through this shape.
+// The one part of a sharp pipeline this file reads: its encoded bytes. sharp's typings name a
+// Buffer type the workspace's @types/node does not declare, so the output is read through this
+// shape.
 export type EncodedPipeline = { toBuffer: () => Promise<Uint8Array> };
 
 // Encodes one webp at the given quality, 1024 by 1024, cover fit.
@@ -59,7 +63,8 @@ async function webpAt(bytes: Uint8Array, quality: number): Promise<Uint8Array> {
   return pipeline.toBuffer();
 }
 
-// Encodes image bytes as webp at quality 80; if that is over the cap, once more at quality 60; still over is refused.
+// Encodes image bytes as webp at quality 80; if that is over the cap, once more at quality 60;
+// still over is refused.
 export async function encodePanelWebp(bytes: Uint8Array): Promise<EncodeResult> {
   const first = await webpAt(bytes, FIRST_QUALITY);
   if (first.length <= PANEL_MAX_BYTES) return { ok: true, bytes: first };
@@ -68,7 +73,8 @@ export async function encodePanelWebp(bytes: Uint8Array): Promise<EncodeResult> 
   return { ok: false, reason: "over_size_cap" };
 }
 
-// Runs one image call per prompt in parallel, with no retry, and encodes every result. Resolves as failed for any rejected call or any image that cannot be stored.
+// Runs one image call per prompt in parallel, with no retry, and encodes every result. Resolves as
+// failed for any rejected call or any image that cannot be stored.
 export async function renderPanels(
   llm: ImageClient,
   prompts: string[],

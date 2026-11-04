@@ -1,5 +1,6 @@
-// The directory's state, which Explore, profiles and Me reuse: browsing with search and paging, the listing meeting flow, and your
-// own listing with Leave (the /directory page itself now sends people to Explore).
+// The directory's state, which Explore, profiles and Me reuse: browsing with search and paging, the
+// listing meeting flow, and your own listing with Leave (the /directory page itself now sends
+// people to Explore).
 export {
   SEARCH_MAX_CHARS,
   FREE_TEXT_REFUSAL,

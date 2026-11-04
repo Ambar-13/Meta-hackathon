@@ -102,7 +102,8 @@ describe("meeting screen", () => {
       ),
     );
     const turn = await screen.findByRole("article");
-    // The design pass shows each quote as a quote card, so the turn holds the quote's words, not a "Quote:" prefix.
+    // The design pass shows each quote as a quote card, so the turn holds the quote's words, not a
+    // "Quote:" prefix.
     expect(turn.textContent).toContain("I work best before nine in the morning");
     expect(turn.textContent).toContain("no quote");
   });

@@ -17,7 +17,8 @@ type Meeting = Pick<SeededMeeting, "meetingId"> & {
   b: { personId: string; sessionToken: string };
 };
 
-// Opens the event stream of one meeting as one person, with the extra request headers the test gives.
+// Opens the event stream of one meeting as one person, with the extra request headers the test
+// gives.
 function openStream(
   meetingId: string,
   token: string,

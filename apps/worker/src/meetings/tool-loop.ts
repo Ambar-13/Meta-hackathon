@@ -14,7 +14,8 @@ import type { AssistantMessage, ToolMessage } from "./history-validator.js";
 export const SPEECH_REQUESTS_MAX = TOOL_ROUNDS_MAX + 1;
 // The reason recorded when a decide turn made no concede or hold call.
 export const NO_DECISION_REASON = "no explicit decision";
-// The text between two parts of one turn's partial text, such as a resumed attempt's saved text and the new round.
+// The text between two parts of one turn's partial text, such as a resumed attempt's saved text and
+// the new round.
 export const ROUND_TEXT_SEPARATOR = "\n\n";
 
 // One speech request's result, as the step job's speak function returns it.
@@ -44,10 +45,12 @@ export type SpeechState = {
   requestsMade: number;
   hasDecision: boolean;
 };
-// How the loop ended: the final turn text, the requests made, and whether a concede or hold was recorded.
+// How the loop ended: the final turn text, the requests made, and whether a concede or hold was
+// recorded.
 export type SpeechOutcome = { text: string; requestsMade: number; hasDecision: boolean };
 
-// The functions one speech run calls: the speech request, the round save and the discard of a cut round.
+// The functions one speech run calls: the speech request, the round save and the discard of a cut
+// round.
 type SpeechDeps = { speak: SpeakFn; runRound: RunRoundFn; discardRound: () => Promise<void> };
 // One speech request as the loop sends it.
 type SpeakRequest = { messages: ChatMessage[]; tools: ToolDefinition[] | undefined; round: number };
@@ -79,8 +82,9 @@ export async function runSpeechRounds(
   return finishTurn(messages, "", { requestsMade, hasDecision });
 }
 
-// The texts of a turn so far, joined: each stored assistant text of a round that called no tool, then the current round's text.
-// A round that called a tool is never part of the turn: its words were about the call, and the screen dropped them when it ended.
+// The texts of a turn so far, joined: each stored assistant text of a round that called no tool,
+// then the current round's text. A round that called a tool is never part of the turn: its words
+// were about the call, and the screen dropped them when it ended.
 export function joinTurnText(messages: readonly ChatMessage[], currentText: string): string {
   const texts: string[] = [];
   for (const message of messages.slice(2)) {
@@ -97,7 +101,8 @@ export function joinTurnText(messages: readonly ChatMessage[], currentText: stri
   return texts.join(ROUND_TEXT_SEPARATOR);
 }
 
-// True for the two errors after which the round is discarded and retried once (dossier client: model_stream_cut, model_stream_length).
+// True for the two errors after which the round is discarded and retried once (dossier client:
+// model_stream_cut, model_stream_length).
 export function isRoundBreak(error: unknown): boolean {
   return (
     error instanceof ContractError &&
@@ -160,7 +165,8 @@ export class PartialTextWriter {
   }
 }
 
-// One speech request. A round that breaks (a cut stream or a length stop) comes back as null; other errors are thrown.
+// One speech request. A round that breaks (a cut stream or a length stop) comes back as null; other
+// errors are thrown.
 async function attemptSpeak(speak: SpeakFn, request: SpeakRequest): Promise<SpeakResult | null> {
   try {
     const result = await speak(request);
@@ -171,7 +177,8 @@ async function attemptSpeak(speak: SpeakFn, request: SpeakRequest): Promise<Spea
   }
 }
 
-// One round: a broken round is discarded and run once more with the same messages. A second break that throws is rethrown as it is.
+// One round: a broken round is discarded and run once more with the same messages. A second break
+// that throws is rethrown as it is.
 async function speakRound(deps: SpeechDeps, request: SpeakRequest): Promise<SpeakResult> {
   const first = await attemptSpeak(deps.speak, request);
   if (first !== null) return first;

@@ -19,7 +19,8 @@ const MEETING_JOB_NAMES: readonly MeetingJobName[] = [
   "check_question",
 ];
 
-// A meeting test's context: the job context, the fake clock it reads, the jobs it recorded and not yet run, the scripted client.
+// A meeting test's context: the job context, the fake clock it reads, the jobs it recorded and not
+// yet run, the scripted client.
 export type MeetingTestContext = {
   context: JobContext;
   clock: { now: () => Date; advance: (ms: number) => void };
@@ -29,7 +30,8 @@ export type MeetingTestContext = {
   close: () => Promise<void>;
 };
 
-// Builds the context over db with the script and a fake clock at clockStart. Without fixtureRoot the fixtures go to a temporary folder (a fake fixture folder).
+// Builds the context over db with the script and a fake clock at clockStart. Without fixtureRoot
+// the fixtures go to a temporary folder (a fake fixture folder).
 export async function makeMeetingTestContext(options: {
   db: Kysely<Database>;
   script: ReplyScript;
@@ -66,7 +68,8 @@ export async function makeMeetingTestContext(options: {
   };
 }
 
-// Runs one of the three meeting jobs now, with its payload parsed by JobPayloads, as Graphile would.
+// Runs one of the three meeting jobs now, with its payload parsed by JobPayloads, as Graphile
+// would.
 export async function runMeetingJob(
   test: MeetingTestContext,
   name: MeetingJobName,
@@ -83,7 +86,8 @@ export async function runMeetingJob(
   await runCheckQuestion(JobPayloads.check_question.parse(payload), test.context);
 }
 
-// Runs recorded jobs that are due on the fake clock, earliest run_at first, until none is due or limit jobs ran; returns the jobs it ran in order.
+// Runs recorded jobs that are due on the fake clock, earliest run_at first, until none is due or
+// limit jobs ran; returns the jobs it ran in order.
 export async function drainJobs(
   test: MeetingTestContext,
   options: { limit: number; names?: readonly JobName[]; stepGapMs?: number },
@@ -102,7 +106,8 @@ export async function drainJobs(
   return ran;
 }
 
-// Builds both prefixes with the real check_question job, then claims a running slot and begins the meeting as the start route does.
+// Builds both prefixes with the real check_question job, then claims a running slot and begins the
+// meeting as the start route does.
 export async function startTestMeeting(test: MeetingTestContext, meetingId: string): Promise<void> {
   await withMeeting(test.context.db, meetingId, (trx) =>
     trx
@@ -133,7 +138,8 @@ export async function startTestMeeting(test: MeetingTestContext, meetingId: stri
     );
 }
 
-// One side's approved card items with their turn_index and turn id, in position order, for scripts that quote the card.
+// One side's approved card items with their turn_index and turn id, in position order, for scripts
+// that quote the card.
 export async function readSideItems(
   db: Kysely<Database>,
   meetingId: string,
@@ -185,7 +191,8 @@ export async function readSideItems(
   });
 }
 
-// The next job the drain should run: due on the fake clock, of an allowed name, earliest run_at first, first enqueued on a tie.
+// The next job the drain should run: due on the fake clock, of an allowed name, earliest run_at
+// first, first enqueued on a tie.
 function nextDueJob(test: MeetingTestContext, names: readonly JobName[]): EnqueuedJob | undefined {
   const now = test.clock.now().getTime();
   let best: EnqueuedJob | undefined;

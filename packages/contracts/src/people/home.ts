@@ -3,7 +3,8 @@ import { IsoTime, PhotoKey, Uuid } from "../primitives.js";
 import { CardState, ItemKind } from "../cards/card.js";
 import { MeetingState, QuestionKind } from "../meetings/meeting.js";
 
-// Meetings and pairs the home screen lists, newest first, 10 each (the design pass gives no number).
+// Meetings and pairs the home screen lists, newest first, 10 each (the design pass gives no
+// number).
 export const HOME_LIST_MAX = 10;
 // Card items the home screen shows on the person's name tag, 3.
 export const HOME_CARD_ITEMS_MAX = 3;
@@ -20,7 +21,8 @@ export type HomeSource = z.infer<typeof HomeSource>;
 export const HomeCardItem = z.object({ kind: ItemKind, claim: z.string(), quote: z.string() });
 export type HomeCardItem = z.infer<typeof HomeCardItem>;
 
-// The person's newest card: its id, state, how many items it has, and its first approved items (all items while it is not approved).
+// The person's newest card: its id, state, how many items it has, and its first approved items (all
+// items while it is not approved).
 export const HomeCard = z.object({
   id: Uuid,
   state: CardState,
@@ -29,8 +31,8 @@ export const HomeCard = z.object({
 });
 export type HomeCard = z.infer<typeof HomeCard>;
 
-// One meeting the person is a member of: the question, its kind, where it is, the other person's display name, and whether
-// this person's brief is written.
+// One meeting the person is a member of: the question, its kind, where it is, the other person's
+// display name, and whether this person's brief is written.
 export const HomeMeetingRow = z.object({
   id: Uuid,
   questionText: z.string(),
@@ -42,7 +44,8 @@ export const HomeMeetingRow = z.object({
 });
 export type HomeMeetingRow = z.infer<typeof HomeMeetingRow>;
 
-// One pair the person made or joined that has not expired: who else is in it, if anyone, and when it expires.
+// One pair the person made or joined that has not expired: who else is in it, if anyone, and when
+// it expires.
 export const HomePairRow = z.object({
   id: Uuid,
   otherDisplayName: z.string().nullable(), // null while nobody has joined
@@ -51,8 +54,8 @@ export const HomePairRow = z.object({
 });
 export type HomePairRow = z.infer<typeof HomePairRow>;
 
-// What GET /api/home returns: everything the home screen shows to the signed-in person, and nothing about anyone else
-// beyond the display names already shown in their pairs and meetings.
+// What GET /api/home returns: everything the home screen shows to the signed-in person, and nothing
+// about anyone else beyond the display names already shown in their pairs and meetings.
 export const HomeView = z.object({
   displayName: z.string(),
   // The person's own profile photo, when they put one up.

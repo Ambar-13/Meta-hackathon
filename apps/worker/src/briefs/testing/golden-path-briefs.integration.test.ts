@@ -21,7 +21,8 @@ afterEach(async () => {
   await rm(fixtureRoot, { recursive: true, force: true });
 });
 
-// The verdict lines of each recorded judge reply among the paths the writer printed, read from the chat reply layout.
+// The verdict lines of each recorded judge reply among the paths the writer printed, read from the
+// chat reply layout.
 async function judgeLines(paths: string[]): Promise<Array<{ supported: boolean }>> {
   const judgePaths = paths.filter((path) => path.includes(`${sep}brief_support_judge${sep}`));
   const recorded = await Promise.all(

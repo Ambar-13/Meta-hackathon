@@ -1,5 +1,6 @@
-// Sign-up on a site that sets ACCESS_CODE: without the code nobody gets an account, so a script cannot make accounts and spend
-// the model budget through them. Open sign-up, with no ACCESS_CODE, is what sessions.security.test.ts runs on.
+// Sign-up on a site that sets ACCESS_CODE: without the code nobody gets an account, so a script
+// cannot make accounts and spend the model budget through them. Open sign-up, with no ACCESS_CODE,
+// is what sessions.security.test.ts runs on.
 import { afterAll, beforeAll, expect, it } from "vitest";
 import type { FastifyInstance, LightMyRequestResponse } from "fastify";
 import { buildTestApp } from "../testing/app-factory.js";

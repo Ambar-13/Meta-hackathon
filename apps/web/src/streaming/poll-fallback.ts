@@ -3,7 +3,8 @@ import { PollResponse, routes } from "@meet-first/contracts";
 import { apiFetch } from "../app-shell/index.js";
 import type { PollReply } from "../transcript/event-fold.js";
 
-// The poll reply read leniently: v, the raw events, the running partial and serverNow, so one unreadable event cannot hide the rest.
+// The poll reply read leniently: v, the raw events, the running partial and serverNow, so one
+// unreadable event cannot hide the rest.
 export const PollEnvelope = z.object({
   v: z.number(),
   events: z.array(z.unknown()),

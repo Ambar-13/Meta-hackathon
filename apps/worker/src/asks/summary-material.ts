@@ -1,5 +1,6 @@
-// A subject's checked summary as a persona request uses it: the points found in the subject's own messages, quotable with their turns,
-// and the points not found, which the persona says as "likely". Read in the subject's own context; a help ask never reads it.
+// A subject's checked summary as a persona request uses it: the points found in the subject's own
+// messages, quotable with their turns, and the points not found, which the persona says as
+// "likely". Read in the subject's own context; a help ask never reads it.
 import { SummaryPointView, type AskMode } from "@meet-first/contracts";
 import type { DatabaseTransaction } from "@meet-first/db";
 import type { CitableTurn } from "../meetings/receipts.js";
@@ -10,8 +11,9 @@ export type FoundPoint = { item: PersonaItem; turn: CitableTurn; sourceId: strin
 // What a request takes from the summary: the found points, and the text of every other point.
 export type SummaryMaterial = { found: FoundPoint[]; only: string[] };
 
-// The subject's checked points when this ask may use them: a react ask only when the summary's friends switch is on, a help ask never,
-// any other ask (the subject's own) always. Empty when there is no ready summary or its points do not read.
+// The subject's checked points when this ask may use them: a react ask only when the summary's
+// friends switch is on, a help ask never, any other ask (the subject's own) always. Empty when
+// there is no ready summary or its points do not read.
 export async function readUsablePoints(
   trx: DatabaseTransaction,
   personId: string,
@@ -30,7 +32,8 @@ export async function readUsablePoints(
   return parsed.success ? parsed.data : [];
 }
 
-// The found points with their turns, and the rest as their text; a found point whose turn is gone, with its upload, joins the rest.
+// The found points with their turns, and the rest as their text; a found point whose turn is gone,
+// with its upload, joins the rest.
 export async function readSummaryMaterial(
   trx: DatabaseTransaction,
   points: readonly SummaryPointView[],

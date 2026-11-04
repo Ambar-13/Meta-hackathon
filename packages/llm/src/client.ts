@@ -49,7 +49,8 @@ import {
 
 // The worker's variables, read with the contracts schema.
 type WorkerEnv = z.infer<typeof workerEnv>;
-// What one client needs: the database, the env, the clock, the sleep and random sources, and the seams a test replaces.
+// What one client needs: the database, the env, the clock, the sleep and random sources, and the
+// seams a test replaces.
 export type LlmClientDeps = {
   db: Kysely<Database>;
   env: WorkerEnv;
@@ -60,7 +61,8 @@ export type LlmClientDeps = {
   live?: LiveCaller;
   timeoutSignal?: (ms: number) => AbortSignal;
 };
-// The arguments of one non-streamed call. There is no transaction: the client writes its own ledger rows.
+// The arguments of one non-streamed call. There is no transaction: the client writes its own ledger
+// rows.
 export type CompleteArgs = {
   callSite: CallSite;
   promptVersion: string;
@@ -70,7 +72,8 @@ export type CompleteArgs = {
   promptCacheKey?: string;
   ledger: { personId: string | null; meetingId: string | null };
 };
-// What one call returns: text, the parsed JSON when a schema was sent, tool calls, finish reason, usage and the ledger row id.
+// What one call returns: text, the parsed JSON when a schema was sent, tool calls, finish reason,
+// usage and the ledger row id.
 export type CompleteResult = {
   text: string | null;
   parsed: unknown;
@@ -110,7 +113,8 @@ type ClientState = {
   timeoutSignal: (ms: number) => AbortSignal;
   sdk: openai;
 };
-// One call as the client sends it: its body, its estimate, its effort, and whose ledger row it writes.
+// One call as the client sends it: its body, its estimate, its effort, and whose ledger row it
+// writes.
 type CallCore = {
   callSite: CallSite;
   promptVersion: string;
@@ -124,7 +128,8 @@ type CallCore = {
 type RowRef = { ledger: CompleteArgs["ledger"]; ledgerId: string };
 // One finished attempt: its reply and the ledger row it wrote.
 type Attempt = { reply: LlmReply; ledgerId: string };
-// What a non-streamed reply says once it is read; isCut marks a reply that ran out of room or broke its schema.
+// What a non-streamed reply says once it is read; isCut marks a reply that ran out of room or broke
+// its schema.
 type Reading = {
   text: string | null;
   parsed: unknown;
@@ -193,8 +198,9 @@ export function makeSdk(env: Pick<WorkerEnv, "META_API_KEY" | "META_API_BASE_URL
   return new openai({ apiKey: env.META_API_KEY, baseURL: env.META_API_BASE_URL, maxRetries: 0 });
 }
 
-// The usage recorded when a live reply carries none, or a live attempt fails before it reports any: the request estimate as prompt tokens and max_tokens
-// as completion tokens, so the caps count the worst case.
+// The usage recorded when a live reply carries none, or a live attempt fails before it reports any:
+// the request estimate as prompt tokens and max_tokens as completion tokens, so the caps count the
+// worst case.
 export function worstCaseUsage(body: Record<string, unknown>): RecordedCall["usage"] {
   return {
     promptTokens: estimateTokens(requestChars(body), null),
@@ -232,7 +238,8 @@ export function makeLiveCaller(sdk: openai): LiveCaller {
   };
 }
 
-// The streamed live caller: reads the SDK stream so deltas reach the hooks as they arrive, and returns the recorded layout.
+// The streamed live caller: reads the SDK stream so deltas reach the hooks as they arrive, and
+// returns the recorded layout.
 export function makeStreamingLiveCaller(sdk: openai, hooks: StreamHooks): LiveCaller {
   return async (request, signal) => {
     const options = { timeout: CALL_SITE_CONFIG[request.callSite].timeoutMs, signal };
@@ -250,12 +257,14 @@ export function makeStreamingLiveCaller(sdk: openai, hooks: StreamHooks): LiveCa
   };
 }
 
-// Refuses replay in production for this worker env. The mode is read inside packages/llm because CI rejects its variable name in every other folder.
+// Refuses replay in production for this worker env. The mode is read inside packages/llm because CI
+// rejects its variable name in every other folder.
 export function assertWorkerModeAllowed(env: WorkerEnv, nodeEnv: string | undefined): void {
   assertModeAllowed(env.LLM_MODE, nodeEnv);
 }
 
-// Builds the client. The SDK is constructed once with maxRetries 0 and the base URL; every call sets its own timeout and signal.
+// Builds the client. The SDK is constructed once with maxRetries 0 and the base URL; every call
+// sets its own timeout and signal.
 export function makeLlmClient(deps: LlmClientDeps): LlmClient {
   const sdk = makeSdk(deps.env);
   const state: ClientState = {
@@ -282,7 +291,8 @@ function requestIdOf(response: Record<string, unknown>): string | null {
   return typeof response.id === "string" ? response.id : null;
 }
 
-// Refuses a call that names no person and no meeting, before any row is written; only the boot self-test may do so.
+// Refuses a call that names no person and no meeting, before any row is written; only the boot
+// self-test may do so.
 function assertLedgerOwner(callSite: CallSite, ledger: CompleteArgs["ledger"]): void {
   if (ledger.personId === null && ledger.meetingId === null && callSite !== "self_test") {
     throw new ContractError(
@@ -293,7 +303,8 @@ function assertLedgerOwner(callSite: CallSite, ledger: CompleteArgs["ledger"]): 
   }
 }
 
-// Runs one ledger write in its own short transaction, as the person or the meeting; the self-test runs as nobody.
+// Runs one ledger write in its own short transaction, as the person or the meeting; the self-test
+// runs as nobody.
 async function inLedger<T>(
   state: ClientState,
   ledger: CompleteArgs["ledger"],
@@ -329,7 +340,8 @@ function vendorStatus(error: unknown): number | undefined {
   return parsed.success ? parsed.data.status : undefined;
 }
 
-// The ledger finish for an attempt that threw: timeout when its deadline fired, else error, with the status when there is one.
+// The ledger finish for an attempt that threw: timeout when its deadline fired, else error, with
+// the status when there is one.
 function failureFinish(error: unknown, timedOut: boolean): LedgerFinish {
   const httpStatus = vendorStatus(error);
   return {
@@ -338,7 +350,8 @@ function failureFinish(error: unknown, timedOut: boolean): LedgerFinish {
   };
 }
 
-// The ledger finish for a reply that came back: its usage and dollars, and its status and id when the reply had them.
+// The ledger finish for a reply that came back: its usage and dollars, and its status and id when
+// the reply had them.
 function finishFromReply(status: "ok" | "error", reply: LlmReply): LedgerFinish {
   return {
     status,
@@ -354,9 +367,11 @@ function isReplayMiss(error: unknown): boolean {
   return error instanceof ContractError && error.code === "replay_fixture_missing";
 }
 
-// The usage and dollars of an attempt that threw. Meta may have billed a live or recorded chat call that timed out, was aborted, broke mid-stream or
-// failed without an HTTP status, so its row counts the worst case, which the caps and the meeting token stop read. A vendor HTTP error,
-// a replay miss, replay mode and comic_image count nothing: replay calls nobody, and Meta bills an image only when it is returned.
+// The usage and dollars of an attempt that threw. Meta may have billed a live or recorded chat call
+// that timed out, was aborted, broke mid-stream or failed without an HTTP status, so its row counts
+// the worst case, which the caps and the meeting token stop read. A vendor HTTP error, a replay
+// miss, replay mode and comic_image count nothing: replay calls nobody, and Meta bills an image
+// only when it is returned.
 function failureCharge(
   state: ClientState,
   core: CallCore,
@@ -374,7 +389,8 @@ function failureCharge(
   return { usage, usd: usdForUsage(usage) };
 }
 
-// Writes the request of a replay miss to the temp folder, so a fixture can be made from the exact body the code sent.
+// Writes the request of a replay miss to the temp folder, so a fixture can be made from the exact
+// body the code sent.
 function writeMissFile(core: CallCore): void {
   const path = join(
     tmpdir(),
@@ -389,7 +405,8 @@ function writeMissFile(core: CallCore): void {
   );
 }
 
-// The error a failed non-streamed attempt raises: a replay miss stays as it is, a deadline becomes model_call_timeout.
+// The error a failed non-streamed attempt raises: a replay miss stays as it is, a deadline becomes
+// model_call_timeout.
 function attemptFailure(core: CallCore, error: unknown, timedOut: boolean): unknown {
   if (isReplayMiss(error)) {
     writeMissFile(core);
@@ -445,7 +462,8 @@ function requestArgsOf(args: CompleteArgs): Omit<ChatRequestArgs, "stream"> {
   };
 }
 
-// The call a set of arguments makes: its body, its estimate and its effort; an override builds the length retry.
+// The call a set of arguments makes: its body, its estimate and its effort; an override builds the
+// length retry.
 function coreOf(
   args: CompleteArgs,
   isStreamed: boolean,
@@ -484,7 +502,8 @@ function reasonOf(reason: string | null): "stop" | "length" | "tool_calls" {
   return "stop";
 }
 
-// Reads one non-streamed reply: its text, its JSON when a schema was sent, its tool calls, and whether it was cut.
+// Reads one non-streamed reply: its text, its JSON when a schema was sent, its tool calls, and
+// whether it was cut.
 function readCompletion(reply: LlmReply, structured: boolean): Reading {
   const parsed = Completion.safeParse(reply.response);
   const choice = parsed.success ? parsed.data.choices[0] : undefined;
@@ -506,7 +525,8 @@ function readCompletion(reply: LlmReply, structured: boolean): Reading {
   };
 }
 
-// One non-streamed round: the attempt with its transport retries, then the reading; a cut reply is retried once at minimal effort.
+// One non-streamed round: the attempt with its transport retries, then the reading; a cut reply is
+// retried once at minimal effort.
 async function completeRound(
   state: ClientState,
   args: CompleteArgs,
@@ -522,7 +542,8 @@ async function completeRound(
   try {
     reading = readCompletion(attempt.reply, !isSelfTest && args.schema !== undefined);
   } catch (error) {
-    // A reply came back, so Meta billed it even though it is unusable: the row keeps its usage and dollars.
+    // A reply came back, so Meta billed it even though it is unusable: the row keeps its usage and
+    // dollars.
     await finishRow(
       state,
       { ledger: args.ledger, ledgerId: attempt.ledgerId },
@@ -581,7 +602,8 @@ async function complete(state: ClientState, args: CompleteArgs): Promise<Complet
   return completeRound(state, args, false);
 }
 
-// The deadline and first-token gate of one streamed attempt: a late first token aborts the call, a late call aborts it too.
+// The deadline and first-token gate of one streamed attempt: a late first token aborts the call, a
+// late call aborts it too.
 function openGate(state: ClientState, args: StreamArgs): Gate {
   const config = CALL_SITE_CONFIG[args.callSite];
   const deadline = state.timeoutSignal(config.timeoutMs);
@@ -617,7 +639,8 @@ function openGate(state: ClientState, args: StreamArgs): Gate {
   return { deadline, firstGate, callAbort, flags, hooks, dispose };
 }
 
-// The outcome of a streamed reply the live caller already sent to the hooks: read from its layout, with no hook call.
+// The outcome of a streamed reply the live caller already sent to the hooks: read from its layout,
+// with no hook call.
 function outcomeFromLayout(reply: LlmReply): StreamOutcome {
   const choice = ReplayResponse.parse(reply.response).choices[0];
   return {
@@ -629,7 +652,8 @@ function outcomeFromLayout(reply: LlmReply): StreamOutcome {
   };
 }
 
-// The error a failed streamed attempt raises, in this order: text already shown first, then the timers, then a replay miss.
+// The error a failed streamed attempt raises, in this order: text already shown first, then the
+// timers, then a replay miss.
 function streamFailure(core: CallCore, error: unknown, gate: Gate): unknown {
   if (gate.flags.hasDelivered)
     return new ContractError(
@@ -653,7 +677,8 @@ function streamFailure(core: CallCore, error: unknown, gate: Gate): unknown {
   return error;
 }
 
-// One streamed attempt: writes its row, runs the call, reads the stream or the replay, and finishes the row as a failure when it throws.
+// One streamed attempt: writes its row, runs the call, reads the stream or the replay, and finishes
+// the row as a failure when it throws.
 async function streamAttempt(
   state: ClientState,
   args: StreamArgs,
@@ -695,7 +720,8 @@ async function streamAttempt(
   }
 }
 
-// One streamed round with its transport retries; a cut or length reply before any text is shown is retried once.
+// One streamed round with its transport retries; a cut or length reply before any text is shown is
+// retried once.
 async function streamRound(
   state: ClientState,
   args: StreamArgs,

@@ -1,6 +1,6 @@
-// POST /api/sessions/recover: a person who lost the cookie types the 32-character code shown once at signup.
-// auth_redeem_recovery spends the code in one conditional UPDATE and opens a new session, so a second try finds
-// nothing. No fresh code is issued.
+// POST /api/sessions/recover: a person who lost the cookie types the 32-character code shown once
+// at signup. auth_redeem_recovery spends the code in one conditional UPDATE and opens a new
+// session, so a second try finds nothing. No fresh code is issued.
 import type { FastifyInstance } from "fastify";
 import { sql, type Kysely } from "kysely";
 import {
@@ -19,7 +19,8 @@ import { hashToken, newHexToken, setSessionCookie } from "./cookie.js";
 export const RECOVERY_CODE_UNKNOWN_SENTENCE =
   "This code is wrong or was already used. Each code works once.";
 
-// Spends the code and opens a session for its owner; null when the code is unknown, spent, or its person was deleted.
+// Spends the code and opens a session for its owner; null when the code is unknown, spent, or its
+// person was deleted.
 export async function redeemRecoveryCode(
   db: Kysely<Database>,
   code: string,
@@ -33,7 +34,8 @@ export async function redeemRecoveryCode(
   return result.rows[0]?.person_id ?? null;
 }
 
-// Registers POST /api/sessions/recover: 200 {personId} with a new session cookie, or 404 recovery_code_unknown.
+// Registers POST /api/sessions/recover: 200 {personId} with a new session cookie, or 404
+// recovery_code_unknown.
 export function registerRecover(app: FastifyInstance, deps: RouteDeps): void {
   app.post(routes.people.recover.path, async (request, reply) => {
     const body = Recover.parse(request.body);

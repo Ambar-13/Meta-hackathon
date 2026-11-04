@@ -1,5 +1,6 @@
-// The run_ask job: the question check, the answer rows, one persona answer per row, the support check and the places.
-// It is safe to run again, because each stage starts from the state the stage before it stored.
+// The run_ask job: the question check, the answer rows, one persona answer per row, the support
+// check and the places. It is safe to run again, because each stage starts from the state the stage
+// before it stored.
 import { ContractError, QuestionCheckOutput, type JobPayload } from "@meet-first/contracts";
 import { withPerson } from "@meet-first/db";
 import { LimiterBusy, reenqueueAfterLimiter } from "@meet-first/llm";
@@ -16,8 +17,8 @@ type AskPayload = JobPayload<"run_ask">;
 // What the question check gave: the verdict, a full token window, or a failure that fails the ask.
 type CheckResult = QuestionCheckOutput | "limited" | "failed";
 
-// Runs one ask from the stage it is in to its end, or until a full token window re-queues it 5 s later.
-// A missing ask, and one that is done, refused or failed, is left as it is.
+// Runs one ask from the stage it is in to its end, or until a full token window re-queues it 5 s
+// later. A missing ask, and one that is done, refused or failed, is left as it is.
 export const runAsk: JobTask<"run_ask"> = async (payload, context) => {
   let ask = await withPerson(context.db, payload.personId, (trx) => readAsk(trx, payload.askId));
   if (ask?.state === "checking") ask = await checkAsk(context, payload, ask);
@@ -25,7 +26,8 @@ export const runAsk: JobTask<"run_ask"> = async (payload, context) => {
   if (ask?.state === "ranking") await rankAnswers(context, payload, ask);
 };
 
-// Design step 2: the question check. Refused or failed ends the ask; allowed stores the kind and moves the ask to asking.
+// Design step 2: the question check. Refused or failed ends the ask; allowed stores the kind and
+// moves the ask to asking.
 async function checkAsk(
   context: JobContext,
   payload: AskPayload,
@@ -53,8 +55,9 @@ async function checkAsk(
   return isMoved ? { ...ask, state: "asking", questionKind } : null;
 }
 
-// The question check's one model call, on the asker's ledger. A full window is "limited". Any other failure, and a reply that breaks
-// the schema, is "failed", so no persona ever sees an ask the check did not allow.
+// The question check's one model call, on the asker's ledger. A full window is "limited". Any other
+// failure, and a reply that breaks the schema, is "failed", so no persona ever sees an ask the
+// check did not allow.
 async function runQuestionCheck(context: JobContext, ask: AskRow): Promise<CheckResult> {
   const prompt = readPrompt("question-check");
   try {
@@ -83,7 +86,8 @@ async function runQuestionCheck(context: JobContext, ask: AskRow): Promise<Check
   }
 }
 
-// Design steps 3 and 4: the answer rows, then one persona answer for each pending row; moves the ask to ranking when none is pending.
+// Design steps 3 and 4: the answer rows, then one persona answer for each pending row; moves the
+// ask to ranking when none is pending.
 async function askPersonas(
   context: JobContext,
   payload: AskPayload,
@@ -106,7 +110,8 @@ async function askPersonas(
   return isMoved ? { ...ask, state: "ranking" } : null;
 }
 
-// Moves the ask in its asker's context, the only context whose policy lets the job write it, and says whether it moved.
+// Moves the ask in its asker's context, the only context whose policy lets the job write it, and
+// says whether it moved.
 function moveInAsker(
   context: JobContext,
   ask: AskRow,

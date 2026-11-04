@@ -1,8 +1,9 @@
 import type { ReactElement } from "react";
 import { PolicyPage, PolicySections, type PolicySection } from "./policy-page.js";
 
-// The terms of using Meety: what it is and is not, the account, what people may upload and post, what is not allowed, what happens
-// when the rules are broken, what the service promises, and how to leave.
+// The terms of using Meety: what it is and is not, the account, what people may upload and post,
+// what is not allowed, what happens when the rules are broken, what the service promises, and how
+// to leave.
 const TERMS_SECTIONS: readonly PolicySection[] = [
   {
     title: "What Meety is",

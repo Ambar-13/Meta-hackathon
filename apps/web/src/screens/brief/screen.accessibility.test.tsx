@@ -39,7 +39,8 @@ function point(spec: {
   };
 }
 
-// The brief the fixture screen shows: one unsupported clash line, and every line backed except that one, so the rate is 8 of 9.
+// The brief the fixture screen shows: one unsupported clash line, and every line backed except that
+// one, so the rate is 8 of 9.
 function briefFixture(): Brief {
   return Brief.parse({
     agree: [

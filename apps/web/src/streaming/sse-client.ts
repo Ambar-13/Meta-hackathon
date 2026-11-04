@@ -9,7 +9,8 @@ import {
   type MeetingFoldState,
 } from "../transcript/event-fold.js";
 
-// One frame of the stream: its id, event and data lines; all three are null for a comment such as the heartbeat or the padding.
+// One frame of the stream: its id, event and data lines; all three are null for a comment such as
+// the heartbeat or the padding.
 export type SseFrame = { id: string | null; event: string | null; data: string | null };
 // The connection state a screen shows.
 export type FeedStatus = "connecting" | "live" | "polling" | "reconnecting" | "closed";
@@ -40,7 +41,8 @@ function applyField(frame: SseFrame, line: string): void {
   else if (field === "data") frame.data = frame.data === null ? value : `${frame.data}\n${value}`;
 }
 
-// Splits one block of text lines into a frame, following the SSE field rules. Empty lines and comment lines are skipped.
+// Splits one block of text lines into a frame, following the SSE field rules. Empty lines and
+// comment lines are skipped.
 function frameFromBlock(block: string): SseFrame {
   const frame: SseFrame = { id: null, event: null, data: null };
   for (const rawLine of block.split("\n")) {
@@ -50,7 +52,8 @@ function frameFromBlock(block: string): SseFrame {
   return frame;
 }
 
-// Splits buffered stream text into complete frames and returns the unfinished tail to keep for the next chunk.
+// Splits buffered stream text into complete frames and returns the unfinished tail to keep for the
+// next chunk.
 export function parseSseText(buffer: string): { frames: SseFrame[]; rest: string } {
   const end = buffer.lastIndexOf("\n\n");
   if (end === -1) return { frames: [], rest: buffer };
@@ -78,7 +81,8 @@ type FeedContext = {
   stopWatching: () => void;
 };
 
-// Stores the new state and status, tells the screen, and asks for one resync poll when the fold needs one.
+// Stores the new state and status, tells the screen, and asks for one resync poll when the fold
+// needs one.
 function publish(ctx: FeedContext, next: MeetingFoldState, nextStatus: FeedStatus): void {
   ctx.state = next;
   ctx.status = nextStatus;
@@ -124,7 +128,8 @@ function takeFrame(ctx: FeedContext, frame: SseFrame): void {
   publish(ctx, foldRaw(ctx.state, raw), ctx.status);
 }
 
-// Schedules the next connection after the backoff delay, unless this stream was replaced or the feed is closed.
+// Schedules the next connection after the backoff delay, unless this stream was replaced or the
+// feed is closed.
 function streamEnded(ctx: FeedContext, number: number): void {
   if (number !== ctx.streamNumber || ctx.isClosed) return;
   clearFirstByte(ctx);
@@ -169,7 +174,8 @@ async function pumpChunks(ctx: FeedContext, response: Response, number: number):
   }
 }
 
-// Reads the reply of one stream connection: an auth or not-found status stops the feed, any other failure reconnects.
+// Reads the reply of one stream connection: an auth or not-found status stops the feed, any other
+// failure reconnects.
 async function readStream(ctx: FeedContext, response: Response, number: number): Promise<void> {
   if (number !== ctx.streamNumber) return;
   if (response.status === 401 || response.status === 403 || response.status === 404) {
@@ -183,7 +189,8 @@ async function readStream(ctx: FeedContext, response: Response, number: number):
   await pumpChunks(ctx, response, number);
 }
 
-// Opens one stream connection, replaying from the last committed seq and starting the first-byte timer.
+// Opens one stream connection, replaying from the last committed seq and starting the first-byte
+// timer.
 function openStream(ctx: FeedContext): void {
   if (ctx.isClosed) return;
   ctx.streamNumber += 1;
@@ -221,7 +228,8 @@ function stopFeed(ctx: FeedContext, error: ApiError): void {
   ctx.options.onStopped(error);
 }
 
-// Closes the feed: aborts the stream, clears its timers and polling, and tells the screen it is closed.
+// Closes the feed: aborts the stream, clears its timers and polling, and tells the screen it is
+// closed.
 function closeFeed(ctx: FeedContext): void {
   if (ctx.isClosed) return;
   ctx.isClosed = true;
@@ -234,7 +242,8 @@ function closeFeed(ctx: FeedContext): void {
   publish(ctx, ctx.state, "closed");
 }
 
-// One poll for the feed: folds the reply after the last seq; an auth or not-found error stops the feed.
+// One poll for the feed: folds the reply after the last seq; an auth or not-found error stops the
+// feed.
 async function pollAndFold(ctx: FeedContext): Promise<void> {
   try {
     const reply = await pollEventsOnce({
@@ -269,7 +278,8 @@ function visibilityFor(options: MeetingFeedOptions): VisibilitySource | null {
   return typeof document === "undefined" ? null : (document as VisibilitySource);
 }
 
-// Opens the meeting stream and keeps one folded state: replay from the last seq, polling when the stream is silent, reconnects with backoff and on return from the background.
+// Opens the meeting stream and keeps one folded state: replay from the last seq, polling when the
+// stream is silent, reconnects with backoff and on return from the background.
 export function openMeetingFeed(options: MeetingFeedOptions): MeetingFeed {
   const source = visibilityFor(options);
   const ctx: FeedContext = {

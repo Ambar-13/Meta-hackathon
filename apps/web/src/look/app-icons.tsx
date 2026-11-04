@@ -1,6 +1,8 @@
-// The signed-in app's line icons and round avatars, the look of Instagram and ChatGPT. Icons come from lucide at one size and stroke; a person is the first letter of their name on a soft circle in
-// one of four colours that their name picks, so the same person always looks the same, and a sample person is their face with the
-// orange made-up mark. The landing keeps the name tags and stickers.
+// The signed-in app's line icons and round avatars, the look of Instagram and ChatGPT. Icons come
+// from lucide at one size and stroke; a person is the first letter of their name on a soft circle
+// in one of four colours that their name picks, so the same person always looks the same, and a
+// sample person is their face with the orange made-up mark. The landing keeps the name tags and
+// stickers.
 import type { ReactElement } from "react";
 import {
   ArrowRight,
@@ -62,10 +64,12 @@ const ICONS = {
 } as const;
 // The name of one icon.
 export type IconName = keyof typeof ICONS;
-// The icons that are drawn filled when they mark the current page, as Instagram fills its current page's icon; the others go bold.
+// The icons that are drawn filled when they mark the current page, as Instagram fills its current
+// page's icon; the others go bold.
 const FILLED_WHEN_CURRENT: ReadonlySet<IconName> = new Set(["home", "meety", "friends", "me"]);
 
-// One line icon, hidden from screen readers because the words next to it say what it is. isBold draws the current page's icon.
+// One line icon, hidden from screen readers because the words next to it say what it is. isBold
+// draws the current page's icon.
 export const Icon = (props: {
   name: IconName;
   size?: number;
@@ -87,22 +91,26 @@ export const Icon = (props: {
   );
 };
 
-// The four colours a person's circle can take; each class sets --c (the letter) and --k-soft (the circle) in app.css.
+// The four colours a person's circle can take; each class sets --c (the letter) and --k-soft (the
+// circle) in app.css.
 const TINTS = ["c-blue", "c-coral", "c-lilac", "c-yellow"] as const;
 
-// The colour class a name picks: the same name always gets the same colour. Example: "Mira" always gets the same one of the four.
+// The colour class a name picks: the same name always gets the same colour. Example: "Mira" always
+// gets the same one of the four.
 export function tintOf(name: string): (typeof TINTS)[number] {
   let hash = 0;
   for (const character of name) hash = (hash * 31 + (character.codePointAt(0) ?? 0)) >>> 0;
   return TINTS[hash % TINTS.length] ?? "c-blue";
 }
 
-// A person's sizes: s for lists (32 px), m for rows (44 px), l for a phone profile (86 px), xl for a laptop profile (150 px).
+// A person's sizes: s for lists (32 px), m for rows (44 px), l for a phone profile (86 px), xl for
+// a laptop profile (150 px).
 export type AvatarSize = "s" | "m" | "l" | "xl";
 
-// A person as a round picture: their face when there is one (only sample people have one so far), else their first letter on their
-// colour; a sample person also carries a small orange asterisk at the top right, so nobody takes a made-up face for a real one. Hidden from screen readers, because their name, and the Sample
-// mark in words, are always next to it.
+// A person as a round picture: their face when there is one (only sample people have one so far),
+// else their first letter on their colour; a sample person also carries a small orange asterisk at
+// the top right, so nobody takes a made-up face for a real one. Hidden from screen readers, because
+// their name, and the Sample mark in words, are always next to it.
 export const PersonAvatar = (props: {
   name: string;
   size?: AvatarSize;
@@ -134,9 +142,9 @@ function shapeOf(photo: { width: number; height: number }): "is-square" | "is-ta
   return photo.height > photo.width ? "is-tall" : "is-wide";
 }
 
-// A post's photo, with square corners: a wide photo at 3:2, a
-// tall one at 4:5 on a phone and square on wider screens, and a photo a person shared square. Nothing shows for a key this build does
-// not have.
+// A post's photo, with square corners: a wide photo at 3:2, a tall one at 4:5 on a phone and square
+// on wider screens, and a photo a person shared square. Nothing shows for a key this build does not
+// have.
 export const PostPhoto = (props: {
   photo: string | null | undefined;
   alt: string | null | undefined;
@@ -161,9 +169,10 @@ export const PostPhoto = (props: {
   );
 };
 
-// A story's picture, after Instagram's: a tall 9:16 frame with square corners holding the whole photo on a blurred, darkened copy of
-// itself, so a wide photo shows whole, with the story's words over the foot of it; a story of words alone shows them large on the warm
-// card. alt is what a screen reader reads for the photo.
+// A story's picture, after Instagram's: a tall 9:16 frame with square corners holding the whole
+// photo on a blurred, darkened copy of itself, so a wide photo shows whole, with the story's words
+// over the foot of it; a story of words alone shows them large on the warm card. alt is what a
+// screen reader reads for the photo.
 export const StoryPicture = (props: {
   src: string | null;
   alt: string;
@@ -186,7 +195,8 @@ export const StoryPicture = (props: {
   );
 };
 
-// The orange asterisk on a made-up person's picture: three crossed strokes, as in the "Other" concept's wordmark.
+// The orange asterisk on a made-up person's picture: three crossed strokes, as in the "Other"
+// concept's wordmark.
 const MadeUpMark = (): ReactElement => {
   return (
     <svg className="made-up-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -195,7 +205,8 @@ const MadeUpMark = (): ReactElement => {
   );
 };
 
-// The mark on every sample person (migration 0009): a made-up person seeded so Explore has people to try, never shown as a real one.
+// The mark on every sample person (migration 0009): a made-up person seeded so Explore has people
+// to try, never shown as a real one.
 export const SampleChip = (): ReactElement => {
   return <span className="sample-chip">Sample</span>;
 };

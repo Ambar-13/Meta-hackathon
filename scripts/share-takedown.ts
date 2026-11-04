@@ -1,10 +1,12 @@
-// A human hides a reported share page: by its public slug through share_revoke, or every share page of one meeting.
+// A human hides a reported share page: by its public slug through share_revoke, or every share page
+// of one meeting.
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { ContractError, HTTP } from "@meet-first/contracts";
 import { makeDatabase, withMeeting } from "@meet-first/db";
 
-// The database handle the script opens, typed from the db package so the script needs no direct kysely import.
+// The database handle the script opens, typed from the db package so the script needs no direct
+// kysely import.
 type Db = ReturnType<typeof makeDatabase>;
 // The Postgres error code for a function that does not exist (42883 undefined_function).
 const UNDEFINED_FUNCTION = "42883";
@@ -29,7 +31,8 @@ function badArguments(): ContractError {
   );
 }
 
-// Reads the one flag the script takes; an unknown flag, a missing value, or both flags is bad arguments.
+// Reads the one flag the script takes; an unknown flag, a missing value, or both flags is bad
+// arguments.
 function readTarget(argv: readonly string[]): Target {
   let values: { slug?: string | undefined; meeting?: string | undefined };
   try {
@@ -48,7 +51,8 @@ function readTarget(argv: readonly string[]): Target {
   throw badArguments();
 }
 
-// Hides the share page of one meeting by setting revoked_at to now() on each page not revoked yet; returns how many changed.
+// Hides the share page of one meeting by setting revoked_at to now() on each page not revoked yet;
+// returns how many changed.
 export async function revokeShareByMeeting(db: Db, meetingId: string): Promise<number> {
   return withMeeting(db, meetingId, async (trx) => {
     const result = await trx
@@ -69,7 +73,8 @@ async function revokeShareBySlug(db: Db, slug: string): Promise<boolean | null> 
   return row?.revoked ?? null;
 }
 
-// Runs one takedown on the database given, and writes only the result word or the count, never a snapshot.
+// Runs one takedown on the database given, and writes only the result word or the count, never a
+// snapshot.
 export async function runTakedown(
   argv: readonly string[],
   db: Db,
@@ -95,7 +100,8 @@ function isUndefinedFunction(error: unknown): boolean {
   );
 }
 
-// Reads the worker URL, opens the database, runs the takedown, and maps each failure to its exit code.
+// Reads the worker URL, opens the database, runs the takedown, and maps each failure to its exit
+// code.
 export async function main(
   argv: readonly string[],
   env: NodeJS.ProcessEnv,
@@ -127,7 +133,8 @@ export async function main(
   }
 }
 
-// Runs the script when this file is the process entry (pnpm share:takedown); importing it starts nothing.
+// Runs the script when this file is the process entry (pnpm share:takedown); importing it starts
+// nothing.
 const isEntryPoint =
   process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isEntryPoint) {

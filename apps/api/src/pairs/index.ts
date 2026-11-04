@@ -1,4 +1,5 @@
-// The pairs folder: invites made and joined by a single-use token, and the lobby poll that also marks presence.
+// The pairs folder: invites made and joined by a single-use token, and the lobby poll that also
+// marks presence.
 import type { RoutePlugin } from "../app-types.js";
 import { registerCreatePair } from "./create-pair.js";
 import { registerJoinPair } from "./join-pair.js";

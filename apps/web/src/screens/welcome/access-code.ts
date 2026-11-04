@@ -1,5 +1,6 @@
-// The access code a deployed Meety can ask for at sign-up. A link with ?access= fills it in, this browser keeps it
-// once it opened a profile, and the invite link that person shares carries it, so the friend who opens the link never types it.
+// The access code a deployed Meety can ask for at sign-up. A link with ?access= fills it in, this
+// browser keeps it once it opened a profile, and the invite link that person shares carries it, so
+// the friend who opens the link never types it.
 
 // The name of the query part that carries the code in a link.
 export const ACCESS_PARAM = "access";
@@ -11,7 +12,8 @@ export function accessCodeIn(search: string): string {
   return (new URLSearchParams(search).get(ACCESS_PARAM) ?? "").trim();
 }
 
-// The link with the code added as ?access=, or the link as it came when there is no code or it is not a link this page can read.
+// The link with the code added as ?access=, or the link as it came when there is no code or it is
+// not a link this page can read.
 export function withAccessCode(link: string, code: string): string {
   if (code === "") return link;
   try {
@@ -29,7 +31,8 @@ export function rememberAccessCode(code: string): void {
   try {
     window.localStorage.setItem(STORAGE_KEY, code);
   } catch {
-    // Storage is off in this browser, so the invite links go out without the code and the friend types it.
+    // Storage is off in this browser, so the invite links go out without the code and the friend
+    // types it.
   }
 }
 

@@ -46,7 +46,8 @@ function shareUrlOf(state: ConsentState): string | null {
 // Props of the consent and withdraw button: the state and the two actions the hook gives.
 type ActionProps = { state: ConsentState; onConsent: () => void; onWithdraw: () => void };
 
-// The one button this person can press: consent when they have not, take the page down when they have.
+// The one button this person can press: consent when they have not, take the page down when they
+// have.
 const ConsentButton = (props: ActionProps): ReactElement | null => {
   if (props.state.kind !== "open") return null;
   if (isMineConsented(props.state)) {
@@ -77,7 +78,8 @@ const ShareLink = (props: { state: ConsentState }): ReactElement | null => {
   );
 };
 
-// The closed face: the briefs are not written yet, so there is nothing to consent to; the way on is the meeting itself.
+// The closed face: the briefs are not written yet, so there is nothing to consent to; the way on is
+// the meeting itself.
 const ClosedState = (props: { meetingId: string }): ReactElement => {
   return (
     <EmptyState
@@ -94,8 +96,9 @@ const ClosedState = (props: { meetingId: string }): ReactElement => {
   );
 };
 
-// The member's consent screen for one meeting: the live link once there is one, the preview of the page, the explainer, then the
-// status and the one button, kept in reach at the bottom of the screen.
+// The member's consent screen for one meeting: the live link once there is one, the preview of the
+// page, the explainer, then the status and the one button, kept in reach at the bottom of the
+// screen.
 export const ConsentScreen = (): ReactElement => {
   const meetingId = useParams()["meetingId"] ?? "";
   const share = useConsentState(meetingId);

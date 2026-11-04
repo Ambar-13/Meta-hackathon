@@ -16,7 +16,8 @@ import type { RouteDeps } from "../app-types.js";
 import { makeNotFoundError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
 
-// The reasons a start is refused, in the order they are checked, each with its sentence (409, presence is not one).
+// The reasons a start is refused, in the order they are checked, each with its sentence (409,
+// presence is not one).
 export const START_REFUSALS = {
   meeting_already_started: "This meeting has already started or ended.",
   question_rejected:
@@ -42,7 +43,8 @@ export function meetingIdOf(params: unknown): string {
   return parsed.data.id;
 }
 
-// The first refusal for this meeting and its two members, or null when it may start (pure, so the order is tested).
+// The first refusal for this meeting and its two members, or null when it may start (pure, so the
+// order is tested).
 export function startRefusal(
   meeting: {
     state: string;
@@ -60,7 +62,8 @@ export function startRefusal(
   return null;
 }
 
-// Locks the meeting row, checks the start rule and, when it holds, claims a slot and begins the meeting.
+// Locks the meeting row, checks the start rule and, when it holds, claims a slot and begins the
+// meeting.
 export async function tryStart(
   trx: Transaction<Database>,
   attempt: { meetingId: string; now: Date; maxRunning: number },
@@ -96,7 +99,8 @@ export async function tryStart(
   return { kind: "queued", queuePosition: row.queue_position ?? 0 };
 }
 
-// After the commit: enqueues step 1 of a meeting that started, or check_question again for one still preparing.
+// After the commit: enqueues step 1 of a meeting that started, or check_question again for one
+// still preparing.
 export async function enqueueAfterStart(
   deps: RouteDeps,
   meetingId: string,
@@ -111,7 +115,8 @@ export async function enqueueAfterStart(
   }
 }
 
-// The display names of both sides of a meeting, read through pair_display_names, because a person cannot read the other person's people row (docs/contracts.md section 6a).
+// The display names of both sides of a meeting, read through pair_display_names, because a person
+// cannot read the other person's people row (docs/contracts.md section 6a).
 export async function readMemberNames(
   trx: Transaction<Database>,
   meetingId: string,
@@ -150,7 +155,8 @@ export async function readMemberNames(
   return { a: sideName("a"), b: sideName("b") };
 }
 
-// Writes one committed event with the next gapless seq after parsing it with CommittedEvent; the api's copy of the worker's appendMeetingEvent.
+// Writes one committed event with the next gapless seq after parsing it with CommittedEvent; the
+// api's copy of the worker's appendMeetingEvent.
 export async function appendApiMeetingEvent(
   trx: Transaction<Database>,
   write: {
@@ -182,7 +188,8 @@ export async function appendApiMeetingEvent(
     .execute();
 }
 
-// Begins a meeting that won its slot: phase open, step 1 pending for side a, meeting.started, phase.changed; the api's copy of the worker's beginRunningMeeting.
+// Begins a meeting that won its slot: phase open, step 1 pending for side a, meeting.started,
+// phase.changed; the api's copy of the worker's beginRunningMeeting.
 export async function beginRunningMeeting(
   trx: Transaction<Database>,
   meetingId: string,
@@ -225,7 +232,8 @@ export async function beginRunningMeeting(
   });
 }
 
-// Registers POST /api/meetings/:id/start: 200 {state: "running"} or {state: "queued", queuePosition}; 404; 409 with a START_REFUSALS code.
+// Registers POST /api/meetings/:id/start: 200 {state: "running"} or {state: "queued",
+// queuePosition}; 404; 409 with a START_REFUSALS code.
 export function registerStart(app: FastifyInstance, deps: RouteDeps): void {
   app.post(routes.meetings.start.path, async (request, reply) => {
     const personId = requirePerson(request);
@@ -245,7 +253,8 @@ export function registerStart(app: FastifyInstance, deps: RouteDeps): void {
   });
 }
 
-// An ISO time of a stored timestamp; a running meeting always has both times, so a missing one is a fault.
+// An ISO time of a stored timestamp; a running meeting always has both times, so a missing one is a
+// fault.
 function isoOf(value: Date | null): string {
   if (value === null)
     throw new ContractError(

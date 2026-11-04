@@ -23,7 +23,8 @@ const word = (words: ArrayLike<number>, index: number): number => words[index] ?
 const rotateRight = (value: number, bits: number): number =>
   (value >>> bits) | (value << (32 - bits));
 
-// Pads the message to whole 64-byte blocks, with its length in bits in the last 8 bytes (FIPS 180-4).
+// Pads the message to whole 64-byte blocks, with its length in bits in the last 8 bytes (FIPS
+// 180-4).
 function padMessage(message: Uint8Array): DataView {
   const padded = new Uint8Array(Math.ceil((message.length + 9) / 64) * 64);
   padded.set(message);
@@ -49,7 +50,8 @@ function messageSchedule(view: DataView, offset: number): Uint32Array {
   return schedule;
 }
 
-// One round of the compression on the eight working words a to h, in place (FIPS 180-4, 6.2.2 step 3).
+// One round of the compression on the eight working words a to h, in place (FIPS 180-4, 6.2.2 step
+// 3).
 function compressionRound(work: Uint32Array, constant: number, scheduled: number): void {
   const a = word(work, 0);
   const b = word(work, 1);
@@ -67,7 +69,8 @@ function compressionRound(work: Uint32Array, constant: number, scheduled: number
   work.set([(first + sum0 + majority) >>> 0, a, b, c, (d + first) >>> 0, e, f, g]);
 }
 
-// Runs the 64 rounds on one block and adds the result into the state (FIPS 180-4, 6.2.2 steps 2 to 4).
+// Runs the 64 rounds on one block and adds the result into the state (FIPS 180-4, 6.2.2 steps 2 to
+// 4).
 function compressBlock(state: Uint32Array, schedule: Uint32Array): void {
   const work = Uint32Array.from(state);
   for (let round = 0; round < 64; round += 1)
@@ -96,9 +99,10 @@ function splitMix64(state: bigint): { state: bigint; output: bigint } {
   return { state: next, output: mixed ^ (mixed >> 31n) };
 }
 
-// Picks `count` distinct ids from 1 to `total`, the same ones every time for the same seed text, in ascending order.
-// Seed: the first 8 bytes of sha256(seed text), unsigned big-endian. Shuffle: Fisher-Yates from the last place down,
-// swapping place i with place (SplitMix64 output mod (i + 1)).
+// Picks `count` distinct ids from 1 to `total`, the same ones every time for the same seed text, in
+// ascending order. Seed: the first 8 bytes of sha256(seed text), unsigned big-endian. Shuffle:
+// Fisher-Yates from the last place down, swapping place i with place (SplitMix64 output mod (i +
+// 1)).
 export function seededSample(seedText: string, count: number, total: number): number[] {
   const ids = Array.from({ length: total }, (value, index) => index + 1);
   let state = new DataView(sha256(new TextEncoder().encode(seedText)).buffer).getBigUint64(0);

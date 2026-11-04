@@ -21,7 +21,8 @@ function point(text: string, quotes: Quote[], isSupported: boolean | null = true
   return { text, quotes, supported: isSupported };
 }
 
-// The sample brief of a get-along meeting: three lines per part, one weak, one with a quote that did not match.
+// The sample brief of a get-along meeting: three lines per part, one weak, one with a quote that
+// did not match.
 const SAMPLE: Brief = {
   questionKind: "get_along",
   supportRate: 0.89,
@@ -81,7 +82,8 @@ function briefAt(slot: {
   };
 }
 
-// The brief page: ready, a deal's labels, a brief whose check did not run, the quote sheet, still being written, gone, failed.
+// The brief page: ready, a deal's labels, a brief whose check did not run, the quote sheet, still
+// being written, gone, failed.
 export const views: readonly GalleryView[] = [
   briefAt({
     name: "brief-ready",

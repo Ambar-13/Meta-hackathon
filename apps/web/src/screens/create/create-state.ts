@@ -4,27 +4,31 @@ import { apiFetch, asApiError, routes, type ApiError } from "../../app-shell/ind
 import { readListingOrNull } from "../card/index.js";
 import { base64Of, PhotoFileError, postJpeg, storyJpeg } from "../me/index.js";
 
-// The sentences of Create: a file that is not a picture, one too large even when drawn smaller, and a share with nothing in it.
+// The sentences of Create: a file that is not a picture, one too large even when drawn smaller, and
+// a share with nothing in it.
 const CREATE_SENTENCES = {
   notPicture: "That file is not a photo this browser can open. Try a JPEG or PNG.",
   tooLarge: "That photo is too large to share. Try another one.",
   empty: "Add a photo or some words first.",
 } as const;
 
-// The photo chosen for a share: the file it came from, so a switch between post and story draws it again, the JPEG drawn for the
-// current kind, and the address that shows that JPEG.
+// The photo chosen for a share: the file it came from, so a switch between post and story draws it
+// again, the JPEG drawn for the current kind, and the address that shows that JPEG.
 export type ChosenPhoto = { file: Blob; jpeg: Blob; url: string };
-// Where a share stands: drawing the photo, sending, refused before any request with its sentence, or failed with the api's error.
+// Where a share stands: drawing the photo, sending, refused before any request with its sentence,
+// or failed with the api's error.
 export type ShareState =
   | { kind: "idle" }
   | { kind: "drawing" }
   | { kind: "sending" }
   | { kind: "refused"; sentence: string }
   | { kind: "failed"; error: ApiError };
-// Whether the person is in Explore, which decides who sees a post: unknown while it is read, and unknown when the read fails.
+// Whether the person is in Explore, which decides who sees a post: unknown while it is read, and
+// unknown when the read fails.
 export type Listed = "unknown" | "listed" | "not-listed";
 
-// What Create holds and does: the kind, the photo, the words, where the share stands, and whether the person is in Explore.
+// What Create holds and does: the kind, the photo, the words, where the share stands, and whether
+// the person is in Explore.
 export type CreateModel = {
   kind: PostKind;
   setKind: (kind: PostKind) => void;
@@ -48,12 +52,14 @@ function photoSentence(error: PhotoFileError): string {
   return error.message === "too large" ? CREATE_SENTENCES.tooLarge : CREATE_SENTENCES.notPicture;
 }
 
-// True when a share has something in it: a photo, or words once trimmed. The words never pass POST_TEXT_MAX_CHARS, which the box allows.
+// True when a share has something in it: a photo, or words once trimmed. The words never pass
+// POST_TEXT_MAX_CHARS, which the box allows.
 export function canShare(text: string, photo: ChosenPhoto | null): boolean {
   return photo !== null || (text.trim() !== "" && text.trim().length <= POST_TEXT_MAX_CHARS);
 }
 
-// Reads once whether the person is in Explore (GET /api/directory/me), for who sees a post and where Create goes after sharing.
+// Reads once whether the person is in Explore (GET /api/directory/me), for who sees a post and
+// where Create goes after sharing.
 function useListed(): Listed {
   const [listed, setListed] = useState<Listed>("unknown");
   useEffect(() => {
@@ -71,8 +77,9 @@ function useListed(): Listed {
   return listed;
 }
 
-// Create's state: a photo is drawn in the browser the moment it is chosen, and again when the kind changes, so what shows is what goes
-// up; Share sends POST /api/posts with the photo as base64. The address of a drawn photo is let go once it is replaced or the page closes.
+// Create's state: a photo is drawn in the browser the moment it is chosen, and again when the kind
+// changes, so what shows is what goes up; Share sends POST /api/posts with the photo as base64. The
+// address of a drawn photo is let go once it is replaced or the page closes.
 export function useCreate(initialKind: PostKind): CreateModel {
   const [kind, setKindState] = useState<PostKind>(initialKind);
   const [photo, setPhoto] = useState<ChosenPhoto | null>(null);

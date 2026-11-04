@@ -8,7 +8,8 @@ import {
 import { type Kysely, sql } from "kysely";
 import type { Database, LedgerTable } from "@meet-first/db";
 
-// What the ledger row holds before a model call starts. The row is written first, so a crash still counts.
+// What the ledger row holds before a model call starts. The row is written first, so a crash still
+// counts.
 export type LedgerStart = {
   personId: string | null;
   meetingId: string | null;
@@ -27,11 +28,13 @@ export type LedgerFinish = {
   usd?: number;
 };
 
-// The database types these functions take, from @meet-first/db, so the ledger shape lives in one place.
+// The database types these functions take, from @meet-first/db, so the ledger shape lives in one
+// place.
 export type { Database, LedgerTable };
 
-// Writes the ledger row before the call so a crash mid-call still counts against the caps. Returns the row id.
-// The caller commits this row before it calls the model, so other workers' limiters see it.
+// Writes the ledger row before the call so a crash mid-call still counts against the caps. Returns
+// the row id. The caller commits this row before it calls the model, so other workers' limiters see
+// it.
 export async function startLedgerRow(trx: Kysely<Database>, start: LedgerStart): Promise<string> {
   const row = await trx
     .insertInto("ledger")
@@ -50,7 +53,8 @@ export async function startLedgerRow(trx: Kysely<Database>, start: LedgerStart):
   return row.id;
 }
 
-// The usage columns of a finish that carries no usage, such as a vendor HTTP error, a replay miss or a failed image call.
+// The usage columns of a finish that carries no usage, such as a vendor HTTP error, a replay miss
+// or a failed image call.
 const NO_USAGE = {
   promptTokens: null,
   cachedTokens: null,
@@ -58,8 +62,8 @@ const NO_USAGE = {
   reasoningTokens: null,
 };
 
-// Fills the row after the call: usage, dollars, status, request id. A row it cannot see is a fault, never a silent skip,
-// because a missing finish would leave the spend uncounted.
+// Fills the row after the call: usage, dollars, status, request id. A row it cannot see is a fault,
+// never a silent skip, because a missing finish would leave the spend uncounted.
 export async function finishLedgerRow(
   trx: Kysely<Database>,
   id: string,
@@ -90,7 +94,8 @@ export async function finishLedgerRow(
   }
 }
 
-// Token and call totals over the last n seconds across everyone, through the SECURITY DEFINER function.
+// Token and call totals over the last n seconds across everyone, through the SECURITY DEFINER
+// function.
 export async function readLedgerWindow(
   db: Kysely<Database>,
   seconds: number,
@@ -108,7 +113,8 @@ export async function readLedgerWindow(
   };
 }
 
-// Dollars spent since a time across everyone, for the daily and total caps. Postgres sends numeric as text.
+// Dollars spent since a time across everyone, for the daily and total caps. Postgres sends numeric
+// as text.
 export async function readUsdSince(db: Kysely<Database>, since: Date): Promise<number> {
   const result = await sql<{ usd: string }>`SELECT ledger_usd_since(${since}) AS usd`.execute(db);
   return Number(result.rows[0]?.usd ?? 0);

@@ -13,7 +13,8 @@ import {
 } from "./home-state.js";
 import "./home.css";
 
-// The one next step, on a tilted blue panel with its sticker: the main link, and a second one when there is a real choice.
+// The one next step, on a tilted blue panel with its sticker: the main link, and a second one when
+// there is a real choice.
 export const NextStepPanel = (props: { home: HomeView }): ReactElement => {
   const step = nextStepOf(props.home);
   return (
@@ -35,7 +36,8 @@ export const NextStepPanel = (props: { home: HomeView }): ReactElement => {
   );
 };
 
-// The person's card as their own name tag: the band, their name written on it, their first items and one quote.
+// The person's card as their own name tag: the band, their name written on it, their first items
+// and one quote.
 const CardTag = (props: { card: HomeCard; name: string }): ReactElement => {
   const first = props.card.items[0];
   return (
@@ -148,7 +150,8 @@ export const PairsSection = (props: { home: HomeView }): ReactElement | null => 
   );
 };
 
-// The home screen: hello with your own name tag, the one next step, your card, your meetings and your open invites (design pass fix 4).
+// The home screen: hello with your own name tag, the one next step, your card, your meetings and
+// your open invites (design pass fix 4).
 export const HomeScreen = (): ReactElement => {
   const home = useHomeView();
   const value = home.value;

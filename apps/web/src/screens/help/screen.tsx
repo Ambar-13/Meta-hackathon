@@ -1,4 +1,5 @@
-// What exists: a person stuck on a problem can send it to the personas listed in the directory, and run_ask asks up to 20 of them.
+// What exists: a person stuck on a problem can send it to the personas listed in the directory, and
+// run_ask asks up to 20 of them.
 //The problem: the person must see where the problem goes before sending it, because sending is their consent.
 //The step: the box, HELP_SEND_COPY under it, and the send button; a sent search opens its answers page. What it does not do:
 // check the question; run_ask does that before any persona sees it.

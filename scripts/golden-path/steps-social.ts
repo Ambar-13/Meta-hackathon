@@ -1,5 +1,6 @@
-// Steps 22 and 23: a new person C asks to be B's friend from B's profile and B accepts; then A asks the orchestrator how B
-// would probably react, runs the plan it gives, and gets B's persona's answer through the friend ask it starts.
+// Steps 22 and 23: a new person C asks to be B's friend from B's profile and B accepts; then A asks
+// the orchestrator how B would probably react, runs the plan it gives, and gets B's persona's
+// answer through the friend ask it starts.
 import { ErrorBody, routes, type AskView, type OrchestratorMessage } from "@meet-first/contracts";
 import { ORCHESTRATOR_MESSAGE, REACT_ASK_TEXT } from "./fixtures.js";
 import { PersonClient } from "./person-client.js";
@@ -15,7 +16,8 @@ import {
 } from "./report.js";
 import { signUpBody } from "./steps-people-and-sources.js";
 
-// The orchestrator's reply may take 120 s on a live run: one model call at effort low, queued behind the worker's other jobs.
+// The orchestrator's reply may take 120 s on a live run: one model call at effort low, queued
+// behind the worker's other jobs.
 const REPLY_WAIT_MS = 120_000;
 const REPLY_POLL_MS = 1_500;
 // An ask may take 180 s, as in step 20.
@@ -55,8 +57,8 @@ async function readFriends(
     .sort((first, second) => first.displayName.localeCompare(second.displayName));
 }
 
-// Step 22: C signs up, finds B's profile, sends a friend request; B sees it incoming and accepts; each now lists the other as a friend,
-// and A, already B's friend by invite, is refused a request.
+// Step 22: C signs up, finds B's profile, sends a friend request; B sees it incoming and accepts;
+// each now lists the other as a friend, and A, already B's friend by invite, is refused a request.
 export async function step22FriendRequest(run: RunState): Promise<StepResult> {
   const listingB = need(run.ids.listingB, "listingB");
   const c = new PersonClient("C", run.options.base);
@@ -178,8 +180,9 @@ async function waitForAsk(client: PersonClient, askId: string): Promise<AskView>
   );
 }
 
-// Step 23: A asks the orchestrator to ask B the step 20 question; the reply is a planned friend ask about B; A runs it, the second press
-// changes nothing, and the friend ask finishes with B's persona's answer.
+// Step 23: A asks the orchestrator to ask B the step 20 question; the reply is a planned friend ask
+// about B; A runs it, the second press changes nothing, and the friend ask finishes with B's
+// persona's answer.
 export async function step23Orchestrator(run: RunState): Promise<StepResult> {
   const sent = await run.a.json({
     method: "POST",

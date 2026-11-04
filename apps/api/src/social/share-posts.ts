@@ -1,7 +1,8 @@
-// Sharing as Instagram does: anyone signed in shares a post or a story that shows for STORY_HOURS, with words, a
-// photo or both, deletes their own, and likes the posts the feed and profiles show them. The browser draws each photo itself as a JPEG,
-// which drops any camera or location data, and sends it as base64; the api checks the bytes are a JPEG of a sane size before storing
-// them (migration 0013).
+// Sharing as Instagram does: anyone signed in shares a post or a story that shows for STORY_HOURS,
+// with words, a photo or both, deletes their own, and likes the posts the feed and profiles show
+// them. The browser draws each photo itself as a JPEG, which drops any camera or location data, and
+// sends it as base64; the api checks the bytes are a JPEG of a sane size before storing them
+// (migration 0013).
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { sql } from "kysely";
 import { z } from "zod";
@@ -24,13 +25,15 @@ import { isJpeg } from "../home/profile-edit.js";
 import { makeNotFoundError, makePayloadInvalidError } from "../route-errors.js";
 import { requirePerson } from "../sessions/index.js";
 
-// The :id of the delete and like routes: a post id. One that is not a uuid is not_found, so a bad id tells nothing.
+// The :id of the delete and like routes: a post id. One that is not a uuid is not_found, so a bad
+// id tells nothing.
 const PostParams = z.object({ id: Uuid });
-// The body limit of POST /api/posts: the largest photo as base64, and room for the words and the JSON around them.
+// The body limit of POST /api/posts: the largest photo as base64, and room for the words and the
+// JSON around them.
 const CREATE_BODY_LIMIT_BYTES = POST_PHOTO_BASE64_MAX_CHARS + 8_192;
 
-// The photo of a new post as bytes, or null when it has none; a photo that is not a JPEG, or is larger than POST_PHOTO_MAX_BYTES, is
-// payload_invalid.
+// The photo of a new post as bytes, or null when it has none; a photo that is not a JPEG, or is
+// larger than POST_PHOTO_MAX_BYTES, is payload_invalid.
 function photoBytes(photo: string | null): Buffer | null {
   if (photo === null) return null;
   const bytes = Buffer.from(photo, "base64");
@@ -38,9 +41,10 @@ function photoBytes(photo: string | null): Buffer | null {
   return bytes;
 }
 
-// Registers POST /api/posts: 201 PostCreated with the new post's id, its kind and when a story stops showing; 400 payload_invalid for a
-// body with neither words nor a photo, or a photo that is not a JPEG of at most POST_PHOTO_MAX_BYTES; 429 post_daily_cap once the caller
-// has shared SHARES_PER_DAY times this UTC day, counted after their other shares in progress are done.
+// Registers POST /api/posts: 201 PostCreated with the new post's id, its kind and when a story
+// stops showing; 400 payload_invalid for a body with neither words nor a photo, or a photo that is
+// not a JPEG of at most POST_PHOTO_MAX_BYTES; 429 post_daily_cap once the caller has shared
+// SHARES_PER_DAY times this UTC day, counted after their other shares in progress are done.
 export function registerCreatePost(app: FastifyInstance, deps: RouteDeps): void {
   app.post(
     routes.social.createPost.path,
@@ -51,8 +55,9 @@ export function registerCreatePost(app: FastifyInstance, deps: RouteDeps): void 
       if (!body.success) throw makePayloadInvalidError();
       const photo = photoBytes(body.data.photo);
       const row = await withPerson(deps.db, personId, async (trx) => {
-        // The sharer's row lock makes shares sent at the same moment take turns, so none can pass the day's count, as friend_request_send
-        // does for friend requests. NO KEY UPDATE leaves alone the key locks that rows pointing at the person take.
+        // The sharer's row lock makes shares sent at the same moment take turns, so none can pass
+        // the day's count, as friend_request_send does for friend requests. NO KEY UPDATE leaves
+        // alone the key locks that rows pointing at the person take.
         await trx
           .selectFrom("people")
           .select("id")
@@ -98,8 +103,8 @@ export function registerCreatePost(app: FastifyInstance, deps: RouteDeps): void 
   );
 }
 
-// Registers DELETE /api/posts/:id: 204 once the caller's own post or story is gone, with its likes; 404 not_found for an id that is not
-// one of theirs, or not an id at all.
+// Registers DELETE /api/posts/:id: 204 once the caller's own post or story is gone, with its likes;
+// 404 not_found for an id that is not one of theirs, or not an id at all.
 export function registerDeletePost(app: FastifyInstance, deps: RouteDeps): void {
   app.delete(routes.social.deletePost.path, async (request, reply) => {
     const personId = requirePerson(request);
@@ -117,8 +122,9 @@ export function registerDeletePost(app: FastifyInstance, deps: RouteDeps): void 
   });
 }
 
-// The handler of one like route: PUT likes a post the feed or a profile shows the caller (liking twice changes nothing), and 404s for any
-// other post; DELETE takes the caller's like away, also when there was none or the post is gone.
+// The handler of one like route: PUT likes a post the feed or a profile shows the caller (liking
+// twice changes nothing), and 404s for any other post; DELETE takes the caller's like away, also
+// when there was none or the post is gone.
 function likeHandler(deps: RouteDeps, isLiked: boolean) {
   return async (request: FastifyRequest, reply: FastifyReply): Promise<FastifyReply> => {
     const personId = requirePerson(request);
@@ -151,8 +157,8 @@ function likeHandler(deps: RouteDeps, isLiked: boolean) {
   };
 }
 
-// Registers PUT and DELETE /api/posts/:id/like: 200 PostLiked with whether the caller likes the post now; 404 not_found for a like on a
-// post the caller is not shown.
+// Registers PUT and DELETE /api/posts/:id/like: 200 PostLiked with whether the caller likes the
+// post now; 404 not_found for a like on a post the caller is not shown.
 export function registerLikePost(app: FastifyInstance, deps: RouteDeps): void {
   app.put(routes.social.likePost.path, likeHandler(deps, true));
   app.delete(routes.social.unlikePost.path, likeHandler(deps, false));

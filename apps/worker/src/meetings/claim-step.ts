@@ -90,7 +90,8 @@ export async function claimStep(
   return readUnclaimed(trx, meetingId, stepSeq);
 }
 
-// Moves a step this runner holds back to pending or to stalled; false when the runner no longer holds it.
+// Moves a step this runner holds back to pending or to stalled; false when the runner no longer
+// holds it.
 export async function releaseStep(
   trx: Transaction<Database>,
   held: HeldRef,
@@ -100,7 +101,8 @@ export async function releaseStep(
   return result.numUpdatedRows === 1n;
 }
 
-// Saves the messages and the request count after a tool round, only while this runner holds the step.
+// Saves the messages and the request count after a tool round, only while this runner holds the
+// step.
 export async function saveRound(
   trx: Transaction<Database>,
   held: HeldRef,
@@ -127,7 +129,8 @@ export async function savePartialText(
   return result.numUpdatedRows === 1n;
 }
 
-// Saves the partial text in its own short transaction, then sends the d: NOTIFY with the attempt and the UTF-16 length.
+// Saves the partial text in its own short transaction, then sends the d: NOTIFY with the attempt
+// and the UTF-16 length.
 export async function writePartial(
   db: Kysely<Database>,
   held: HeldRef,
@@ -147,7 +150,8 @@ export async function writePartial(
   });
 }
 
-// Stamps first_token_at once per attempt, in its own short transaction, for the first-turn latency metric.
+// Stamps first_token_at once per attempt, in its own short transaction, for the first-turn latency
+// metric.
 export async function recordFirstToken(
   db: Kysely<Database>,
   held: HeldRef,
@@ -171,7 +175,8 @@ function updateHeldStep(trx: Transaction<Database>, held: HeldRef) {
     .where("state", "=", "running");
 }
 
-// Reads a step that could not be claimed: missing, done (its output is returned) or held by another runner.
+// Reads a step that could not be claimed: missing, done (its output is returned) or held by another
+// runner.
 async function readUnclaimed(
   trx: Transaction<Database>,
   meetingId: string,
@@ -188,7 +193,8 @@ async function readUnclaimed(
   return { kind: "busy" };
 }
 
-// One stored message as the chat request type expects it; the optional tool calls are added only when present.
+// One stored message as the chat request type expects it; the optional tool calls are added only
+// when present.
 function toChatMessage(message: z.infer<typeof StoredMessage>): ChatMessage {
   if (message.role === "assistant") {
     return {

@@ -1,6 +1,7 @@
-// POST /api/sessions/claim: the second browser posts the token from the link's fragment and gets its own
-// session cookie. auth_claim_transfer spends the link in one conditional UPDATE, so a second claim finds nothing,
-// and it refuses a link older than 10 minutes. The route is public: the new browser has no session yet.
+// POST /api/sessions/claim: the second browser posts the token from the link's fragment and gets
+// its own session cookie. auth_claim_transfer spends the link in one conditional UPDATE, so a
+// second claim finds nothing, and it refuses a link older than 10 minutes. The route is public: the
+// new browser has no session yet.
 import type { FastifyInstance } from "fastify";
 import { sql, type Kysely } from "kysely";
 import {
@@ -19,7 +20,8 @@ import { hashToken, newHexToken, setSessionCookie } from "./cookie.js";
 export const TRANSFER_SPENT_SENTENCE =
   "This link was already used or is older than 10 minutes. Make a new one on the device that is signed in.";
 
-// Spends the link and opens a session for its owner; null when the link was used, expired or never existed.
+// Spends the link and opens a session for its owner; null when the link was used, expired or never
+// existed.
 export async function claimTransferLink(
   db: Kysely<Database>,
   token: string,
@@ -33,7 +35,8 @@ export async function claimTransferLink(
   return result.rows[0]?.person_id ?? null;
 }
 
-// Registers POST /api/sessions/claim: 200 {personId} with a new session cookie, or 409 transfer_used_or_expired.
+// Registers POST /api/sessions/claim: 200 {personId} with a new session cookie, or 409
+// transfer_used_or_expired.
 export function registerClaim(app: FastifyInstance, deps: RouteDeps): void {
   app.post(routes.people.claim.path, async (request, reply) => {
     const body = TransferClaim.parse(request.body);

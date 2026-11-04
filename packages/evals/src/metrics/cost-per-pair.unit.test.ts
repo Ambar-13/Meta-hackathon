@@ -1,4 +1,5 @@
-// Unit tests for cost per complete pair: the meeting's ledger plus both members' card rows, over completed meetings only.
+// Unit tests for cost per complete pair: the meeting's ledger plus both members' card rows, over
+// completed meetings only.
 import { describe, expect, it } from "vitest";
 import type { EvalRows, LedgerRow, MeetingRow } from "../collect-rows.js";
 import { measureCostPerPair } from "./cost-per-pair.js";

@@ -52,7 +52,8 @@ function line(spec: { text: string; side: "a" | "b"; turnId: string; supported: 
   };
 }
 
-// Writes one brief row for one person of a meeting, through the worker. The first decide-first line gets the given support flag.
+// Writes one brief row for one person of a meeting, through the worker. The first decide-first line
+// gets the given support flag.
 async function writeBrief(
   meeting: SeededMeeting,
   owner: { personId: string; side: "a" | "b" },

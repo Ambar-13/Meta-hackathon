@@ -17,7 +17,8 @@ export function isApiPath(url: string): boolean {
   return url === "/api" || url.startsWith("/api/") || url.startsWith("/api?");
 }
 
-// Registers GET / and GET /*: the app shell for every client path, not_found as JSON for an /api path no route claimed.
+// Registers GET / and GET /*: the app shell for every client path, not_found as JSON for an /api
+// path no route claimed.
 export async function registerSpaFallback(
   app: FastifyInstance,
   distDir: string,

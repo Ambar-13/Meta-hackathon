@@ -1,4 +1,5 @@
-// The meeting test kit: a meeting test's context, the drain, the seeded items and the scripted replies.
+// The meeting test kit: a meeting test's context, the drain, the seeded items and the scripted
+// replies.
 export {
   makeMeetingTestContext,
   runMeetingJob,
@@ -7,7 +8,8 @@ export {
   readSideItems,
   type MeetingTestContext,
 } from "./meeting-test-context.js";
-// The scripted replies of a test: the wrapped client, the fixture layouts and the request body they hash.
+// The scripted replies of a test: the wrapped client, the fixture layouts and the request body they
+// hash.
 export {
   withScriptedReplies,
   speechReplyLayout,

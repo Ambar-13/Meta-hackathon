@@ -11,7 +11,8 @@ export const MEETING_TURNS_MAX = AGENDA.open + AGENDA.exploreMax + AGENDA.decide
 // The phases a step can be in. Close is not a model turn; it is meeting.ended.
 export type StepPhase = "open" | "explore" | "decide";
 
-// What the agenda reads about a running meeting: the last committed step, the phases of all committed steps in order, the start.
+// What the agenda reads about a running meeting: the last committed step, the phases of all
+// committed steps in order, the start.
 export type AgendaProgress = { lastStepSeq: number; phases: readonly StepPhase[]; startedAt: Date };
 
 // The step to create next, or the end of the meeting.
@@ -24,7 +25,8 @@ export function sideForStep(stepSeq: number): "a" | "b" {
   return stepSeq % 2 === 1 ? "a" : "b";
 }
 
-// Places the step after the last committed one, from the phases so far and the clock at commit time.
+// Places the step after the last committed one, from the phases so far and the clock at commit
+// time.
 export function nextStep(progress: AgendaProgress, now: Date): NextStep {
   const count = (phase: StepPhase): number =>
     progress.phases.filter((done) => done === phase).length;

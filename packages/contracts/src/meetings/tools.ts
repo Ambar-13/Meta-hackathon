@@ -8,7 +8,8 @@ export const TOOL_ROUNDS_MAX = 4;
 export const RECALL_TOP_K = 5;
 // Characters of each recalled turn that the model sees.
 export const RECALL_SNIPPET_CHARS = 600;
-// The tools a persona may call. The meeting runs persona to persona with nobody online, so no tool reaches a person.
+// The tools a persona may call. The meeting runs persona to persona with nobody online, so no tool
+// reaches a person.
 export const ToolName = z.enum(["recall", "concede", "hold"]);
 export type ToolName = z.infer<typeof ToolName>;
 // Arguments of the recall tool: a short query over the speaker's own scrubbed notes.
@@ -35,7 +36,8 @@ export type HoldArgs = z.infer<typeof holdArgs>;
 export const recordedResult = z.object({ recorded: z.literal(true) });
 // The type of recordedResult, read from the schema above.
 export type RecordedResult = z.infer<typeof recordedResult>;
-// One tool as the chat completions request expects it. Parameters come from the strict JSON schema of its arguments.
+// One tool as the chat completions request expects it. Parameters come from the strict JSON schema
+// of its arguments.
 export type ToolDefinition = {
   type: "function";
   function: {

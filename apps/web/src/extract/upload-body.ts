@@ -29,12 +29,14 @@ function checkDecodedSize(decodedBytes: number): void {
   if (decodedBytes > UPLOAD_DECODED_MAX_BYTES) throw tooLarge();
 }
 
-// Refuses a body that is over 8 MiB as sent, whichever encoding it has, the same rule the API applies.
+// Refuses a body that is over 8 MiB as sent, whichever encoding it has, the same rule the API
+// applies.
 function checkEncodedSize(encodedBytes: number): void {
   if (encodedBytes > UPLOAD_COMPRESSED_MAX_BYTES) throw tooLarge();
 }
 
-// Writes the SourceHeader line, then one Turn line per turn, joined by "\n", with no newline at the end.
+// Writes the SourceHeader line, then one Turn line per turn, joined by "\n", with no newline at the
+// end.
 export function buildNdjson(header: SourceHeader, turns: readonly Turn[]): string {
   return [JSON.stringify(header), ...turns.map((turn) => JSON.stringify(turn))].join("\n");
 }

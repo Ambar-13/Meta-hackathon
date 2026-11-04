@@ -25,7 +25,8 @@ afterEach(async () => {
   await fresh.drop();
 });
 
-// One row of the ledger for a person, as a finished replay call; startedAt defaults to the database's now().
+// One row of the ledger for a person, as a finished replay call; startedAt defaults to the
+// database's now().
 async function insertRows(
   personId: string,
   rows: Array<{ estTokens: number; callSite?: string; usd?: number; startedAt?: Date }>,

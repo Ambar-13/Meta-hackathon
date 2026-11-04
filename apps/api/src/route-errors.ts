@@ -10,7 +10,8 @@ const INTERNAL_SENTENCE = "Something went wrong on our side. Try again in a minu
 // An error turned into the status, code and sentence the client receives.
 export type DescribedError = { status: number; code: string; message: string };
 
-// Status codes that Fastify or a plugin raises without a ContractError, each with the code and sentence the client sees (413 is the upload body limit).
+// Status codes that Fastify or a plugin raises without a ContractError, each with the code and
+// sentence the client sees (413 is the upload body limit).
 export const FRAMEWORK_STATUS_ERRORS: Readonly<Record<number, { code: string; message: string }>> =
   {
     400: { code: "payload_invalid", message: PAYLOAD_INVALID_SENTENCE },
@@ -25,7 +26,8 @@ export const FRAMEWORK_STATUS_ERRORS: Readonly<Record<number, { code: string; me
     },
   };
 
-// session_missing, 401. Contracts HTTP now names 401 as unauthorized, so the constant is read from there.
+// session_missing, 401. Contracts HTTP now names 401 as unauthorized, so the constant is read from
+// there.
 export function makeSessionMissingError(): ContractError {
   return new ContractError(
     "session_missing",
@@ -53,7 +55,8 @@ export function makePayloadInvalidError(): ContractError {
   return new ContractError("payload_invalid", PAYLOAD_INVALID_SENTENCE, HTTP.badRequest);
 }
 
-// Reads one named field of a value, or undefined when the value is not an object or has no such field.
+// Reads one named field of a value, or undefined when the value is not an object or has no such
+// field.
 function readField(value: unknown, key: string): unknown {
   if (typeof value !== "object" || value === null || !(key in value)) {
     return undefined;
@@ -73,8 +76,9 @@ function readTextField(value: unknown, key: string): string | undefined {
   return typeof field === "string" ? field : undefined;
 }
 
-// The answer for a status that Fastify or a plugin raised: the limiter's own code and sentence, a framework code, or
-// request_refused for any other 4xx. Null for a status none of these rules cover.
+// The answer for a status that Fastify or a plugin raised: the limiter's own code and sentence, a
+// framework code, or request_refused for any other 4xx. Null for a status none of these rules
+// cover.
 function describeStatus(
   status: number,
   code: string | undefined,
@@ -93,7 +97,8 @@ function describeStatus(
   return null;
 }
 
-// Decides the status for an error that Fastify or a plugin raised, by the rules after ContractError and ZodError.
+// Decides the status for an error that Fastify or a plugin raised, by the rules after ContractError
+// and ZodError.
 function describeFastifyError(error: unknown): DescribedError {
   const status = readNumberField(error, "statusCode");
   const described =
@@ -114,8 +119,8 @@ export function describeError(error: unknown): DescribedError {
   return describeFastifyError(error);
 }
 
-// Reads a JSON body. An empty body counts as no body, because the web app and the golden-path script send
-// Content-Type application/json on bodiless POSTs; broken JSON is payload_invalid.
+// Reads a JSON body. An empty body counts as no body, because the web app and the golden-path
+// script send Content-Type application/json on bodiless POSTs; broken JSON is payload_invalid.
 export function parseJsonBody(request: FastifyRequest, body: string | Buffer): Promise<unknown> {
   const text = typeof body === "string" ? body : body.toString("utf8");
   if (text.trim() === "") {
@@ -128,13 +133,15 @@ export function parseJsonBody(request: FastifyRequest, body: string | Buffer): P
   }
 }
 
-// Replaces Fastify's own JSON parser with parseJsonBody, because Fastify's refuses an empty body with its own error shape.
+// Replaces Fastify's own JSON parser with parseJsonBody, because Fastify's refuses an empty body
+// with its own error shape.
 export function replaceJsonParser(app: FastifyInstance): void {
   app.removeContentTypeParser("application/json");
   app.addContentTypeParser("application/json", { parseAs: "string" }, parseJsonBody);
 }
 
-// Sends ErrorBody for any thrown value, and logs the value at error level when it becomes internal_error (repo rule 3).
+// Sends ErrorBody for any thrown value, and logs the value at error level when it becomes
+// internal_error (repo rule 3).
 export function handleRouteError(
   error: unknown,
   request: FastifyRequest,
@@ -149,7 +156,8 @@ export function handleRouteError(
     .send(ErrorBody.parse({ code: described.code, message: described.message }));
 }
 
-// Answers a path no route claimed with not_found as JSON; the web-pages GET fallback answers GET paths before this runs.
+// Answers a path no route claimed with not_found as JSON; the web-pages GET fallback answers GET
+// paths before this runs.
 export function handleNotFound(request: FastifyRequest, reply: FastifyReply): void {
   const error = makeNotFoundError();
   void reply

@@ -56,7 +56,8 @@ export type PollReply = {
   partial: PartialTurn | null;
   serverNow: string;
 };
-// What one raw event is: readable, from a newer version that needs a refresh, or something to ignore.
+// What one raw event is: readable, from a newer version that needs a refresh, or something to
+// ignore.
 export type EventReading =
   | { kind: "event"; event: MeetingEvent }
   | { kind: "refresh" }
@@ -83,7 +84,8 @@ export function emptyMeetingState(meetingId: string): MeetingFoldState {
   };
 }
 
-// Reads one raw event: a v other than EVENT_VERSION needs a refresh, an unknown or unreadable event is ignored.
+// Reads one raw event: a v other than EVENT_VERSION needs a refresh, an unknown or unreadable event
+// is ignored.
 export function readMeetingEvent(raw: unknown): EventReading {
   if (typeof raw !== "object" || raw === null) return { kind: "ignored" };
   const version: unknown = "v" in raw ? raw.v : undefined;
@@ -93,7 +95,8 @@ export function readMeetingEvent(raw: unknown): EventReading {
   return parsed.success ? { kind: "event", event: parsed.data } : { kind: "ignored" };
 }
 
-// Folds one raw event from the stream: sets needsRefresh for a newer v, changes nothing for an ignored one, else foldEvent.
+// Folds one raw event from the stream: sets needsRefresh for a newer v, changes nothing for an
+// ignored one, else foldEvent.
 export function foldRaw(state: MeetingFoldState, raw: unknown): MeetingFoldState {
   const reading = readMeetingEvent(raw);
   if (reading.kind === "refresh") return { ...state, needsRefresh: true };
@@ -177,7 +180,8 @@ function recallFound(result: Record<string, unknown>): number {
   return parsed.success ? parsed.data.turns.length : 0;
 }
 
-// Folds a committed turn: it replaces the streamed text, and an older partial stays only when it is for a later step.
+// Folds a committed turn: it replaces the streamed text, and an older partial stays only when it is
+// for a later step.
 function applyTurn(
   state: MeetingFoldState,
   event: Extract<CommittedEvent, { type: "turn.committed" }>,
@@ -199,7 +203,8 @@ function applyTurn(
   };
 }
 
-// Folds the remaining events: the lines of concede and hold, the end of a meeting, and the brief and comic results.
+// Folds the remaining events: the lines of concede and hold, the end of a meeting, and the brief
+// and comic results.
 function applyLast(state: MeetingFoldState, event: CommittedEvent): MeetingFoldState {
   switch (event.type) {
     case "concede":
@@ -241,7 +246,8 @@ function committedFrom(raw: unknown): CommittedEvent | null {
   return reading.event;
 }
 
-// Folds a poll reply: its events after lastSeq in seq order, its partial in place of ours, and the resync request cleared.
+// Folds a poll reply: its events after lastSeq in seq order, its partial in place of ours, and the
+// resync request cleared.
 export function foldPollReply(state: MeetingFoldState, reply: PollReply): MeetingFoldState {
   if (Math.trunc(reply.v) !== EVENT_VERSION)
     return { ...state, needsRefresh: true, resyncRequested: false };

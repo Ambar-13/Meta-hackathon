@@ -9,7 +9,8 @@ import {
   type PolledView,
 } from "../../app-shell/index.js";
 
-// How often the quiz screen polls while the persona answers or the judge works (the 3 s card interval).
+// How often the quiz screen polls while the persona answers or the judge works (the 3 s card
+// interval).
 export const QUIZ_POLL_MS = 3_000;
 // Where sending the answers stands.
 export type SubmitState =

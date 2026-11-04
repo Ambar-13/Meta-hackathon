@@ -9,21 +9,24 @@ export const DIRECTORY_MEETINGS_PER_LISTING_PER_DAY = 10;
 export const LISTING_LINE_MAX_CHARS = 140;
 // Listings one directory page shows.
 export const DIRECTORY_PAGE_SIZE = 20;
-// The words next to the directory switch on the card screen. Off by default; turning it on is the consent to be met.
+// The words next to the directory switch on the card screen. Off by default; turning it on is the
+// consent to be met.
 export const DIRECTORY_SWITCH_COPY =
   "List my Meety in Explore. Anyone in Explore can have their Meety meet yours, and your Meety may answer when someone asks for help in Explore, using only the items you mark public. You get every brief and every answer. You can leave at any time.";
-// The words next to the dating switch on the card screen, under the directory switch. Off by default, and on only while listed.
+// The words next to the dating switch on the card screen, under the directory switch. Off by
+// default, and on only while listed.
 export const ROMANCE_SWITCH_COPY =
   "Open to dating questions: people in Explore can ask my Meety how I would get on with them romantically. I get every brief.";
 // The words next to the friends switch on the card screen. Off by default.
 export const FRIENDS_ASK_SWITCH_COPY =
   "Let friends I've met here ask my Meety how I would probably react to something. I get a copy of every answer. I can turn this off at any time.";
 
-// One public item as the directory shows it: its kind, claim and quote, and nothing else of the card or the notes.
+// One public item as the directory shows it: its kind, claim and quote, and nothing else of the
+// card or the notes.
 export const PublicItem = z.object({ kind: ItemKind, claim: z.string(), quote: z.string() });
 export type PublicItem = z.infer<typeof PublicItem>;
-// One listing as anyone in the directory sees it: only listing fields, the sample mark and the face of a sample person, never a person
-// id, a turn or an item that is not public.
+// One listing as anyone in the directory sees it: only listing fields, the sample mark and the face
+// of a sample person, never a person id, a turn or an item that is not public.
 export const DirectoryListing = z.object({
   listingId: Uuid,
   displayName: z.string(),
@@ -34,7 +37,8 @@ export const DirectoryListing = z.object({
   photo: PhotoKey.nullable().optional(),
 });
 export type DirectoryListing = z.infer<typeof DirectoryListing>;
-// What GET /api/directory returns: one page of listings, newest first or best match first when there is a query. The caller's own listing is left out.
+// What GET /api/directory returns: one page of listings, newest first or best match first when
+// there is a query. The caller's own listing is left out.
 export const DirectoryPage = z.object({
   listings: z.array(DirectoryListing),
   page: z.number().int().min(0),
@@ -57,15 +61,16 @@ export const MyListing = z.object({
   createdAt: IsoTime,
 });
 export type MyListing = z.infer<typeof MyListing>;
-// The body of PUT /api/directory/me: join or change the listing, and the dating switch. The card must be the caller's, approved, with at
-// least one public item.
+// The body of PUT /api/directory/me: join or change the listing, and the dating switch. The card
+// must be the caller's, approved, with at least one public item.
 export const ListingUpsert = z.object({
   cardId: Uuid,
   line: z.string().trim().min(1).max(LISTING_LINE_MAX_CHARS),
   openToRomance: z.boolean(),
 });
 export type ListingUpsert = z.infer<typeof ListingUpsert>;
-// One meeting a listed persona took part in, for the listed person's own list (GET /api/directory/me/meetings).
+// One meeting a listed persona took part in, for the listed person's own list (GET
+// /api/directory/me/meetings).
 export const ListedMeeting = z.object({
   meetingId: Uuid,
   otherDisplayName: z.string(),
@@ -77,8 +82,8 @@ export type ListedMeeting = z.infer<typeof ListedMeeting>;
 // What GET /api/directory/me/meetings returns, newest first.
 export const ListedMeetingsView = z.object({ meetings: z.array(ListedMeeting) });
 export type ListedMeetingsView = z.infer<typeof ListedMeetingsView>;
-// The sharing settings of one card (GET and PUT /api/cards/:id/sharing): the friends switch and the public items by position.
-// Only approved, verified items may be public.
+// The sharing settings of one card (GET and PUT /api/cards/:id/sharing): the friends switch and the
+// public items by position. Only approved, verified items may be public.
 export const CardSharing = z.object({
   friendsCanAsk: z.boolean(),
   publicPositions: z.array(z.number().int().min(1)).max(CARD_ITEMS_MAX),

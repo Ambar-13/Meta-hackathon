@@ -2,18 +2,20 @@ import { z } from "zod";
 
 // Environment names and their defaults, shared by every app.
 const base = { LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info") };
-// The variables apps/api reads at boot. PORT defaults to 3000 because Render's PORT handling is unverified.
+// The variables apps/api reads at boot. PORT defaults to 3000 because Render's PORT handling is
+// unverified.
 export const apiEnv = z.object({
   ...base,
   DATABASE_URL_API: z.string().url(),
   APP_ORIGIN: z.string().url(),
   PORT: z.coerce.number().int().default(3000),
   MAX_CONCURRENT_MEETINGS: z.coerce.number().int().default(40),
-  // The code a person gives to sign up, or empty for open sign-up. The deployed site sets one, so a script cannot make accounts
-  // and spend the model budget through them.
+  // The code a person gives to sign up, or empty for open sign-up. The deployed site sets one, so a
+  // script cannot make accounts and spend the model budget through them.
   ACCESS_CODE: z.string().trim().default(""),
-  // The site's Google sign-in client from Google Cloud, or empty to leave Continue with Google off. The secret is set only
-  // in the host's settings, never in the repo. A Google sign-in needs no access code: a script cannot make Google accounts at will.
+  // The site's Google sign-in client from Google Cloud, or empty to leave Continue with Google off.
+  // The secret is set only in the host's settings, never in the repo. A Google sign-in needs no
+  // access code: a script cannot make Google accounts at will.
   GOOGLE_CLIENT_ID: z.string().trim().default(""),
   GOOGLE_CLIENT_SECRET: z.string().trim().default(""),
 });
@@ -28,7 +30,8 @@ export const workerEnv = z.object({
   TOTAL_USD_CAP: z.coerce.number().default(130),
   MAX_CONCURRENT_MEETINGS: z.coerce.number().int().default(40),
 });
-// The variable the migrate command reads. Migrations run as the table owner, never as a runtime role.
+// The variable the migrate command reads. Migrations run as the table owner, never as a runtime
+// role.
 export const migrateEnv = z.object({ DATABASE_URL_MIGRATE: z.string().url() });
 // The three ways model calls run: live, record to fixtures, or replay recorded fixtures.
 export const LlmMode = z.enum(["live", "record", "replay"]);

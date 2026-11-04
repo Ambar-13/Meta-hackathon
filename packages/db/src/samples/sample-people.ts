@@ -1,11 +1,12 @@
-// The sample people of Explore: six made-up people, first names only, so Explore has people, posts and profiles to try
-// before real people list themselves. Each has notes in their own words, a card whose items quote those notes word for word, a line
-// for Explore and a post or two. pnpm db:seed-samples writes them (seed-samples.ts); the app marks each one Sample, and each accepts
-// a friend request at once (migration 0009). None of them is a real person.
+// The sample people of Explore: six made-up people, first names only, so Explore has people, posts
+// and profiles to try before real people list themselves. Each has notes in their own words, a card
+// whose items quote those notes word for word, a line for Explore and a post or two. pnpm
+// db:seed-samples writes them (seed-samples.ts); the app marks each one Sample, and each accepts a
+// friend request at once (migration 0009). None of them is a real person.
 import type { ItemKind } from "@meet-first/contracts";
 
-// One item of a sample card: its kind and claim, the note it quotes by index, the quote, which must be part of that note word for
-// word, and whether Explore shows it.
+// One item of a sample card: its kind and claim, the note it quotes by index, the quote, which must
+// be part of that note word for word, and whether Explore shows it.
 export type SampleItem = {
   kind: ItemKind;
   claim: string;
@@ -13,10 +14,12 @@ export type SampleItem = {
   quote: string;
   isPublic: boolean;
 };
-// A photo of a sample post: its key, which the web build maps to the bundled image (apps/web/src/look/sample-photos.ts), and the words
-// a screen reader reads for it. The photos are free Unsplash photos (docs/sample-photos.md).
+// A photo of a sample post: its key, which the web build maps to the bundled image
+// (apps/web/src/look/sample-photos.ts), and the words a screen reader reads for it. The photos are
+// free Unsplash photos (docs/sample-photos.md).
 export type SamplePhoto = { key: string; alt: string };
-// One sample post, dated this many hours before the seed runs, so the feed reads as a few days of posts, with its photo when it has one.
+// One sample post, dated this many hours before the seed runs, so the feed reads as a few days of
+// posts, with its photo when it has one.
 export type SamplePost = { text: string; hoursAgo: number; photo?: SamplePhoto };
 // One sample person, with the key of the face the app shows for them.
 export type SamplePerson = {

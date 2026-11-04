@@ -14,13 +14,15 @@ import { SERVER_NOW } from "../../fixtures.js";
 import { FOREVER_MS, type GalleryStub } from "../fetch-stub.js";
 import type { GalleryView } from "../gallery-views.js";
 
-// One scripted step on a gallery view: press the last button with these words, or type text into the first text box.
+// One scripted step on a gallery view: press the last button with these words, or type text into
+// the first text box.
 export type GalleryStep = { click: string } | { type: string };
 
 // How often the script looks for the next step's control, in ms.
 const STEP_POLL_MS = 120;
 
-// Types into a React text box: sets the value through the native setter, then sends the input event React listens to.
+// Types into a React text box: sets the value through the native setter, then sends the input event
+// React listens to.
 function typeInto(field: HTMLTextAreaElement | HTMLInputElement, text: string): void {
   const proto =
     field instanceof HTMLTextAreaElement
@@ -46,7 +48,8 @@ function runStep(step: GalleryStep): boolean {
   return true;
 }
 
-// Renders a screen, then plays the steps in order as their controls appear, so a view can show a state a person reaches by acting.
+// Renders a screen, then plays the steps in order as their controls appear, so a view can show a
+// state a person reaches by acting.
 export const ScriptedSteps = (props: {
   steps: readonly GalleryStep[];
   children: ReactElement;
@@ -213,8 +216,9 @@ function friendsView(
   };
 }
 
-// The friends page: requests to answer, the list with each friend's switch, the open ask box and its errors, the answers your persona
-// gave, the asks you sent, and the loading, empty and error states.
+// The friends page: requests to answer, the list with each friend's switch, the open ask box and
+// its errors, the answers your persona gave, the asks you sent, and the loading, empty and error
+// states.
 export const views: readonly GalleryView[] = [
   friendsView(
     { name: "friends-requests", title: "Friends, requests to answer, friends and requests sent" },

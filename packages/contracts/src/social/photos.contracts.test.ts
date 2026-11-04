@@ -4,7 +4,8 @@ import { PhotoKey } from "../primitives.js";
 import { Post } from "./posts.js";
 import { ProfileView } from "./profile.js";
 
-// One listing, one friend and one post as the api sent them before photos, so each still reads without them.
+// One listing, one friend and one post as the api sent them before photos, so each still reads
+// without them.
 const LISTING = {
   listingId: "00000000-0000-4000-8000-000000000611",
   displayName: "Maya",

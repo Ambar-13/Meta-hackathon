@@ -1,8 +1,10 @@
-// Turns a briefs row into the Brief the browser renders. The three jsonb columns are parsed with BriefPoint, so a broken row fails here and not on a phone.
+// Turns a briefs row into the Brief the browser renders. The three jsonb columns are parsed with
+// BriefPoint, so a broken row fails here and not on a phone.
 import { Brief, BriefPoint, type QuestionKind } from "@meet-first/contracts";
 import { z } from "zod";
 
-// The columns of one briefs row the view reads; the numeric column comes back from Postgres as text.
+// The columns of one briefs row the view reads; the numeric column comes back from Postgres as
+// text.
 export type BriefRow = {
   agree: unknown;
   clash: unknown;
@@ -14,8 +16,8 @@ export type BriefRow = {
 // The three sections of a brief: exactly three lines each, every one a parsed BriefPoint.
 const Section = z.array(BriefPoint).length(3);
 
-// Turns a briefs row into the Brief contract, with the meeting's question kind so the screen picks the
-// section labels. A stored null support flag stays null.
+// Turns a briefs row into the Brief contract, with the meeting's question kind so the screen picks
+// the section labels. A stored null support flag stays null.
 export function toBriefView(row: BriefRow, questionKind: QuestionKind): Brief {
   return Brief.parse({
     agree: Section.parse(row.agree),

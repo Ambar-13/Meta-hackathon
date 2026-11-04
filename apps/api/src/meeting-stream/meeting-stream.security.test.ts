@@ -14,7 +14,8 @@ import { meetingStreamRoutes } from "./index.js";
 import { makeStreamReads } from "./replay-and-poll.js";
 import { createSubscriber, STREAM_TIMING } from "./subscriber.js";
 
-// The session re-check interval these tests use, shorter than the 15 s real one, so a signed-out stream ends quickly.
+// The session re-check interval these tests use, shorter than the 15 s real one, so a signed-out
+// stream ends quickly.
 const SESSION_CHECK_MS = 200;
 
 let t: Awaited<ReturnType<typeof buildTestApp>>;

@@ -218,7 +218,8 @@ describe("the card routes", () => {
     const held = new Promise<void>((resolve) => {
       release = resolve;
     });
-    // FOR NO KEY UPDATE: the card insert's foreign-key check does not wait on it, so only the route's own row lock can make the request wait.
+    // FOR NO KEY UPDATE: the card insert's foreign-key check does not wait on it, so only the
+    // route's own row lock can make the request wait.
     const holder = asPerson(t.db, owner.personId, async (trx) => {
       await trx
         .selectFrom("sources")
@@ -480,7 +481,8 @@ describe("the card routes", () => {
   });
 });
 
-// Seeds the two-turn source and a card with one verified item and one flagged item, as the quote tests read them.
+// Seeds the two-turn source and a card with one verified item and one flagged item, as the quote
+// tests read them.
 async function seedQuoteCard(): Promise<{ owner: Person; stranger: Person; cardId: string }> {
   const owner = await createTestPerson(t.db, "Quote Owner");
   const stranger = await createTestPerson(t.db, "Quote Stranger");

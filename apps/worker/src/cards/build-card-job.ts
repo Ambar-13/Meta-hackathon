@@ -42,7 +42,8 @@ type TurnRow = {
   norm_text: string;
   sensitive_categories: string[];
 };
-// What the build reads before any model call: the card's source and turns, or "stop" when there is nothing to do.
+// What the build reads before any model call: the card's source and turns, or "stop" when there is
+// nothing to do.
 type CardInput = { source: SourceRow | undefined; turns: TurnRow[] } | "stop";
 // The numbers and items one finished card build writes.
 type CardResult = {
@@ -61,7 +62,8 @@ type BuildPlan = {
   forbidden: string[];
 };
 
-// Builds one persona card from a frozen source: whole turns in, items with quotes out, each quote checked inside its named turn, one regeneration, thin under 6.
+// Builds one persona card from a frozen source: whole turns in, items with quotes out, each quote
+// checked inside its named turn, one regeneration, thin under 6.
 export const buildCardTask: JobTask<"build_card"> = async (payload, context) => {
   const input = await readCardInput(context.db, payload);
   if (input === "stop") return;
@@ -98,7 +100,8 @@ function toSampledTurn(turn: TurnRow): SampledTurn {
   };
 }
 
-// The turns a card may use: no sensitive tag, or every tag opted in, the same rule as recall_corpus.
+// The turns a card may use: no sensitive tag, or every tag opted in, the same rule as
+// recall_corpus.
 export function eligibleTurns<T extends { sensitive_categories: readonly string[] }>(
   turns: readonly T[],
   optIn: readonly string[],
@@ -110,7 +113,8 @@ export function eligibleTurns<T extends { sensitive_categories: readonly string[
   );
 }
 
-// Reads the card, its source and its turns in one transaction; a card that is not building is left alone and makes no call.
+// Reads the card, its source and its turns in one transaction; a card that is not building is left
+// alone and makes no call.
 async function readCardInput(
   db: Kysely<Database>,
   payload: JobPayload<"build_card">,
@@ -143,8 +147,9 @@ async function readCardInput(
   });
 }
 
-// Runs the card calls for one built sample and writes the card; a first reply that fails its schema fails the card, an error of the
-// first call reaches the caller, and a regeneration that fails leaves the first reply's verified items.
+// Runs the card calls for one built sample and writes the card; a first reply that fails its schema
+// fails the card, an error of the first call reaches the caller, and a regeneration that fails
+// leaves the first reply's verified items.
 async function buildAndWrite(
   context: JobContext,
   payload: JobPayload<"build_card">,
@@ -202,8 +207,9 @@ async function buildAndWrite(
   });
 }
 
-// The one regeneration: when a check failed and the card call allows a retry, the failed items go back once; a second failure is dropped.
-// A regeneration that throws is logged and gives nothing, so the card keeps the first reply's verified items instead of failing.
+// The one regeneration: when a check failed and the card call allows a retry, the failed items go
+// back once; a second failure is dropped. A regeneration that throws is logged and gives nothing,
+// so the card keeps the first reply's verified items instead of failing.
 async function regenerate(
   context: JobContext,
   payload: JobPayload<"build_card">,
@@ -229,7 +235,8 @@ async function regenerate(
   }
 }
 
-// The chars per token of a source from its first card call: request characters over prompt tokens, 3 decimals, at most 999.999; null when the reply reported no prompt tokens.
+// The chars per token of a source from its first card call: request characters over prompt tokens,
+// 3 decimals, at most 999.999; null when the reply reported no prompt tokens.
 export function charsPerTokenFrom(requestCharCount: number, promptTokens: number): number | null {
   if (promptTokens <= 0) return null;
   return Math.min(999.999, Math.round((requestCharCount / promptTokens) * 1000) / 1000);
@@ -261,7 +268,8 @@ async function failCard(
   );
 }
 
-// Writes the card and its items in one transaction, and the calibrated chars per token of the source.
+// Writes the card and its items in one transaction, and the calibrated chars per token of the
+// source.
 async function writeCard(
   context: JobContext,
   payload: JobPayload<"build_card">,
@@ -318,7 +326,8 @@ async function writeCard(
   });
 }
 
-// Handles an error of the build: a full window is rethrown for the wrapper, a cap or any other error fails the card.
+// Handles an error of the build: a full window is rethrown for the wrapper, a cap or any other
+// error fails the card.
 async function handleBuildError(
   context: JobContext,
   payload: JobPayload<"build_card">,

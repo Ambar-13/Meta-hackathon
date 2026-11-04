@@ -67,7 +67,8 @@ const HELP_COPY: AboutMeAnswer = {
   claims: [UNVERIFIED],
   createdAt: SERVER_NOW,
 };
-// The listing of a friend and a requester who are in Explore, and the pending requests of the T7 test.
+// The listing of a friend and a requester who are in Explore, and the pending requests of the T7
+// test.
 const LISTED = "00000000-0000-4000-8000-000000000511";
 const REQUEST_IDS = {
   ola: "00000000-0000-4000-8000-000000000531",

@@ -27,7 +27,8 @@ function reads(isListed: boolean): GalleryStub[] {
   ];
 }
 
-// Create: a new post before anything is chosen, a caption typed by someone not in Explore, and a new story.
+// Create: a new post before anything is chosen, a caption typed by someone not in Explore, and a
+// new story.
 export const views: readonly GalleryView[] = [
   {
     name: "create-post",

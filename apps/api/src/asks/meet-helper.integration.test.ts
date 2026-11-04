@@ -24,8 +24,8 @@ afterAll(async () => {
   await t.close();
 });
 
-// One request: method, URL, the session token of the person making it (none for a request without a session), a JSON payload or a
-// raw string payload, and whether to leave out the Origin header.
+// One request: method, URL, the session token of the person making it (none for a request without a
+// session), a JSON payload or a raw string payload, and whether to leave out the Origin header.
 type Call = {
   method: "GET" | "POST";
   url: string;
@@ -40,7 +40,8 @@ function payloadText(payload: unknown): string | undefined {
   return typeof payload === "string" ? payload : JSON.stringify(payload);
 }
 
-// Makes one request through the app's injector and returns the status, the headers and the parsed body.
+// Makes one request through the app's injector and returns the status, the headers and the parsed
+// body.
 async function send(
   call: Call,
 ): Promise<{ statusCode: number; headers: Record<string, unknown>; body: unknown }> {
@@ -64,7 +65,8 @@ async function send(
 // One seeded person: the session token a request sends, the approved card, and the display name.
 type Person = { personId: string; sessionToken: string; cardId: string; name: string };
 
-// Creates a person with a frozen source of the three SEED_TURNS_A turns and an approved card of 6 items quoting them.
+// Creates a person with a frozen source of the three SEED_TURNS_A turns and an approved card of 6
+// items quoting them.
 async function seedPerson(name: string): Promise<Person> {
   const person = await createTestPerson(t.db, name);
   const source = await createFrozenSource(t.db, person.personId, [...SEED_TURNS_A]);
@@ -77,8 +79,8 @@ async function seedPerson(name: string): Promise<Person> {
   };
 }
 
-// Lists the person in the directory with their first two items public, as the sharing part and the directory switch would,
-// and returns the listing id.
+// Lists the person in the directory with their first two items public, as the sharing part and the
+// directory switch would, and returns the listing id.
 async function listInDirectory(person: Person): Promise<string> {
   const row = await withPerson(t.db, person.personId, async (trx) => {
     await trx
@@ -104,7 +106,8 @@ const NOT_MEETABLE = {
   message: "This person can no longer be met from these results.",
 };
 
-// Writes a help ask of the asker in the given state with one answered row for the helper, and returns both ids.
+// Writes a help ask of the asker in the given state with one answered row for the helper, and
+// returns both ids.
 async function seedHelpAnswer(input: {
   asker: Person;
   helper: Person;
@@ -185,8 +188,8 @@ async function meet(input: {
   });
 }
 
-// The person's meeting memberships made since midnight UTC today, read as that person; with isPublicOnly, only those where the
-// person was the listed side.
+// The person's meeting memberships made since midnight UTC today, read as that person; with
+// isPublicOnly, only those where the person was the listed side.
 async function countMemberships(input: {
   personId: string;
   isPublicOnly: boolean;

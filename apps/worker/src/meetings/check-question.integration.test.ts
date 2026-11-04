@@ -76,7 +76,8 @@ function questionCheck(verdict: unknown): ReplyScript {
   return { speech: [], receipts: [], questionCheck: [verdict] };
 }
 
-// Makes the test meeting free text that has not been checked yet, with the kind a new free-text meeting has.
+// Makes the test meeting free text that has not been checked yet, with the kind a new free-text
+// meeting has.
 async function freeText(meetingId: string): Promise<void> {
   await withMeeting(workerDb, meetingId, (trx) =>
     trx
@@ -124,7 +125,8 @@ async function eventsOf(meetingId: string): Promise<CommittedEvent[]> {
   return rows.map(rowToEvent);
 }
 
-// The two members of a meeting in side order, as named values; a meeting without two members is a broken seed.
+// The two members of a meeting in side order, as named values; a meeting without two members is a
+// broken seed.
 async function sidesOf(meetingId: string): Promise<{ a: Member; b: Member }> {
   const [a, b] = await membersOf(meetingId);
   if (a === undefined || b === undefined) throw new Error("The meeting has no two members.");
@@ -343,7 +345,8 @@ it("D31-T2: a judged quiz's misses enter that side's prefix and only that side's
   const { a, b } = await sidesOf(m.meetingId);
   const missText = QUIZ_BANK[(ids[0] ?? 1) - 1]?.text ?? "";
   expect(a.frozen_prefix).toContain("<do_not_guess>\n- " + missText + "\n</do_not_guess>");
-  // The moderator text names the tag in its own rules, so the check is that side b holds none of side a's misses.
+  // The moderator text names the tag in its own rules, so the check is that side b holds none of
+  // side a's misses.
   expect(b.frozen_prefix).not.toContain(missText);
 });
 

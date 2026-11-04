@@ -1,4 +1,5 @@
-// Unit tests for the grounded brief rate: it recomputes the quote check and never trusts the stored flag alone.
+// Unit tests for the grounded brief rate: it recomputes the quote check and never trusts the stored
+// flag alone.
 import { describe, expect, it } from "vitest";
 import { normQuote } from "@meet-first/receipts";
 import type { BriefLineRow, EvalRows, TurnTextRow } from "../collect-rows.js";

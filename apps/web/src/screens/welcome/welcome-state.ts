@@ -56,15 +56,16 @@ export type ClaimState =
   | { kind: "done" }
   | { kind: "failed"; error: ApiError };
 
-// The invalid message for a rejected create body: the name sentence when the name is the cause, the access code sentence when the
-// code is, else the groups sentence.
+// The invalid message for a rejected create body: the name sentence when the name is the cause, the
+// access code sentence when the code is, else the groups sentence.
 function createMessage(issuePaths: Array<string | number | undefined>): string {
   if (issuePaths.includes("displayName")) return NAME_MESSAGE;
   return issuePaths.includes("accessCode") ? ACCESS_MESSAGE : GROUPS_MESSAGE;
 }
 
-// Creates a person and keeps the allowlist in memory; the recovery code lives only in this state. An access code, when
-// one was typed or came in the link, goes with the request and is kept for the invite links this person shares.
+// Creates a person and keeps the allowlist in memory; the recovery code lives only in this state.
+// An access code, when one was typed or came in the link, goes with the request and is kept for the
+// invite links this person shares.
 export function useCreatePerson(): {
   state: CreateState;
   create: (displayName: string, groups: string, accessCode: string) => Promise<void>;
@@ -125,7 +126,8 @@ export function useRecover(): { state: RecoverState; recover: (code: string) => 
   return { state, recover };
 }
 
-// Reads the token from the fragment once, removes it from the address bar, and claims it when asked.
+// Reads the token from the fragment once, removes it from the address bar, and claims it when
+// asked.
 export function useClaim(): { state: ClaimState; claim: () => Promise<void> } {
   const location = useLocation();
   const navigate = useNavigate();
@@ -154,8 +156,8 @@ export function useClaim(): { state: ClaimState; claim: () => Promise<void> } {
   return { state, claim };
 }
 
-// Whether this site offers Continue with Google (GET /api/auth/options): false while it is read and when it cannot be read, so the start
-// page never shows a button that leads nowhere.
+// Whether this site offers Continue with Google (GET /api/auth/options): false while it is read and
+// when it cannot be read, so the start page never shows a button that leads nowhere.
 export function useGoogleSignIn(): boolean {
   const [isOn, setIsOn] = useState(false);
   useEffect(() => {
@@ -173,7 +175,8 @@ export function useGoogleSignIn(): boolean {
   return isOn;
 }
 
-// Why a Google sign-in came back unfinished, from the start page's address, or null when it did not come back from one.
+// Why a Google sign-in came back unfinished, from the start page's address, or null when it did not
+// come back from one.
 export function googleResultIn(search: string): GoogleSignInResult | null {
   const parsed = GoogleSignInResult.safeParse(new URLSearchParams(search).get(GOOGLE_RESULT_QUERY));
   return parsed.success ? parsed.data : null;

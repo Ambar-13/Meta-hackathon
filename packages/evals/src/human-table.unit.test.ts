@@ -1,4 +1,5 @@
-// Unit tests for the human metrics table: it aggregates the sides of each response and skips the example.
+// Unit tests for the human metrics table: it aggregates the sides of each response and skips the
+// example.
 import { mkdtempSync, writeFileSync, copyFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -24,7 +25,8 @@ function side(answers: { card: number; unsupported: string[]; worth: number; use
   };
 }
 
-// One response file with a pair id, the known-collaborator flag, both sides and any friction points.
+// One response file with a pair id, the known-collaborator flag, both sides and any friction
+// points.
 function response(input: {
   pairId: string;
   knownCollaborators: boolean;

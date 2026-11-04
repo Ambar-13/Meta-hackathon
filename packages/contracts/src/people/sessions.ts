@@ -27,7 +27,8 @@ export type RecoverResponse = z.infer<typeof RecoverResponse>;
 // What POST /api/sessions/transfer returns: a link and when it stops working.
 export const TransferResponse = z.object({ url: z.string().url(), expiresAt: IsoTime });
 export type TransferResponse = z.infer<typeof TransferResponse>;
-// The body of POST /api/sessions/claim. The token is 16 random bytes as 32 lower-case hex characters.
+// The body of POST /api/sessions/claim. The token is 16 random bytes as 32 lower-case hex
+// characters.
 export const TransferClaim = z.object({ token: z.string().regex(/^[0-9a-f]{32}$/) });
 export type TransferClaim = z.infer<typeof TransferClaim>;
 // What a successful claim returns; the new session cookie is set on the same response.

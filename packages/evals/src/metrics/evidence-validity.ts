@@ -1,8 +1,10 @@
-// Evidence validity: the share of committed claims whose quote the check accepted. Flagged claims stay in the count.
+// Evidence validity: the share of committed claims whose quote the check accepted. Flagged claims
+// stay in the count.
 import type { EvalRows } from "../collect-rows.js";
 import type { MetricResult } from "./index.js";
 
-// Reads the claims rows of the driven meetings and returns the valid share, or no value when there are no claims.
+// Reads the claims rows of the driven meetings and returns the valid share, or no value when there
+// are no claims.
 export function measureEvidenceValidity(rows: EvalRows): MetricResult {
   const total = rows.claims.length;
   const valid = rows.claims.filter((claim) => claim.evidenceValid).length;

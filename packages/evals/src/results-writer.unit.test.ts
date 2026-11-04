@@ -1,4 +1,5 @@
-// Unit tests for the results writer: the exit code, the results file, the README block and the table.
+// Unit tests for the results writer: the exit code, the results file, the README block and the
+// table.
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

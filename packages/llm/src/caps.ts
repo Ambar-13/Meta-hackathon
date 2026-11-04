@@ -35,7 +35,8 @@ export function copyFor(callSite: CallSite): string {
 
 // The two cap settings of the worker env.
 type CapSettings = Pick<z.infer<typeof workerEnv>, "DAILY_USD_CAP" | "TOTAL_USD_CAP">;
-// Throws CapReached when today's spend reaches DAILY_USD_CAP or all-time spend reaches TOTAL_USD_CAP. The total is checked first.
+// Throws CapReached when today's spend reaches DAILY_USD_CAP or all-time spend reaches
+// TOTAL_USD_CAP. The total is checked first.
 export async function assertUnderCaps(
   db: Kysely<Database>,
   env: CapSettings,

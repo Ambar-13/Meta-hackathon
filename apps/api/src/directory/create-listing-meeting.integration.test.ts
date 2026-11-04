@@ -12,14 +12,16 @@ import { enqueuedJobs, TEST_APP_ORIGIN } from "../testing/app-factory.js";
 import { sessionHeader } from "../testing/cookie-jar.js";
 import { registerDirectoryRoutes } from "./index.js";
 
-// The three turns every seeded person uploads. createApprovedCard quotes them in turn, so items 1 and 4 quote the first, 2 and 5 the second, 3 and 6 the third.
+// The three turns every seeded person uploads. createApprovedCard quotes them in turn, so items 1
+// and 4 quote the first, 2 and 5 the second, 3 and 6 the third.
 const TURNS = [
   "I plan the week on Sunday night and keep to it.",
   "I answer messages only after lunch.",
   "Honest feedback matters more to me than comfort.",
 ];
 
-// A seeded person: a session, a frozen source of TURNS, and an approved card whose items are all approved and verified.
+// A seeded person: a session, a frozen source of TURNS, and an approved card whose items are all
+// approved and verified.
 type Member = {
   personId: string;
   sessionToken: string;
@@ -38,7 +40,8 @@ afterAll(async () => {
   await t.close();
 });
 
-// Makes one person with a frozen source of TURNS and an approved card of this many items (6 unless given).
+// Makes one person with a frozen source of TURNS and an approved card of this many items (6 unless
+// given).
 async function seedMember(displayName: string, items = 6): Promise<Member> {
   const person = await createTestPerson(t.db, displayName);
   const source = await createFrozenSource(t.db, person.personId, [...TURNS]);
@@ -52,7 +55,8 @@ async function seedMember(displayName: string, items = 6): Promise<Member> {
   };
 }
 
-// Sends one request through the test app as this person, or with no session when null, always with the app's Origin, and with a JSON body when one is given.
+// Sends one request through the test app as this person, or with no session when null, always with
+// the app's Origin, and with a JSON body when one is given.
 function send(
   member: { sessionToken: string } | null,
   call: { method: "GET" | "PUT" | "POST" | "DELETE"; url: string; payload?: unknown },
@@ -73,7 +77,8 @@ function pathOf(route: { path: string }, id: string): string {
   return route.path.replace(":id", id);
 }
 
-// Marks these positions of a card public, as its owner (the person's first card unless another card id is given).
+// Marks these positions of a card public, as its owner (the person's first card unless another card
+// id is given).
 async function markPublic(
   member: Member,
   positions: number[],
@@ -89,7 +94,8 @@ async function markPublic(
   );
 }
 
-// Lists the person in the directory with their first card and this line, as that person; returns the listing id.
+// Lists the person in the directory with their first card and this line, as that person; returns
+// the listing id.
 async function listMember(member: Member, line: string, isOpenToRomance = false): Promise<string> {
   const row = await asPerson(t.db, member.personId, (trx) =>
     trx
@@ -113,7 +119,8 @@ function curated(id: number): { questionId: number; text: string; kind: string }
   return { questionId: row.id, text: row.text, kind: row.kind };
 }
 
-// Makes a directory meeting through directory_meeting_create as the visitor, past the route and its two caps, with a per-listing cap of 100; returns the meeting id.
+// Makes a directory meeting through directory_meeting_create as the visitor, past the route and its
+// two caps, with a per-listing cap of 100; returns the meeting id.
 async function directMeeting(
   visitor: Member,
   listingId: string,
@@ -131,7 +138,8 @@ async function directMeeting(
   return id;
 }
 
-// The two listed people the tests of this file meet: Lia, not open to dating questions, and Romy, open to them.
+// The two listed people the tests of this file meet: Lia, not open to dating questions, and Romy,
+// open to them.
 let lia: Member;
 let liaListing: string;
 let romy: Member;

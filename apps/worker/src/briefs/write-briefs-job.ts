@@ -1,4 +1,5 @@
-// Writes both humans' briefs after a meeting ends, checks each line's quote with a second model call, then tells both browsers with one brief.ready event.
+// Writes both humans' briefs after a meeting ends, checks each line's quote with a second model
+// call, then tells both browsers with one brief.ready event.
 import type { Kysely } from "kysely";
 import {
   type QuestionKind,
@@ -32,14 +33,16 @@ import {
 } from "./brief-lines.js";
 import { applyJudgeOutput, buildJudgeInput, computeSupportRate } from "./support-judge.js";
 
-// The brief call. Effort medium. The client applies these from CALL_SITE_CONFIG; the values match it.
+// The brief call. Effort medium. The client applies these from CALL_SITE_CONFIG; the values match
+// it.
 export const BRIEF_CALL = {
   effort: "medium",
   maxTokens: 4000,
   timeoutMs: 120_000,
   retries: 1,
 } as const;
-// The support judge. Minimal effort, temperature 0, 30 s, one retry. The client applies these from CALL_SITE_CONFIG.
+// The support judge. Minimal effort, temperature 0, 30 s, one retry. The client applies these from
+// CALL_SITE_CONFIG.
 export const SUPPORT_JUDGE_CALL = {
   effort: "minimal",
   temperature: 0,
@@ -52,7 +55,8 @@ export const SUPPORT_JUDGE_CALL = {
 const SIDES = ["a", "b"] as const;
 // The one side letter the job works with.
 type Side = (typeof SIDES)[number];
-// The meeting as the brief job reads it once: who the members are, the notes, the transcript, the items and what is written already.
+// The meeting as the brief job reads it once: who the members are, the notes, the transcript, the
+// items and what is written already.
 export type BriefSnapshot = {
   meetingId: string;
   questionText: string;
@@ -68,7 +72,8 @@ export type BriefSnapshot = {
 export type SnapshotRead =
   | { kind: "ready"; snapshot: BriefSnapshot }
   | { kind: "skipped"; reason: "meeting_gone" | "meeting_not_ended" };
-// One finished brief for one side, ready to store: its sections, the check's outcome and its raw record.
+// One finished brief for one side, ready to store: its sections, the check's outcome and its raw
+// record.
 type SideBrief = {
   side: Side;
   personId: string;
@@ -95,7 +100,8 @@ type MemberRow = {
   public_only: boolean;
 };
 
-// Writes the briefs of an ended meeting that are not written yet, then the brief.ready event once both exist.
+// Writes the briefs of an ended meeting that are not written yet, then the brief.ready event once
+// both exist.
 export const writeBriefsTask: JobTask<"write_briefs"> = async (payload, context) => {
   const read = await readBriefSnapshot(context.db, payload.meetingId);
   if (read.kind === "skipped") {
@@ -113,7 +119,8 @@ export const writeBriefsTask: JobTask<"write_briefs"> = async (payload, context)
   await writeReadyEventIfMissing(context.db, snapshot.meetingId, context.now());
 };
 
-// Reads the meeting, its members, notes, transcript, approved items and written briefs in one meeting context.
+// Reads the meeting, its members, notes, transcript, approved items and written briefs in one
+// meeting context.
 export async function readBriefSnapshot(
   db: Kysely<Database>,
   meetingId: string,
@@ -232,7 +239,8 @@ async function readSourceTurns(
   });
 }
 
-// The approved items of both cards, with the side each belongs to. A listed persona met through the directory brings only its public items.
+// The approved items of both cards, with the side each belongs to. A listed persona met through the
+// directory brings only its public items.
 async function readApprovedItems(
   trx: DatabaseTransaction,
   members: MemberRow[],
@@ -347,7 +355,8 @@ async function writeSideBrief(
   };
 }
 
-// Runs the support judge for one brief, with its one retry. A failed judge after its retry leaves every line unchecked (fail closed); a full window or a cap is passed up.
+// Runs the support judge for one brief, with its one retry. A failed judge after its retry leaves
+// every line unchecked (fail closed); a full window or a cap is passed up.
 async function checkSupport(
   context: JobContext,
   check: { meetingId: string; side: Side; sections: BriefSections },
@@ -388,7 +397,8 @@ async function checkSupport(
   return failedCheck(sections, code);
 }
 
-// The outcome of a support check that did not run: every line stays unchecked, the rate is null, and the code is kept.
+// The outcome of a support check that did not run: every line stays unchecked, the rate is null,
+// and the code is kept.
 function failedCheck(sections: BriefSections, code: string): JudgeOutcome {
   const unchecked = {
     agree: sections.agree.map((point) => ({ ...point, supported: null })),
@@ -398,7 +408,8 @@ function failedCheck(sections: BriefSections, code: string): JudgeOutcome {
   return { sections: unchecked, reliable: false, rate: null, raw: { error: code } };
 }
 
-// Stores one side's brief. A second attempt that races the first loses quietly on the unique key (one brief per recipient).
+// Stores one side's brief. A second attempt that races the first loses quietly on the unique key
+// (one brief per recipient).
 async function insertSideBrief(
   db: Kysely<Database>,
   meetingId: string,
@@ -425,7 +436,8 @@ async function insertSideBrief(
   );
 }
 
-// Writes brief.ready once, after both briefs exist. The meeting row is locked first, so two writers take turns.
+// Writes brief.ready once, after both briefs exist. The meeting row is locked first, so two writers
+// take turns.
 async function writeReadyEventIfMissing(
   db: Kysely<Database>,
   meetingId: string,

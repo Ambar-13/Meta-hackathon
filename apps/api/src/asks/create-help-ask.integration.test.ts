@@ -27,8 +27,8 @@ afterAll(async () => {
   await t.close();
 });
 
-// One request: method, URL, the session token of the person making it (none for a request without a session), a JSON payload or a
-// raw string payload, and whether to leave out the Origin header.
+// One request: method, URL, the session token of the person making it (none for a request without a
+// session), a JSON payload or a raw string payload, and whether to leave out the Origin header.
 type Call = {
   method: "GET" | "POST";
   url: string;
@@ -43,7 +43,8 @@ function payloadText(payload: unknown): string | undefined {
   return typeof payload === "string" ? payload : JSON.stringify(payload);
 }
 
-// Makes one request through the app's injector and returns the status, the headers and the parsed body.
+// Makes one request through the app's injector and returns the status, the headers and the parsed
+// body.
 async function send(
   call: Call,
 ): Promise<{ statusCode: number; headers: Record<string, unknown>; body: unknown }> {

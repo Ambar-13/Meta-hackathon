@@ -5,18 +5,22 @@ import {
   TURN_TEXT_MAX_CHARS,
 } from "@meet-first/contracts";
 
-// The role the scrub-names prompt gives a person under 18; such a name stays replaced, with no keep choice in the names review.
+// The role the scrub-names prompt gives a person under 18; such a name stays replaced, with no keep
+// choice in the names review.
 export const MINOR_ROLE = "child";
 // Scripts written without spaces between words: a name in them is matched as a plain substring.
 export const NO_SPACE_SCRIPT =
   /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Thai}]/u;
-// The pattern text of a protected token: a redaction placeholder, a code placeholder, or a role token such as [person:colleague 2].
+// The pattern text of a protected token: a redaction placeholder, a code placeholder, or a role
+// token such as [person:colleague 2].
 export const PROTECTED_TOKEN_SOURCE = String.raw`\[(?:redacted:[a-z_]+:[0-9a-f]{8}|code: [^\]\n]{0,80}|person:[^[\]\n]{1,60})\]`;
-// Every protected token in a text. Use it only with matchAll, replace or split, because its g flag keeps state between test or exec calls.
+// Every protected token in a text. Use it only with matchAll, replace or split, because its g flag
+// keeps state between test or exec calls.
 export const PROTECTED_TOKEN = new RegExp(PROTECTED_TOKEN_SOURCE, "g");
 // One name the names pass found, with its role and the role token it has in this source.
 export type NameToken = { text: string; role: string; token: string; isMinor: boolean };
-// The planned change to one turn: new text, sensitive categories, and how many times each token of the list was written into it.
+// The planned change to one turn: new text, sensitive categories, and how many times each token of
+// the list was written into it.
 export type TurnRewrite = {
   turnId: string;
   text: string;
@@ -25,10 +29,12 @@ export type TurnRewrite = {
   isCategoriesChanged: boolean;
   occurrences: number[];
 };
-// One piece of a text while tokens are placed: plain text that may be matched, or a protected token that may not.
+// One piece of a text while tokens are placed: plain text that may be matched, or a protected token
+// that may not.
 type Segment = { text: string; isProtected: boolean };
 
-// A role from the model as the token's role: lower case, single spaces, no bracket or line break, at most 40 characters, "person" when nothing is left.
+// A role from the model as the token's role: lower case, single spaces, no bracket or line break,
+// at most 40 characters, "person" when nothing is left.
 export function roleText(role: string): string {
   const cleaned = role
     .replace(/[[\]\n]/g, " ")
@@ -40,7 +46,8 @@ export function roleText(role: string): string {
   return cleaned === "" ? "person" : cleaned;
 }
 
-// One token per distinct name, first seen first; a role already taken in this source becomes "<role> 2", then "<role> 3" and on (ingest spec 4.3.7).
+// One token per distinct name, first seen first; a role already taken in this source becomes
+// "<role> 2", then "<role> 3" and on (ingest spec 4.3.7).
 export function assignTokens(names: ReadonlyArray<{ text: string; role: string }>): NameToken[] {
   const seen = new Set<string>();
   const used = new Set<string>();
@@ -62,7 +69,8 @@ export function assignTokens(names: ReadonlyArray<{ text: string; role: string }
   return tokens;
 }
 
-// True when a name is the person's own: the display name, a word of it, or an affiliation, ignoring case.
+// True when a name is the person's own: the display name, a word of it, or an affiliation, ignoring
+// case.
 export function isAllowlisted(
   name: string,
   person: { displayName: string; affiliations: readonly string[] },
@@ -74,7 +82,8 @@ export function isAllowlisted(
   return person.affiliations.some((affiliation) => affiliation.trim().toLowerCase() === key);
 }
 
-// The pattern that finds one name in plain text: whole words in spaced scripts, any position in scripts without spaces.
+// The pattern that finds one name in plain text: whole words in spaced scripts, any position in
+// scripts without spaces.
 function namePattern(name: string): RegExp {
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   if (NO_SPACE_SCRIPT.test(name)) return new RegExp(escaped, "giu");
@@ -110,7 +119,8 @@ function replaceInSegments(segments: readonly Segment[], token: NameToken): Segm
   return next;
 }
 
-// Rewrites every occurrence of every name in one turn's text into its role token; protected tokens are never touched.
+// Rewrites every occurrence of every name in one turn's text into its role token; protected tokens
+// are never touched.
 export function applyRoleTokens(text: string, tokens: readonly NameToken[]): string {
   const split = text.split(new RegExp(`(${PROTECTED_TOKEN_SOURCE})`));
   let segments: Segment[] = split.map((part, index) => ({
@@ -143,7 +153,8 @@ export function countToken(text: string, token: string): number {
   return text.split(token).length - 1;
 }
 
-// The sensitive categories of one turn after the names pass: existing tags, every SENSITIVE_CATEGORIES placeholder in the text, and minor when a child's name was replaced.
+// The sensitive categories of one turn after the names pass: existing tags, every
+// SENSITIVE_CATEGORIES placeholder in the text, and minor when a child's name was replaced.
 export function sensitiveCategoriesFor(
   text: string,
   existing: readonly string[],
@@ -159,7 +170,8 @@ export function sensitiveCategoriesFor(
   return [...categories].sort();
 }
 
-// The rewrite of one turn for one set of tokens: new text, how often each token was written, and the categories it now carries.
+// The rewrite of one turn for one set of tokens: new text, how often each token was written, and
+// the categories it now carries.
 function planOneTurn(
   turn: { id: string; text: string; sensitive_categories: readonly string[] },
   tokens: readonly NameToken[],

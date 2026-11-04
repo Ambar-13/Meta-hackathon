@@ -31,7 +31,8 @@ const BLOCK_OPENERS: ReadonlyMap<string, RegExp> = new Map([
   ["sequenceDiagram", /^(alt|opt|loop|par|critical|break|rect|box)\b/],
 ]);
 
-// In these diagram types, the text after the first colon is free text, such as a message or a label.
+// In these diagram types, the text after the first colon is free text, such as a message or a
+// label.
 const FREE_TEXT_AFTER_COLON: ReadonlySet<string> = new Set([
   "sequenceDiagram",
   "stateDiagram",
@@ -159,7 +160,8 @@ const FLOWCHART_WORDS: ReadonlySet<string> = new Set([
   "LR",
 ]);
 
-// Removes quoted text and every bracketed shape, innermost first, so a label never reads as a box name.
+// Removes quoted text and every bracketed shape, innermost first, so a label never reads as a box
+// name.
 function withoutShapes(text: string): string {
   let result = text.replace(/"[^"]*"/g, "");
   for (let previous = ""; previous !== result; ) {
@@ -169,7 +171,8 @@ function withoutShapes(text: string): string {
   return result;
 }
 
-// The node names of one flowchart line: the ids on either side of each arrow, with edge labels and class marks removed.
+// The node names of one flowchart line: the ids on either side of each arrow, with edge labels and
+// class marks removed.
 function flowchartNames(text: string): string[] {
   const bare = withoutShapes(text)
     .replace(/\|[^|]*\|/g, "")
@@ -178,7 +181,8 @@ function flowchartNames(text: string): string[] {
   return (bare.match(/[A-Za-z_]\w*/g) ?? []).filter((word) => !FLOWCHART_WORDS.has(word));
 }
 
-// The state names of one state diagram line: the states on either side of each arrow, or the one a state line declares.
+// The state names of one state diagram line: the states on either side of each arrow, or the one a
+// state line declares.
 function stateNames(text: string): string[] {
   const head = (text.split(":")[0] ?? "").replace(/\[\*\]/g, "");
   const alias = /^state\s+"[^"]*"\s+as\s+(\w+)/.exec(head);
@@ -186,7 +190,8 @@ function stateNames(text: string): string[] {
   return (withoutShapes(head).match(/[A-Za-z_]\w*/g) ?? []).filter((word) => word !== "state");
 }
 
-// The participant names of one sequence diagram line: a declared participant, or the sender and the receiver of a message.
+// The participant names of one sequence diagram line: a declared participant, or the sender and the
+// receiver of a message.
 function sequenceNames(text: string): string[] {
   const declared = /^(?:participant|actor)\s+(\w+)/.exec(text);
   if (declared?.[1] !== undefined) return [declared[1]];
@@ -197,7 +202,8 @@ function sequenceNames(text: string): string[] {
     .filter((name): name is string => name !== undefined);
 }
 
-// The entity names of one data diagram line: the entity a block opens, or the two entities of a relationship.
+// The entity names of one data diagram line: the entity a block opens, or the two entities of a
+// relationship.
 function entityNames(text: string): string[] {
   const words = (text.split(":")[0] ?? "").trim().split(/\s+/);
   if (text.endsWith("{")) return words.slice(0, 1);
@@ -206,7 +212,8 @@ function entityNames(text: string): string[] {
   return words.length >= 3 && first !== undefined && last !== undefined ? [first, last] : [];
 }
 
-// The box names of one line, by the kind of diagram it is in. Kinds without a rule here count no boxes.
+// The box names of one line, by the kind of diagram it is in. Kinds without a rule here count no
+// boxes.
 function lineNames(text: string, kind: string): string[] {
   if (kind === "flowchart") return flowchartNames(text);
   if (kind === "stateDiagram") return stateNames(text);

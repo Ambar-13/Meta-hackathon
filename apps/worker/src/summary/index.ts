@@ -1,4 +1,5 @@
-// The summary folder: the check_summary job, which replaces names in a person's pasted summary and finds each point's quotes.
+// The summary folder: the check_summary job, which replaces names in a person's pasted summary and
+// finds each point's quotes.
 import type { TaskList } from "../job-context.js";
 import { checkSummaryTask } from "./check-summary-job.js";
 

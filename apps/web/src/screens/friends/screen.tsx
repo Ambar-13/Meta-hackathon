@@ -1,8 +1,10 @@
-// What exists: friends are the people a person joined a pair with, by an invite link or an accepted friend request, and each
-// friend has a switch that lets friends ask their persona how they would probably react. The problem: the page must show the
-// requests to answer first, offer the ask only where the friend said yes, and show the person every answer their own persona gave.
+// What exists: friends are the people a person joined a pair with, by an invite link or an accepted
+// friend request, and each friend has a switch that lets friends ask their persona how they would
+// probably react. The problem: the page must show the requests to answer first, offer the ask only
+// where the friend said yes, and show the person every answer their own persona gave.
 //The step: incoming requests with Accept and Decline, one row per friend with the ask box and Meet, the requests you sent, then
-// the copies from GET /api/asks. What it does not do: ask how a stranger would react; that is not built.
+// the copies from GET /api/asks. What it does not do: ask how a stranger would react; that is not
+// built.
 import "./friends.css";
 import { useState, type FormEvent, type ReactElement } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -51,7 +53,8 @@ const SENT_MODE_LINES: Record<AskSummary["mode"], string> = {
 // The most characters the ask box takes, the upper bound of AskCreate.
 const ASK_MAX_CHARACTERS = 300;
 
-// The line for a friend who has not turned on friend asks, in the same words as the API's friend_asks_off sentence.
+// The line for a friend who has not turned on friend asks, in the same words as the API's
+// friend_asks_off sentence.
 function asksOffLine(friend: Friend): string {
   return `${friend.displayName} has not turned on friend asks.`;
 }
@@ -109,8 +112,8 @@ const ReactAskForm = (props: {
   );
 };
 
-// What one friend's row offers: Ask their agent (or the line that their friend asks are off) and Meet, then the open ask box with
-// its errors under the friend.
+// What one friend's row offers: Ask their agent (or the line that their friend asks are off) and
+// Meet, then the open ask box with its errors under the friend.
 const FriendAction = (props: { friend: Friend; model: FriendsScreenModel }): ReactElement => {
   const { friend, model } = props;
   const isChosen = model.chosenPairId === friend.pairId;
@@ -158,7 +161,8 @@ const FriendAction = (props: { friend: Friend; model: FriendsScreenModel }): Rea
   );
 };
 
-// The friends part: loading, an error, nobody yet, or one row per friend in the order the server gives (most recently joined first).
+// The friends part: loading, an error, nobody yet, or one row per friend in the order the server
+// gives (most recently joined first).
 const FriendsBody = (props: { model: FriendsScreenModel }): ReactElement => {
   const { friends } = props.model;
   if (friends.value === null)
@@ -192,7 +196,8 @@ const FriendsBody = (props: { model: FriendsScreenModel }): ReactElement => {
   );
 };
 
-// The incoming requests, first on the page and only when there are some: each with Accept (the main action) and Decline.
+// The incoming requests, first on the page and only when there are some: each with Accept (the main
+// action) and Decline.
 const RequestsSection = (props: {
   model: FriendsScreenModel;
   incoming: FriendRequestView[];
@@ -251,7 +256,8 @@ const SentRequestsSection = (props: { outgoing: FriendRequestView[] }): ReactEle
   );
 };
 
-// One copy as a short talk: the asker's blue bubble with what they asked, then your persona's coral bubble with its answer and quotes.
+// One copy as a short talk: the asker's blue bubble with what they asked, then your persona's coral
+// bubble with its answer and quotes.
 const CopyItem = (props: { copy: AboutMeAnswer }): ReactElement => {
   const { copy } = props;
   return (
@@ -278,7 +284,8 @@ const CopyItem = (props: { copy: AboutMeAnswer }): ReactElement => {
   );
 };
 
-// The copies part: every answer the caller's persona gave, newest first, with who asked, what, the answer and its claims.
+// The copies part: every answer the caller's persona gave, newest first, with who asked, what, the
+// answer and its claims.
 const CopiesBody = (props: { model: FriendsScreenModel }): ReactElement => {
   const { asks } = props.model;
   if (asks.value === null)
@@ -302,8 +309,9 @@ const CopiesBody = (props: { model: FriendsScreenModel }): ReactElement => {
   );
 };
 
-// The asks the caller sent, newest first, under their own heading: each one's kind, its question and where it is, linking to its
-// answers page. Shown once the asks have loaded; the copies part above already shows the loading line and any error.
+// The asks the caller sent, newest first, under their own heading: each one's kind, its question
+// and where it is, linking to its answers page. Shown once the asks have loaded; the copies part
+// above already shows the loading line and any error.
 const SentBody = (props: { model: FriendsScreenModel }): ReactElement | null => {
   const { asks } = props.model;
   if (asks.value === null) return null;
@@ -343,8 +351,9 @@ const SentBody = (props: { model: FriendsScreenModel }): ReactElement | null => 
   );
 };
 
-// The /friends page: requests to answer, your friends with Ask their agent and Meet, the requests you sent, then the answers your
-// persona gave and the asks you sent. On a laptop the people sit beside the answers.
+// The /friends page: requests to answer, your friends with Ask their agent and Meet, the requests
+// you sent, then the answers your persona gave and the asks you sent. On a laptop the people sit
+// beside the answers.
 export const FriendsScreen = (): ReactElement => {
   const navigate = useNavigate();
   const model = useFriendsScreen((path) => {

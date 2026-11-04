@@ -1,6 +1,7 @@
-// The check_summary job: replaces the names of other people in a person's pasted summary, reads its points, and looks each point's
-// quotes up in the person's own names-checked messages. One names call per run, since a summary fits one chunk. A summary saved again
-// while the job runs is left to the job that save queued.
+// The check_summary job: replaces the names of other people in a person's pasted summary, reads its
+// points, and looks each point's quotes up in the person's own names-checked messages. One names
+// call per run, since a summary fits one chunk. A summary saved again while the job runs is left to
+// the job that save queued.
 import type { Kysely } from "kysely";
 import { NamesPassOutput, SUMMARY_MAX_CHARS, type SummaryPointView } from "@meet-first/contracts";
 import { withPerson, type Database } from "@meet-first/db";
@@ -48,8 +49,9 @@ async function readSummaryInput(
   });
 }
 
-// The summary as the names prompt expects its messages: each block of fields on its own, after its label [t:N], with a blank line
-// between blocks. The names come back as text, so the labels never reach the stored summary.
+// The summary as the names prompt expects its messages: each block of fields on its own, after its
+// label [t:N], with a blank line between blocks. The names come back as text, so the labels never
+// reach the stored summary.
 function labelledBlocks(text: string): string {
   const blocks = text
     .split(/\n\s*\n/u)
@@ -58,8 +60,9 @@ function labelledBlocks(text: string): string {
   return blocks.map((block, index) => `[t:${String(index)}] ${block}`).join("\n\n");
 }
 
-// The names in the summary, from one names call. A full token window is thrown on, so the job runs again in 5 s, as every job does; a
-// daily cap runs the job again after midnight UTC; any other failure, after the client's own retry, ends as failed.
+// The names in the summary, from one names call. A full token window is thrown on, so the job runs
+// again in 5 s, as every job does; a daily cap runs the job again after midnight UTC; any other
+// failure, after the client's own retry, ends as failed.
 async function findSummaryNames(
   context: JobContext,
   personId: string,
@@ -93,8 +96,9 @@ async function findSummaryNames(
   }
 }
 
-// The rewritten summary cut back to SUMMARY_MAX_CHARS, since role tokens are longer than the names they replace: at the last blank line
-// between blocks when there is one, else before any token the limit would split, and never inside a character.
+// The rewritten summary cut back to SUMMARY_MAX_CHARS, since role tokens are longer than the names
+// they replace: at the last blank line between blocks when there is one, else before any token the
+// limit would split, and never inside a character.
 export function fitSummaryLength(text: string): string {
   if (text.length <= SUMMARY_MAX_CHARS) return text;
   const blank = text.slice(0, SUMMARY_MAX_CHARS).lastIndexOf("\n\n");
@@ -109,7 +113,8 @@ export function fitSummaryLength(text: string): string {
   return text.slice(0, end).trimEnd();
 }
 
-// The checked points: each point with the first of its quotes found in the person's own messages, or null.
+// The checked points: each point with the first of its quotes found in the person's own messages,
+// or null.
 async function checkedPoints(
   db: Kysely<Database>,
   personId: string,
@@ -127,7 +132,8 @@ async function checkedPoints(
   });
 }
 
-// Stores the result unless the summary was saved again meanwhile: ready with the new text and points, or failed with none.
+// Stores the result unless the summary was saved again meanwhile: ready with the new text and
+// points, or failed with none.
 async function storeResult(
   db: Kysely<Database>,
   personId: string,

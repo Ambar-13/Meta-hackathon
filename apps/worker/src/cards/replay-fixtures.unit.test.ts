@@ -23,7 +23,8 @@ import { requestChars } from "@meet-first/llm";
 // The reply a fixture holds: the response object and the usage it reports.
 type FixtureReply = { response: Record<string, unknown>; usage: RecordedCall["usage"] };
 
-// Makes the miss files of one request, as the fixture authoring loop reads them, and returns the message that names the write-fixture command to run.
+// Makes the miss files of one request, as the fixture authoring loop reads them, and returns the
+// message that names the write-fixture command to run.
 function missing(callSite: CallSite, request: LlmRequest, reply: FixtureReply): string {
   const hash = requestHash(request.body);
   const folder = join(tmpdir(), "meet-first-fixture-requests", callSite);
@@ -38,7 +39,8 @@ function missing(callSite: CallSite, request: LlmRequest, reply: FixtureReply): 
   return `fixture missing: ${recordedReplyPath(callSite, hash)}; run pnpm --filter @meet-first/llm write-fixture ${callSite} ${requestPath} ${responsePath}`;
 }
 
-// Checks one fixture file: it exists, it holds this request and this reply, and it is hand-written. Returns true when every check passed.
+// Checks one fixture file: it exists, it holds this request and this reply, and it is hand-written.
+// Returns true when every check passed.
 function checkFixture(callSite: CallSite, request: LlmRequest, reply: FixtureReply): boolean {
   const hash = requestHash(request.body);
   if (!existsSync(recordedReplyPath(callSite, hash)))

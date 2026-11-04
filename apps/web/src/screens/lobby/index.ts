@@ -2,5 +2,6 @@
 export { LobbyScreen } from "./screen.js";
 // The question picker, which the directory's Meet button reuses with leaveOutKinds.
 export { QuestionPicker } from "./lobby-parts.js";
-// The meeting body a pick and a card make, the pick's type, and the meeting state words, which the directory page reuses.
+// The meeting body a pick and a card make, the pick's type, and the meeting state words, which the
+// directory page reuses.
 export { meetingCreateBody, MEETING_STATE_LABELS, type QuestionPick } from "./lobby-state.js";

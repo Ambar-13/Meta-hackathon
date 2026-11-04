@@ -25,7 +25,8 @@ function frameFor(event: Record<string, unknown>, withId = true): string {
   return `${idLine}event: ${String(event.type)}\ndata: ${JSON.stringify(event)}\n\n`;
 }
 
-// A response whose body holds the given text at once and then stays open until the reader cancels it.
+// A response whose body holds the given text at once and then stays open until the reader cancels
+// it.
 function openStream(text: string): Response {
   const encoder = new TextEncoder();
   const body = new ReadableStream<Uint8Array>({
@@ -50,7 +51,8 @@ describe("event stream reader", () => {
       const last = Number(new Headers(init.headers).get("Last-Event-ID") ?? 0);
       sentLastIds.push(String(last));
       calls += 1;
-      // The first connection carries seq 1 to 3 only; the reopened one carries everything after the last seq it was given.
+      // The first connection carries seq 1 to 3 only; the reopened one carries everything after the
+      // last seq it was given.
       const ceiling = calls === 1 ? 3 : 5;
       const frames = all
         .filter((event) => Number(event.seq) > last && Number(event.seq) <= ceiling)

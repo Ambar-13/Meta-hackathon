@@ -1,6 +1,7 @@
 import type { RawTurn } from "./chatgpt-shapes.js";
 
-// How deep the walk goes below the root, so a pathological file cannot exhaust the stack (picked here).
+// How deep the walk goes below the root, so a pathological file cannot exhaust the stack (picked
+// here).
 const WALK_DEPTH_MAX = 40;
 // The roles that count as the uploader's own words.
 const OWN_ROLES: ReadonlyArray<string> = ["user", "human"];
@@ -24,7 +25,8 @@ function joinStrings(parts: unknown[]): string {
   return parts.filter((part): part is string => typeof part === "string").join("\n");
 }
 
-// The text of a kept object, taken from the first field that applies: text, content, parts, content.parts, content.text.
+// The text of a kept object, taken from the first field that applies: text, content, parts,
+// content.parts, content.text.
 function textOf(node: Record<string, unknown>): string | null {
   if (typeof node.text === "string") return node.text;
   if (typeof node.content === "string") return node.content;
@@ -35,7 +37,8 @@ function textOf(node: Record<string, unknown>): string | null {
   return null;
 }
 
-// The create time of a kept object: create_time when it is a number, else created_at when it is a date, else null.
+// The create time of a kept object: create_time when it is a number, else created_at when it is a
+// date, else null.
 function timeOf(node: Record<string, unknown>): number | null {
   if (typeof node.create_time === "number") return node.create_time;
   if (typeof node.created_at !== "string") return null;
@@ -43,7 +46,8 @@ function timeOf(node: Record<string, unknown>): number | null {
   return Number.isNaN(milliseconds) ? null : milliseconds / 1000;
 }
 
-// Visits one value: a kept object becomes a turn (or is dropped when its text is empty) and is not looked into; any other value has its children visited.
+// Visits one value: a kept object becomes a turn (or is dropped when its text is empty) and is not
+// looked into; any other value has its children visited.
 function visit(value: unknown, depth: number, found: RawTurn[]): void {
   if (depth > WALK_DEPTH_MAX || !isNode(value)) return;
   if (isOwnRole(value)) {
@@ -55,8 +59,9 @@ function visit(value: unknown, depth: number, found: RawTurn[]): void {
   for (const child of Object.values(value)) visit(child, depth + 1, found);
 }
 
-// Walks any JSON value depth-first (depth cap 40) and keeps every object that has `author.role` or `role` or `sender` equal to
-// "user" or "human" and a string in `text`, `content`, or string elements of `parts`. Order is document order.
+// Walks any JSON value depth-first (depth cap 40) and keeps every object that has `author.role` or
+// `role` or `sender` equal to "user" or "human" and a string in `text`, `content`, or string
+// elements of `parts`. Order is document order.
 export function walkGeneric(root: unknown): RawTurn[] {
   const found: RawTurn[] = [];
   visit(root, 0, found);

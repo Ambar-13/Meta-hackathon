@@ -22,11 +22,13 @@ type TransferState =
   | { kind: "created"; url: string }
   | { kind: "failed"; error: ApiError };
 
-// The delete section copy and the notice shown after the request is accepted, byte for byte as the settings spec gives them.
+// The delete section copy and the notice shown after the request is accepted, byte for byte as the
+// settings spec gives them.
 const SECTION_BODY = "Removes everything we hold about you from our database.";
 const DELETED_NOTICE =
   "Your account is being deleted. Everything is removed within a few minutes. You can close this tab.";
-// The sentence for a session the server no longer accepts, and the app's general sentence for any other failure.
+// The sentence for a session the server no longer accepts, and the app's general sentence for any
+// other failure.
 const SESSION_ENDED = "Your session has ended. Open the app again to continue.";
 const GENERAL_FAILURE = "The server could not finish this. Try again in a minute.";
 // The line while the one-time link is being made.
@@ -38,7 +40,8 @@ function failureText(flow: DeleteFlowState): string | null {
   return flow.code === SESSION_ENDED_CODE ? SESSION_ENDED : GENERAL_FAILURE;
 }
 
-// The delete section: the trigger, the dialog while it is open, and the notice once the server accepts the request.
+// The delete section: the trigger, the dialog while it is open, and the notice once the server
+// accepts the request.
 const DeleteAccountSection = (): ReactElement => {
   const flow = useDeleteAccount();
   const triggerRef = useRef<HTMLButtonElement | null>(null);

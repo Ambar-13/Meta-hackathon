@@ -17,12 +17,15 @@ import {
 import { readListingOrNull } from "../card/index.js";
 import { meetingCreateBody, type QuestionPick } from "../lobby/index.js";
 
-// The longest search the directory takes: the maximum of the query in DirectoryQuery in contracts, which names no constant.
+// The longest search the directory takes: the maximum of the query in DirectoryQuery in contracts,
+// which names no constant.
 export const SEARCH_MAX_CHARS = 200;
-// The lobby's sentence for free text outside 5 to 300 characters, in the same words, so both pickers say the same (lobby-state.ts).
+// The lobby's sentence for free text outside 5 to 300 characters, in the same words, so both
+// pickers say the same (lobby-state.ts).
 export const FREE_TEXT_REFUSAL = "Write a question of 5 to 300 characters.";
 
-// The listings shown so far: the search they answer, the next page to ask for, whether more exist, and how the last load went.
+// The listings shown so far: the search they answer, the next page to ask for, whether more exist,
+// and how the last load went.
 export type BrowseState = {
   query: string;
   listings: DirectoryListing[];
@@ -32,18 +35,21 @@ export type BrowseState = {
   isLoading: boolean;
   error: ApiError | null;
 };
-// The listings with their two actions: a new search from page 0, and the next page of the same search.
+// The listings with their two actions: a new search from page 0, and the next page of the same
+// search.
 export type BrowseHook = BrowseState & { search: (query: string) => void; loadMore: () => void };
-// Where the Meet flow stands: whose picker is open, whether a create is out, and the sentence of the last refusal.
+// Where the Meet flow stands: whose picker is open, whether a create is out, and the sentence of
+// the last refusal.
 export type MeetState = { openListingId: string | null; isSending: boolean; error: string | null };
-// The Meet flow with its two actions: open or close one listing's picker, and create the meeting from a pick.
+// The Meet flow with its two actions: open or close one listing's picker, and create the meeting
+// from a pick.
 export type MeetControls = {
   state: MeetState;
   toggle: (listingId: string) => void;
   create: (listingId: string, pick: QuestionPick) => Promise<void>;
 };
-// The Your listing part's data: loading, failed, or ready with the listing (null when not listed), the card it was on when the page
-// opened, and the meetings the persona was in.
+// The Your listing part's data: loading, failed, or ready with the listing (null when not listed),
+// the card it was on when the page opened, and the meetings the persona was in.
 export type YourListingLoad =
   | { kind: "loading" }
   | { kind: "failed"; error: ApiError }
@@ -59,7 +65,8 @@ export type LeaveState =
   | { kind: "sending" }
   | { kind: "left" }
   | { kind: "failed"; error: ApiError };
-// The Your listing part's data with the Leave action, and replaceListing for a listing the person has joined with or saved.
+// The Your listing part's data with the Leave action, and replaceListing for a listing the person
+// has joined with or saved.
 export type YourListingHook = {
   load: YourListingLoad;
   leaveState: LeaveState;
@@ -78,7 +85,8 @@ const FIRST_BROWSE: BrowseState = {
   error: null,
 };
 
-// The query values of one directory request: the page always, and the words only when the trimmed search is not empty.
+// The query values of one directory request: the page always, and the words only when the trimmed
+// search is not empty.
 export function directoryQueryFor(query: string, page: number): Record<string, string | number> {
   const words = query.trim();
   return words === "" ? { page } : { query: words, page };
@@ -98,7 +106,8 @@ export function withPage(state: BrowseState, reply: DirectoryPage): BrowseState 
   };
 }
 
-// The card a Meet button speaks from: the card in the address, else the card this tab approved, else the card of the person's listing.
+// The card a Meet button speaks from: the card in the address, else the card this tab approved,
+// else the card of the person's listing.
 export function cardForMeeting(input: {
   search: string;
   approvedCardId: string | null;
@@ -107,12 +116,14 @@ export function cardForMeeting(input: {
   return readCardQuery(input.search) ?? input.approvedCardId ?? input.listedCardId;
 }
 
-// The question kinds the Meet picker leaves out: romance, unless the listing is open to dating questions.
+// The question kinds the Meet picker leaves out: romance, unless the listing is open to dating
+// questions.
 export function leaveOutKindsFor(listing: DirectoryListing): readonly QuestionKind[] {
   return listing.openToRomance ? [] : ["romance"];
 }
 
-// The directory listings with search and More. A reply to an older request is dropped, so a new search never mixes with an old page.
+// The directory listings with search and More. A reply to an older request is dropped, so a new
+// search never mixes with an old page.
 export function useDirectoryBrowse(): BrowseHook {
   const [state, setState] = useState<BrowseState>(FIRST_BROWSE);
   const latestTicket = useRef(0);
@@ -145,7 +156,8 @@ export function useDirectoryBrowse(): BrowseHook {
   };
 }
 
-// The Meet flow of the directory page: one picker open at a time, and a created meeting opens its page.
+// The Meet flow of the directory page: one picker open at a time, and a created meeting opens its
+// page.
 export function useListingMeeting(options: {
   cardId: string | null;
   go: (path: string) => void;
@@ -188,7 +200,8 @@ export function useListingMeeting(options: {
   return { state, toggle, create };
 }
 
-// The person's own listing, the card it was on when the page opened, the meetings their persona was in, and Leave.
+// The person's own listing, the card it was on when the page opened, the meetings their persona was
+// in, and Leave.
 export function useYourListing(): YourListingHook {
   const [load, setLoad] = useState<YourListingLoad>({ kind: "loading" });
   const [leaveState, setLeaveState] = useState<LeaveState>({ kind: "idle" });

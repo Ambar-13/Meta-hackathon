@@ -19,8 +19,8 @@ const PUBLIC_COPY = {
   whatIs: "What is Meety?",
 } as const;
 
-// The public share page: the two name tags over the sky, the question as the heading, then the snapshot, then the report link.
-// Visitors need no session.
+// The public share page: the two name tags over the sky, the question as the heading, then the
+// snapshot, then the report link. Visitors need no session.
 export const PublicSharePage = (): ReactElement => {
   const slug = useParams()["slug"] ?? "";
   const state = usePublicSnapshot(slug);

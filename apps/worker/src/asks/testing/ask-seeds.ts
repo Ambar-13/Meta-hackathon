@@ -1,5 +1,5 @@
-// The people, listings, pairs, asks and quiz rows the ask tests seed, and the reads their checks use. Every write runs as the row's
-// owner, as the app's routes would.
+// The people, listings, pairs, asks and quiz rows the ask tests seed, and the reads their checks
+// use. Every write runs as the row's owner, as the app's routes would.
 import { randomBytes } from "node:crypto";
 import { sql, type Kysely, type Selectable } from "kysely";
 import {
@@ -17,7 +17,8 @@ import {
   sha256Text,
 } from "@meet-first/db/testing";
 
-// One seeded person: their ids, display name, approved card (3 items quoting turns 0, 1 and 2) and turn ids in turn order.
+// One seeded person: their ids, display name, approved card (3 items quoting turns 0, 1 and 2) and
+// turn ids in turn order.
 export type AskPerson = {
   personId: string;
   displayName: string;
@@ -25,8 +26,9 @@ export type AskPerson = {
   turnIds: string[];
 };
 
-// The turns of the test people. Each is long enough to quote, and no line shares 20 characters with a prompt.
-// Omar's turns are Cyrillic and Rosa's, Tom's and Iris's are Greek, so no English ask matches them.
+// The turns of the test people. Each is long enough to quote, and no line shares 20 characters with
+// a prompt. Omar's turns are Cyrillic and Rosa's, Tom's and Iris's are Greek, so no English ask
+// matches them.
 export const ASK_TURNS = {
   ana: [
     "I write my own training loops for small language models every weekend.",
@@ -141,7 +143,8 @@ export async function unapproveItem(
   );
 }
 
-// Lists the person in the directory with this line and dating switch, off unless isOpenToRomance is true; returns the listing id.
+// Lists the person in the directory with this line and dating switch, off unless isOpenToRomance is
+// true; returns the listing id.
 export async function listInDirectory(
   db: Kysely<Database>,
   person: AskPerson,
@@ -195,7 +198,8 @@ export async function allowFriendAsks(db: Kysely<Database>, person: AskPerson): 
   );
 }
 
-// Joins two people by an invite pair, as the invite link does: the creator makes the pair, the joiner joins it with pairs_join. Returns the pair id.
+// Joins two people by an invite pair, as the invite link does: the creator makes the pair, the
+// joiner joins it with pairs_join. Returns the pair id.
 export async function joinInvitePair(
   db: Kysely<Database>,
   creator: Pick<AskPerson, "personId">,
@@ -271,8 +275,9 @@ export async function insertSelfAsk(
   return row.id;
 }
 
-// Seeds a judged, reliable quiz on the person's card whose first sampled question was missed, as the meeting test D31-T2 does, and returns
-// that question's text, the one do-not-guess topic. It runs on the worker database, which writes quizzes.
+// Seeds a judged, reliable quiz on the person's card whose first sampled question was missed, as
+// the meeting test D31-T2 does, and returns that question's text, the one do-not-guess topic. It
+// runs on the worker database, which writes quizzes.
 export async function seedJudgedQuiz(
   workerDb: Kysely<Database>,
   person: AskPerson,
@@ -340,7 +345,8 @@ export async function readAnswerRows(
   );
 }
 
-// Stores a checked summary for the person, as the check_summary job leaves it, with friend asks on or off.
+// Stores a checked summary for the person, as the check_summary job leaves it, with friend asks on
+// or off.
 export async function seedReadySummary(
   db: Kysely<Database>,
   person: Pick<AskPerson, "personId">,

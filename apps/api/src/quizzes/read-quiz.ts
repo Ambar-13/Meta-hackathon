@@ -15,7 +15,8 @@ import { requirePerson } from "../sessions/index.js";
 // The :id of GET /api/quizzes/:id: a uuid, or the quiz cannot exist.
 const QuizRouteParams = z.object({ id: Uuid });
 
-// One item as the read query returns it: the position, the bank question and both answers with the judge's verdict.
+// One item as the read query returns it: the position, the bank question and both answers with the
+// judge's verdict.
 type ItemRow = {
   position: number;
   question_id: number;
@@ -25,7 +26,8 @@ type ItemRow = {
   agree: boolean | null;
 };
 
-// Shapes one item for the screen. The persona answer is left out until the human answer exists, so nobody can peek.
+// Shapes one item for the screen. The persona answer is left out until the human answer exists, so
+// nobody can peek.
 export function toQuizItemView(row: ItemRow): QuizItemView {
   const answers =
     row.human_answer === null || row.persona_answer === null
@@ -40,7 +42,8 @@ export function toQuizItemView(row: ItemRow): QuizItemView {
   };
 }
 
-// The copy for the whole quiz: "matched n of 10" once judged, an empty string before that; the screen owns the waiting copy.
+// The copy for the whole quiz: "matched n of 10" once judged, an empty string before that; the
+// screen owns the waiting copy.
 export function quizViewCopy(quiz: {
   state: string;
   matched: number | null;

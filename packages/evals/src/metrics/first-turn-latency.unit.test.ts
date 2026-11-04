@@ -1,4 +1,5 @@
-// Unit tests for first-turn latency: nearest-rank percentiles over the meetings that have both times.
+// Unit tests for first-turn latency: nearest-rank percentiles over the meetings that have both
+// times.
 import { describe, expect, it } from "vitest";
 import type { EvalRows, MeetingRow } from "../collect-rows.js";
 import { measureFirstTurnLatency, percentile } from "./first-turn-latency.js";

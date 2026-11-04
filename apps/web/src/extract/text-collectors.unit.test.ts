@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import codexText from "../../../../packages/parsers/fixtures/codex-session.jsonl?raw";
 import { collectorFor, wantedLines, type TextCollector } from "./text-collectors.js";
 
-// Pushes the bytes of a text into a collector in slices that end at the given offsets, then returns what the collector gives back.
+// Pushes the bytes of a text into a collector in slices that end at the given offsets, then returns
+// what the collector gives back.
 function collectInSlices(collector: TextCollector, text: string, cuts: number[]): string {
   const bytes = new TextEncoder().encode(text);
   let start = 0;

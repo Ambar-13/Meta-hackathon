@@ -19,7 +19,8 @@ function isInviteExpired(pair: PairView): boolean {
   return pair.joiner === undefined && Date.parse(pair.serverNow) >= Date.parse(pair.expiresAt);
 }
 
-// The two names as tags: by meeting side when a meeting view gives sides (a coral, b blue), else the creator in coral and the joiner in blue.
+// The two names as tags: by meeting side when a meeting view gives sides (a coral, b blue), else
+// the creator in coral and the joiner in blue.
 function tagNames(pair: PairView, meeting: MeetingView | null): { a: string; b: string | null } {
   if (meeting !== null) {
     const sideA = meeting.members.find((member) => member.side === "a");
@@ -71,7 +72,8 @@ const PairLine = (props: { pair: PairView; cardId: string | null }): ReactElemen
   );
 };
 
-// The part of the lobby below the pair line: the picker, the next meeting, or the note that a card is needed first.
+// The part of the lobby below the pair line: the picker, the next meeting, or the note that a card
+// is needed first.
 const NextMeeting = (props: {
   current: boolean;
   hasCard: boolean;
@@ -93,7 +95,8 @@ const NextMeeting = (props: {
   );
 };
 
-// The /pairs/:pairId page: who is paired, the next meeting, and the question picker; it polls and never streams.
+// The /pairs/:pairId page: who is paired, the next meeting, and the question picker; it polls and
+// never streams.
 export const LobbyScreen = (): ReactElement => {
   const navigate = useNavigate();
   const location = useLocation();

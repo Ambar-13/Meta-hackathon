@@ -31,7 +31,8 @@ export async function runJobOnce(
   await task(parsed, context);
 }
 
-// A job context for tests: the real client over the scripted replies, a recording enqueue, a silent log. With live, the mode is live and the live caller is that fake.
+// A job context for tests: the real client over the scripted replies, a recording enqueue, a silent
+// log. With live, the mode is live and the live caller is that fake.
 export function makeTestJobContext(options: {
   db: Kysely<Database>;
   now?: () => Date;

@@ -1,5 +1,6 @@
-// The orchestrate job: reads one thinking reply with the message it answers, asks the model for one plan, checks the plan in
-// code against the friends snapshot, and writes it. It is safe to run again: a reply that is no longer thinking is left as it is.
+// The orchestrate job: reads one thinking reply with the message it answers, asks the model for one
+// plan, checks the plan in code against the friends snapshot, and writes it. It is safe to run
+// again: a reply that is no longer thinking is left as it is.
 import { ContractError, OrchestratorFriends, OrchestratorPlanOutput } from "@meet-first/contracts";
 import { withPerson, type DatabaseTransaction } from "@meet-first/db";
 import { CapReached, LimiterBusy } from "@meet-first/llm";
@@ -27,8 +28,9 @@ const CAP_SENTENCES: Readonly<Record<string, string>> = {
 // What a failed call writes: the sentence, and no action.
 export type FailedPlan = { state: "failed"; text: string };
 
-// Reads a thinking reply with the person's message, the friends snapshot and the earlier messages, oldest first; null when the reply
-// is gone or no longer thinking, which is also what row security shows for another person's reply.
+// Reads a thinking reply with the person's message, the friends snapshot and the earlier messages,
+// oldest first; null when the reply is gone or no longer thinking, which is also what row security
+// shows for another person's reply.
 async function readPlanInput(
   trx: DatabaseTransaction,
   messageId: string,
@@ -62,8 +64,8 @@ async function readPlanInput(
   return { text: message.text, friends: OrchestratorFriends.parse(reply.friends_snapshot), recent };
 }
 
-// The one model call and the checks; a dollar cap or any other failure becomes a failed reply with its sentence, and a full token
-// window is thrown on, so the runner queues the job again in 5 s.
+// The one model call and the checks; a dollar cap or any other failure becomes a failed reply with
+// its sentence, and a full token window is thrown on, so the runner queues the job again in 5 s.
 async function planReply(
   context: JobContext,
   input: { personId: string; messageId: string; plan: PlanInput },
@@ -97,7 +99,8 @@ async function planReply(
   }
 }
 
-// Writes the plan onto the reply, only while it is still thinking, so a second run that lost a race writes nothing.
+// Writes the plan onto the reply, only while it is still thinking, so a second run that lost a race
+// writes nothing.
 async function writePlan(
   trx: DatabaseTransaction,
   messageId: string,
@@ -122,13 +125,15 @@ async function writePlan(
     .execute();
 }
 
-// True when Postgres refused a write because a row it points to is gone (SQLSTATE 23503), as the pair of a friend who deleted their account.
+// True when Postgres refused a write because a row it points to is gone (SQLSTATE 23503), as the
+// pair of a friend who deleted their account.
 function isForeignKeyViolation(error: unknown): boolean {
   return typeof error === "object" && error !== null && Reflect.get(error, "code") === "23503";
 }
 
-// What a reply becomes when its plan could not be written: words saying the friend is gone, when the plan's pair was deleted while the
-// model worked, else the failed sentence. Either way the job ends here, so a retry never calls the model a second time.
+// What a reply becomes when its plan could not be written: words saying the friend is gone, when
+// the plan's pair was deleted while the model worked, else the failed sentence. Either way the job
+// ends here, so a retry never calls the model a second time.
 export function fallbackPlan(
   plan: CheckedPlan | FailedPlan,
   error: unknown,
@@ -146,7 +151,8 @@ export function fallbackPlan(
   return { state: "failed", text: PLAN_FAILED_SENTENCE };
 }
 
-// Plans one reply from thinking to planned, done or failed. A missing reply, and one already planned, is left as it is.
+// Plans one reply from thinking to planned, done or failed. A missing reply, and one already
+// planned, is left as it is.
 export const orchestrate: JobTask<"orchestrate"> = async (payload, context) => {
   const input = await withPerson(context.db, payload.personId, (trx) =>
     readPlanInput(trx, payload.messageId),

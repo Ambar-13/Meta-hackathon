@@ -24,7 +24,8 @@ export function replayTimeline(exported: ReplayExport, speed: number): ReplaySte
   return steps;
 }
 
-// Plays an export through foldEvent, calling onState after each event; returns the function that stops it.
+// Plays an export through foldEvent, calling onState after each event; returns the function that
+// stops it.
 export function playReplay(
   exported: ReplayExport,
   options: { speed: number; onState: (state: MeetingFoldState) => void },

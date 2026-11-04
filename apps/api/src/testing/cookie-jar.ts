@@ -1,6 +1,7 @@
-// A browser keeps the session cookie and sends it back on the next request; light-my-request does not, so route
-// tests use this jar. Every request it builds also carries the Origin of the test app,
-// because every request the web app sends does, and the Origin check refuses a POST without it.
+// A browser keeps the session cookie and sends it back on the next request; light-my-request does
+// not, so route tests use this jar. Every request it builds also carries the Origin of the test
+// app, because every request the web app sends does, and the Origin check refuses a POST without
+// it.
 import type { LightMyRequestResponse } from "fastify";
 import { SESSION_COOKIE } from "@meet-first/contracts";
 import { TEST_APP_ORIGIN } from "./app-factory.js";
@@ -16,7 +17,8 @@ function toCookieLines(value: string | string[] | number | undefined): string[] 
   return [String(value)];
 }
 
-// Reads __Host-session from Set-Cookie: the token, "" when the server cleared it (an empty value or Max-Age=0), or undefined when no such line came.
+// Reads __Host-session from Set-Cookie: the token, "" when the server cleared it (an empty value or
+// Max-Age=0), or undefined when no such line came.
 export function readSessionCookie(
   setCookie: string | string[] | number | undefined,
 ): string | undefined {
@@ -35,12 +37,14 @@ export function readSessionCookie(
   return undefined;
 }
 
-// The headers of a request from the web app for a person whose token is known, such as one from createTestPerson.
+// The headers of a request from the web app for a person whose token is known, such as one from
+// createTestPerson.
 export function sessionHeader(token: string): Record<string, string> {
   return { origin: TEST_APP_ORIGIN, cookie: `${SESSION_COOKIE}=${token}` };
 }
 
-// Keeps the session cookie between inject calls the way a browser would, and adds the test app's Origin to every request.
+// Keeps the session cookie between inject calls the way a browser would, and adds the test app's
+// Origin to every request.
 export function cookieJar(): {
   header: () => Record<string, string>;
   absorb: (response: LightMyRequestResponse) => void;

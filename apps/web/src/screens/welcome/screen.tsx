@@ -7,8 +7,9 @@ import { FirstCoffee, QuestionKinds, SampleMeeting, WhatItDoes } from "./welcome
 import { BackAgain, LastCall, Promises, ThreeSteps, WelcomeFooter } from "./welcome-close.js";
 import "./welcome.css";
 
-// The first screen: the sky, the headline with two name tags stuck beside its last word, what it does in one line, Continue with Google
-// when the site offers it, and the name-tag form, so a phone shows the purpose and the main action before any scroll (design pass fix 1).
+// The first screen: the sky, the headline with two name tags stuck beside its last word, what it
+// does in one line, Continue with Google when the site offers it, and the name-tag form, so a phone
+// shows the purpose and the main action before any scroll (design pass fix 1).
 const WelcomeHero = (props: { onDone: () => void }): ReactElement => {
   return (
     <section className="wl-hero sky" aria-labelledby="wl-hero-title">
@@ -51,7 +52,8 @@ const WelcomeHero = (props: { onDone: () => void }): ReactElement => {
   );
 };
 
-// The start page: the landing with the name-tag form first, the story of how it works, and the way back in with a recovery code.
+// The start page: the landing with the name-tag form first, the story of how it works, and the way
+// back in with a recovery code.
 export const WelcomeScreen = (): ReactElement => {
   const navigate = useNavigate();
   const goToUpload = (): void => {

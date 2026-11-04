@@ -34,14 +34,15 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-// An ID token with these claims, as Google's token endpoint returns one: a header, the claims and a signature, each base64url.
+// An ID token with these claims, as Google's token endpoint returns one: a header, the claims and a
+// signature, each base64url.
 function idToken(claims: Record<string, unknown>): string {
   const part = (value: unknown): string => Buffer.from(JSON.stringify(value)).toString("base64url");
   return `${part({ alg: "RS256", kid: "test" })}.${part(claims)}.${Buffer.from("signature").toString("base64url")}`;
 }
 
-// The claims of a good sign-in for this nonce: Google's, for this client, an hour from expiring, with a name and an email Meety must
-// not keep.
+// The claims of a good sign-in for this nonce: Google's, for this client, an hour from expiring,
+// with a name and an email Meety must not keep.
 function goodClaims(nonce: string, sub = "google-sub-1"): Record<string, unknown> {
   return {
     iss: "https://accounts.google.com",
@@ -54,7 +55,8 @@ function goodClaims(nonce: string, sub = "google-sub-1"): Record<string, unknown
   };
 }
 
-// Stands in for Google's token endpoint: answers this status and body, and keeps each form the server sent.
+// Stands in for Google's token endpoint: answers this status and body, and keeps each form the
+// server sent.
 function fakeGoogle(
   answer: (form: URLSearchParams) => { status: number; body: unknown },
 ): URLSearchParams[] {

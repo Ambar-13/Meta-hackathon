@@ -1,5 +1,6 @@
-// Writes an ask's answer rows once: up to 20 listed personas whose public items match a help search, the
-// one friend of a friend ask, or the person of a self ask. Subjects are read in their own context and only read; the rows are written in the asker's context.
+// Writes an ask's answer rows once: up to 20 listed personas whose public items match a help
+// search, the one friend of a friend ask, or the person of a self ask. Subjects are read in their
+// own context and only read; the rows are written in the asker's context.
 import { sql, type Kysely } from "kysely";
 import { HELP_SHORTLIST_MAX } from "@meet-first/contracts";
 import { withPerson, type Database, type DatabaseTransaction } from "@meet-first/db";
@@ -14,7 +15,8 @@ import {
   type NewAnswer,
 } from "./ask-store.js";
 
-// What choosing the subjects ended with: answer rows exist, nobody can answer this help search, or the friend ask cannot be answered.
+// What choosing the subjects ended with: answer rows exist, nobody can answer this help search, or
+// the friend ask cannot be answered.
 export type SubjectsOutcome = "rows" | "none" | "failed";
 // One row of directory_shortlist (migration 0006; its fourth argument is p_romance_only).
 type ShortlistRow = {
@@ -26,7 +28,8 @@ type ShortlistRow = {
   match_rank: number;
 };
 
-// Makes sure the ask has its answer rows: rows an earlier run wrote are kept, and otherwise the subjects are chosen and written once.
+// Makes sure the ask has its answer rows: rows an earlier run wrote are kept, and otherwise the
+// subjects are chosen and written once.
 export async function chooseSubjects(context: JobContext, ask: AskRow): Promise<SubjectsOutcome> {
   const existing = await withPerson(context.db, ask.personId, (trx) => countAnswers(trx, ask.id));
   if (existing > 0) return "rows";
@@ -39,7 +42,8 @@ export async function chooseSubjects(context: JobContext, ask: AskRow): Promise<
   return isWritten ? "rows" : "none";
 }
 
-// Writes the rows under a lock on the ask, unless another run wrote them first; false when the asker's own row is gone.
+// Writes the rows under a lock on the ask, unless another run wrote them first; false when the
+// asker's own row is gone.
 async function writeSubjects(
   trx: DatabaseTransaction,
   ask: AskRow,
@@ -53,9 +57,10 @@ async function writeSubjects(
   return true;
 }
 
-// The listed personas of a help search, in shortlist order. The shortlist runs on the worker connection with no person context,
-// because only the worker may run directory_shortlist and it reads every listing (migration 0006). A romance ask reaches only
-// listings open to dating questions.
+// The listed personas of a help search, in shortlist order. The shortlist runs on the worker
+// connection with no person context, because only the worker may run directory_shortlist and it
+// reads every listing (migration 0006). A romance ask reaches only listings open to dating
+// questions.
 async function helpSubjects(db: Kysely<Database>, ask: AskRow): Promise<NewAnswer[]> {
   const words = shortlistWords(ask.text);
   if (words.length === 0) return [];
@@ -72,8 +77,9 @@ async function helpSubjects(db: Kysely<Database>, ask: AskRow): Promise<NewAnswe
   return subjects;
 }
 
-// One shortlisted persona, read in its owner's context: the display name and the listing's line. Null when the person or the listing
-// is gone, or the listing now names another card, so the shortlist's match no longer holds.
+// One shortlisted persona, read in its owner's context: the display name and the listing's line.
+// Null when the person or the listing is gone, or the listing now names another card, so the
+// shortlist's match no longer holds.
 async function readListedSubject(
   db: Kysely<Database>,
   row: ShortlistRow,
@@ -97,16 +103,18 @@ async function readListedSubject(
   });
 }
 
-// The subjects of an ask by its mode: the shortlist of a help search, the friend of a friend ask, or the person of a self ask.
+// The subjects of an ask by its mode: the shortlist of a help search, the friend of a friend ask,
+// or the person of a self ask.
 function subjectsOf(db: Kysely<Database>, ask: AskRow): Promise<NewAnswer[] | "failed"> {
   if (ask.mode === "help") return helpSubjects(db, ask);
   if (ask.mode === "self") return selfSubject(db, ask);
   return friendSubject(db, ask);
 }
 
-// The person of a self ask, read in their own context: their display name and most recently approved card, with or without its friends
-// switch, since they are asking about themself; no card when they have none, and the answer then rests on their summary alone.
-// "failed" when the person is gone.
+// The person of a self ask, read in their own context: their display name and most recently
+// approved card, with or without its friends switch, since they are asking about themself; no card
+// when they have none, and the answer then rests on their summary alone. "failed" when the person
+// is gone.
 async function selfSubject(db: Kysely<Database>, ask: AskRow): Promise<NewAnswer[] | "failed"> {
   return withPerson(db, ask.personId, async (trx) => {
     const displayName = await readDisplayName(trx, ask.personId);
@@ -134,8 +142,9 @@ async function selfSubject(db: Kysely<Database>, ask: AskRow): Promise<NewAnswer
   });
 }
 
-// The friend of a friend ask: the other member of the ask's invite pair, read in the asker's context, with that friend's most recently
-// approved card whose friends switch is on. "failed" when the pair is missing, not joined or made by the directory, or no such card exists.
+// The friend of a friend ask: the other member of the ask's invite pair, read in the asker's
+// context, with that friend's most recently approved card whose friends switch is on. "failed" when
+// the pair is missing, not joined or made by the directory, or no such card exists.
 async function friendSubject(db: Kysely<Database>, ask: AskRow): Promise<NewAnswer[] | "failed"> {
   const pairId = ask.pairId;
   if (pairId === null) return "failed";
@@ -169,9 +178,10 @@ async function friendSubject(db: Kysely<Database>, ask: AskRow): Promise<NewAnsw
   ];
 }
 
-// The friend's display name and most recently approved card with friends_can_ask on, in the friend's own context. A friend with no
-// approved card at all is answered from their summary when it is ready with its friends switch on, so the card is null. Null when the
-// name is missing, when every approved card has the switch off, or when there is no card and no such summary.
+// The friend's display name and most recently approved card with friends_can_ask on, in the
+// friend's own context. A friend with no approved card at all is answered from their summary when
+// it is ready with its friends switch on, so the card is null. Null when the name is missing, when
+// every approved card has the switch off, or when there is no card and no such summary.
 async function readFriendCard(
   trx: DatabaseTransaction,
   friendId: string,

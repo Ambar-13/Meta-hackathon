@@ -16,8 +16,9 @@ import { makeSessionMissingError } from "../route-errors.js";
 export const SESSION_TOKEN_PATTERN = /^[0-9a-f]{64}$/;
 // The cookie's Max-Age in seconds: 90 days, which is 7,776,000.
 export const SESSION_MAX_AGE_SECONDS = SESSION_LIFETIME_DAYS * 86_400;
-// The api routes that answer with no session, by their contracts names. Every other /api route refuses with session_missing when no
-// live session came, so a new route is closed until it is listed here.
+// The api routes that answer with no session, by their contracts names. Every other /api route
+// refuses with session_missing when no live session came, so a new route is closed until it is
+// listed here.
 export const PUBLIC_ROUTES = [
   routes.people.createPerson,
   routes.people.recover,
@@ -47,7 +48,8 @@ export function isPublicRoute(method: string, routePattern: string): boolean {
   );
 }
 
-// Sets __Host-session with HttpOnly, Secure, Path=/, SameSite=Lax and Max-Age 90 days, and no Domain.
+// Sets __Host-session with HttpOnly, Secure, Path=/, SameSite=Lax and Max-Age 90 days, and no
+// Domain.
 export function setSessionCookie(reply: FastifyReply, token: string): void {
   reply.setCookie(SESSION_COOKIE, token, { ...COOKIE_ATTRIBUTES, maxAge: SESSION_MAX_AGE_SECONDS });
 }
@@ -58,7 +60,8 @@ export function clearSessionCookie(reply: FastifyReply): void {
 }
 
 // The person behind a live session token hash, through auth_person_for_session, or null. A stream
-// uses the hash it kept on the request, because the token itself is not kept after the cookie is read.
+// uses the hash it kept on the request, because the token itself is not kept after the cookie is
+// read.
 export async function findPersonForSessionHash(
   db: Kysely<Database>,
   tokenHash: Buffer,

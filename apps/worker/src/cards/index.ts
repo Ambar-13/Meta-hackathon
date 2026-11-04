@@ -18,7 +18,8 @@ export { sampleTurns, cardCall, cardRegenerationCall, type SampledTurn } from ".
 export { verifyItems, hasEnoughOwnText, type ItemCheck, type FailedItem } from "./verify-items.js";
 // The sensitive-turn filter of the card build, shared with the fixture cases.
 export { eligibleTurns } from "./build-card-job.js";
-// The role tokens that replace names: one per distinct name, the check that leaves a person's own names alone, and the rewrite.
+// The role tokens that replace names: one per distinct name, the check that leaves a person's own
+// names alone, and the rewrite.
 export {
   applyRoleTokens,
   assignTokens,

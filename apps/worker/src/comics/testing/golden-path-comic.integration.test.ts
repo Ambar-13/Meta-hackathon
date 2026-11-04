@@ -41,7 +41,8 @@ function point(text: string, turnId: string): BriefPoint {
   };
 }
 
-// Seeds an ended meeting with both briefs, the brief.ready event and a comic row that failed for lack of fixtures.
+// Seeds an ended meeting with both briefs, the brief.ready event and a comic row that failed for
+// lack of fixtures.
 async function seedGoldenMeeting(): Promise<{ meetingId: string }> {
   const meeting = await createPairedMeetingWithTurns(fresh.db);
   const now = new Date();

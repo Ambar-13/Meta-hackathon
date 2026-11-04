@@ -14,7 +14,8 @@ import type { StoredClaim } from "./receipts.js";
 import { NO_DECISION_REASON } from "./tool-loop.js";
 import { isPublicOnlyCard } from "./public-items.js";
 
-// A committed event's own fields: everything except the five the log adds (v, type, meetingId, seq, at).
+// A committed event's own fields: everything except the five the log adds (v, type, meetingId, seq,
+// at).
 export type EventFields<T extends CommittedEvent["type"]> = Omit<
   Extract<CommittedEvent, { type: T }>,
   "v" | "type" | "meetingId" | "seq" | "at"
@@ -43,7 +44,8 @@ export type FinishedTurn = {
 };
 // How a commit ended: the next step exists, the meeting ended, or this runner had lost the step.
 export type CommitResult = { kind: "next"; stepSeq: number } | { kind: "ended" } | { kind: "lost" };
-// A claim after its row was written: the row id, the speaker's side, its position and whether its evidence is valid.
+// A claim after its row was written: the row id, the speaker's side, its position and whether its
+// evidence is valid.
 type StoredRow = {
   id: string;
   side: "a" | "b";
@@ -52,7 +54,8 @@ type StoredRow = {
   isEvidenceValid: boolean;
 };
 
-// Writes one committed event with the next gapless seq, after parsing the whole event with CommittedEvent.
+// Writes one committed event with the next gapless seq, after parsing the whole event with
+// CommittedEvent.
 export async function appendMeetingEvent<T extends CommittedEvent["type"]>(
   trx: Transaction<Database>,
   write: EventWrite<T>,
@@ -80,7 +83,8 @@ export async function appendMeetingEvent<T extends CommittedEvent["type"]>(
   return event;
 }
 
-// Starts a meeting that is ready on both sides (both go-aheads, the question checked, both prefixes stored) through claim_meeting_slot, with nobody online.
+// Starts a meeting that is ready on both sides (both go-aheads, the question checked, both prefixes
+// stored) through claim_meeting_slot, with nobody online.
 export async function startIfReady(
   trx: Transaction<Database>,
   slot: { meetingId: string; now: Date; maxRunning: number },
@@ -116,7 +120,8 @@ export async function startIfReady(
   return "running";
 }
 
-// Begins a meeting that has won a running slot: phase open, step 1 pending for side a, meeting.started then phase.changed.
+// Begins a meeting that has won a running slot: phase open, step 1 pending for side a,
+// meeting.started then phase.changed.
 export async function beginRunningMeeting(
   trx: Transaction<Database>,
   meetingId: string,
@@ -162,7 +167,8 @@ export async function beginRunningMeeting(
   });
 }
 
-// Ends a running meeting with its reason and writes meeting.ended; false when the meeting was not running.
+// Ends a running meeting with its reason and writes meeting.ended; false when the meeting was not
+// running.
 export async function endMeeting(
   trx: Transaction<Database>,
   end: { meetingId: string; reason: "decided" | "budget"; now: Date },
@@ -199,7 +205,8 @@ export async function commitTurn(context: JobContext, turn: FinishedTurn): Promi
   return result;
 }
 
-// Runs the commit inside the meeting's transaction, in the order of the design: lock, mark the step, claims, hold, turn, next step.
+// Runs the commit inside the meeting's transaction, in the order of the design: lock, mark the
+// step, claims, hold, turn, next step.
 async function writeTurn(
   trx: Transaction<Database>,
   turn: FinishedTurn,
@@ -283,7 +290,8 @@ async function markStepDone(
     );
 }
 
-// Writes one claim row per claim, in list order, and records whether each claim's turn is behind an approved item or in the recall corpus.
+// Writes one claim row per claim, in list order, and records whether each claim's turn is behind an
+// approved item or in the recall corpus.
 async function insertClaims(trx: Transaction<Database>, turn: FinishedTurn): Promise<StoredRow[]> {
   const evidence = await evidenceTurnIds(trx, turn);
   const rows: StoredRow[] = [];
@@ -315,7 +323,8 @@ async function insertClaims(trx: Transaction<Database>, turn: FinishedTurn): Pro
   return rows;
 }
 
-// The turn ids a claim may rest on: the approved items of the speaker's card and the recall corpus of that card.
+// The turn ids a claim may rest on: the approved items of the speaker's card and the recall corpus
+// of that card.
 async function evidenceTurnIds(
   trx: Transaction<Database>,
   turn: FinishedTurn,
@@ -342,7 +351,8 @@ async function evidenceTurnIds(
   return new Set([...approved, ...corpus].map((row) => row.turn_id));
 }
 
-// Moves the meeting to the next step, or ends it when the agenda is done; writes phase.changed when a new phase starts.
+// Moves the meeting to the next step, or ends it when the agenda is done; writes phase.changed when
+// a new phase starts.
 async function advance(
   trx: Transaction<Database>,
   scope: { turn: FinishedTurn; startedAt: Date; now: Date },
@@ -406,7 +416,8 @@ function toClaim(row: StoredRow): Claim {
   });
 }
 
-// True for the two refusals that mean this runner lost the step or the meeting, so nothing is written.
+// True for the two refusals that mean this runner lost the step or the meeting, so nothing is
+// written.
 function isLostStep(error: unknown): boolean {
   return (
     error instanceof ContractError &&
@@ -414,7 +425,8 @@ function isLostStep(error: unknown): boolean {
   );
 }
 
-// An ISO time of a stored timestamp; a running meeting always has both times, so a missing one is a fault.
+// An ISO time of a stored timestamp; a running meeting always has both times, so a missing one is a
+// fault.
 function timeOf(value: Date | null): string {
   if (value === null)
     throw new ContractError(

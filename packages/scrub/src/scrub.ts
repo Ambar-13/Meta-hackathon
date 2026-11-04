@@ -16,13 +16,15 @@ import { applyEntropyRule } from "./entropy.js";
 // What a caller passes: the names to leave alone and, optionally, where placeholder ids come from.
 export type ScrubOptions = { allowlist: readonly string[]; nextId?: () => string };
 
-// Every placeholder kind already in a text: a redacted one, a code one, or a role token, as one pattern with groups in that order.
+// Every placeholder kind already in a text: a redacted one, a code one, or a role token, as one
+// pattern with groups in that order.
 const EXISTING_TOKENS = new RegExp(
   REDACTED_PLACEHOLDER.source + "|" + CODE_PLACEHOLDER.source + "|" + ROLE_TOKEN_PATTERN.source,
   "g",
 );
 
-// How a placeholder found in free text is protected: its category, or null for a role token, or null overall when it stays free.
+// How a placeholder found in free text is protected: its category, or null for a role token, or
+// null overall when it stays free.
 function protectedCategory(match: RegExpMatchArray): { category: Segment["category"] } | null {
   const name = match[1];
   if (name !== undefined) return isCategory(name) ? { category: name } : null;
@@ -49,12 +51,14 @@ function markFree(segment: Segment): Segment[] {
   return pieces;
 }
 
-// Protects the placeholders and role tokens already in the text, so a second pass keeps them and gives each placeholder a new id in order.
+// Protects the placeholders and role tokens already in the text, so a second pass keeps them and
+// gives each placeholder a new id in order.
 export function markExistingPlaceholders(segments: Segment[]): Segment[] {
   return segments.flatMap((segment) => (segment.isProtected ? [segment] : markFree(segment)));
 }
 
-// Joins the segments into the final text, giving each redaction the next id in text order, and lists the redactions.
+// Joins the segments into the final text, giving each redaction the next id in text order, and
+// lists the redactions.
 export function assignPlaceholderIds(segments: Segment[], nextId: () => string): ScrubResult {
   let text = "";
   const redactions: Redaction[] = [];
@@ -73,8 +77,9 @@ export function assignPlaceholderIds(segments: Segment[], nextId: () => string):
   return { text, redactions };
 }
 
-// Replaces every secret, identifier and code fence in one text with a placeholder and lists the replacements in text order.
-// Pass one nextId for a whole source so ids stay unique across its turns.
+// Replaces every secret, identifier and code fence in one text with a placeholder and lists the
+// replacements in text order. Pass one nextId for a whole source so ids stay unique across its
+// turns.
 export function scrub(text: string, options: ScrubOptions): ScrubResult {
   const nextId = options.nextId ?? makePlaceholderCounter();
   let segments = replaceCodeFences(text);

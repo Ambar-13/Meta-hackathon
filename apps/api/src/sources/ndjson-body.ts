@@ -14,7 +14,8 @@ import { makePayloadInvalidError } from "../route-errors.js";
 // The decoded body split into its SourceHeader line and its Turn lines.
 export type ParsedSourceBody = { header: SourceHeader; turns: Turn[] };
 
-// The sentence for a body over either size cap. The browser shows the same sentence for the same cap.
+// The sentence for a body over either size cap. The browser shows the same sentence for the same
+// cap.
 const UPLOAD_TOO_LARGE_SENTENCE =
   "The upload is over the size limit. Export a shorter date range, or paste fewer notes.";
 // The sentence for a body that says it is gzip and is not.
@@ -39,7 +40,8 @@ function tooLarge(): ContractError {
   return new ContractError("upload_too_large", UPLOAD_TOO_LARGE_SENTENCE, HTTP.payloadTooLarge);
 }
 
-// Inflates a gzip body, and refuses it as soon as the inflated total passes the decoded cap, so a small bomb stops early.
+// Inflates a gzip body, and refuses it as soon as the inflated total passes the decoded cap, so a
+// small bomb stops early.
 function inflateGzip(raw: Buffer): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const gunzip = createGunzip();
@@ -64,7 +66,8 @@ function inflateGzip(raw: Buffer): Promise<Buffer> {
   });
 }
 
-// Returns the body's bytes, inflated when Content-Encoding is gzip; refuses more than 8 MiB as sent or 20 MiB decoded.
+// Returns the body's bytes, inflated when Content-Encoding is gzip; refuses more than 8 MiB as sent
+// or 20 MiB decoded.
 export async function decodeUploadBody(
   raw: Buffer,
   contentEncoding: string | undefined,
@@ -82,7 +85,8 @@ export async function decodeUploadBody(
   return inflateGzip(raw);
 }
 
-// Splits the decoded bytes into lines, dropping one final line break; an empty body or a blank line is a shape error.
+// Splits the decoded bytes into lines, dropping one final line break; an empty body or a blank line
+// is a shape error.
 function splitLines(decoded: Buffer): string[] {
   const lines = decoded.toString("utf8").split("\n");
   if (lines[lines.length - 1] === "") lines.pop();
@@ -99,7 +103,8 @@ function parseJsonLine(line: string): unknown {
   }
 }
 
-// Refuses a header that announces too many messages, and a body with no messages, before anything else is read.
+// Refuses a header that announces too many messages, and a body with no messages, before anything
+// else is read.
 function checkAnnouncedCounts(headerValue: unknown, turnLines: number): void {
   const announced = z.object({ turnCount: z.number() }).safeParse(headerValue);
   const announcedCount = announced.success ? announced.data.turnCount : undefined;
@@ -121,7 +126,8 @@ function checkAttested(headerValue: unknown): void {
   }
 }
 
-// Reads every turn line, checking each one's shape and that its turnIndex is its position after the header.
+// Reads every turn line, checking each one's shape and that its turnIndex is its position after the
+// header.
 function parseTurnLines(lines: string[]): Turn[] {
   return lines.map((line, position) => {
     const parsed = Turn.safeParse(parseJsonLine(line));

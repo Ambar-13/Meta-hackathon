@@ -4,7 +4,8 @@ import { z } from "zod";
 import { Category } from "@meet-first/contracts";
 import { scrub } from "./scrub.js";
 
-// One planted secret: the sentence that holds it, the exact secret, and the one category its redaction must carry.
+// One planted secret: the sentence that holds it, the exact secret, and the one category its
+// redaction must carry.
 const PlantedLine = z.object({ category: Category, text: z.string(), secret: z.string() });
 
 // Reads and parses the 40 planted secrets, one JSON object per line.

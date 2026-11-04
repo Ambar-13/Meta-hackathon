@@ -1,6 +1,7 @@
-// A person's summary, written by their own AI from Meety's prompt and pasted in. The text is stored canonical and scrubbed by code
-// (secrets, emails, phone numbers), with the person's own names left alone, and the check_summary job then replaces other people's
-// names and checks each point's quotes against the person's own messages. Saving clears the old points until that job runs again.
+// A person's summary, written by their own AI from Meety's prompt and pasted in. The text is stored
+// canonical and scrubbed by code (secrets, emails, phone numbers), with the person's own names left
+// alone, and the check_summary job then replaces other people's names and checks each point's
+// quotes against the person's own messages. Saving clears the old points until that job runs again.
 import type { FastifyInstance } from "fastify";
 import { sql } from "kysely";
 import { z } from "zod";
@@ -34,7 +35,8 @@ type SummaryRow = {
 // What one save stores: the scrubbed text and the switch.
 type SummaryInput = { personId: string; text: string; friendsCanAsk: boolean };
 
-// The view of one stored summary; points stored in another shape are left out rather than shown wrong.
+// The view of one stored summary; points stored in another shape are left out rather than shown
+// wrong.
 function viewOf(row: SummaryRow): SummaryView {
   const points = z.array(SummaryPointView).safeParse(row.points);
   return SummaryView.parse({
@@ -45,12 +47,14 @@ function viewOf(row: SummaryRow): SummaryView {
   });
 }
 
-// An opening square bracket that would make typed text look like a placeholder or a role token, which the names check leaves alone.
+// An opening square bracket that would make typed text look like a placeholder or a role token,
+// which the names check leaves alone.
 const TOKEN_SHAPED = /\[(?=\s*(?:person|code|redacted)\s*:)/giu;
 
-// The text as it is stored: canonical first, since that strips invisible characters that could split a token shape; then token-shaped
-// brackets the person typed turned round, so no name can hide inside one; then scrubbed by code with the person's own names left alone.
-// Only the scrub writes placeholders.
+// The text as it is stored: canonical first, since that strips invisible characters that could
+// split a token shape; then token-shaped brackets the person typed turned round, so no name can
+// hide inside one; then scrubbed by code with the person's own names left alone. Only the scrub
+// writes placeholders.
 function scrubbedText(text: string, allowlist: readonly string[]): string {
   return scrub(canonicalise(text).replace(TOKEN_SHAPED, "("), {
     allowlist,
@@ -58,8 +62,9 @@ function scrubbedText(text: string, allowlist: readonly string[]): string {
   }).text;
 }
 
-// Counts one save on the person, unless they already saved SUMMARY_SAVES_PER_DAY times this UTC day; false at the cap. The count
-// lives on the person, so deleting the summary does not reset it, and the row lock makes two saves at once take turns.
+// Counts one save on the person, unless they already saved SUMMARY_SAVES_PER_DAY times this UTC
+// day; false at the cap. The count lives on the person, so deleting the summary does not reset it,
+// and the row lock makes two saves at once take turns.
 async function countSave(trx: DatabaseTransaction, personId: string): Promise<boolean> {
   const result = await sql<{ id: string }>`
     UPDATE people SET
@@ -86,9 +91,9 @@ async function upsertSummary(trx: DatabaseTransaction, input: SummaryInput): Pro
   return row;
 }
 
-// Saves the person's summary, then queues its check after the commit; undefined past the day's saves. When the queue refuses, the
-// summary is marked failed, so it never waits for a check that will not come, and the queue's error goes on, as job-queue.ts says
-// every route does.
+// Saves the person's summary, then queues its check after the commit; undefined past the day's
+// saves. When the queue refuses, the summary is marked failed, so it never waits for a check that
+// will not come, and the queue's error goes on, as job-queue.ts says every route does.
 export async function saveSummary(
   deps: Pick<RouteDeps, "db" | "enqueue">,
   personId: string,
@@ -122,8 +127,9 @@ export async function saveSummary(
   return row;
 }
 
-// Registers PUT /api/people/me/summary: 202 SummaryView, checking, and a check_summary job queued after the save commits; 400 for an
-// empty or too long text; 429 summary_daily_cap past the day's saves.
+// Registers PUT /api/people/me/summary: 202 SummaryView, checking, and a check_summary job queued
+// after the save commits; 400 for an empty or too long text; 429 summary_daily_cap past the day's
+// saves.
 function registerSaveSummary(app: FastifyInstance, deps: RouteDeps): void {
   app.put(routes.people.saveSummary.path, async (request, reply) => {
     const personId = requirePerson(request);
@@ -136,7 +142,8 @@ function registerSaveSummary(app: FastifyInstance, deps: RouteDeps): void {
   });
 }
 
-// Registers GET /api/people/me/summary (200 SummaryView, or 404 when there is none) and DELETE (204, whether or not there was one).
+// Registers GET /api/people/me/summary (200 SummaryView, or 404 when there is none) and DELETE
+// (204, whether or not there was one).
 function registerReadAndDelete(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.people.readSummary.path, async (request, reply) => {
     const personId = requirePerson(request);

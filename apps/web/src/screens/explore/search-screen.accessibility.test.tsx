@@ -64,7 +64,8 @@ function photoPost(n: number, photo: string, photoAlt: string): PostsView["posts
   };
 }
 
-// What Search's other two reads answer in a test: the replies for GET /api/posts, and the friends list.
+// What Search's other two reads answer in a test: the replies for GET /api/posts, and the friends
+// list.
 type OtherReads = { posts?: StubInput[]; friends?: FriendsView };
 
 // Renders Search with these replies for GET /api/directory; no posts and no friends unless given.

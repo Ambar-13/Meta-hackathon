@@ -1,6 +1,7 @@
-// Posts as the feed and a profile show them (migration 0009): the newest posts of people listed in Explore, one listed person's posts for
-// their profile's Posts tab, and (migration 0013), your own posts and the stories in the row of faces. Others' posts and
-// stories read through definer functions that never return a person id; your own read through row security.
+// Posts as the feed and a profile show them (migration 0009): the newest posts of people listed in
+// Explore, one listed person's posts for their profile's Posts tab, and (migration 0013), your own
+// posts and the stories in the row of faces. Others' posts and stories read through definer
+// functions that never return a person id; your own read through row security.
 import type { FastifyInstance } from "fastify";
 import { sql } from "kysely";
 import { z } from "zod";
@@ -35,7 +36,8 @@ import {
   type PhotoIds,
 } from "../home/person-photos.js";
 
-// The :id of GET /api/directory/:id/posts: a listing id. One that is not a uuid is not_found, so a bad id tells nothing.
+// The :id of GET /api/directory/:id/posts: a listing id. One that is not a uuid is not_found, so a
+// bad id tells nothing.
 const ListingParams = z.object({ id: Uuid });
 
 // One row of explore_posts or listing_posts by its SQL names (migrations 0009 and 0013).
@@ -67,7 +69,8 @@ type StoryRow = {
   expires_at: Date;
 };
 
-// The posts view of some post rows, in their order; photos holds the photo ids of the writers who put up a photo, by listing.
+// The posts view of some post rows, in their order; photos holds the photo ids of the writers who
+// put up a photo, by listing.
 export function toPostsView(rows: readonly PostRow[], photos: PhotoIds = new Map()): PostsView {
   return PostsView.parse({ posts: rows.map((row) => toPost(row, photos.get(row.listing_id))) });
 }
@@ -92,8 +95,9 @@ async function readPosts(
   };
 }
 
-// The photo of a post and the words a screen reader reads for it: a sample person's bundled photo, else the photo the writer shared,
-// read by the post's own id and described by its words, else none.
+// The photo of a post and the words a screen reader reads for it: a sample person's bundled photo,
+// else the photo the writer shared, read by the post's own id and described by its words, else
+// none.
 function postPhotoOf(row: {
   post_id: string;
   display_name: string;
@@ -105,8 +109,8 @@ function postPhotoOf(row: {
   return row.has_photo ? { key: photoKeyOf(row.post_id), alt: null } : null;
 }
 
-// One post row as the contract has it: the writer's picture (a sample person's face, or the photo a real person put up), the post's
-// photo, and whether it is the caller's and the caller liked it.
+// One post row as the contract has it: the writer's picture (a sample person's face, or the photo a
+// real person put up), the post's photo, and whether it is the caller's and the caller liked it.
 function toPost(row: PostRow, writerPhotoId: string | undefined): PostsView["posts"][number] {
   const photo = postPhotoOf(row);
   return {
@@ -128,7 +132,8 @@ function toPost(row: PostRow, writerPhotoId: string | undefined): PostsView["pos
   };
 }
 
-// Registers GET /api/posts: 200 PostsView, the newest EXPLORE_POSTS_MAX posts of people listed in Explore, leaving out the caller's own.
+// Registers GET /api/posts: 200 PostsView, the newest EXPLORE_POSTS_MAX posts of people listed in
+// Explore, leaving out the caller's own.
 export function registerListPosts(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.social.listPosts.path, async (request, reply) => {
     const personId = requirePerson(request);
@@ -140,8 +145,8 @@ export function registerListPosts(app: FastifyInstance, deps: RouteDeps): void {
   });
 }
 
-// Registers GET /api/directory/:id/posts: 200 PostsView, the newest PROFILE_POSTS_MAX posts of one listed person, empty for a listing
-// Explore does not show; 404 not_found for a bad id.
+// Registers GET /api/directory/:id/posts: 200 PostsView, the newest PROFILE_POSTS_MAX posts of one
+// listed person, empty for a listing Explore does not show; 404 not_found for a bad id.
 export function registerListListingPosts(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.social.listListingPosts.path, async (request, reply) => {
     const personId = requirePerson(request);
@@ -162,8 +167,9 @@ export function registerListListingPosts(app: FastifyInstance, deps: RouteDeps):
   });
 }
 
-// Registers GET /api/people/me/posts: 200 MyPostsView, the caller's own posts, newest first, at most PROFILE_POSTS_MAX, whether or not
-// they are in Explore, so the Posts tab of /me shows a post the moment it is shared.
+// Registers GET /api/people/me/posts: 200 MyPostsView, the caller's own posts, newest first, at
+// most PROFILE_POSTS_MAX, whether or not they are in Explore, so the Posts tab of /me shows a post
+// the moment it is shared.
 export function registerListMyPosts(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.social.listMyPosts.path, async (request, reply) => {
     const personId = requirePerson(request);
@@ -210,8 +216,9 @@ function toStory(row: StoryRow, authorPhoto: string | null): Story {
   };
 }
 
-// The stories of the sample people in the feed: each one's newest post with a photo, shown as their story with no end, because sample
-// people share nothing themselves and the row of faces would be empty before real people share.
+// The stories of the sample people in the feed: each one's newest post with a photo, shown as their
+// story with no end, because sample people share nothing themselves and the row of faces would be
+// empty before real people share.
 function sampleStories(rows: readonly PostRow[]): Story[] {
   const stories: Story[] = [];
   for (const row of rows) {
@@ -234,7 +241,8 @@ function sampleStories(rows: readonly PostRow[]): Story[] {
   return stories;
 }
 
-// The stories in the row of faces: the caller's own first, then the others' newest first, each until it expires, then the sample people's.
+// The stories in the row of faces: the caller's own first, then the others' newest first, each
+// until it expires, then the sample people's.
 async function readStories(trx: DatabaseTransaction, personId: string): Promise<Story[]> {
   const rows = (
     await sql<StoryRow>`SELECT story_id, listing_id, display_name, is_sample, is_mine, text, has_photo, created_at, expires_at FROM story_feed(${STORIES_MAX}::int)`.execute(
@@ -262,7 +270,8 @@ async function readStories(trx: DatabaseTransaction, personId: string): Promise<
   return [...stories, ...sampleStories(await readExplorePosts(trx))];
 }
 
-// Registers GET /api/stories: 200 StoriesView, the stories that show now, never cached because a story can expire at any moment.
+// Registers GET /api/stories: 200 StoriesView, the stories that show now, never cached because a
+// story can expire at any moment.
 export function registerListStories(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.social.listStories.path, async (request, reply) => {
     const personId = requirePerson(request);
@@ -272,12 +281,12 @@ export function registerListStories(app: FastifyInstance, deps: RouteDeps): void
   });
 }
 
-// One row of feed_posts by its SQL names (migration 0014), with its time to the microsecond as text, so the next page starts exactly
-// after it; a JavaScript Date keeps only milliseconds.
+// One row of feed_posts by its SQL names (migration 0014), with its time to the microsecond as
+// text, so the next page starts exactly after it; a JavaScript Date keeps only milliseconds.
 type FeedRow = PostRow & { cursor_at: string };
 
-// One page of Home's feed and where the next one starts: the first FEED_PAGE_SIZE rows of a read of one more, and a cursor at the last
-// of them when that one more came back.
+// One page of Home's feed and where the next one starts: the first FEED_PAGE_SIZE rows of a read of
+// one more, and a cursor at the last of them when that one more came back.
 async function readFeedPage(trx: DatabaseTransaction, query: FeedQuery): Promise<FeedPage> {
   const rows = (
     await sql<FeedRow>`SELECT ${POST_COLUMNS}, to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS cursor_at
@@ -295,8 +304,9 @@ async function readFeedPage(trx: DatabaseTransaction, query: FeedQuery): Promise
   return FeedPage.parse({ posts: toPostsView(read.rows, read.photos).posts, next });
 }
 
-// Registers GET /api/feed: 200 FeedPage, one page of Home's feed (FeedQuery): your friends' posts and your own, or everyone else's,
-// newest first, FEED_PAGE_SIZE at a time, with where the next page starts; 400 payload_invalid for a query it cannot read.
+// Registers GET /api/feed: 200 FeedPage, one page of Home's feed (FeedQuery): your friends' posts
+// and your own, or everyone else's, newest first, FEED_PAGE_SIZE at a time, with where the next
+// page starts; 400 payload_invalid for a query it cannot read.
 export function registerListFeed(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.social.listFeed.path, async (request, reply) => {
     const personId = requirePerson(request);

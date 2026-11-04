@@ -14,7 +14,8 @@ export * from "./meetings.js";
 export * from "./briefs.js";
 export * from "./directory.js";
 export * from "./social.js";
-// Every route map under one name: routes.sources.createSource.path, routes.meetings.startMeeting.method, and so on.
+// Every route map under one name: routes.sources.createSource.path,
+// routes.meetings.startMeeting.method, and so on.
 export const routes = {
   people: peopleRoutes,
   sources: sourcesRoutes,

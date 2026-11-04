@@ -11,7 +11,8 @@ import { NamesReview, SourceView } from "@meet-first/contracts";
 
 // How often the names screen polls while the source is not frozen (the 3 s card interval).
 export const NAMES_POLL_MS = 3_000;
-// The sensitive categories offered as opt-ins; minor is never offered, because a named minor has no toggle (the stricter reading: fewer ways to expose a minor).
+// The sensitive categories offered as opt-ins; minor is never offered, because a named minor has no
+// toggle (the stricter reading: fewer ways to expose a minor).
 export const OFFERED_OPT_INS = ["health", "address", "identifier"] as const;
 // One offered opt-in.
 export type SensitiveOptIn = (typeof OFFERED_OPT_INS)[number];
@@ -34,7 +35,8 @@ export type ReviewChoice = {
   optIns: ReadonlySet<SensitiveOptIn>;
 };
 
-// Builds the review body: every name seen so far, keep true only for kept names in choose mode, and the ticked opt-ins.
+// Builds the review body: every name seen so far, keep true only for kept names in choose mode, and
+// the ticked opt-ins.
 export function buildNamesReview(seenNames: readonly string[], choice: ReviewChoice): NamesReview {
   const decisions = seenNames.map((text) => ({
     text,

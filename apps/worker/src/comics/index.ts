@@ -12,7 +12,8 @@ export {
   type SkipReason,
   checkPromptsWithScrubber,
 } from "./render-comic-job.js";
-// The headline pick, the prompt builders and the style prefix, shared with the tests and the golden path.
+// The headline pick, the prompt builders and the style prefix, shared with the tests and the golden
+// path.
 export { buildImagePrompts, HEADLINES_MAX, pickHeadlines, STYLE_PREFIX } from "./panel-prompts.js";
 // The image calls and the webp encoder under the cap, shared with the tests and the golden path.
 export { encodePanelWebp, renderPanels } from "./image-calls.js";

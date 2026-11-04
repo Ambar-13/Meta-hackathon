@@ -14,11 +14,13 @@ export function friendsLinkName(incomingCount: number): string {
   return incomingCount < 1 ? "Friends" : `Friends, ${requestCountWords(incomingCount)}`;
 }
 
-// What the rail shows: the number of friend requests waiting for an answer, as a count on the Friends icon.
+// What the rail shows: the number of friend requests waiting for an answer, as a count on the
+// Friends icon.
 export type RailData = { incomingCount: number };
 
-// Reads GET /api/friend-requests when the page opens and every RAIL_POLL_MS; a failed read shows no count and never blocks the page.
-// The friends themselves are listed on the home page, in its right-hand column, as Instagram lists suggestions there.
+// Reads GET /api/friend-requests when the page opens and every RAIL_POLL_MS; a failed read shows no
+// count and never blocks the page. The friends themselves are listed on the home page, in its
+// right-hand column, as Instagram lists suggestions there.
 export function useRailData(): RailData {
   const requests = usePolledView(() => apiFetch(routes.social.listFriendRequests), {
     key: "rail-requests",

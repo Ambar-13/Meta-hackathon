@@ -14,14 +14,18 @@ import {
   routes,
 } from "../../app-shell/index.js";
 
-// The code GET /api/directory/me answers with when the person has no listing. It means not listed, not a failure.
+// The code GET /api/directory/me answers with when the person has no listing. It means not listed,
+// not a failure.
 export const NOT_LISTED_CODE = "not_listed";
-// The sentence for a save with the directory switch on and a line that is empty or longer than LISTING_LINE_MAX_CHARS.
+// The sentence for a save with the directory switch on and a line that is empty or longer than
+// LISTING_LINE_MAX_CHARS.
 export const LINE_REFUSAL = "Write a line of 1 to 140 characters about yourself.";
-// The sentence for a save with the directory switch on and no public item, which the server would refuse too.
+// The sentence for a save with the directory switch on and no public item, which the server would
+// refuse too.
 export const NO_PUBLIC_ITEM_REFUSAL = "Mark at least one item public to join Explore.";
 
-// What the server holds: this card's sharing settings, and the person's listing, which may be on another card, or null.
+// What the server holds: this card's sharing settings, and the person's listing, which may be on
+// another card, or null.
 export type SavedSharing = { sharing: CardSharing; listing: MyListing | null };
 // What the person has set on the screen and not saved yet.
 export type SharingDraft = {
@@ -31,16 +35,19 @@ export type SharingDraft = {
   line: string;
   openToRomance: boolean;
 };
-// The calls of one save, in this order: leave the directory when asked, the card's sharing, then the listing when it changed.
+// The calls of one save, in this order: leave the directory when asked, the card's sharing, then
+// the listing when it changed.
 export type SharingSendPlan = {
   kind: "send";
   isLeavingFirst: boolean;
   sharing: CardSharing;
   listing: ListingUpsert | null;
 };
-// One save, decided before any request: sent as planned, or refused with a sentence and nothing sent.
+// One save, decided before any request: sent as planned, or refused with a sentence and nothing
+// sent.
 export type SharingSavePlan = SharingSendPlan | { kind: "refused"; sentence: string };
-// The section's data: loading, failed with the error to show, or ready with what the server holds and the draft.
+// The section's data: loading, failed with the error to show, or ready with what the server holds
+// and the draft.
 export type SharingLoad =
   | { kind: "loading" }
   | { kind: "failed"; error: ApiError }
@@ -74,7 +81,8 @@ export function isListedWith(listing: MyListing | null, cardId: string): boolean
   return listing !== null && listing.cardId === cardId;
 }
 
-// The person's listing, or null when GET /api/directory/me answers not_listed; any other failure is thrown on to the caller.
+// The person's listing, or null when GET /api/directory/me answers not_listed; any other failure is
+// thrown on to the caller.
 export async function readListingOrNull(): Promise<MyListing | null> {
   try {
     return await apiFetch(routes.directory.readMyListing);
@@ -85,7 +93,8 @@ export async function readListingOrNull(): Promise<MyListing | null> {
   }
 }
 
-// The draft a saved state opens with: each control as the server holds it, so every control is off when nothing is shared.
+// The draft a saved state opens with: each control as the server holds it, so every control is off
+// when nothing is shared.
 export function draftFromSaved(saved: SavedSharing, cardId: string): SharingDraft {
   const isListedHere = isListedWith(saved.listing, cardId);
   return {
@@ -106,7 +115,8 @@ function draftRefusal(draft: SharingDraft): string | null {
   return null;
 }
 
-// The listing body to send, or null when the switch is off or the listing on this card already has this line and dating switch.
+// The listing body to send, or null when the switch is off or the listing on this card already has
+// this line and dating switch.
 function listingToSend(input: {
   cardId: string;
   listedHere: MyListing | null;
@@ -142,7 +152,8 @@ export function planSharingSave(input: {
   };
 }
 
-// Sends one planned save in order and returns what the server now holds. A failed call throws, so the calls after it are not sent.
+// Sends one planned save in order and returns what the server now holds. A failed call throws, so
+// the calls after it are not sent.
 export async function sendSharingSave(input: {
   cardId: string;
   saved: SavedSharing;
@@ -200,7 +211,8 @@ export function useSharing(cardId: string): SharingHook {
   const { load, setLoad } = useSavedSharing(cardId);
   const [status, setStatus] = useState<SharingStatus>({ kind: "idle" });
 
-  // A change clears the last saved or refused line, but never the sending state, so Save stays off while a save is out.
+  // A change clears the last saved or refused line, but never the sending state, so Save stays off
+  // while a save is out.
   const change = (update: (draft: SharingDraft) => SharingDraft): void => {
     setLoad((previous) =>
       previous.kind === "ready" ? { ...previous, draft: update(previous.draft) } : previous,

@@ -2,7 +2,8 @@
 // Steps, in order: NFC; case fold (toLowerCase after NFC); curly quotes and dashes to ASCII; runs of ASCII whitespace to one space;
 // trim; then strip leading and trailing punctuation.
 
-// The character map used by normQuote, exported so the offset map can replay it one character at a time.
+// The character map used by normQuote, exported so the offset map can replay it one character at a
+// time.
 export const QUOTE_FOLDS: ReadonlyMap<string, string> = new Map([
   ["\u2018", "'"],
   ["\u2019", "'"],
@@ -24,10 +25,12 @@ export const QUOTE_FOLDS: ReadonlyMap<string, string> = new Map([
 export const LEADING_TRAILING_PUNCTUATION = /^[\s\p{P}]+|[\s\p{P}]+$/gu;
 // A run of ordinary spaces, tabs or line breaks, collapsed to one space.
 export const ASCII_WHITESPACE_RUN = /[ \t\n\r\f\v]+/g;
-// A base character with the combining marks that follow it. NFC composes inside one cluster, so clusters are normalised alone.
+// A base character with the combining marks that follow it. NFC composes inside one cluster, so
+// clusters are normalised alone.
 const CLUSTER = /\P{M}\p{M}*|\p{M}+/gu;
 
-// The normalised text and, for each of its UTF-16 code units, the index in the original text that produced it.
+// The normalised text and, for each of its UTF-16 code units, the index in the original text that
+// produced it.
 export type FoldedText = { normalised: string; sources: number[] };
 
 // Runs the normalisation steps and keeps track of where each output code unit came from.
@@ -46,7 +49,8 @@ export function foldQuote(text: string): FoldedText {
   return stripEnds(collapsed.normalised, collapsed.sources);
 }
 
-// Replaces each run of ASCII whitespace with one space, taking the position of the first character of the run.
+// Replaces each run of ASCII whitespace with one space, taking the position of the first character
+// of the run.
 function collapseWhitespace(text: string, sources: readonly number[]): FoldedText {
   let normalised = "";
   const outSources: number[] = [];
@@ -64,7 +68,8 @@ function collapseWhitespace(text: string, sources: readonly number[]): FoldedTex
   return { normalised, sources: outSources };
 }
 
-// Drops the punctuation and spaces at both ends. The regex matches at the start and at the end, so each match is one or the other.
+// Drops the punctuation and spaces at both ends. The regex matches at the start and at the end, so
+// each match is one or the other.
 function stripEnds(text: string, sources: readonly number[]): FoldedText {
   let start = 0;
   let end = text.length;

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-// One error shape for every refusal: a stable code and a sentence that says what to do next (repo rule 3).
+// One error shape for every refusal: a stable code and a sentence that says what to do next (repo
+// rule 3).
 export class ContractError extends Error {
   readonly code: string;
   readonly httpStatus: number;

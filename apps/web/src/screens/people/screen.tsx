@@ -39,8 +39,9 @@ function sourceFor(name: string): string {
   return `${name}, in their own words`;
 }
 
-// See how you'd get on: the button that opens the meeting picker for this listing, where your Meety and theirs talk a question you pick
-// through and you get a short brief, or the line that a card is needed.
+// See how you'd get on: the button that opens the meeting picker for this listing, where your Meety
+// and theirs talk a question you pick through and you get a short brief, or the line that a card is
+// needed.
 const MeetAgent = (props: { profile: ProfileView; meet: MeetControls | null }): ReactElement => {
   const { profile, meet } = props;
   if (meet === null) return <p className="profile-note">{PROFILE_COPY.noCard}</p>;
@@ -71,7 +72,8 @@ const MeetAgent = (props: { profile: ProfileView; meet: MeetControls | null }): 
   );
 };
 
-// The buttons of a friend's profile: the Friends chip, Ask their Meety (or why not), and See how you'd get on.
+// The buttons of a friend's profile: the Friends chip, Ask their Meety (or why not), and See how
+// you'd get on.
 const FriendButtons = (props: {
   profile: ProfileView;
   meet: MeetControls | null;
@@ -146,7 +148,8 @@ const FriendshipButtons = (props: {
   );
 };
 
-// A loaded profile: the header with its buttons and any refusal, then the About and Posts tabs, open on Posts when the address says so.
+// A loaded profile: the header with its buttons and any refusal, then the About and Posts tabs,
+// open on Posts when the address says so.
 const ProfileBody = (props: { model: ProfileModel; profile: ProfileView }): ReactElement => {
   const { model, profile } = props;
   const navigate = useNavigate();
@@ -182,7 +185,8 @@ const ProfileBody = (props: { model: ProfileModel; profile: ProfileView }): Reac
   );
 };
 
-// The page before a profile has loaded: loading, gone from Explore (404), or another error with a retry.
+// The page before a profile has loaded: loading, gone from Explore (404), or another error with a
+// retry.
 const ProfileWaiting = (props: { model: ProfileModel }): ReactElement => {
   const { error } = props.model.profile;
   if (error === null) return <LoadingLine text={PROFILE_COPY.loading} />;
@@ -209,7 +213,8 @@ const ProfileWaiting = (props: { model: ProfileModel }): ReactElement => {
   );
 };
 
-// One person's profile from Explore, at /people/:listingId: Instagram's header and tabs, with the buttons of a friend request.
+// One person's profile from Explore, at /people/:listingId: Instagram's header and tabs, with the
+// buttons of a friend request.
 export const PersonScreen = (): ReactElement => {
   const { listingId = "" } = useParams();
   const model = useProfile(listingId);

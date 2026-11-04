@@ -3,7 +3,8 @@ import { registerGiveConsent } from "./give-consent.js";
 import { registerReadSharePage } from "./read-share-page.js";
 import { registerWithdrawConsent } from "./withdraw-consent.js";
 
-// The share routes as one plugin for apps/api/src/server.ts slot 10: give consent, withdraw consent, read the public page.
+// The share routes as one plugin for apps/api/src/server.ts slot 10: give consent, withdraw
+// consent, read the public page.
 export const registerShareRoutes: RoutePlugin = async (app, deps) => {
   await registerGiveConsent(app, deps);
   await registerWithdrawConsent(app, deps);

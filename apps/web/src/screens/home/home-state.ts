@@ -9,12 +9,14 @@ import {
 } from "../../app-shell/index.js";
 import type { StickerName } from "../../look/index.js";
 
-// How often the home screen asks again while something on it is still moving (a card being written, a meeting under way), in ms.
+// How often the home screen asks again while something on it is still moving (a card being written,
+// a meeting under way), in ms.
 export const HOME_POLL_MS = 5_000;
 
 // One link the next step offers: its words and where it goes.
 export type StepLink = { label: string; to: string };
-// The one next step home shows: a short heading, one line, the main link, an optional second link, and its sticker.
+// The one next step home shows: a short heading, one line, the main link, an optional second link,
+// and its sticker.
 export type NextStep = {
   title: string;
   text: string;
@@ -23,7 +25,8 @@ export type NextStep = {
   sticker: StickerName;
 };
 
-// Loads the home view and asks again while a card is being written or a meeting is waiting or running.
+// Loads the home view and asks again while a card is being written or a meeting is waiting or
+// running.
 export function useHomeView(): PolledView<HomeView> {
   return usePolledView(() => apiFetch(routes.people.readHome, {}), {
     key: "home",
@@ -96,7 +99,8 @@ function stepBeforeApproval(home: HomeView): NextStep | null {
   };
 }
 
-// The step after the card is approved: watch a meeting, read a brief, go back to a waiting pair, or meet someone.
+// The step after the card is approved: watch a meeting, read a brief, go back to a waiting pair, or
+// meet someone.
 function stepAfterApproval(home: HomeView, cardId: string): NextStep {
   const live = home.meetings.find((meeting) => isUnderWay(meeting.state));
   if (live !== undefined) {
@@ -139,7 +143,8 @@ function stepAfterApproval(home: HomeView, cardId: string): NextStep {
   };
 }
 
-// The one next step for this person, from where they are: notes, names, card, then meetings (design pass fix 4).
+// The one next step for this person, from where they are: notes, names, card, then meetings (design
+// pass fix 4).
 export function nextStepOf(home: HomeView): NextStep {
   const before = stepBeforeApproval(home);
   if (before !== null || home.card === null)

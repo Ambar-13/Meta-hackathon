@@ -7,10 +7,12 @@ import { SummarySection, useSummary, type SummaryHook } from "../summary/index.j
 import { useIsNarrowScreen, useUploadFlow, type UploadFlow } from "./upload-state.js";
 import { FileTab, PasteTab, PreparingLine, PreviewPanel, UploadTabs } from "./upload-parts.js";
 
-// The sentence for a file check that crashed; it has no code of its own, so it is shown as a status 0 error.
+// The sentence for a file check that crashed; it has no code of its own, so it is shown as a status
+// 0 error.
 const CRASHED_SENTENCE = "The file check stopped. Reload the page and try again.";
 
-// What the page does when the person acts: pick a tab, start, stop, start over, paste instead, attest, upload.
+// What the page does when the person acts: pick a tab, start, stop, start over, paste instead,
+// attest, upload.
 export type UploadActions = {
   onTab: (tab: "paste" | "file") => void;
   onStart: (input: UploadInput) => void;
@@ -75,8 +77,8 @@ const FlowBody = (props: { flow: UploadFlow; actions: UploadActions }): ReactEle
   return null;
 };
 
-// The page for one flow state: while nothing is picked, your AI's summary first, then your chats with their lede and tabs; after that
-// the flow body. The gallery renders it directly.
+// The page for one flow state: while nothing is picked, your AI's summary first, then your chats
+// with their lede and tabs; after that the flow body. The gallery renders it directly.
 export const UploadView = (props: {
   flow: UploadFlow;
   tab: "paste" | "file";
@@ -122,8 +124,8 @@ export const UploadView = (props: {
   );
 };
 
-// The upload page: your AI's summary, then paste or pick, see what will be sent, attest, upload. The summary's quotes and topics go to
-// the file check, so what you said first is kept first.
+// The upload page: your AI's summary, then paste or pick, see what will be sent, attest, upload.
+// The summary's quotes and topics go to the file check, so what you said first is kept first.
 export const UploadScreen = (props: { prepare?: typeof prepareUpload }): ReactElement => {
   const navigate = useNavigate();
   const isNarrow = useIsNarrowScreen();

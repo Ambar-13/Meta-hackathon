@@ -1,9 +1,11 @@
-// The human metrics: reads the private response files, one per real pair, and prints the table. Names are never read.
+// The human metrics: reads the private response files, one per real pair, and prints the table.
+// Names are never read.
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { z } from "zod";
 
-// The answers of one side: the card, the unsupported lines, the worth of the brief, and the teammate question.
+// The answers of one side: the card, the unsupported lines, the worth of the brief, and the
+// teammate question.
 const SideAnswers = z
   .object({
     cardRepresentedYou: z.number().int().min(1).max(5),
@@ -37,7 +39,8 @@ function mean(values: number[]): number {
     : values.reduce((total, value) => total + value, 0) / values.length;
 }
 
-// Reads every response file in the folder. A file that does not match the schema is named in a warning and skipped.
+// Reads every response file in the folder. A file that does not match the schema is named in a
+// warning and skipped.
 async function readResponses(folder: string): Promise<HumanResponse[]> {
   const names = await readdir(folder).catch(() => []);
   const responses: HumanResponse[] = [];
@@ -76,7 +79,8 @@ function tableOf(responses: HumanResponse[]): string {
   ].join("\n");
 }
 
-// Builds the human table from the response folder. Zero real responses prints the sentence and nothing else.
+// Builds the human table from the response folder. Zero real responses prints the sentence and
+// nothing else.
 export async function buildHumanTable(
   responsesDir: string,
 ): Promise<{ table: string; count: number }> {

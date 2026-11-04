@@ -42,7 +42,8 @@ const messages0: ChatMessage[] = buildReceiptsMessages("RECEIPTS RULES", {
   recallTurns: [],
 });
 
-// A fake receipts call: returns its scripted replies in order, records the messages of each call, and throws a scripted error when a reply is an Error.
+// A fake receipts call: returns its scripted replies in order, records the messages of each call,
+// and throws a scripted error when a reply is an Error.
 function fakeReceipts(replies: ReadonlyArray<unknown>) {
   const queue = [...replies];
   const seen: ChatMessage[][] = [];

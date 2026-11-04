@@ -1,4 +1,5 @@
-// Steps 8 to 12: the streamed meeting, the background return, the removed ask steps, and the decision.
+// Steps 8 to 12: the streamed meeting, the background return, the removed ask steps, and the
+// decision.
 import {
   MeetingEnded,
   MeetingStarted,
@@ -24,8 +25,9 @@ import {
   type StepResult,
 } from "./report.js";
 
-// The first and second turns may take 210 s each: one first-token retry (45 s), a 120 s speech call and 30 s of receipts, rounded up
-// (as measured on the live model on 27 Oct 2026: Muse Spark reasons silently before its first word).
+// The first and second turns may take 210 s each: one first-token retry (45 s), a 120 s speech call
+// and 30 s of receipts, rounded up (as measured on the live model on 27 Oct 2026: Muse Spark
+// reasons silently before its first word).
 const TURN_TIMEOUT_MS = 210_000;
 // The meeting may run for 14 minutes from its start: the 13-minute worst case plus a minute.
 const MEETING_WAIT_MS = 840_000;
@@ -53,7 +55,8 @@ function turnsOf(reader: EventStreamReader): TurnCommitted[] {
   );
 }
 
-// Whether the turns both readers hold read the same text and claims, comparing every step both have seen.
+// Whether the turns both readers hold read the same text and claims, comparing every step both have
+// seen.
 function sameTurnsOnBothScreens(
   a: EventStreamReader,
   b: EventStreamReader,
@@ -100,8 +103,9 @@ async function arrivalAfter(
   }
 }
 
-// The checks on the recall switch: A's persona calls recall when it chooses to, and B's lookups return nothing.
-// The recorded model did not call recall, so --mock tolerates a missing call as a live run does.
+// The checks on the recall switch: A's persona calls recall when it chooses to, and B's lookups
+// return nothing. The recorded model did not call recall, so --mock tolerates a missing call as a
+// live run does.
 function recallChecks(a: EventStreamReader, isMock: boolean, notes: string[]): Assertion[] {
   const isRecallCalled = a.committed.some(
     (event) => event.type === "tool.called" && event.tool === "recall" && event.side === "a",
@@ -133,7 +137,8 @@ function recallChecks(a: EventStreamReader, isMock: boolean, notes: string[]): A
   return checks;
 }
 
-// The checks on the deltas: a delta comes before its commit, and the offsets of each attempt rise. A live run without deltas is a warning.
+// The checks on the deltas: a delta comes before its commit, and the offsets of each attempt rise.
+// A live run without deltas is a warning.
 function deltaChecks(a: EventStreamReader, isMock: boolean, notes: string[]): Assertion[] {
   const firstTurn = turnsOf(a)[0];
   const deltaFirst =
@@ -159,7 +164,8 @@ function deltaChecks(a: EventStreamReader, isMock: boolean, notes: string[]): As
   return checks;
 }
 
-// The planned cut: under mock the stream must reach its seq, and the first event after it must be the next seq.
+// The planned cut: under mock the stream must reach its seq, and the first event after it must be
+// the next seq.
 function cutChecks(a: EventStreamReader, isMock: boolean, notes: string[]): Assertion[] {
   const hasCut = a.committed.some((event) => event.seq === PLANNED_DISCONNECT_SEQ);
   if (!hasCut) {
@@ -180,8 +186,10 @@ function cutChecks(a: EventStreamReader, isMock: boolean, notes: string[]): Asse
   return [check("planned reconnect", RESUMED_SEQ, a.committed[index + 1]?.seq)];
 }
 
-// Step 8: both screens show the same turns, the recall switch works on A's side only, deltas arrive before the commit, and the planned cut resumes with the next seq.
-// Under a live run a missing recall call, missing deltas or a meeting that ends before the cut are noted, not failed (model choice).
+// Step 8: both screens show the same turns, the recall switch works on A's side only, deltas arrive
+// before the commit, and the planned cut resumes with the next seq. Under a live run a missing
+// recall call, missing deltas or a meeting that ends before the cut are noted, not failed (model
+// choice).
 export async function step08Stream(run: RunState): Promise<StepResult> {
   const { a, b } = readers(run);
   const isMock = run.options.mode === "mock";
@@ -235,9 +243,10 @@ export function removedStep(number: number, name: string): StepResult {
   };
 }
 
-// Step 11: A backgrounds the page during B's turn. The replay after the return has no gap and no duplicate, and the mid-turn text comes back.
-// It waits for a delta of B's that arrives after the step starts, so A closes while B is writing; a delta seen earlier could be from a
-// meeting that has already ended, and then nothing comes back after the return.
+// Step 11: A backgrounds the page during B's turn. The replay after the return has no gap and no
+// duplicate, and the mid-turn text comes back. It waits for a delta of B's that arrives after the
+// step starts, so A closes while B is writing; a delta seen earlier could be from a meeting that
+// has already ended, and then nothing comes back after the return.
 export async function step11Background(run: RunState): Promise<StepResult> {
   const { a } = readers(run);
   const meetingId = need(run.ids.meetingId, "meetingId");
@@ -296,8 +305,9 @@ export async function step11Background(run: RunState): Promise<StepResult> {
   return finishStep(11, "background", { rows: ["R8.3", "R8.1", "D49"], detail, assertions });
 }
 
-// The concede and hold checks of the decision: a decide phase, and each side concedes or holds.
-// How many sides concede is the model's choice; the recorded meeting had none, so --mock does not count them.
+// The concede and hold checks of the decision: a decide phase, and each side concedes or holds. How
+// many sides concede is the model's choice; the recorded meeting had none, so --mock does not count
+// them.
 function decisionChecks(a: EventStreamReader): Assertion[] {
   const isEachSide = (["a", "b"] as const).every((side) =>
     a.committed.some(
@@ -314,7 +324,8 @@ function decisionChecks(a: EventStreamReader): Assertion[] {
   ];
 }
 
-// Step 12: the meeting decides within 13 minutes. Both readers agree on the turns, and the database has one meeting.ended.
+// Step 12: the meeting decides within 13 minutes. Both readers agree on the turns, and the database
+// has one meeting.ended.
 export async function step12Decide(run: RunState): Promise<StepResult> {
   const { a, b } = readers(run);
   const meetingId = need(run.ids.meetingId, "meetingId");

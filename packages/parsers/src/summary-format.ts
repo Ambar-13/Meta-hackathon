@@ -17,8 +17,9 @@ type Field = "kind" | "topic" | "point" | "strength" | "quote";
 // One block while it is read: its fields so far.
 type Draft = { kind?: string; topic?: string; point?: string; strength?: string; quotes: string[] };
 
-// A field line after any bullets (hyphens, en or em dashes, dots), numbers, quote markers or bold around the field name, with an
-// optional number after it: "1. **Kind:** view", "- point: ...", "Quote 2: ...", "Quote #3: ...".
+// A field line after any bullets (hyphens, en or em dashes, dots), numbers, quote markers or bold
+// around the field name, with an optional number after it: "1. **Kind:** view", "- point: ...",
+// "Quote 2: ...", "Quote #3: ...".
 const FIELD_LINE =
   /^[\s>*•\-\u2013\u2014\d.)]*(?:\*\*|__)?(kind|topic|point|strength|quote)(?:\s*#?\d+)?(?:\*\*|__)?\s*:\s*(?:\*\*|__)?\s*(.*)$/i;
 // Quote marks that may wrap a value, each opener with its closer.
@@ -49,7 +50,8 @@ function cutTo(text: string, max: number): string {
   return Array.from(text).slice(0, max).join("");
 }
 
-// The point a finished block makes, or null when it has no point. The strength is its first word, so a note after it is ignored.
+// The point a finished block makes, or null when it has no point. The strength is its first word,
+// so a note after it is ignored.
 function pointOf(draft: Draft): SummaryPoint | null {
   const point = cutTo(draft.point ?? "", SUMMARY_LINE_MAX_CHARS);
   if (point === "") return null;
@@ -67,12 +69,14 @@ function pointOf(draft: Draft): SummaryPoint | null {
   };
 }
 
-// True when a field starts a new block: a kind or a point arriving after the block already has a point.
+// True when a field starts a new block: a kind or a point arriving after the block already has a
+// point.
 function startsNewBlock(draft: Draft, field: Field): boolean {
   return (field === "kind" || field === "point") && draft.point !== undefined;
 }
 
-// The blocks of a summary, each as its fields. A blank line ends a block, and so does a new kind or point after a point.
+// The blocks of a summary, each as its fields. A blank line ends a block, and so does a new kind or
+// point after a point.
 function readDrafts(text: string): Draft[] {
   const drafts: Draft[] = [];
   let draft: Draft = { quotes: [] };
@@ -97,8 +101,9 @@ function readDrafts(text: string): Draft[] {
   return drafts;
 }
 
-// The points of a summary written in the copy prompt's format, at most SUMMARY_MAX_POINTS. Lines that are not fields are
-// ignored, so an AI's opening sentence or headings do no harm; text with no point gives an empty list.
+// The points of a summary written in the copy prompt's format, at most SUMMARY_MAX_POINTS. Lines
+// that are not fields are ignored, so an AI's opening sentence or headings do no harm; text with no
+// point gives an empty list.
 export function parseSummary(text: string): SummaryPoint[] {
   return readDrafts(text)
     .map(pointOf)
@@ -106,7 +111,8 @@ export function parseSummary(text: string): SummaryPoint[] {
     .slice(0, SUMMARY_MAX_POINTS);
 }
 
-// Every quote of the points in order, and every topic once, in the order it first appears, ignoring case.
+// Every quote of the points in order, and every topic once, in the order it first appears, ignoring
+// case.
 export function summaryPriority(points: readonly SummaryPoint[]): SummaryPriority {
   const seen = new Set<string>();
   const topics: string[] = [];
@@ -119,8 +125,9 @@ export function summaryPriority(points: readonly SummaryPoint[]): SummaryPriorit
   return { quotes: points.flatMap((point) => point.quotes), topics };
 }
 
-// The points written back in the copy prompt's format: one block per point with its fields in order, a blank line between blocks, and
-// no Topic or Quote line where the point has none. parseSummary reads the same points from it.
+// The points written back in the copy prompt's format: one block per point with its fields in
+// order, a blank line between blocks, and no Topic or Quote line where the point has none.
+// parseSummary reads the same points from it.
 export function formatSummary(points: readonly SummaryPoint[]): string {
   return points
     .map((point) =>

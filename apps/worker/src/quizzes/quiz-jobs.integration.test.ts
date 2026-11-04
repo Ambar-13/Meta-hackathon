@@ -77,7 +77,8 @@ type SetUpOptions = {
 // The ids a set-up gives back; quizId is null when the test skipped the quiz.
 type SetUp = { personId: string; cardId: string; quizId: string | null };
 
-// The question id one position asks in this set-up: the fixed id, or the id the test names for that position.
+// The question id one position asks in this set-up: the fixed id, or the id the test names for that
+// position.
 function questionIdFor(options: SetUpOptions, position: number): number {
   const questionAt = options.questionIdAt;
   if (questionAt !== undefined && questionAt.position === position) return questionAt.questionId;
@@ -92,14 +93,16 @@ function personaAnswerFor(personaAnswers: PersonaAnswers, position: number): str
   return isAnswered ? requireElement(FIXTURE_PERSONA_ANSWERS, position - 1) : null;
 }
 
-// The human answer of one position in this set-up: the fixture answer, the position 6 variant when named, or null.
+// The human answer of one position in this set-up: the fixture answer, the position 6 variant when
+// named, or null.
 function humanAnswerFor(options: SetUpOptions, position: number): string | null {
   if (options.humanAnswers !== "all") return null;
   if (position === 6 && options.humanAnswerAt6 !== undefined) return options.humanAnswerAt6;
   return requireElement(FIXTURE_HUMAN_ANSWERS, position - 1);
 }
 
-// Replaces the card's items with the six fixture items, unapproved at the positions the set-up names.
+// Replaces the card's items with the six fixture items, unapproved at the positions the set-up
+// names.
 async function insertCardItems(
   trx: DatabaseTransaction,
   args: {
@@ -173,7 +176,8 @@ async function insertQuizRows(
   return quiz.id;
 }
 
-// Writes one person, a frozen source, an approved card with the six fixture items, and a quiz in the state the test names.
+// Writes one person, a frozen source, an approved card with the six fixture items, and a quiz in
+// the state the test names.
 async function setUpQuiz(options: SetUpOptions): Promise<SetUp> {
   const owner = await createTestPerson(database.db, "Quiz Owner");
   const source = await createFrozenSource(database.db, owner.personId, [...FIXTURE_TURNS]);
@@ -231,7 +235,8 @@ async function countLedger(
   return numberFromPostgres(row.n);
 }
 
-// Writes one ledger row for a person as the owner, so a test can fill the limiter window or the daily dollar cap.
+// Writes one ledger row for a person as the owner, so a test can fill the limiter window or the
+// daily dollar cap.
 async function plantLedgerRow(
   personId: string,
   values: { estTokens: number; usd?: number; status: "started" | "ok" },

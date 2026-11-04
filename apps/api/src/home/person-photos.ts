@@ -1,5 +1,6 @@
-// Which picture a person shows: a sample person's bundled face, or the profile photo a real person put up themselves, read
-// by listing or by pair through definer functions (migration 0012), so no person id leaves the database.
+// Which picture a person shows: a sample person's bundled face, or the profile photo a real person
+// put up themselves, read by listing or by pair through definer functions (migration 0012), so no
+// person id leaves the database.
 import { sql } from "kysely";
 import { sampleFaceKey, type DatabaseTransaction } from "@meet-first/db";
 
@@ -14,7 +15,8 @@ export function photoKeyOf(photoId: string): string {
   return `photos/${photoId}`;
 }
 
-// The picture of one person: a sample person's face by their name, else their own photo when they put one up, else none.
+// The picture of one person: a sample person's face by their name, else their own photo when they
+// put one up, else none.
 export function personPhoto(input: {
   isSample: boolean;
   displayName: string;

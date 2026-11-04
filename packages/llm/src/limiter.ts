@@ -10,7 +10,8 @@ import type { Kysely } from "kysely";
 import { LIMITER } from "./config.js";
 import { readLedgerWindow } from "./ledger.js";
 
-// The refusal for a call that would overflow the shared token window, with the time the job may try again.
+// The refusal for a call that would overflow the shared token window, with the time the job may try
+// again.
 export class LimiterBusy extends ContractError {
   constructor(public readonly retryAtMs: number) {
     super(
@@ -21,7 +22,8 @@ export class LimiterBusy extends ContractError {
   }
 }
 
-// Reads ledger_window(60) and throws LimiterBusy when the window is at or over any ceiling. The ledger is the only counter.
+// Reads ledger_window(60) and throws LimiterBusy when the window is at or over any ceiling. The
+// ledger is the only counter.
 export async function assertWindowHasRoom(
   db: Kysely<Database>,
   kind: "chat" | "image",

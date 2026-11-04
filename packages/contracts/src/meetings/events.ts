@@ -45,7 +45,8 @@ export const PhaseChanged = z.object({
   stepSeq: z.number().int(),
 });
 export type PhaseChanged = z.infer<typeof PhaseChanged>;
-// A slice of a turn still being written. It is not stored and has no seq, so a reconnect never replays it.
+// A slice of a turn still being written. It is not stored and has no seq, so a reconnect never
+// replays it.
 export const TurnDelta = z.object({
   ...base,
   type: z.literal("turn.delta"),
@@ -165,7 +166,8 @@ export type MeetingEventRow = {
   payload: Record<string, unknown>;
   created_at: Date | string;
 };
-// Rebuilds and checks one committed event from its row. A row that no longer matches its schema is a server fault.
+// Rebuilds and checks one committed event from its row. A row that no longer matches its schema is
+// a server fault.
 export function rowToEvent(row: MeetingEventRow): CommittedEvent {
   const parsed = CommittedEvent.safeParse({
     ...row.payload,
@@ -184,12 +186,14 @@ export function rowToEvent(row: MeetingEventRow): CommittedEvent {
   }
   return parsed.data;
 }
-// The payload column for one committed event: the event without v, type, meetingId, seq and at. A writer stores
-// { meeting_id: event.meetingId, seq: event.seq, type: event.type, v: event.v, payload: eventToPayload(event), created_at: event.at }.
+// The payload column for one committed event: the event without v, type, meetingId, seq and at. A
+// writer stores { meeting_id: event.meetingId, seq: event.seq, type: event.type, v: event.v,
+// payload: eventToPayload(event), created_at: event.at }.
 export function eventToPayload(event: CommittedEvent): Record<string, unknown> {
   return Object.fromEntries(Object.entries(event).filter(([key]) => !KEYS_STORED_APART.has(key)));
 }
-// What the poll route returns: committed events after a sequence number, the partial turn, and the server time.
+// What the poll route returns: committed events after a sequence number, the partial turn, and the
+// server time.
 export const PollResponse = z.object({
   v: z.literal(EVENT_VERSION),
   events: z.array(CommittedEvent),

@@ -22,14 +22,16 @@ const TRY_COPY = {
 // The fewest characters a question may have, as POST /api/asks counts them.
 const QUESTION_MIN_CHARACTERS = 5;
 
-// Where a question to your own Meety stands: not sent, sending, refused before any request, or failed.
+// Where a question to your own Meety stands: not sent, sending, refused before any request, or
+// failed.
 type TryState =
   | { kind: "idle" }
   | { kind: "sending" }
   | { kind: "refused"; sentence: string }
   | { kind: "failed"; error: ApiError };
 
-// Sends a self ask with POST /api/asks and opens its page, where the answer shows as a friend ask's does.
+// Sends a self ask with POST /api/asks and opens its page, where the answer shows as a friend ask's
+// does.
 function useSelfAsk(): { state: TryState; send: (text: string) => Promise<void> } {
   const navigate = useNavigate();
   const [state, setState] = useState<TryState>({ kind: "idle" });
@@ -52,7 +54,8 @@ function useSelfAsk(): { state: TryState; send: (text: string) => Promise<void> 
   return { state, send };
 }
 
-// Try your Meety, on Me once there is a card or a checked summary: one question to your own Meety about you.
+// Try your Meety, on Me once there is a card or a checked summary: one question to your own Meety
+// about you.
 export const TryMeety = (): ReactElement => {
   const titleId = useId();
   const [text, setText] = useState("");

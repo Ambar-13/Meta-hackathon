@@ -134,7 +134,8 @@ function takeFill(candidates: readonly Candidate[], chosen: Set<number>, room: R
   }
 }
 
-// Picks whole turns for the card prompt: the newest up to half the cap, then the turns that add the most new keywords, then the newest of the rest, never over maxChars.
+// Picks whole turns for the card prompt: the newest up to half the cap, then the turns that add the
+// most new keywords, then the newest of the rest, never over maxChars.
 export function sampleTurns(turns: readonly SampledTurn[], maxChars: number): SampledTurn[] {
   const ordered = [...turns].sort((a, b) => a.turnIndex - b.turnIndex);
   const budget = maxChars + TURN_BLOCK_SEPARATOR.length;
@@ -152,7 +153,8 @@ export function sampleTurns(turns: readonly SampledTurn[], maxChars: number): Sa
   return candidates.flatMap((candidate, index) => (chosen.has(index) ? [candidate.turn] : []));
 }
 
-// The keywords of a text: lower-case letter and digit runs of 3 or more characters minus STOP_WORDS; in scripts written without spaces, every 2-character window of a run.
+// The keywords of a text: lower-case letter and digit runs of 3 or more characters minus
+// STOP_WORDS; in scripts written without spaces, every 2-character window of a run.
 export function keywordsOf(text: string): Set<string> {
   const plain = text.replace(PROTECTED_TOKEN, " ").toLowerCase();
   const words = plain.match(/[\p{L}\p{M}\p{N}]+/gu) ?? [];
@@ -169,7 +171,8 @@ export function keywordsOf(text: string): Set<string> {
   return keywords;
 }
 
-// The first card call: the dossier prompt and the untrusted-data rules as the system message, the sampled turns in turn_index order as the user message.
+// The first card call: the dossier prompt and the untrusted-data rules as the system message, the
+// sampled turns in turn_index order as the user message.
 export function cardCall(turns: readonly SampledTurn[]): ModelCall {
   const prompt = readPrompt("dossier");
   const rules = readPrompt("untrusted-data-rules");
@@ -188,7 +191,8 @@ export function cardCall(turns: readonly SampledTurn[]): ModelCall {
   };
 }
 
-// The one regeneration call: the first call's messages, the first reply as the assistant message, and the failed items as a new user message.
+// The one regeneration call: the first call's messages, the first reply as the assistant message,
+// and the failed items as a new user message.
 export function cardRegenerationCall(
   first: ModelCall,
   firstReplyText: string,

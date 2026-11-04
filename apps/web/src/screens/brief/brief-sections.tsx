@@ -3,7 +3,8 @@ import { NO_RECEIPT_COPY, type BriefPoint, type Quote } from "@meet-first/contra
 import { Sticker } from "../../look/index.js";
 import { isWeakReceipt } from "./brief-state.js";
 
-// How many characters of a quote a chip shows before the ellipsis (the chip copy in the screen table).
+// How many characters of a quote a chip shows before the ellipsis (the chip copy in the screen
+// table).
 const CHIP_CHARACTERS = 40;
 // The handler a chip calls with the line it came from and the quote it shows.
 export type ShowQuote = (lineText: string, quote: Quote) => void;
@@ -21,12 +22,14 @@ function excerptOf(quote: Quote): string {
     : quote.text;
 }
 
-// The text of one quote chip: the side letter, then the first 40 characters, with an ellipsis when the quote is longer.
+// The text of one quote chip: the side letter, then the first 40 characters, with an ellipsis when
+// the quote is longer.
 export function chipText(quote: Quote): string {
   return `${sideLetter(quote.side)}: ${excerptOf(quote)}`;
 }
 
-// One quote chip: the side's letter in its colour, the start of the quote, and the no-receipt words when it did not match.
+// One quote chip: the side's letter in its colour, the start of the quote, and the no-receipt words
+// when it did not match.
 const QuoteChip = (props: { quote: Quote; onOpen: () => void }): ReactElement => {
   const { quote } = props;
   const name = quote.verified ? chipText(quote) : `${chipText(quote)} ${NO_RECEIPT_COPY}`;
@@ -46,7 +49,8 @@ const QuoteChip = (props: { quote: Quote; onOpen: () => void }): ReactElement =>
   );
 };
 
-// One line of a brief: its text, the weak receipt mark when the check did not back it, and one chip per quote.
+// One line of a brief: its text, the weak receipt mark when the check did not back it, and one chip
+// per quote.
 export const BriefLine = (props: { point: BriefPoint; onQuote: ShowQuote }): ReactElement => {
   const isWeak = isWeakReceipt(props.point);
   return (
@@ -72,7 +76,8 @@ export const BriefLine = (props: { point: BriefPoint; onQuote: ShowQuote }): Rea
   );
 };
 
-// The colour and sticker of each part of a brief, in order: where you click, where you rub, what to settle first, set aside.
+// The colour and sticker of each part of a brief, in order: where you click, where you rub, what to
+// settle first, set aside.
 export type SectionTone = "agree" | "clash" | "first" | "aside";
 // Each tone's colour class and sticker.
 const TONES: Record<SectionTone, { colour: string; sticker: "smile" | "spark" | "ask" | "nope" }> =
@@ -83,7 +88,8 @@ const TONES: Record<SectionTone, { colour: string; sticker: "smile" | "spark" | 
     aside: { colour: "", sticker: "nope" },
   };
 
-// One titled section of a brief, as a tilted colour panel with its lines in order; set-aside lines sit on a quiet dashed panel.
+// One titled section of a brief, as a tilted colour panel with its lines in order; set-aside lines
+// sit on a quiet dashed panel.
 export const BriefSection = (props: {
   title: string;
   points: BriefPoint[];

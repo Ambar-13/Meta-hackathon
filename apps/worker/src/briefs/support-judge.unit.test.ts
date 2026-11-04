@@ -116,7 +116,8 @@ describe("support judge input and verdicts", () => {
   });
 
   it("W2-BRIEF-T4 (ARCHITECTURE.md 3.19): computeSupportRate ignores lines without a quote and returns null when no line has one", () => {
-    // Four lines carry a quote (indexes 0 to 3); three of them are supported. The other five have no quote.
+    // Four lines carry a quote (indexes 0 to 3); three of them are supported. The other five have
+    // no quote.
     const points = nineLines();
     const withFourQuotes: BriefSections = {
       agree: points.agree,

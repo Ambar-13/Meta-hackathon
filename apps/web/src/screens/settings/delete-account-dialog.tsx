@@ -11,7 +11,8 @@ export const DELETING_COPY = "Deleting. This takes a few seconds.";
 // The id of the dialog title, which names the dialog for screen readers.
 const TITLE_ID = "delete-account-dialog-title";
 
-// The props of the dialog: whether a delete is running, the failure sentence if any, and the two actions.
+// The props of the dialog: whether a delete is running, the failure sentence if any, and the two
+// actions.
 type DeleteAccountDialogProps = {
   isBusy: boolean;
   errorText: string | null;
@@ -19,15 +20,17 @@ type DeleteAccountDialogProps = {
   onConfirm: () => void;
 };
 
-// The modal dialog that asks before a delete, over a dimmed page. Focus starts on Keep my account, Tab stays inside the dialog, and
-// Escape keeps the account. Both buttons are full width; the delete one is the coral danger button.
+// The modal dialog that asks before a delete, over a dimmed page. Focus starts on Keep my account,
+// Tab stays inside the dialog, and Escape keeps the account. Both buttons are full width; the
+// delete one is the coral danger button.
 export const DeleteAccountDialog = (props: DeleteAccountDialogProps): ReactElement => {
   const keepRef = useRef<HTMLButtonElement | null>(null);
   const confirmRef = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {
     keepRef.current?.focus();
   }, []);
-  // Keeps Tab and Shift+Tab inside the two buttons, and closes the dialog on Escape when no delete is running.
+  // Keeps Tab and Shift+Tab inside the two buttons, and closes the dialog on Escape when no delete
+  // is running.
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
     if (event.key === "Escape" && !props.isBusy) props.onCancel();
     const first = keepRef.current;

@@ -8,7 +8,8 @@ export const QUIZ_ITEMS = 10;
 // Where a quiz is in its life, from answering to judged or failed.
 export const QuizState = z.enum(["answering", "waiting_human", "judging", "judged", "failed"]);
 export type QuizState = z.infer<typeof QuizState>;
-// One question of a quiz as the browser sees it. The persona answer stays hidden until the human answers.
+// One question of a quiz as the browser sees it. The persona answer stays hidden until the human
+// answers.
 export const QuizItemView = z.object({
   position: z.number().int().min(1).max(QUIZ_ITEMS),
   questionId: z.number().int().min(1).max(30),
@@ -59,7 +60,8 @@ export type QuizPersonaAnswerOutput = z.infer<typeof QuizPersonaAnswerOutput>;
 // What the blind judge returns: whether the two answers agree and why.
 export const QuizJudgeOutput = z.object({ agree: z.boolean(), reason: z.string().min(1).max(300) });
 export type QuizJudgeOutput = z.infer<typeof QuizJudgeOutput>;
-// One item's raw judge record, kept in quiz_items.judge_raw: the run, the order the judge saw, its parsed output and the ledger row of the call.
+// One item's raw judge record, kept in quiz_items.judge_raw: the run, the order the judge saw, its
+// parsed output and the ledger row of the call.
 export const QuizJudgeRaw = z.object({
   run: z.union([z.literal(1), z.literal(2)]),
   isHumanFirst: z.boolean(),
@@ -67,7 +69,8 @@ export const QuizJudgeRaw = z.object({
   ledgerId: Uuid,
 });
 export type QuizJudgeRaw = z.infer<typeof QuizJudgeRaw>;
-// One calibration run, kept in quizzes.calibration_raw: the probe used, both pair results and whether the run passed.
+// One calibration run, kept in quizzes.calibration_raw: the probe used, both pair results and
+// whether the run passed.
 export const QuizCalibrationRun = z.object({
   run: z.union([z.literal(1), z.literal(2)]),
   entryIndex: z.number().int().min(0).max(7),

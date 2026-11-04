@@ -14,12 +14,14 @@ import {
 
 // One item still waiting for its persona answer: its position and the bank question text.
 type PendingItem = { position: number; text: string };
-// What the job reads before it calls the model: skip the quiz, or answer the pending items from these card items.
+// What the job reads before it calls the model: skip the quiz, or answer the pending items from
+// these card items.
 type AnswerPlan =
   | { kind: "skip" }
   | { kind: "answer"; cardItems: PersonaCardItem[]; pending: PendingItem[] };
 
-// The card items the persona may use: the verified items of a ready card, or the approved and verified items of an approved card, in position order.
+// The card items the persona may use: the verified items of a ready card, or the approved and
+// verified items of an approved card, in position order.
 export async function readPersonaCardItems(
   trx: Transaction<Database>,
   cardId: string,
@@ -41,7 +43,8 @@ export async function readPersonaCardItems(
   return query.orderBy("position", "asc").execute();
 }
 
-// Marks a quiz failed from the state its job was working in and logs the stop code, so the screen stops waiting (fail closed).
+// Marks a quiz failed from the state its job was working in and logs the stop code, so the screen
+// stops waiting (fail closed).
 export async function markQuizFailed(
   context: JobContext,
   target: { personId: string; quizId: string; fromState: "answering" | "judging" },
@@ -62,7 +65,8 @@ export async function markQuizFailed(
   context.log.warn({ quizId: target.quizId, code }, sentence);
 }
 
-// Reads what the job needs in one committed read: the quiz state, the card items the persona may use, and the items still unanswered.
+// Reads what the job needs in one committed read: the quiz state, the card items the persona may
+// use, and the items still unanswered.
 async function readAnswerPlan(trx: Transaction<Database>, quizId: string): Promise<AnswerPlan> {
   const quiz = await trx
     .selectFrom("quizzes")
@@ -85,7 +89,8 @@ async function readAnswerPlan(trx: Transaction<Database>, quizId: string): Promi
   return { kind: "answer", cardItems: await readPersonaCardItems(trx, quiz.card_id), pending };
 }
 
-// One model call for one item. The answer is stored in its own short transaction the moment the call returns, so a later run skips it.
+// One model call for one item. The answer is stored in its own short transaction the moment the
+// call returns, so a later run skips it.
 async function answerOneItem(
   context: JobContext,
   args: {
@@ -120,7 +125,8 @@ async function answerOneItem(
   );
 }
 
-// Opens the quiz for the human once every item has a persona answer. Until then the form stays locked.
+// Opens the quiz for the human once every item has a persona answer. Until then the form stays
+// locked.
 async function openForHuman(trx: Transaction<Database>, quizId: string): Promise<void> {
   const missing = await trx
     .selectFrom("quiz_items")
@@ -138,7 +144,8 @@ async function openForHuman(trx: Transaction<Database>, quizId: string): Promise
   }
 }
 
-// The answer_quiz job: answers every item that has no persona answer yet, then opens the quiz for the human.
+// The answer_quiz job: answers every item that has no persona answer yet, then opens the quiz for
+// the human.
 export const answerQuizTask: JobTask<"answer_quiz"> = async (payload, context) => {
   const { quizId, personId } = payload;
   const plan = await withPerson(context.db, personId, (trx) => readAnswerPlan(trx, quizId));

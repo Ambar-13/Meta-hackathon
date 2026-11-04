@@ -55,7 +55,8 @@ export const QUIZ_STOP_SENTENCES = {
 // The codes a quiz job logs when it stops.
 export type QuizStopCode = keyof typeof QUIZ_STOP_SENTENCES;
 
-// The element at one place of a list. A missing place is a bug in the caller, so this throws (noUncheckedIndexedAccess in tsconfig.base.json).
+// The element at one place of a list. A missing place is a bug in the caller, so this throws
+// (noUncheckedIndexedAccess in tsconfig.base.json).
 export function requireElement<T>(list: readonly T[], index: number): T {
   const value = list[index];
   if (value === undefined) {
@@ -85,7 +86,8 @@ export function formatCardItems(items: readonly PersonaCardItem[]): string {
   return ["<card>", ...itemLines, "</card>"].join("\n");
 }
 
-// The call for one persona answer: the system prompt, then the card and one bank question, and nothing from the quiz tables.
+// The call for one persona answer: the system prompt, then the card and one bank question, and
+// nothing from the quiz tables.
 export function buildPersonaAnswerCall(
   prompt: QuizPrompt,
   items: readonly PersonaCardItem[],
@@ -105,7 +107,8 @@ export function buildPersonaAnswerCall(
   };
 }
 
-// The call for one judge verdict: the system prompt, then the question and the two answers, with no word about who wrote either.
+// The call for one judge verdict: the system prompt, then the question and the two answers, with no
+// word about who wrote either.
 export function buildJudgeCall(prompt: QuizPrompt, input: JudgeInput): QuizModelCall {
   const question = escapeBlockText(input.questionText);
   const answer1 = escapeBlockText(input.answer1);
@@ -124,7 +127,8 @@ export function buildJudgeCall(prompt: QuizPrompt, input: JudgeInput): QuizModel
   };
 }
 
-// The order of one item for the judge. Run 1 shows the human answer first when flipped is true, and run 2 shows the other order.
+// The order of one item for the judge. Run 1 shows the human answer first when flipped is true, and
+// run 2 shows the other order.
 export function orderForJudge(
   item: { personaAnswer: string; humanAnswer: string; flipped: boolean },
   run: 1 | 2,

@@ -5,7 +5,8 @@ import type { RouteDeps } from "../app-types.js";
 import { requirePerson } from "../sessions/index.js";
 import { readHomeView } from "./home-view.js";
 
-// Registers GET /api/home: 200 HomeView for the signed-in person; 401 session_missing without a session.
+// Registers GET /api/home: 200 HomeView for the signed-in person; 401 session_missing without a
+// session.
 export function registerReadHome(app: FastifyInstance, deps: RouteDeps): void {
   app.get(routes.people.readHome.path, async (request, reply) => {
     const personId = requirePerson(request);

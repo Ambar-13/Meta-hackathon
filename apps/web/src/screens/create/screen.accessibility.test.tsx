@@ -7,8 +7,9 @@ import { unlabelledControls } from "../../testing/render-screen.js";
 import { IDS, LISTING_IDS, SERVER_NOW } from "../../testing/fixtures.js";
 import { CreateScreen } from "./screen.js";
 
-// The browser's drawing of a picture, which jsdom cannot do: a picture file gives a small JPEG marked with the shape it was drawn for,
-// any other file the error the browser gives for a file it cannot draw; the base64 of a drawn JPEG names its shape too.
+// The browser's drawing of a picture, which jsdom cannot do: a picture file gives a small JPEG
+// marked with the shape it was drawn for, any other file the error the browser gives for a file it
+// cannot draw; the base64 of a drawn JPEG names its shape too.
 const drawn = vi.hoisted(() => ({ shapes: [] as string[], shapeOf: new Map<Blob, string>() }));
 vi.mock("../me/photo-file.js", async (importOriginal) => {
   const original = await importOriginal<typeof import("../me/photo-file.js")>();

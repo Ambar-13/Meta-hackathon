@@ -8,11 +8,12 @@ import type {
 import { apiFetch, routes, usePolledView, type PolledView } from "../../app-shell/index.js";
 import { useAdds, type AddsModel } from "../chat/index.js";
 
-// How many posts come before the row of people to meet, as Instagram puts "Suggested for you" a little way into its feed.
+// How many posts come before the row of people to meet, as Instagram puts "Suggested for you" a
+// little way into its feed.
 const POSTS_BEFORE_PEOPLE = 2;
 
-// Where the row of people goes among the posts: after the second post, or after the last when there are fewer.
-// Example: 5 posts give 2, 1 post gives 1, no posts give 0.
+// Where the row of people goes among the posts: after the second post, or after the last when there
+// are fewer. Example: 5 posts give 2, 1 post gives 1, no posts give 0.
 export function peopleRowAt(postCount: number): number {
   return Math.min(POSTS_BEFORE_PEOPLE, postCount);
 }
@@ -63,8 +64,9 @@ const COMMON_WORDS: ReadonlySet<string> = new Set([
   "yours",
 ]);
 
-// The words of a text that can tie it to another: lower case, four letters or more, not common, a plural s taken off, and none of leaveOut.
-// Example: "Draw the three screens" gives draw, three, screen.
+// The words of a text that can tie it to another: lower case, four letters or more, not common, a
+// plural s taken off, and none of leaveOut. Example: "Draw the three screens" gives draw, three,
+// screen.
 export function keyWords(text: string, leaveOut: ReadonlySet<string> = new Set()): Set<string> {
   const words = text.toLowerCase().match(/[a-z]+/g) ?? [];
   const kept = words
@@ -73,9 +75,10 @@ export function keyWords(text: string, leaveOut: ReadonlySet<string> = new Set()
   return new Set(kept.filter((word) => !leaveOut.has(word)));
 }
 
-// The public item of a post's writer that shares the most words with the post, for the line under it: the first such item on a tie,
-// and null when no item shares a word or the writer is not on the loaded pages. The writer's own name never counts as a shared word.
-// Example: Jun's post "Looking for a team that needs someone to own the hardware" picks "Will own the hardware on a team".
+// The public item of a post's writer that shares the most words with the post, for the line under
+// it: the first such item on a tie, and null when no item shares a word or the writer is not on the
+// loaded pages. The writer's own name never counts as a shared word. Example: Jun's post "Looking
+// for a team that needs someone to own the hardware" picks "Will own the hardware on a team".
 export function noteItemFor(post: Post, listing: DirectoryListing | undefined): PublicItem | null {
   if (listing === undefined) return null;
   const name = keyWords(post.displayName);
@@ -94,8 +97,8 @@ export function noteItemFor(post: Post, listing: DirectoryListing | undefined): 
   return best;
 }
 
-// The person's home view (GET /api/home), read once when the feed opens, for the next step while they have no approved card; a failed
-// read shows no next step and never blocks the feed.
+// The person's home view (GET /api/home), read once when the feed opens, for the next step while
+// they have no approved card; a failed read shows no next step and never blocks the feed.
 export function useFeedHome(): PolledView<HomeView> {
   return usePolledView(() => apiFetch(routes.people.readHome, {}), {
     key: "feed-home",
@@ -104,7 +107,8 @@ export function useFeedHome(): PolledView<HomeView> {
   });
 }
 
-// The newest posts of people in Explore (GET /api/posts), read once when the page opens; a failed read is tried again after 30 s.
+// The newest posts of people in Explore (GET /api/posts), read once when the page opens; a failed
+// read is tried again after 30 s.
 export function useExplorePosts(): PolledView<PostsView> {
   return usePolledView(() => apiFetch(routes.social.listPosts, {}), {
     key: "explore-posts",
@@ -113,15 +117,16 @@ export function useExplorePosts(): PolledView<PostsView> {
   });
 }
 
-// Who among the people in Explore is already a friend, whose agent can be asked, and the Add friend requests sent from this page.
+// Who among the people in Explore is already a friend, whose agent can be asked, and the Add friend
+// requests sent from this page.
 export type ExploreFriends = {
   isFriend: (listingId: string) => boolean;
   canAsk: (listingId: string) => boolean;
   adds: AddsModel;
 };
 
-// Reads the friends list once (GET /api/friends) and holds the Add friend buttons; adding a sample person, who accepts at once, reads
-// the friends list again.
+// Reads the friends list once (GET /api/friends) and holds the Add friend buttons; adding a sample
+// person, who accepts at once, reads the friends list again.
 export function useExploreFriends(): ExploreFriends {
   const friends = usePolledView(() => apiFetch(routes.directory.friends, {}), {
     key: "explore-friends",

@@ -1,6 +1,7 @@
-// POST /api/pairs: a person makes an invite for one other person. The token is 128 random bits; only its
-// sha256 is stored, it works once, and it expires 24 hours after it is made. The link carries the token after "#",
-// so it never reaches a server log; the web app shows the link as a QR code.
+// POST /api/pairs: a person makes an invite for one other person. The token is 128 random bits;
+// only its sha256 is stored, it works once, and it expires 24 hours after it is made. The link
+// carries the token after "#", so it never reaches a server log; the web app shows the link as a QR
+// code.
 import type { FastifyInstance } from "fastify";
 import {
   PAIR_LIFETIME_HOURS,

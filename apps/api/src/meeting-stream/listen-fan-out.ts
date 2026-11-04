@@ -5,18 +5,23 @@ import { RECONNECT } from "@meet-first/contracts";
 
 // The one NOTIFY channel.
 export const LISTEN_CHANNEL = "meeting_events";
-// The application_name of the LISTEN connection, so a test or an operator can find it in pg_stat_activity.
+// The application_name of the LISTEN connection, so a test or an operator can find it in
+// pg_stat_activity.
 export const LISTEN_APPLICATION_NAME = "meet-first-listen";
-// The largest value a Postgres int column holds (seq, step_seq, attempt and partial_len are int columns); a number above it is not a real payload.
+// The largest value a Postgres int column holds (seq, step_seq, attempt and partial_len are int
+// columns); a number above it is not a real payload.
 export const MAX_INT_COLUMN = 2_147_483_647;
-// How long one connect attempt may take before it counts as failed: 5 s, the pool's connectionTimeoutMillis in the database spec 4.1 (node-pg waits forever by default, which would stop the api from booting).
+// How long one connect attempt may take before it counts as failed: 5 s, the pool's
+// connectionTimeoutMillis in the database spec 4.1 (node-pg waits forever by default, which would
+// stop the api from booting).
 export const LISTEN_CONNECT_TIMEOUT_MS = 5_000;
 
 // One parsed NOTIFY payload: a committed event, or a flush of a running step's partial text.
 export type ListenPayload =
   | { kind: "event"; meetingId: string; seq: number }
   | { kind: "delta"; meetingId: string; stepSeq: number; attempt: number; len: number };
-// What wakes one stream: a payload for its meeting, or a poll (the 10 s safety poll, or a LISTEN reconnect).
+// What wakes one stream: a payload for its meeting, or a poll (the 10 s safety poll, or a LISTEN
+// reconnect).
 export type WakeSignal = ListenPayload | { kind: "poll" };
 // This process's LISTEN connection, as the streams see it.
 export type FanOut = {
@@ -34,7 +39,8 @@ function isUuid(text: string): boolean {
   return z.string().uuid().safeParse(text).success;
 }
 
-// Reads a whole number from text that has the given form, or null when it does not, or when it is over the int column limit.
+// Reads a whole number from text that has the given form, or null when it does not, or when it is
+// over the int column limit.
 function readIntText(text: string | undefined, form: RegExp): number | null {
   if (text === undefined || !form.test(text)) {
     return null;
@@ -63,7 +69,8 @@ function parseDeltaPayload(meetingId: string, rest: string[]): ListenPayload | n
   return { kind: "delta", meetingId, stepSeq, attempt, len };
 }
 
-// Reads one payload: e:{meeting_id}:{seq} or d:{meeting_id}:{step_seq}:{attempt}:{len}; any other text is null and is ignored.
+// Reads one payload: e:{meeting_id}:{seq} or d:{meeting_id}:{step_seq}:{attempt}:{len}; any other
+// text is null and is ignored.
 export function parseListenPayload(payload: string): ListenPayload | null {
   const [kind, meetingId, ...rest] = payload.split(":");
   if (meetingId === undefined || !isUuid(meetingId)) {
@@ -79,12 +86,14 @@ export function parseListenPayload(payload: string): ListenPayload | null {
   return null;
 }
 
-// The wait before reconnect attempt n (0-based): 1 s doubling to a cap of 30 s, no jitter, because there is one connection per process (RECONNECT).
+// The wait before reconnect attempt n (0-based): 1 s doubling to a cap of 30 s, no jitter, because
+// there is one connection per process (RECONNECT).
 export function listenReconnectDelayMs(attempt: number): number {
   return Math.min(RECONNECT.capMs, RECONNECT.firstMs * RECONNECT.factor ** attempt);
 }
 
-// This process's one LISTEN connection and the streams waiting on it. Built only through startListenFanOut.
+// This process's one LISTEN connection and the streams waiting on it. Built only through
+// startListenFanOut.
 export class ListenFanOut implements FanOut {
   private readonly registry = new Map<string, Set<(signal: WakeSignal) => void>>();
   private current: pg.Client | null = null;
@@ -101,14 +110,16 @@ export class ListenFanOut implements FanOut {
     this.registry.set(meetingId, set);
     return () => {
       set.delete(wake);
-      // Only the set that is still registered is removed, so a late unsubscribe never drops a newer subscriber.
+      // Only the set that is still registered is removed, so a late unsubscribe never drops a newer
+      // subscriber.
       if (set.size === 0 && this.registry.get(meetingId) === set) {
         this.registry.delete(meetingId);
       }
     };
   }
 
-  // Opens the connection and listens on the channel. Never throws: a failure is logged and a retry is scheduled.
+  // Opens the connection and listens on the channel. Never throws: a failure is logged and a retry
+  // is scheduled.
   async connect(): Promise<void> {
     const client = new pg.Client({
       connectionString: this.options.connectionString,
@@ -210,7 +221,8 @@ export class ListenFanOut implements FanOut {
   }
 }
 
-// Opens the LISTEN connection, then returns the fan-out; a failed first attempt is retried in the background, so the api still boots.
+// Opens the LISTEN connection, then returns the fan-out; a failed first attempt is retried in the
+// background, so the api still boots.
 export async function startListenFanOut(options: {
   connectionString: string;
   log: FastifyBaseLogger;

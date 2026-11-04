@@ -1,8 +1,8 @@
-// Migration rules for packages/db/migrations.
-// Every file starts with the package line and a one-sentence comment, and its number is unique and inside a range
-// from ranges.txt. Every CREATE TABLE in public needs ENABLE and FORCE row-level security and a policy, unless the
-// table is listed in global-tables.txt. The words BYPASSRLS and SUPERUSER are banned, because a role that can bypass
-// row security would defeat every policy.
+// Migration rules for packages/db/migrations. Every file starts with the package line and a
+// one-sentence comment, and its number is unique and inside a range from ranges.txt. Every CREATE
+// TABLE in public needs ENABLE and FORCE row-level security and a policy, unless the table is
+// listed in global-tables.txt. The words BYPASSRLS and SUPERUSER are banned, because a role that
+// can bypass row security would defeat every policy.
 import { existsSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { type Finding } from "./finding.js";

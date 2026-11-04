@@ -19,7 +19,8 @@ import {
 } from "./authoritative-scrub.js";
 import { decodeUploadBody, parseSourceBody, type ParsedSourceBody } from "./ndjson-body.js";
 
-// What one upload ended as: the row it points at, the numbers for the reply, and whether the names pass must be queued.
+// What one upload ended as: the row it points at, the numbers for the reply, and whether the names
+// pass must be queued.
 export type UploadOutcome = {
   sourceId: string;
   turnCount: number;
@@ -28,13 +29,15 @@ export type UploadOutcome = {
   needsNamesPass: boolean;
 };
 
-// Rows per insert statement, so 10,000 turns stay well under Postgres's limit on bound values in one statement.
+// Rows per insert statement, so 10,000 turns stay well under Postgres's limit on bound values in
+// one statement.
 export const INSERT_BATCH_ROWS = 1_000;
 
 // The sentence for a person who already holds the most sources one person may keep.
 const SOURCE_LIMIT_SENTENCE =
   "You already have 3 sources, the most one person can keep. Use one of them instead of uploading again.";
-// The sentence for a turn whose id the insert did not return; this should never reach a person, so it is an internal error.
+// The sentence for a turn whose id the insert did not return; this should never reach a person, so
+// it is an internal error.
 const TURN_ID_MISSING_SENTENCE = "A message was not saved with its id. Try the upload again.";
 
 // The first value of a header, when a client sent it more than once.
@@ -52,7 +55,8 @@ async function countSources(trx: DatabaseTransaction, personId: string): Promise
   return Number(counted.count);
 }
 
-// The answer for an upload whose content is already stored: the first id, its counts, and whether the names pass still has to run.
+// The answer for an upload whose content is already stored: the first id, its counts, and whether
+// the names pass still has to run.
 async function duplicateOutcome(
   trx: DatabaseTransaction,
   existing: { id: string; turn_count: number; frozen_at: Date | null },
@@ -164,7 +168,8 @@ async function insertSource(
   return source.id;
 }
 
-// Stores one parsed upload in the caller's transaction after the authoritative scrub, or finds the earlier identical one.
+// Stores one parsed upload in the caller's transaction after the authoritative scrub, or finds the
+// earlier identical one.
 export async function storeUpload(
   trx: DatabaseTransaction,
   input: { personId: string; body: ParsedSourceBody },
@@ -205,8 +210,9 @@ export async function storeUpload(
   };
 }
 
-// Registers POST /api/sources: 201 SourceCreateResponse for a new or a duplicate upload; the refusals of 4.3.2, 4.3.3 and source_limit_reached.
-// Registration is synchronous, as the pairs and sessions folders do; the handlers themselves are async.
+// Registers POST /api/sources: 201 SourceCreateResponse for a new or a duplicate upload; the
+// refusals of 4.3.2, 4.3.3 and source_limit_reached. Registration is synchronous, as the pairs and
+// sessions folders do; the handlers themselves are async.
 export function registerUploadRoute(app: FastifyInstance, deps: RouteDeps): void {
   app.addContentTypeParser(
     "application/x-ndjson",
@@ -229,9 +235,10 @@ export function registerUploadRoute(app: FastifyInstance, deps: RouteDeps): void
       const outcome = await withPerson(deps.db, personId, (trx) =>
         storeUpload(trx, { personId, body }, deps.now()),
       );
-      // The job is queued after the commit, because the queue writes through its own connection. When the queue
-      // refuses it, the error goes to the client and the stored source stays whole; a later upload of the same file is a
-      // duplicate that queues the names check again (4.3.1 step 6).
+      // The job is queued after the commit, because the queue writes through its own connection.
+      // When the queue refuses it, the error goes to the client and the stored source stays whole;
+      // a later upload of the same file is a duplicate that queues the names check again (4.3.1
+      // step 6).
       if (outcome.needsNamesPass)
         await deps.enqueue("scrub_names", { sourceId: outcome.sourceId, personId });
       return reply.code(201).send(

@@ -36,7 +36,8 @@ afterAll(async () => {
   await t.close();
 });
 
-// One request to the summary routes as the person with this session token; the status and the parsed body.
+// One request to the summary routes as the person with this session token; the status and the
+// parsed body.
 async function send(
   method: "GET" | "PUT" | "DELETE",
   token: string,

@@ -23,7 +23,8 @@ export function supportLine(brief: Brief): string {
   return `Support rate ${brief.supportRate.toFixed(2)}: ${String(supported)} of ${String(withQuote.length)} lines are backed by their quote.`;
 }
 
-// The first quote of the brief that matched its turn, shown large: their own words are the hero of the page.
+// The first quote of the brief that matched its turn, shown large: their own words are the hero of
+// the page.
 function featuredQuote(brief: Brief): Quote | null {
   for (const point of [...brief.agree, ...brief.decideFirst, ...brief.clash]) {
     const quote = point.quotes.find((candidate) => candidate.verified);
@@ -55,7 +56,8 @@ const BriefBody = (props: {
   sheetQuote: OpenQuote | null;
 }): ReactElement => {
   const sections = splitBriefForDisplay(props.brief);
-  // The headings follow the question: "where you'd click" for getting along, "where you agree" for a deal.
+  // The headings follow the question: "where you'd click" for getting along, "where you agree" for
+  // a deal.
   const labels = BRIEF_SECTION_LABELS[props.brief.questionKind];
   const kind = KIND_LOOK[props.brief.questionKind];
   return (
@@ -107,7 +109,8 @@ const BriefBody = (props: {
   );
 };
 
-// The brief page: waits while the brief is written, then shows the three sections with tappable quotes.
+// The brief page: waits while the brief is written, then shows the three sections with tappable
+// quotes.
 export const BriefScreen = (): ReactElement => {
   const meetingId = useParams()["meetingId"] ?? "";
   const hook = useBriefState(meetingId);

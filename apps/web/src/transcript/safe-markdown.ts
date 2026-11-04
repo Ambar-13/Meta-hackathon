@@ -65,7 +65,8 @@ function closeBlock(parser: Parser): void {
   parser.blocks.push({ kind: open.kind, inlines: inlinesOf(open.lines.join(" ")) });
 }
 
-// Adds a quote or paragraph line to the open block of that kind, or closes the open block and starts a new one.
+// Adds a quote or paragraph line to the open block of that kind, or closes the open block and
+// starts a new one.
 function addTextLine(parser: Parser, kind: "paragraph" | "quote", text: string): void {
   const open = parser.open;
   if (open !== null && open.kind === kind) {
@@ -76,7 +77,8 @@ function addTextLine(parser: Parser, kind: "paragraph" | "quote", text: string):
   parser.open = { kind, lines: [text] };
 }
 
-// Adds a list item to the open list of the same kind, or closes the open block and starts a new list.
+// Adds a list item to the open list of the same kind, or closes the open block and starts a new
+// list.
 function addListItem(parser: Parser, item: { isOrdered: boolean; text: string }): void {
   const open = parser.open;
   if (open !== null && open.kind === "list" && open.isOrdered === item.isOrdered) {
@@ -87,7 +89,8 @@ function addListItem(parser: Parser, item: { isOrdered: boolean; text: string })
   parser.open = { kind: "list", isOrdered: item.isOrdered, items: [item.text] };
 }
 
-// Reads one line into the parser: a blank line closes the block, and each other line joins or starts one.
+// Reads one line into the parser: a blank line closes the block, and each other line joins or
+// starts one.
 function readLine(parser: Parser, line: string): void {
   if (/^\s*$/.test(line)) {
     closeBlock(parser);
@@ -107,7 +110,8 @@ function readLine(parser: Parser, line: string): void {
   }
 }
 
-// Parses model text into the allowed blocks; anything else, links, images and HTML included, stays literal text.
+// Parses model text into the allowed blocks; anything else, links, images and HTML included, stays
+// literal text.
 export function parseSafeMarkdown(text: string): SafeBlock[] {
   const parser: Parser = { blocks: [], open: null };
   for (const line of text.replace(/\r\n?/g, "\n").split("\n")) {
@@ -137,7 +141,8 @@ function renderBlock(block: SafeBlock): ReactElement {
   return createElement(block.isOrdered ? "ol" : "ul", null, ...items);
 }
 
-// Renders model text with p, blockquote, ul, ol, li, em and strong elements only, never as inner HTML.
+// Renders model text with p, blockquote, ul, ol, li, em and strong elements only, never as inner
+// HTML.
 export const SafeMarkdown = (props: { text: string }): ReactElement => {
   return createElement(
     "div",

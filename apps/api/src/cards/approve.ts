@@ -17,7 +17,8 @@ import { requirePerson } from "../sessions/index.js";
 // The params of the approve route: a uuid id.
 const CardParams = z.object({ id: Uuid });
 
-// Refuses an approval: no such card, a card still building or failed, a card already approved, no item chosen, or an item not on the card.
+// Refuses an approval: no such card, a card still building or failed, a card already approved, no
+// item chosen, or an item not on the card.
 export function assertCanApprove(
   card: { state: string } | undefined,
   chosenIds: readonly string[],
@@ -56,7 +57,8 @@ export function assertCanApprove(
     );
 }
 
-// Approves the chosen items, unapproves the rest, then marks the card approved with the recall switch.
+// Approves the chosen items, unapproves the rest, then marks the card approved with the recall
+// switch.
 export async function applyApproval(
   trx: Transaction<Database> | DatabaseTransaction,
   args: { cardId: string; itemIds: readonly string[]; isRecallAllowed: boolean; now: Date },
@@ -89,7 +91,9 @@ export async function applyApproval(
     );
 }
 
-// Registers POST /api/cards/:id/approve: 200 CardApproveResponse; 400 payload_invalid, card_items_none, card_item_unknown; 404 not_found; 409 card_not_ready, card_failed, card_already_approved.
+// Registers POST /api/cards/:id/approve: 200 CardApproveResponse; 400 payload_invalid,
+// card_items_none, card_item_unknown; 404 not_found; 409 card_not_ready, card_failed,
+// card_already_approved.
 export function registerApprove(app: FastifyInstance, deps: RouteDeps): Promise<void> {
   app.post(routes.cards.approveCard.path, async (request, reply) => {
     const personId = requirePerson(request);

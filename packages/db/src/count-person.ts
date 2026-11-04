@@ -12,7 +12,8 @@ export type PersonColumns = { table: string; columns: string[] };
 // One connection is enough to count one person's rows.
 const COUNT_POOL_SIZE = 1;
 
-// The foreign keys to people, read from the system catalog: every column that points at people, sorted by byte order.
+// The foreign keys to people, read from the system catalog: every column that points at people,
+// sorted by byte order.
 const PERSON_FOREIGN_KEYS = `
 SELECT c.conrelid::regclass::text AS table_name, a.attname::text AS column_name
 FROM pg_constraint c
@@ -20,7 +21,8 @@ JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = ANY (c.conkey)
 WHERE c.contype = 'f' AND c.confrelid = 'public.people'::regclass
 ORDER BY c.conrelid::regclass::text COLLATE "C", a.attname COLLATE "C"`;
 
-// Lists people by id, then every table with a foreign key to people, read from the system catalog so a new table is never missed.
+// Lists people by id, then every table with a foreign key to people, read from the system catalog
+// so a new table is never missed.
 export async function listPersonColumns(trx: DatabaseTransaction): Promise<PersonColumns[]> {
   const rows = await sql<{
     table_name: string;
@@ -38,7 +40,8 @@ export async function listPersonColumns(trx: DatabaseTransaction): Promise<Perso
   ];
 }
 
-// Counts, table by table, the rows that still point at this person, inside the person's own context.
+// Counts, table by table, the rows that still point at this person, inside the person's own
+// context.
 export async function countRowsForPerson(
   db: Kysely<Database>,
   personId: string,
@@ -69,7 +72,8 @@ export function formatCounts(counts: Record<string, number>): { text: string; ex
   return { text: lines.join("\n"), exitCode: sum === 0 ? 0 : 1 };
 }
 
-// The private command body: counts the rows of the person whose id is the only argument, and returns the exit code.
+// The private command body: counts the rows of the person whose id is the only argument, and
+// returns the exit code.
 async function main(): Promise<0 | 1> {
   const personId = process.argv[2] ?? "";
   if (!Uuid.safeParse(personId).success) {

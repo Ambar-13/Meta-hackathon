@@ -1,4 +1,5 @@
-// Reads one meeting's event stream the way the browser does, records every event in arrival order, and reports any replay or schema problem.
+// Reads one meeting's event stream the way the browser does, records every event in arrival order,
+// and reports any replay or schema problem.
 import {
   CommittedEvent,
   EVENT_VERSION,
@@ -9,7 +10,8 @@ import {
 import type { PersonClient } from "./person-client.js";
 import { StepFailure } from "./report.js";
 
-// Options for one reader. Reader A sets plannedDisconnectAtSeq to PLANNED_DISCONNECT_SEQ, so the stream is cut and resumed once (step 8).
+// Options for one reader. Reader A sets plannedDisconnectAtSeq to PLANNED_DISCONNECT_SEQ, so the
+// stream is cut and resumed once (step 8).
 export type ReaderOptions = { plannedDisconnectAtSeq?: number };
 // The planned disconnect reopens the stream after this many milliseconds (the spec's 500).
 const PLANNED_RECONNECT_MS = 500;
@@ -18,7 +20,8 @@ const MAX_UNPLANNED_RECONNECTS = 5;
 // A reconnect may be up to 20% shorter than its base delay, so phones do not reconnect together.
 const JITTER_FRACTION = 0.2;
 
-// One connection: its abort controller, its body reader, whether this reader ended it on purpose, and whether it has carried an event.
+// One connection: its abort controller, its body reader, whether this reader ended it on purpose,
+// and whether it has carried an event.
 type Connection = {
   controller: AbortController;
   body: ReadableStreamDefaultReader<Uint8Array> | undefined;
@@ -31,7 +34,8 @@ type Waiter = {
   resolve: (event: MeetingEvent) => void;
   reject: (error: Error) => void;
 };
-// One parsed SSE frame: its id line, its event name, its data text and whether it carried the heartbeat comment.
+// One parsed SSE frame: its id line, its event name, its data text and whether it carried the
+// heartbeat comment.
 type Frame = {
   id: string | undefined;
   event: string | undefined;
@@ -39,7 +43,8 @@ type Frame = {
   isHeartbeat: boolean;
 };
 
-// Reads one SSE frame: the id, event and data lines, and the heartbeat comment. Other comment lines are padding.
+// Reads one SSE frame: the id, event and data lines, and the heartbeat comment. Other comment lines
+// are padding.
 function parseFrame(text: string): Frame {
   let id: string | undefined;
   let event: string | undefined;
@@ -82,13 +87,15 @@ function describeError(error: unknown): string {
   return error instanceof Error ? error.message : show(error);
 }
 
-// The wait before reconnect number attempt (0 first): the first delay doubled each time, capped, then cut by up to 20% at random.
+// The wait before reconnect number attempt (0 first): the first delay doubled each time, capped,
+// then cut by up to 20% at random.
 function reconnectDelayMs(attempt: number, random: () => number): number {
   const base = Math.min(RECONNECT.capMs, RECONNECT.firstMs * RECONNECT.factor ** attempt);
   return Math.round(base * (1 - JITTER_FRACTION * random()));
 }
 
-// Reads one meeting's events over HTTP. Every problem it sees is kept, and assertGapless fails with the first one.
+// Reads one meeting's events over HTTP. Every problem it sees is kept, and assertGapless fails with
+// the first one.
 export class EventStreamReader {
   private readonly seen: CommittedEvent[] = [];
   private readonly deltaList: TurnDelta[] = [];
@@ -145,7 +152,8 @@ export class EventStreamReader {
     return this.isPlannedDone;
   }
 
-  // Opens the stream, sending Last-Event-ID with the last seq seen, so the server replays from the next one.
+  // Opens the stream, sending Last-Event-ID with the last seq seen, so the server replays from the
+  // next one.
   async open(): Promise<void> {
     this.isStopped = false;
     this.startedAt ??= Date.now();
@@ -158,14 +166,16 @@ export class EventStreamReader {
     if (this.current !== undefined) this.interrupt(this.current);
   }
 
-  // Resolves with the first event that matches, seen earlier or later. Rejects after timeoutMs, or at once when a problem was recorded.
+  // Resolves with the first event that matches, seen earlier or later. Rejects after timeoutMs, or
+  // at once when a problem was recorded.
   waitFor(predicate: (event: MeetingEvent) => boolean, timeoutMs: number): Promise<MeetingEvent> {
     const found = this.arrivalLog.find(predicate);
     if (found !== undefined) return Promise.resolve(found);
     return this.waitForNext(predicate, timeoutMs);
   }
 
-  // Resolves with the first matching event that arrives from now on; events seen earlier do not count. Rejects like waitFor.
+  // Resolves with the first matching event that arrives from now on; events seen earlier do not
+  // count. Rejects like waitFor.
   waitForNext(
     predicate: (event: MeetingEvent) => boolean,
     timeoutMs: number,
@@ -192,7 +202,8 @@ export class EventStreamReader {
     });
   }
 
-  // Fails with the first problem recorded (a duplicate, a skipped seq, a bad version, a bad schema, a delta with an id), or with the first gap in the seq numbers.
+  // Fails with the first problem recorded (a duplicate, a skipped seq, a bad version, a bad schema,
+  // a delta with an id), or with the first gap in the seq numbers.
   assertGapless(): void {
     const [problem] = this.problems;
     if (problem !== undefined) throw new StepFailure(problem);
@@ -202,7 +213,8 @@ export class EventStreamReader {
     }
   }
 
-  // Starts one connection and its background reader. It resolves once the server has answered with the stream.
+  // Starts one connection and its background reader. It resolves once the server has answered with
+  // the stream.
   private async connect(): Promise<void> {
     const connection: Connection = {
       controller: new AbortController(),
@@ -219,19 +231,22 @@ export class EventStreamReader {
     void this.pump(connection);
   }
 
-  // Reads the body of one connection until it ends. A drop that this reader did not cause is counted and retried.
+  // Reads the body of one connection until it ends. A drop that this reader did not cause is
+  // counted and retried.
   private async pump(connection: Connection): Promise<void> {
     const reader = connection.body;
     if (reader === undefined) return;
     try {
       await this.readBody(connection, reader);
     } catch {
-      // A read that fails after this reader ended the connection is expected. Any other end is a drop, handled below.
+      // A read that fails after this reader ended the connection is expected. Any other end is a
+      // drop, handled below.
     }
     if (!connection.isIntentional) this.scheduleUnplanned();
   }
 
-  // Reads chunks until the body ends or this reader ends the connection, and hands every complete frame to handleFrame.
+  // Reads chunks until the body ends or this reader ends the connection, and hands every complete
+  // frame to handleFrame.
   private async readBody(
     connection: Connection,
     reader: ReadableStreamDefaultReader<Uint8Array>,
@@ -246,7 +261,8 @@ export class EventStreamReader {
     }
   }
 
-  // Splits text into complete frames, handles each one, and returns the unfinished tail for the next chunk.
+  // Splits text into complete frames, handles each one, and returns the unfinished tail for the
+  // next chunk.
   private consume(text: string, connection: Connection): string {
     const frames = text.split("\n\n");
     const tail = frames.pop() ?? "";
@@ -293,7 +309,8 @@ export class EventStreamReader {
     this.accept(parsed.data);
   }
 
-  // A committed event carries a version and a seq. The version is checked before the schema, so a new version is named as one.
+  // A committed event carries a version and a seq. The version is checked before the schema, so a
+  // new version is named as one.
   private handleCommitted(data: string, connection: Connection): void {
     const raw = parseObject(data);
     if (raw === undefined) {
@@ -314,7 +331,8 @@ export class EventStreamReader {
     this.acceptCommitted(parsed.data, connection);
   }
 
-  // Keeps one committed event. A seq at or below the highest seen is a duplicate; the first event after a reconnect must follow on.
+  // Keeps one committed event. A seq at or below the highest seen is a duplicate; the first event
+  // after a reconnect must follow on.
   private acceptCommitted(event: CommittedEvent, connection: Connection): void {
     const isFirstOfConnection = !connection.hasSeenEvent;
     connection.hasSeenEvent = true;
@@ -346,7 +364,8 @@ export class EventStreamReader {
     for (const waiter of waiting) waiter.reject(new StepFailure(problem));
   }
 
-  // Ends the connection on purpose at the planned seq, then reopens it after the planned delay. The reopen is not counted as a drop.
+  // Ends the connection on purpose at the planned seq, then reopens it after the planned delay. The
+  // reopen is not counted as a drop.
   private plannedDisconnect(connection: Connection): void {
     this.isPlannedDone = true;
     this.interrupt(connection);
@@ -378,7 +397,8 @@ export class EventStreamReader {
     }, delay);
   }
 
-  // Opens a new connection unless the caller has closed the reader; a failure to open is recorded as a problem.
+  // Opens a new connection unless the caller has closed the reader; a failure to open is recorded
+  // as a problem.
   private reconnect(): void {
     if (this.isStopped) return;
     void this.connect().catch((error: unknown) => {

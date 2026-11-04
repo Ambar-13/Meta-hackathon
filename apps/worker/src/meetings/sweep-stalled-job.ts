@@ -7,40 +7,46 @@ import { isOverTokenStop } from "./agenda.js";
 import { releaseStep } from "./claim-step.js";
 import { beginRunningMeeting, endMeeting, startIfReady } from "./commit-turn.js";
 
-// The claims a meeting step gets. Once the current step is stalled at this attempt, the sweep ends the meeting with reason budget
-// instead of enqueueing the step again, so a turn that keeps failing after its model calls stops paying for them (claimStep adds 1
-// to the attempt on every claim).
+// The claims a meeting step gets. Once the current step is stalled at this attempt, the sweep ends
+// the meeting with reason budget instead of enqueueing the step again, so a turn that keeps failing
+// after its model calls stops paying for them (claimStep adds 1 to the attempt on every claim).
 export const MEETING_STEP_MAX_ATTEMPTS = 3;
-// How long past its ends_at a stalled meeting may go on before the sweep ends it with reason budget: 2 minutes, room for the decide
-// turns that begin near the end.
+// How long past its ends_at a stalled meeting may go on before the sweep ends it with reason
+// budget: 2 minutes, room for the decide turns that begin near the end.
 export const MEETING_OVERTIME_GRACE_MS = 120_000;
-// How long a running step belongs to the runner that claimed it: the sweep does not stall a running step claimed less than 6 minutes
-// ago, because a slow but healthy step (a long reasoning call, two receipts calls) would get a second runner that pays again.
+// How long a running step belongs to the runner that claimed it: the sweep does not stall a running
+// step claimed less than 6 minutes ago, because a slow but healthy step (a long reasoning call, two
+// receipts calls) would get a second runner that pays again.
 export const STEP_CLAIM_FRESH_MS = 360_000;
 
 // The four kinds sweep_candidates returns, in the order the sweep handles them.
 const KINDS = ["stalled", "queued", "running", "ready"] as const;
 // One of the four kinds.
 type Kind = (typeof KINDS)[number];
-// The meetings the sweep must look at, by kind, each id once, in the order sweep_candidates returned them.
+// The meetings the sweep must look at, by kind, each id once, in the order sweep_candidates
+// returned them.
 export type SweepCandidates = Record<Kind, string[]>;
 // The outcome of one promotion attempt: it started the meeting, or every slot is taken.
 type PromoteOutcome = "started" | "full";
-// What the sweep reads of a silent meeting's current step: its state, how many times it was claimed, and when it was last claimed.
+// What the sweep reads of a silent meeting's current step: its state, how many times it was
+// claimed, and when it was last claimed.
 export type SweptStep = {
   state: "pending" | "running" | "stalled" | "done";
   attempt: number;
   claimedAt: Date | null;
 };
-// What the sweep does with a silent meeting: leave its step alone, give the step a new job, or end the meeting with reason budget.
+// What the sweep does with a silent meeting: leave its step alone, give the step a new job, or end
+// the meeting with reason budget.
 export type StallAction = "skip" | "enqueue" | "end";
-// What the transaction of one silent meeting did: nothing, a new job is due for this step, or it ended the meeting.
+// What the transaction of one silent meeting did: nothing, a new job is due for this step, or it
+// ended the meeting.
 type StalledOutcome =
   | { kind: "skipped" }
   | { kind: "enqueued"; stepSeq: number }
   | { kind: "ended" };
 
-// The sweep_stalled job: heartbeat, token stop, stalled steps, queue promotion, ready starts, in that order.
+// The sweep_stalled job: heartbeat, token stop, stalled steps, queue promotion, ready starts, in
+// that order.
 export const runSweepStalled: JobTask<"sweep_stalled"> = async (payload, context) => {
   const now = context.now();
   await writeHeartbeat(context.db, now);
@@ -58,7 +64,8 @@ export const runSweepStalled: JobTask<"sweep_stalled"> = async (payload, context
   await startReadyMeetings(context, candidates.ready);
 };
 
-// Writes the worker heartbeat /api/health reads; the table has no person or meeting column, so no context is set.
+// Writes the worker heartbeat /api/health reads; the table has no person or meeting column, so no
+// context is set.
 export async function writeHeartbeat(db: Kysely<Database>, now: Date): Promise<void> {
   await db
     .updateTable("service_heartbeats")
@@ -67,7 +74,8 @@ export async function writeHeartbeat(db: Kysely<Database>, now: Date): Promise<v
     .execute();
 }
 
-// The meetings sweep_candidates returns, by kind, each id once, in the order returned: queued ones lowest queue position first (docs/contracts.md section 6a).
+// The meetings sweep_candidates returns, by kind, each id once, in the order returned: queued ones
+// lowest queue position first (docs/contracts.md section 6a).
 export async function readSweepCandidates(db: Kysely<Database>): Promise<SweepCandidates> {
   const rows = (
     await sql<{
@@ -86,7 +94,8 @@ export async function readSweepCandidates(db: Kysely<Database>): Promise<SweepCa
   return candidates;
 }
 
-// Ends a running meeting whose ledger tokens reached 1,500,000, so one meeting cannot burn the day; true when it ended it.
+// Ends a running meeting whose ledger tokens reached 1,500,000, so one meeting cannot burn the day;
+// true when it ended it.
 export async function stopOverBudget(context: JobContext, meetingId: string): Promise<boolean> {
   const isEnded = await withMeeting(context.db, meetingId, async (trx) => {
     const tokens = await readMeetingTokens(trx, meetingId);
@@ -97,8 +106,9 @@ export async function stopOverBudget(context: JobContext, meetingId: string): Pr
   return isEnded;
 }
 
-// Handles the current step of a meeting with no event for 150 s: a running step whose claim is stale goes stalled, then
-// the step gets a new job, or the meeting ends with reason budget; the briefs are queued only when this sweep's end ended the meeting.
+// Handles the current step of a meeting with no event for 150 s: a running step whose claim is
+// stale goes stalled, then the step gets a new job, or the meeting ends with reason budget; the
+// briefs are queued only when this sweep's end ended the meeting.
 export async function resumeStalledMeeting(
   context: JobContext,
   meetingId: string,
@@ -112,9 +122,11 @@ export async function resumeStalledMeeting(
   return outcome.kind;
 }
 
-// What the sweep does with a silent running meeting, in this order: more than MEETING_OVERTIME_GRACE_MS past ends_at, it ends; a
-// done or missing step is left alone; a running step claimed less than STEP_CLAIM_FRESH_MS ago is left to its runner; a stalled or
-// stale running step at MEETING_STEP_MAX_ATTEMPTS ends the meeting; anything else, a pending step among them, gets a new job.
+// What the sweep does with a silent running meeting, in this order: more than
+// MEETING_OVERTIME_GRACE_MS past ends_at, it ends; a done or missing step is left alone; a running
+// step claimed less than STEP_CLAIM_FRESH_MS ago is left to its runner; a stalled or stale running
+// step at MEETING_STEP_MAX_ATTEMPTS ends the meeting; anything else, a pending step among them,
+// gets a new job.
 export function stallAction(
   seen: { endsAt: Date | null; step: SweptStep | undefined },
   now: Date,
@@ -127,8 +139,9 @@ export function stallAction(
   return "enqueue";
 }
 
-// The writes for one silent meeting, inside its transaction: read the meeting and its current step, mark a stale running step
-// stalled, then end the meeting through endMeeting or hand the step on, as stallAction decides.
+// The writes for one silent meeting, inside its transaction: read the meeting and its current step,
+// mark a stale running step stalled, then end the meeting through endMeeting or hand the step on,
+// as stallAction decides.
 async function sweepStalledInside(
   trx: Transaction<Database>,
   meetingId: string,
@@ -168,17 +181,20 @@ async function readSweptStep(
     : { state: row.state, attempt: row.attempt, claimedAt: row.claimed_at };
 }
 
-// True when a step was claimed less than STEP_CLAIM_FRESH_MS before now, so its runner may still be working.
+// True when a step was claimed less than STEP_CLAIM_FRESH_MS before now, so its runner may still be
+// working.
 function isClaimFresh(claimedAt: Date | null, now: Date): boolean {
   return claimedAt !== null && now.getTime() - claimedAt.getTime() < STEP_CLAIM_FRESH_MS;
 }
 
-// True when a step is running on a claim older than STEP_CLAIM_FRESH_MS, the mark of a runner that died, so the sweep stalls it.
+// True when a step is running on a claim older than STEP_CLAIM_FRESH_MS, the mark of a runner that
+// died, so the sweep stalls it.
 function isStaleRunning(step: SweptStep | undefined, now: Date): step is SweptStep {
   return step !== undefined && step.state === "running" && !isClaimFresh(step.claimedAt, now);
 }
 
-// Promotes queued meetings in queue_position order while claim_meeting_slot finds a free slot; returns how many started.
+// Promotes queued meetings in queue_position order while claim_meeting_slot finds a free slot;
+// returns how many started.
 export async function promoteQueuedMeetings(
   context: JobContext,
   meetingIds: readonly string[],
@@ -192,7 +208,8 @@ export async function promoteQueuedMeetings(
   return started;
 }
 
-// Starts each meeting that is ready on both sides with its prefixes stored, so nobody has to press start; returns how many started running.
+// Starts each meeting that is ready on both sides with its prefixes stored, so nobody has to press
+// start; returns how many started running.
 export async function startReadyMeetings(
   context: JobContext,
   meetingIds: readonly string[],
@@ -241,7 +258,8 @@ async function startOne(
   return "started";
 }
 
-// Runs one meeting's sweep step; a failure is logged with the meeting id and the sweep goes on (undefined).
+// Runs one meeting's sweep step; a failure is logged with the meeting id and the sweep goes on
+// (undefined).
 async function guarded<T>(
   context: JobContext,
   meetingId: string,

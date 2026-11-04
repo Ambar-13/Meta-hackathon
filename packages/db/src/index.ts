@@ -2,7 +2,8 @@
 export { makeDatabase, numberFromPostgres, POOL_SIZE } from "./client.js";
 // The two transaction wrappers and the transaction type they hand to callers.
 export { withPerson, withMeeting, type DatabaseTransaction } from "./transaction.js";
-// The database types: one interface per table and view of migrations 0001 and 0002, and the whole database.
+// The database types: one interface per table and view of migrations 0001 and 0002, and the whole
+// database.
 export type {
   Database,
   PeopleTable,
@@ -47,7 +48,8 @@ export {
 export { queryWords, searchRecallCorpus } from "./recall-search.js";
 // The event log seq and the event append.
 export { nextEventSeq, appendMeetingEvent } from "./event-seq.js";
-// Counts, table by table, the rows that still point at one person. The golden path reads it after a deletion.
+// Counts, table by table, the rows that still point at one person. The golden path reads it after a
+// deletion.
 export { countRowsForPerson } from "./count-person.js";
 // The sample people's faces and post photos, as keys the web build maps to its images.
 export { sampleFaceKey, samplePostPhoto } from "./samples/sample-photos.js";

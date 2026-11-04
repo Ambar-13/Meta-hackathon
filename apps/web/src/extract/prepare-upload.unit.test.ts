@@ -3,7 +3,8 @@ import { prepareUpload, type UploadProgress, type UploadRefused } from "./index.
 import type { WorkerMessage } from "./worker-entry.js";
 import { FILE_UNREADABLE_SENTENCE } from "./zip-stream.js";
 
-// A stand-in for the browser Worker: it records what the page sends and lets a test send messages back.
+// A stand-in for the browser Worker: it records what the page sends and lets a test send messages
+// back.
 class FakeWorker {
   static instances: FakeWorker[] = [];
   onmessage: ((event: { data: WorkerMessage }) => void) | null = null;

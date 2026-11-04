@@ -86,7 +86,8 @@ function listingOfPost(post: Post): DirectoryListing {
   };
 }
 
-// Why Ask NAME's Meety cannot ask yet, said under the post: not friends, a request waiting, or friend asks off.
+// Why Ask NAME's Meety cannot ask yet, said under the post: not friends, a request waiting, or
+// friend asks off.
 function askWhyNot(name: string, listingId: string, friends: ExploreFriends): string {
   if (friends.isFriend(listingId)) return `${name} has not turned on friend asks yet.`;
   if (friends.adds.stateOf(listingId).kind === "requested")
@@ -99,8 +100,9 @@ function todayWords(now: Date): string {
   return now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 }
 
-// The strip under a post that ties it to what its writer shared: their own words from the public item that shares the most words with
-// the post, one link to their profile. Nothing shows when no item shares a word.
+// The strip under a post that ties it to what its writer shared: their own words from the public
+// item that shares the most words with the post, one link to their profile. Nothing shows when no
+// item shares a word.
 const FeedNote = (props: { post: Post; item: PublicItem }): ReactElement => {
   const { post, item } = props;
   return (
@@ -115,8 +117,9 @@ const FeedNote = (props: { post: Post; item: PublicItem }): ReactElement => {
   );
 };
 
-// A post's head: the writer's picture (a sample person's face with the orange mark), their name, the post's age and their line, with
-// Add friend at the end; your own post leads to your own profile and has no Add friend.
+// A post's head: the writer's picture (a sample person's face with the orange mark), their name,
+// the post's age and their line, with Add friend at the end; your own post leads to your own
+// profile and has no Add friend.
 const FeedHead = (props: {
   post: Post;
   listing: DirectoryListing | undefined;
@@ -150,7 +153,8 @@ const FeedHead = (props: {
   );
 };
 
-// A post's body: its words over its photo, or, with no photo, its words large on a warm card. A photo with no words shows alone.
+// A post's body: its words over its photo, or, with no photo, its words large on a warm card. A
+// photo with no words shows alone.
 const FeedBody = (props: { post: Post }): ReactElement => {
   const { post } = props;
   if (photoOf(post.photo) === null) {
@@ -174,7 +178,8 @@ const FeedBody = (props: { post: Post }): ReactElement => {
   );
 };
 
-// Ask NAME's Meety, which opens the chat with a friend ask when it can, and else says why under the post.
+// Ask NAME's Meety, which opens the chat with a friend ask when it can, and else says why under the
+// post.
 const AskAction = (props: { post: Post; friends: ExploreFriends }): ReactElement => {
   const { post, friends } = props;
   const [isWhyOpen, setIsWhyOpen] = useState(false);
@@ -212,8 +217,8 @@ const AskAction = (props: { post: Post; friends: ExploreFriends }): ReactElement
   );
 };
 
-// A post's foot: Like, the heart filled red once you like it, then Ask NAME's Meety and Posts, their Posts tab; on your own post, Like,
-// Posts, your own Posts tab, and Delete.
+// A post's foot: Like, the heart filled red once you like it, then Ask NAME's Meety and Posts,
+// their Posts tab; on your own post, Like, Posts, your own Posts tab, and Delete.
 const FeedFoot = (props: {
   post: Post;
   friends: ExploreFriends;
@@ -250,7 +255,8 @@ const FeedFoot = (props: {
   );
 };
 
-// One post, after the "Other" concept and Instagram: the head, the body, the strip tying it to what its writer shared, and the foot.
+// One post, after the "Other" concept and Instagram: the head, the body, the strip tying it to what
+// its writer shared, and the foot.
 const FeedPost = (props: {
   post: Post;
   listing: DirectoryListing | undefined;
@@ -278,8 +284,9 @@ const FeedPost = (props: {
   );
 };
 
-// The row of people Explore suggests, inside the feed on a phone and a tablet (the laptop has the right-hand column instead): cards that
-// scroll sideways, See all at the top opening Search, and Show more at the end while more pages exist.
+// The row of people Explore suggests, inside the feed on a phone and a tablet (the laptop has the
+// right-hand column instead): cards that scroll sideways, See all at the top opening Search, and
+// Show more at the end while more pages exist.
 const SuggestedRow = (props: { browse: BrowseHook; friends: ExploreFriends }): ReactElement => {
   const { browse, friends } = props;
   return (
@@ -311,7 +318,8 @@ const SuggestedRow = (props: { browse: BrowseHook; friends: ExploreFriends }): R
   );
 };
 
-// The line under the feed when a page did not load, with Try again, which asks for the same page again.
+// The line under the feed when a page did not load, with Try again, which asks for the same page
+// again.
 const PostsFailed = (props: { feed: EndlessFeed }): ReactElement | null => {
   if (props.feed.error === null) return null;
   return (
@@ -324,9 +332,9 @@ const PostsFailed = (props: { feed: EndlessFeed }): ReactElement | null => {
   );
 };
 
-// The line between your friends' posts and everyone else's, as Instagram's "You're all caught up": a check in a ring and the words over
-// the posts that follow, under the heading Suggested posts. With none of your friends' posts above it, only the heading shows, with where
-// theirs will go.
+// The line between your friends' posts and everyone else's, as Instagram's "You're all caught up":
+// a check in a ring and the words over the posts that follow, under the heading Suggested posts.
+// With none of your friends' posts above it, only the heading shows, with where theirs will go.
 const CaughtUp = (props: { hasFriendsPosts: boolean; hasOthers: boolean }): ReactElement => {
   return (
     <li className="feed-caught-up">
@@ -350,9 +358,10 @@ const CaughtUp = (props: { hasFriendsPosts: boolean; hasOthers: boolean }): Reac
   );
 };
 
-// Calls onNear when the element at the feed's end comes within 800px of the screen, so the next page loads before the reader gets there.
-// The watch starts again after each page, so a page too short to fill the screen loads the one after it. Where the browser has no
-// IntersectionObserver nothing happens, and Show more posts does it by hand.
+// Calls onNear when the element at the feed's end comes within 800px of the screen, so the next
+// page loads before the reader gets there. The watch starts again after each page, so a page too
+// short to fill the screen loads the one after it. Where the browser has no IntersectionObserver
+// nothing happens, and Show more posts does it by hand.
 function useNearEnd(
   onNear: () => void,
   isActive: boolean,
@@ -377,8 +386,9 @@ function useNearEnd(
   return setElement;
 }
 
-// The foot of the feed: loading, a failed page with Try again, Show more posts while more pages exist, and, at the end, a line that
-// says so with a link to Search, so the feed ends honestly instead of filling itself with anything.
+// The foot of the feed: loading, a failed page with Try again, Show more posts while more pages
+// exist, and, at the end, a line that says so with a link to Search, so the feed ends honestly
+// instead of filling itself with anything.
 const FeedEnd = (props: {
   feed: EndlessFeed;
   nearEnd: (element: HTMLDivElement | null) => void;
@@ -403,8 +413,8 @@ const FeedEnd = (props: {
   );
 };
 
-// The entries of the feed in order: your friends' posts, then the line between the parts once your friends' posts have run out and there
-// is anything around it, then everyone else's posts.
+// The entries of the feed in order: your friends' posts, then the line between the parts once your
+// friends' posts have run out and there is anything around it, then everyone else's posts.
 function feedEntries(feed: EndlessFeed): Array<Post | "caught-up"> {
   const isPastFriends =
     feed.part !== "friends" &&
@@ -412,9 +422,10 @@ function feedEntries(feed: EndlessFeed): Array<Post | "caught-up"> {
   return [...feed.friends, ...(isPastFriends ? ["caught-up" as const] : []), ...feed.others];
 }
 
-// The feed, endless and honest: your friends' posts and your own a page at a time, the
-// line that you are all caught up, then everyone else's, the next page loading as you near the end, until the end says so. The row of
-// suggested people sits after the second post; each post's line comes from the loaded people.
+// The feed, endless and honest: your friends' posts and your own a page at a time, the line that
+// you are all caught up, then everyone else's, the next page loading as you near the end, until the
+// end says so. The row of suggested people sits after the second post; each post's line comes from
+// the loaded people.
 const Feed = (props: {
   browse: BrowseHook;
   feed: EndlessFeed;
@@ -473,9 +484,10 @@ const Feed = (props: {
   );
 };
 
-// The right-hand column on a laptop, after the "Other" concept: a warm card on what your Meety does, with slow circles drawn in its
-// corner and a link to what it shares, then a few people you are not friends with yet, each with Add friend, and See everyone beside
-// their heading, opening Search.
+// The right-hand column on a laptop, after the "Other" concept: a warm card on what your Meety
+// does, with slow circles drawn in its corner and a link to what it shares, then a few people you
+// are not friends with yet, each with Add friend, and See everyone beside their heading, opening
+// Search.
 const FeedRail = (props: { browse: BrowseHook; friends: ExploreFriends }): ReactElement => {
   const { browse, friends } = props;
   const people = browse.listings
@@ -564,7 +576,8 @@ const FeedStatus = (props: { browse: BrowseHook; isEmpty: boolean }): ReactEleme
   );
 };
 
-// True when the feed has nothing to show: nobody in Explore and no posts, once both have loaded to their end or failed.
+// True when the feed has nothing to show: nobody in Explore and no posts, once both have loaded to
+// their end or failed.
 function isNothingShown(browse: BrowseHook, feed: EndlessFeed): boolean {
   const isNobody =
     browse.hasLoaded && !browse.isLoading && browse.error === null && browse.listings.length === 0;
@@ -575,9 +588,10 @@ function isNothingShown(browse: BrowseHook, feed: EndlessFeed): boolean {
   return isNobody && hasNoPosts;
 }
 
-// Home, the feed, as Instagram's home, in the look of the "Other" concept: on a laptop a small line over the title with today's date at
-// the right, which a phone leaves out as Instagram does; your next step while you have no approved card; the row of stories; then the
-// posts with the people Explore suggests. On a laptop the right-hand column sits beside it.
+// Home, the feed, as Instagram's home, in the look of the "Other" concept: on a laptop a small line
+// over the title with today's date at the right, which a phone leaves out as Instagram does; your
+// next step while you have no approved card; the row of stories; then the posts with the people
+// Explore suggests. On a laptop the right-hand column sits beside it.
 export const FeedScreen = (): ReactElement => {
   const browse = useDirectoryBrowse();
   const feed = useEndlessFeed();

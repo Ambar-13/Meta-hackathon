@@ -1,5 +1,6 @@
-// The ask test kit: the scripted job context with its replies, and the seeded people, listings, pairs, asks and the reads the checks use.
-// The job context of one ask test, its call counters, and the scripted replies of the question check, the personas and the support check.
+// The ask test kit: the scripted job context with its replies, and the seeded people, listings,
+// pairs, asks and the reads the checks use. The job context of one ask test, its call counters, and
+// the scripted replies of the question check, the personas and the support check.
 export {
   makeAskTestContext,
   countCalls,
@@ -25,7 +26,8 @@ export {
   type AskTestContext,
   type SeenCall,
 } from "./ask-test-context.js";
-// The turns and lines of the test people, the seed writes, and the reads of the ask and answer rows.
+// The turns and lines of the test people, the seed writes, and the reads of the ask and answer
+// rows.
 export {
   ASK_TURNS,
   ASK_LINES,

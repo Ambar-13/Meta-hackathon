@@ -11,7 +11,8 @@ import type { SummaryPriority } from "./summary-format.js";
 // One file from the archive or the paste box, already read into memory by the worker.
 export type ExtractInput = { name: string; text: string };
 
-// What the worker gets back: the kept turns after ranking and cutting, the shape that matched, and the persona signal of the full set.
+// What the worker gets back: the kept turns after ranking and cutting, the shape that matched, and
+// the persona signal of the full set.
 export type ExtractResult = {
   turns: Turn[];
   kind: SourceKind;
@@ -28,12 +29,14 @@ const NOT_JSON_SENTENCE =
   "This file is not a JSON export. Pick conversations.json from the zip, or paste text.";
 // A byte order mark at the start of a JSON file, removed before parsing.
 const JSON_BOM = /^﻿/;
-// The start of a structured file: an optional byte order mark, spaces or line breaks, then an opening bracket or brace.
+// The start of a structured file: an optional byte order mark, spaces or line breaks, then an
+// opening bracket or brace.
 const STRUCTURED_START = /^﻿?\s*[[{]/;
 // The name of a structured file: a .json export, or a Codex session log in .jsonl.
 const STRUCTURED_NAME = /\.jsonl?$/i;
-// The kind a Codex session is stored as. The frozen SourceKind has no codex kind, and Codex is OpenAI's agent, signed in with a
-// ChatGPT account. The kind is stored with the source and shown nowhere on screen.
+// The kind a Codex session is stored as. The frozen SourceKind has no codex kind, and Codex is
+// OpenAI's agent, signed in with a ChatGPT account. The kind is stored with the source and shown
+// nowhere on screen.
 const CODEX_KIND: SourceKind = "chatgpt";
 // Splits pasted text into blocks at one or more blank lines.
 const BLANK_LINE = /\n\s*\n/;
@@ -56,14 +59,16 @@ function parseJson(text: string): unknown {
   }
 }
 
-// The kind of a turn that the generic walker found: the hint when it names a structured kind, else from the file name.
+// The kind of a turn that the generic walker found: the hint when it names a structured kind, else
+// from the file name.
 function genericKind(input: ExtractInput, kindHint: SourceKind | null): SourceKind {
   if (kindHint === "chatgpt" || kindHint === "claude") return kindHint;
   const baseName = (input.name.split("/").pop() ?? "").toLowerCase();
   return baseName === "conversations.json" ? "chatgpt" : "claude";
 }
 
-// Runs the four structured parsers in order; the first that returns one or more turns wins and sets the kind.
+// Runs the four structured parsers in order; the first that returns one or more turns wins and sets
+// the kind.
 function structuredTurns(
   input: ExtractInput,
   kindHint: SourceKind | null,
@@ -87,10 +92,12 @@ function blockTurns(text: string): RawTurn[] {
     .map((block, index) => ({ text: block, exportOrder: index, createTime: null }));
 }
 
-// What reading one input gives: the kind its path sets, its raw turns, and whether a repeat of an earlier input's turn is dropped.
+// What reading one input gives: the kind its path sets, its raw turns, and whether a repeat of an
+// earlier input's turn is dropped.
 type InputRead = { kind: SourceKind; turns: RawTurn[]; dropsRepeats: boolean };
 
-// Reads one input into raw turns and the kind its path gives. Only Codex sessions drop repeats (see withoutRepeats).
+// Reads one input into raw turns and the kind its path gives. Only Codex sessions drop repeats (see
+// withoutRepeats).
 function readInput(input: ExtractInput, kindHint: SourceKind | null): InputRead {
   const path = detectKind(input, kindHint);
   if (path === "notes" || path === "paste")
@@ -100,7 +107,8 @@ function readInput(input: ExtractInput, kindHint: SourceKind | null): InputRead 
   return { ...structuredTurns(input, kindHint), dropsRepeats: false };
 }
 
-// Canonicalises each turn and drops the ones with no character other than whitespace (step 3 of extractOwnTurns).
+// Canonicalises each turn and drops the ones with no character other than whitespace (step 3 of
+// extractOwnTurns).
 function canonicalTurns(turns: RawTurn[]): RawTurn[] {
   return turns.flatMap((turn) => {
     const text = canonicalise(turn.text);
@@ -108,8 +116,9 @@ function canonicalTurns(turns: RawTurn[]): RawTurn[] {
   });
 }
 
-// The turns whose text no earlier input gave, with their texts added to the seen set. Codex copies a person's messages into forked
-// and resumed sessions, so without this the same words would count two or more times.
+// The turns whose text no earlier input gave, with their texts added to the seen set. Codex copies
+// a person's messages into forked and resumed sessions, so without this the same words would count
+// two or more times.
 function withoutRepeats(turns: RawTurn[], seen: Set<string>): RawTurn[] {
   return turns.filter((turn) => {
     if (seen.has(turn.text)) return false;
@@ -118,10 +127,11 @@ function withoutRepeats(turns: RawTurn[], seen: Set<string>): RawTurn[] {
   });
 }
 
-// Pulls the uploader's own turns out of any supported export. Throws source_no_own_turns when nothing is found.
-// Order of attempts: ChatGPT 2024 mapping, ChatGPT 2026 messages, Claude chat_messages, generic walker, then notes or paste for plain text.
-// A Codex .jsonl session log goes to the Codex reader, and a message repeated in a later session is kept once. With a summary, its
-// quotes and topics decide first which messages are kept.
+// Pulls the uploader's own turns out of any supported export. Throws source_no_own_turns when
+// nothing is found. Order of attempts: ChatGPT 2024 mapping, ChatGPT 2026 messages, Claude
+// chat_messages, generic walker, then notes or paste for plain text. A Codex .jsonl session log
+// goes to the Codex reader, and a message repeated in a later session is kept once. With a summary,
+// its quotes and topics decide first which messages are kept.
 export function extractOwnTurns(
   inputs: ExtractInput[],
   kindHint: SourceKind | null,

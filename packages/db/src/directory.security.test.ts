@@ -54,7 +54,8 @@ async function caught(run: () => Promise<unknown>): Promise<unknown> {
   }
 }
 
-// A question a directory meeting is started on: a curated id with its kind, or free text with no id and no kind yet.
+// A question a directory meeting is started on: a curated id with its kind, or free text with no id
+// and no kind yet.
 type MeetingAsk = { questionId: number | null; text: string; kind: string | null };
 // Curated question 1, a get-along question.
 const HACKATHON: MeetingAsk = {
@@ -63,7 +64,8 @@ const HACKATHON: MeetingAsk = {
   kind: "get_along",
 };
 
-// Starts a meeting with a listed persona as this person, with a question and a cap; returns the meeting id.
+// Starts a meeting with a listed persona as this person, with a question and a cap; returns the
+// meeting id.
 async function meetListing(
   me: { personId: string; cardId: string },
   listing: { id: string; ask?: MeetingAsk },

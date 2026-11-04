@@ -1,4 +1,5 @@
-// Every database read the golden path makes. Each runs inside withPerson or withMeeting, so row security applies, and reads only what the routes cannot show.
+// Every database read the golden path makes. Each runs inside withPerson or withMeeting, so row
+// security applies, and reads only what the routes cannot show.
 import {
   countRowsForPerson,
   makeDatabase,
@@ -16,7 +17,8 @@ function numberOrZero(value: unknown): number {
   return value === null || value === undefined ? 0 : numberFromPostgres(value);
 }
 
-// The text of a redaction placeholder, as the scrubber writes it. Its count in a turn is the placeholder count.
+// The text of a redaction placeholder, as the scrubber writes it. Its count in a turn is the
+// placeholder count.
 const REDACTED_OPEN = "[redacted:";
 
 // Opens the worker connection that every read uses.
@@ -46,7 +48,8 @@ export async function countSessions(db: GoldenDatabase, personId: string): Promi
   });
 }
 
-// The source row fields the steps check: its kind, its turn count, and when its names pass, its review and its freeze happened.
+// The source row fields the steps check: its kind, its turn count, and when its names pass, its
+// review and its freeze happened.
 export async function readSource(db: GoldenDatabase, personId: string, sourceId: string) {
   return withPerson(db, personId, (trx) =>
     trx
@@ -90,7 +93,8 @@ export async function countTurnsContaining(
   });
 }
 
-// The query that counts placeholders in a source's turns: each turn's length minus its length without the marker, over the marker's length, summed.
+// The query that counts placeholders in a source's turns: each turn's length minus its length
+// without the marker, over the marker's length, summed.
 export function placeholderCountQuery(db: GoldenDatabase, sourceId: string) {
   return db
     .selectFrom("turns")
@@ -128,7 +132,8 @@ export async function countPlaceholders(
   );
 }
 
-// The card fields the steps check: its state, whether it is thin, its recall switch, and its item totals.
+// The card fields the steps check: its state, whether it is thin, its recall switch, and its item
+// totals.
 export async function readCard(db: GoldenDatabase, personId: string, cardId: string) {
   return withPerson(db, personId, (trx) =>
     trx
@@ -190,7 +195,8 @@ export async function countRecallCorpus(
   });
 }
 
-// The quiz fields the steps check: its state, its matched count, its reliability flag, and how many judge runs it used.
+// The quiz fields the steps check: its state, its matched count, its reliability flag, and how many
+// judge runs it used.
 export async function readQuiz(db: GoldenDatabase, personId: string, quizId: string) {
   return withPerson(db, personId, (trx) =>
     trx
@@ -201,7 +207,8 @@ export async function readQuiz(db: GoldenDatabase, personId: string, quizId: str
   );
 }
 
-// The meeting fields the steps check: its state, phase, times, end reason and the question check time.
+// The meeting fields the steps check: its state, phase, times, end reason and the question check
+// time.
 export async function readMeeting(db: GoldenDatabase, meetingId: string) {
   return withMeeting(db, meetingId, (trx) =>
     trx
@@ -250,8 +257,9 @@ export async function countSteps(
   });
 }
 
-// The two members of a meeting: their side, their go-ahead and last-seen times, whether a frozen prefix is stored, and whether
-// the member speaks from public items only, as a listed persona met through the directory does.
+// The two members of a meeting: their side, their go-ahead and last-seen times, whether a frozen
+// prefix is stored, and whether the member speaks from public items only, as a listed persona met
+// through the directory does.
 export async function readMembers(db: GoldenDatabase, meetingId: string) {
   return withMeeting(db, meetingId, async (trx) => {
     const rows = await trx
@@ -270,7 +278,8 @@ export async function readMembers(db: GoldenDatabase, meetingId: string) {
   });
 }
 
-// The turn ids that the stored claims of one ask's answers quote, read as the asker. A claim whose quote was not found has none.
+// The turn ids that the stored claims of one ask's answers quote, read as the asker. A claim whose
+// quote was not found has none.
 export async function readAnswerTurnIds(
   db: GoldenDatabase,
   askerId: string,
@@ -393,7 +402,8 @@ function firstAgreeText(value: unknown): string | null {
   return null;
 }
 
-// Each person's own brief row: who owns it, its support rate and reliability flag, and its first agree line.
+// Each person's own brief row: who owns it, its support rate and reliability flag, and its first
+// agree line.
 export async function readBriefOwners(db: GoldenDatabase, meetingId: string) {
   return withMeeting(db, meetingId, async (trx) => {
     const rows = await trx
@@ -430,7 +440,8 @@ export async function readComic(
   });
 }
 
-// The share page row of a meeting: each side's consent, whether it is published, when it was withdrawn, and its slug.
+// The share page row of a meeting: each side's consent, whether it is published, when it was
+// withdrawn, and its slug.
 export async function readSharePage(db: GoldenDatabase, meetingId: string) {
   return withMeeting(db, meetingId, (trx) =>
     trx
@@ -457,7 +468,8 @@ export async function countMeetingAsMember(
   });
 }
 
-// Every table of a person and how many rows still point at them. The list comes from the db package.
+// Every table of a person and how many rows still point at them. The list comes from the db
+// package.
 export async function countPerson(
   db: GoldenDatabase,
   personId: string,
@@ -465,7 +477,8 @@ export async function countPerson(
   return countRowsForPerson(db, personId);
 }
 
-// The distinct llm modes and call sites of the ledger, read from the meeting and both people's contexts and merged.
+// The distinct llm modes and call sites of the ledger, read from the meeting and both people's
+// contexts and merged.
 export async function readLedgerFacts(
   db: GoldenDatabase,
   meetingId: string,

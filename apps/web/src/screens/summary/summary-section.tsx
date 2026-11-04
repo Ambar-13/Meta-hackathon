@@ -38,7 +38,8 @@ function pointWords(count: number): string {
   return `${String(count)} ${count === 1 ? "point" : "points"}`;
 }
 
-// What a saved summary's check says: still checking, failed, or how many points have a quote found in the person's chats.
+// What a saved summary's check says: still checking, failed, or how many points have a quote found
+// in the person's chats.
 function checkLine(view: SummaryView): string {
   if (view.state === "checking") return SUMMARY_COPY.checking;
   if (view.state === "failed") return SUMMARY_COPY.failed;
@@ -46,7 +47,8 @@ function checkLine(view: SummaryView): string {
   return `${String(found)} of ${pointWords(view.points.length)} found in your chats.`;
 }
 
-// The points a paste gives, each with its first quote and a Remove button; the count names the list.
+// The points a paste gives, each with its first quote and a Remove button; the count names the
+// list.
 const PointList = (props: {
   points: SummaryPoint[];
   onRemove: (index: number) => void;
@@ -123,7 +125,8 @@ const PasteResult = (props: { summary: SummaryHook }): ReactElement | null => {
   );
 };
 
-// The way in: copy the prompt, paste the answer, check its points, choose whether friends can ask, save.
+// The way in: copy the prompt, paste the answer, check its points, choose whether friends can ask,
+// save.
 const SummaryForm = (props: { summary: SummaryHook }): ReactElement => {
   const { summary } = props;
   const isSending = summary.send.kind === "sending";
@@ -185,7 +188,8 @@ const SavedSummary = (props: { view: SummaryView; summary: SummaryHook }): React
   );
 };
 
-// The section's body: the first read, its error, the form when there is no summary or a new one is being pasted, else the saved one.
+// The section's body: the first read, its error, the form when there is no summary or a new one is
+// being pasted, else the saved one.
 function sectionBody(summary: SummaryHook): ReactElement {
   const { view } = summary;
   if (view.value === null && view.isLoading) return <LoadingLine text={SUMMARY_COPY.loading} />;
@@ -194,8 +198,9 @@ function sectionBody(summary: SummaryHook): ReactElement {
   return <SavedSummary view={view.value} summary={summary} />;
 }
 
-// Your AI's summary of you, on Me and first on the upload page. hasChats is false when you have no chats yet, which adds the line
-// that asks for them; null on the upload page, whose next part is adding them.
+// Your AI's summary of you, on Me and first on the upload page. hasChats is false when you have no
+// chats yet, which adds the line that asks for them; null on the upload page, whose next part is
+// adding them.
 export const SummarySection = (props: {
   hasChats: boolean | null;
   summary: SummaryHook;

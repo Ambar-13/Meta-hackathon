@@ -1,4 +1,5 @@
-// Runs one pair through the product by HTTP, in the order of the golden path, and returns the ids the collectors need.
+// Runs one pair through the product by HTTP, in the order of the golden path, and returns the ids
+// the collectors need.
 import { readFileSync } from "node:fs";
 import type { ZodType, ZodTypeDef } from "zod";
 import {
@@ -27,7 +28,8 @@ import {
   type PersonFixture,
 } from "./fixture-people.js";
 
-// One pair as the spec gives it: the two people fixtures, the question, the recall switches and the optional injection.
+// One pair as the spec gives it: the two people fixtures, the question, the recall switches and the
+// optional injection.
 export type PairSpec = {
   a: string;
   b: string;
@@ -37,14 +39,16 @@ export type PairSpec = {
   injection?: "a" | "b" | undefined;
   injectionFile?: string | undefined;
 };
-// What one person's side of a driven pair came to: their id, their source, their card and their fixture name.
+// What one person's side of a driven pair came to: their id, their source, their card and their
+// fixture name.
 export type DrivenSide = {
   personId: string;
   sourceId: string;
   cardId: string;
   fixtureName: string;
 };
-// One pair after it ran: the meeting, the people, whether the brief came, and the markers planted in each side.
+// One pair after it ran: the meeting, the people, whether the brief came, and the markers planted
+// in each side.
 export type DrivenPair = {
   pairId: string;
   meetingId: string;
@@ -55,7 +59,8 @@ export type DrivenPair = {
   markers: Record<"a" | "b", string[]>;
 };
 
-// The waits of the golden path: names 120 s, card 300 s, start 75 s, with a 3 s card poll and a 2 s event poll.
+// The waits of the golden path: names 120 s, card 300 s, start 75 s, with a 3 s card poll and a 2 s
+// event poll.
 const NAMES_TIMEOUT_MS = 120_000;
 const CARD_TIMEOUT_MS = 300_000;
 const START_TIMEOUT_MS = 75_000;
@@ -89,7 +94,8 @@ function pathFor(template: string, id: string): string {
   return template.replace(":id", id);
 }
 
-// One simulated person: a cookie jar, the Origin header on every write, and calls that check each reply against its contract.
+// One simulated person: a cookie jar, the Origin header on every write, and calls that check each
+// reply against its contract.
 class PersonHttp {
   private token: string | undefined;
 
@@ -170,7 +176,8 @@ class PersonHttp {
   }
 }
 
-// Parses one reply body with its schema. A body that does not match is refused with the path it came from.
+// Parses one reply body with its schema. A body that does not match is refused with the path it
+// came from.
 function parseReply<T>(schema: ZodType<T, ZodTypeDef, unknown>, text: string, path: string): T {
   let json: unknown;
   try {
@@ -187,13 +194,15 @@ function parseReply<T>(schema: ZodType<T, ZodTypeDef, unknown>, text: string, pa
   return parsed.data;
 }
 
-// The sign-up body for one display name, with the access code when the site asks for one (ACCESS_CODE in the shell).
+// The sign-up body for one display name, with the access code when the site asks for one
+// (ACCESS_CODE in the shell).
 function signUpBody(displayName: string): { displayName: string; accessCode?: string } {
   const accessCode = (process.env.ACCESS_CODE ?? "").trim();
   return accessCode === "" ? { displayName } : { displayName, accessCode };
 }
 
-// Makes one person, uploads their source, freezes the names, builds and approves their card. Returns the ids.
+// Makes one person, uploads their source, freezes the names, builds and approves their card.
+// Returns the ids.
 async function prepareSide(
   client: PersonHttp,
   fixture: PersonFixture,
@@ -229,7 +238,8 @@ async function prepareSide(
   return { personId: created.personId, sourceId, cardId };
 }
 
-// Reads every page of names and sends the review that replaces each one (every name replaced by default).
+// Reads every page of names and sends the review that replaces each one (every name replaced by
+// default).
 async function reviewNames(client: PersonHttp, sourceId: string, first: SourceView): Promise<void> {
   const pages = Math.max(1, Math.ceil(first.names.total / NAMES_PAGE_SIZE));
   const rows = [...first.names.rows];
@@ -251,7 +261,8 @@ async function reviewNames(client: PersonHttp, sourceId: string, first: SourceVi
   });
 }
 
-// Asks for the card on a source and waits until it is no longer building. A failed card stops this pair.
+// Asks for the card on a source and waits until it is no longer building. A failed card stops this
+// pair.
 async function buildCard(client: PersonHttp, sourceId: string): Promise<string> {
   const requested = await client.call({
     method: "POST",
@@ -307,7 +318,8 @@ function tokenOf(inviteUrl: string): string {
   return new URL(inviteUrl).hash.slice(1);
 }
 
-// Follows the meeting by its poll route for both sides until brief.ready, a deleted end, or the timeout. Returns what the run needs.
+// Follows the meeting by its poll route for both sides until brief.ready, a deleted end, or the
+// timeout. Returns what the run needs.
 async function followMeeting(
   sides: { a: PersonHttp; b: PersonHttp },
   meetingId: string,
@@ -360,7 +372,8 @@ function summarize(seen: Map<number, MeetingEvent>): {
   };
 }
 
-// Looks up the fixture for one side; a missing file is refused with eval_fixture_missing, and the run goes on.
+// Looks up the fixture for one side; a missing file is refused with eval_fixture_missing, and the
+// run goes on.
 function fixtureFor(fixtures: Map<string, PersonFixture>, name: string): PersonFixture {
   const fixture = fixtures.get(name);
   if (fixture === undefined)
@@ -371,8 +384,9 @@ function fixtureFor(fixtures: Map<string, PersonFixture>, name: string): PersonF
   return fixture;
 }
 
-// The fixture for one side, with its injection file when the pair plants one there, and the markers that file plants.
-// Only a paste source can carry an injection, because a card is built from one source.
+// The fixture for one side, with its injection file when the pair plants one there, and the markers
+// that file plants. Only a paste source can carry an injection, because a card is built from one
+// source.
 function sideFixture(
   fixture: PersonFixture,
   spec: PairSpec,
@@ -396,7 +410,8 @@ function sideFixture(
   };
 }
 
-// Runs one pair end to end: two people, their sources and cards, the pair, the meeting, and the follow to the brief.
+// Runs one pair end to end: two people, their sources and cards, the pair, the meeting, and the
+// follow to the brief.
 export async function drivePair(
   spec: PairSpec,
   flags: EvalFlags,

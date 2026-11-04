@@ -1,4 +1,5 @@
-// The command-line flags of the golden path, the run options they make, the usage text, and the step selection for --until.
+// The command-line flags of the golden path, the run options they make, the usage text, and the
+// step selection for --until.
 import { ExitError } from "./report.js";
 
 // Which worker mode the run expects: live, replay (mock), record, or neither (no ledger assertion).
@@ -10,7 +11,8 @@ export type RunOptions = {
   mode: RunMode;
   reportPath: string;
 };
-// The step names in order, as --until takes them. Steps 9 and 10 stay in the list, because they are removed steps that keep their numbers.
+// The step names in order, as --until takes them. Steps 9 and 10 stay in the list, because they are
+// removed steps that keep their numbers.
 export const STEP_NAMES = [
   "person",
   "paste",
@@ -70,7 +72,8 @@ const VALUE_FLAGS = new Set(["--base", "--until", "--report"]);
 // The flags that stand alone.
 const SWITCH_FLAGS = new Set(["--live", "--mock", "--record"]);
 
-// Reads the flags into a map. Values are strings and switches are "true". A flag it does not know, or a value flag with no value, exits 2.
+// Reads the flags into a map. Values are strings and switches are "true". A flag it does not know,
+// or a value flag with no value, exits 2.
 function readArguments(argv: readonly string[]): Map<string, string> {
   const values = new Map<string, string>();
   for (let index = 0; index < argv.length; index += 1) {
@@ -103,7 +106,8 @@ function modeOf(values: ReadonlyMap<string, string>): RunMode {
   return chosen[0] === "--record" ? "record" : "none";
 }
 
-// Turns the command line into the run options. A bad flag, an unknown step or both --live and --mock exits 2.
+// Turns the command line into the run options. A bad flag, an unknown step or both --live and
+// --mock exits 2.
 export function parseFlags(argv: readonly string[]): RunOptions {
   const values = readArguments(argv);
   const mode = modeOf(values);

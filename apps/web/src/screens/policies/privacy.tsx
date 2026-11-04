@@ -1,7 +1,8 @@
 import type { ReactElement } from "react";
 import { PolicyPage, PolicySections, type PolicySection } from "./policy-page.js";
 
-// What Meety keeps, what it does with it, who sees what, what it keeps in the browser, and how to delete it, true to what the code does.
+// What Meety keeps, what it does with it, who sees what, what it keeps in the browser, and how to
+// delete it, true to what the code does.
 const PRIVACY_SECTIONS: readonly PolicySection[] = [
   {
     title: "What Meety keeps",

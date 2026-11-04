@@ -14,7 +14,8 @@ import {
   type QuizPrompt,
 } from "./quiz-requests.js";
 
-// The six turns of the fixture source. Each fixture card item quotes one of them, in the same order.
+// The six turns of the fixture source. Each fixture card item quotes one of them, in the same
+// order.
 export const FIXTURE_TURNS: readonly string[] = [
   "Tell me the bad news straight away, I can handle it. Waiting makes it worse.",
   "When a plan dies I sit down that evening and write a new one, every time.",
@@ -70,7 +71,8 @@ export const FIXTURE_CARD_ITEMS: readonly PersonaCardItem[] = [
   },
 ];
 
-// The bank question ids of every fixture quiz, positions 1 to 10 (fixed here so fixtures can match).
+// The bank question ids of every fixture quiz, positions 1 to 10 (fixed here so fixtures can
+// match).
 export const FIXTURE_QUESTION_IDS: readonly number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 // The persona answers to questions 1 to 10 from the six-item card.
@@ -139,7 +141,8 @@ export const AGREE_REASON = "Both answers give the same main point.";
 // The reason every judge fixture returns for a disagreeing verdict.
 export const DISAGREE_REASON = "The two answers give different main points.";
 
-// The quiz ids of the judge tests. Their first two hex characters pick the calibration entries (calibration.ts).
+// The quiz ids of the judge tests. Their first two hex characters pick the calibration entries
+// (calibration.ts).
 export const FIXTURE_QUIZ_IDS = {
   judgedFirstRun: "00000000-0000-4000-8000-000000000101",
   rerunPasses: "02000000-0000-4000-8000-000000000102",
@@ -148,7 +151,8 @@ export const FIXTURE_QUIZ_IDS = {
   rawRecord: "08000000-0000-4000-8000-000000000105",
 } as const;
 
-// One fixture: its id, the call site, the call it answers, and the JSON content of the model's reply.
+// One fixture: its id, the call site, the call it answers, and the JSON content of the model's
+// reply.
 export type FixtureCase = {
   id: string;
   callSite: "quiz_answer" | "quiz_judge";
@@ -293,7 +297,8 @@ export function fixtureCases(): FixtureCase[] {
   return [...personaCases(), ...calibrationCases(), ...itemCases()];
 }
 
-// The exact body the model client sends for a call: buildChatRequest with stream false, as LlmClient.complete builds it (dossier spec 4.7 step 2).
+// The exact body the model client sends for a call: buildChatRequest with stream false, as
+// LlmClient.complete builds it (dossier spec 4.7 step 2).
 export function requestBodyFor(call: QuizModelCall): Record<string, unknown> {
   return buildChatRequest({
     callSite: call.callSite,
@@ -303,7 +308,8 @@ export function requestBodyFor(call: QuizModelCall): Record<string, unknown> {
   });
 }
 
-// Writes <outDir>/<id>.request.json and <outDir>/<id>.response.json for one case, for the write-fixture command of llm.
+// Writes <outDir>/<id>.request.json and <outDir>/<id>.response.json for one case, for the
+// write-fixture command of llm.
 export async function writeFixtureCaseFiles(caseId: string, outDir: string): Promise<void> {
   const fixture = fixtureCases().find((candidate) => candidate.id === caseId);
   if (fixture === undefined) {
@@ -343,7 +349,8 @@ export async function writeFixtureCaseFiles(caseId: string, outDir: string): Pro
   await writeFile(join(outDir, `${fixture.id}.response.json`), response);
 }
 
-// Writes every case when the target is "all", else the one case named. The second argument is the folder to write into.
+// Writes every case when the target is "all", else the one case named. The second argument is the
+// folder to write into.
 export async function main(args: readonly string[]): Promise<void> {
   const [target, outDir] = args;
   if (target === undefined || outDir === undefined) {
@@ -362,7 +369,8 @@ export async function main(args: readonly string[]): Promise<void> {
   await writeFixtureCaseFiles(target, outDir);
 }
 
-// The command line entry. It runs only when this file is run directly, so the integration test can import the cases without writing files.
+// The command line entry. It runs only when this file is run directly, so the integration test can
+// import the cases without writing files.
 if (process.argv[1]?.endsWith("quiz-fixtures.ts") === true) {
   main(process.argv.slice(2)).catch((error: unknown) => {
     console.error(error);
