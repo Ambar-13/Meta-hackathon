@@ -89,7 +89,7 @@ The other person keeps their own source and card, and the screen says so.
 
 ## The browser side
 
-The session cookie is named `__Host-session`. It is HttpOnly, Secure, has Path=/ and SameSite=Lax, and has no Domain attribute, which the browser needs for the `__Host-` prefix. The api checks the Origin header on every request that is not a GET. The Content-Security-Policy string is, word for word:
+The session cookie is named `__Host-session`. It is HttpOnly, Secure, has Path=/ and SameSite=Lax, and has no Domain attribute, which the browser needs for the `__Host-` prefix. A page asked for on Render's own address (meet-first.onrender.com) moves to the same path on APP_ORIGIN (https://heymeety.com) with a 301, so the cookie always belongs to one address; /api/ and /assets/ are not moved. The api checks the Origin header on every request that is not a GET. The Content-Security-Policy string is, word for word:
 
 > default-src 'self'; img-src 'self' data:; connect-src 'self'
 

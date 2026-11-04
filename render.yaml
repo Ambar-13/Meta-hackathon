@@ -24,7 +24,7 @@ services:
       - key: DATABASE_URL_WORKER
         sync: false          # role app_worker; the worker process only
       - key: APP_ORIGIN
-        sync: false          # https://<service>.onrender.com until a domain exists (A7)
+        sync: false          # https://heymeety.com; a page on the onrender.com address moves there (A7)
       - key: META_API_KEY
         sync: false          # the worker process only; the start script keeps it out of the api
       - key: ACCESS_CODE

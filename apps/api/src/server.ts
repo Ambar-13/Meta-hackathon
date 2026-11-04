@@ -27,7 +27,11 @@ import { registerShareRoutes } from "./share/index.js";
 import { registerDirectoryRoutes } from "./directory/index.js";
 import { registerAsksRoutes } from "./asks/index.js";
 import { registerSocialRoutes } from "./social/index.js";
-import { addContentSecurityPolicy, registerWebPagesRoutes } from "./web-pages/index.js";
+import {
+  addContentSecurityPolicy,
+  addRenderAddressRedirect,
+  registerWebPagesRoutes,
+} from "./web-pages/index.js";
 
 // Connections in the api's Kysely pool (10 for the api). The LISTEN connection is one more client,
 // owned by meeting-stream.
@@ -99,6 +103,7 @@ export async function buildApp(
   });
   replaceJsonParser(app);
   addContentSecurityPolicy(app);
+  addRenderAddressRedirect(app, deps.env.APP_ORIGIN);
   addOriginCheck(app, deps.env.APP_ORIGIN);
   await addSessionHook(app, deps);
   await registerAccountRateLimit(app);

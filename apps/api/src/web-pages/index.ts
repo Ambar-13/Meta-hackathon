@@ -31,3 +31,6 @@ export const registerWebPagesRoutes: RoutePlugin = (app, deps) =>
 
 // The policy header, which server.ts adds before any route.
 export { addContentSecurityPolicy, CONTENT_SECURITY_POLICY } from "./static-files.js";
+
+// The move from Render's own address to APP_ORIGIN, which server.ts adds before the Origin check.
+export { addRenderAddressRedirect } from "./render-address.js";

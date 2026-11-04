@@ -4,7 +4,7 @@ Your Meety meets theirs first. With receipts.
 
 Meety builds an AI of you from your own chat history, using only the parts you approve. Before two people spend an evening, a weekend or a company on each other, their two Meetys talk first and play out how the two of them would probably react: would they get along, could one help the other, would they agree on a deal. Each person gets a short brief, and every line of it quotes the words it rests on. Meety never scores a person.
 
-It is live at [meet-first.onrender.com](https://meet-first.onrender.com). The app was called Meet First until November 2026, so the code, the packages and the database still use that name.
+It is live at [heymeety.com](https://heymeety.com). The app was called Meet First until November 2026, so the code, the packages and the database still use that name.
 
 ## Try it
 
@@ -93,4 +93,4 @@ pnpm test:journeys
 - [What keeps each person's data theirs]
 - [What Meety does not do]
 - [How AI was used]
-- [Privacy](https://meet-first.onrender.com/privacy), [terms](https://meet-first.onrender.com/terms) and [cookies](https://meet-first.onrender.com/cookies)
+- [Privacy](https://heymeety.com/privacy), [terms](https://heymeety.com/terms) and [cookies](https://heymeety.com/cookies)
