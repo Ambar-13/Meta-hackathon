@@ -188,7 +188,7 @@ function belowFrom(
     aboutEnd: (
       <>
         {home.value.card !== null || summary.view.value?.state === "ready" ? <TryMeety /> : null}
-        <SummarySection hasChats={home.value.source !== null} summary={summary} />
+        <SummarySection hasChats={home.value.source !== null} summary={summary} isCompact />
         {home.value.card === null ? null : <AddChats />}
       </>
     ),

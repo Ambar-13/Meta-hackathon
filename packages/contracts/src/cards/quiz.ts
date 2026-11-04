@@ -51,7 +51,7 @@ export type QuizAnswersResponse = z.infer<typeof QuizAnswersResponse>;
 export const quizCopy = (matched: number, isReliable: boolean): string =>
   isReliable
     ? `matched ${String(matched)} of 10`
-    : `matched ${String(matched)} of 10. The judge failed its own check twice, so treat this count as rough.`;
+    : `matched ${String(matched)} of 10. This count may be a little off.`;
 // What the persona answer call returns: one short answer (quiz-persona-answer prompt).
 export const QuizPersonaAnswerOutput = z.object({
   answer: z.string().min(1).max(QUIZ_ANSWER_MAX_CHARS),

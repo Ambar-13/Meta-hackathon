@@ -15,7 +15,6 @@ export const COMPOSER_LABEL = "Ask Meety, your personal AI";
 // The most lines the box grows to before it scrolls.
 const MAX_ROWS = 6;
 // The line under the box.
-const SAFETY_LINE = "Nothing goes to anyone's Meety until you press the button on a reply.";
 
 // The rows the box asks for, from the lines its text holds, for browsers that cannot size a text
 // box to its content.
@@ -90,7 +89,6 @@ export const Composer = (props: { model: ComposerModel }): ReactElement => {
           </button>
         </div>
       </form>
-      <p className="chat-safety">{SAFETY_LINE}</p>
     </div>
   );
 };

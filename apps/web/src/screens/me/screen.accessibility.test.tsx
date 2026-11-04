@@ -454,14 +454,23 @@ describe("/me with no chats, against the MSW route stubs (a fake server)", () =>
     stubMeReads({ home: home({ source: null, card: null }) });
     renderMe();
 
-    expect(
-      await screen.findByText(
-        "Add your chats too. With them, your Meety can quote you and help your friends better.",
-      ),
-    ).toBeTruthy();
+    expect(await screen.findByText("With your chats, your Meety can quote you.")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Add your chats" }).getAttribute("href")).toBe(
       APP_PATHS.upload,
     );
+  });
+});
+
+describe("/me with no summary, against the MSW route stubs (a fake server)", () => {
+  it("W7-ME-T12: with no summary saved, Me links to the page that takes one instead of showing the paste form", async () => {
+    stubMeReads({});
+    renderMe();
+
+    expect(
+      (await screen.findByRole("link", { name: "Add your AI's summary" })).getAttribute("href"),
+    ).toBe(APP_PATHS.upload);
+    expect(screen.queryByRole("button", { name: "Copy the prompt" })).toBeNull();
+    expect(screen.queryByRole("textbox", { name: "Your AI's answer" })).toBeNull();
   });
 });
 

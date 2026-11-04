@@ -549,9 +549,7 @@ describe("quiz routes", () => {
       (await send(owner, { method: "GET", url: readQuizPath(quizId) })).json(),
     );
 
-    expect(view.copy).toBe(
-      "matched 6 of 10. The judge failed its own check twice, so treat this count as rough.",
-    );
+    expect(view.copy).toBe("matched 6 of 10. This count may be a little off.");
     expect(view.reliable).toBe(false);
   });
 

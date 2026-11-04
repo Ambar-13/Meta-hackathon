@@ -152,6 +152,8 @@ main.screen.wide:has(.explore), main.screen.wide:has(.search-page) { max-width: 
   color: var(--ui-ink-2); font: 500 14px/20px var(--ui-font); transition: background-color 0.15s var(--ease), color 0.15s var(--ease); }
 :is(.explore, .search-page) .feed-action:hover, :is(.explore, .search-page) .feed-action:hover:not(:disabled) { filter: none; background: var(--ui-soft); color: var(--ui-ink); text-decoration: none; }
 :is(.explore, .search-page) .feed-action.is-ask { color: var(--ui-blue); font-weight: 600; }
+/* Like is the heart alone, as Instagram's; its words stay for screen readers. */
+:is(.explore, .search-page) .feed-action.is-icon { justify-content: center; min-width: 44px; padding: 0; }
 :is(.explore, .search-page) .feed-action[aria-pressed="true"] { color: var(--ui-ink); }
 :is(.explore, .search-page) .feed-action[aria-pressed="true"] .icon { color: var(--ui-red); fill: currentColor; }
 .feed-delete { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }

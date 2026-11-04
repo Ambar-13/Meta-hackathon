@@ -10,8 +10,6 @@ export const PREVIEW_COPY = {
   loading: "Reading what the page would hold.",
   noLinesTitle: "No brief lines to publish",
   noLines: "None of your brief lines passed the support check, so the page shows none of them.",
-  alsoShown:
-    "The card items you both approved, what the two Meetys said, and the other person's checked brief lines will appear too.",
 } as const;
 
 // The display name of one side of the meeting, or an empty string when the view does not hold it.
@@ -97,7 +95,6 @@ export const PublishPreviewPanel = (props: { preview: PublishPreview }): ReactEl
         </div>
         <div className="share-preview-body">
           {preview.lines === null ? null : <PreviewBrief lines={preview.lines} meeting={meeting} />}
-          <p className="share-also">{PREVIEW_COPY.alsoShown}</p>
         </div>
       </div>
     </section>

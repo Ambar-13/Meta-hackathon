@@ -12,7 +12,6 @@ import {
 // The words of Try your Meety.
 const TRY_COPY = {
   title: "Try your Meety",
-  lede: "Ask it something about you, the way a friend would, and see how it answers.",
   label: "Ask your Meety about you",
   placeholder: "How would I react if a friend cancelled our trip?",
   ask: "Ask my Meety",
@@ -68,7 +67,6 @@ export const TryMeety = (): ReactElement => {
   return (
     <section className="me-try" aria-labelledby={titleId}>
       <h2 id={titleId}>{TRY_COPY.title}</h2>
-      <p className="me-try-lede">{TRY_COPY.lede}</p>
       <form onSubmit={onSubmit}>
         <label>
           <span>{TRY_COPY.label}</span>

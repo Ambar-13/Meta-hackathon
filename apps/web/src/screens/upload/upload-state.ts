@@ -10,8 +10,7 @@ import type { SummaryPriority } from "@meet-first/parsers";
 import { apiUpload, asApiError, ApiError, readAllowlist } from "../../app-shell/index.js";
 
 // The consent copy, shown unchanged with the preview count before the upload button.
-export const CONSENT_COPY =
-  "Your original archive stays on your device. After you review redactions, we upload and store only the selected excerpts shown here. You can delete them at any time.";
+export const CONSENT_COPY = "Only these messages are sent. You can delete them any time.";
 // Under 640 px the paste tab comes first.
 export const NARROW_SCREEN_QUERY = "(max-width: 639px)";
 // The words shown for each stage the extraction worker reports (drafted copy).

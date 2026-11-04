@@ -1,5 +1,5 @@
 import { useEffect, useRef, type KeyboardEvent, type ReactElement } from "react";
-import { Avatar, Sticker } from "../../look/index.js";
+import { Avatar, Icon, Sticker } from "../../look/index.js";
 import { sideLetter } from "./brief-sections.js";
 import type { OpenQuote } from "./brief-state.js";
 
@@ -37,15 +37,21 @@ export const QuoteSheet = (props: {
         onKeyDown={keepFocus}
       >
         <Sticker name="quote" />
+        <button
+          ref={closeButton}
+          type="button"
+          className="quiet sheet-close"
+          onClick={props.onClose}
+          aria-label="Close"
+        >
+          <Icon name="close" size={22} />
+        </button>
         <h2 id="quote-sheet-title">Quote</h2>
         <blockquote>{quote.text}</blockquote>
         <p className="quote-sheet-who">
           <Avatar name={side} side={quote.side} isSmall />
           {sentence}
         </p>
-        <button ref={closeButton} type="button" className="quiet" onClick={props.onClose}>
-          Close
-        </button>
       </div>
     </div>
   );

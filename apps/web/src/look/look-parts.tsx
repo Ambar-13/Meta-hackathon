@@ -82,7 +82,7 @@ export const Receipt = (props: {
       <Sticker name="quote" />
       <span>
         <q>{props.quote}</q>
-        <small>{props.source}</small>
+        {props.source === "" ? null : <small>{props.source}</small>}
       </span>
     </>
   );

@@ -10,7 +10,7 @@ import { PublicSharePage } from "./public-page.js";
 
 // The explainer, word for word from the copy table.
 const CONSENT_EXPLAINER =
-  "Publishing makes a page anyone with the link can read. It shows your display names, the question, the card items you approved, what the two Meetys said, and the brief lines that passed the support check with their quotes. It never shows your archive, redacted text, quiz answers or anything you did not approve. Either of you can take it down at any time; the page disappears on the next visit.";
+  "Anyone with the link can read this page: your names, the question, your approved card items, what your Meetys said and the brief, with quotes. Nothing you didn't approve. Either of you can take it down at any time.";
 // The slug of the fixture page: 22 URL-safe characters.
 const SLUG = "AAAAAAAAAAAAAAAAAAAAAA";
 // The question of the fixture page.
@@ -169,7 +169,7 @@ describe("consent screen preview (design fix 2: the consent screen shows the exc
     for (const line of [...HELD_BACK_LINES, "Filler line 1"]) {
       expect(within(preview).queryByText(line)).toBeNull();
     }
-    expect(within(preview).getByText(/will appear too\.$/)).toBeTruthy();
+    expect(within(preview).queryByText(/will appear too\.$/)).toBeNull();
     const button = screen.getByRole("button", { name: "I consent to publish" });
     expect(preview.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
     expect(screen.getByText(CONSENT_EXPLAINER)).toBeTruthy();

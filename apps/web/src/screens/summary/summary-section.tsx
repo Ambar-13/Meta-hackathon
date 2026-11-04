@@ -3,14 +3,14 @@ import { useId, type ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { SUMMARY_MAX_CHARS, type SummaryPoint, type SummaryView } from "@meet-first/contracts";
 import { APP_PATHS, ErrorNotice } from "../../app-shell/index.js";
-import { LoadingLine } from "../../look/index.js";
+import { Icon, LoadingLine } from "../../look/index.js";
 import { PillSwitch } from "../card/pill-switch.js";
 import { SUMMARY_PROMPT, type SummaryHook } from "./summary-state.js";
 
 // The words of the summary section.
 const SUMMARY_COPY = {
   title: "Your AI's summary of you",
-  lede: "ChatGPT or Claude already knows you. Copy the prompt, paste it into a chat there, then paste its answer here. You see every point before it is saved.",
+  lede: "ChatGPT or Claude already knows you. Copy the prompt, paste it there, then paste the answer here. You check every point before it is saved.",
   loading: "Opening your summary.",
   copy: "Copy the prompt",
   copied: "Copied. Paste it into ChatGPT or Claude.",
@@ -29,8 +29,9 @@ const SUMMARY_COPY = {
   friendsOff: "Only your own Meety uses this summary.",
   replace: "Paste a new summary",
   delete: "Delete summary",
-  nudge: "Add your chats too. With them, your Meety can quote you and help your friends better.",
+  nudge: "With your chats, your Meety can quote you.",
   addChats: "Add your chats",
+  addSummary: "Add your AI's summary",
 } as const;
 
 // "1 point" or "n points".
@@ -68,13 +69,13 @@ const PointList = (props: {
             </div>
             <button
               type="button"
-              className="quiet"
+              className="quiet summary-remove"
               aria-label={`Remove this point: ${point.point}`}
               onClick={() => {
                 props.onRemove(index);
               }}
             >
-              Remove
+              <Icon name="close" size={18} />
             </button>
           </li>
         ))}
@@ -189,28 +190,37 @@ const SavedSummary = (props: { view: SummaryView; summary: SummaryHook }): React
 };
 
 // The section's body: the first read, its error, the form when there is no summary or a new one is
-// being pasted, else the saved one.
-function sectionBody(summary: SummaryHook): ReactElement {
+// being pasted, else the saved one. A compact section links to the upload page in place of the
+// form while there is no summary.
+function sectionBody(summary: SummaryHook, isCompact: boolean): ReactElement {
   const { view } = summary;
   if (view.value === null && view.isLoading) return <LoadingLine text={SUMMARY_COPY.loading} />;
   if (view.value === null && view.error !== null) return <ErrorNotice error={view.error} />;
+  if (view.value === null && isCompact && !summary.isReplacing) {
+    return (
+      <p className="summary-add">
+        <Link to={APP_PATHS.upload}>{SUMMARY_COPY.addSummary}</Link>
+      </p>
+    );
+  }
   if (view.value === null || summary.isReplacing) return <SummaryForm summary={summary} />;
   return <SavedSummary view={view.value} summary={summary} />;
 }
 
 // Your AI's summary of you, on Me and first on the upload page. hasChats is false when you have no
 // chats yet, which adds the line that asks for them; null on the upload page, whose next part is
-// adding them.
+// adding them. On Me the section is compact: the form lives on the upload page.
 export const SummarySection = (props: {
   hasChats: boolean | null;
   summary: SummaryHook;
+  isCompact?: boolean;
 }): ReactElement => {
   const titleId = useId();
   const { send } = props.summary;
   return (
     <section className="summary-section" aria-labelledby={titleId}>
       <h2 id={titleId}>{SUMMARY_COPY.title}</h2>
-      {sectionBody(props.summary)}
+      {sectionBody(props.summary, props.isCompact === true)}
       {send.kind === "failed" ? <ErrorNotice error={send.error} /> : null}
       {props.hasChats === false ? (
         <p className="summary-nudge">

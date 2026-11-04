@@ -352,8 +352,9 @@ const ViewerHead = (props: {
         className="story-icon"
         onClick={props.onPause}
         aria-pressed={props.isPaused}
+        aria-label={props.isPaused ? STORY_COPY.play : STORY_COPY.pause}
       >
-        {props.isPaused ? STORY_COPY.play : STORY_COPY.pause}
+        <Icon name={props.isPaused ? "play" : "pause"} size={24} />
       </button>
       <button
         ref={props.closeRef}

@@ -5,6 +5,7 @@ import { UploadView, type UploadActions } from "../../../screens/upload/screen.j
 import { useIsNarrowScreen, type UploadFlow } from "../../../screens/upload/upload-state.js";
 import { useSummary } from "../../../screens/summary/index.js";
 import type { GalleryView } from "../gallery-views.js";
+import { pasteSummary } from "./me.js";
 
 // Actions that do nothing: the gallery shows one state and stays there.
 const NO_ACTIONS: UploadActions = {
@@ -77,6 +78,14 @@ export const views: readonly GalleryView[] = [
     "Upload, the file tab before a file is picked",
     <UploadAt flow={{ kind: "idle" }} tab="file" />,
   ),
+  {
+    ...uploadView(
+      "upload-summary-pasted",
+      "Upload, a summary pasted: its points to save",
+      <UploadAt flow={{ kind: "idle" }} tab="file" />,
+    ),
+    play: pasteSummary,
+  },
   uploadView(
     "upload-paste-empty",
     "Upload, the paste tab with an empty box (the check button stays shut)",

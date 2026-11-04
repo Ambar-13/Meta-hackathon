@@ -5,7 +5,7 @@ import { CONSENT_COPY, STAGE_WORDS } from "./upload-state.js";
 
 // The words for a low persona signal (drafted copy).
 const LOW_SIGNAL_NOTE =
-  "Most of these messages look like tasks or code, not about you, so the card may come out thin. Pasting a few notes about yourself works better.";
+  "These are mostly tasks or code, so your card may come out thin. A few notes about yourself help.";
 // The worker's stages in the order it reports them, for the step list under the progress line.
 const STAGE_ORDER: readonly UploadProgress["stage"][] = [
   "reading",
@@ -111,16 +111,12 @@ export const FileTab = (props: { isBusy: boolean; onPick: (file: File) => void }
             type="file"
             accept=".zip,.json,.jsonl,.txt,.md"
             disabled={props.isBusy}
-            aria-describedby="file-hint"
             onChange={(event) => {
               const file = event.target.files?.[0];
               if (file !== undefined) props.onPick(file);
             }}
           />
         </label>
-        <p className="hint" id="file-hint">
-          The file is read on this device. Only the excerpts you approve are sent.
-        </p>
       </div>
     </div>
   );
@@ -218,7 +214,7 @@ export const PreviewPanel = (props: {
           disabled={!props.isAttested || props.isUploading}
           onClick={props.onUpload}
         >
-          Upload these excerpts
+          Upload these messages
         </button>
       </div>
       {props.isUploading ? <LoadingLine text="Uploading your excerpts." /> : null}

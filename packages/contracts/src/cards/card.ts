@@ -72,7 +72,7 @@ export const CardRequestResponse = z.object({ cardId: Uuid });
 export type CardRequestResponse = z.infer<typeof CardRequestResponse>;
 // The words shown next to the recall switch, kept word for word.
 export const RECALL_SWITCH_COPY =
-  "Let my Meety search my notes during meetings, with names hidden and secrets removed. The other person may see quotes from them.";
+  "Let my Meety quote my chats in meetings. Names and secrets stay hidden.";
 // What the card model returns: items with a kind, a claim, a language, a gloss, a turn label and a
 // quote. The per-field maximums bound parsing and are picked here.
 export const CardBuildOutput = z.object({

@@ -1,6 +1,6 @@
 import "./create.css";
 import type { FormEvent, ReactElement } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { POST_TEXT_MAX_CHARS, type PostKind } from "@meet-first/contracts";
 import {
   APP_PATHS,
@@ -9,7 +9,7 @@ import {
   readCreateKind,
   ScreenFrame,
 } from "../../app-shell/index.js";
-import { Icon, MeetyMark, StoryPicture } from "../../look/index.js";
+import { Icon, StoryPicture } from "../../look/index.js";
 import { canShare, useCreate, type CreateModel } from "./create-state.js";
 
 // The words of Create.
@@ -26,11 +26,9 @@ const CREATE_COPY = {
   caption: { post: "Caption", story: "Words on your story" },
   placeholder: { post: "Write a caption", story: "Add words to your story" },
   storyLine: "Your story shows for 24 hours, then it is gone.",
-  meety: "Your Meety learns from your chats and your AI's summary of you.",
   notListed: "Only you see your posts until you join Explore.",
   share: "Share",
   sharing: "Sharing",
-  invite: "Invite a friend instead",
   preview: "Your photo",
 } as const;
 // From how many characters on the box shows how many are left.
@@ -188,10 +186,6 @@ export const CreateScreen = (): ReactElement => {
               <p className="create-count" aria-live="polite">{`${String(left)} characters left`}</p>
             ) : null}
             {model.kind === "story" ? <p className="create-note">{CREATE_COPY.storyLine}</p> : null}
-            <p className="create-meety">
-              <MeetyMark />
-              {CREATE_COPY.meety}
-            </p>
             {model.listed === "not-listed" && model.kind === "post" ? (
               <p className="create-note">{CREATE_COPY.notListed}</p>
             ) : null}
@@ -199,9 +193,6 @@ export const CreateScreen = (): ReactElement => {
             <button type="submit" className="btn create-share" disabled={!isReady}>
               {isSending ? CREATE_COPY.sharing : CREATE_COPY.share}
             </button>
-            <Link className="create-invite" to={APP_PATHS.pair}>
-              {CREATE_COPY.invite}
-            </Link>
           </div>
         </div>
       </form>

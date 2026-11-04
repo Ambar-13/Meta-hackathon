@@ -11,7 +11,7 @@ const DELETION_ID = "00000000-0000-4000-8000-000000000301";
 // The dialog copy, byte for byte as the settings spec gives it.
 const DIALOG_TITLE = "Delete everything we hold about you?";
 const DIALOG_BODY =
-  "This removes your uploaded excerpts, your card, your quizzes, your meetings, briefs, comics and any share page from our database. Anyone you met keeps their own excerpts and card, and loses the shared meeting, brief and share page. Your recovery code stops working. This cannot be undone.";
+  "This deletes your chats, card, meetings, briefs and posts. People you met lose the meetings and briefs you shared. This can't be undone.";
 const DELETING = "Deleting. This takes a few seconds.";
 const DELETED_NOTICE =
   "Your account is being deleted. Everything is removed within a few minutes. You can close this tab.";

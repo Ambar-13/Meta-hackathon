@@ -30,11 +30,8 @@
   font: 400 16px/24px var(--ui-font); resize: vertical; }
 .create-caption textarea:focus { border-color: var(--ui-ink-2); outline: none; }
 .create-count, .create-note { margin: 0; color: var(--ui-ink-2); font: 400 14px/20px var(--ui-font); }
-.create-meety { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--ui-ink-2); font: 400 14px/20px var(--ui-font); }
-.create-meety .meety-mark { --a-size: 22px; }
 .create-refusal { margin: 0; color: var(--ui-red); font-weight: 600; }
 .create-share { width: 100%; min-height: 48px; margin-top: 4px; }
-.create-invite { justify-self: center; display: inline-flex; align-items: center; min-height: 44px; font: 600 14px/20px var(--ui-font); }
 
 @media (min-width: 900px) {
   .create-body { grid-template-columns: minmax(0, 1.15fr) minmax(300px, 1fr); align-items: start; gap: 32px; }

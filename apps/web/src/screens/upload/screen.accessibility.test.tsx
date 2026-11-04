@@ -72,11 +72,11 @@ describe("upload screen, using a fake prepareUpload (needs ingest on main, stage
       url: APP_PATHS.upload,
     });
     checkPaste();
-    const upload = await screen.findByRole("button", { name: "Upload these excerpts" });
+    const upload = await screen.findByRole("button", { name: "Upload these messages" });
     expect(upload.hasAttribute("disabled")).toBe(true);
     fireEvent.click(screen.getByRole("checkbox", { name: "These are my own chats." }));
-    fireEvent.click(screen.getByRole("button", { name: "Upload these excerpts" }));
-    fireEvent.click(screen.getByRole("button", { name: "Upload these excerpts" }));
+    fireEvent.click(screen.getByRole("button", { name: "Upload these messages" }));
+    fireEvent.click(screen.getByRole("button", { name: "Upload these messages" }));
     expect((await screen.findByTestId("location")).textContent).toBe(
       `/sources/${IDS.source}/names`,
     );
@@ -97,7 +97,7 @@ describe("upload screen, using a fake prepareUpload (needs ingest on main, stage
     });
     checkPaste();
     fireEvent.click(await screen.findByRole("checkbox", { name: "These are my own chats." }));
-    fireEvent.click(screen.getByRole("button", { name: "Upload these excerpts" }));
+    fireEvent.click(screen.getByRole("button", { name: "Upload these messages" }));
     await screen.findByTestId("location");
     expect(requestsTo(routes.sources.createSource)[0]?.body).toBe(
       '{"kind":"paste"}\n{"turnIndex":0}',
@@ -147,7 +147,7 @@ describe("upload screen, using a fake prepareUpload (needs ingest on main, stage
     checkPaste();
     expect(
       await screen.findByText(
-        "Most of these messages look like tasks or code, not about you, so the card may come out thin. Pasting a few notes about yourself works better.",
+        "These are mostly tasks or code, so your card may come out thin. A few notes about yourself help.",
       ),
     ).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Paste notes instead" }));

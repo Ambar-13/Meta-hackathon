@@ -102,6 +102,10 @@ describe("your AI's summary, against the MSW route stubs (a fake server)", () =>
     });
     const list = screen.getByRole("list", { name: "2 points to save" });
     expect(within(list).getAllByRole("listitem")).toHaveLength(2);
+    const remove = within(list).getByRole("button", {
+      name: "Remove this point: Believes Rentably was never a bad idea.",
+    });
+    expect(remove.textContent?.trim()).toBe("");
     fireEvent.click(
       within(list).getByRole("button", {
         name: "Remove this point: Believes Rentably was never a bad idea.",

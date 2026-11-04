@@ -64,8 +64,7 @@ const UNVERIFIED: AnswerClaim = {
   supported: null,
 };
 // The line shown in place of the meeting button when this phone knows no card.
-const NO_CARD_LINE =
-  "Open your approved card on this phone first, then come back here to start a meeting.";
+const NO_CARD_LINE = "Open your card on this device first, then come back to start a meeting.";
 
 // One help answer of the fixture.
 function helpAnswer(spec: {

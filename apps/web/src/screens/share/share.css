@@ -23,7 +23,6 @@
 .share-preview-body { padding: 4px 16px 16px; }
 .share-preview-section h3 { margin: 16px 0 0; }
 .share-preview .empty { margin: 14px 0; }
-.share-also { margin: 14px 0 0; padding: 12px 14px; border-radius: 16px; background: var(--blue-soft); font: 500 15px/1.4 var(--sans); color: var(--ink); }
 
 /* ---------- consent: the explainer, the dock, the live link ---------- */
 .share-explainer { margin: 20px 0; font-size: 15.5px; line-height: 1.5; color: var(--ink-2); }

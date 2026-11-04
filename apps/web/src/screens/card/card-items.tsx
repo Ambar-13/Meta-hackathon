@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactElement } from "react";
 import { RECALL_SWITCH_COPY, type CardItem, type CardItemSource } from "@meet-first/contracts";
 import { apiFetch, asApiError, ApiError, ErrorNotice, routes } from "../../app-shell/index.js";
-import { EmptyState, LoadingLine, Receipt, ReceiptFlag, Sticker } from "../../look/index.js";
+import { EmptyState, Icon, LoadingLine, Receipt, ReceiptFlag, Sticker } from "../../look/index.js";
 import { KIND_LABELS } from "./card-state.js";
 import { PillSwitch } from "./pill-switch.js";
 
@@ -67,6 +67,15 @@ export const QuoteSheet = (props: {
         aria-modal="true"
         aria-labelledby="quote-title"
       >
+        <button
+          type="button"
+          className="quiet sheet-close"
+          ref={closeRef}
+          onClick={props.onClose}
+          aria-label="Close"
+        >
+          <Icon name="close" size={22} />
+        </button>
         <h2 id="quote-title">The quote</h2>
         {source.kind === "loading" ? <LoadingLine text="Loading the message." /> : null}
         {source.kind === "loaded" ? <MessageText source={source.source} /> : null}
@@ -76,9 +85,6 @@ export const QuoteSheet = (props: {
             ? "Found word for word in your message."
             : "This quote did not match your message."}
         </p>
-        <button type="button" className="quiet" ref={closeRef} onClick={props.onClose}>
-          Close
-        </button>
       </div>
     </div>
   );
@@ -153,11 +159,7 @@ const CardItemRow = (props: {
       >
         <Receipt
           quote={item.quote}
-          source={
-            item.verified
-              ? "Your own words. Tap to see the message."
-              : "Not found in your message. Tap to check."
-          }
+          source={item.verified ? "" : "Not found in your message. Tap to check."}
         />
       </button>
       <div className="card-item-foot">
@@ -192,6 +194,7 @@ export const CardItemList = (props: {
   }
   return (
     <>
+      <p className="muted card-items-hint">Tap a quote to see its message.</p>
       <ul className="card-items">
         {props.items.map((item) => (
           <CardItemRow

@@ -93,9 +93,7 @@ describe("card screen", () => {
     fireEvent.click(screen.getByRole("button", { name: "Approve my card" }));
     expect(await screen.findByText("Card approved.")).toBeTruthy();
     expect(
-      screen.getByText(
-        "Your card is short: fewer than 6 items had a quote that checked out. Meetings still work; the quiz is skipped.",
-      ),
+      screen.getByText("Your card is short, so the quiz is skipped. Meetings still work."),
     ).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Take the knows-me quiz" })).toBeNull();
     expect(
@@ -114,6 +112,8 @@ describe("card screen", () => {
       body: { turnIndex: 0, text, highlight: { start: 7, end: 7 + quote.length } },
     });
     renderCard();
+    expect(await screen.findByText("Tap a quote to see its message.")).toBeTruthy();
+    expect(screen.queryAllByText("Your own words. Tap to see the message.")).toHaveLength(0);
     fireEvent.click(
       (await screen.findAllByRole("button", { name: "Show the quote" }))[0] as HTMLElement,
     );
@@ -121,6 +121,7 @@ describe("card screen", () => {
     expect(await within(dialog).findByText(quote)).toBeTruthy();
     expect(within(dialog).getByText("Found word for word in your message.")).toBeTruthy();
     expect(document.activeElement).toBe(within(dialog).getByRole("button", { name: "Close" }));
+    expect(within(dialog).getByRole("button", { name: "Close" }).textContent?.trim()).toBe("");
     fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
     expect(screen.queryByRole("dialog")).toBeNull();
   });

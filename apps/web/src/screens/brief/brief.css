@@ -35,7 +35,7 @@
 .quote-scrim { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; background: oklch(20% 0.05 266 / 0.35); }
 .quote-sheet { position: relative; width: 100%; max-width: 560px; padding: 24px 20px calc(20px + env(safe-area-inset-bottom)); border-radius: 28px 28px 0 0; background: var(--paper);
   box-shadow: 0 -10px 40px -10px oklch(20% 0.05 266 / 0.4); }
-.quote-sheet > .stk { position: absolute; right: 18px; top: -24px; font-size: 50px; transform: rotate(10deg); }
+.quote-sheet > .stk { position: absolute; right: 72px; top: -24px; font-size: 50px; transform: rotate(10deg); }
 .quote-sheet h2 { margin: 0; font-size: 24px; }
 .quote-sheet blockquote { margin: 12px 0; padding: 14px 16px; border-radius: 16px; background: var(--blue-soft); font: 600 18px/1.45 var(--sans); }
 .quote-sheet-who { display: flex; align-items: center; gap: 8px; color: var(--ink-2); font-size: 15px; }

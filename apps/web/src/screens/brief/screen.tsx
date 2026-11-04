@@ -16,11 +16,11 @@ import "./brief.css";
 // The one line under the title: the rate as a rate, or the note that the check did not run.
 export function supportLine(brief: Brief): string {
   if (brief.supportReliable !== true || brief.supportRate === null)
-    return "The support check did not run. Every line is marked weak quote.";
+    return "The quotes were not checked this time, so every line is marked weak quote.";
   const lines = [...brief.agree, ...brief.clash, ...brief.decideFirst];
   const withQuote = lines.filter((point) => point.quotes.length > 0);
   const supported = withQuote.filter((point) => point.supported === true).length;
-  return `Support rate ${brief.supportRate.toFixed(2)}: ${String(supported)} of ${String(withQuote.length)} lines are backed by their quote.`;
+  return `${String(supported)} of ${String(withQuote.length)} lines have a quote.`;
 }
 
 // The first quote of the brief that matched its turn, shown large: their own words are the hero of

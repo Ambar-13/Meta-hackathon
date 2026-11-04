@@ -30,7 +30,7 @@ describe("pair and join screens", () => {
     );
     expect(screen.getByRole("button", { name: "Copy link" })).toBeTruthy();
     expect(screen.getByText("The invite works once, for 24 hours.")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Go to the lobby" }).getAttribute("href")).toBe(
+    expect(screen.getByRole("link", { name: "Set up the meeting" }).getAttribute("href")).toBe(
       `/pairs/${IDS.pair}?card=${IDS.card}`,
     );
   });

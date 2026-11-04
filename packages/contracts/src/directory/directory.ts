@@ -12,14 +12,14 @@ export const DIRECTORY_PAGE_SIZE = 20;
 // The words next to the directory switch on the card screen. Off by default; turning it on is the
 // consent to be met.
 export const DIRECTORY_SWITCH_COPY =
-  "List my Meety in Explore. Anyone in Explore can have their Meety meet yours, and your Meety may answer when someone asks for help in Explore, using only the items you mark public. You get every brief and every answer. You can leave at any time.";
+  "Show me in Explore. People there can meet my Meety or ask it for help, using only what I mark public. I get every brief and answer.";
 // The words next to the dating switch on the card screen, under the directory switch. Off by
 // default, and on only while listed.
 export const ROMANCE_SWITCH_COPY =
-  "Open to dating questions: people in Explore can ask my Meety how I would get on with them romantically. I get every brief.";
+  "Allow dating questions: people in Explore can ask my Meety how we'd get on as a couple.";
 // The words next to the friends switch on the card screen. Off by default.
 export const FRIENDS_ASK_SWITCH_COPY =
-  "Let friends I've met here ask my Meety how I would probably react to something. I get a copy of every answer. I can turn this off at any time.";
+  "Let friends ask my Meety how I'd probably react. I get a copy of every answer.";
 
 // One public item as the directory shows it: its kind, claim and quote, and nothing else of the
 // card or the notes.

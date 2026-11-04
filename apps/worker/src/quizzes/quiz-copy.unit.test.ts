@@ -28,9 +28,7 @@ describe("quiz copy, calibration and misses", () => {
   });
 
   it("D31-T2: an unreliable count adds the second sentence", () => {
-    expect(quizCopy(7, false)).toBe(
-      "matched 7 of 10. The judge failed its own check twice, so treat this count as rough.",
-    );
+    expect(quizCopy(7, false)).toBe("matched 7 of 10. This count may be a little off.");
   });
 
   it("R4.5-T1: no copy is ever a percentage", () => {

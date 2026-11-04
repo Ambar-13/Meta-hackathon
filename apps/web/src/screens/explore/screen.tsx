@@ -2,14 +2,7 @@ import "./explore.css";
 import { useEffect, useRef, useState, type ReactElement } from "react";
 import { Link } from "react-router-dom";
 import type { DirectoryListing, Post, PublicItem } from "@meet-first/contracts";
-import {
-  APP_PATHS,
-  chatPathWithDraft,
-  ErrorNotice,
-  personPostsPath,
-  PROFILE_TAB_QUERY,
-  ScreenFrame,
-} from "../../app-shell/index.js";
+import { APP_PATHS, chatPathWithDraft, ErrorNotice, ScreenFrame } from "../../app-shell/index.js";
 import {
   EmptyState,
   Icon,
@@ -54,7 +47,6 @@ const FEED_COPY = {
   morePosts: "Show more posts",
   feedLabel: "Posts",
   yourPost: "Your post",
-  yourPosts: "Your posts",
   more: "Show more",
   sample: "Sample person",
   suggestedTitle: "Suggested for you",
@@ -215,8 +207,8 @@ const AskAction = (props: { post: Post; friends: ExploreFriends }): ReactElement
   );
 };
 
-// A post's foot: Like, the heart filled red once you like it, then Ask NAME's Meety and Posts,
-// their Posts tab; on your own post, Like, Posts, your own Posts tab, and Delete.
+// A post's foot: Like, a heart alone that fills red once you like it, then Ask NAME's Meety; on your
+// own post, Like and Delete. The writer's name and picture above already open their profile.
 const FeedFoot = (props: {
   post: Post;
   friends: ExploreFriends;
@@ -229,23 +221,14 @@ const FeedFoot = (props: {
     <footer className="feed-actions">
       <button
         type="button"
-        className="feed-action"
+        className="feed-action is-icon"
         aria-pressed={likes.isLiked(post)}
         aria-label={isMine ? "Like your post" : `Like ${post.displayName}'s post`}
         onClick={() => void likes.toggle(post)}
       >
-        <Icon name="heart" size={20} />
-        Like
+        <Icon name="heart" size={22} />
       </button>
       {isMine ? null : <AskAction post={post} friends={props.friends} />}
-      <Link
-        className="feed-action"
-        to={isMine ? `${APP_PATHS.me}?${PROFILE_TAB_QUERY}=posts` : personPostsPath(post.listingId)}
-        aria-label={isMine ? FEED_COPY.yourPosts : `${post.displayName}'s posts`}
-      >
-        <Icon name="posts" size={20} />
-        Posts
-      </Link>
       {isMine ? (
         <DeletePost postId={post.postId} onDeleted={props.onDeleted} buttonClass="feed-action" />
       ) : null}

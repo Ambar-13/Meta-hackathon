@@ -11,8 +11,7 @@ import { emptyMeetingState, type MeetingFoldState } from "../../transcript/index
 import type { FeedStatus, MeetingFeed, MeetingFeedOptions } from "../../streaming/index.js";
 
 // The status line while the feed polls (drafted copy).
-export const POLLING_COPY =
-  "Live updates are slow on this network, so this screen checks for new turns every 2 seconds.";
+export const POLLING_COPY = "Slow connection, so this updates every few seconds.";
 // The status line while the feed waits to reconnect (drafted copy).
 export const RECONNECTING_COPY = "Connection lost. Reconnecting.";
 

@@ -202,7 +202,7 @@ describe("Home, the feed, against the MSW route stubs (a fake server)", () => {
     expect(unlabelledControls(document.body)).toEqual([]);
   });
 
-  it("W7-SAMPLE-WEB-T1: the feed shows the posts newest first with the suggested people after the second; each post has its writer's name linking to their profile, the sample mark, its age, their line and Posts", async () => {
+  it("W7-SAMPLE-WEB-T1: the feed shows the posts newest first with the suggested people after the second; each post has its writer's name linking to their profile, the sample mark, its age and their line, and no Posts button", async () => {
     renderFeed([page(0, [MIRA, SAMPLE_RAVI], false), page(0, [SAMPLE_RAVI], false)], {
       posts: [{ posts: [post(1, "Ravi", 3), post(2, "Mira", 30), post(3, "Mira", 50)] }],
     });
@@ -227,9 +227,7 @@ describe("Home, the feed, against the MSW route stubs (a fake server)", () => {
     expect(within(first).getByRole("link", { name: "Ravi" }).getAttribute("href")).toBe(
       `/people/${LISTING_IDS.ravi}`,
     );
-    expect(within(first).getByRole("link", { name: "Ravi's posts" }).getAttribute("href")).toBe(
-      `/people/${LISTING_IDS.ravi}?tab=posts`,
-    );
+    expect(within(first).queryByRole("link", { name: "Ravi's posts" })).toBeNull();
     expect(within(first).getByText("Sample person")).toBeTruthy();
     expect(first.querySelector(".feed-avatar .made-up-mark")).not.toBeNull();
     expect(within(first).getByText("3 hours ago")).toBeTruthy();
@@ -455,6 +453,7 @@ describe("Home, the feed, against the MSW route stubs (a fake server)", () => {
     const viewer = screen.getByRole("dialog", { name: "Your story: story 1 of 1" });
 
     const pause = within(viewer).getByRole("button", { name: "Pause" });
+    expect(pause.textContent?.trim()).toBe("");
     fireEvent.click(pause);
     expect(within(viewer).getByRole("button", { name: "Play" }).getAttribute("aria-pressed")).toBe(
       "true",
@@ -484,6 +483,7 @@ describe("Home, the feed, against the MSW route stubs (a fake server)", () => {
     renderFeed([page(0, [MIRA], false)], { posts: [{ posts: [mira] }] });
     const like = await screen.findByRole("button", { name: "Like Mira's post" });
 
+    expect(like.textContent?.trim()).toBe("");
     expect(like.getAttribute("aria-pressed")).toBe("false");
     fireEvent.click(like);
     expect(like.getAttribute("aria-pressed")).toBe("true");
@@ -502,7 +502,7 @@ describe("Home, the feed, against the MSW route stubs (a fake server)", () => {
     expect(like.getAttribute("aria-pressed")).toBe("false");
   });
 
-  it("W7-SHARE-WEB-T5: your own post shows with Like, Posts leading to your own Posts tab and Delete, and no Add friend or Ask; Delete asks once more, then takes it out of the feed", async () => {
+  it("W7-SHARE-WEB-T5: your own post shows with Like and Delete, and no Posts, Add friend or Ask; Delete asks once more, then takes it out of the feed", async () => {
     const own = {
       ...post(2, "Mira", 1),
       displayName: "Ana",
@@ -518,9 +518,7 @@ describe("Home, the feed, against the MSW route stubs (a fake server)", () => {
       APP_PATHS.me,
     );
     expect(within(article).getByRole("button", { name: "Like your post" })).toBeTruthy();
-    expect(within(article).getByRole("link", { name: "Your posts" }).getAttribute("href")).toBe(
-      "/me?tab=posts",
-    );
+    expect(within(article).queryByRole("link", { name: "Your posts" })).toBeNull();
     expect(within(article).getByRole("button", { name: "Delete" })).toBeTruthy();
     expect(within(article).queryByRole("button", { name: /Add .* as a friend/ })).toBeNull();
     expect(within(article).queryByText(/Ask .*'s Meety/)).toBeNull();

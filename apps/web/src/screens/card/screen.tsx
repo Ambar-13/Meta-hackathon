@@ -108,10 +108,7 @@ const ApprovedNext = (props: {
 const ThinNote = (props: { isThin: boolean }): ReactElement | null => {
   if (!props.isThin) return null;
   return (
-    <p className="thin-note">
-      Your card is short: fewer than 6 items had a quote that checked out. Meetings still work; the
-      quiz is skipped.
-    </p>
+    <p className="thin-note">Your card is short, so the quiz is skipped. Meetings still work.</p>
   );
 };
 

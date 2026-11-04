@@ -136,13 +136,11 @@ describe("meeting screen", () => {
     });
     push(feed, fold(meetingStarted(1)), "polling");
     expect(
-      await screen.findByText(
-        "Live updates are slow on this network, so this screen checks for new turns every 2 seconds.",
-      ),
+      await screen.findByText("Slow connection, so this updates every few seconds."),
     ).toBeTruthy();
     push(feed, fold(meetingStarted(1)), "reconnecting");
     expect(await screen.findByText("Connection lost. Reconnecting.")).toBeTruthy();
-    expect(screen.queryByText(/Live updates are slow/)).toBeNull();
+    expect(screen.queryByText(/Slow connection/)).toBeNull();
   });
 
   it("R8.3-T3: the transcript follows new lines only when the reader was within 80 px of the bottom", async () => {

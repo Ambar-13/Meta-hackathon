@@ -27,7 +27,7 @@ const ME_COPY = {
   saved: "Saved. People in Explore see this now.",
   leave: "Leave Explore",
   left: "You left Explore. Your meetings stay in the Meetings tab.",
-  pickPublic: "Choose which items are public on your card",
+  pickPublic: "Choose what's public",
   nextLabel: "Your next step",
   noMeetings: "No meetings yet",
   noMeetingsLine: "Your first one starts from an invite or Explore.",

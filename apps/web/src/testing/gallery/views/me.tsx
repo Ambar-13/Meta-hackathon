@@ -169,8 +169,9 @@ const READY_SUMMARY: SummaryView = {
   updatedAt: SERVER_NOW,
 };
 
-// Pastes the summary into the paste box the way React sees typing, for a play step.
-function pasteSummary(): void {
+// Pastes the summary into the paste box the way React sees typing, for a play step. The box is on
+// the upload page; Me links to it.
+export function pasteSummary(): void {
   const label = Array.from(document.querySelectorAll("label")).find((element) =>
     (element.textContent ?? "").trim().startsWith("Your AI's answer"),
   );
@@ -240,15 +241,6 @@ export const views: readonly GalleryView[] = [
       { meetings: [] },
       { ...HOME, source: null, card: null },
     ),
-  },
-  {
-    name: "me-summary-pasted",
-    title: "Me, a summary pasted: its points to save",
-    pattern: ROUTE_PATTERNS.me,
-    url: "/me",
-    element: <MeScreen />,
-    stubs: reads(ok(LISTING), MEETINGS),
-    play: pasteSummary,
   },
   {
     name: "me-summary-ready",

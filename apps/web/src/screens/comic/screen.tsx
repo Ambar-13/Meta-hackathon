@@ -17,7 +17,7 @@ import { DrawingFrames, PanelGrid } from "./panel-grid.js";
 
 // The sentence that says what the comic is, above the picker (comic spec 4.8).
 export const COMIC_INTRO_COPY =
-  "Six panels drawn from the lines the support check backed. Two cartoon characters stand in for you both; no faces, no names.";
+  "Six panels from your brief. Two cartoon characters stand in for you, with no faces or names.";
 
 // The one sentence for a skipped comic, from the reason when the view carries one; no retry is
 // offered (one comic per meeting).

@@ -16,8 +16,7 @@ import { Avatar, Sticker } from "../../look/index.js";
 const NO_CLAIMS_LINE = "No quotes from their notes.";
 // The line in place of the meeting button when this phone knows no approved card; the lobby has the
 // same limit.
-const NO_CARD_LINE =
-  "Open your approved card on this phone first, then come back here to start a meeting.";
+const NO_CARD_LINE = "Open your card on this device first, then come back to start a meeting.";
 // The words of the meeting button.
 const MEET_LABEL = "Start a meeting";
 

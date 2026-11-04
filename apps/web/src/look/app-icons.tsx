@@ -18,6 +18,8 @@ import {
   ImagePlus,
   LayoutGrid,
   MessageCircle,
+  Pause,
+  Play,
   Plus,
   Quote,
   Rows3,
@@ -61,6 +63,8 @@ const ICONS = {
   heart: Heart,
   back: ChevronLeft,
   close: X,
+  pause: Pause,
+  play: Play,
 } as const;
 // The name of one icon.
 export type IconName = keyof typeof ICONS;

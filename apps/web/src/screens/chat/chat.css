@@ -98,7 +98,6 @@ main.screen:has(.chat) { padding-bottom: calc(var(--tab-bar, 62px) + 12px + env(
 .chat .chat-send:hover:not(:disabled) { filter: none; background: var(--ui-blue-hover); }
 .chat .chat-send:disabled { background: color-mix(in oklab, var(--ui-ink) 16%, var(--ui-bg)); color: var(--ui-bg); }
 .chat-left { font: 500 13px/1.2 var(--ui-font); color: var(--ui-ink-2); }
-.chat .chat-safety { margin: 8px 0 0; text-align: center; font: 400 13px/18px var(--ui-font); color: var(--ui-ink-2); }
 .chat-thread-error { margin: 0 0 16px; }
 .chat-thread-error > button { margin-top: 4px; }
 

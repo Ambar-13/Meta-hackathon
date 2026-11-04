@@ -31,7 +31,6 @@ const SHARING_COPY = {
   save: "Save sharing",
   saved: "Sharing saved.",
   openDirectory: "Find people",
-  datingNote: "Dating is your call. Leave this off if you only want teammates and friends.",
   noPublicItems: "No item can be public yet. Only items in your card with a checked quote can.",
 } as const;
 
@@ -92,7 +91,6 @@ const DirectoryControls = (props: { draft: SharingDraft; hook: SharingHook }): R
         isDisabled={!draft.isListed}
         onChange={hook.setOpenToRomance}
       />
-      <p className="dating-note">{SHARING_COPY.datingNote}</p>
     </>
   );
 };
@@ -167,7 +165,6 @@ export const SharingSection = (props: { cardId: string; items: CardItem[] }): Re
         <h2 id="sharing-title">Sharing</h2>
         <Sticker name="tags" />
       </div>
-      <p className="muted sharing-lead">Each switch stays off until you turn it on.</p>
       {load.kind === "loading" ? <LoadingLine text={SHARING_COPY.loading} /> : null}
       {load.kind === "failed" ? <ErrorNotice error={load.error} /> : null}
       {load.kind === "ready" ? (

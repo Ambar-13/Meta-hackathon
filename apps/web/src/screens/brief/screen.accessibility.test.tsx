@@ -125,12 +125,11 @@ describe("brief screen", () => {
     expect(sheet.textContent).toContain(first.quotes[0]?.text ?? "");
   });
 
-  it("W2-BRIEF-T20 (A1 copy): the support rate is shown as a rate and never as a percentage or proof", async () => {
+  it("W2-BRIEF-T20 (A1 copy): the brief says how many lines have a quote, never a rate, a percentage or proof", async () => {
     stubRoute(routes.briefs.readBrief, briefFixture());
     await renderBrief();
-    expect(
-      screen.getByText("Support rate 0.89: 8 of 9 lines are backed by their quote."),
-    ).toBeTruthy();
+    expect(screen.getByText("8 of 9 lines have a quote.")).toBeTruthy();
+    expect(screen.queryByText(/Support rate/)).toBeNull();
     const text = document.body.textContent ?? "";
     expect(text.includes("%")).toBe(false);
     expect(text.toLowerCase().includes("proof")).toBe(false);

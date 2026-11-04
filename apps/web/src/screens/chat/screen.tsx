@@ -19,8 +19,7 @@ import { MeetyName, Thread, type ReplyActions } from "./thread-parts.js";
 import { FriendsRow, HomeSide } from "./home-parts.js";
 
 // The lines of this page that the design gives word for word, and the loading line it does not.
-const UNDER_GREETING =
-  "Ask who could help you with something, or how a friend would probably react to something.";
+const UNDER_GREETING = "Ask who could help you, or how a friend would probably react.";
 const LOADING_LINE = "Loading your chat.";
 // The line under Meety's name at the top of the chat, as Instagram shows who you are talking to.
 const INTRO_LINE = "Your personal AI";

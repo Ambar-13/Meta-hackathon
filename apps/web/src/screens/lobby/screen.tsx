@@ -86,7 +86,7 @@ const NextMeeting = (props: {
   if (!props.hasCard) {
     return (
       <EmptyState sticker="chat" title="No meeting yet">
-        To create a meeting from this phone, open your card and tap Invite a friend.
+        Open your card on this device, then tap Invite a friend.
       </EmptyState>
     );
   }

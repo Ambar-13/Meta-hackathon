@@ -60,9 +60,7 @@ export const PairScreen = (): ReactElement => {
       )}
       {state.kind === "failed" ? <ErrorNotice error={state.error} /> : null}
       {cardId === null && state.kind === "created" ? (
-        <p className="muted">
-          You can pair now. To start a meeting from this phone, approve your card first.
-        </p>
+        <p className="muted">You can pair now. Open your card on this device to start a meeting.</p>
       ) : null}
     </ScreenFrame>
   );
@@ -98,7 +96,7 @@ const InviteView = (props: {
         <p className="muted">The invite works once, for 24 hours.</p>
         <div className="actions">
           <Link className="btn" to={lobbyPathWithCard(props.pairId, props.cardId)}>
-            Go to the lobby
+            Set up the meeting
           </Link>
           <CopyButton text={link} label="Copy link" />
         </div>

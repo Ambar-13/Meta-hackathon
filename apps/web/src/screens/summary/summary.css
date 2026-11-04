@@ -15,6 +15,8 @@
 .summary-count { margin: 4px 0 0; font: 600 14px/1.4 var(--ui-font); color: var(--ui-ink); }
 .summary-points { list-style: none; margin: 0; padding: 0; border: 1px solid var(--ui-line); border-radius: 14px; }
 .summary-points > li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 12px 14px; }
+/* Remove, as a round cross at the row's end; its words stay for screen readers. */
+.summary-points button.summary-remove { display: grid; place-items: center; width: 44px; height: 44px; min-height: 44px; padding: 0; border-radius: 50%; }
 .summary-points > li + li { border-top: 1px solid var(--ui-line); }
 .summary-point { margin: 0; font: 400 15px/1.45 var(--ui-font); color: var(--ui-ink); overflow-wrap: anywhere; }
 .summary-quote { margin: 4px 0 0; font: 400 14px/1.45 var(--ui-font); color: var(--ui-ink-2); overflow-wrap: anywhere; }

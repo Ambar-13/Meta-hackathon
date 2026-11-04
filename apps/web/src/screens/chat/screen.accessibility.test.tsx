@@ -86,10 +86,9 @@ describe("chat screen", () => {
       await screen.findByRole("heading", { name: "Hi Ana, what do you want to find out?" }),
     ).toBeTruthy();
     expect(
-      screen.getByText(
-        "Ask who could help you with something, or how a friend would probably react to something.",
-      ),
+      screen.getByText("Ask who could help you, or how a friend would probably react."),
     ).toBeTruthy();
+    expect(screen.queryByText(/Nothing goes to anyone's Meety/)).toBeNull();
     expect(await chipWords()).toHaveLength(3);
 
     fireEvent.click(

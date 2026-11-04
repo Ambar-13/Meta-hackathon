@@ -58,7 +58,7 @@ button.receipt-open { display: block; max-width: 100%; min-height: 44px; margin:
 
 /* ---------- the quote sheet: over the page, from the bottom on a phone ---------- */
 .quote-sheet-ground { position: fixed; z-index: 40; inset: 0; display: flex; align-items: flex-end; justify-content: center; padding: 16px; background: var(--line-strong); }
-.quote-sheet { width: 100%; max-width: 560px; max-height: 80vh; margin: 0; overflow: auto; border-radius: var(--radius-l); box-shadow: var(--lift); }
+.quote-sheet { position: relative; width: 100%; max-width: 560px; max-height: 80vh; margin: 0; overflow: auto; border-radius: var(--radius-l); box-shadow: var(--lift); }
 .source-message { margin: 10px 0; padding: 12px 14px; border-radius: 16px; background: var(--blue-soft); font-size: 16px; }
 .source-message mark { padding: 1px 3px; border-radius: 5px; background: var(--yellow); color: var(--ink); font-weight: 600; }
 
@@ -67,7 +67,6 @@ button.receipt-open { display: block; max-width: 100%; min-height: 44px; margin:
 .sharing-head { display: flex; align-items: center; gap: 10px; }
 .sharing-head h2 { margin: 0; }
 .sharing-head .stk { font-size: 34px; transform: rotate(8deg); }
-.sharing-lead { margin: 4px 0 6px; }
 .sharing .switch-row { border-top: 1px solid var(--ui-line); }
 .public-items { margin: 4px 0 10px; padding: 14px 0 0; border: 0; border-top: 1px solid var(--ui-line); border-radius: 0; background: none; }
 .public-items legend { float: left; width: 100%; margin: 0 0 8px; padding: 0; font: 700 15.5px/1.3 var(--sans); letter-spacing: 0; }
@@ -75,7 +74,6 @@ button.receipt-open { display: block; max-width: 100%; min-height: 44px; margin:
 .listing-line { margin: 0 0 4px; padding: 0 0 6px; font-weight: 600; }
 .listing-line:has(input:disabled) { color: var(--ink-3); }
 .listing-line input:disabled { border-style: dashed; border-color: var(--line-strong); color: var(--ink-3); }
-.dating-note { margin: -6px 0 6px; font: 400 14px/1.45 var(--ui-font); color: var(--ui-ink-2); }
 .other-card { font-weight: 600; }
 .sharing-actions { margin: 18px 0 6px; }
 .save-line { margin: 8px 0 0; font-weight: 700; }
