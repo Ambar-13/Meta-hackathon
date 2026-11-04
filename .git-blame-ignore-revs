@@ -1,2 +1,4 @@
 # Formatting only: Prettier at 100 columns. git blame skips it with --ignore-revs-file, and GitHub skips it by itself.
 3ee64e9ceeb2091694e0cc08b3d6dcaff1492582
+# Comment line breaks only, at 100 columns.
+47721ab58555ce45149cb5c724e4b668b444015a
