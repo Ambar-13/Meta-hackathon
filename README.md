@@ -42,6 +42,10 @@ The model never decides what is stored, what is public, or what is deleted. Thos
 <!-- human-metrics:start -->
 <!-- human-metrics:end -->
 
+## What search engines and AI fetchers get
+
+The start page and the three policy pages are served with their words already in the HTML (`apps/web/prerender.ts` writes them at build time; the api serves them at `/`, `/privacy`, `/terms` and `/cookies` and fills in the live address), so Google, Bing and the crawlers behind ChatGPT, Claude and Perplexity read the page without running JavaScript. The start page carries a title, a description, a canonical address, link-preview tags with `/og.png`, and structured data that repeats what the page says. `/robots.txt` names those crawlers and allows every page but `/api/`; `/sitemap.xml` lists the four public pages. Every signed-in page answers with `X-Robots-Tag: noindex`, because it shows nothing without a session, and an address the app has no page for answers 404.
+
 ## Built with
 
 TypeScript throughout, in one pnpm workspace. React 19 and Vite in the browser; Fastify 5 for the api; Graphile Worker for background jobs; Postgres 16 through Kysely; zod schemas shared by all three. The model is Meta's muse-spark-1.3 through the Meta Model API, and muse-image-1.0 draws the comic of a meeting.

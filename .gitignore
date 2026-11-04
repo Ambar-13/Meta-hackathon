@@ -1,6 +1,7 @@
 node_modules/
 dist/
 dist-gallery/
+dist-prerender/
 coverage/
 .env
 .env.*

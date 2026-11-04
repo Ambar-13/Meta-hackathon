@@ -14,6 +14,8 @@ export * from "./meetings.js";
 export * from "./briefs.js";
 export * from "./directory.js";
 export * from "./social.js";
+// The browser app's own paths, so the api can tell a page from an address nobody has.
+export * from "./client-paths.js";
 // Every route map under one name: routes.sources.createSource.path,
 // routes.meetings.startMeeting.method, and so on.
 export const routes = {

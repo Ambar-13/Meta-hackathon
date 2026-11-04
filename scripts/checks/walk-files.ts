@@ -4,7 +4,14 @@ import { join, relative } from "node:path";
 
 // Folders no check ever reads: installed packages, build output, git's own files, the local
 // database cluster and test coverage reports.
-const SKIPPED_FOLDERS = new Set(["node_modules", "dist", ".git", ".local", "coverage"]);
+const SKIPPED_FOLDERS = new Set([
+  "node_modules",
+  "dist",
+  "dist-prerender",
+  ".git",
+  ".local",
+  "coverage",
+]);
 
 /**
  * Every file under root/folder whose name passes the filter, as absolute paths.

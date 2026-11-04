@@ -52,7 +52,7 @@ const sizeRules = {
 };
 
 export default tseslint.config(
-  { ignores: ["**/dist/**", "**/node_modules/**", "**/*.d.ts", "docs/evidence/**"] },
+  { ignores: ["**/dist/**", "**/dist-prerender/**", "**/node_modules/**", "**/*.d.ts", "docs/evidence/**"] },
   ...tseslint.configs.strictTypeChecked.map((config) => ({ ...config, files: ["**/*.ts", "**/*.tsx"] })),
   {
     files: ["**/*.ts", "**/*.tsx"],

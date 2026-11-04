@@ -1,9 +1,10 @@
-// The web-pages folder: the built web app, the app-shell fallback for client paths, the CSP header,
-// and /api/health.
+// The web-pages folder: the built web app, the public pages with their words in the HTML, robots.txt
+// and the sitemap, the app-shell fallback for client paths, the CSP header, and /api/health.
 import type { FastifyInstance } from "fastify";
 import type { RouteDeps, RoutePlugin } from "../app-types.js";
 import { fetchTagFromGoogle, registerAnalyticsTag } from "./analytics-tag.js";
 import { registerHealthRoute } from "./health.js";
+import { registerPublicPages } from "./public-pages.js";
 import { registerSpaFallback } from "./spa-fallback.js";
 import { registerStaticFiles, WEB_DIST_DIR } from "./static-files.js";
 
@@ -11,8 +12,8 @@ import { registerStaticFiles, WEB_DIST_DIR } from "./static-files.js";
 // the env's DATABASE_DISK_BYTES, and tests pass their own.
 export type WebPagesOptions = { distDir: string; diskPlanBytes: number };
 
-// Registers health, Google Analytics' tag, the hashed files, then the fallback, in that order, with
-// the options given.
+// Registers health, Google Analytics' tag, the hashed files, the public pages, then the fallback,
+// in that order, with the options given.
 export async function registerWebPages(
   app: FastifyInstance,
   deps: RouteDeps,
@@ -21,6 +22,7 @@ export async function registerWebPages(
   registerHealthRoute(app, deps, options.diskPlanBytes);
   registerAnalyticsTag(app, fetchTagFromGoogle, Date.now);
   const hasBuild = await registerStaticFiles(app, options.distDir);
+  await registerPublicPages(app, options.distDir, deps.env.APP_ORIGIN);
   await registerSpaFallback(app, options.distDir, hasBuild);
 }
 

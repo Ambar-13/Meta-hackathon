@@ -17,6 +17,8 @@
   "include": [
     "src",
     "vite.config.ts",
-    "vite.gallery.config.ts"
+    "vite.gallery.config.ts",
+    "vite.prerender.config.ts",
+    "prerender.ts"
   ]
 }
