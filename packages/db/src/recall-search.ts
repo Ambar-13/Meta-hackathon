@@ -8,6 +8,9 @@ export const RECALL_QUERY_WORDS_MAX = 20;
 // Most turns a recall corpus may hold for an ask to read all of it instead of searching it.
 export const RECALL_WHOLE_MAX = 40;
 
+// How many turns of a larger corpus an ask reads besides the search's hits, one from each stretch.
+export const RECALL_SPREAD_SIZE = 30;
+
 // Smallest trigram word similarity the fallback accepts, from 0 to 1.
 export const RECALL_TRIGRAM_MIN = 0.3;
 
@@ -80,6 +83,22 @@ export async function wholeRecallCorpus(
     trx,
   );
   if (result.rows.length > RECALL_WHOLE_MAX) return null;
+  return result.rows.map((row) => ({ turnId: row.turn_id, text: snippetOf(row.text) }));
+}
+
+// A spread of one card's recall corpus for an ask about something no message mentions: the file cut
+// into RECALL_SPREAD_SIZE stretches, and the longest turn of each, because a longer message shows
+// more of how someone thinks. In file order, and it can hold turns the search also found.
+export async function spreadRecallCorpus(
+  trx: Transaction<Database>,
+  cardId: string,
+): Promise<Array<{ turnId: string; text: string }>> {
+  const result = await sql<{
+    turn_id: string;
+    text: string;
+  }>`WITH stretches AS (SELECT r.turn_id, r.text, t.turn_index, ntile(${RECALL_SPREAD_SIZE}::int) OVER (ORDER BY t.turn_index) AS stretch FROM recall_corpus r JOIN turns t ON t.id = r.turn_id WHERE r.card_id = ${cardId}) SELECT DISTINCT ON (stretch) turn_id, text FROM stretches ORDER BY stretch, length(text) DESC, turn_index`.execute(
+    trx,
+  );
   return result.rows.map((row) => ({ turnId: row.turn_id, text: snippetOf(row.text) }));
 }
 

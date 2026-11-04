@@ -44,11 +44,13 @@ export {
   type DatabaseRefusal,
   type TriggerCode,
 } from "./database-errors.js";
-// The recall lookup, and the read of a small corpus whole.
+// The recall lookup, the read of a small corpus whole, and a spread of a larger one.
 export {
   queryWords,
+  RECALL_SPREAD_SIZE,
   RECALL_WHOLE_MAX,
   searchRecallCorpus,
+  spreadRecallCorpus,
   wholeRecallCorpus,
 } from "./recall-search.js";
 // The event log seq and the event append.

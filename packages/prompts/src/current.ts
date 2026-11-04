@@ -13,8 +13,8 @@ export const CURRENT_PROMPTS = {
   "comic-panels": "v1",
   "comic-image": "v1",
   "untrusted-data-rules": "v1",
-  "persona-answer": "v3",
-  orchestrator: "v4",
+  "persona-answer": "v4",
+  orchestrator: "v5",
   "summary-request": "v1",
   "search-words": "v1",
 } as const;

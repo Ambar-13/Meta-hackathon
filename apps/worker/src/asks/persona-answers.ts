@@ -1,13 +1,14 @@
 // Asks each pending answer's persona once and stores the checked reply. A request holds only what
 // its subject allowed: public items for a help search; approved, verified items and, when the
 // subject switched recall on, recall results for a friend or self ask: all of a small corpus, or a
-// search of a larger one with the words the search-words call gives; the summary's points for a
-// self ask, and for a friend ask when the subject's summary switch is on; and the subject's quiz
-// misses as do-not-guess topics.
+// search of a larger one with the words the search-words call gives and a spread of the rest; the
+// summary's points for a self ask, and for a friend ask when the subject's summary switch is on;
+// and the subject's quiz misses as do-not-guess topics.
 import type { Kysely } from "kysely";
 import { ContractError, PersonaAnswerOutput, RECALL_TOP_K } from "@meet-first/contracts";
 import {
   searchRecallCorpus,
+  spreadRecallCorpus,
   wholeRecallCorpus,
   withPerson,
   type Database,
@@ -376,17 +377,28 @@ async function readItems(
   }));
 }
 
-// A friend's recall results, each turn once: all of a small corpus in file order, or the search's
-// hits for the ask's text in its order. Each is the snippet the request shows and the whole turn the
-// quote check reads.
+// The turns of a friend's corpus an ask reads: all of a small one in file order, or the search's
+// hits for the ask's text and then a spread of the rest, so a question no message mentions still
+// has the person to reason from.
+async function recallHits(
+  trx: DatabaseTransaction,
+  cardId: string,
+  askText: string,
+): Promise<Array<{ turnId: string; text: string }>> {
+  const whole = await wholeRecallCorpus(trx, cardId);
+  if (whole !== null) return whole;
+  const found = await searchRecallCorpus(trx, { cardId, query: askText, limit: RECALL_TOP_K });
+  return [...found, ...(await spreadRecallCorpus(trx, cardId))];
+}
+
+// A friend's recall results, each turn once and in recallHits' order: the snippet the request shows
+// and the whole turn the quote check reads.
 async function readRecall(
   trx: DatabaseTransaction,
   cardId: string,
   askText: string,
 ): Promise<RecallWithTurn[]> {
-  const hits =
-    (await wholeRecallCorpus(trx, cardId)) ??
-    (await searchRecallCorpus(trx, { cardId, query: askText, limit: RECALL_TOP_K }));
+  const hits = await recallHits(trx, cardId, askText);
   if (hits.length === 0) return [];
   const turns = await trx
     .selectFrom("turns")

@@ -96,16 +96,17 @@ describe("prompt texts", () => {
     for (const [reply] of replies) expect(reply).not.toMatch(/\bagents?\b/);
   });
 
-  it("R3.9-T4: a persona's guess is a tier of its own that keeps its mark, its quote and what it never reaches", () => {
+  it("R3.9-T4: a persona's guess is a tier of its own that keeps its marks, its quote and what it never reaches", () => {
     const { text } = readPrompt("persona-answer");
     expect(text).toContain("<guesses>");
     expect(text).toContain("so this is a guess:");
+    expect(text).toContain("so this is a rough guess:");
     expect(text).toContain("The claim states the trait, never the prediction");
     expect(text).toContain("In help a guess is never given");
     expect(text).toContain("<do_not_guess> beats a summary line and a guess");
   });
 
-  it("R3.9-T2: current.ts names every prompt folder, the question-kind prompts at v5, v4 or v2, persona-answer at v3 and the rest at v1, and readPrompt reads that version", () => {
+  it("R3.9-T2: current.ts names every prompt folder, the question-kind prompts at v5, v4 or v2, persona-answer at v4 and the rest at v1, and readPrompt reads that version", () => {
     expect(PROMPT_NAMES).toEqual([
       "dossier",
       "scrub-names",
@@ -131,8 +132,8 @@ describe("prompt texts", () => {
       "meeting-speech": "v2",
       brief: "v5",
       "brief-support-judge": "v2",
-      orchestrator: "v4",
-      "persona-answer": "v3",
+      orchestrator: "v5",
+      "persona-answer": "v4",
     };
     for (const name of PROMPT_NAMES) expect(currentVersion(name)).toBe(changed[name] ?? "v1");
     for (const name of [

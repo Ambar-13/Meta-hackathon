@@ -4,6 +4,7 @@ import type { SummaryPointView } from "@meet-first/contracts";
 import {
   makeDatabase,
   POOL_SIZE,
+  RECALL_SPREAD_SIZE,
   RECALL_WHOLE_MAX,
   withPerson,
   type Database,
@@ -376,8 +377,36 @@ it('W7-ASK-T21: a react ask about "your startup" finds the Rentably message thro
     "<ask>What does Ren think about their startup now?</ask>\n<topics>\n- Rentably\n</topics>",
   ]);
   expect(userTexts(test, "persona_answer")[0] ?? "").toContain(
-    `<recall_result>\n[t:${String(RECALL_WHOLE_MAX)}] rentably was never a bad idea, the timing was just early\n</recall_result>`,
+    `<recall_result>\n[t:${String(RECALL_WHOLE_MAX)}] rentably was never a bad idea, the timing was just early\n`,
   );
+});
+
+it("W7-ASK-T32: a friend's large corpus still reaches the request as a spread when no search word matches", async () => {
+  const lia = await createAskPerson(fresh.db, {
+    name: "Lia",
+    turns: [...Array(RECALL_WHOLE_MAX + 1).keys()].map((index) => `gym note ${String(index)}`),
+    isRecallAllowed: true,
+  });
+  await allowFriendAsks(fresh.db, lia);
+  const pairId = await joinInvitePair(fresh.db, ana, lia);
+  const askId = await insertReactAsk(fresh.db, ana, {
+    pairId,
+    text: "How would Lia react if I brought a llama to the office?",
+    aboutName: "Lia",
+  });
+  const test = await openTest({
+    questionCheck: [ALLOWED_REACT],
+    searchWords: [{ words: ["llama"] }],
+    personaAnswers: { Lia: NO_SIGN },
+    judge: [],
+  });
+
+  await runAsk({ askId, personId: ana.personId }, test.context);
+
+  const recallLines = /<recall_result>\n(.*)\n<\/recall_result>/s.exec(
+    userTexts(test, "persona_answer")[0] ?? "",
+  );
+  expect(recallLines?.[1]?.split("\n")).toHaveLength(RECALL_SPREAD_SIZE);
 });
 
 it("W7-ASK-T30: a friend's small corpus reaches the request whole, so a message no search word matches still counts", async () => {

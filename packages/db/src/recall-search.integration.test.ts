@@ -1,5 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { RECALL_WHOLE_MAX, searchRecallCorpus, wholeRecallCorpus } from "./recall-search.js";
+import {
+  RECALL_SPREAD_SIZE,
+  RECALL_WHOLE_MAX,
+  searchRecallCorpus,
+  spreadRecallCorpus,
+  wholeRecallCorpus,
+} from "./recall-search.js";
 import {
   asMeeting,
   asPerson,
@@ -170,6 +176,22 @@ describe("recall search", () => {
     expect(rows).toBeNull();
   });
 
+  it("D38-T10: a spread takes the fullest turn of each stretch of the file, in file order", async () => {
+    const j = await createTestPerson(t.db, "Test J");
+    const texts = [...Array(RECALL_SPREAD_SIZE * 3).keys()].map((index) =>
+      index % 3 === 1 ? `the fullest note of its stretch, number ${String(index)}` : "note",
+    );
+    const source = await createFrozenSource(t.db, j.personId, texts);
+    const card = await createApprovedCard(t.db, source.sourceId, { recallAllowed: true });
+
+    const rows = await asPerson(t.db, j.personId, (trx) => spreadRecallCorpus(trx, card.cardId));
+
+    expect(rows).toHaveLength(RECALL_SPREAD_SIZE);
+    expect(rows.map((row) => row.turnId)).toEqual(
+      source.turnIds.filter((turnId) => source.turnIds.indexOf(turnId) % 3 === 1),
+    );
+  });
+
   it("INV16-T1: a card with recall off yields nothing", async () => {
     const result = await asPerson(t.db, m.b.personId, async (trx) => ({
       rows: await searchRecallCorpus(trx, { cardId: m.b.cardId, query: "deadlines", limit: 5 }),
@@ -245,6 +267,28 @@ describe("recall search", () => {
     ]);
     expect(off).toEqual([]);
     expect(other).toEqual([]);
+  });
+
+  it("INV16-T2c: a spread holds no turn that recall could not reach", async () => {
+    const k = await createTestPerson(t.db, "Test K");
+    const source = await createFrozenSource(t.db, k.personId, [
+      "My doctor said the migraines come from stress at work, and it is a long story.",
+      "I keep a calendar.",
+    ]);
+    const card = await createApprovedCard(t.db, source.sourceId, { recallAllowed: true });
+    await asPerson(t.db, k.personId, (trx) =>
+      trx
+        .updateTable("turns")
+        .set({ sensitive_categories: ["health"] })
+        .where("id", "=", at(source.turnIds, 0))
+        .execute(),
+    );
+
+    const open = await asPerson(t.db, k.personId, (trx) => spreadRecallCorpus(trx, card.cardId));
+    const off = await asPerson(t.db, m.b.personId, (trx) => spreadRecallCorpus(trx, m.b.cardId));
+
+    expect(open).toEqual([{ turnId: at(source.turnIds, 1), text: "I keep a calendar." }]);
+    expect(off).toEqual([]);
   });
 
   it("INV16-T3: a meeting job reads the speaking side's corpus and no other", async () => {
