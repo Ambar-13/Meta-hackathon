@@ -93,7 +93,7 @@ const UnlistedMe = (props: { home: HomeView | null; yours: YourListingHook; belo
 };
 
 // The next step, the end of About and the Meetings panel from the home view; while it loads, or when it fails, its loading line or
-// error. The end of About is Try your Meety once there is a card or a summary, then your AI's summary, with the line that asks for
+// error. The end of About is Try your Meety once there is a card or a checked summary, then your AI's summary, with the line that asks for
 // your chats when you have none; Add more chats shows only
 // once there is a card: before that the next step is the way to add your notes.
 function belowFrom(home: PolledView<HomeView>, fromExplore: ReadonlySet<string>, parts: Pick<MeBelow, "posts" | "firstTab"> & { summary: SummaryHook }): MeBelow {
@@ -106,7 +106,7 @@ function belowFrom(home: PolledView<HomeView>, fromExplore: ReadonlySet<string>,
     next: <MeNext home={home.value} />,
     aboutEnd: (
       <>
-        {home.value.card !== null || summary.view.value !== null ? <TryMeety /> : null}
+        {home.value.card !== null || summary.view.value?.state === "ready" ? <TryMeety /> : null}
         <SummarySection hasChats={home.value.source !== null} summary={summary} />
         {home.value.card === null ? null : <AddChats />}
       </>

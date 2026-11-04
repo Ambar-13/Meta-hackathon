@@ -319,3 +319,20 @@ describe("/me, Try your Meety, against the MSW route stubs (a fake server)", () 
     expect((await screen.findByTestId("location")).textContent).toBe("/asks/" + askId);
   });
 });
+
+describe("/me, Try your Meety while a summary is checked, against the MSW route stubs (a fake server)", () => {
+  it("W7-ME-T11: with no card, Try your Meety waits until the summary is checked", async () => {
+    stubMeReads({ home: home({ source: null, card: null }) });
+    stubRoute(routes.people.readSummary, { state: "checking", points: [], friendsCanAsk: false, updatedAt: SERVER_NOW });
+    renderMe();
+
+    expect(await screen.findByText("Checking your summary against your chats.")).toBeTruthy();
+    expect(screen.queryByLabelText("Ask your Meety about you")).toBeNull();
+    cleanup();
+
+    stubRoute(routes.people.readSummary, { state: "ready", points: [], friendsCanAsk: false, updatedAt: SERVER_NOW });
+    renderMe();
+
+    expect(await screen.findByLabelText("Ask your Meety about you")).toBeTruthy();
+  });
+});

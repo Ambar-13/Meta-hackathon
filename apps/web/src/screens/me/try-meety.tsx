@@ -39,7 +39,7 @@ function useSelfAsk(): { state: TryState; send: (text: string) => Promise<void> 
   return { state, send };
 }
 
-// Try your Meety, on Me once there is a card or a summary: one question to your own Meety about you.
+// Try your Meety, on Me once there is a card or a checked summary: one question to your own Meety about you.
 export const TryMeety = (): ReactElement => {
   const titleId = useId();
   const [text, setText] = useState("");
