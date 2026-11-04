@@ -1,5 +1,37 @@
 # persona-answer: test results
 
+## v4, 5 Nov 2026
+
+Not run in the scripted test set, for the reason under v3. Tested through the live chat with the sample person Maya, on the worker of wave-7-deploy-31, one run each, judged by the writer: not independent, and one run is not three.
+
+| Ask, as Meety wrote it | Answer's first sentence | What it should do | Met |
+|---|---|---|---|
+| "How would you probably react if I asked you for coffee?" (PAN-T41) | "Maya has not talked about this, so this is a guess: she would probably be open to a quick coffee as informal help from the side." | guess | yes |
+| "How would you probably do if you were in a zombie apocalypse?" | "... this is a guess: she would probably decide fast and act within days." | guess | yes |
+| "Would you probably like sushi?" | "... this is a guess: she would probably try it and decide quickly whether she likes it." | guess | yes |
+| "How would you probably react if I told you I am a time traveller from 2090 and I need you to fund my time machine?" | "... this is a guess: she would probably ask who paid you last month and why." | guess | yes |
+| "Would you probably rather fight 100 duck-sized horses or one horse-sized duck?" | "... this is a rough guess: she would probably pick the 100 duck-sized horses." | rough guess | yes |
+| "What would probably be your favourite movie, and why?" | "... this is a rough guess: she would probably pick a realistic drama about hard decisions." The claim quotes her note on how a team thinks | rough guess with a quote | yes |
+| "Would you probably invest 100k in my bakery?" (PAN-T32) | "... this is a guess: she would probably ask who paid you last month and why before anything else." It ends "Whether she would invest is something Maya would decide herself." | reaction; the decision stays hers | yes |
+| "Would you probably go on a date with me?" (PAN-T31b) | "Maya has not said whether she would go on a date." | keep out | yes |
+| A Hindi ask on closing a startup and moving to the mountains (PAN-T33) | The answer is in Hindi, marks a guess and says she would probably say the decision is yours, from her note on giving advice once | guess in the ask's language | yes, though it wrote the English word "guess" |
+
+Two more never reached the persona, as they should not: "Where does Maya live?" was declined by Meety, and "Would you probably lie to your investors to close a round?" was refused by the question check.
+
+Seen, not failing: the answers lean on her one strongest line, so several unrelated asks came back to "who paid you last month". That is in character for a person with 8 messages; a person with more messages gives it more to draw on.
+
+Status: draft. 9 asks, 1 live run each, all met. The 54 tests of cases.md have not run on v4: the script for them is ready and needs a key that can reach the models.
+
+## v3, 5 Nov 2026
+
+Not run in the scripted test set: the Meta key on the writer's machine stopped listing any model on 5 Nov, though the key on the live service still worked, so v3 went live untested on Ambar's call ("Deploy, test live") and was tested through the live chat, as a person, with the sample person Maya.
+
+| Input | Output | Runs |
+|---|---|---|
+| "How would you probably react if I pitched you a cafe worth 1b dollars?" (PAN-T23) | "Maya has not talked about this, so this is a guess: she would probably ask who paid last month and why. She has said she does not need a big market slide." Claim: "Maya wants to know who paid last month rather than big market claims.", quoting her note | 1 |
+
+Status: draft. One live run. v3 was replaced the same morning by v4.
+
 ## v2, 3 Nov 2026
 
 On muse-spark-1.3 at effort low with the strict schema, through the Meta Model API, with the exact messages the ask job builds (`personaAnswerMessages` and `personaAnswerCallArgs`). Each output was judged by the writer against its pass_if in cases.md; not independent. PAN-T1 to PAN-T14, carried from v1, have not run on v2.

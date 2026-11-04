@@ -62,3 +62,21 @@ The two reads, each by a fresh instance given only the prompt:
 - Laziest target: 16 findings, 11 open on the text it read. F6 (rule 6 against rule 8) was already closed by the change to rule 8 (T25), and F11 by the self-check and never-list lines that allow the one question after a turned-down plan (T29). The rest are closed by: "yes but ..." is a correction (T42); an offered friend is not who a pronoun means (T43); a plan built from two or more messages quotes its question and says who will see it (T44, T45); a quoted question takes later corrections (T46); Meety's latest plan stands in for a first question that left the window (T47); a best guess needs a topic (T48); "and jonah?" after a help search carries the topic in the react form (T49); a "yes" to an offered action plans it (T50); "0 to pi" after two questions back is planned (T51).
 
 The golden path's call, recorded on the final text, returned react, friend "B" and the quoted question word for word, as on v1 and v2. Its recording sits beside v2's in the fixture folder; v2's stays because it was a paid recording.
+
+## v4 and v5 (replies in the app's words), 5 Nov 2026
+
+Not run in the scripted test set: the Meta key on the writer's machine stopped listing any model on 5 Nov, though the live service's key still worked. Tested through the live chat, one run each, judged by the writer.
+
+| Message | Reply | Met |
+|---|---|---|
+| "What can you do for me?" (ORC-T52) | "I am Meety, your personal AI. Tell me what you want to know: I can ask Maya's Meety, the AI that answers for her, how she would probably react, or ask the Meetys of people in Explore who could help you. They answer from what each person shared, so nobody has to reply, but those people will see your question and the answer." | yes: no "agent", no "press" |
+| "How would Maya react to me asking for coffee" (ORC-T53) | "I can ask Maya's Meety, the AI that answers for her, how she would probably react if you asked her for coffee. Maya does not have to reply herself, but she will see your question and the answer. Press the button when you are ready." | yes |
+| "would maya survive a zombie apocalypse" (as ORC-T60) | react, with the question "How would you probably do if you were in a zombie apocalypse?" | yes |
+| "does maya like sushi" (ORC-T61) | react, with the question "Would you probably like sushi?" | yes |
+| "Where does Maya live?" | reply: "I cannot ask where Maya lives, but I can ask Maya's Meety, the AI that answers for her, how she would probably react to something else." | yes |
+| a Hindi question about Maya (as ORC-T18) | react; reply and question in Hindi | yes |
+
+These ran in a chat whose earlier replies still said "agent", and no v5 reply copied the word.
+
+Status: draft. 6 messages, 1 live run each, all met. ORC-T52 to ORC-T64 have not run in the script, and the 51 tests of v3 have not been re-run on v5.
+
