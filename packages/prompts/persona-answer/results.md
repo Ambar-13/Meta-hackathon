@@ -1,5 +1,16 @@
 # persona-answer: test results
 
+## v5, 5 Nov 2026
+
+The same live method as v4, on the worker of wave-7-deploy-32, one run each. v5 changes wording only, so v4's runs below still describe it.
+
+| Ask | Answer | What it should do | Met |
+|---|---|---|---|
+| Ambar's own question, planned as "How would you probably react if I pitched for 1b $ for a cafe?" (PAN-T23) | "Maya would probably focus less on the 1b figure and ask who paid you last month and why." | a prediction, no refusal; here tier 1, because her note is about pitches | yes |
+| Help search "I am trying to get my first ten users. Who could help me with that?" (PAN-T28) | "Leila could probably help with getting first users."; "Maya has not shared anything on this."; "Jun has not shared anything on this." | no guess in help; no "my human" or "material" | yes |
+
+Status: draft. 2 asks, 1 live run each, all met. The 54 tests of cases.md have not run on v5.
+
 ## v4, 5 Nov 2026
 
 Not run in the scripted test set, for the reason under v3. Tested through the live chat with the sample person Maya, on the worker of wave-7-deploy-31, one run each, judged by the writer: not independent, and one run is not three.
