@@ -8,7 +8,7 @@ It is live at [heymeety.com](https://heymeety.com). The app was called Meet Firs
 
 ## Try it
 
-1. Open the site and choose **Continue with Google**. It runs on a free plan, so the first visit after a quiet spell can take about a minute.
+1. Open the site and choose **Continue with Google**.
 2. Home is your feed. Six sample people are already on it: Maya, Priya, Ravi, Jun, Leila and Tomas. They are made up, marked Sample, and accept a friend request at once.
 3. Add one of them as a friend, open Meety, and ask how they would react to something, such as "would Maya enjoy a weekend hackathon?". Meety plans the question and waits for your press; Maya's Meety then answers from her notes and quotes them.
 4. To make your own Meety, upload a ChatGPT, Claude or Codex export, or paste your notes. Your browser keeps only your own messages and removes secrets and contact details before anything is sent. You approve your card item by item.

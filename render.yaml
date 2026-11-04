@@ -1,21 +1,19 @@
-# One web service runs the api and the worker (scripts/start-api-and-worker.sh) beside Postgres,
-# on Render's free plans, because Render has no free background worker. Auto-deploy is off; scripts/release.sh deploys the commit
-# of a tag on the release branch through the service's one deploy hook. Limits are Render's on 2026-10-28 (render.com/docs/free,
-# render.com/docs/blueprint-spec): a free web service sleeps after 15 minutes with no visits and has no pre-deploy command, so the
-# start script migrates; the free database holds 1 GB and expires 30 days after it is made. Two paid services: see git history.
+# One web service runs the api and the worker (scripts/start-api-and-worker.sh) beside Postgres, both on paid plans, so the
+# service never sleeps and the database does not expire. Auto-deploy is off; scripts/release.sh deploys the commit of a tag on the
+# release branch through the service's one deploy hook. The start script migrates, so a deploy that starts while Postgres restarts
+# fails and Render keeps the running instance: change one plan at a time. Two paid services: see git history.
 services:
   - type: web
     name: meet-first
     runtime: docker
-    plan: free               # 0.1 CPU, 512 MB; 0.5c-512mb ($7 a month) never sleeps and has 0.5 CPU
+    plan: 1c-2g              # 1 CPU, 2 GB ($25 a month); 0.5c-512mb ($7 a month) has 0.5 CPU and 512 MB
     region: singapore        # close to the people using it; latency to api.meta.ai is not measured
     dockerfilePath: ./Dockerfile.render   # the whole workspace; starts as root so the api and the worker run as two users
     dockerContext: .
     dockerCommand: bash /app/scripts/start-api-and-worker.sh   # migrations, then the api and the worker (D71)
     autoDeployTrigger: "off"   # D70, R12.3
     healthCheckPath: /api/health        # R12.5
-    # No maxShutdownDelaySeconds: Render refuses it on free services, so a deploy stops the service after Render's default
-    # wait, and a model call longer than that can be cut. On a paid plan, set it to 150.
+    maxShutdownDelaySeconds: 150   # a model call can finish before a deploy stops the service
     envVars:
       - key: DATABASE_URL_MIGRATE
         sync: false          # from pnpm db:render-roles; the start script gives it to the migrate step only (as-built item 9)
@@ -42,9 +40,9 @@ services:
       - key: TOTAL_USD_CAP
         value: "111"         # at most $111 of the Meta credit in all
       - key: MAX_CONCURRENT_MEETINGS
-        value: "5"           # D57, lowered: both processes share 512 MB, and one meeting took them to 368 MB together (28 Oct)
+        value: "5"           # D57, set for 512 MB, where one meeting took both processes to 368 MB (28 Oct); 2 GB is not yet measured
       - key: DATABASE_DISK_BYTES
-        value: "1000000000"  # the free database's 1 GB, which /api/health measures against; a paid database needs its own size here
+        value: "1000000000"  # the database's 1 GB, which /api/health measures against; a bigger disk needs its own size here
       - key: SEED_SAMPLES
         value: "1"           # the six sample people of Explore, added once by the start script; "0" stops adding them
       - key: LOG_LEVEL
@@ -53,6 +51,6 @@ services:
         value: production
 databases:
   - name: meet-first-db
-    plan: free               # 1 GB (DATABASE_DISK_BYTES above), expires 30 days after it is made; 0.1c-256mb ($6 a month) keeps it
+    plan: 0.1c-256mb         # 1 GB (DATABASE_DISK_BYTES above), $6 a month, with backups, and it does not expire
     postgresMajorVersion: "16"
     region: singapore
