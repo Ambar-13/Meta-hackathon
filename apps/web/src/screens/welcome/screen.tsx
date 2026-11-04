@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { APP_PATHS } from "../../app-shell/index.js";
 import { Cloud, NameTag, Sticker } from "../../look/index.js";
 import { GoogleSignIn, WelcomeForm } from "./welcome-forms.js";
-import { FirstCoffee, QuestionKinds, SampleMeeting, WhatItDoes } from "./welcome-story.js";
+import { FirstCoffee, QuestionKinds, SampleMeeting } from "./welcome-story.js";
 import { BackAgain, LastCall, Promises, ThreeSteps, WelcomeFooter } from "./welcome-close.js";
 import "./welcome.css";
 
@@ -22,7 +22,7 @@ const WelcomeHero = (props: { onDone: () => void }): ReactElement => {
           Meety
         </Link>
         <span className="wl-nav-chips">
-          <a className="chip c-green wl-desk" href="#how">
+          <a className="chip c-green wl-desk" href="#steps">
             How it works
           </a>
           <a className="chip c-lilac wl-desk" href="#kinds">
@@ -63,7 +63,6 @@ export const WelcomeScreen = (): ReactElement => {
     <>
       <main className="wl">
         <WelcomeHero onDone={goToUpload} />
-        <WhatItDoes />
         <SampleMeeting />
         <QuestionKinds />
         <FirstCoffee />

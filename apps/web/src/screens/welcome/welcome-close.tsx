@@ -15,7 +15,7 @@ const STEPS: readonly Step[] = [
     colour: "c-green",
     sticker: "phone",
     title: "Upload your chats",
-    text: "From ChatGPT, Claude, Codex, your notes or a paste. Your browser keeps only your own messages and scrubs them before anything is sent.",
+    text: "From ChatGPT, Claude, Codex, your notes or a paste.",
     time: "a couple of minutes",
   },
   {
@@ -157,9 +157,9 @@ export const WelcomeFooter = (): ReactElement => {
   return (
     <footer className="wl-foot">
       <p className="wl-foot-name">Meety</p>
-      <p>Your Meety meets theirs first. With receipts.</p>
+      <p>Your Meety meets theirs first.</p>
       <nav className="wl-puffs" aria-label="On this page">
-        <a className="wl-puff c-yellow" href="#how">
+        <a className="wl-puff c-yellow" href="#steps">
           How it works
         </a>
         <a className="wl-puff c-green" href="#kinds">
@@ -169,7 +169,6 @@ export const WelcomeFooter = (): ReactElement => {
           I have a code
         </a>
       </nav>
-      <p className="wl-foot-small">Probably, never will. No scores, ever.</p>
       <nav className="wl-foot-links" aria-label="Policies">
         <Link to={APP_PATHS.privacy}>Privacy</Link>
         <Link to={APP_PATHS.terms}>Terms</Link>

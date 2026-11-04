@@ -10,31 +10,9 @@ import {
   type StickerName,
 } from "../../look/index.js";
 
-// The welcome page below the first screen: what it does, a sample meeting, the kinds of question,
+// The welcome page below the first screen: a sample meeting, the kinds of question,
 // the three steps, the promises and the last call. Mira and Jonah are made up, and the page says
 // so; nothing here is a real person's data.
-
-// The paragraph that says what Meety does, with small stickers inside the sentence (Lofty Lab's
-// "who we are").
-export const WhatItDoes = (): ReactElement => {
-  return (
-    <section className="wl-mission" id="how" aria-labelledby="wl-mission-title">
-      <h2 className="wl-kicker" id="wl-mission-title">
-        What it does
-      </h2>
-      <p className="wl-mission-text">
-        Upload your chats once <Sticker name="chat" />. Your Meety learns how you talk, then meets
-        someone else&apos;s Meety <Sticker name="tags" /> and plays it out: on a team{" "}
-        <Sticker name="laptop" />, as friends <Sticker name="smile" />, on a first date{" "}
-        <Sticker name="cup" />. You read a short brief, and every line shows its quote{" "}
-        <Sticker name="quote" />.
-      </p>
-      <a className="btn quiet" href="#steps">
-        See the three steps
-      </a>
-    </section>
-  );
-};
 
 // One line of the sample meeting: who says it, what they say, and its quote or its missing-quote
 // flag.
@@ -223,11 +201,9 @@ const KIND_PANELS: readonly KindPanel[] = [
   },
 ];
 
-// One tilted colour panel: the kind, the question, the brief's three parts for that kind, and a
-// two-line sample.
+// One tilted colour panel: the kind, the question and a two-line sample.
 const KindCard = (props: { panel: KindPanel; index: number }): ReactElement => {
   const { panel } = props;
-  const labels = BRIEF_SECTION_LABELS[panel.kind];
   return (
     <article className={`wl-kind ${panel.colour} wl-tilt-${String(props.index % 4)}`}>
       <div className="wl-kind-text">
@@ -236,20 +212,6 @@ const KindCard = (props: { panel: KindPanel; index: number }): ReactElement => {
           {panel.label}
         </span>
         <h3>{panel.question}</h3>
-        <ol className="rows">
-          <li>
-            <b>01</b>
-            <span>{labels.agree}</span>
-          </li>
-          <li>
-            <b>02</b>
-            <span>{labels.clash}</span>
-          </li>
-          <li>
-            <b>03</b>
-            <span>{labels.decideFirst}</span>
-          </li>
-        </ol>
         {panel.note === undefined ? null : <p className="wl-kind-note">{panel.note}</p>}
       </div>
       <div className="wl-kind-sample" aria-label="Two sample lines">
