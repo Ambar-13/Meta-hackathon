@@ -11,8 +11,9 @@ type Field = "kind" | "topic" | "point" | "strength" | "quote";
 // One block while it is read: its fields so far.
 type Draft = { kind?: string; topic?: string; point?: string; strength?: string; quotes: string[] };
 
-// A field line after any bullets, numbers, quote markers or bold around the field name: "1. **Kind:** view", "- point: ...".
-const FIELD_LINE = /^[\s>*•\-\d.)]*(?:\*\*|__)?(kind|topic|point|strength|quote)(?:\*\*|__)?\s*:\s*(?:\*\*|__)?\s*(.*)$/i;
+// A field line after any bullets (hyphens, en or em dashes, dots), numbers, quote markers or bold around the field name, with an
+// optional number after it: "1. **Kind:** view", "- point: ...", "Quote 2: ...", "Quote #3: ...".
+const FIELD_LINE = /^[\s>*•\-\u2013\u2014\d.)]*(?:\*\*|__)?(kind|topic|point|strength|quote)(?:\s*#?\d+)?(?:\*\*|__)?\s*:\s*(?:\*\*|__)?\s*(.*)$/i;
 // Quote marks that may wrap a value, each opener with its closer.
 const WRAPPERS: ReadonlyArray<[string, string]> = [['"', '"'], ["'", "'"], ["“", "”"], ["‘", "’"], ["«", "»"], ["`", "`"]];
 // The kinds as a set, for a quick check.
@@ -32,12 +33,12 @@ function cutTo(text: string, max: number): string {
   return Array.from(text).slice(0, max).join("");
 }
 
-// The point a finished block makes, or null when it has no point.
+// The point a finished block makes, or null when it has no point. The strength is its first word, so a note after it is ignored.
 function pointOf(draft: Draft): SummaryPoint | null {
   const point = cutTo(draft.point ?? "", SUMMARY_LINE_MAX_CHARS);
   if (point === "") return null;
   const kind = (draft.kind ?? "").toLowerCase();
-  const strength = (draft.strength ?? "").toLowerCase();
+  const strength = /^[a-z]+/.exec((draft.strength ?? "").toLowerCase())?.[0] ?? "";
   return {
     kind: (KINDS.has(kind) ? kind : "other") as SummaryKind,
     topic: cutTo(draft.topic ?? "", SUMMARY_TOPIC_MAX_CHARS),

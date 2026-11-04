@@ -85,6 +85,16 @@ describe("the summary format", () => {
     });
   });
 
+  it("W7-SUMMARY-T11: numbered quote lines, dash bullets and a strength with a note read like the plain format", () => {
+    const dash = "\u2013 ";
+    const text = ["Kind: view", "Topic: Rentably", "Point: Rentably was never a bad idea.", "Strength: strong (said often)", "Quote 1: rentably was never a bad idea, the timing was just early", "Quote #2: i'd build it again tomorrow"].map((line) => dash + line).join("\n");
+    const emDash = text.replaceAll("\u2013", "\u2014");
+
+    const expected = [{ kind: "view", topic: "Rentably", point: "Rentably was never a bad idea.", strength: "strong", quotes: ["rentably was never a bad idea, the timing was just early", "i'd build it again tomorrow"] }];
+    expect(parseSummary(text)).toEqual(expected);
+    expect(parseSummary(emDash)).toEqual(expected);
+  });
+
   it("W7-SUMMARY-T10: formatSummary writes points back in the fixed format, so parseSummary reads the same points again", () => {
     const points = parseSummary(PLAIN);
     const text = formatSummary(points);
