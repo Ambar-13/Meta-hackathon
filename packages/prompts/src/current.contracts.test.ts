@@ -113,7 +113,22 @@ describe("prompt texts", () => {
     expect(text).not.toContain('"my human has not said"');
   });
 
-  it("R3.9-T2: current.ts names every prompt folder, the question-kind prompts at v5, v4 or v2, persona-answer at v5 and the rest at v1, and readPrompt reads that version", () => {
+  it("R3.9-T6: a persona guesses how its human would react to a date, leaves the yes or no to them, and keeps out who they are with and what they feel for the asker", () => {
+    const { text } = readPrompt("persona-answer");
+    expect(text).not.toContain("a date with the person asking included");
+    expect(text).toContain("In react and self, a date is a question like any other.");
+    expect(text).toContain("Never say whether they would say yes or no");
+    expect(text).toContain("A line about dating, sex, exes, crushes or partners");
+    expect(text).toContain("This beats the tier order and <strength>");
+    expect(text).toContain("your human, the person asking or the person they would go with");
+    expect(text).toContain("the first sentence opens with the decision and carries the mark");
+    expect(text).toContain("The words are the same for every cause");
+    expect(text).toContain("the ask says your human turned down, blocked or avoided the person asking");
+    expect(text).toContain("Whether your human likes, fancies or is drawn to the person asking");
+    expect(text).toContain("sexuality, romantic relationships or personal finances, of your human");
+  });
+
+  it("R3.9-T2: current.ts names every prompt folder, the question-kind prompts at v5, v4 or v2, persona-answer at v6 and the rest at v1, and readPrompt reads that version", () => {
     expect(PROMPT_NAMES).toEqual([
       "dossier",
       "scrub-names",
@@ -140,7 +155,7 @@ describe("prompt texts", () => {
       brief: "v5",
       "brief-support-judge": "v2",
       orchestrator: "v5",
-      "persona-answer": "v5",
+      "persona-answer": "v6",
     };
     for (const name of PROMPT_NAMES) expect(currentVersion(name)).toBe(changed[name] ?? "v1");
     for (const name of [

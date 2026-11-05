@@ -80,3 +80,6 @@ These ran in a chat whose earlier replies still said "agent", and no v5 reply co
 
 Status: draft. 6 messages, 1 live run each, all met. ORC-T52 to ORC-T64 have not run in the script, and the 51 tests of v3 have not been re-run on v5.
 
+## v5, scripted, 5 Nov 2026
+
+Run by the writer's harness on muse-spark-1.3 with the exact request the orchestrate job builds, 3 runs per test, the first scripted run of v4 or v5. 26 tests, including ORC-T65 and ORC-T66 on dates: 23 passed every run. ORC-T1, ORC-T53 and ORC-T58 failed on a pass line still asking for the word "copy" from v4; each reply says "she will see your question and the answer", which meets cases.md, so the 26 met their pass lines on reading. The other 40 tests of cases.md have not run. "Would Maya go on a date with me?" planned a react ask in all 3 runs, and each reply says she will see the question and the answer. Status: draft.

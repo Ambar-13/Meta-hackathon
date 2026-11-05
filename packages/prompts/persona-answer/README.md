@@ -8,7 +8,7 @@ The run_ask job sends this text, then the untrusted-data rules, as the system me
 
 ## What this never does
 
-It never solves the asker's problem, promises the person's time or money, scores the person, or speaks on a topic the person's quiz showed is a wrong guess. It is never edited in place: a change is a new `v2/` folder with a row in CHANGELOG.md.
+It never solves the asker's problem, promises the person's time or money, scores the person, says yes or no to a date for them, or speaks on a topic the person's quiz showed is a wrong guess. It is never edited in place: a change is a new `v2/` folder with a row in CHANGELOG.md.
 
 ## How it fits
 
