@@ -20,11 +20,17 @@ describe("welcome screens", () => {
   it("WL-HERO-T1: the first screen explains the social product before introducing setup", () => {
     renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/" });
 
+    const headline = screen.getByRole("heading", {
+      name: "The next generation of social media, with context.",
+    });
+    const productExample = screen.getByRole("article", {
+      name: "Fictional example conversation with Jun's Meety",
+    });
+    // The example comes first in the page, so a phone shows the product before the pitch; on a
+    // laptop the grid puts it on the right.
     expect(
-      screen.getByRole("heading", {
-        name: "The next generation of social media, with context.",
-      }),
-    ).toBeTruthy();
+      productExample.compareDocumentPosition(headline) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(screen.getByText(/People are more than profiles/i)).toBeTruthy();
     expect(screen.getByRole("link", { name: "Create your Meety" }).getAttribute("href")).toBe(
       "#start",

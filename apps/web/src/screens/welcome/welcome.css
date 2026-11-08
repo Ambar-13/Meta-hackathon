@@ -49,11 +49,11 @@
 .wl-nav-wide { display: none; }
 
 /* One column that never grows past the screen on a phone, however long a line inside it is. */
-.wl-hero-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 58px; max-width: 1240px; margin: 54px auto 0; }
+.wl-hero-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 38px; max-width: 1240px; margin: 42px auto 0; }
 .wl-eyebrow, .wl-section-head > p:first-child, .wl-start-copy > p:first-child, .wl-trust > div > p {
   margin: 0 0 14px; color: var(--wl-brand); font: 700 14px/1.2 var(--sans); letter-spacing: 0.015em;
 }
-.wl-hero h1 { max-width: 100%; margin: 0; font-size: clamp(42px, 12.3vw, 76px); line-height: 0.9; letter-spacing: -0.065em; }
+.wl-hero h1 { max-width: 100%; margin: 0; font-size: clamp(36px, 10vw, 46px); line-height: 0.94; letter-spacing: -0.055em; }
 .wl-hero-main { display: block; max-width: 11.5ch; }
 .wl-hero-next { color: var(--wl-blue); }
 .wl-hero-context { color: var(--wl-brand); }
@@ -181,6 +181,9 @@
 @media (min-width: 980px) {
   .wl-hero { padding-inline: 44px; }
   .wl-hero-grid { grid-template-columns: minmax(0, 0.92fr) minmax(460px, 0.78fr); gap: clamp(60px, 8vw, 124px); align-items: center; margin-top: 9vh; }
+  /* The example comes first in the page for phones; on a laptop the words go left and the example right. */
+  .wl-hero-copy { grid-column: 1; grid-row: 1; }
+  .wl-demo-wrap { grid-column: 2; grid-row: 1; }
   .wl-hero h1 { max-width: 11.5ch; font-size: clamp(70px, 6.5vw, 100px); }
   .wl-lede { font-size: 20px; }
   .wl-demo { border-radius: 28px; }

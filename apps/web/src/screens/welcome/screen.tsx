@@ -73,6 +73,7 @@ const Hero = (): ReactElement => (
       </nav>
     </header>
     <div className="wl-hero-grid">
+      <ProductDemo />
       <div className="wl-hero-copy">
         <p className="wl-eyebrow">People are more than profiles.</p>
         <h1 id="wl-hero-title">
@@ -95,7 +96,6 @@ const Hero = (): ReactElement => (
         </div>
         <p className="wl-hero-note">No scores. No mind reading. Every answer shows its source.</p>
       </div>
-      <ProductDemo />
     </div>
   </section>
 );
