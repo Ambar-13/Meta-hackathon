@@ -6,6 +6,7 @@ import { Health } from "@meet-first/contracts";
 import { buildTestApp, TEST_APP_ORIGIN } from "../testing/app-factory.js";
 import type { RoutePlugin } from "../app-types.js";
 import { registerWebPages, registerWebPagesRoutes } from "./index.js";
+import { INDEXNOW_KEY } from "./public-pages.js";
 
 // The app shell as the web build writes it: its share tags name the origin as the placeholder.
 const INDEX_HTML =
@@ -121,6 +122,15 @@ it("SEO-T13: pages that show nothing without a session carry noindex, share page
   }
   expect(halfShare.statusCode).toBe(301);
   expect(halfShare.headers.location).toBe("/share");
+});
+
+it("SEO-T21: the IndexNow key answers at /<key>.txt as plain text, so Bing and Yandex accept this site's lists of changed pages", async () => {
+  expect(INDEXNOW_KEY).toMatch(/^[0-9a-f]{32}$/);
+  const response = await t1.app.inject({ method: "GET", url: `/${INDEXNOW_KEY}.txt` });
+
+  expect(response.statusCode).toBe(200);
+  expect(response.headers["content-type"]).toBe("text/plain; charset=utf-8");
+  expect(response.body).toBe(INDEXNOW_KEY);
 });
 
 it("SEO-T17: the app shell on a share page or a deep link names the live origin in its share tags, so a link preview can fetch the picture", async () => {

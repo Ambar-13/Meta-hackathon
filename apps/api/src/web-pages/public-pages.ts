@@ -15,6 +15,9 @@ export const ROOT_FILES: ReadonlyArray<{ path: string; file: string; type: strin
 ];
 // The cache header of a root file: one day, because its name never changes.
 export const ROOT_FILE_CACHE = "public, max-age=86400";
+// The IndexNow key. Bing, Yandex and the other IndexNow engines fetch it at /<key>.txt to check
+// that a list of changed pages sent with it comes from this site, so it is public by design.
+export const INDEXNOW_KEY = "3eddbe85ad978db3ee10c7c694b12bc0";
 // The crawlers that feed searches and answers, each named in robots.txt, so that a later edit to
 // the group for every other crawler can never block them by accident. Blocking any of these removes
 // the site from that engine's results; training-only crawlers are not named and follow the * group.
@@ -100,9 +103,9 @@ async function registerPrerenderedPages(
   }
 }
 
-// Registers robots.txt and sitemap.xml for the api's origin, then the root files and the
-// prerendered public pages the build has; registered before the app-shell fallback, whose /* would
-// otherwise answer every one of these paths with the empty shell.
+// Registers robots.txt, sitemap.xml and the IndexNow key for the api's origin, then the root
+// files and the prerendered public pages the build has; registered before the app-shell fallback,
+// whose /* would otherwise answer every one of these paths with the empty shell.
 export async function registerPublicPages(
   app: FastifyInstance,
   distDir: string,
@@ -119,6 +122,12 @@ export async function registerPublicPages(
       .header("cache-control", ROOT_FILE_CACHE)
       .type("application/xml; charset=utf-8")
       .send(sitemap),
+  );
+  app.get(`/${INDEXNOW_KEY}.txt`, (request, reply) =>
+    reply
+      .header("cache-control", ROOT_FILE_CACHE)
+      .type("text/plain; charset=utf-8")
+      .send(INDEXNOW_KEY),
   );
   await registerRootFiles(app, distDir);
   await registerPrerenderedPages(app, distDir, origin);
