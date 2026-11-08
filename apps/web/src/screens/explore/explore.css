@@ -10,17 +10,23 @@
    field, the people as rows with Add friend, and the photos as
    Instagram's Explore grid of tall tiles. Spacing is on a 4px grid. */
 
-/* ---------- the page: one column, and on a laptop the right-hand column beside it ---------- */
-main.screen.wide:has(.explore), main.screen.wide:has(.search-page) { max-width: 700px; }
+/* ---------- the page: the feed fills the width beside the sidebar, and from 1024px the right-hand column sits beside it ---------- */
 .explore { width: 100%; }
 .explore-main { min-width: 0; }
 .explore-rail { display: none; }
-@media (min-width: 1200px) {
-  main.screen.wide:has(.explore) { max-width: 1000px; }
-  .explore { display: grid; grid-template-columns: minmax(0, 560px) 264px; gap: 40px; align-items: start; }
+/* From a tablet up the page uses the whole width beside the sidebar, whatever the screen, so no empty band shows on either side. */
+@media (min-width: 768px) {
+  main.screen.wide:has(.explore), main.screen.wide:has(.search-page) { max-width: none; padding-inline: clamp(24px, 3vw, 56px); }
+  /* A tall photo never runs past the window: past 78% of its height it is cropped to fit. */
+  .explore .feed-photo > img { max-height: 78vh; }
+}
+@media (min-width: 1024px) {
+  .explore { display: grid; grid-template-columns: minmax(0, 1fr) clamp(300px, 26vw, 420px); gap: clamp(32px, 3vw, 64px); align-items: start; }
   .explore-rail { position: sticky; top: 24px; display: grid; gap: 28px; padding-top: 12px; }
   /* The right-hand column lists people here, so the row inside the feed steps aside. */
   .feed-list > li.feed-suggested { display: none; }
+  /* Search's photos fill the wider page with more tiles to a row, each at least 240px wide. */
+  .search-page .photo-grid { grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); }
 }
 .hidden-words { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 
@@ -200,8 +206,8 @@ main.screen.wide:has(.explore), main.screen.wide:has(.search-page) { max-width: 
 /* ---------- the right-hand column on a laptop: the peach card with its slow circles, then people you might click with ---------- */
 .rail-meety { position: relative; overflow: hidden; padding: 24px 24px 20px; border-radius: 16px; background: var(--ui-peach); }
 :is(.explore, .search-page) .rail-meety-label { margin: 0; color: var(--ui-ink-2); font: 500 13px/16px var(--ui-font); letter-spacing: 0.01em; }
-:is(.explore, .search-page) .rail-meety h2 { max-width: 200px; margin: 16px 0 0; font: 600 24px/29px var(--ui-font); letter-spacing: -0.035em; }
-:is(.explore, .search-page) .rail-meety-line { max-width: 236px; margin: 12px 0 20px; color: var(--ui-ink-2); font-size: 14px; line-height: 22px; }
+:is(.explore, .search-page) .rail-meety h2 { max-width: 260px; margin: 16px 0 0; font: 600 24px/29px var(--ui-font); letter-spacing: -0.035em; }
+:is(.explore, .search-page) .rail-meety-line { max-width: 300px; margin: 12px 0 20px; color: var(--ui-ink-2); font-size: 14px; line-height: 22px; }
 :is(.explore, .search-page) .rail-meety-link { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px;
   background: var(--ui-bg); color: var(--ui-ink); font: 600 14px/20px var(--ui-font); transition: box-shadow 0.15s var(--ease); }
 :is(.explore, .search-page) .rail-meety-link:hover { text-decoration: none; box-shadow: 0 1px 4px oklch(20% 0.01 78.3 / 0.14); }
