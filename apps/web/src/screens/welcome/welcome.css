@@ -131,8 +131,9 @@
 
 /* ---------- start and account forms ---------- */
 .wl-start { display: grid; gap: 42px; width: min(calc(100% - 24px), 1120px); margin: 42px auto; border-radius: 28px; background: var(--wl-brand); }
-.wl-start .wl-start-copy > p:first-child { color: var(--wl-ink); }
-.wl-start-copy > p:last-child { max-width: 40ch; margin: 18px 0 0; color: oklch(26% 0.035 33); }
+/* White words on the red card: 4.7:1, so even its small lines are easy to read. */
+.wl-start h2, .wl-start .wl-start-copy > p { color: var(--wl-bg); }
+.wl-start-copy > p:last-child { max-width: 40ch; margin: 18px 0 0; }
 .wl-start-form { padding: 22px; border: 1px solid oklch(48% 0.12 33); border-radius: 20px; background: var(--wl-bg); }
 .wl-google { display: grid; gap: 10px; margin-bottom: 16px; }
 .wl-google-btn { width: 100%; background: var(--wl-bg) !important; color: var(--wl-ink) !important; border: 1px solid var(--wl-line) !important; }
@@ -176,6 +177,18 @@
   .wl-footer { padding-inline: 32px; }
   .wl-footer > section { grid-template-columns: 1fr 1fr; align-items: end; }
   .wl-footer-row { flex-direction: row; align-items: center; justify-content: space-between; }
+}
+
+/* Between phone and laptop the hero is one centred column, the example and then the words, so a
+   narrow block of words never sits beside an empty half of the screen. */
+@media (min-width: 560px) and (max-width: 979.98px) {
+  .wl-hero-grid { justify-items: center; text-align: center; }
+  .wl-demo-wrap { width: min(100%, 540px); text-align: left; }
+  .wl-hero-copy { display: grid; justify-items: center; }
+  .wl-hero h1 { font-size: clamp(52px, 10.5vw, 84px); }
+  .wl-hero-main, .wl-lede, .wl-hero-note { margin-inline: auto; }
+  .wl-hero-actions { justify-content: center; }
+  .wl-hero-actions .btn { width: auto; }
 }
 
 @media (min-width: 980px) {
