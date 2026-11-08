@@ -2,6 +2,12 @@
 
 The look of the Meety web app. Who it is for and why it looks this way are in [PRODUCT.md](PRODUCT.md).
 
+## The welcome page: the product before the mechanism
+
+The first three seconds explain the social network in ordinary words: “People are more than profiles.” A fictional Jun example beside it shows the real interaction, a person, a question for their Meety, a qualified answer, and the source that supports it. The page says what someone can ask about (what a person may care about, want, dislike, or debate) before it asks the visitor to understand agents, personas, or two AIs meeting.
+
+The public page borrows the signed-in product's restraint: the same near-white ground, Hanken and Bricolage, photo-led people, hairlines and compact social controls. The old sky, clouds, giant name-tag form, stacked question catalogue and decorative first-coffee interlude are gone. The deep coral-red from the left half of the Meety logo is the public brand anchor: it carries the words "with context", the primary action and the account-creation room. Colour still has a job: blue is direct questions and conversation, coral is the Meety brand and human reaction, yellow is curiosity and evidence, lilac is disagreement, and sage is possible collaboration. The flow is short: promise and product demo, questions a person could ask, three steps, control and privacy, account creation, then sign-in.
+
 ## The signed-in app: Instagram and Facebook
 
 The signed-in app uses Instagram's photo-led feed and direct-message layout, with Facebook-style labelled navigation and clear blue actions. Colour supports the people, content and controls. Everything below this section is the landing's look; it stays for the welcome, claim, join and public share pages. Every signed-in page takes the look in `apps/web/src/app-shell/app-look.css`, scoped to `.social-frame`.

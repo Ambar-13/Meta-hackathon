@@ -17,6 +17,27 @@ afterEach(() => {
 });
 
 describe("welcome screens", () => {
+  it("WL-HERO-T1: the first screen explains the social product before introducing setup", () => {
+    renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/" });
+
+    expect(
+      screen.getByRole("heading", {
+        name: "The next generation of social media, with context.",
+      }),
+    ).toBeTruthy();
+    expect(screen.getByText(/People are more than profiles/i)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Create your Meety" }).getAttribute("href")).toBe(
+      "#start",
+    );
+    expect(
+      screen.getAllByRole("link", { name: "Sign in" }).map((link) => link.getAttribute("href")),
+    ).toEqual(["#signin", "#signin"]);
+    expect(screen.getByRole("heading", { name: "Questions profiles cannot answer." })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "What people share stays theirs." })).toBeTruthy();
+    expect(screen.queryByText(/investor meeting/i)).toBeNull();
+    expect(screen.queryByText("Your Meety meets theirs first.")).toBeNull();
+  });
+
   it("A5-T1: the recovery code is shown once with a copy action and the save sentence", async () => {
     stubRoute(routes.people.createPerson, { status: 201, body: personCreated() });
     renderScreen(<WelcomeScreen />, { pattern: ROUTE_PATTERNS.welcome, url: "/" });

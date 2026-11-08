@@ -7,9 +7,11 @@ it("SEO-T6: the start page renders to HTML with its headline, its steps, its pro
   const html = await renderPath("/");
 
   expect(html).toContain("Your Meety");
-  expect(html).toContain("meets");
-  expect(html).toContain("Three steps to your first brief.");
-  expect(html).toContain("It never scores anyone.");
+  expect(html).toContain("next generation");
+  expect(html).toContain("of social media,");
+  expect(html).toContain("with context.");
+  expect(html).toContain("People are more than profiles.");
+  expect(html).toContain("No scores. No mind reading.");
   expect(html).toContain('href="/privacy"');
   expect(html).toContain('href="/terms"');
   expect(html).toContain('href="/cookies"');

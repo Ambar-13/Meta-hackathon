@@ -24,11 +24,11 @@ export type PageHead = {
 export const PAGE_HEADS: readonly PageHead[] = [
   {
     path: "/",
-    title: "Meety - your AI meets theirs first, with receipts",
+    title: "Meety: the next generation of social media with context",
     description:
-      "Your Meety learns you from your own chats, meets a friend's Meety and plays out how you'd probably get on. The brief quotes your words. No scores.",
-    shareTitle: "Your Meety meets theirs first. With receipts.",
-    mustContain: "Three steps to your first brief.",
+      "Meety is the next generation of social media, with context. Ask what someone may care about, want, dislike or debate before you start the conversation.",
+    shareTitle: "Meety: the next generation of social media, with context.",
+    mustContain: "next generation",
   },
   {
     path: "/privacy",
@@ -66,6 +66,7 @@ export const HOME_STRUCTURED_DATA = {
       "@id": `${ORIGIN_PLACEHOLDER}/#website`,
       url: `${ORIGIN_PLACEHOLDER}/`,
       name: "Meety",
+      alternateName: "Meety: social media with context",
       inLanguage: "en",
     },
     {
@@ -80,11 +81,19 @@ export const HOME_STRUCTURED_DATA = {
       isAccessibleForFree: true,
       offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
       description:
-        "Your Meety meets theirs first. The two agents play out how two people would probably get on, and each person gets a short brief where every line shows the words it came from.",
+        "Meety is a social network with context. Each person has a Meety built from information they approve. Friends can ask what someone may care about, want, dislike or debate, and every answer keeps its source attached.",
+      keywords: [
+        "the new social network",
+        "AI social network",
+        "AI of you from your own chats",
+        "social media with context",
+        "people are more than profiles",
+        "ask a friend's AI",
+      ],
       featureList: [
-        "Upload your chats from ChatGPT, Claude, Codex, your notes or a paste",
-        "Approve your card line by line, each line with the quote it came from",
-        "Pick a question and let the two Meetys talk it through",
+        "Choose context from ChatGPT, Claude, Codex, notes or a paste",
+        "Approve every point before anyone can ask about it",
+        "Ask what someone may care about, want, dislike, know or debate",
         "It says probably, never what you will do",
         "It never scores anyone",
         "Messages are scrubbed in your browser before anything is sent",
