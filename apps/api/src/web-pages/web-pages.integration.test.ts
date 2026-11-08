@@ -3,12 +3,15 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import { Health } from "@meet-first/contracts";
-import { buildTestApp } from "../testing/app-factory.js";
+import { buildTestApp, TEST_APP_ORIGIN } from "../testing/app-factory.js";
 import type { RoutePlugin } from "../app-types.js";
 import { registerWebPages, registerWebPagesRoutes } from "./index.js";
 
+// The app shell as the web build writes it: its share tags name the origin as the placeholder.
 const INDEX_HTML =
-  '<!doctype html><html><head><title>Meet First</title></head><body><div id="root"></div></body></html>';
+  '<!doctype html><html><head><title>Meet First</title><meta property="og:image" content="__APP_ORIGIN__/og.png" /></head><body><div id="root"></div></body></html>';
+// The shell as the api serves it, with the origin in place of the placeholder.
+const SERVED_SHELL = INDEX_HTML.replaceAll("__APP_ORIGIN__", TEST_APP_ORIGIN);
 // The start page as prerender.ts writes it: the origin as the placeholder, the words in the root.
 const START_PAGE_HTML =
   '<!doctype html><html><head><title>Meety - start</title><link rel="canonical" href="__APP_ORIGIN__/" /></head><body><div id="root"><h1>Your Meety meets theirs first.</h1><a href="__APP_ORIGIN__/og.png">picture</a></div></body></html>';
@@ -68,7 +71,7 @@ it("A7-T5: client paths serve the built index.html with no-store, and hashed fil
     expect(shell.statusCode).toBe(200);
     expect(shell.headers["content-type"]).toBe("text/html; charset=utf-8");
     expect(shell.headers["cache-control"]).toBe("no-store");
-    expect(shell.body).toBe(INDEX_HTML);
+    expect(shell.body).toBe(SERVED_SHELL);
   }
   expect(asset.statusCode).toBe(200);
   expect(asset.headers["cache-control"]).toBe("public, max-age=31536000, immutable");
@@ -95,7 +98,7 @@ it("SEO-T12: a public page the build prerendered is served at its path with the 
   expect(privacy.statusCode).toBe(200);
   expect(privacy.body).toBe(PRIVACY_PAGE_HTML);
   expect(terms.statusCode).toBe(200);
-  expect(terms.body).toBe(INDEX_HTML);
+  expect(terms.body).toBe(SERVED_SHELL);
   expect(terms.headers["x-robots-tag"]).toBeUndefined();
 });
 
@@ -114,10 +117,18 @@ it("SEO-T13: pages that show nothing without a session carry noindex, share page
     expect(response.statusCode).toBe(404);
     expect(response.headers["content-type"]).toBe("text/html; charset=utf-8");
     expect(response.headers["x-robots-tag"]).toBe("noindex");
-    expect(response.body).toBe(INDEX_HTML);
+    expect(response.body).toBe(SERVED_SHELL);
   }
   expect(halfShare.statusCode).toBe(301);
   expect(halfShare.headers.location).toBe("/share");
+});
+
+it("SEO-T17: the app shell on a share page or a deep link names the live origin in its share tags, so a link preview can fetch the picture", async () => {
+  for (const url of ["/share/abc", "/home?access=meetfirst-x"]) {
+    const response = await t1.app.inject({ method: "GET", url });
+    expect(response.body).toContain(`content="${TEST_APP_ORIGIN}/og.png"`);
+    expect(response.body).not.toContain("__APP_ORIGIN__");
+  }
 });
 
 it("SEO-T14: a trailing slash redirects for good to the address without it, query kept", async () => {

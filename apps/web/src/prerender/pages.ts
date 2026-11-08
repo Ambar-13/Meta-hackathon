@@ -8,15 +8,14 @@
 export const ORIGIN_PLACEHOLDER = "__APP_ORIGIN__";
 
 // The head of one public page: the path it lives at, the words a search result shows, the words a
-// link preview shows, a line of the page's own text that proves the render worked, and whether the
-// preview carries the share picture (og.png, which shows the start page's first screen).
+// link preview shows, and a line of the page's own text that proves the render worked. Every page's
+// preview carries the share picture (og.png).
 export type PageHead = {
   path: string;
   title: string;
   description: string;
   shareTitle: string;
   mustContain: string;
-  hasShareImage: boolean;
 };
 
 // The four public pages' heads. Titles are about 50 to 60 characters with the brand last, the
@@ -30,7 +29,6 @@ export const PAGE_HEADS: readonly PageHead[] = [
       "Your Meety learns you from your own chats, meets a friend's Meety and plays out how you'd probably get on. The brief quotes your words. No scores.",
     shareTitle: "Your Meety meets theirs first. With receipts.",
     mustContain: "Three steps to your first brief.",
-    hasShareImage: true,
   },
   {
     path: "/privacy",
@@ -39,7 +37,6 @@ export const PAGE_HEADS: readonly PageHead[] = [
       "What Meety keeps, what it does with it, who sees what, the two cookies, and how deleting your account removes everything that belongs to you.",
     shareTitle: "Meety's privacy page",
     mustContain: "What Meety keeps",
-    hasShareImage: false,
   },
   {
     path: "/terms",
@@ -48,7 +45,6 @@ export const PAGE_HEADS: readonly PageHead[] = [
       "What Meety is and is not, your account, what you may upload and post, what is not allowed, what Meety promises, and how to leave.",
     shareTitle: "Meety's terms",
     mustContain: "What Meety is",
-    hasShareImage: false,
   },
   {
     path: "/cookies",
@@ -57,7 +53,6 @@ export const PAGE_HEADS: readonly PageHead[] = [
       "The two cookies that sign you in, the two notes the app keeps in your browser, Google's own sign-in page, and how to remove them.",
     shareTitle: "Meety's cookies page",
     mustContain: "Removing them",
-    hasShareImage: false,
   },
 ];
 

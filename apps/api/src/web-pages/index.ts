@@ -21,7 +21,11 @@ export async function registerWebPages(
   registerHealthRoute(app, deps, options.diskPlanBytes);
   const hasBuild = await registerStaticFiles(app, options.distDir);
   await registerPublicPages(app, options.distDir, deps.env.APP_ORIGIN);
-  await registerSpaFallback(app, options.distDir, hasBuild);
+  await registerSpaFallback(app, {
+    distDir: options.distDir,
+    hasBuild,
+    origin: deps.env.APP_ORIGIN,
+  });
 }
 
 // The web pages as one plugin for server.ts slot 11, always last, because its fallback answers

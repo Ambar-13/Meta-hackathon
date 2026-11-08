@@ -2,11 +2,8 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { FastifyInstance } from "fastify";
 import { PUBLIC_PAGES } from "@meet-first/contracts";
-import { HTML_CONTENT_TYPE, INDEX_CACHE } from "./spa-fallback.js";
+import { HTML_CONTENT_TYPE, INDEX_CACHE, ORIGIN_PLACEHOLDER } from "./spa-fallback.js";
 
-// The text the prerendered pages carry where the live origin goes (apps/web/src/prerender/pages.ts
-// writes it); the api puts its APP_ORIGIN there when it reads them, so one build serves any domain.
-export const ORIGIN_PLACEHOLDER = "__APP_ORIGIN__";
 // The folder under the web build where apps/web/prerender.ts wrote the public pages.
 export const PRERENDERED_DIR = "prerendered";
 // The files at the site's root that browsers and link previews ask for by name, each served from

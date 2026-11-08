@@ -4,6 +4,10 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { ContractError, isClientPath, isIndexablePath, pathOf } from "@meet-first/contracts";
 import { makeNotFoundError } from "../route-errors.js";
 
+// The text the app shell and the prerendered pages carry where the live origin goes
+// (apps/web/src/prerender/pages.ts writes it); the api puts its APP_ORIGIN there when it reads them,
+// so one build serves any domain.
+export const ORIGIN_PLACEHOLDER = "__APP_ORIGIN__";
 // The content type of the app shell, with its charset.
 export const HTML_CONTENT_TYPE = "text/html; charset=utf-8";
 // The app shell is never cached, so a new deploy reaches every browser on its next load.
@@ -42,13 +46,18 @@ function hasTrailingSlash(url: string): boolean {
 // Registers GET / and GET /*: the app shell for every page of the app, with noindex on the pages
 // that show nothing without a session; the shell with a 404 for an address the app has no page
 // for, so a missing page never counts as a page; a permanent redirect off a trailing slash; and
-// not_found as JSON for an /api path no route claimed.
+// not_found as JSON for an /api path no route claimed. The shell's share tags name the origin as the
+// placeholder, swapped here for the live origin, so a link preview of any page can fetch the picture.
 export async function registerSpaFallback(
   app: FastifyInstance,
-  distDir: string,
-  hasBuild: boolean,
+  build: { distDir: string; hasBuild: boolean; origin: string },
 ): Promise<void> {
-  const indexHtml = hasBuild ? await readFile(join(distDir, "index.html"), "utf8") : null;
+  const indexHtml = build.hasBuild
+    ? (await readFile(join(build.distDir, "index.html"), "utf8")).replaceAll(
+        ORIGIN_PLACEHOLDER,
+        build.origin,
+      )
+    : null;
   const handler = (request: FastifyRequest, reply: FastifyReply) => {
     if (isApiPath(request.url)) {
       throw makeNotFoundError();
