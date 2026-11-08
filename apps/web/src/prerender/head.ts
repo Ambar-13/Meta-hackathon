@@ -4,13 +4,15 @@
 // shows a preview; a prerendered page swaps them for its own.
 import { HOME_STRUCTURED_DATA, ORIGIN_PLACEHOLDER, type PageHead } from "./pages.js";
 
-// The share picture, as og.png is drawn: 1200 by 630, the size link previews expect.
+// The share picture, as og.png is drawn: 1200 by 630, the size link previews expect. The ?v= number
+// goes up whenever the picture changes, so LinkedIn, X and the rest fetch the new one instead of
+// showing their cached copy; index.html carries the same address.
 export const SHARE_IMAGE = {
-  path: "/og.png",
+  path: "/og.png?v=2",
   width: 1200,
   height: 630,
   type: "image/png",
-  alt: "Your Meety meets theirs first, with two name tags, Mira and Jonah, on a sky",
+  alt: "The next generation of social media, with context. Beside it, a sample chat asks whether Jun would join an early hardware startup, and Jun's Meety answers with Jun's own words as the source.",
 } as const;
 
 // Every tag a link preview reads, by its name or property; each page's head and the app shell carry
