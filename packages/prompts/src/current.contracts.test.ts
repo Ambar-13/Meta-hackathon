@@ -123,7 +123,9 @@ describe("prompt texts", () => {
     expect(text).toContain("your human, the person asking or the person they would go with");
     expect(text).toContain("the first sentence opens with the decision and carries the mark");
     expect(text).toContain("The words are the same for every cause");
-    expect(text).toContain("the ask says your human turned down, blocked or avoided the person asking");
+    expect(text).toContain(
+      "the ask says your human turned down, blocked or avoided the person asking",
+    );
     expect(text).toContain("Whether your human likes, fancies or is drawn to the person asking");
     expect(text).toContain("sexuality, romantic relationships or personal finances, of your human");
   });
