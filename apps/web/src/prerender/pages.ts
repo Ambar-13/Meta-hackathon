@@ -81,7 +81,7 @@ export const HOME_STRUCTURED_DATA = {
       isAccessibleForFree: true,
       offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
       description:
-        "Meety is a social network with context. Each person has a Meety built from information they approve. Friends can ask what someone may care about, want, dislike or debate, and every answer keeps its source attached.",
+        "Meety is a free social network with context. Each person has a Meety, an AI built from information they approve. Friends can ask what someone may care about, want, dislike or debate, and every answer keeps its source attached.",
       keywords: [
         "the new social network",
         "AI social network",

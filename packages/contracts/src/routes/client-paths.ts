@@ -42,7 +42,7 @@ export type PublicPage = { path: string; file: string; changed: string };
 // The public pages, in the order the sitemap lists them. Move a page's day only when its words
 // change, never otherwise: search engines treat a moving date with unchanged words as a warning sign.
 export const PUBLIC_PAGES: readonly PublicPage[] = [
-  { path: "/", file: "index.html", changed: "2026-11-05" },
+  { path: "/", file: "index.html", changed: "2026-11-08" },
   { path: "/privacy", file: "privacy.html", changed: "2026-11-05" },
   { path: "/terms", file: "terms.html", changed: "2026-11-03" },
   { path: "/cookies", file: "cookies.html", changed: "2026-11-05" },

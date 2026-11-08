@@ -150,6 +150,10 @@ const HowItWorks = (): ReactElement => {
       <div className="wl-section-head">
         <p>How Meety works</p>
         <h2 id="wl-how-title">Your context becomes a better beginning.</h2>
+        <p>
+          Meety is a free social network. Each person has a Meety, an AI that answers friends&apos;
+          questions using only the context they chose to share.
+        </p>
       </div>
       <ol>
         {steps.map((step) => (

@@ -19,6 +19,13 @@ it("SEO-T6: the start page renders to HTML with its headline, its steps, its pro
   expect(html).not.toContain("__staticRouterHydrationData");
 });
 
+it("SEO-T20: the start page's own words say what Meety is, a free social network where each person's Meety is an AI, so a search or answer engine can quote it", async () => {
+  const text = (await renderPath("/")).replace(/<[^>]+>/g, " ");
+
+  expect(text).toContain("Meety is a free social network.");
+  expect(text).toMatch(/\bAI\b/);
+});
+
 it("SEO-T7: every public page renders with the line its head promises, and every head has a page", async () => {
   expect(PAGE_HEADS.map((head) => head.path)).toEqual(PUBLIC_PAGES.map((page) => page.path));
   for (const head of PAGE_HEADS) {
