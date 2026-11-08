@@ -26,6 +26,14 @@ it("SEO-T20: the start page's own words say what Meety is, a free social network
   expect(text).toMatch(/\bAI\b/);
 });
 
+it("SEO-T23: the start page's description is the hero's own words and never repeats the title, so a link preview adds to the title instead of saying it twice", async () => {
+  const start = PAGE_HEADS[0];
+  const text = (await renderPath("/")).replace(/<[^>]+>/g, "").replace(/\s+/g, " ");
+
+  expect(text).toContain(start?.description);
+  expect(start?.description).not.toContain("next generation");
+});
+
 it("SEO-T7: every public page renders with the line its head promises, and every head has a page", async () => {
   expect(PAGE_HEADS.map((head) => head.path)).toEqual(PUBLIC_PAGES.map((page) => page.path));
   for (const head of PAGE_HEADS) {

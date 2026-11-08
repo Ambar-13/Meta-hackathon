@@ -26,7 +26,7 @@ export const PAGE_HEADS: readonly PageHead[] = [
     path: "/",
     title: "Meety: the next generation of social media with context",
     description:
-      "Meety is the next generation of social media, with context. Ask what someone may care about, want, dislike or debate before you start the conversation.",
+      "Ask what someone would care about, want, dislike, or debate before the real conversation begins. Their Meety answers only from context they chose to share.",
     shareTitle: "Meety: the next generation of social media, with context.",
     mustContain: "next generation",
   },

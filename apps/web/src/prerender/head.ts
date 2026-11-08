@@ -8,7 +8,7 @@ import { HOME_STRUCTURED_DATA, ORIGIN_PLACEHOLDER, type PageHead } from "./pages
 // goes up whenever the picture changes, so LinkedIn, X and the rest fetch the new one instead of
 // showing their cached copy; index.html carries the same address.
 export const SHARE_IMAGE = {
-  path: "/og.png?v=2",
+  path: "/og.png?v=3",
   width: 1200,
   height: 630,
   type: "image/png",
