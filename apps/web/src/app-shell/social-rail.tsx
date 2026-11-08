@@ -106,8 +106,8 @@ export const SocialRail = (props: { pathname: string; hasSettingsLink: boolean }
           />
         ))}
         <Link className="btn rail-invite" to={APP_PATHS.pair}>
-          {RAIL_COPY.invite}
           <Icon name="add" size={18} />
+          <span className="rail-invite-word">{RAIL_COPY.invite}</span>
         </Link>
         {settings === undefined ? null : (
           <PageLink page={settings} pathname={props.pathname} incomingCount={0} />
@@ -115,7 +115,7 @@ export const SocialRail = (props: { pathname: string; hasSettingsLink: boolean }
       </nav>
       <div className="rail-foot">
         <MeetyMark size="m" />
-        <span>
+        <span className="rail-foot-words">
           <b>{RAIL_COPY.meety}</b>
           <small>{RAIL_COPY.meetyLine}</small>
         </span>

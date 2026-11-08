@@ -32,27 +32,29 @@
   .social-pages.tab-bar .count-pill { top: -4px; right: 0; min-width: 20px; height: 20px; padding: 0 5px; font-size: 13px; }
 }
 
-/* ---------- 768px and wider: the rail on the left ---------- */
+/* ---------- 768px and wider: the rail on the left, as Instagram's: white with no edge line, icons in near-black, the current page in
+   bold with no colour block behind it, the row the mouse is on in blue on a soft grey, and the pages in the middle of the screen ---------- */
 @media (min-width: 768px) {
   :root { --tab-bar: 0px; }
   .social-frame { --tab-bar: 0px; }
   /* Two classes, so app.css's .top-bar { display: flex }, which can come later in the built stylesheet, never shows the phone bar here. */
   .social-frame .social-top { display: none; }
   .social-rail { position: fixed; z-index: 30; top: 0; bottom: 0; left: 0; width: 72px; display: flex; flex-direction: column; align-items: center;
-    padding: 20px 0 16px; background: var(--ui-bg); box-shadow: 1px 0 0 var(--ui-line); }
+    padding: 24px 0 20px; background: var(--ui-bg); }
   .rail-logo { display: inline-grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; font-size: 28px; }
   .rail-logo:hover { background: var(--ui-soft); text-decoration: none; }
   .rail-logo .stk { display: inline-block; }
   .social-body { padding-left: 72px; }
 
-  .social-pages.tab-bar { position: static; flex: 1; flex-direction: column; justify-content: flex-start; align-items: center; gap: 8px; width: 100%; padding: 0;
+  .social-pages.tab-bar { position: static; flex: 1; flex-direction: column; justify-content: flex-start; align-items: center; gap: 12px; width: 100%; padding: 0;
     border-radius: 0; background: none; box-shadow: none; }
   .social-pages.tab-bar a { position: relative; flex: none; display: grid; place-items: center; width: 48px; min-height: 48px; padding: 0; border-radius: 12px;
-    color: var(--ui-ink); transition: background-color 0.15s var(--ease); }
+    color: var(--ui-ink); transition: background-color 0.15s var(--ease), color 0.15s var(--ease); }
   .social-pages.tab-bar a:first-child { margin-top: auto; }
   .social-pages.tab-bar a.rail-only { margin-top: auto; }
-  .social-pages.tab-bar a:hover { background: var(--ui-soft); text-decoration: none; }
-  .social-pages.tab-bar a[aria-current="page"] { background: var(--ui-blue-soft); color: var(--ui-blue); box-shadow: none; }
+  .social-pages.tab-bar a:hover { background: var(--ui-soft); color: var(--ui-blue); text-decoration: none; }
+  .social-pages.tab-bar a[aria-current="page"] { background: none; color: var(--ui-ink); box-shadow: none; }
+  .social-pages.tab-bar a[aria-current="page"]:hover { background: var(--ui-soft); color: var(--ui-blue); }
 }
 
 /* ---------- 768px to 1200px: each icon's words beside it on hover and on keyboard focus, as a small dark label ---------- */
@@ -62,27 +64,40 @@
   .social-pages.tab-bar a:hover::after, .social-pages.tab-bar a:focus-visible::after { opacity: 1; }
 }
 
-/* ---------- 1200px and wider: the sidebar with words ---------- */
+/* ---------- 1200px and wider: the sidebar with words, as Instagram's open one: the Meety mark at the top, the pages in the middle,
+   Invite a friend as a row like the others, Settings at the foot. Every row keeps its icon in the same place as the closed rail's, so
+   the mouse sidebar below can open without moving one. ---------- */
 @media (min-width: 1200px) {
-  .social-rail { width: 248px; align-items: stretch; padding: 28px 20px 20px; }
+  .social-rail { width: 248px; align-items: stretch; padding: 24px 12px 20px; }
   .social-body { padding-left: 248px; }
-  .rail-logo { display: flex; align-items: center; gap: 12px; width: auto; height: auto; padding: 4px 8px; font-size: 32px; }
-  .rail-wordmark { display: inline; font-size: 26px; line-height: 1; }
-  .rail-tagline { display: block; margin: 8px 8px 28px; color: var(--ui-ink-2); font-size: 13px; line-height: 20px; }
-  .social-pages.tab-bar { align-items: stretch; gap: 8px; }
+  .rail-logo { display: flex; align-items: center; justify-content: flex-start; width: auto; height: 48px; padding: 0 6px; font-size: 28px; }
+  .rail-logo > * { flex: none; max-width: none; }
+  .social-pages.tab-bar { align-items: stretch; gap: 12px; }
   /* Row, not app.css's column: the icon beside its words. */
-  .social-pages.tab-bar a { display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 16px; width: auto; min-height: 48px; padding: 0 14px;
-    color: var(--ui-ink-2); font: 500 16px/20px var(--ui-font); }
-  .social-pages.tab-bar a:first-child { margin-top: 0; }
-  .social-pages.tab-bar a:hover { color: var(--ui-ink); }
-  .social-pages.tab-bar a[aria-current="page"] { background: var(--ui-blue-soft); color: var(--ui-blue); font-weight: 700; }
+  .social-pages.tab-bar a { display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 16px; width: 100%; min-height: 48px; padding: 0 12px;
+    color: var(--ui-ink); font: 400 16px/20px var(--ui-font); white-space: nowrap; }
+  .social-pages.tab-bar a:hover { color: var(--ui-blue); }
+  .social-pages.tab-bar a[aria-current="page"] { font-weight: 700; }
   .social-pages .page-word { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; clip-path: none; }
-  .social-pages .page-icon { position: static; }
-  .social-pages .count-pill { top: 50%; right: 14px; translate: 0 -50%; box-shadow: none; }
-  .social-pages.tab-bar a.rail-invite { display: flex; flex-direction: row; justify-content: space-between; align-items: center; gap: 8px; margin-top: 20px; padding: 0 20px;
-    border-radius: 999px; background: var(--ui-blue); color: var(--ui-bg); font: 600 15px/20px var(--ui-font); }
-  .social-pages.tab-bar a.rail-invite:hover { background: var(--ui-blue-hover); color: var(--ui-bg); }
-  .rail-foot { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 16px 8px 4px; border-top: 1px solid var(--ui-line); }
-  .rail-foot b { display: block; color: var(--ui-ink); font: 600 14px/20px var(--ui-font); }
-  .rail-foot small { display: block; color: var(--ui-ink-2); font: 400 13px/16px var(--ui-font); }
+  .social-pages .page-icon { flex: none; }
+  /* Invite a friend: its plus is smaller than the page icons, so it sits 3px further in to share their middle, and its words line up with
+     theirs. */
+  .social-pages.tab-bar a.rail-invite { display: flex; flex-direction: row; justify-content: flex-start; align-items: center; gap: 19px; margin: 0; padding: 0 15px;
+    border-radius: 12px; background: none; color: var(--ui-ink); font: 400 16px/20px var(--ui-font); filter: none; }
+  .social-pages.tab-bar a.rail-invite:hover { background: var(--ui-soft); color: var(--ui-blue); filter: none; }
+  .rail-invite svg { flex: none; }
+}
+
+/* ---------- With a mouse, from 1200px: the sidebar rests as the column of icons and opens on hover or keyboard focus, as Instagram's
+   does. The page keeps the open sidebar's 248px, so the feed stays where it is and opening never covers it. The words fade in beside
+   their icons, left to right. A click does not keep it open once the mouse leaves. A touch screen has no hover, so it keeps the open
+   sidebar above. ---------- */
+@media (min-width: 1200px) and (hover: hover) and (pointer: fine) {
+  .social-rail { width: 72px; overflow: hidden; transition: width 0.3s var(--ease); }
+  .social-rail:hover, .social-rail:has(:focus-visible) { width: 248px; }
+  .social-pages .page-word, .rail-invite-word { opacity: 0; translate: -8px 0; transition: opacity 0.18s var(--ease), translate 0.3s var(--ease); }
+  :is(.social-rail:hover, .social-rail:has(:focus-visible)) :is(.page-word, .rail-invite-word) { opacity: 1; translate: 0 0; transition-delay: 0.06s; }
+}
+@media (min-width: 1200px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) {
+  .social-rail, .social-pages .page-word, .rail-invite-word { transition: none; }
 }
